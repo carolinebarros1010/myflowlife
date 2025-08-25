@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyFlowLife — Fluxo para cada fase da vida</title>
+  <meta name="description" content="MyFlowLife — RespiraFlow, FemFlow, TacticalFlow, PrecisionFlow e MaleFlow. Ciência aplicada à respiração, treino e performance." />
+  <style>
+    :root{
+      --mlf-cream:#F4E1D7;
+      --mlf-peach:#EFBDA6;
+      --mlf-terra:#CC6A5A;
+      --mlf-teal:#335953;
+      --mlf-white:#FFFFFF;
+      --mlf-gray:#D9D9D9;
+      --mlf-text:#1C1C1C;
+      --mlf-muted:#4A4A4A;
+      --mlf-ring:rgba(51,89,83,.35);
+      --mlf-shadow:0 10px 25px rgba(51,89,83,.12);
+      --radius-xl:24px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--mlf-text);background:var(--mlf-cream);}
+    img{max-width:100%;display:block;}
+    a{color:var(--mlf-teal);text-decoration:none;}
+    a:focus-visible,button:focus-visible{outline:2px solid transparent;box-shadow:0 0 0 4px var(--mlf-ring);border-radius:10px;}
+    .container{width:100%;max-width:1200px;margin-inline:auto;padding:0 1.2rem;}
+    .nav{position:sticky;top:0;z-index:50;background:rgba(244,225,215,.8);backdrop-filter:blur(8px);border-bottom:1px solid var(--mlf-gray);}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:.8rem 0;}
+    .brand{display:flex;align-items:center;gap:.7rem;font-weight:700;letter-spacing:.3px;color:var(--mlf-teal);}
+    .brand-logo{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 30% 30%, var(--mlf-peach), var(--mlf-terra));box-shadow:var(--mlf-shadow);}
+    .nav-links{display:flex;gap:1rem;align-items:center;}
+    .nav-links a{padding:.5rem .8rem;border-radius:999px;color:var(--mlf-teal);font-weight:600;}
+    .nav-cta{background:var(--mlf-teal);color:var(--mlf-white);padding:.6rem 1rem;border-radius:999px;box-shadow:var(--mlf-shadow);}
+    .hero{position:relative;overflow:hidden;color:#fff;}
+    .hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#F4E1D7 0%, #EFBDA6 35%, #CC6A5A 80%);}
+    .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(51,89,83,.95) 0%, rgba(51,89,83,.70) 55%, rgba(51,89,83,.35) 100%);}
+    .hero-inner{position:relative;padding:clamp(72px,10vw,120px) 0;}
+    .hero h1{font-family:"Playfair Display", Georgia, serif;font-weight:800;font-size:clamp(2rem,6vw,3.6rem);line-height:1.05;margin:0 0 .6rem;}
+    .hero p{max-width:720px;font-size:clamp(1rem,2.5vw,1.25rem);opacity:.95;}
+    .hero-ctas{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.2rem;}
+    .btn{display:inline-flex;align-items:center;gap:.6rem;padding:.9rem 1.2rem;border-radius:999px;font-weight:700;box-shadow:var(--mlf-shadow);border:0;cursor:pointer;transition:transform .08s ease,box-shadow .2s ease,background .2s ease,opacity .2s ease;}
+    .btn:hover{transform:translateY(-1px);}
+    .btn--primary{background:var(--mlf-teal);color:var(--mlf-white);}
+    .btn--secondary{background:var(--mlf-terra);color:var(--mlf-white);}
+    .btn--ghost{background:transparent;color:var(--mlf-white);border:1px solid rgba(255,255,255,.7);}
+    section{padding:clamp(48px,8vw,84px) 0;}
+    .section-title{font-family:"Playfair Display", Georgia, serif;color:var(--mlf-teal);font-size:clamp(1.6rem,4vw,2.4rem);margin:0 0 .6rem;}
+    .section-sub{color:var(--mlf-muted);max-width:780px;}
+    .grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:1rem;margin-top:1.2rem;}
+    @media(min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    @media(min-width:1024px){.grid{grid-template-columns:repeat(5,minmax(0,1fr));}}
+    .card{background:var(--mlf-white);border:1px solid var(--mlf-gray);border-radius:var(--radius-xl);padding:1.2rem;box-shadow:var(--mlf-shadow);display:flex;flex-direction:column;justify-content:space-between;min-height:280px;}
+    .card h3{margin:.2rem 0 .4rem;color:var(--mlf-teal);font-size:1.25rem;}
+    .card p{color:var(--mlf-muted);font-size:.98rem;}
+    .badge{display:inline-block;padding:.35rem .7rem;border-radius:999px;font-size:.78rem;font-weight:700;letter-spacing:.3px;border:1px solid var(--mlf-gray);color:var(--mlf-teal);background:var(--mlf-cream);}
+    .card-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem;}
+    .flowline{position:relative;height:6px;background:linear-gradient(90deg,var(--mlf-peach),var(--mlf-terra));border-radius:999px;margin:24px 0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
+    .testimony{background:var(--mlf-peach);border-top:1px solid var(--mlf-gray);border-bottom:1px solid var(--mlf-gray);}
+    .quote{font-size:clamp(1.05rem,2.5vw,1.25rem);color:#16322E;max-width:800px;}
+    .cta{text-align:center;}
+    footer{background:#17322F;color:#fff;}
+    .foot{display:grid;gap:1rem;grid-template-columns:1fr;padding:28px 0;}
+    .foot a{color:#fff;opacity:.9;}
+    @media(min-width:720px){.foot{grid-template-columns:1.3fr .7fr .7fr;}}
+  </style>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="brand" aria-label="Início MyFlowLife">
+        <span class="brand-logo" aria-hidden="true"></span>
+        <span>MyFlowLife</span>
+      </a>
+      <div class="nav-links">
+        <a href="#sobre">Sobre</a>
+        <a href="#produtos">Produtos</a>
+        <a href="#contato">Contato</a>
+        <a class="nav-cta" href="/femflow/">FemFlow</a>
+      </div>
+    </div>
+  </nav>
+  <header id="topo" class="hero" role="banner" aria-label="Apresentação MyFlowLife">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="container hero-inner">
+      <h1>Fluxo para cada fase da vida</h1>
+      <p>Um ecossistema de soluções que combina ciência, respiração e performance: <strong>RespiraFlow</strong>, <strong>FemFlow</strong>, <strong>TacticalFlow</strong>, <strong>PrecisionFlow</strong> e <strong>MaleFlow</strong>. Escolha seu ponto de entrada e siga o fluxo.</p>
+      <div class="hero-ctas">
+        <a class="btn btn--primary" href="#produtos">Conhecer Produtos</a>
+        <a class="btn btn--ghost" href="/femflow/">Ir para FemFlow</a>
+      </div>
+    </div>
+  </header>
+  <section id="sobre" aria-labelledby="tit-sobre">
+    <div class="container">
+      <h2 id="tit-sobre" class="section-title">O que é o MyFlowLife?</h2>
+      <p class="section-sub">Uma plataforma que integra métodos de <em>regulação emocional</em>, <em>treinamento físico</em> e <em>desempenho cognitivo</em>. Desenhado para pessoas reais, com rotinas reais. Menos fricção, mais consistência.</p>
+      <div class="flowline" aria-hidden="true"></div>
+    </div>
+  </section>
+  <section id="produtos" aria-labelledby="tit-prod">
+    <div class="container">
+      <h2 id="tit-prod" class="section-title">Produtos MyFlowLife</h2>
+      <p class="section-sub">Cinco portas de entrada. Um mesmo princípio: <strong>fluidez com método</strong>.</p>
+      <div class="grid" role="list">
+        <article class="card" role="listitem">
+          <div>
+            <span class="badge">Respiração</span>
+            <h3>RespiraFlow</h3>
+            <p>Protocolos de respiração para reduzir estresse, modular o sistema nervoso e ganhar foco em minutos. Cards práticos + guia rápido.</p>
+          </div>
+          <div class="card-actions">
+            <a class="btn btn--primary" href="/respiraflow/">Acessar página</a>
+            <a class="btn btn--secondary" href="#respiraflow">Resumo</a>
+          </div>
+        </article>
+        <article class="card" role="listitem">
+          <div>
+            <span class="badge">Treino feminino</span>
+            <h3>FemFlow</h3>
+            <p>Treinamento baseado no ciclo hormonal: constância, presença e prazer no movimento. Adaptação inteligente e periodização.</p>
+          </div>
+          <div class="card-actions">
+            <a class="btn btn--primary" href="/femflow/">Acessar página</a>
+            <a class="btn btn--ghost" href="#femflow">Resumo</a>
+          </div>
+        </article>
+        <article class="card" role="listitem">
+          <div>
+            <span class="badge">Foco & Resiliência</span>
+            <h3>TacticalFlow</h3>
+            <p>Rotinas táticas para tomada de decisão sob pressão: protocolos breves de foco, clareza e prevenção de burnout em ambientes críticos.</p>
+          </div>
+          <div class="card-actions">
+            <a class="btn btn--primary" href="/tacticalflow/">Acessar página</a>
+            <a class="btn btn--secondary" href="#tacticalflow">Resumo</a>
+          </div>
+        </article>
+        <article class="card" role="listitem">
+          <div>
+            <span class="badge">Dados & Performance</span>
+            <h3>PrecisionFlow</h3>
+            <p>Treinamento orientado por dados: métricas, feedbacks e ajustes finos para evoluir com segurança e eficiência.</p>
+          </div>
+          <div class="card-actions">
+            <a class="btn btn--primary" href="/precisionflow/">Acessar página</a>
+            <a class="btn btn--secondary" href="#precisionflow">Resumo</a>
+          </div>
+        </article>
+        <article class="card" role="listitem">
+          <div>
+            <span class="badge">Treino masculino</span>
+            <h3>MaleFlow</h3>
+            <p>Treino e regulação para o público masculino: constância, força funcional, mobilidade e recuperação.</p>
+          </div>
+          <div class="card-actions">
+            <a class="btn btn--primary" href="/maleflow/">Acessar página</a>
+            <a class="btn btn--secondary" href="#maleflow">Resumo</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+  <section id="respiraflow" aria-label="Resumo RespiraFlow">
+    <div class="container">
+      <h3 class="section-title" style="font-size:1.6rem">RespiraFlow — Resumo</h3>
+      <p class="section-sub">Técnicas categorizadas por gatilhos (ansiedade, irritação, bloqueio, exaustão). Cada protocolo leva de 1 a 5 minutos e inclui orientação clara e um marcador de progresso.</p>
+    </div>
+  </section>
+  <section id="femflow" aria-label="Resumo FemFlow">
+    <div class="container">
+      <h3 class="section-title" style="font-size:1.6rem">FemFlow — Resumo</h3>
+      <p class="section-sub">Fase de adaptação com treinos leves e modulação por ciclo menstrual. Estrutura de 15 dias + periodização por perfis (iniciante a performance).</p>
+    </div>
+  </section>
+  <section id="tacticalflow" aria-label="Resumo TacticalFlow">
+    <div class="container">
+      <h3 class="section-title" style="font-size:1.6rem">TacticalFlow — Resumo</h3>
+      <p class="section-sub">Protocolos rápidos para operadores e líderes: respiração estratégica, checagens cognitivas e rotinas de recuperação para reduzir fadiga decisória.</p>
+    </div>
+  </section>
+  <section id="precisionflow" aria-label="Resumo PrecisionFlow">
+    <div class="container">
+      <h3 class="section-title" style="font-size:1.6rem">PrecisionFlow — Resumo</h3>
+      <p class="section-sub">Medições acessíveis + ajustes graduais. Metodologia de feedback contínuo para progressão segura sem picos de lesão.</p>
+    </div>
+  </section>
+  <section id="maleflow" aria-label="Resumo MaleFlow">
+    <div class="container">
+      <h3 class="section-title" style="font-size:1.6rem">MaleFlow — Resumo</h3>
+      <p class="section-sub">Blocos semanais de força base, mobilidade e condicionamento moderado; pilares de consistência, mobilidade, treino híbrido, recuperação e progressão mensurável.</p>
+    </div>
+  </section>
+  <section class="testimony" aria-labelledby="tit-equipe">
+    <div class="container">
+      <h2 id="tit-equipe" class="section-title">Quem está por trás</h2>
+      <p class="quote">Equipe MyFlowLife</p>
+    </div>
+  </section>
+  <section id="contato" class="cta" aria-labelledby="tit-contato">
+    <div class="container">
+      <h2 id="tit-contato" class="section-title">Entre no fluxo</h2>
+      <p class="section-sub" style="text-align:center">Assine a lista de espera ou fale direto no WhatsApp para conhecer os lançamentos e participar dos testes beta.</p>
+      <div class="hero-ctas" style="justify-content:center;">
+        <a class="btn btn--primary" href="https://wa.me/551151942268" target="_blank" rel="noopener">Falar no WhatsApp</a>
+        <a class="btn btn--secondary" href="#" aria-disabled="true" style="opacity:.8;cursor:not-allowed;">Assinar newsletter (em breve)</a>
+      </div>
+    </div>
+  </section>
+  <footer role="contentinfo" aria-label="Rodapé MyFlowLife">
+    <div class="container foot">
+      <div>
+        <div class="brand" style="color:#fff;">
+          <span class="brand-logo" aria-hidden="true"></span>
+          <span>MyFlowLife</span>
+        </div>
+        <p style="opacity:.85;max-width:520px;">Ciência aplicada ao cotidiano. Respiração, treino e performance integrados em um só lugar.</p>
+      </div>
+      <div>
+        <strong>Mapa</strong><br/>
+        <a href="#sobre">Sobre</a><br/>
+        <a href="#produtos">Produtos</a><br/>
+        <a href="#contato">Contato</a>
+      </div>
+      <div>
+        <strong>Projetos</strong><br/>
+        <a href="/respiraflow/">RespiraFlow</a><br/>
+        <a href="/femflow/">FemFlow</a><br/>
+        <a href="/tacticalflow/">TacticalFlow</a><br/>
+        <a href="/precisionflow/">PrecisionFlow</a><br/>
+        <a href="/maleflow/">MaleFlow</a>
+      </div>
+    </div>
+  </footer>
+  <script>
+    document.addEventListener('click', function(e){
+      const a=e.target.closest('a[href^="#"]');
+      if(!a) return;
+      const id=a.getAttribute('href');
+      if(id==='#') return;
+      const el=document.querySelector(id);
+      if(el){
+        e.preventDefault();
+        el.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    });
+  </script>
+</body>
+</html>
