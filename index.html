@@ -1,11 +1,400 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=/hub/">
-  <title>MyFlowLife Redirecionando...</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MyFlowLife — Treino, Respiração e Foco</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            fem: {
+              primary: "#E26D5A",   /* terracota */
+              primaryHover: "#CF5F4D",
+              border: "#FFD7CF",
+              soft: "#FFEAE5",
+              mint: "#E8FFFA"
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <meta name="description" content="Produtos e consultorias que combinam periodização, protocolos de respiração e rotinas enxutas. FemFlow, RespiraFlow, TacticalFlow e mais." />
 </head>
-<body>
-  <p>Redirecionando para <a href="/hub/">MyFlowLife</a>...</p>
+<body class="min-h-screen bg-gradient-to-b from-fem-soft via-white to-fem-mint text-slate-900">
+  <!-- NAV -->
+  <header class="sticky top-0 z-50 backdrop-blur bg-white/70 border-b border-fem-border">
+    <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+      <a href="#home" class="font-semibold tracking-tight text-fem-primary">MyFlowLife</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="#produtos" class="hover:text-fem-primary">Produtos</a>
+        <a href="#como-funciona" class="hover:text-fem-primary">Como funciona</a>
+        <a href="#planos" class="hover:text-fem-primary">Planos</a>
+        <a href="#depoimentos" class="hover:text-fem-primary">Depoimentos</a>
+        <a href="#faq" class="hover:text-fem-primary">FAQ</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <a href="https://wa.me/551151942268" target="_blank" rel="noreferrer"
+           class="inline-flex items-center rounded-2xl bg-fem-primary px-4 py-2 text-white hover:bg-fem-primaryHover transition">
+          Falar no WhatsApp
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="home" class="relative overflow-hidden">
+    <div class="mx-auto max-w-6xl px-4 py-16 md:py-20 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm uppercase tracking-widest text-fem-primary font-medium">Treino, Respiração e Foco</p>
+        <h1 class="mt-2 text-4xl md:text-5xl font-extrabold leading-tight">
+          Potencial real, método claro.
+          <span class="block text-fem-primary">Resultados sustentáveis.</span>
+        </h1>
+        <p class="mt-4 text-slate-600 max-w-prose">
+          Produtos e consultorias que combinam periodização inteligente, protocolos de respiração e rotinas enxutas.
+          Feito para quem treina na vida real — tempo limitado, objetivos grandes.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="#produtos" class="inline-flex items-center rounded-2xl bg-fem-primary px-4 py-2 text-white hover:bg-fem-primaryHover transition">Ver produtos</a>
+          <a href="#planos" class="inline-flex items-center rounded-2xl border border-fem-border px-4 py-2 hover:bg-white/60 transition">Planos</a>
+        </div>
+        <ul class="mt-6 text-sm text-slate-600 space-y-1">
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Periodização prática (macro/meso/micro)
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Rotina 90–20–5 para foco e constância
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Suporte humano + materiais digitais prontos
+          </li>
+        </ul>
+      </div>
+      <div class="relative">
+        <div class="aspect-[4/3] rounded-3xl bg-gradient-to-tr from-fem-soft via-fem-mint to-white shadow-xl"></div>
+        <p class="sr-only">Mockup do ecossistema MyFlowLife</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUTOS -->
+  <section id="produtos" class="py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="text-2xl md:text-3xl font-bold">Produtos</h2>
+      <p class="text-slate-600 mt-2 max-w-prose">Escolha seu eixo principal — combine módulos para acelerar resultados.</p>
+
+      <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Card helper -->
+        <template id="card-template">
+          <div class="rounded-2xl border border-fem-border shadow-sm hover:shadow-md transition">
+            <div class="p-5">
+              <div class="flex items-center gap-3">
+                <span class="text-fem-primary" data-icon></span>
+                <h3 class="font-semibold tracking-tight" data-title></h3>
+              </div>
+              <p class="text-sm text-slate-600 mt-2" data-pitch></p>
+            </div>
+            <div class="px-5 pb-5">
+              <ul class="space-y-2 text-sm text-slate-700" data-bullets></ul>
+              <a class="mt-4 inline-flex w-full justify-center rounded-2xl bg-fem-primary px-4 py-2 text-white hover:bg-fem-primaryHover transition" data-cta></a>
+            </div>
+          </div>
+        </template>
+
+        <div id="cards" class="contents"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section id="como-funciona" class="py-16 bg-gradient-to-br from-white to-fem-soft/60 border-y border-fem-border">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="text-2xl md:text-3xl font-bold">Como funciona</h2>
+      <div class="mt-6 grid md:grid-cols-3 gap-6">
+        <div class="rounded-2xl border border-fem-border p-5">
+          <h3 class="font-semibold">1) Diagnóstico</h3>
+          <p class="text-sm text-slate-600">Questionário rápido (Typebot/Forms) + metas. Se preferir, enviamos por WhatsApp.</p>
+        </div>
+        <div class="rounded-2xl border border-fem-border p-5">
+          <h3 class="font-semibold">2) Plano</h3>
+          <p class="text-sm text-slate-600">Planos de treino e respiração no app/planilha, com blocos semanais e progressão.</p>
+        </div>
+        <div class="rounded-2xl border border-fem-border p-5">
+          <h3 class="font-semibold">3) Ajustes</h3>
+          <p class="text-sm text-slate-600">Feedback contínuo e ajustes mensais. Suporte direto e objetivo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANOS -->
+  <section id="planos" class="py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="text-2xl md:text-3xl font-bold">Planos</h2>
+      <div class="mt-8 grid md:grid-cols-3 gap-6">
+        <!-- 1 esporte -->
+        <div class="rounded-2xl border border-fem-border">
+          <div class="p-5 flex items-center justify-between">
+            <h3 class="tracking-tight font-semibold">Plano 1 Esporte</h3>
+            <span class="text-xs px-2 py-1 rounded-full bg-fem-soft text-[#C55343]">1 esporte</span>
+          </div>
+          <div class="px-5">
+            <p class="text-3xl font-extrabold">R$ 120/mês</p>
+            <ul class="mt-3 space-y-2 text-sm text-slate-700">
+              <li class="flex gap-2"><svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 1 plano mensal (força OU corrida)</li>
+              <li class="flex gap-2"><svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Ajustes por feedback</li>
+              <li class="flex gap-2"><svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Suporte por WhatsApp (assíncrono)</li>
+            </ul>
+            <a href="#comprar-1esporte120" class="mt-4 mb-5 inline-flex w-full justify-center rounded-2xl bg-slate-900 px-4 py-2 text-white hover:bg-slate-800 transition">Assinar</a>
+          </div>
+        </div>
+        <!-- Combo -->
+        <div class="rounded-2xl border border-[#FFC0B3] ring-1 ring-fem-border">
+          <div class="p-5 flex items-center justify-between">
+            <h3 class="tracking-tight font-semibold">Combo 2 Esportes</h3>
+            <span class="text-xs px-2 py-1 rounded-full bg-fem-primary text-white">Mais popular</span>
+          </div>
+          <div class="px-5">
+            <p class="text-3xl font-extrabold">R$ 149/mês</p>
+            <ul class="mt-3 space-y-2 text-sm text-slate-700">
+              <li class="flex gap-2"><svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Planos mensais integrados</li>
+              <li class="flex gap-2"><svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Periodização alinhada (FemFlow/MaleFlow)</li>
+              <li class="flex gap-2"><svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Suporte por WhatsApp (prioritário)</li>
+            </ul>
+            <a href="#comprar-combo149" class="mt-4 mb-5 inline-flex w-full justify-center rounded-2xl bg-fem-primary px-4 py-2 text-white hover:bg-fem-primaryHover transition">Assinar</a>
+          </div>
+        </div>
+        <!-- Premium -->
+        <div class="rounded-2xl border border-fem-border">
+          <div class="p-5 flex items-center justify-between">
+            <h3 class="tracking-tight font-semibold">Programa Premium</h3>
+            <span class="text-xs px-2 py-1 rounded-full bg-fem-soft text-[#C55343]">Personalizado</span>
+          </div>
+          <div class="px-5">
+            <p class="text-3xl font-extrabold">Sob consulta</p>
+            <ul class="mt-3 space-y-2 text-sm text-slate-700">
+              <li class="flex gap-2"><svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Acompanhamento individual semanal</li>
+              <li class="flex gap-2"><svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Relatórios + vídeo-chamadas</li>
+              <li class="flex gap-2"><svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Ajustes avançados de periodização</li>
+            </ul>
+            <a href="#consultar-premium" class="mt-4 mb-5 inline-flex w-full justify-center rounded-2xl border border-fem-border px-4 py-2 hover:bg-white/60 transition">Falar com especialista</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEPOIMENTOS -->
+  <section id="depoimentos" class="py-16 bg-gradient-to-br from-fem-mint/60 to-white border-y border-fem-border">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="text-2xl md:text-3xl font-bold">Resultados de alunos</h2>
+      <div class="mt-8 grid md:grid-cols-3 gap-6">
+        <div class="rounded-2xl border border-fem-border p-5">
+          <h3 class="tracking-tight font-semibold">Aluna 1</h3>
+          <p class="text-sm text-slate-600 mt-2">“Depoimento curto. Benefício mensurável em 4–8 semanas.”</p>
+        </div>
+        <div class="rounded-2xl border border-fem-border p-5">
+          <h3 class="tracking-tight font-semibold">Aluno 2</h3>
+          <p class="text-sm text-slate-600 mt-2">“Depoimento curto. Evolução de ritmo e constância.”</p>
+        </div>
+        <div class="rounded-2xl border border-fem-border p-5">
+          <h3 class="tracking-tight font-semibold">Aluna 3</h3>
+          <p class="text-sm text-slate-600 mt-2">“Depoimento curto. Mais energia e menos dor.”</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="text-2xl md:text-3xl font-bold">Perguntas frequentes</h2>
+      <div class="mt-6 grid md:grid-cols-2 gap-6">
+        <div class="rounded-2xl border border-fem-border p-5">
+          <h3 class="font-semibold">Posso treinar com pouco tempo?</h3>
+          <p class="text-sm text-slate-600">Sim. Temos versões 45–60 min e rotina 90–20–5.</p>
+        </div>
+        <div class="rounded-2xl border border-fem-border p-5">
+          <h3 class="font-semibold">Como funcionam os feedbacks?</h3>
+          <p class="text-sm text-slate-600">Você envia RPE/PSE e sensação semanalmente; ajustamos o plano.</p>
+        </div>
+        <div class="rounded-2xl border border-fem-border p-5">
+          <h3 class="font-semibold">Quais plataformas de entrega?</h3>
+          <p class="text-sm text-slate-600">App/planilha + e-books e cards PDF. Integração com WhatsApp e Typebot.</p>
+        </div>
+        <div class="rounded-2xl border border-fem-border p-5">
+          <h3 class="font-semibold">Posso cancelar quando quiser?</h3>
+          <p class="text-sm text-slate-600">Sim, planos mensais sem fidelidade. Premium tem política própria.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="py-20">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h3 class="text-2xl md:text-3xl font-extrabold">Comece hoje com um plano simples</h3>
+      <p class="mt-3 text-slate-600">Ajustes reais, progresso mensurável e suporte humano. Bora tirar o plano da cabeça e colocar no calendário.</p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <a href="#planos" class="inline-flex items-center rounded-2xl bg-fem-primary px-4 py-2 text-white hover:bg-fem-primaryHover transition">Escolher um plano</a>
+        <a href="https://wa.me/551151942268" target="_blank" rel="noreferrer" class="inline-flex items-center rounded-2xl border border-fem-border px-4 py-2 hover:bg-white/60 transition">Tirar uma dúvida</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-10 border-t border-fem-border bg-white/60">
+    <div class="mx-auto max-w-6xl px-4 grid md:grid-cols-3 gap-6 text-sm text-slate-600">
+      <div>
+        <p class="font-semibold text-slate-800">MyFlowLife</p>
+        <p class="mt-2">Plataforma de produtos e consultoria em treinamento, respiração e foco. CNPJ/contato aqui.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-slate-800">Links</p>
+        <ul class="mt-2 space-y-1">
+          <li><a class="hover:text-fem-primary" href="#produtos">Produtos</a></li>
+          <li><a class="hover:text-fem-primary" href="#planos">Planos</a></li>
+          <li><a class="hover:text-fem-primary" href="#faq">FAQ</a></li>
+          <li><a class="hover:text-fem-primary" href="mailto:contato@myflowlife.com.br">contato@myflowlife.com.br</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-semibold text-slate-800">WhatsApp</p>
+        <a class="text-fem-primary hover:text-fem-primaryHover" href="https://wa.me/551151942268" target="_blank" rel="noreferrer">+55 11 5194-2268</a>
+        <p class="mt-2">Atendimento de seg a sex, 09h–18h (BRT).</p>
+      </div>
+    </div>
+    <div class="mx-auto max-w-6xl px-4 mt-6 text-xs text-slate-500">© <span id="year"></span> MyFlowLife. Todos os direitos reservados.</div>
+  </footer>
+
+  <!-- SCRIPT: injeta cards dinamicamente para facilitar manutenção -->
+  <script>
+    const products = [
+      {
+        title: "FemFlow",
+        pitch: "Treinamento feminino guiado pelo ciclo hormonal, com periodização, força e corrida.",
+        bullets: [
+          "Planos 28–32 dias ajustados às fases (menstrual, folicular, ovulatória, lútea)",
+          "Força com ênfase em glúteo, costas e core",
+          "Protocolos respiratórios para foco e recuperação",
+        ],
+        cta: { label: "Conhecer o FemFlow", href: "femflow/index.html" },
+        icon: "❤"
+      },
+      {
+        title: "RespiraFlow",
+        pitch: "Protocolos de respiração para performance, foco e regulação emocional.",
+        bullets: [
+          "Cartas de respiração + e-book prático",
+          "Protocolos para ansiedade, foco, estresse e sono",
+          "Aplicações táticas para ambientes de alta pressão",
+        ],
+        cta: { label: "Conhecer o RespiraFlow", href: "respiraflow/index.html" },
+        icon: "🫁"
+      },
+      {
+        title: "TacticalFlow",
+        pitch: "Tomada de decisão sob pressão com protocolos de respiração e foco situacional.",
+        bullets: [
+          "Módulos para liderança e gestão de crises",
+          "Modelos de checklist e rotinas de prontidão",
+          "Treinos breves (90–20–5) integrados à rotina",
+        ],
+        cta: { label: "Conhecer o TacticalFlow", href: "tacticalflow/index.html" },
+        icon: "🛡️"
+      },
+      {
+        title: "MaleFlow",
+        pitch: "Treinamento masculino com ciclos práticos de força, potência e condicionamento.",
+        bullets: [
+          "Divisões semanais flexíveis",
+          "Blocos de força, potência e trabalho oxidativo",
+          "Integração com protocolos respiratórios",
+        ],
+        cta: { label: "Conhecer o MaleFlow", href: "maleflow/index.html" },
+        icon: "🏋️"
+      },
+      {
+        title: "NeuroFlow",
+        pitch: "Metodologia adaptativa para mentes neurodivergentes com ciclos mensais/bimestrais.",
+        bullets: [
+          "Treinos cíclicos e não lineares",
+          "Rotinas de foco e descarrego sensorial",
+          "Ferramentas de organização 90–20–5",
+        ],
+        cta: { label: "Conhecer o NeuroFlow", href: "hub/index.html#neuroflow" },
+        icon: "🧠"
+      },
+      {
+        title: "PrecisionFlow",
+        pitch: "Personalização avançada com foco em periodização, métricas e hábitos.",
+        bullets: [
+          "Estruturas macro/meso/micro + treinos guiados",
+          "Dashboards e checklists práticos",
+          "Integração com consulta e suporte remoto",
+        ],
+        cta: { label: "Conhecer o PrecisionFlow", href: "precisionflow/index.html" },
+        icon: "⏱️"
+      },
+      {
+        title: "Tênis de Corrida e Treinamento",
+        pitch: "Seleção de tênis de alta performance para corrida e treinos funcionais.",
+        bullets: [
+          "Modelos testados para endurance e velocidade",
+          "Tecnologia de amortecimento e durabilidade",
+          "Indicações para diferentes níveis de atleta",
+        ],
+        cta: { label: "Ver Tênis", href: "hub/index.html#tenis" },
+        icon: "👟"
+      },
+      {
+        title: "Roupas Femininas para Treinamento",
+        pitch: "Linha de roupas confortáveis e tecnológicas para treinos femininos.",
+        bullets: [
+          "Tecidos respiráveis e elásticos",
+          "Design para liberdade de movimento",
+          "Estilo alinhado à performance",
+        ],
+        cta: { label: "Ver Roupas", href: "hub/index.html#roupas" },
+        icon: "👚"
+      }
+    ];
+
+    const tpl = document.getElementById("card-template");
+    const mount = document.getElementById("cards");
+
+    products.forEach(p => {
+      const node = tpl.content.cloneNode(true);
+      node.querySelector("[data-title]").textContent = p.title;
+      node.querySelector("[data-pitch]").textContent = p.pitch;
+      node.querySelector("[data-cta]").textContent = p.cta.label;
+      node.querySelector("[data-cta]").setAttribute("href", p.cta.href);
+
+      const iconSpan = node.querySelector("[data-icon]");
+      iconSpan.textContent = p.icon;
+
+      const bulletsEl = node.querySelector("[data-bullets]");
+      p.bullets.forEach(b => {
+        const li = document.createElement("li");
+        li.className = "flex gap-2";
+        li.innerHTML = `<svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${b}</span>`;
+        bulletsEl.appendChild(li);
+      });
+
+      mount.appendChild(node);
+    });
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
