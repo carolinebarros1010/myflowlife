@@ -282,15 +282,15 @@
     const products = [
       {
       title: "FemFlow",
-pitch: "Treinamento feminino guiado pelo ciclo hormonal, com periodização, força e corrida.",
-bullets: [
-  "Planos 28–32 dias ajustados às fases (menstrual, folicular, ovulatória, lútea)",
-  "Força com ênfase em glúteo, costas e core",
-  "Protocolos respiratórios para foco e recuperação",
-],
-cta: { label: "Conhecer o FemFlow", href: "https://www.femflow.com.br" },
-icon: "/assets/logo-femflow.png" 
-      },
+    pitch: "Treinamento feminino guiado pelo ciclo hormonal, com periodização, força e corrida.",
+    bullets: [
+      "Planos 28–32 dias por fases (menstrual, folicular, ovulatória, lútea)",
+      "Força com ênfase em glúteo, costas e core",
+      "Protocolos respiratórios para foco e recuperação"
+    ],
+    cta: { label: "Conhecer o FemFlow", href: "https://www.femflow.com.br" },
+    icon: { type: "img", src: "assets/logo-femflow.png", alt: "FemFlow" }
+  },
       {
         title: "RespiraFlow",
         pitch: "Protocolos de respiração para performance, foco e regulação emocional.",
@@ -315,15 +315,15 @@ icon: "/assets/logo-femflow.png"
       },
       {
         title: "MaleFlow",
-        pitch: "Treinamento masculino com ciclos práticos de força, potência e condicionamento.",
-        bullets: [
-          "Divisões semanais flexíveis",
-          "Blocos de força, potência e trabalho oxidativo",
-          "Integração com protocolos respiratórios",
-        ],
-        cta: { label: "Conhecer o MaleFlow", href: "maleflow/index.html" },
-        icon: "/assets/logo-maleflow.png" 
-      },
+    pitch: "Metodologia de treinamento masculino com foco em força, potência e resiliência.",
+    bullets: [
+      "Treino de força com ênfase em potência",
+      "Periodização adaptada à rotina",
+      "Estratégias de recuperação inteligente"
+    ],
+    cta: { label: "Explorar o MaleFlow", href: "#maleflow" },
+    icon: { type: "img", src: "assets/logo-maleflow.png", alt: "MaleFlow" }
+  },
       {
         title: "NeuroFlow",
         pitch: "Metodologia adaptativa para mentes neurodivergentes com ciclos mensais/bimestrais.",
@@ -396,5 +396,57 @@ icon: "/assets/logo-femflow.png"
 
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+
+  function renderProducts(list) {
+    const container = document.getElementById("cards");
+    const tpl = document.getElementById("card-template");
+
+    list.forEach(p => {
+      const node = tpl.content.cloneNode(true);
+      const iconEl = node.querySelector("[data-icon]");
+      const titleEl = node.querySelector("[data-title]");
+      const pitchEl = node.querySelector("[data-pitch]");
+      const bulletsEl = node.querySelector("[data-bullets]");
+      const ctaEl = node.querySelector("[data-cta]");
+
+      // Ícone / Logo
+      if (p.icon?.type === "img" && p.icon.src) {
+        iconEl.innerHTML = `
+          <img src="${p.icon.src}" alt="${p.icon.alt || p.title}"
+               loading="lazy" decoding="async"
+               class="h-10 w-10 object-contain rounded-md bg-white ring-1 ring-fem-border/50 p-1">
+        `;
+      } else if (p.icon?.type === "emoji" && p.icon.value) {
+        iconEl.textContent = p.icon.value;
+        iconEl.classList.add("text-xl");
+      } else {
+        iconEl.textContent = "";
+      }
+
+      // Título, pitch, CTA
+      titleEl.textContent = p.title;
+      pitchEl.textContent = p.pitch;
+      ctaEl.textContent = p.cta?.label || "Saiba mais";
+      if (p.cta?.href) ctaEl.href = p.cta.href;
+
+      // Bullets (com checkmark)
+      (p.bullets || []).forEach(txt => {
+        const li = document.createElement("li");
+        li.className = "flex items-start gap-2";
+        li.innerHTML = `
+          <svg class="w-4 h-4 mt-[2px] text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>${txt}</span>
+        `;
+        bulletsEl.appendChild(li);
+      });
+
+      container.appendChild(node);
+    });
+  }
+
+  renderProducts(products);
+</script>
 </body>
 </html>
