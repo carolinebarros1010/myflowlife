@@ -277,125 +277,98 @@
     <div class="mx-auto max-w-6xl px-4 mt-6 text-xs text-slate-500">© <span id="year"></span> MyFlowLife. Todos os direitos reservados.</div>
   </footer>
 
-  <!-- SCRIPT: injeta cards dinamicamente para facilitar manutenção -->
-  <script>
-    const products = [
-      {
+<!-- SCRIPT: injeta cards dinamicamente para facilitar manutenção -->
+<script>
+  const products = [
+    {
       title: "FemFlow",
-    pitch: "Treinamento feminino guiado pelo ciclo hormonal, com periodização, força e corrida.",
-    bullets: [
-      "Planos 28–32 dias por fases (menstrual, folicular, ovulatória, lútea)",
-      "Força com ênfase em glúteo, costas e core",
-      "Protocolos respiratórios para foco e recuperação"
-    ],
-    cta: { label: "Conhecer o FemFlow", href: "https://www.femflow.com.br" },
-    icon: { type: "img", src: "assets/logo-femflow.png", alt: "FemFlow" }
-  },
-      {
-        title: "RespiraFlow",
-        pitch: "Protocolos de respiração para performance, foco e regulação emocional.",
-        bullets: [
-          "Cartas de respiração + e-book prático",
-          "Protocolos para ansiedade, foco, estresse e sono",
-          "Aplicações táticas para ambientes de alta pressão",
-        ],
-        cta: { label: "Conhecer o RespiraFlow", href: "respiraflow/index.html" },
-        icon: "🫁"
-      },
-      {
-        title: "TacticalFlow",
-        pitch: "Tomada de decisão sob pressão com protocolos de respiração e foco situacional.",
-        bullets: [
-          "Módulos para liderança e gestão de crises",
-          "Modelos de checklist e rotinas de prontidão",
-          "Treinos breves (90–20–5) integrados à rotina",
-        ],
-        cta: { label: "Conhecer o TacticalFlow", href: "tacticalflow/index.html" },
-        icon: "🛡️"
-      },
-      {
-        title: "MaleFlow",
-    pitch: "Metodologia de treinamento masculino com foco em força, potência e resiliência.",
-    bullets: [
-      "Treino de força com ênfase em potência",
-      "Periodização adaptada à rotina",
-      "Estratégias de recuperação inteligente"
-    ],
-    cta: { label: "Explorar o MaleFlow", href: "#maleflow" },
-    icon: { type: "img", src: "assets/logo-maleflow.png", alt: "MaleFlow" }
-  },
-      {
-        title: "NeuroFlow",
-        pitch: "Metodologia adaptativa para mentes neurodivergentes com ciclos mensais/bimestrais.",
-        bullets: [
-          "Treinos cíclicos e não lineares",
-          "Rotinas de foco e descarrego sensorial",
-          "Ferramentas de organização 90–20–5",
-        ],
-        cta: { label: "Conhecer o NeuroFlow", href: "hub/index.html#neuroflow" },
-        icon: "🧠"
-      },
-      {
-        title: "PrecisionFlow",
-        pitch: "Personalização avançada com foco em periodização, métricas e hábitos.",
-        bullets: [
-          "Estruturas macro/meso/micro + treinos guiados",
-          "Dashboards e checklists práticos",
-          "Integração com consulta e suporte remoto",
-        ],
-        cta: { label: "Conhecer o PrecisionFlow", href: "precisionflow/index.html" },
-        icon: "⏱️"
-      },
-      {
-        title: "Tênis de Corrida e Treinamento",
-        pitch: "Seleção de tênis de alta performance para corrida e treinos funcionais.",
-        bullets: [
-          "Modelos testados para endurance e velocidade",
-          "Tecnologia de amortecimento e durabilidade",
-          "Indicações para diferentes níveis de atleta",
-        ],
-        cta: { label: "Ver Tênis", href: "hub/index.html#tenis" },
-        icon: "👟"
-      },
-      {
-        title: "Roupas Femininas para Treinamento",
-        pitch: "Linha de roupas confortáveis e tecnológicas para treinos femininos.",
-        bullets: [
-          "Tecidos respiráveis e elásticos",
-          "Design para liberdade de movimento",
-          "Estilo alinhado à performance",
-        ],
-        cta: { label: "Ver Roupas", href: "hub/index.html#roupas" },
-        icon: "👚"
-      }
-    ];
-
-    const tpl = document.getElementById("card-template");
-    const mount = document.getElementById("cards");
-
-    products.forEach(p => {
-      const node = tpl.content.cloneNode(true);
-      node.querySelector("[data-title]").textContent = p.title;
-      node.querySelector("[data-pitch]").textContent = p.pitch;
-      node.querySelector("[data-cta]").textContent = p.cta.label;
-      node.querySelector("[data-cta]").setAttribute("href", p.cta.href);
-
-      const iconSpan = node.querySelector("[data-icon]");
-      iconSpan.textContent = p.icon;
-
-      const bulletsEl = node.querySelector("[data-bullets]");
-      p.bullets.forEach(b => {
-        const li = document.createElement("li");
-        li.className = "flex gap-2";
-        li.innerHTML = `<svg class="w-4 h-4 text-fem-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${b}</span>`;
-        bulletsEl.appendChild(li);
-      });
-
-      mount.appendChild(node);
-    });
-
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+      pitch: "Treinamento feminino guiado pelo ciclo hormonal, com periodização, força e corrida.",
+      bullets: [
+        "Planos 28–32 dias por fases (menstrual, folicular, ovulatória, lútea)",
+        "Força com ênfase em glúteo, costas e core",
+        "Protocolos respiratórios para foco e recuperação"
+      ],
+      cta: { label: "Conhecer o FemFlow", href: "https://www.femflow.com.br" },
+      icon: { type: "img", src: "assets/logo-femflow.png", alt: "FemFlow" }
+    },
+    {
+      title: "RespiraFlow",
+      pitch: "Protocolos de respiração para performance, foco e regulação emocional.",
+      bullets: [
+        "Cartas de respiração + e-book prático",
+        "Protocolos para ansiedade, foco, estresse e sono",
+        "Aplicações táticas para ambientes de alta pressão"
+      ],
+      cta: { label: "Conhecer o RespiraFlow", href: "respiraflow/index.html" },
+      icon: { type: "emoji", value: "🫁" }
+    },
+    {
+      title: "TacticalFlow",
+      pitch: "Tomada de decisão sob pressão com protocolos de respiração e foco situacional.",
+      bullets: [
+        "Módulos para liderança e gestão de crises",
+        "Modelos de checklist e rotinas de prontidão",
+        "Treinos breves (90–20–5) integrados à rotina"
+      ],
+      cta: { label: "Conhecer o TacticalFlow", href: "tacticalflow/index.html" },
+      icon: { type: "emoji", value: "🛡️" }
+    },
+    {
+      title: "MaleFlow",
+      pitch: "Metodologia de treinamento masculino com foco em força, potência e resiliência.",
+      bullets: [
+        "Treino de força com ênfase em potência",
+        "Periodização adaptada à rotina",
+        "Estratégias de recuperação inteligente"
+      ],
+      cta: { label: "Explorar o MaleFlow", href: "#maleflow" },
+      icon: { type: "img", src: "assets/logo-maleflow.png", alt: "MaleFlow" }
+    },
+    {
+      title: "NeuroFlow",
+      pitch: "Metodologia adaptativa para mentes neurodivergentes com ciclos mensais/bimestrais.",
+      bullets: [
+        "Treinos cíclicos e não lineares",
+        "Rotinas de foco e descarrego sensorial",
+        "Ferramentas de organização 90–20–5"
+      ],
+      cta: { label: "Conhecer o NeuroFlow", href: "hub/index.html#neuroflow" },
+      icon: { type: "emoji", value: "🧠" }
+    },
+    {
+      title: "PrecisionFlow",
+      pitch: "Personalização avançada com foco em periodização, métricas e hábitos.",
+      bullets: [
+        "Estruturas macro/meso/micro + treinos guiados",
+        "Dashboards e checklists práticos",
+        "Integração com consulta e suporte remoto"
+      ],
+      cta: { label: "Conhecer o PrecisionFlow", href: "precisionflow/index.html" },
+      icon: { type: "emoji", value: "⏱️" }
+    },
+    {
+      title: "Tênis de Corrida e Treinamento",
+      pitch: "Seleção de tênis de alta performance para corrida e treinos funcionais.",
+      bullets: [
+        "Modelos testados para endurance e velocidade",
+        "Tecnologia de amortecimento e durabilidade",
+        "Indicações para diferentes níveis de atleta"
+      ],
+      cta: { label: "Ver Tênis", href: "hub/index.html#tenis" },
+      icon: { type: "emoji", value: "👟" }
+    },
+    {
+      title: "Roupas Femininas para Treinamento",
+      pitch: "Linha de roupas confortáveis e tecnológicas para treinos femininos.",
+      bullets: [
+        "Tecidos respiráveis e elásticos",
+        "Design para liberdade de movimento",
+        "Estilo alinhado à performance"
+      ],
+      cta: { label: "Ver Roupas", href: "hub/index.html#roupas" },
+      icon: { type: "emoji", value: "👚" }
+    }
+  ];
 
   function renderProducts(list) {
     const container = document.getElementById("cards");
@@ -403,11 +376,11 @@
 
     list.forEach(p => {
       const node = tpl.content.cloneNode(true);
-      const iconEl = node.querySelector("[data-icon]");
-      const titleEl = node.querySelector("[data-title]");
-      const pitchEl = node.querySelector("[data-pitch]");
-      const bulletsEl = node.querySelector("[data-bullets]");
-      const ctaEl = node.querySelector("[data-cta]");
+      const iconEl   = node.querySelector("[data-icon]");
+      const titleEl  = node.querySelector("[data-title]");
+      const pitchEl  = node.querySelector("[data-pitch]");
+      const bulletsEl= node.querySelector("[data-bullets]");
+      const ctaEl    = node.querySelector("[data-cta]");
 
       // Ícone / Logo
       if (p.icon?.type === "img" && p.icon.src) {
@@ -447,6 +420,6 @@
   }
 
   renderProducts(products);
+  document.getElementById("year").textContent = new Date().getFullYear();
 </script>
-</body>
-</html>
+
