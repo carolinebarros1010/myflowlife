@@ -146,6 +146,7 @@ function pickSequencial(cat){
   if (cat==='pot'){ const i = seq.pot % fasesPotencia.length; seq.pot++; return fasesPotencia[i]; }
 }
 
+
 function round2(n){ return Math.round(n*100)/100; }
 
 /* ======= Render ======= */
@@ -179,6 +180,21 @@ function plotSemana(semana){
     data: { labels, datasets: [{ label:'km', data, borderWidth:1 }] },
     options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
   });
+}
+function runTests(){
+  const tests = [
+    ["toSecPace 5:30", () => toSecPace("5:30") === 330],
+    ["paceStr 330", () => paceStr(330) === "5:30"],
+    ["Seq vel avança", () => { const n=seq.vel; pickSequencial('vel'); return seq.vel===n+1; }],
+    ["Sem var pace NaN", () => !isNaN(toSecPace("4:05"))]
+  ];
+  const fails = tests.filter(t => !t[1]());
+  if (fails.length)
+    toast("Testes falharam: " + fails.map(f => f[0]).join(", "));
+  else
+    toast("Testes OK (" + tests.length + ")");
+  beep(700,120,"square",.08);
+  console.log("🧪 Testes automáticos executados");
 }
 
 /* ======= Toast ======= */
