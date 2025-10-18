@@ -21,6 +21,10 @@ function beep(freq = 880, dur = 120, type = "sine", vol = 0.08) {
   g.gain.value = vol; o.connect(g); g.connect(audioCtx.destination);
   o.start(); setTimeout(()=>{ o.stop(); }, dur);
 }
+function playFeedback(type = "click") {
+  const freq = type === "success" ? 1100 : type === "error" ? 300 : 800;
+  beep(freq, 100, "sine", 0.08);
+}
 
 /* ======= Helpers ======= */
 function toSecPace(p) {
