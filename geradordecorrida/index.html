@@ -370,45 +370,6 @@ input:focus, select:focus, textarea:focus {
 
     // ========== PWA: registrar Service Worker ==========
     if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').then(()=>console.log('✅ SW registrado')).catch(e=>console.log('❌ SW erro',e)); }); }
-  </script>
-</body>
-</html>
-
-<!-- ======== ARQUIVOS ADICIONAIS (crie na raiz do projeto) ========
-
-1) manifest.json
-{
-  "name": "Gerador MyFlowLife",
-  "short_name": "MyFlowLife",
-  "description": "Gerador de Microciclo com progressão, volume e ritmo dinâmicos.",
-  "start_url": "/index.html",
-  "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#CC6A5A",
-  "icons": [
-    { "src": "https://www.myflowlife.com.br/assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "https://www.myflowlife.com.br/assets/icon-512.png", "sizes": "512x512", "type": "image/png" }
-  ]
-}
-
-2) sw.js
-const CACHE_NAME = 'myflowlife-cache-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
-];
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
-});
-self.addEventListener('fetch', e => {
-  e.respondWith(caches.match(e.request).then(resp => resp || fetch(e.request)));
-});
-
-====================================================== -->
-
 
   <!-- JS da app -->
   <script src="app.js" defer></script>
