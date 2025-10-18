@@ -97,10 +97,10 @@ const regrasNivel = {
 
 /* ======= Geração ======= */
 function gerarPlano() {
-  const provaKm = parseFloat(byId('prova').value);
-  const nivel = byId('nivel').value;
-  const nTreinos = parseInt(byId('semanal').value,10);
-  const ritmoBaseSec = toSecPace(byId('ritmoBase').value || "5:30");
+  const provaKm = parseFloat(byId('distProva').value);
+  const nivel = byId('perfil').value;
+  const nTreinos = parseInt(byId('treinosSemana').value,10);
+  const ritmoBaseSec = toSecPace(byId('ritmoMedio').value || "5:30");
   const esforco = parseInt(byId('esforco').value,10) || 7;
   const dias = (byId('dias').value || "ter,qui,sab,dom").split(",").map(s=>s.trim());
   const inicio = byId('inicio').value ? dayjs(byId('inicio').value) : dayjs();
@@ -285,6 +285,8 @@ function toast(msg){
 
 /* ======= Eventos V24 Revisados (IDs atualizados) ======= */
 window.addEventListener('DOMContentLoaded', () => {
+  console.log("🚀 app.js carregado com sucesso!");
+
   // Splash
   setTimeout(() => byId('splash')?.classList.add('hidden'), 900);
 
@@ -311,7 +313,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Conecta cada botão existente
   Object.entries(map).forEach(([id, fn]) => {
     const el = byId(id);
     if (el) el.addEventListener('click', fn);
@@ -320,29 +321,4 @@ window.addEventListener('DOMContentLoaded', () => {
 
   console.log("⚡️ Gerador de Corrida V24 conectado com IDs atualizados");
 });
-
-/* ======= PWA ======= */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () =>
-    navigator.serviceWorker.register('./sw.js').catch(() => {})
-  );
-}
-window.addEventListener('DOMContentLoaded', () => {
-  const map = {
-    btnGerarPlano: gerarPlano,
-    btnRodarTestes: runTests,
-    btnExportarPDF: exportPDF,
-    btnGerarCards: () => screenshotCard(document.querySelector('#card-grid .card') || byId('card-grid')),
-    btnResetar: () => { byId('card-grid').innerHTML = ""; if(window.chart) chart.destroy(); toast("Limpo"); },
-    btnPremium: () => { toast("Premium em breve ✨"); beep(1200,160,"triangle",.1); }
-  };
-
-  Object.entries(map).forEach(([id, fn]) => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('click', fn);
-  });
-
-  console.log("⚡️ Gerador de Corrida V24 conectado com IDs atualizados");
-});
-
 
