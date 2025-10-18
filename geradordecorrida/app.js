@@ -92,6 +92,102 @@ const regrasNivel = {
   avancado: { velSemana:2, resSemana:2, potCadaNDias:14, potPre:1 },
 };
 
+// ===== Funções principais =====
+function pickSequencial(cat){
+  if (cat==='vel') { const i = seq.vel % fasesVelocidadePura.length; seq.vel++; return fasesVelocidadePura[i]; }
+  if (cat==='res') { const i = seq.res % fasesResVelocidade.length; seq.res++; return fasesResVelocidade[i]; }
+  if (cat==='pot'){ const i = seq.pot % fasesPotencia.length; seq.pot++; return fasesPotencia[i]; }
+}
+
+function countTipo(arr,t){ return arr.filter(a=>a.tipo===t).length; }
+function round2(n){ return Math.round(n*100)/100; }
+
+function gerarPlano() {
+  const provaKm = parseFloat(byId('distProva').value || 10);
+  const nivel = byId('perfil').value;
+  const nTreinos = parseInt(byId('treinosSemana').value,10);
+  const ritmoBaseSec = toSecPace(byId('ritmoMedio').value || "5:30");
+  const esforco = parseInt(byId('esforco').value,10) || 7;
+
+  let fator = nivel==="iniciante"?1.5:(nivel==="intermediario"?2.0:2.5);
+  const volMaxKm = provaKm * fator;
+  const regra = regrasNivel[nivel];
+
+  const varMin = 0.05, varMax = 0.10;
+  const escala = 1 - (clamp(esforco,1,10)-1)/9;
+  const varPct = varMin + (varMax-varMin)*escala;
+  const ritmoForte = ritmoBaseSec*(1 - varPct);
+  const ritmoLeve  = ritmoBaseSec*(1 + varPct*0.6);
+
+  const semana = [];
+  let distAcum = 0;
+
+  for (let i=0; i<nTreinos; i++) {
+    let treino;
+    if (countTipo(semana,'intensidade') < regra.velSemana) treino = pickSequencial('vel');
+    else if (countTipo(semana,'res_vel') < regra.resSemana) treino = pickSequencial('res');
+    else treino = pickSequencial('pot');
+
+    let alvo = treino.distKm;
+    if (distAcum + alvo > volMaxKm) alvo = Math.max(2, volMaxKm - distAcum);
+
+    semana.push({
+      dia:`Dia ${i+1}`,
+      nome:treino.nome,
+      tipo:treino.tipo,
+      distKm:round2(alvo),
+      ritmo:paceStr(treino.tipo==="leve"?ritmoLeve:ritmoForte),
+      desc:treino.desc
+    });
+    distAcum += alvo;
+  }
+
+  renderSemana(semana);
+  toast("Plano gerado com sucesso!");
+  playFeedback("success");
+}
+
+function renderSemana(semana){
+  const grid = byId('card-grid');
+  grid.innerHTML = "";
+  semana.forEach((t,idx)=>{
+    const el = document.createElement('article');
+    el.className = "card";
+    el.innerHTML = `
+      <div class="body">
+        <span class="badge">${t.dia}</span>
+        <div class="title">${idx+1}. ${t.nome}</div>
+        <div class="kv">Tipo: ${t.tipo}</div>
+        <div class="kv">Distância: <b>${t.distKm} km</b> • Ritmo: <b>${t.ritmo}</b></div>
+        <p class="kv">${t.desc}</p>
+      </div>`;
+    grid.appendChild(el);
+  });
+}
+
+async function exportPDF(){
+  toast("PDF exportado (simulado)");
+  playFeedback("success");
+}
+
+async function screenshotCard(){
+  toast("Card gerado (simulado)");
+  playFeedback("success");
+}
+
+function runTests(){
+  const tests = [
+    ["toSecPace 5:30", ()=>toSecPace("5:30")===330],
+    ["paceStr 330", ()=>paceStr(330)==="5:30"],
+    ["Seq vel avança", ()=>{ const n=seq.vel; pickSequencial('vel'); return seq.vel===n+1; }]
+  ];
+  const fails = tests.filter(t=>!t[1]());
+  if (fails.length) toast("Testes falharam: "+fails.map(f=>f[0]).join(", "));
+  else toast("Testes OK ("+tests.length+")");
+  beep(700,120,"square",.08);
+  console.log("🧪 Testes automáticos executados");
+}
+
 /* ======= Geração ======= */
 function gerarPlano() {
   const provaKm = parseFloat(byId('distProva').value);
