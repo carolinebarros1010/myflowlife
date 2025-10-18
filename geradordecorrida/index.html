@@ -416,7 +416,7 @@ input:focus, select:focus, textarea:focus {
 <!-- Importação correta para GitHub Pages -->
 <script src="./app.js" defer></script>
 
-<!-- Registro do Service Worker -->
+<!-- Registro do Service Worker e fallback do Splash -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js")
@@ -424,7 +424,7 @@ input:focus, select:focus, textarea:focus {
       .catch(err => console.warn("SW falhou:", err));
   }
 
-  // Garantia: se o app.js falhar, splash sai mesmo assim
+  // Fallback: se algo travar, splash desaparece de qualquer jeito
   window.addEventListener("load", () => {
     setTimeout(() => {
       const splash = document.getElementById("splash");
@@ -435,6 +435,7 @@ input:focus, select:focus, textarea:focus {
     }, 1200);
   });
 </script>
+
 
 </body>
 </html>
