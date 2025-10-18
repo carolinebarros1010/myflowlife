@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#CC6A5A">
+  <link rel="manifest" href="manifest.json">
+  <title>Gerador de Corrida MyFlowLife</title>
+  <style>
+    /* Variáveis e estilos base */
+    :root {
+       --bg-dark: #0f172a;
+       --panel-dark: #111827;
+       --ink-dark: #e5e7eb;
+       --muted-dark: #9ca3af;
+       --bg-light: #f8fafc;
+       --panel-light: #ffffff;
+       --ink-light: #1e293b;
+       --muted-light: #64748b;
+       --teal: #335953;
+       --terracota: #cc6a5a;
+       --pessego: #efbda6;
+    }
+    body {
+       margin:0;
+       padding:0;
+       font-family: 'Arial', sans-serif;
+       background: var(--bg-light);
+       color: var(--ink-light);
+    }
+    @media(prefers-color-scheme:dark) {
+       body { background: var(--bg-dark); color: var(--ink-dark);}  
+    }
+    header {
+       position: sticky; top:0; width: 100%; padding: 1rem; background: var(--panel-light); z-index:999;
+       display:flex; justify-content: space-between; align-items:center; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    header button {
+       background: var(--terracota); color:white; border:none; padding: 0.5rem 1rem; border-radius:4px;
+    }
+    main { padding: 1rem; }
+    .form-group { margin-bottom:1rem; }
+    input, select {
+       width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;
+    }
+    table { width:100%; border-collapse: collapse; margin-top:1rem;}
+    th, td { border:1px solid #ddd; padding:0.5rem; text-align:left;}
+    th { background: var(--panel-light);}    
+  </style>
+</head>
+<body>
+<header>
+  <h1>Gerador de Corrida</h1>
+  <button id="premium-btn">Assinar Premium</button>
+</header>
+<main>
+  <div class="form-group">
+    <label for="distancia">Distância da prova alvo (km)</label>
+    <input id="distancia" type="number" min="1" step="0.1" value="10">
+  </div>
+  <div class="form-group">
+    <label for="dataProva">Data da prova alvo</label>
+    <input id="dataProva" type="date">
+  </div>
+  <div class="form-group">
+    <label for="treinosSemanais">Número de treinos semanais</label>
+    <input id="treinosSemanais" type="number" min="1" max="7" value="3">
+  </div>
+  <div class="form-group">
+    <label for="perfil">Perfil do atleta</label>
+    <select id="perfil">
+      <option value="iniciante">Iniciante</option>
+      <option value="intermediario">Intermediário</option>
+      <option value="avancado">Avançado</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="esforco">Esforço do último treino (1-10)</label>
+    <input id="esforco" type="number" min="1" max="10" value="6">
+  </div>
+  <button id="gerarBtn">Gerar plano da semana</button>
+  <button id="pdfBtn">Exportar PDF</button>
+  <button id="cardsBtn">Gerar cards</button>
+  <div id="tabelaTreinos"></div>
+  <canvas id="graficoVolume" height="200"></canvas>
+</main>
+<audio id="clickSound" src="https://cdn.myflowlife.com/sounds/flow_click.mp3" preload="auto"></audio>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// Feedback audível ao clicar nos botões
+function playSound() {
+  const snd=document.getElementById('clickSound');
+  if(snd){ snd.volume=0.3; snd.play().catch(()=>{}); }
+}
+
+document.getElementById('gerarBtn').addEventListener('click', () => {
+  playSound();
+  gerarPlano();
+});
+document.getElementById('pdfBtn').addEventListener('click', async () => {
+  playSound();
+  await exportarPDF();
+});
+document.getElementById('cardsBtn').addEventListener('click', async () => {
+  playSound();
+  await exportarCards();
+});
+
+function gerarPlano(){
+  const distancia= parseFloat(document.getElementById('distancia').value || 0);
+  const treinosSemanais= parseInt(document.getElementById('treinosSemanais').value || 3);
+  const perfil = document.getElementById('perfil').value;
+  // cálculo do volume máximo (km) com fator conforme perfil
+  let fator=1.5;
+  if(perfil==='intermediario'){fator=2;}
+  if(perfil==='avancado'){fator=2.5;}
+  const volMax= distancia * fator;
+  // planilha exemplo de treinos (pode evoluir para sequência completa)
+  const treinos = [
+    {nome:'Sprint Curto com Recuperação', desc:'12×100 m com recuperação completa'},
+    {nome:'Intervalado 300/300', desc:'5×300 m forte / 300 m leve'},
+    {nome:'Sprint em Subida + Pliometria', desc:'8×60 m subida + pliometria'},
+  ];
+  const semanas = 6;
+  // construir tabela
+  const tabela = document.createElement('table');
+  const header = tabela.insertRow();
+  ['Semana','Treino','Volume (km)','Descrição'].forEach(text=>{
+    const th=document.createElement('th');
+    th.textContent=text;
+    header.appendChild(th);
+  });
+  for(let i=0;i<semanas;i++){
+    for(let j=0;j<treinosSemanais;j++){
+      const tr = tabela.insertRow();
+      const treino = treinos[(i*treinosSemanais+j) % treinos.length];
+      tr.insertCell().textContent = i+1;
+      tr.insertCell().textContent = treino.nome;
+      tr.insertCell().textContent = (volMax / treinosSemanais).toFixed(2);
+      tr.insertCell().textContent = treino.desc;
+    }
+  }
+  const container=document.getElementById('tabelaTreinos');
+  container.innerHTML='';
+  container.appendChild(tabela);
+  // gerar gráfico de volume
+  const semanasLabels=[];
+  const volumes=[];
+  for(let s=1;s<=semanas;s++){
+    semanasLabels.push('Sem '+s);
+    volumes.push(volMax);
+  }
+  const ctx=document.getElementById('graficoVolume').getContext('2d');
+  new Chart(ctx,{
+    type:'line',
+    data:{labels: semanasLabels, datasets:[{label:'Volume semanal (km)', data:volumes}]},
+    options:{responsive:true}
+  });
+}
+
+async function exportarPDF(){
+  const tabela=document.getElementById('tabelaTreinos');
+  const canvas=await html2canvas(tabela);
+  const imgData=canvas.toDataURL('image/png');
+  const pdf=new window.jspdf.jsPDF();
+  const imgProps=pdf.getImageProperties(imgData);
+  const pdfWidth=pdf.internal.pageSize.getWidth();
+  const pdfHeight=(imgProps.height * pdfWidth) / imgProps.width;
+  pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+  pdf.save('plano_semana.pdf');
+}
+
+async function exportarCards(){
+  const rows=document.querySelectorAll('#tabelaTreinos table tr');
+  for(let i=1;i<rows.length;i++){
+    const row=rows[i];
+    const card=document.createElement('div');
+    card.style.border='1px solid #ccc';
+    card.style.padding='10px';
+    card.style.margin='10px';
+    const cells=row.querySelectorAll('td');
+    card.innerHTML='<h3>'+cells[1].textContent+'</h3><p>'+cells[3].textContent+'</p>';
+    const canvas=await html2canvas(card);
+    const imgData=canvas.toDataURL('image/png');
+    const pdf=new window.jspdf.jsPDF();
+    const imgProps=pdf.getImageProperties(imgData);
+    const pdfWidth=pdf.internal.pageSize.getWidth();
+    const pdfHeight=(imgProps.height * pdfWidth) / imgProps.width;
+    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+    pdf.save('card_'+i+'.pdf');
+  }
+}
+</script>
+</body>
+</html>
