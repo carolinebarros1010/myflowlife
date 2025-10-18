@@ -189,13 +189,6 @@ function runTests(){
 }
 
 /* ======= Geração ======= */
-function gerarPlano() {
-  const provaKm = parseFloat(byId('distProva').value);
-  const nivel = byId('perfil').value;
-  const nTreinos = parseInt(byId('treinosSemana').value,10);
-  const ritmoBaseSec = toSecPace(byId('ritmoMedio').value || "5:30");
-  const esforco = parseInt(byId('esforco').value,10) || 7;
-
   let fator = 2.0;
   if (nivel==="iniciante") fator = 1.5;
   else if (nivel==="intermediario") fator = 2.0;
