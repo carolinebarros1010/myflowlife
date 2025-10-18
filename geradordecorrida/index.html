@@ -400,8 +400,8 @@ input:focus, select:focus, textarea:focus {
     if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').then(()=>console.log('✅ SW registrado')).catch(e=>console.log('❌ SW erro',e)); }); }
 
   <!-- JS da app -->
-  <script src="app.js" defer></script>
-  <script>
+  <script src="./app.js" defer></script>
+   <script>
   window.addEventListener('load', () => {
     const splash = document.getElementById('splash');
     if (splash) {
@@ -409,7 +409,7 @@ input:focus, select:focus, textarea:focus {
       console.log('💡 Splash forçado a desaparecer.');
     }
   });
-</script>
+ </script>
 
 </body>
 </html>
