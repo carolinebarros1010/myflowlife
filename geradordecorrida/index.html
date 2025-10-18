@@ -144,8 +144,9 @@ input:focus, select:focus, textarea:focus {
 <!-- Splash SVG animado -->
 <div id="splash" class="splash">
   <div class="splash-content">
-    <svg id="logoMyFlow" width="220" height="60" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
+    <svg id="logoMyFlow" width="260" height="100" viewBox="0 0 260 100" xmlns="http://www.w3.org/2000/svg">
       <defs>
+        <!-- Gradiente animado compartilhado -->
         <linearGradient id="gradFlow" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#EFBDA6">
             <animate attributeName="offset" values="-0.2;1.2" dur="2.5s" repeatCount="indefinite" />
@@ -158,13 +159,20 @@ input:focus, select:focus, textarea:focus {
           </stop>
         </linearGradient>
       </defs>
-      <text x="0" y="42" font-size="38" font-weight="700" font-family="Poppins, sans-serif" fill="url(#gradFlow)">MyFlowLife</text>
+
+      <!-- Texto principal -->
+      <text x="0" y="42" font-size="38" font-weight="700" font-family="Poppins, sans-serif" fill="url(#gradFlow)">
+        MyFlowLife
+      </text>
+
+      <!-- Subtítulo “Potência Sustentável” com mesmo gradiente -->
+      <text x="0" y="80" font-size="22" font-weight="600" font-family="Poppins, sans-serif" fill="url(#gradFlow)">
+        Potência Sustentável
+      </text>
     </svg>
-    <p class="splash-title" style="font-size:1.1rem;color:var(--muted);margin-top:.6rem;">
-      <span style="color:var(--terracota);font-weight:600;">Potência Sustentável</span>
-    </p>
   </div>
 </div>
+
 
 
   <!-- Topo fixo com Premium -->
