@@ -1,25 +1,54 @@
-// SW simples V24
-const CACHE = "mfl-gerador-v24";
-const CORE = ["./index.html","./styles.css","./app.js","./manifest.json"];
+// SW V24 Unificado – MyFlowLife / Gerador de Corrida
+const CACHE_NAME = "myflowlife-gerador-v24";
+const ASSETS = [
+  "./",
+  "./index.html",
+  "./styles.css",
+  "./app.js",
+  "./manifest.json",
+  "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js",
+  "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",
+  "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js",
+  "https://cdn.jsdelivr.net/npm/dayjs@1.11.11/dayjs.min.js"
+];
 
-self.addEventListener("install", e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)));
-});
-
-self.addEventListener("activate", e=>{
-  e.waitUntil(
-    caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+// Instalação (pré-cache)
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener("fetch", e=>{
-  const req = e.request;
-  e.respondWith(
-    caches.match(req).then(cached=> cached || fetch(req).then(r=>{
-      const copy = r.clone();
-      caches.open(CACHE).then(c=>c.put(req, copy));
-      return r;
-    }).catch(()=> cached || new Response("offline", {status:200})))
+// Ativação (limpa versões antigas)
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys => 
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+
+// Estratégia híbrida: cache-first com atualização em background
+self.addEventListener("fetch", event => {
+  const req = event.request;
+  if (req.method !== "GET") return; // ignora POST, PUT etc.
+
+  event.respondWith(
+    caches.match(req).then(cached => {
+      const fetchPromise = fetch(req)
+        .then(netRes => {
+          // Atualiza cache em background
+          caches.open(CACHE_NAME).then(c => c.put(req, netRes.clone()));
+          return netRes;
+        })
+        .catch(() => cached || new Response("Você está offline 📴", {status: 200}));
+      return cached || fetchPromise;
+    })
   );
 });
 
+// Mensagem opcional para debug
+console.log("✅ SW V24 ativo e funcional");
