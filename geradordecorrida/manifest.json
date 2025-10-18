@@ -7,8 +7,8 @@
   "scope": "/geradordecorrida/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F4E1D7",
-  "theme_color": "#CC6A5A",
+ "theme_color": "#0f172a",
+  "background_color": "#0b1220",
   "icons": [
     {
       "src": "/shared/icons/icon-192.png",
