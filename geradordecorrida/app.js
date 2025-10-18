@@ -28,6 +28,12 @@ function toSecPace(p) {
   const [m,s] = p.split(":").map(x=>parseInt(x,10));
   return (m*60 + (isNaN(s)?0:s));
 }
+function playFeedback(type = "click") {
+  // toca um som leve de feedback
+  if (type === "success") beep(1100, 120, "triangle", 0.08);
+  else if (type === "error") beep(300, 200, "square", 0.1);
+  else beep(800, 80, "sine", 0.07);
+}
 function paceStr(sec) {
   const s = Math.round(sec);
   const m = Math.floor(s/60);
