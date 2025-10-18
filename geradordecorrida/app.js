@@ -1,3 +1,5 @@
+console.log("🚀 app.js carregado com sucesso!");
+
 /* ===== V24 – Gerador de Corrida (microciclo) =====
    - progressão sequencial por fase
    - volumes por nível (1.5× / 2× / 2–3×)
