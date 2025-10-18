@@ -142,11 +142,6 @@ function gerarPlano() {
     distAcum += alvo;
   }
 
-  renderSemana(semana);
-  toast("Plano gerado com sucesso!");
-  playFeedback("success");
-}
-
 function renderSemana(semana){
   const grid = byId('card-grid');
   grid.innerHTML = "";
