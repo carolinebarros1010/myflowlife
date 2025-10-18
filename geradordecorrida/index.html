@@ -413,18 +413,28 @@ input:focus, select:focus, textarea:focus {
     });
   </script>
 
-  <!-- Importação segura do app.js -->
-  <!-- ⚠️ use caminho absoluto se hospedado dentro de /geradordecorrida -->
-  <script src="/geradordecorrida/app.js" defer></script>
+<!-- Importação correta para GitHub Pages -->
+<script src="./app.js" defer></script>
 
-  <!-- Registro do service worker (opcional, evita erro offline) -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/geradordecorrida/sw.js")
-        .then(() => console.log("✅ Service Worker registrado"))
-        .catch(err => console.warn("SW falhou:", err));
-    }
-  </script>
+<!-- Registro do Service Worker -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js")
+      .then(() => console.log("✅ SW V24 ativo e funcional"))
+      .catch(err => console.warn("SW falhou:", err));
+  }
+
+  // Garantia: se o app.js falhar, splash sai mesmo assim
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      const splash = document.getElementById("splash");
+      if (splash) {
+        splash.classList.add("hidden");
+        console.log("💡 Splash forçado a desaparecer.");
+      }
+    }, 1200);
+  });
+</script>
 
 </body>
 </html>
