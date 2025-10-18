@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gerador de Microciclo MyFlowLife v23 (PWA)</title>
+  <title>Gerador de Microciclo MyFlowLife v23.1 (PWA)</title>
   <!-- PWA: Manifesto -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#CC6A5A" />
@@ -25,6 +25,23 @@
       .btn { color:#fff }
       th, td { background:#f8fafc; color:var(--ink) }
     }
+    /* ==== Correção contraste inputs no tema claro ==== */
+@media (prefers-color-scheme: light) {
+  input, select, textarea {
+    background: #f9fafb; /* leve contraste sobre o fundo branco */
+    color: #1e293b; /* texto bem escuro e legível */
+    border: 1px solid #cbd5e1; /* borda suave mas visível */
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: #335953; /* teal da paleta */
+    background: #ffffff; /* realce ao foco */
+    color: #0f172a; /* reforço de contraste */
+  }
+
+  ::placeholder {
+    color: #94a3b8; /* tom médio visível */
+  }
 
     /* ===== Splash animado (v20) ===== */
     #splashScreen { position:fixed; inset:0; background:linear-gradient(135deg,var(--terracota),var(--pessego)); display:flex; align-items:center; justify-content:center; z-index:10000; animation:fadeOut 1s ease forwards; animation-delay:2.8s; }
@@ -127,7 +144,7 @@
 
   <div class="wrap">
     <header>
-      <div class="brand">Gerador de Microciclo <span style="color:var(--pessego)">MyFlowLife</span> v23</div>
+      <div class="brand">Gerador de Microciclo <span style="color:var(--pessego)">MyFlowLife</span> v23.1</div>
     </header>
     <p class="sub">Escolha perfil, distância da prova e disponibilidade. O sistema monta a semana com velocidade, resistência e potência, ajusta ritmo pelos níveis de esforço e gera PDF e cards.</p>
 
@@ -287,8 +304,14 @@
       // Cards
       const cards=byId('cardsWrap'); cards.innerHTML=''; plan.forEach((p,i)=>{ const c=document.createElement('div'); c.className='mini-card'; c.id='card-'+i; const fLabel = (p.tipo.startsWith('Velocidade')?'VEL':p.tipo.startsWith('Resistência')?'RES':p.tipo.startsWith('Potência')?'POT':null); const f = fLabel? getFase(fLabel) : 1; const cor=faseCor(Math.max(f-1,1)); c.style.borderTop=`3px solid ${cor}`; c.innerHTML=`<h4>${p.tipo}</h4><div class="tag">${p.nome}</div><p style="margin:8px 0 6px"><b>Duração:</b> ${p.duracao} min • <b>Distância:</b> ${p.dist? p.dist+' km':'—'} • <b>Esforço:</b> ${p.esforco}</p><p style="margin:0">${p.desc}</p>`; cards.appendChild(c); });
 
-      // Gráfico
-      const volumeSemanas=[]; const intensidadeSemanas=[]; const volMaxKm=distProva*fMax; for(let s=1;s<=12;s++){ let pc=s/pico; if(pc>1) pc=1-((s-pico)/(12-pico)); pc=Math.max(0.6,pc); let v=volMaxKm*pc; if(s===3||s===7)v*=1.1; if(s===4||s===8)v*=0.8; volumeSemanas.push(parseFloat(v.toFixed(1))); intensidadeSemanas.push(s<4?5:s<8?7:s<11?8.5:7.5); }
+      // Gráfico (FIX: usa volMaxKm já declarado)
+      const volumeSemanas=[]; const intensidadeSemanas=[]; 
+      for(let s=1;s<=12;s++){
+        let pc=s/pico; if(pc>1) pc=1-((s-pico)/(12-pico)); pc=Math.max(0.6,pc);
+        let v=volMaxKm*pc; if(s===3||s===7)v*=1.1; if(s===4||s===8)v*=0.8;
+        volumeSemanas.push(parseFloat(v.toFixed(1)));
+        intensidadeSemanas.push(s<4?5:s<8?7:s<11?8.5:7.5);
+      }
       if(chart) chart.destroy();
       const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
       const corTexto = prefersLight ? '#1e293b' : '#e5e7eb';
@@ -301,7 +324,12 @@
     async function gerarCards(){ const wrap=byId('cardsWrap'); if(!wrap.children.length){ alert('Gere o plano antes de criar os cards.'); return; } let i=0; for(const el of wrap.children){ const canvas=await html2canvas(el,{backgroundColor:'#0b1620',scale:2}); const url=canvas.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download=`card_${++i}.png`; a.click(); } }
 
     // ========== Testes ==========
-    function runTests(){ const out=byId('testsOut'); const results=[]; try{ results.push({name:'toSec 06:00 = 360', ok:toSec('06:00')===360}); }catch(e){ results.push({name:'toSec', ok:false, err:e}); } try{ results.push({name:'toPace 375s = 06:15', ok:toPace(375)==='06:15'}); }catch(e){ results.push({name:'toPace', ok:false, err:e}); } try{ results.push({name:'Campo #esforco existe', ok:!!byId('esforco')}); }catch(e){ results.push({name:'Campo esforco', ok:false, err:e}); } try{ gerarPlano(); const hasRows=!!(byId('tabelaWrap').querySelector('tbody tr')); results.push({name:'gerarPlano produz tabela', ok:hasRows}); }catch(e){ results.push({name:'gerarPlano', ok:false, err:e}); } out.innerHTML = results.map(r=>`<div class="${r.ok?'ok':'bad'}">${r.ok?'✔':'✖'} ${r.name}${r.err?' — '+r.err:''}</div>`).join(''); }
+    function runTests(){ const out=byId('testsOut'); const results=[]; try{ results.push({name:'toSec 06:00 = 360', ok:toSec('06:00')===360}); }catch(e){ results.push({name:'toSec', ok:false, err:e}); } try{ results.push({name:'toPace 375s = 06:15', ok:toPace(375)==='06:15'}); }catch(e){ results.push({name:'toPace', ok:false, err:e}); } try{ results.push({name:'Campo #esforco existe', ok:!!byId('esforco')}); }catch(e){ results.push({name:'Campo esforco', ok:false, err:e}); }
+      try{ gerarPlano(); const hasRows=!!(byId('tabelaWrap').querySelector('tbody tr')); results.push({name:'gerarPlano produz tabela', ok:hasRows}); }catch(e){ results.push({name:'gerarPlano', ok:false, err:e}); }
+      // Novos testes: execução dupla e perfis
+      try{ gerarPlano(); results.push({name:'gerarPlano pode rodar 2x sem erro', ok:true}); }catch(e){ results.push({name:'gerarPlano repetido', ok:false, err:e}); }
+      try{ const dist=10; byId('distProva').value=dist; byId('perfil').value='intermediario'; gerarPlano(); const vm=parseFloat(byId('kVolMax').textContent); results.push({name:'Perfil intermediário = 2x distância', ok: Math.abs(vm - (2*dist))<0.01 }); }catch(e){ results.push({name:'Perfil intermediário cálculo volMax', ok:false, err:e}); }
+      out.innerHTML = results.map(r=>`<div class="${r.ok?'ok':'bad'}">${r.ok?'✔':'✖'} ${r.name}${r.err?' — '+r.err:''}</div>`).join(''); }
 
     // ========== Splash + som (toca só 1ª vez) ==========
     window.addEventListener('load', ()=>{
