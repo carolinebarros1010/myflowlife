@@ -138,12 +138,11 @@ input:focus, select:focus, textarea:focus {
 
 }
 
-    
-  </style>
+</style>
 </head>
 <body>
-  <!-- Splash SVG animado + som (v21) -->
-  <div id="splashScreen">
+  <!-- Splash SVG animado -->
+  <div id="splash" class="splash">
     <div class="splash-content">
       <svg id="logoMyFlow" width="220" height="60" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -166,64 +165,82 @@ input:focus, select:focus, textarea:focus {
   </div>
 
   <!-- Topo fixo com Premium -->
-  <div id="topBar">
-    <span id="siteTitle">🏃‍♂️ Gerador MyFlowLife</span>
-    <a href="https://www.myflowlife.com.br/premium" id="btnPremium" target="_blank" title="Acesse o Plano Premium MyFlowLife">💎 COMPRE O PLANO PREMIUM</a>
+  <div class="topbar">
+    <span class="brand">🏃‍♂️ Gerador MyFlowLife</span>
+    <a href="https://www.myflowlife.com.br/premium" id="btnPremium" target="_blank" title="Acesse o Plano Premium MyFlowLife" class="btn-app">💎 COMPRE O PLANO PREMIUM</a>
   </div>
 
-  <div class="wrap">
+  <div class="container">
     <header>
-      <div class="brand">Gerador de Microciclo <span style="color:var(--pessego)">MyFlowLife</span> v23.1</div>
+      <div class="brand">Gerador de Microciclo <span style="color:var(--accent)">MyFlowLife</span> V24</div>
     </header>
-    <p class="sub">Escolha perfil, distância da prova e disponibilidade. O sistema monta a semana com velocidade, resistência e potência, ajusta ritmo pelos níveis de esforço e gera PDF e cards.</p>
 
-    <section class="card">
+    <p class="muted">Escolha perfil, distância da prova e disponibilidade. O sistema monta a semana com velocidade, resistência e potência, ajusta ritmo pelos níveis de esforço e gera PDF e cards.</p>
+
+    <!-- ENTRADAS -->
+    <section class="panel">
       <h2>Entradas</h2>
-      <div class="row3">
-        <div><label>Perfil</label><select id="perfil"><option value="iniciante">Iniciante</option><option value="intermediario">Intermediário</option><option value="avancado">Avançado</option></select></div>
-        <div><label>Distância da prova (km)</label><input id="distProva" type="number" min="3" value="10"></div>
-        <div><label>Semana atual (1–12)</label><input id="semana" type="number" min="1" max="12" value="1"></div>
+      <div class="grid">
+        <label>Perfil
+          <select id="nivel">
+            <option value="iniciante">Iniciante</option>
+            <option value="intermediario">Intermediário</option>
+            <option value="avancado">Avançado</option>
+          </select>
+        </label>
+        <label>Distância da prova (km)
+          <input id="prova" type="number" min="3" value="10">
+        </label>
+        <label>Dias da semana
+          <input id="dias" value="ter,qui,sab,dom">
+        </label>
+        <label>Treinos por semana
+          <input id="semanal" type="number" min="3" max="6" value="4">
+        </label>
+        <label>Ritmo base (min:seg/km)
+          <input id="ritmoBase" value="05:30">
+        </label>
+        <label>Esforço do último treino (1–10)
+          <input id="esforco" type="number" min="1" max="10" step="1" value="7">
+        </label>
+        <label>Início
+          <input id="inicio" type="date">
+        </label>
       </div>
-      <div class="row3" style="margin-top:8px">
-        <div><label>Ritmo médio (min:seg / km)</label><input id="ritmoMedio" value="06:00"></div>
-        <div><label>Esforço do último treino (1–10)</label><input id="esforco" type="number" min="1" max="10" step="1" value="7"></div>
-        <div><label>Treinos disponíveis/semana (3–6)</label><input id="treinosSemana" type="number" min="3" max="6" value="4"></div>
+
+      <div class="actions" style="margin-top:1rem;">
+        <button id="btnGerarPlano" class="btn primary">Gerar plano da semana</button>
+        <button id="btnRodarTestes" class="btn">Rodar testes</button>
       </div>
-      <div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap;">
-        <button id="btnGerarPlano" class="btn" onclick="playFeedback('btnGerarPlano'); gerarPlano()">Gerar plano da semana</button>
-        <button id="btnRodarTestes" class="btn" onclick="playFeedback('btnRodarTestes'); runTests()">Rodar Testes</button>
-      </div>
-      <div id="testsOut" class="tests"></div>
     </section>
 
-    <section class="card">
-      <h2>Resumo</h2>
-      <div class="kpi">
-        <div><span class="t">Volume máximo</span><span id="kVolMax" class="v">—</span></div>
-        <div><span class="t">Volume sugerido</span><span id="kVolSug" class="v">—</span></div>
-        <div><span class="t">Tempo total</span><span id="kTempo" class="v">—</span></div>
-        <div><span class="t">Ritmo ajustado</span><span id="kRitmo" class="v">—</span></div>
-      </div>
-      <canvas id="grafico"></canvas>
-    </section>
-
-    <section class="card" id="secTabela">
-      <h2>Fases atuais</h2>
-      <div id="fasesInfo" style="text-align:center;margin-bottom:10px;color:var(--muted)"></div>
+    <!-- RESULTADOS -->
+    <section class="panel">
       <h2>Plano semanal</h2>
-      <div id="tabelaWrap"></div>
-      <div class="actions">
-        <button id="btnExportarPDF" class="btn" onclick="playFeedback('btnExportarPDF'); exportarPDF()">📄 Exportar PDF</button>
-        <button id="btnGerarCards" class="btn" onclick="playFeedback('btnGerarCards'); gerarCards()">🖼️ Gerar Cards</button>
-        <button id="btnResetar" class="btn" onclick="playFeedback('btnResetar'); resetarFases()">🔁 Resetar Progressão</button>
-      </div>
-      <div id="cardsWrap" class="card-grid" style="margin-top:14px"></div>
+      <div id="card-grid" class="grid-cards"></div>
     </section>
+
+    <!-- GRÁFICO -->
+    <section class="panel">
+      <h2>Resumo semanal</h2>
+      <canvas id="chart"></canvas>
+    </section>
+
+    <!-- AÇÕES -->
+    <div class="actions">
+      <button id="btnExportarPDF" class="btn">📄 Exportar PDF</button>
+      <button id="btnGerarCards" class="btn">🖼️ Gerar Cards</button>
+      <button id="btnResetar" class="btn danger">🔁 Resetar</button>
+    </div>
   </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
 
   <!-- Sons -->
   <audio id="splashSound" src="https://cdn.myflowlife.com/sounds/flow_inspire.mp3" preload="auto"></audio>
   <audio id="clickSound" src="https://cdn.myflowlife.com/sounds/flow_click.mp3" preload="auto"></audio>
+
 
   <script>
     // ========== Utils ==========
