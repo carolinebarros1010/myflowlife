@@ -248,11 +248,6 @@ input:focus, select:focus, textarea:focus {
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <!-- Sons -->
-  <!audio id="splashSound" src="https://cdn.myflowlife.com/sounds/flow_inspire.mp3" preload="auto"></!audio>
-  <!audio id="clickSound" src="https://cdn.myflowlife.com/sounds/flow_click.mp3" preload="auto"></!audio>
-
-
   <script>
     // ========== Utils ==========
     const byId = id => document.getElementById(id);
@@ -396,20 +391,41 @@ input:focus, select:focus, textarea:focus {
       setTimeout(()=> splash && splash.remove(), 3200);
     });
 
-    // ========== PWA: registrar Service Worker ==========
-    if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').then(()=>console.log('✅ SW registrado')).catch(e=>console.log('❌ SW erro',e)); }); }
+  <!-- Sons opcionais (seguro mesmo se não existirem ainda) -->
+  <audio id="splashSound" src="https://cdn.myflowlife.com/sounds/flow_inspire.mp3" preload="auto"></audio>
+  <audio id="clickSound" src="https://cdn.myflowlife.com/sounds/flow_click.mp3" preload="auto"></audio>
 
-  <!-- JS da app -->
-  <script src>="./app.js" defer></script>
-   <script>
-  window.addEventListener('load', () => {
-    const splash = document.getElementById('splash');
-    if (splash) {
-      splash.classList.add('hidden');
-      console.log('💡 Splash forçado a desaparecer.');
+  <!-- ======================================
+       JS principal — versão segura p/ GitHub Pages
+       ====================================== -->
+  <script>
+    console.log("⚡ Verificando app.js...");
+
+    // Teste rápido: força remoção do splash se o app falhar
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        const splash = document.getElementById("splash");
+        if (splash) {
+          splash.classList.add("hidden");
+          console.log("💡 Splash forçado a desaparecer.");
+        }
+      }, 1200);
+    });
+  </script>
+
+  <!-- Importação segura do app.js -->
+  <!-- ⚠️ use caminho absoluto se hospedado dentro de /geradordecorrida -->
+  <script src="/geradordecorrida/app.js" defer></script>
+
+  <!-- Registro do service worker (opcional, evita erro offline) -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/geradordecorrida/sw.js")
+        .then(() => console.log("✅ Service Worker registrado"))
+        .catch(err => console.warn("SW falhou:", err));
     }
-  });
- </script>
+  </script>
 
 </body>
 </html>
+
