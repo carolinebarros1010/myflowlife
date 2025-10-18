@@ -186,7 +186,7 @@ function round2(n){ return Math.round(n*100)/100; }
 
 /* ======= Render de cards (grid Netflix) ======= */
 function renderSemana(semana){
-  const grid = byId('grid'); grid.innerHTML = "";
+  const grid = byId('card-grid'); grid.innerHTML = "";
   semana.forEach((t,idx)=>{
     const el = document.createElement('article');
     el.className = "card";
@@ -235,7 +235,7 @@ async function screenshotCard(btn){
 }
 
 async function exportPDF(){
-  const grid = byId('grid');
+  const grid = byId('card-grid');
   if(!grid.children.length){ toast("Gere o plano primeiro"); return; }
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({unit:"pt", format:"a4"});
@@ -275,25 +275,48 @@ function toast(msg){
   setTimeout(()=> t.classList.remove('show'), 1800);
 }
 
-/* ======= Eventos ======= */
-window.addEventListener('DOMContentLoaded', ()=>{
-  // splash
-  setTimeout(()=> byId('splash').classList.add('hidden'), 900);
+/* ======= Eventos V24 Revisados (IDs atualizados) ======= */
+window.addEventListener('DOMContentLoaded', () => {
+  // Splash
+  setTimeout(() => byId('splash')?.classList.add('hidden'), 900);
 
-  // default inicio = hoje
-  if (!byId('inicio').value) byId('inicio').value = dayjs().format('YYYY-MM-DD');
+  // Define data de início
+  if (byId('inicio') && !byId('inicio').value)
+    byId('inicio').value = dayjs().format('YYYY-MM-DD');
 
-  byId('btnGerar').addEventListener('click', gerarPlano);
-  byId('btnPDF').addEventListener('click', exportPDF);
-  byId('btnCards').addEventListener('click', ()=> screenshotCard(byId('grid').querySelector('.card')||byId('grid')));
-  byId('btnTestes').addEventListener('click', runTests);
-  byId('btnReset').addEventListener('click', ()=>{ byId('grid').innerHTML=""; if(window.chart) chart.destroy(); toast("Limpo"); });
+  // Botões com novos IDs
+  const map = {
+    btnGerarPlano: gerarPlano,
+    btnRodarTestes: runTests,
+    btnExportarPDF: exportPDF,
+    btnGerarCards: () =>
+      screenshotCard(document.querySelector('#card-grid .card') || byId('card-grid')),
+    btnResetar: () => {
+      const grid = byId('card-grid');
+      if (grid) grid.innerHTML = "";
+      if (window.chart) chart.destroy();
+      toast("Limpo");
+    },
+    btnPremium: () => {
+      toast("Premium em breve ✨");
+      beep(1200, 160, "triangle", 0.1);
+    }
+  };
 
-  // Premium (efeito)
-  byId('btnPremium').addEventListener('click', ()=>{ toast("Premium em breve ✨"); beep(1200,160,"triangle",.1); });
+  // Conecta cada botão existente
+  Object.entries(map).forEach(([id, fn]) => {
+    const el = byId(id);
+    if (el) el.addEventListener('click', fn);
+    else console.warn(`⚠️ Botão ${id} não encontrado no DOM`);
+  });
+
+  console.log("⚡️ Gerador de Corrida V24 conectado com IDs atualizados");
 });
 
 /* ======= PWA ======= */
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  window.addEventListener('load', () =>
+    navigator.serviceWorker.register('./sw.js').catch(() => {})
+  );
 }
+
