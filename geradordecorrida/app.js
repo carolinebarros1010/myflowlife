@@ -327,4 +327,22 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {})
   );
 }
+window.addEventListener('DOMContentLoaded', () => {
+  const map = {
+    btnGerarPlano: gerarPlano,
+    btnRodarTestes: runTests,
+    btnExportarPDF: exportPDF,
+    btnGerarCards: () => screenshotCard(document.querySelector('#card-grid .card') || byId('card-grid')),
+    btnResetar: () => { byId('card-grid').innerHTML = ""; if(window.chart) chart.destroy(); toast("Limpo"); },
+    btnPremium: () => { toast("Premium em breve ✨"); beep(1200,160,"triangle",.1); }
+  };
+
+  Object.entries(map).forEach(([id, fn]) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', fn);
+  });
+
+  console.log("⚡️ Gerador de Corrida V24 conectado com IDs atualizados");
+});
+
 
