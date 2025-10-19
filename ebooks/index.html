@@ -17,6 +17,68 @@
       --card: #1E2A28;
       --shadow: 0 10px 30px rgba(0,0,0,.35);
     }
+<header>
+  <nav class="nav">
+    <div class="brand">
+      <img src="logomyflowlife.png" alt="MyFlowLife Logo" />
+      <div class="tag">Biblioteca de eBooks</div>
+    </div>
+    <button class="btn-outline">Explorar</button>
+  </nav>
+</header>
+
+<style>
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.85); /* fundo branco translúcido */
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.8rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand img {
+    height: 64px; /* logo maior e mais visível */
+    width: auto;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2)); /* leve sombra */
+  }
+
+  .tag {
+    font-size: 0.85rem;
+    color: #335953; /* verde do myflowlife */
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: #335953;
+    border: 2px solid #335953;
+    border-radius: 12px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .btn-outline:hover {
+    background: #335953;
+    color: white;
+  }
+
+  @media (max-width: 480px) {
+    .brand img {
+      height: 50px;
+    }
 
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
