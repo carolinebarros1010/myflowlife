@@ -34,7 +34,7 @@
     const splashShown = localStorage.getItem("splashShown");
     const splash = document.getElementById("splash");
     if (splashShown) splash.remove();
-    else setTimeout(()=>{ splash.remove(); localStorage.setItem("splashShown", "true"); }, 3500);
+    else setTimeout(()=>{ splash.remove(); localStorage.setItem("splashShown", "true"); }, 1500);
 
     // Controle de origem e ebook
     const form = document.getElementById("form");
