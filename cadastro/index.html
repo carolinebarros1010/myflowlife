@@ -6,9 +6,21 @@
   <title>Cadastro MyFlowLife</title>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --verde: #335953;
+      --terracota: #CC6A5A;
+      --pessego: #EFBDA6;
+      --fundo: linear-gradient(160deg, var(--verde), var(--terracota), var(--pessego));
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
       font-family: 'Lato', sans-serif;
-      background: linear-gradient(160deg, #335953, #CC6A5A, #EFBDA6);
+      background: var(--fundo);
       color: #fff;
       min-height: 100vh;
       margin: 0;
@@ -16,58 +28,113 @@
       align-items: center;
       justify-content: center;
       flex-direction: column;
+      padding: 1rem;
     }
+
     .container {
-      background: rgba(0,0,0,0.3);
+      background: rgba(0,0,0,0.35);
       padding: 2rem;
       border-radius: 16px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      width: 90%;
+      width: 100%;
       max-width: 420px;
       backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.8s ease-in-out;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     h2 {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
     }
+
     input {
       width: 100%;
-      padding: 0.8rem;
+      padding: 0.9rem;
       margin-bottom: 1rem;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
+      color: #333;
     }
+
+    input::placeholder {
+      color: #888;
+    }
+
     button {
       width: 100%;
-      background: linear-gradient(90deg, #CC6A5A, #EFBDA6);
+      background: linear-gradient(90deg, var(--terracota), var(--pessego));
       border: none;
       color: #1E2B26;
-      padding: 0.9rem;
+      padding: 1rem;
       border-radius: 8px;
       font-weight: 700;
       font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s ease;
     }
+
     button:hover {
       transform: scale(1.03);
       filter: brightness(1.1);
     }
+
     .logo {
-      width: 140px;
+      width: 160px;
       margin-bottom: 1rem;
+      animation: float 3s ease-in-out infinite;
     }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
     .msg {
       text-align: center;
-      font-size: 0.95rem;
-      margin-bottom: 1rem;
+      font-size: 1rem;
+      margin-bottom: 1.2rem;
+      line-height: 1.4;
     }
+
     footer {
       margin-top: 2rem;
       font-size: 0.8rem;
       text-align: center;
       opacity: 0.8;
+    }
+
+    /* ====== Responsividade ====== */
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      .container {
+        padding: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      .logo {
+        width: 120px;
+      }
+
+      input, button {
+        font-size: 0.95rem;
+        padding: 0.85rem;
+      }
     }
   </style>
 </head>
