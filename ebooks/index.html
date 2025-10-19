@@ -10,7 +10,7 @@
     function scrollRight(id){ document.getElementById(id).scrollBy({left:320, behavior:'smooth'}); }
     function goCadastro(destino, ebook, origem){
       try{ localStorage.setItem('origemURL', destino); }catch(e){}
-      const url = `/cadastro/index_ebook.html?ebook=${encodeURIComponent(ebook)}&origem=${encodeURIComponent(origem)}`;
+      const url = `/cadastro/index.html?ebook=${encodeURIComponent(ebook)}&origem=${encodeURIComponent(origem)}`;
       window.location.href = url;
       return false;
     }
