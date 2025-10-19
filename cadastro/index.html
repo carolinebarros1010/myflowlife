@@ -170,4 +170,93 @@ button:hover {
   inset: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(10px);
+  font-size: 1.4rem;
+  color: var(--texto);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  z-index: 50;
+}
+.success.show {
+  opacity: 1;
+  pointer-events: all;
+}
+  </style>
+</head>
+<body>
+  <div id="splash">
+    <h1>MYFLOWLIFE</h1>
+    <h2>Potência Sustentável</h2>
+  </div>
+
+  <div class="logo">MYFLOWLIFE</div>
+
+  <form id="form" class="card">
+    <input type="text" id="nome" name="nome" placeholder="Nome" required pattern="^[A-Za-zÀ-ÿ0-9\s'.-]{2,}$">
+    <input type="email" id="email" name="email" placeholder="Email" required pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$">
+    <input type="text" id="telefone" name="telefone" placeholder="(11) 98234-7127" required pattern="^[0-9()\\s-]{8,15}$">
+    <button type="submit">Continuar</button>
+  </form>
+
+  <div class="success" id="success">Cadastro enviado com sucesso!</div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const splash = document.getElementById('splash');
+    const logo = document.querySelector('.logo');
+    const card = document.querySelector('.card');
+
+    // animação suave: mantém visível e depois dissolve
+    setTimeout(() => splash.classList.add('fade-out'), 1200);
+    setTimeout(() => {
+      splash.style.display = 'none';
+      logo.style.opacity = '1';
+      card.classList.add('ready');
+    }, 4000);
+  });
+
+  // controle de origem e ebook
+  const form = document.getElementById("form");
+  const success = document.getElementById("success");
+  const urlParams = new URLSearchParams(window.location.search);
+
+  const origem = urlParams.get("origem") || localStorage.getItem("origem");
+  if (origem) localStorage.setItem("origem", origem);
+
+  const ebook = urlParams.get("ebook") || localStorage.getItem("ebook");
+  if (ebook) localStorage.setItem("ebook", ebook);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = {
+      nome: form.nome.value.trim(),
+      email: form.email.value.trim(),
+      telefone: form.telefone.value.trim(),
+      origem: localStorage.getItem("origem") || "desconhecida",
+      ebook: localStorage.getItem("ebook") || "não informado"
+    };
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbzoLP8uwomZSPBLo6mmcD71POBA7GByedp5wHtdZpvzYyxeB_P-F7BsUYIC1hVsBg9f/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      success.classList.add("show");
+      setTimeout(() => {
+        const destino = localStorage.getItem("origemURL");
+        if (destino) window.location.href = destino;
+        else history.back();
+      }, 3000);
+    } catch (err) {
+      alert("Erro ao enviar o cadastro. Tente novamente.");
+    }
+  });
+  </script>
+</body>
+</html>
+
 
