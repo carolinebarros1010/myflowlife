@@ -92,6 +92,28 @@
     </div>
     <button class="arrow right" aria-label="avançar" onclick="scrollRight('rail1')">❯</button>
   </section>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const scrollers = document.querySelectorAll('.row-wrap');
+    scrollers.forEach(wrapper => {
+      const scroller = wrapper.querySelector('.scroller');
+      const left = wrapper.querySelector('.arrow.left');
+      const right = wrapper.querySelector('.arrow.right');
+      
+      if (!scroller || !left || !right) return;
 
+      // Define distância de rolagem proporcional ao tamanho da viewport
+      const scrollAmount = window.innerWidth > 768 ? 300 : 220;
+
+      left.addEventListener('click', () => {
+        scroller.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      });
+
+      right.addEventListener('click', () => {
+        scroller.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      });
+    });
+  });
+</script>
 </body>
 </html>
