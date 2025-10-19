@@ -4,25 +4,24 @@ console.log("🚀 app.js carregado com sucesso!");
    - progressão sequencial por fase
    - volumes por nível (1.5× / 2× / 2–3×)
    - esforço (1–10) ajusta variação de ritmo (±5–10%)
-   - intervalos mínimos entre treinos (h)
-     • intensidade/VO2: 24h
-     • resistência de velocidade: 24h
-     • potência: 24h
-     • resistência contínua/leve: 12h
 */
 
-const $ = (sel) => document.querySelector(sel);
 const byId = (id) => document.getElementById(id);
+const $ = (sel) => document.querySelector(sel);
 
 /* ======= Som (WebAudio) ======= */
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function beep(freq = 880, dur = 120, type = "sine", vol = 0.08) {
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type; o.frequency.value = freq;
-  g.gain.value = vol;
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(); setTimeout(()=>o.stop(), dur);
+  try {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.value = vol;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); setTimeout(()=>o.stop(), dur);
+  } catch(e) {
+    console.warn("Som não disponível:", e);
+  }
 }
 
 function playFeedback(type = "click") {
@@ -33,6 +32,7 @@ function playFeedback(type = "click") {
 
 /* ======= Helpers ======= */
 function toSecPace(p) {
+  if (!p) return 330; // padrão 5:30
   const [m, s] = p.split(":").map(x => parseInt(x, 10));
   return (m * 60 + (isNaN(s) ? 0 : s));
 }
@@ -105,49 +105,61 @@ function pickSequencial(cat){
 function countTipo(arr, t){ return arr.filter(a=>a.tipo===t).length; }
 
 function gerarPlano() {
-  const provaKm = parseFloat(byId('distProva').value || 10);
-  const nivel = byId('perfil').value;
-  const nTreinos = parseInt(byId('treinosSemana').value, 10);
-  const ritmoBaseSec = toSecPace(byId('ritmoMedio').value || "5:30");
-  const esforco = parseInt(byId('esforco').value, 10) || 7;
+  console.log("🏃 Gerando plano...");
+  
+  try {
+    // Obtém valores com IDs CORRETOS
+    const provaKm = parseFloat(byId('distProva')?.value || 10);
+    const nivel = byId('nivel')?.value || 'iniciante';  // ← ID CORRETO: 'nivel'
+    const nTreinos = parseInt(byId('semanal')?.value || 4, 10);  // ← ID CORRETO: 'semanal'
+    const ritmoBaseSec = toSecPace(byId('ritmoBase')?.value || "5:30");  // ← ID CORRETO: 'ritmoBase'
+    const esforco = parseInt(byId('esforco')?.value || 7, 10);
 
-  let fator = nivel==="iniciante"?1.5:(nivel==="intermediario"?2.0:2.5);
-  const volMaxKm = provaKm * fator;
-  const regra = regrasNivel[nivel];
+    console.log("Valores capturados:", { provaKm, nivel, nTreinos, ritmoBaseSec, esforco });
 
-  const varMin = 0.05, varMax = 0.10;
-  const escala = 1 - (clamp(esforco,1,10)-1)/9;
-  const varPct = varMin + (varMax-varMin)*escala;
-  const ritmoForte = ritmoBaseSec*(1 - varPct);
-  const ritmoLeve  = ritmoBaseSec*(1 + varPct*0.6);
+    let fator = nivel==="iniciante"?1.5:(nivel==="intermediario"?2.0:2.5);
+    const volMaxKm = provaKm * fator;
+    const regra = regrasNivel[nivel];
 
-  const semana = [];
-  let distAcum = 0;
+    const varMin = 0.05, varMax = 0.10;
+    const escala = 1 - (clamp(esforco,1,10)-1)/9;
+    const varPct = varMin + (varMax-varMin)*escala;
+    const ritmoForte = ritmoBaseSec*(1 - varPct);
+    const ritmoLeve  = ritmoBaseSec*(1 + varPct*0.6);
 
-  for (let i=0; i<nTreinos; i++) {
-    let treino;
-    if (countTipo(semana,'intensidade') < regra.velSemana) treino = pickSequencial('vel');
-    else if (countTipo(semana,'res_vel') < regra.resSemana) treino = pickSequencial('res');
-    else treino = pickSequencial('pot');
+    const semana = [];
+    let distAcum = 0;
 
-    let alvo = treino.distKm;
-    if (distAcum + alvo > volMaxKm) alvo = Math.max(2, volMaxKm - distAcum);
+    for (let i=0; i<nTreinos; i++) {
+      let treino;
+      if (countTipo(semana,'intensidade') < regra.velSemana) treino = pickSequencial('vel');
+      else if (countTipo(semana,'res_vel') < regra.resSemana) treino = pickSequencial('res');
+      else treino = pickSequencial('pot');
 
-    semana.push({
-      dia:`Dia ${i+1}`,
-      nome:treino.nome,
-      tipo:treino.tipo,
-      distKm:round2(alvo),
-      ritmo:paceStr(treino.tipo==="leve"?ritmoLeve:ritmoForte),
-      desc:treino.desc
-    });
-    distAcum += alvo;
+      let alvo = treino.distKm;
+      if (distAcum + alvo > volMaxKm) alvo = Math.max(2, volMaxKm - distAcum);
+
+      semana.push({
+        dia:`Dia ${i+1}`,
+        nome:treino.nome,
+        tipo:treino.tipo,
+        distKm:round2(alvo),
+        ritmo:paceStr(treino.tipo==="leve"?ritmoLeve:ritmoForte),
+        desc:treino.desc
+      });
+      distAcum += alvo;
+    }
+
+    renderSemana(semana);
+    plotSemana(semana);
+    toast("✅ Plano gerado com sucesso!");
+    playFeedback("success");
+    console.log("✅ Plano gerado:", semana);
+  } catch(e) {
+    console.error("❌ Erro ao gerar plano:", e);
+    toast("❌ Erro ao gerar plano: " + e.message);
+    playFeedback("error");
   }
-
-  renderSemana(semana);
-  plotSemana(semana);
-  toast("✅ Plano gerado com sucesso!");
-  playFeedback("success");
 }
 
 /* ======= Render ======= */
@@ -195,13 +207,23 @@ function plotSemana(semana){
 
 /* ======= Testes ======= */
 function runTests(){
+  console.log("🧪 Executando testes...");
   const tests = [
     ["toSecPace 5:30 = 330", () => toSecPace("5:30") === 330],
     ["paceStr 330 = 5:30", () => paceStr(330) === "5:30"],
     ["Seq vel avança", () => { const n=seq.vel; pickSequencial('vel'); return seq.vel===n+1; }],
-    ["Sem var pace NaN", () => !isNaN(toSecPace("4:05"))]
+    ["Sem var pace NaN", () => !isNaN(toSecPace("4:05"))],
+    ["Elementos existem", () => !!byId('distProva') && !!byId('nivel') && !!byId('semanal')]
   ];
-  const fails = tests.filter(t => !t[1]());
+  const fails = tests.filter(t => {
+    try {
+      return !t[1]();
+    } catch(e) {
+      console.error("Erro no teste:", t[0], e);
+      return true;
+    }
+  });
+  
   if (fails.length) {
     toast("❌ Testes falharam: " + fails.map(f => f[0]).join(", "));
     playFeedback("error");
@@ -209,8 +231,7 @@ function runTests(){
     toast("✅ Testes OK (" + tests.length + ")");
     playFeedback("success");
   }
-  beep(700, 120, "square", 0.08);
-  console.log("🧪 Testes automáticos executados");
+  console.log("🧪 Testes executados. Falhas:", fails.length);
 }
 
 /* ======= Exportações ======= */
@@ -240,39 +261,46 @@ function toast(msg){
 window.addEventListener('DOMContentLoaded', ()=>{
   console.log("⚡️ Gerador de Corrida V24 conectado");
 
-  // Mapeamento de IDs dos botões
-  const map = {
-    'Gerar plano da semana': gerarPlano,
-    'Rodar testes': runTests,
-    'btnExportarPDF': exportPDF,
-    'btnGerarCards': ()=> screenshotCard(document.querySelector('#card-grid .card') || byId('card-grid')),
-    'btnResetar': ()=>{ 
+  // Conectar event listeners aos botões com IDs corretos
+  const btnGerarPlano = byId('btnGerarPlano');
+  const btnRodarTestes = byId('btnRodarTestes');
+  const btnExportarPDF = byId('btnExportarPDF');
+  const btnGerarCards = byId('btnGerarCards');
+  const btnResetar = byId('btnResetar');
+
+  if (btnGerarPlano) {
+    btnGerarPlano.addEventListener('click', gerarPlano);
+    console.log("✅ Evento conectado: btnGerarPlano");
+  } else {
+    console.warn("⚠️ Botão 'btnGerarPlano' não encontrado");
+  }
+
+  if (btnRodarTestes) {
+    btnRodarTestes.addEventListener('click', runTests);
+    console.log("✅ Evento conectado: btnRodarTestes");
+  } else {
+    console.warn("⚠️ Botão 'btnRodarTestes' não encontrado");
+  }
+
+  if (btnExportarPDF) {
+    btnExportarPDF.addEventListener('click', exportPDF);
+    console.log("✅ Evento conectado: btnExportarPDF");
+  }
+
+  if (btnGerarCards) {
+    btnGerarCards.addEventListener('click', screenshotCard);
+    console.log("✅ Evento conectado: btnGerarCards");
+  }
+
+  if (btnResetar) {
+    btnResetar.addEventListener('click', ()=> {
       const grid = byId('card-grid');
       if (grid) grid.innerHTML=""; 
       if(window.chart) chart.destroy(); 
       toast("🗑️ Tudo limpo"); 
-    },
-    'btnPremium': ()=>{ toast("💎 Premium em breve ✨"); playFeedback("click"); }
-  };
-
-  // Conectar event listeners aos botões
-  Object.entries(map).forEach(([selector, fn])=>{
-    // Tenta encontrar por ID
-    let el = byId(selector);
-    
-    // Se não encontrar por ID, tenta encontrar por texto do botão
-    if (!el) {
-      const buttons = document.querySelectorAll('button');
-      el = Array.from(buttons).find(btn => btn.textContent.trim() === selector);
-    }
-    
-    if (el) {
-      el.addEventListener('click', fn);
-      console.log(`✅ Evento conectado a: ${selector}`);
-    } else {
-      console.warn(`⚠️ Botão não encontrado: ${selector}`);
-    }
-  });
+    });
+    console.log("✅ Evento conectado: btnResetar");
+  }
 
   // Splash desaparece automaticamente
   setTimeout(()=> {
