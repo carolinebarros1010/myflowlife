@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyFlowLife | Biblioteca de eBooks</title>
+  <link href="https://fonts.googleapis.com/css2?family=Aleo:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --verde:#335953;
+      --cinza:#f3f3f3;
+      --vidro:rgba(255,255,255,.6);
+      --borda:rgba(51,89,83,.35);
+      --sombra-card: 0 20px 40px rgba(0,0,0,.12), 0 8px 16px rgba(0,0,0,.06);
+      --sombra-card-hover: 0 28px 60px rgba(0,0,0,.16), 0 10px 24px rgba(0,0,0,.10);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0}
+    body{
+      font-family:'Inter',system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--verde);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #fff 0%, var(--cinza) 55%, #ededed 100%);
+      min-height:100vh;
+    }
+    header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter:saturate(120%) blur(10px);
+      background:rgba(255,255,255,.88);
+      border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .nav{
+      max-width:1200px; margin:0 auto; padding:1rem;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .brand{ display:flex; flex-direction:column; gap:.25rem; }
+    .brand img{ height:64px; width:auto; filter:drop-shadow(0 2px 6px rgba(0,0,0,.12)); }
+    .tag{ font:500 .9rem/1 'Inter'; opacity:.8; }
+    .fixed-actions{
+      position:fixed; top:14px; right:14px; z-index:60;
+      display:flex; gap:10px; animation:fadeDown .6s ease both;
+    }
+    @keyframes fadeDown{ from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:translateY(0)} }
+    .gbtn{
+      font:600 .9rem/1 'Aleo', serif; color:var(--verde);
+      background:var(--vidro); border:1px solid var(--borda);
+      border-radius:14px; padding:.7rem 1rem; text-decoration:none;
+      box-shadow:0 4px 20px rgba(0,0,0,.06); transition:all .25s ease;
+      backdrop-filter: blur(6px);
+    }
+    .gbtn:hover{ transform:translateY(-2px); background:#fff; box-shadow:0 8px 26px rgba(0,0,0,.12); }
+    .hero{ text-align:center; padding:2.4rem 1rem 1.6rem; }
+    .hero h1{
+      font-family:'Aleo',serif; color:var(--verde); font-weight:600;
+      font-size:clamp(1.35rem,1.8vw + 1rem,2.1rem); letter-spacing:.2px; margin:0;
+    }
+    .section-title{ font:600 1.1rem/1 'Aleo',serif; opacity:.9; max-width:1200px; margin:.5rem auto 0; padding:0 1rem; }
+    .stage{ position:relative; max-width:1200px; margin:0 auto; }
+    .rail{ display:flex; gap:20px; padding:1.1rem; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth; }
+    .rail::-webkit-scrollbar{ height:10px; } .rail::-webkit-scrollbar-thumb{ background:rgba(0,0,0,.08); border-radius:10px; }
+    .arrow{
+      position:absolute; top:50%; transform:translateY(-50%);
+      background:var(--vidro); color:var(--verde); border:1px solid var(--borda);
+      width:40px; height:40px; border-radius:50%; display:grid; place-items:center;
+      cursor:pointer; z-index:5; transition:.25s; backdrop-filter: blur(6px);
+    }
+    .arrow:hover{ background:#fff; }
+    .arrow.left{ left:8px; } .arrow.right{ right:8px; }
+    .card{
+      width:210px; flex:0 0 auto; scroll-snap-align:start; border-radius:18px; overflow:hidden; background:#fff;
+      box-shadow:var(--sombra-card); transition:transform .28s ease, box-shadow .28s ease; transform:translateZ(0);
+    }
+    .cover{ position:relative; width:100%; aspect-ratio:3/4; background:#fff; overflow:hidden; }
+    .cover::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(255,255,255,0) 60%, rgba(0,0,0,.02) 100%); pointer-events:none; }
+    .cover img{
+      width:100%; height:100%; object-fit:cover; object-position:center;
+      filter: brightness(.98) contrast(1.02) saturate(.98); transition:transform .4s ease, filter .3s ease;
+    }
+    .card:hover{ transform:translateY(-4px); box-shadow:var(--sombra-card-hover); }
+    .card:hover .cover img{ transform:scale(1.03); filter:brightness(.99) contrast(1.03); }
+    .meta{ display:flex; align-items:center; justify-content:space-between; padding:.7rem .85rem .9rem; background:#fff; }
+    .price{ display:flex; align-items:baseline; gap:.25rem; color:var(--verde); }
+    .price .sym{ font:400 1.25rem/1 'Aleo',serif; opacity:.85; }
+    .price .num{ font:300 1.05rem/1 'Inter',sans-serif; opacity:.85; letter-spacing:.2px; }
+    .soft{
+      text-decoration:none; color:var(--verde); background:var(--vidro); border:1px solid var(--borda);
+      padding:.45rem .75rem; border-radius:12px; font:500 .9rem/1 'Inter',sans-serif; transition:all .25s ease; backdrop-filter: blur(6px);
+    }
+    .soft:hover{ background:#fff; transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,.08); }
+    footer{ margin-top:1rem; background:#efefef; color:var(--verde); border-top:1px solid rgba(0,0,0,.06); text-align:center; padding:1.2rem 1rem; font:400 .9rem/1.6 'Inter'; }
+    @media (max-width: 900px){ .card{ width:190px; } }
+    @media (max-width: 600px){
+      .brand img{ height:54px; }
+      .fixed-actions{ bottom:12px; top:auto; right:12px; flex-direction:column; }
+      .card{ width:160px; border-radius:16px; }
+      .arrow{ display:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="fixed-actions">
+    <a class="gbtn" href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" target="_blank" rel="noopener">Plano Premium</a>
+    <a class="gbtn" href="https://chat.whatsapp.com/FPNeAa1OvaZEThWBKdYOQZ?mode=wwc" target="_blank" rel="noopener">Newsletter</a>
+  </div>
+
+  <header>
+    <nav class="nav">
+      <div class="brand">
+        <img src="logomyflowlife.png" alt="MyFlowLife logo">
+        <span class="tag">Biblioteca de eBooks</span>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Conhecimento que flui: da força masculina ao equilíbrio feminino.</h1>
+  </section>
+
+  <div class="section-title">Coleção MyFlowLife</div>
+
+  <section class="stage">
+    <button class="arrow left" onclick="rail.scrollBy({left:-320,behavior:'smooth'})">❮</button>
+    <div id="rail" class="rail">
+      <article class="card">
+        <div class="cover"><img src="capahipopressivos.png" alt="Exercícios Hipopressivos"></div>
+        <div class="meta"><div class="price"><span class="sym">$</span><span class="num">19,90</span></div><a class="soft" href="https://pay.hotmart.com/N102180089S" target="_blank" rel="noopener">Comprar</a></div>
+      </article>
+      <article class="card">
+        <div class="cover"><img src="capafemflow15.png" alt="FemFlow 15 Dias"></div>
+        <div class="meta"><div class="price"><span class="sym">$</span><span class="num">39,90</span></div><a class="soft" href="https://pay.hotmart.com/O102103923F" target="_blank" rel="noopener">Comprar</a></div>
+      </article>
+      <article class="card">
+        <div class="cover"><img src="capatpmzem.png" alt="Protocolo Respiração Consciente TPM"></div>
+        <div class="meta"><div class="price"><span class="sym">$</span><span class="num">0</span></div><a class="soft" href="downloads/protocolo_tpm_zen.pdf" download>Download</a></div>
+      </article>
+      <article class="card">
+        <div class="cover"><img src="capaaguaequilibrio.png" alt="Guia Essencial Hidratação"></div>
+        <div class="meta"><div class="price"><span class="sym">$</span><span class="num">9,90</span></div><a class="soft" href="https://pay.hotmart.com/E102161861P" target="_blank" rel="noopener">Comprar</a></div>
+      </article>
+      <article class="card">
+        <div class="cover"><img src="capafemflow4semanas.png" alt="FemFlow 4 Semanas"></div>
+        <div class="meta"><div class="price"><span class="sym">$</span><span class="num">99,90</span></div><a class="soft" href="https://pay.hotmart.com/T102397575W" target="_blank" rel="noopener">Comprar</a></div>
+      </article>
+      <article class="card">
+        <div class="cover"><img src="capaefeitoEPOC.png" alt="Efeito EPOC"></div>
+        <div class="meta"><div class="price"><span class="sym">$</span><span class="num">0</span></div><a class="soft" href="downloads/efeito_epoc.pdf" download>Download</a></div>
+      </article>
+      <article class="card">
+        <div class="cover"><img src="placeholder.png" alt="Nutrição alinhada com o ciclo hormonal"></div>
+        <div class="meta"><div class="price"><span class="sym">$</span><span class="num">0</span></div><a class="soft" href="downloads/nutricao_ciclo_hormonal.pdf" download>Download</a></div>
+      </article>
+    </div>
+    <button class="arrow right" onclick="rail.scrollBy({left:320,behavior:'smooth'})">❯</button>
+  </section>
+
+  <footer>© 2025 MyFlowLife · Inspirando equilíbrio e performance.</footer>
+
+  <script>
+    const rail = document.getElementById('rail');
+  </script>
+</body>
+</html>
