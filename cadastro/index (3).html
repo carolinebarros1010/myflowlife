@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyFlowLife | Cadastro Central</title>
+  <link rel="stylesheet" href="style.html">
+</head>
+<body>
+  <div id="splash">
+    <h1>MYFLOWLIFE</h1>
+    <h2>Potência Sustentável</h2>
+  </div>
+
+  <div class="logo">MYFLOWLIFE</div>
+
+  <form id="form" class="card">
+    <label>Nome
+      <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required pattern="^[A-Za-zÀ-ÿ\\s]+$">
+    </label>
+    <label>E-mail
+      <input type="email" id="email" name="email" placeholder="exemplo@email.com" required pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$">
+    </label>
+    <label>Telefone
+      <input type="text" id="telefone" name="telefone" placeholder="(11)999999999" required pattern="^\\(\\d{2}\\)\\d{8,9}$">
+    </label>
+    <button type="submit">Continuar</button>
+  </form>
+
+  <div class="success" id="success">Cadastro enviado com sucesso!</div>
+
+  <script>
+    // Splash control
+    const splashShown = localStorage.getItem("splashShown");
+    const splash = document.getElementById("splash");
+    if (splashShown) splash.remove();
+    else setTimeout(()=>{ splash.remove(); localStorage.setItem("splashShown", "true"); }, 3500);
+
+    // Form logic
+    const form = document.getElementById("form");
+    const success = document.getElementById("success");
+    const urlParams = new URLSearchParams(window.location.search);
+    const origem = urlParams.get("origem") || localStorage.getItem("origem");
+    if (origem) localStorage.setItem("origem", origem);
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = {
+        nome: form.nome.value.trim(),
+        email: form.email.value.trim(),
+        telefone: form.telefone.value.trim(),
+        origem: localStorage.getItem("origem") || "desconhecida"
+      };
+      try {
+        await fetch("https://script.google.com/macros/s/AKfycbzoLP8uwomZSPBLo6mmcD71POBA7GByedp5wHtdZpvzYyxeB_P-F7BsUYIC1hVsBg9f/exec", {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        success.classList.add("show");
+        setTimeout(() => {
+          const destino = localStorage.getItem("origemURL");
+          if (destino) window.location.href = destino;
+          else history.back();
+        }, 3000);
+      } catch(err) {
+        alert("Erro ao enviar o cadastro. Tente novamente.");
+      }
+    });
+  </script>
+</body>
+</html>
