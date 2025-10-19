@@ -104,63 +104,83 @@ function pickSequencial(cat){
 
 function countTipo(arr, t){ return arr.filter(a=>a.tipo===t).length; }
 
+/* ======= GERAÇÃO DE PLANO (compatível com HTML atual) ======= */
 function gerarPlano() {
-  console.log("🏃 Gerando plano...");
-  
-  try {
-    // Obtém valores com IDs CORRETOS
-    const provaKm = parseFloat(byId('distProva')?.value || 10);
-    const nivel = byId('nivel')?.value || 'iniciante';  // ← ID CORRETO: 'nivel'
-    const nTreinos = parseInt(byId('semanal')?.value || 4, 10);  // ← ID CORRETO: 'semanal'
-    const ritmoBaseSec = toSecPace(byId('ritmoBase')?.value || "5:30");  // ← ID CORRETO: 'ritmoBase'
-    const esforco = parseInt(byId('esforco')?.value || 7, 10);
+  console.log("⚙️ Iniciando geração do plano...");
 
-    console.log("Valores capturados:", { provaKm, nivel, nTreinos, ritmoBaseSec, esforco });
+  // === 1. Captura de campos ===
+  const provaKmEl = byId('distProva');
+  const nivelEl = byId('perfil');
+  const nTreinosEl = byId('treinosSemana');
+  const ritmoEl = byId('ritmoMedio');
+  const esforcoEl = byId('esforco');
 
-    let fator = nivel==="iniciante"?1.5:(nivel==="intermediario"?2.0:2.5);
-    const volMaxKm = provaKm * fator;
-    const regra = regrasNivel[nivel];
-
-    const varMin = 0.05, varMax = 0.10;
-    const escala = 1 - (clamp(esforco,1,10)-1)/9;
-    const varPct = varMin + (varMax-varMin)*escala;
-    const ritmoForte = ritmoBaseSec*(1 - varPct);
-    const ritmoLeve  = ritmoBaseSec*(1 + varPct*0.6);
-
-    const semana = [];
-    let distAcum = 0;
-
-    for (let i=0; i<nTreinos; i++) {
-      let treino;
-      if (countTipo(semana,'intensidade') < regra.velSemana) treino = pickSequencial('vel');
-      else if (countTipo(semana,'res_vel') < regra.resSemana) treino = pickSequencial('res');
-      else treino = pickSequencial('pot');
-
-      let alvo = treino.distKm;
-      if (distAcum + alvo > volMaxKm) alvo = Math.max(2, volMaxKm - distAcum);
-
-      semana.push({
-        dia:`Dia ${i+1}`,
-        nome:treino.nome,
-        tipo:treino.tipo,
-        distKm:round2(alvo),
-        ritmo:paceStr(treino.tipo==="leve"?ritmoLeve:ritmoForte),
-        desc:treino.desc
-      });
-      distAcum += alvo;
-    }
-
-    renderSemana(semana);
-    plotSemana(semana);
-    toast("✅ Plano gerado com sucesso!");
-    playFeedback("success");
-    console.log("✅ Plano gerado:", semana);
-  } catch(e) {
-    console.error("❌ Erro ao gerar plano:", e);
-    toast("❌ Erro ao gerar plano: " + e.message);
+  if (!provaKmEl || !nivelEl || !nTreinosEl || !ritmoEl || !esforcoEl) {
+    console.error("❌ Um ou mais campos de entrada não foram encontrados no HTML!");
+    toast("Erro: campo não encontrado no formulário.");
     playFeedback("error");
+    return;
   }
+
+  const provaKm = parseFloat(provaKmEl.value || 10);
+  const nivel = nivelEl.value;
+  const nTreinos = parseInt(nTreinosEl.value || 4, 10);
+  const ritmoBaseSec = toSecPace(ritmoEl.value || "5:30");
+  const esforco = parseInt(esforcoEl.value || 7, 10);
+
+  console.log(`📊 Dados recebidos → prova=${provaKm}km | nível=${nivel} | treinos=${nTreinos} | ritmo=${ritmoEl.value} | esforço=${esforco}`);
+
+  // === 2. Ajuste do volume conforme nível ===
+  let fator = 2.0;
+  if (nivel === "iniciante") fator = 1.5;
+  else if (nivel === "intermediario") fator = 2.0;
+  else if (nivel === "avancado") fator = 2.5;
+
+  const volMaxKm = provaKm * fator;
+  const regra = regrasNivel[nivel] || regrasNivel.intermediario;
+
+  // === 3. Cálculo do ritmo e variação pelo esforço ===
+  const varMin = 0.05, varMax = 0.10;
+  const escala = 1 - (clamp(esforco, 1, 10) - 1) / 9;
+  const varPct = varMin + (varMax - varMin) * escala;
+  const ritmoForte = ritmoBaseSec * (1 - varPct);
+  const ritmoLeve = ritmoBaseSec * (1 + varPct * 0.6);
+
+  // === 4. Montagem dos treinos ===
+  const semana = [];
+  let distAcum = 0;
+
+  for (let i = 0; i < nTreinos; i++) {
+    let treino;
+
+    if (countTipo(semana, 'intensidade') < regra.velSemana) treino = pickSequencial('vel');
+    else if (countTipo(semana, 'res_vel') < regra.resSemana) treino = pickSequencial('res');
+    else treino = pickSequencial('pot');
+
+    let alvo = treino.distKm;
+    if (distAcum + alvo > volMaxKm) alvo = Math.max(2, volMaxKm - distAcum);
+
+    semana.push({
+      dia: `Dia ${i + 1}`,
+      nome: treino.nome,
+      tipo: treino.tipo,
+      distKm: round2(alvo),
+      ritmo: paceStr(treino.leve ? ritmoLeve : ritmoForte),
+      desc: treino.desc
+    });
+
+    distAcum += alvo;
+  }
+
+  // === 5. Renderização ===
+  renderSemana(semana);
+  toast("Plano gerado com sucesso!");
+  playFeedback("success");
+
+  console.log("✅ Plano semanal gerado:");
+  console.table(semana);
 }
+
 
 /* ======= Render ======= */
 function renderSemana(semana){
