@@ -59,7 +59,7 @@ body {
   text-shadow: 0 0 10px rgba(255,255,255,.6);
   opacity: 1;
   transform: scale(1);
-  transition: opacity 2.8s ease, transform 2.8s ease;
+  transition: opacity 1.5s ease, transform 1.5s ease;
 }
 #splash.fade-out {
   opacity: 0;
@@ -204,19 +204,21 @@ button:hover {
   <div class="success" id="success">Cadastro enviado com sucesso!</div>
 
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const splash = document.getElementById('splash');
-    const logo = document.querySelector('.logo');
-    const card = document.querySelector('.card');
+ document.addEventListener('DOMContentLoaded', () => {
+  const splash = document.getElementById('splash');
+  const logo = document.querySelector('.logo');
+  const card = document.querySelector('.card');
 
-    // animação suave: mantém visível e depois dissolve
-    setTimeout(() => splash.classList.add('fade-out'), 1200);
-    setTimeout(() => {
-      splash.style.display = 'none';
-      logo.style.opacity = '1';
-      card.classList.add('ready');
-    }, 4000);
-  });
+  // fade-out começa mais cedo
+  setTimeout(() => splash.classList.add('fade-out'), 800);
+
+  // termina a transição mais rápido (agora 2.8 s totais)
+  setTimeout(() => {
+    splash.style.display = 'none';
+    logo.style.opacity = '1';
+    card.classList.add('ready');
+  }, 2800);
+});
 
   // controle de origem e ebook
   const form = document.getElementById("form");
