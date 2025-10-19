@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Aleo:wght@300;400;600&display=swap');
 
 :root{
@@ -20,6 +19,7 @@ body{
   min-height: 100vh;
 }
 
+/* Header fixo translúcido */
 .header{
   position: sticky; top: 0; z-index: 40;
   background: linear-gradient(to bottom, rgba(255,255,255,.96), rgba(255,255,255,.88));
@@ -60,6 +60,7 @@ body{
   background:#fff;
 }
 
+/* Hero */
 .hero{
   max-width: 1200px;
   margin: .6rem auto 0;
@@ -70,48 +71,78 @@ body{
   letter-spacing: .2px;
 }
 
+/* Corrigido espaçamento e z-index */
 .row-wrap{ position: relative; max-width: 1200px; margin: 0 auto; }
 .scroller{
-  display:flex; gap:18px; overflow-x:auto; scroll-behavior:smooth; padding: 1rem;
+  display:flex;
+  gap:18px;
+  overflow-x:auto;
+  scroll-behavior:smooth;
+  padding: 1rem 3rem; /* espaço lateral maior */
 }
 .scroller::-webkit-scrollbar{ height:10px; }
 .scroller::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.08); border-radius: 10px; }
 
 .arrow{
-  position:absolute; top:50%; transform:translateY(-50%);
-  width:38px; height:38px; border-radius:50%;
-  display:grid; place-items:center;
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
   background: var(--glass);
   border: 1px solid var(--border);
-  cursor:pointer; user-select:none;
+  cursor:pointer;
+  user-select:none;
   box-shadow: var(--shadow);
   transition: all .2s ease;
+  z-index: 20; /* garante que fica acima das miniaturas */
 }
 .arrow:hover{ transform: translateY(-50%) scale(1.04); box-shadow: var(--shadow-deep); background:#fff; }
 .arrow.left{ left: 6px; } .arrow.right{ right: 6px; }
 
 .card{
-  width: 200px; flex: 0 0 auto;
-  border-radius: 16px; overflow:hidden; background:#fff;
+  width: 200px;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  overflow:hidden;
+  background:#fff;
   box-shadow: var(--shadow);
   transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
-  opacity: 0; transform: translateY(8px);
+  opacity: 0;
+  transform: translateY(8px);
   animation: fadeCard .8s ease forwards;
 }
 @keyframes fadeCard{ to{ opacity:1; transform: translateY(0);} }
 
 .cover{ width:100%; aspect-ratio:3/4; background:#fff; overflow:hidden; }
-.cover img{ width:100%; height:100%; object-fit:cover; filter: brightness(.99) contrast(1.02); transition: transform .35s ease; }
+.cover img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  filter: brightness(.99) contrast(1.02);
+  transition: transform .35s ease;
+}
 .card:hover .cover img{ transform: scale(1.03); }
 
-.meta{ display:flex; align-items:center; justify-content:space-between; padding: .7rem .8rem .85rem; }
+.meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: .7rem .8rem .85rem;
+}
 .price{ font-weight: 600; opacity: .9; }
 .price small{ font-weight:400; opacity:.8; }
 
 .cta{
-  text-decoration:none; color: var(--text);
-  background: var(--glass); border: 1px solid var(--border);
-  padding: .45rem .7rem; border-radius: 10px;
+  text-decoration:none;
+  color: var(--text);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  padding: .45rem .7rem;
+  border-radius: 10px;
   transition: box-shadow .2s ease, transform .2s ease, background .2s ease;
   box-shadow: var(--shadow);
 }
@@ -121,6 +152,7 @@ body{
   background:#fff;
 }
 
+/* Responsividade */
 @media (max-width: 920px){ .card{ width: 180px; } }
 @media (max-width: 600px){
   .logo-text{ font-size: 1rem; }
