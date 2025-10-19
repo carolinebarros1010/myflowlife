@@ -41,7 +41,7 @@ body {
   100% { background-position: 0% 50%; }
 }
 
-/* ====== Splash Screen ====== */
+/* ====== Splash elegante ====== */
 #splash {
   position: fixed;
   inset: 0;
@@ -50,17 +50,22 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: 'Helvetica Rounded Bold', 'Helvetica Rounded', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Rounded Bold','Helvetica Rounded',Helvetica,Arial,sans-serif;
   font-weight: bold;
   text-transform: uppercase;
   color: #1e1e1e;
   text-align: center;
-  opacity: 0;
-  animation: splashFade 1.6s ease forwards;
   z-index: 100;
-  text-shadow: 0 0 10px rgba(255,255,255,0.6);
+  text-shadow: 0 0 10px rgba(255,255,255,.6);
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 2.8s ease, transform 2.8s ease;
 }
-
+#splash.fade-out {
+  opacity: 0;
+  transform: scale(1.05) translateY(-10px);
+  pointer-events: none;
+}
 #splash h1 {
   font-size: 2.4rem;
   margin: 0.3rem 0;
@@ -72,15 +77,9 @@ body {
   letter-spacing: 1px;
 }
 
-@keyframes splashFade {
-  0% { opacity: 0; }
-  15%, 85% { opacity: 1; }
-  100% { opacity: 0; visibility: hidden; }
-}
-
 /* ====== Logo ====== */
 .logo {
-  font-family: 'Helvetica Rounded Bold', 'Helvetica Rounded', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Rounded Bold','Helvetica Rounded',Helvetica,Arial,sans-serif;
   font-weight: bold;
   font-size: 2.4rem;
   color: #000;
@@ -90,14 +89,8 @@ body {
   letter-spacing: 1.5px;
   text-transform: uppercase;
   opacity: 0;
-  animation: fadeLogo 1s ease forwards;
-  animation-delay: 2.2s;
+  transition: opacity 1s ease 2.8s;
   text-shadow: 0 0 10px rgba(255,255,255,0.6), 0 2px 8px rgba(0,0,0,0.15);
-}
-
-@keyframes fadeLogo {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ====== Formulário ====== */
@@ -115,13 +108,14 @@ body {
   gap: 1.2rem;
   opacity: 0;
   transform: translateY(10px);
-  animation: aparecer 1s ease forwards;
-  animation-delay: 1.6s;
+  transition: opacity 1s ease 2.8s, transform 1s ease 2.8s;
   position: relative;
   overflow: hidden;
 }
-
-@keyframes aparecer { to { opacity: 1; transform: translateY(0); } }
+.card.ready {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* Reflexo translúcido */
 .card::before {
@@ -133,21 +127,12 @@ body {
   transform: rotate(25deg);
   animation: reflexo 10s linear infinite;
 }
-
 @keyframes reflexo {
   0% { transform: translateX(-100%) rotate(25deg); }
   100% { transform: translateX(100%) rotate(25deg); }
 }
 
-label {
-  display: flex;
-  flex-direction: column;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
 input {
-  margin-top: .3rem;
   border: none;
   border-bottom: 1px solid var(--texto);
   padding: .5rem .2rem;
@@ -156,7 +141,6 @@ input {
   font-size: 1rem;
   transition: all 0.3s ease;
 }
-
 input:focus {
   outline: none;
   border-color: #000;
@@ -174,7 +158,6 @@ button {
   backdrop-filter: blur(6px);
   transition: all .3s ease;
 }
-
 button:hover {
   background: #fff;
   transform: translateY(-2px);
@@ -187,96 +170,4 @@ button:hover {
   inset: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.8);
-  backdrop-filter: blur(10px);
-  font-size: 1.4rem;
-  color: var(--texto);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-  z-index: 50;
-}
-.success.show { opacity: 1; pointer-events: all; }
-  </style>
-</head>
-
-<body>
-  <div id="splash">
-    <h1>MYFLOWLIFE</h1>
-    <h2>Potência Sustentável</h2>
-  </div>
-
-  <div class="logo">MYFLOWLIFE</div>
-
-  <form id="form" class="card">
-    <label>Nome
-      <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required pattern="^[A-Za-zÀ-ÿ\\s]+$">
-    </label>
-    <label>E-mail
-      <input type="email" id="email" name="email" placeholder="exemplo@email.com" required pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$">
-    </label>
-   <label>Telefone
-  <input 
-    type="text" 
-    id="telefone" 
-    name="telefone" 
-    placeholder="(11) 98800-9944" 
-    required 
-    pattern="^(\(?\d{2}\)?\s?)?\d{4,5}-?\d{4}$"
-  >
-</label>
-    <button type="submit">Continuar</button>
-  </form>
-
-  <div class="success" id="success">Cadastro enviado com sucesso!</div>
-
-  <script>
-  // Splash control — 1600ms
-  setTimeout(() => {
-    document.getElementById('splash').style.display = 'none';
-    document.querySelector('.logo').style.opacity = '1';
-    document.querySelector('.card').style.opacity = '1';
-  }, 1600);
-
-  // Controle de origem e ebook
-  const form = document.getElementById("form");
-  const success = document.getElementById("success");
-  const urlParams = new URLSearchParams(window.location.search);
-
-  const origem = urlParams.get("origem") || localStorage.getItem("origem");
-  if (origem) localStorage.setItem("origem", origem);
-
-  const ebook = urlParams.get("ebook") || localStorage.getItem("ebook");
-  if (ebook) localStorage.setItem("ebook", ebook);
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = {
-      nome: form.nome.value.trim(),
-      email: form.email.value.trim(),
-      telefone: form.telefone.value.trim(),
-      origem: localStorage.getItem("origem") || "desconhecida",
-      ebook: localStorage.getItem("ebook") || "não informado"
-    };
-    try {
-      await fetch("https://script.google.com/macros/s/AKfycbzoLP8uwomZSPBLo6mmcD71POBA7GByedp5wHtdZpvzYyxeB_P-F7BsUYIC1hVsBg9f/exec", {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-      success.classList.add("show");
-      setTimeout(() => {
-        const destino = localStorage.getItem("origemURL");
-        if (destino) window.location.href = destino;
-        else history.back();
-      }, 3000);
-    } catch(err) {
-      alert("Erro ao enviar o cadastro. Tente novamente.");
-    }
-  });
-  </script>
-</body>
-</html>
 
