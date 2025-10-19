@@ -216,9 +216,16 @@ button:hover {
     <label>E-mail
       <input type="email" id="email" name="email" placeholder="exemplo@email.com" required pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$">
     </label>
-    <label>Telefone
-      <input type="text" id="telefone" name="telefone" placeholder="(11)999999999" required pattern="^\\(\\d{2}\\)\\d{8,9}$">
-    </label>
+   <label>Telefone
+  <input 
+    type="text" 
+    id="telefone" 
+    name="telefone" 
+    placeholder="(11) 98821-2892" 
+    required 
+    pattern="^(\(?\d{2}\)?\s?)?\d{4,5}-?\d{4}$"
+  >
+</label>
     <button type="submit">Continuar</button>
   </form>
 
