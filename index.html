@@ -750,51 +750,75 @@ body::before {
 
 <script>
 async function carregarEbooks() {
+  // 🔹 caminhos de fallback: local e remoto (GitHub RAW)
   const caminhos = [
-  "ebooks/ebooks.json",
-  "./ebooks/ebooks.json",
-  "/ebooks/ebooks.json",
-  "https://raw.githubusercontent.com/carolinebarros1010/myflowlife/myflowlife.com.br/ebooks/ebooks.json"
-];
+    "ebooks/ebooks.json",
+    "./ebooks/ebooks.json",
+    "/ebooks/ebooks.json",
+    "https://raw.githubusercontent.com/carolinebarros1010/myflowlife/myflowlife.com.br/ebooks/ebooks.json"
+  ];
+
   let ebooks = null;
+
+  // tenta buscar em sequência até achar
   for (const caminho of caminhos) {
     try {
-      const resposta = await fetch(caminho);
-      if (resposta.ok) { ebooks = await resposta.json(); break; }
-    } catch(e) {}
+      const resposta = await fetch(caminho, { cache: "no-store" });
+      if (resposta.ok) {
+        ebooks = await resposta.json();
+        console.log("✅ eBooks carregados de:", caminho);
+        break;
+      }
+    } catch (e) {
+      console.warn("Falha ao tentar:", caminho);
+    }
   }
-  if (!ebooks) return;
 
+  if (!ebooks) {
+    console.error("❌ Nenhum arquivo ebooks.json encontrado.");
+    return;
+  }
+
+  // insere os cards dinamicamente
   const faixa = document.getElementById("destaque");
   faixa.innerHTML = "";
+
   ebooks.forEach((ebook, i) => {
     const card = document.createElement("article");
     card.classList.add("card");
     card.style.animationDelay = `${0.1 * i}s`;
+
+    // define caminho correto da capa
+    const capaSrc = ebook.capa.startsWith("http")
+      ? ebook.capa
+      : `ebooks/${ebook.capa}`;
+
+    // define ação do botão
+    const action = ebook.tipo === "download" ? "Baixar" : "Comprar";
+
     card.innerHTML = `
-      <div class="cover"><img src="ebooks/${ebook.capa}" alt="${ebook.nome}"></div>
+      <div class="cover">
+        <img src="${capaSrc}" alt="${ebook.nome}">
+      </div>
       <div class="meta">
         <div class="price"><small>R$</small> ${ebook.preco}</div>
         <a class="cta" href="#" onclick="return goCadastro('${ebook.link}','${ebook.nome}','${ebook.tipo}')">
-          ${ebook.tipo === "download" ? "Baixar" : "Comprar"}
+          ${action}
         </a>
       </div>`;
     faixa.appendChild(card);
   });
 }
 
+// função para abrir links e armazenar info
 function goCadastro(url, ebook, tipo) {
   localStorage.setItem("ebook", ebook);
   localStorage.setItem("tipo", tipo);
-  if (tipo === "download") {
-    window.open(url, "_blank");
-  } else {
-    window.open(url, "_blank");
-  }
+  window.open(url, "_blank");
   return false;
 }
 
-// Setas laterais
+// setas de rolagem
 document.addEventListener("DOMContentLoaded", () => {
   const scroller = document.getElementById("destaque");
   document.getElementById("next").onclick = () => scroller.scrollBy({ left: 400, behavior: "smooth" });
@@ -802,9 +826,9 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarEbooks();
 });
 </script>
+
  
-//splash screen e o fade-in
-  
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const splash = document.getElementById('splash');
