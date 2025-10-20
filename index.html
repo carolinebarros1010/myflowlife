@@ -634,6 +634,7 @@ body::before {
     <div class="arrow right" id="next">&#10095;</div>
   </div>
 </section>
+  
 </script>
 <!-- ====== EBOOKS ====== -->
 <section class="ebooks-section">
@@ -758,9 +759,9 @@ body::before {
 }
 </style>
 
+<!-- ====== SCRIPT FINAL CORRIGIDO ====== -->
 <script>
 async function carregarEbooks() {
-  // 🔹 caminhos de fallback: local e remoto (GitHub RAW)
   const caminhos = [
     "ebooks/ebooks.json",
     "./ebooks/ebooks.json",
@@ -769,8 +770,6 @@ async function carregarEbooks() {
   ];
 
   let ebooks = null;
-
-  // tenta buscar em sequência até achar
   for (const caminho of caminhos) {
     try {
       const resposta = await fetch(caminho, { cache: "no-store" });
@@ -789,7 +788,6 @@ async function carregarEbooks() {
     return;
   }
 
-  // insere os cards dinamicamente
   const faixa = document.getElementById("destaque");
   faixa.innerHTML = "";
 
@@ -798,12 +796,10 @@ async function carregarEbooks() {
     card.classList.add("card");
     card.style.animationDelay = `${0.1 * i}s`;
 
-    // define caminho correto da capa
     const capaSrc = ebook.capa.startsWith("http")
       ? ebook.capa
       : `ebooks/${ebook.capa}`;
 
-    // define ação do botão
     const action = ebook.tipo === "download" ? "Baixar" : "Comprar";
 
     card.innerHTML = `
@@ -820,7 +816,6 @@ async function carregarEbooks() {
   });
 }
 
-// função para abrir links e armazenar info
 function goCadastro(url, ebook, tipo) {
   localStorage.setItem("ebook", ebook);
   localStorage.setItem("tipo", tipo);
@@ -828,63 +823,45 @@ function goCadastro(url, ebook, tipo) {
   return false;
 }
 
-</script>
+document.addEventListener("DOMContentLoaded", () => {
+  const splash = document.getElementById("splash");
+  const header = document.getElementById("header");
+  const produtos = document.getElementById("produtos");
+  const video = document.getElementById("video");
+  const planos = document.getElementById("planos");
+  const ebooks = document.querySelector(".ebooks-section");
+  const brand = document.querySelector(".brand-minimal");
+  const floatButtons = document.querySelectorAll(".btn-newsletter, .btn-flutuante");
 
- 
+  // Oculta tudo até o splash terminar
+  [header, produtos, video, planos, ebooks].forEach(el => el.classList.remove("ready"));
+  brand.style.opacity = "0";
+  floatButtons.forEach(btn => btn.style.opacity = "0");
 
+  // Inicia fade-out suave
+  setTimeout(() => splash.classList.add("fade-out"), 800);
 
-<script>
-  // Esconde tudo até o splash terminar
-  floatButtons.forEach(btn => btn.style.opacity = '0');
-  brand.style.opacity = '0';
-
-  // Fade-out do splash
-  setTimeout(() => splash.classList.add('fade-out'), 800);
-
-  // Exibe os elementos gradualmente após o splash
+  // Exibe gradualmente
   setTimeout(() => {
-    splash.style.display = 'none';
-    floatButtons.forEach(btn => btn.style.opacity = '0.9');
-    brand.style.opacity = '0.9';
+    splash.style.display = "none";
+    [header, produtos, video, planos, ebooks].forEach(el => el.classList.add("ready"));
+    brand.style.opacity = "0.9";
+    floatButtons.forEach(btn => btn.style.opacity = "0.9");
   }, 1800);
+
+  // Setas do carrossel e carregamento dos eBooks
+  const scroller = document.getElementById("destaque");
+  document.getElementById("next").onclick = () => scroller.scrollBy({ left: 400, behavior: "smooth" });
+  document.getElementById("prev").onclick = () => scroller.scrollBy({ left: -400, behavior: "smooth" });
+  carregarEbooks();
 });
 </script>
-
-
 
 <footer>
   © 2025 MyFlowLife. Todos os direitos reservados.
 </footer>
-
-<script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const splash = document.getElementById('splash');
-  const header = document.getElementById('header');
-  const produtos = document.getElementById('produtos');
-  const video = document.getElementById('video');
-  const planos = document.getElementById('planos');
-  const ebooks = document.querySelector('.ebooks-section');
-  const brand = document.querySelector('.brand-minimal');
-  const floatButtons = document.querySelectorAll('.btn-newsletter, .btn-flutuante');
-
-  // Oculta todos os elementos durante o splash
-  [header, produtos, video, planos, ebooks].forEach(el => el.classList.remove('ready'));
-  brand.style.opacity = '0';
-  floatButtons.forEach(btn => btn.style.opacity = '0');
-
-  // Inicia fade-out suave do splash
-  setTimeout(() => splash.classList.add('fade-out'), 800);
-
-  // Exibe gradualmente os elementos com timing elegante
-  setTimeout(() => {
-    splash.style.display = 'none';
-    [header, produtos, video, planos, ebooks].forEach(el => el.classList.add('ready'));
-    brand.style.opacity = '0.9';
-    floatButtons.forEach(btn => btn.style.opacity = '0.9');
-  }, 1800);
-});
-</script>
+</body>
+</html>
 </body>
 </html>
 
