@@ -571,7 +571,7 @@ body::before {
 </header>
 
 <!-- ====== PRODUTOS ====== -->
-<section id="produtos" class="ready">
+<section id="produtos">
   <div class="card" onclick="window.open('https://www.femflow.com.br','_blank')" style="cursor:pointer;">
     <img src="assets/logo-femflow.png" alt="FemFlow">
     <p>O método feminino baseado no ciclo hormonal: treinos, respiração e equilíbrio para cada fase do mês.</p>
@@ -582,6 +582,7 @@ body::before {
     <p>A pirâmide da potência masculina: consistência, intensidade e evolução com base na ciência do treino.</p>
   </div>
 </section>
+
 
 
 
@@ -818,37 +819,12 @@ function goCadastro(url, ebook, tipo) {
   return false;
 }
 
-// setas de rolagem
-document.addEventListener("DOMContentLoaded", () => {
-  const scroller = document.getElementById("destaque");
-  document.getElementById("next").onclick = () => scroller.scrollBy({ left: 400, behavior: "smooth" });
-  document.getElementById("prev").onclick = () => scroller.scrollBy({ left: -400, behavior: "smooth" });
-  carregarEbooks();
-});
 </script>
 
  
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const splash = document.getElementById('splash');
-  const sections = ['header','produtos','video','planos','ebooks'].map(id => document.getElementById(id));
-
-  setTimeout(() => splash.classList.add('fade-out'), 800);
-  setTimeout(() => {
-    splash.style.display = 'none';
-    sections.forEach(el => el.classList.add('ready'));
-  }, 1800);
-});
-</script>
-  
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const splash = document.getElementById('splash');
-  const floatButtons = document.querySelectorAll('.btn-newsletter, .btn-flutuante');
-  const brand = document.querySelector('.brand-minimal');
-
   // Esconde tudo até o splash terminar
   floatButtons.forEach(btn => btn.style.opacity = '0');
   brand.style.opacity = '0';
@@ -872,23 +848,32 @@ document.addEventListener('DOMContentLoaded', () => {
 </footer>
 
 <script>
+<script>
 document.addEventListener('DOMContentLoaded', () => {
   const splash = document.getElementById('splash');
   const header = document.getElementById('header');
   const produtos = document.getElementById('produtos');
   const video = document.getElementById('video');
   const planos = document.getElementById('planos');
-  const ebooks = document.getElementById('ebooks');
+  const ebooks = document.querySelector('.ebooks-section');
+  const brand = document.querySelector('.brand-minimal');
+  const floatButtons = document.querySelectorAll('.btn-newsletter, .btn-flutuante');
 
+  // Oculta todos os elementos durante o splash
+  [header, produtos, video, planos, ebooks].forEach(el => el.classList.remove('ready'));
+  brand.style.opacity = '0';
+  floatButtons.forEach(btn => btn.style.opacity = '0');
+
+  // Inicia fade-out suave do splash
   setTimeout(() => splash.classList.add('fade-out'), 800);
+
+  // Exibe gradualmente os elementos com timing elegante
   setTimeout(() => {
     splash.style.display = 'none';
-    header.classList.add('ready');
-    produtos.classList.add('ready');
-    video.classList.add('ready');
-    planos.classList.add('ready');
-    ebooks.classList.add('ready');
-  }, 2200);
+    [header, produtos, video, planos, ebooks].forEach(el => el.classList.add('ready'));
+    brand.style.opacity = '0.9';
+    floatButtons.forEach(btn => btn.style.opacity = '0.9');
+  }, 1800);
 });
 </script>
 </body>
