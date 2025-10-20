@@ -1,1 +1,157 @@
+:root{
+  --bg1:#9CBCC1;
+  --bg2:#A3C6C7;
+  --bg3:#F8F8F8;
+  --text:#335953;
+  --glass:rgba(255,255,255,.65);
+  --line:rgba(0,0,0,.1);
+  --shadow:0 10px 24px rgba(0,0,0,.08),0 4px 10px rgba(0,0,0,.06);
+  --shadow-deep:0 20px 50px rgba(0,0,0,.12),0 8px 20px rgba(0,0,0,.08);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--text);
+  background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+  background-size:400% 400%;
+  animation:gradientShift 20s ease infinite;
+  overflow-x:hidden;
+}
+@keyframes gradientShift{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+body::before{
+  content:'';
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(800px 400px at 20% -10%,rgba(255,255,255,.35),transparent 60%),
+    radial-gradient(700px 350px at 80% 110%,rgba(255,255,255,.2),transparent 60%);
+  mix-blend-mode:screen;
+}
+
+/* Splash */
+#splash{
+  position:fixed;inset:0;z-index:999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#f8f8f8;
+  font-family:'Helvetica Rounded Bold','Helvetica Rounded','Helvetica Neue',Helvetica,Arial,sans-serif;
+  text-transform:uppercase;font-weight:bold;color:#111;
+  transition:opacity 1.6s ease,transform 1.6s ease;
+}
+#splash.fade-out{opacity:0;transform:scale(1.03) translateY(-8px);pointer-events:none}
+#splash h1{letter-spacing:1.5px;margin:.2rem 0;font-size:2.2rem}
+#splash h2{letter-spacing:.8px;margin:0;font-size:1.05rem}
+
+/* Header */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:linear-gradient(to bottom,rgba(255,255,255,.96),rgba(255,255,255,.88));
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(10px) saturate(120%);
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+}
+.topbar-inner{
+  max-width:1200px;margin:0 auto;padding:.85rem 1rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand-minimal{
+  font-family:'Helvetica Rounded Bold','Helvetica Rounded','Helvetica Neue',Helvetica,Arial,sans-serif;
+  font-weight:bold;color:#000;letter-spacing:1px;text-transform:capitalize;
+  font-size:1.15rem;opacity:0;transition:opacity .6s ease;
+}
+.actions{display:flex;gap:.5rem}
+.hbtn{
+  text-decoration:none;color:var(--text);
+  background:var(--glass);border:1px solid var(--line);
+  border-radius:999px;padding:.5rem .8rem;box-shadow:var(--shadow);
+  transition:all .25s ease;
+}
+.hbtn:hover{transform:translateY(-1px);box-shadow:var(--shadow-deep);background:#fff}
+
+/* Seções */
+.section{max-width:1200px;margin:2.2rem auto;padding:0 1rem;position:relative}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .9s ease,transform .9s ease}
+.reveal.ready{opacity:1;transform:none}
+
+/* Produtos */
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.pcard{
+  background:var(--glass);border:1px solid var(--line);border-radius:20px;
+  padding:1.4rem;box-shadow:var(--shadow);text-align:center;cursor:pointer;
+  transition:transform .25s ease,box-shadow .25s ease;
+  min-height:320px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+}
+.pcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-deep)}
+.pcard img{width:220px;height:220px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.12))}
+
+/* Vídeo */
+.video-wrap{text-align:center}
+.video-wrap h2{margin:0 0 1rem;font-family:'Helvetica Rounded','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:1.4rem}
+.video-player{
+  width:100%;max-width:360px;aspect-ratio:9/16;border-radius:20px;object-fit:cover;
+  box-shadow:0 10px 30px rgba(0,0,0,.22);
+}
+
+/* Planos */
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.plan{
+  background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:1.4rem;
+  text-align:center;box-shadow:var(--shadow);transition:transform .25s ease,box-shadow .25s ease;
+}
+.plan:hover{transform:translateY(-4px);box-shadow:var(--shadow-deep)}
+.plan h3{margin:.2rem 0 .4rem;font-size:1.05rem}
+.plan p{margin:.1rem 0 .9rem}
+
+/* Ebooks */
+.ebooks{margin:3rem auto 4rem}
+.ebooks h2{
+  font-family:'Helvetica Rounded','Helvetica Neue',Helvetica,Arial,sans-serif;
+  font-size:1.4rem;letter-spacing:.8px;margin:0 0 1rem;
+  background:linear-gradient(90deg,#335953,#cc6a5a);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.row{position:relative;padding:0 2.2rem}
+.scroller{display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;padding:.2rem 0 1rem}
+.scroller::-webkit-scrollbar{height:8px}
+.scroller::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:10px}
+.arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  background:var(--glass);border:1px solid var(--line);cursor:pointer;user-select:none;
+  box-shadow:var(--shadow);transition:all .2s ease;opacity:0;
+}
+.row:hover .arrow{opacity:1}
+.arrow:hover{transform:translateY(-50%) scale(1.06);background:#fff}
+.arrow.left{left:6px}.arrow.right{right:6px}
+
+/* Cards eBooks */
+.card{
+  width:200px;flex:0 0 auto;border-radius:16px;overflow:hidden;
+  background:#fff;box-shadow:var(--shadow);
+  transition:transform .25s ease,box-shadow .25s ease,filter .25s ease;
+  opacity:0;transform:translateY(8px);animation:fadeCard .8s ease forwards;
+}
+@keyframes fadeCard{to{opacity:1;transform:translateY(0)}}
+.cover{width:100%;aspect-ratio:3/4;overflow:hidden}
+.cover img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+.card:hover .cover img{transform:scale(1.04)}
+.meta{display:flex;align-items:center;justify-content:space-between;padding:.7rem .8rem .85rem}
+.price{font-weight:600;opacity:.9}
+.price small{font-weight:400;opacity:.8}
+.cta{
+  text-decoration:none;color:var(--text);
+  background:var(--glass);border:1px solid var(--line);
+  padding:.4rem .75rem;border-radius:10px;box-shadow:var(--shadow);
+  transition:all .2s ease;
+}
+.cta:hover{background:#fff;transform:translateY(-1px);box-shadow:var(--shadow-deep)}
+
+footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
+
+@media (max-width:920px){.card{width:180px}.pcard img{width:200px;height:200px}}
+@media (max-width:600px){.brand-minimal{font-size:1rem}.card{width:160px}.arrow{display:none}}
 
