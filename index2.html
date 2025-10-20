@@ -206,43 +206,40 @@ section.ready {
 
 
 /* ====== EBOOKS ====== */
-.ebooks {
-  background: rgba(255,255,255,0.3);
-  padding: 2rem 1rem 3rem;
-  border-top: 1px solid var(--borda);
-  opacity: 0;
-  transition: opacity 1s ease 3s;
-}
-.ebooks.ready { opacity: 1; }
-.ebooks h2 {
+.ebooks-section {
+  margin: 4rem auto;
+  max-width: 1200px;
   text-align: center;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-}
-.ebook-row {
-  display: flex;
-  overflow-x: auto;
-  gap: 1.2rem;
-  padding-bottom: 1rem;
-}
-.ebook {
-  flex: 0 0 180px;
-  background: var(--vidro);
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-  text-align: center;
-  padding: 1rem;
-}
-.ebook img {
-  width: 100%;
-  border-radius: 10px;
-  margin-bottom: 0.5rem;
-}
-.ebook a {
-  text-decoration: none;
   color: var(--texto);
-  font-weight: 600;
 }
+
+.ebooks-section h2 {
+  font-family: 'Helvetica Rounded Bold', Helvetica, Arial, sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+  margin-bottom: 1.2rem;
+  color: #335953;
+  background: linear-gradient(90deg, #335953, #cc6a5a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ebooks-frame {
+  width: 100%;
+  height: 500px;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+  transition: box-shadow .3s ease, transform .3s ease;
+}
+
+.ebooks-frame:hover {
+  transform: scale(1.01);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.12);
+}
+
 
 /* ====== FOOTER ====== */
 footer {
@@ -251,6 +248,18 @@ footer {
   font-size: 0.85rem;
   color: rgba(0,0,0,0.6);
 }
+  .btn-modern {
+  border: 1px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
+  transition: all 0.4s ease;
+}
+.btn-modern:hover {
+  background: rgba(255,255,255,0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
 </style>
 </head>
 
@@ -309,24 +318,19 @@ footer {
     <button onclick="window.open('https://automacao.chatideal.com.br/meu-typebot-z4uzbgk','_blank')">Assinar Premium</button>
   </div>
 </div>
+  
+<section class="ebooks-section">
+  <h2>Últimos eBooks publicados</h2>
+  <iframe 
+    src="ebooks/index.html#destaque"
+    title="Últimos eBooks"
+    frameborder="0"
+    loading="lazy"
+    class="ebooks-frame">
+  </iframe>
+</section>
 
-<div class="ebooks" id="ebooks">
-  <h2>Últimos eBooks Publicados</h2>
-  <div class="ebook-row">
-    <div class="ebook">
-      <img src="ebooks/down/ebook1.jpg" alt="eBook 1">
-      <a href="ebooks/down/ebook1.pdf" target="_blank">eBook 1</a>
-    </div>
-    <div class="ebook">
-      <img src="ebooks/down/ebook2.jpg" alt="eBook 2">
-      <a href="ebooks/down/ebook2.pdf" target="_blank">eBook 2</a>
-    </div>
-    <div class="ebook">
-      <img src="ebooks/down/ebook3.jpg" alt="eBook 3">
-      <a href="ebooks/down/ebook3.pdf" target="_blank">eBook 3</a>
-    </div>
-  </div>
-</div>
+
 
 <footer>
   © 2025 MyFlowLife. Todos os direitos reservados.
