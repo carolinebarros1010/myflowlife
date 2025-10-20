@@ -1,1 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyFlowLife | Potência Sustentável</title>
+<style>
+:root {
+  --cor1: #9CBCC1;
+  --cor2: #A3C6C7;
+  --cor3: #F8F8F8;
+  --vidro: rgba(255,255,255,0.6);
+  --borda: rgba(0,0,0,0.1);
+  --texto: #335953;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--texto);
+  background: linear-gradient(135deg, var(--cor1), var(--cor2), var(--cor3));
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+  overflow-x: hidden;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ====== SPLASH ====== */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Helvetica Rounded Bold','Helvetica Rounded',Helvetica,Arial,sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #1e1e1e;
+  text-align: center;
+  z-index: 999;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 2.2s ease, transform 2.2s ease;
+}
+#splash.fade-out {
+  opacity: 0;
+  transform: scale(1.05) translateY(-10px);
+  pointer-events: none;
+}
+#splash h1 {
+  font-size: 2.4rem;
+  margin: 0.3rem 0;
+  letter-spacing: 2px;
+}
+#splash h2 {
+  font-size: 1.1rem;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+/* ====== HEADER ====== */
+header {
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+  font-family: 'Helvetica Rounded Bold','Helvetica Rounded',Helvetica,Arial,sans-serif;
+  opacity: 0;
+  transition: opacity 1s ease 2.2s;
+}
+header.ready { opacity: 1; }
+header h1 {
+  font-size: 2.6rem;
+  margin-bottom: 0.3rem;
+  letter-spacing: 1.5px;
+  text-transform: capitalize;
+}
+header p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* ====== SEÇÃO PRODUTOS ====== */
+section {
+  padding: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 1s ease 2.4s, transform 1s ease 2.4s;
+}
+section.ready {
+  opacity: 1;
+  transform: none;
+}
+.card {
+  background: var(--vidro);
+  border: 1px solid var(--borda);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15), inset 0 0 30px rgba(255,255,255,0.1);
+  padding: 2rem;
+  max-width: 420px;
+  flex: 1 1 320px;
+  text-align: center;
+}
+.card img {
+  width: 100%;
+  max-width: 320px;
+  border-radius: 18px;
+  margin-bottom: 1rem;
+}
+
+/* ====== VÍDEO ====== */
+.video-section {
+  width: 100%;
+  text-align: center;
+  margin: 2rem auto;
+  opacity: 0;
+  transition: opacity 1s ease 2.6s;
+}
+.video-section.ready { opacity: 1; }
+
+.video-section video {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  aspect-ratio: 9 / 16;
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+.video-section video:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+
+/* ====== PLANOS ====== */
+.planos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin: 3rem 0;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1s ease 2.8s, transform 1s ease 2.8s;
+}
+.planos.ready {
+  opacity: 1;
+  transform: none;
+}
+.plano {
+  background: var(--vidro);
+  border: 1px solid var(--borda);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 280px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.plano:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+.plano h3 { margin-top: 0; }
+.plano p { margin: 0.5rem 0 1.2rem; }
+.plano button {
+  background: var(--vidro);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 0.8rem 1.4rem;
+  font-weight: 600;
+  color: var(--texto);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.plano button:hover {
+  background: #fff;
+  transform: translateY(-2px);
+}
+
+/* ====== EBOOKS ====== */
+.ebooks {
+  background: rgba(255,255,255,0.3);
+  padding: 2rem 1rem 3rem;
+  border-top: 1px solid var(--borda);
+  opacity: 0;
+  transition: opacity 1s ease 3s;
+}
+.ebooks.ready { opacity: 1; }
+.ebooks h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+.ebook-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 1.2rem;
+  padding-bottom: 1rem;
+}
+.ebook {
+  flex: 0 0 180px;
+  background: var(--vidro);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  text-align: center;
+  padding: 1rem;
+}
+.ebook img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+}
+.ebook a {
+  text-decoration: none;
+  color: var(--texto);
+  font-weight: 600;
+}
+
+/* ====== FOOTER ====== */
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.6);
+}
+</style>
+</head>
+
+<body>
+<div id="splash">
+  <h1>MyFlowLife</h1>
+  <h2>Potência Sustentável</h2>
+</div>
+
+<header id="header">
+  <h1>MyFlowLife</h1>
+  <p>Potência Sustentável • Conecte corpo, mente e performance</p>
+</header>
+
+<section id="produtos">
+  <div class="card">
+    <h2>FemFlow</h2>
+    <img src="ebooks/down/femflow-thumb.jpg" alt="FemFlow">
+    <p>O método feminino baseado no ciclo hormonal. Treinos, respiração e equilíbrio para cada fase do mês.</p>
+  </div>
+
+  <div class="card">
+    <h2>MaleFlow</h2>
+    <img src="ebooks/down/maleflow-thumb.jpg" alt="MaleFlow">
+    <p>A pirâmide da potência masculina: consistência, intensidade e evolução com base na ciência do treino.</p>
+  </div>
+</section>
+
+<div class="video-section" id="video">
+  <h2>Dicas e Inspiração</h2>
+  <video autoplay muted loop playsinline controls poster="videos/myflowlifetrailer-thumb.jpg">
+    <source src="videos/myflowlifetrailer.webm" type="video/webm">
+    <source src="videos/myflowlifetrailer.mp4" type="video/mp4">
+    Seu navegador não suporta a reprodução de vídeos.
+  </video>
+</div>
+
+<div class="planos" id="planos">
+  <div class="plano">
+    <h3>Plano Gratuito</h3>
+    <p>7 dias de acesso livre ao método MyFlowLife.</p>
+    <button onclick="window.open('https://automacao.chatideal.com.br/meu-typebot-z4uzbgk','_blank')">Começar Agora</button>
+  </div>
+  <div class="plano">
+    <h3>Plano Strong</h3>
+    <p>Acompanhamento com App + WhatsApp<br>+300 vídeos e periodização personalizada para até 2 modalidades.</p>
+    <p><strong>R$ 159,90</strong></p>
+    <button onclick="window.open('https://automacao.chatideal.com.br/meu-typebot-z4uzbgk','_blank')">Assinar</button>
+  </div>
+  <div class="plano">
+    <h3>Plano Premium</h3>
+    <p>Mentoria com 3+ modalidades, treinos híbridos e suporte direto.</p>
+    <p><strong>R$ 259,90</strong></p>
+    <button onclick="window.open('https://automacao.chatideal.com.br/meu-typebot-z4uzbgk','_blank')">Assinar Premium</button>
+  </div>
+</div>
+
+<div class="ebooks" id="ebooks">
+  <h2>Últimos eBooks Publicados</h2>
+  <div class="ebook-row">
+    <div class="ebook">
+      <img src="ebooks/down/ebook1.jpg" alt="eBook 1">
+      <a href="ebooks/down/ebook1.pdf" target="_blank">eBook 1</a>
+    </div>
+    <div class="ebook">
+      <img src="ebooks/down/ebook2.jpg" alt="eBook 2">
+      <a href="ebooks/down/ebook2.pdf" target="_blank">eBook 2</a>
+    </div>
+    <div class="ebook">
+      <img src="ebooks/down/ebook3.jpg" alt="eBook 3">
+      <a href="ebooks/down/ebook3.pdf" target="_blank">eBook 3</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2025 MyFlowLife. Todos os direitos reservados.
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const splash = document.getElementById('splash');
+  const header = document.getElementById('header');
+  const produtos = document.getElementById('produtos');
+  const video = document.getElementById('video');
+  const planos = document.getElementById('planos');
+  const ebooks = document.getElementById('ebooks');
+
+  setTimeout(() => splash.classList.add('fade-out'), 800);
+  setTimeout(() => {
+    splash.style.display = 'none';
+    header.classList.add('ready');
+    produtos.classList.add('ready');
+    video.classList.add('ready');
+    planos.classList.add('ready');
+    ebooks.classList.add('ready');
+  }, 2200);
+});
+</script>
+</body>
+</html>
 
