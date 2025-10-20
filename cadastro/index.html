@@ -263,6 +263,76 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   </script>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const splash = document.getElementById('splash');
+  const logo = document.querySelector('.logo');
+  const card = document.querySelector('.card');
+
+  // Splash animado
+  setTimeout(() => splash.classList.add('fade-out'), 600);
+  setTimeout(() => {
+    splash.style.display = 'none';
+    logo.style.opacity = '1';
+    card.classList.add('ready');
+  }, 1600);
+});
+
+// Controle de origem, ebook e redirecionamento pós-cadastro
+const form = document.getElementById("form");
+const success = document.getElementById("success");
+const urlParams = new URLSearchParams(window.location.search);
+
+// 🔹 Captura todos os parâmetros relevantes
+const origem = urlParams.get("origem") || localStorage.getItem("origem");
+const ebook = urlParams.get("ebook") || localStorage.getItem("ebook");
+const origemURL = urlParams.get("origemURL") || localStorage.getItem("origemURL");
+
+// 🔹 Armazena no localStorage para persistir entre páginas
+if (origem) localStorage.setItem("origem", origem);
+if (ebook) localStorage.setItem("ebook", ebook);
+if (origemURL) localStorage.setItem("origemURL", origemURL);
+
+// 🔹 Envio do formulário
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const data = {
+    nome: form.nome.value.trim(),
+    email: form.email.value.trim(),
+    telefone: form.telefone.value.trim(),
+    origem: localStorage.getItem("origem") || "desconhecida",
+    ebook: localStorage.getItem("ebook") || "não informado",
+    origemURL: localStorage.getItem("origemURL") || ""
+  };
+
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbzoLP8uwomZSPBLo6mmcD71POBA7GByedp5wHtdZpvzYyxeB_P-F7BsUYIC1hVsBg9f/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    // Mostra sucesso e redireciona
+    success.classList.add("show");
+    setTimeout(() => {
+      const destino = localStorage.getItem("origemURL");
+      if (destino) {
+        localStorage.removeItem("origemURL");
+        window.location.href = destino;
+      } else {
+        history.back();
+      }
+    }, 2500);
+
+  } catch (err) {
+    alert("Erro ao enviar o cadastro. Tente novamente.");
+  }
+});
+</script>
+
 </body>
 </html>
 
