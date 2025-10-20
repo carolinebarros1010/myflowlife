@@ -548,22 +548,19 @@ body::before {
   <p>Potência Sustentável • Conecte corpo, mente e performance</p>
 </header>
 
-<!-- Dentro da seção de produtos -->
-<section id="produtos">
-  <div class="card">
-    <a href="https://www.femflow.com.br" target="_blank" rel="noopener noreferrer">
-      <img src="assets/logo-femflow.png" alt="FemFlow Logo">
-    </a>
-    <p>O método feminino baseado no ciclo hormonal. Treinos, respiração e equilíbrio para cada fase do mês.</p>
+<!-- ====== PRODUTOS ====== -->
+<section id="produtos" class="ready">
+  <div class="card" onclick="window.open('https://www.femflow.com.br','_blank')" style="cursor:pointer;">
+    <img src="assets/logo-femflow.png" alt="FemFlow">
+    <p>O método feminino baseado no ciclo hormonal: treinos, respiração e equilíbrio para cada fase do mês.</p>
   </div>
 
-  <div class="card">
-    <a href="https://www.maleflow.com.br" target="_blank" rel="noopener noreferrer">
-      <img src="assets/logo-maleflow.png" alt="MaleFlow Logo">
-    </a>
+  <div class="card" onclick="window.open('https://www.maleflow.com.br','_blank')" style="cursor:pointer;">
+    <img src="assets/logo-maleflow.png" alt="MaleFlow">
     <p>A pirâmide da potência masculina: consistência, intensidade e evolução com base na ciência do treino.</p>
   </div>
 </section>
+
 
 
 <div class="video-section" id="video">
@@ -605,65 +602,182 @@ body::before {
     <div class="arrow right" id="next">&#10095;</div>
   </div>
 </section>
+</script>
+<!-- ====== EBOOKS ====== -->
+<section class="ebooks-section">
+  <h2>últimos ebooks publicados</h2>
+
+  <div class="ebooks-row">
+    <div class="arrow left" id="prev">&#10094;</div>
+    <div class="scroller" id="destaque"></div>
+    <div class="arrow right" id="next">&#10095;</div>
+  </div>
+</section>
+
+<style>
+.ebooks-section {
+  margin: 4rem auto 5rem;
+  max-width: 1200px;
+  text-align: center;
+}
+
+.ebooks-section h2 {
+  font-family: 'Helvetica Rounded Bold', Helvetica, Arial, sans-serif;
+  font-size: 1.6rem;
+  text-transform: lowercase;
+  letter-spacing: 1px;
+  margin-bottom: 1.4rem;
+  background: linear-gradient(90deg, #335953, #cc6a5a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ebooks-row {
+  position: relative;
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.scroller {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 1rem;
+  width: 100%;
+}
+
+.scroller::-webkit-scrollbar { height: 8px; }
+.scroller::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,.08);
+  border-radius: 10px;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(0,0,0,0.08);
+  display: grid; place-items: center;
+  cursor: pointer; user-select: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(10px);
+}
+.arrow:hover {
+  transform: translateY(-50%) scale(1.05);
+  background: rgba(255,255,255,0.9);
+}
+.arrow.left { left: 8px; }
+.arrow.right { right: 8px; }
+
+.card {
+  width: 200px;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.7);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  transition: transform .3s ease, box-shadow .3s ease;
+  opacity: 0; transform: translateY(10px);
+  animation: fadeCard .8s ease forwards;
+}
+@keyframes fadeCard { to { opacity:1; transform:translateY(0); } }
+
+.cover { width:100%; aspect-ratio:3/4; background:#fff; overflow:hidden; }
+.cover img { width:100%; height:100%; object-fit:cover; transition: transform .3s ease; }
+.card:hover .cover img { transform: scale(1.05); }
+
+.meta {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: .7rem .8rem .85rem;
+}
+.price {
+  font-weight: 600; opacity: .9;
+}
+.price small { font-weight:400; opacity:.8; }
+
+.cta {
+  text-decoration:none;
+  color: var(--texto);
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(0,0,0,0.1);
+  padding: .4rem .8rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: all 0.25s ease;
+}
+.cta:hover {
+  background:#fff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+@media (max-width: 600px) {
+  .arrow { display: none; }
+  .card { width: 160px; }
+}
+</style>
 
 <script>
 async function carregarEbooks() {
-  try {
-    const resposta = await fetch("ebooks/ebooks.json");
-    const ebooks = await resposta.json();
-    const faixa = document.getElementById("destaque");
-
-    ebooks.forEach((ebook, i) => {
-      const card = document.createElement("article");
-      card.classList.add("card");
-      card.style.animationDelay = `${0.1 * i}s`;
-      card.innerHTML = `
-        <div class="cover"><img src="./ebooks/${ebook.capa}" alt="${ebook.nome}"></div>
-        <div class="meta">
-          <div class="price"><small>R$</small> ${ebook.preco}</div>
-          <a class="cta" href="#" onclick="return goCadastro('ebooks/${ebook.link}','${ebook.nome}','${ebook.tipo}')">
-            ${ebook.tipo === "download" ? "Baixar" : "Comprar"}
-          </a>
-        </div>`;
-      faixa.appendChild(card);
-    });
-  } catch (e) {
-    console.error("Erro ao carregar eBooks:", e);
+  const caminhos = ["ebooks/ebooks.json", "./ebooks/ebooks.json", "/ebooks/ebooks.json"];
+  let ebooks = null;
+  for (const caminho of caminhos) {
+    try {
+      const resposta = await fetch(caminho);
+      if (resposta.ok) { ebooks = await resposta.json(); break; }
+    } catch(e) {}
   }
+  if (!ebooks) return;
+
+  const faixa = document.getElementById("destaque");
+  faixa.innerHTML = "";
+  ebooks.forEach((ebook, i) => {
+    const card = document.createElement("article");
+    card.classList.add("card");
+    card.style.animationDelay = `${0.1 * i}s`;
+    card.innerHTML = `
+      <div class="cover"><img src="ebooks/${ebook.capa}" alt="${ebook.nome}"></div>
+      <div class="meta">
+        <div class="price"><small>R$</small> ${ebook.preco}</div>
+        <a class="cta" href="#" onclick="return goCadastro('${ebook.link}','${ebook.nome}','${ebook.tipo}')">
+          ${ebook.tipo === "download" ? "Baixar" : "Comprar"}
+        </a>
+      </div>`;
+    faixa.appendChild(card);
+  });
 }
 
 function goCadastro(url, ebook, tipo) {
   localStorage.setItem("ebook", ebook);
   localStorage.setItem("tipo", tipo);
-  window.open(url, "_blank");
+  if (tipo === "download") {
+    window.open(url, "_blank");
+  } else {
+    window.open(url, "_blank");
+  }
   return false;
 }
 
-// setas de rolagem
-document.getElementById("next").onclick = () =>
-  document.getElementById("destaque").scrollBy({ left: 400, behavior: "smooth" });
-document.getElementById("prev").onclick = () =>
-  document.getElementById("destaque").scrollBy({ left: -400, behavior: "smooth" });
-
-carregarEbooks();
+// Setas laterais
+document.addEventListener("DOMContentLoaded", () => {
+  const scroller = document.getElementById("destaque");
+  document.getElementById("next").onclick = () => scroller.scrollBy({ left: 400, behavior: "smooth" });
+  document.getElementById("prev").onclick = () => scroller.scrollBy({ left: -400, behavior: "smooth" });
+  carregarEbooks();
+});
 </script>
-
-
-
-<script>
-  const faixa = document.querySelector('.faixa-ebooks');
-  document.getElementById('next').onclick = () => faixa.scrollBy({ left: 400, behavior: 'smooth' });
-  document.getElementById('prev').onclick = () => faixa.scrollBy({ left: -400, behavior: 'smooth' });
-
-  function goCadastro(url, ebook, tipo) {
-    localStorage.setItem('ebook', ebook);
-    localStorage.setItem('tipo', tipo);
-    window.open(url, '_blank');
-    return false;
-  }
-</script>
-
-
+ 
+//splash screen e o fade-in
+  
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const splash = document.getElementById('splash');
