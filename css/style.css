@@ -155,3 +155,19 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
 @media (max-width:920px){.card{width:180px}.pcard img{width:200px;height:200px}}
 @media (max-width:600px){.brand-minimal{font-size:1rem}.card{width:160px}.arrow{display:none}}
 
+/* --- Hero (título + tagline) --- */
+.hero{ text-align:center; margin-top:1rem; }
+.hero-title{
+  font-family:'Helvetica Rounded Bold','Helvetica Rounded','Helvetica Neue',Helvetica,Arial,sans-serif;
+  font-weight:bold; color:#000; letter-spacing:1px;
+  font-size:2.2rem; line-height:1.15; margin:0 0 .35rem;
+}
+.hero-sub{
+  font-size:1.05rem; opacity:.88; margin:0;
+}
+
+@media (max-width:600px){
+  .hero-title{ font-size:1.8rem; }
+  .hero-sub{ font-size:.98rem; }
+}
+
