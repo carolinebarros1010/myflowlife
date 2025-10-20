@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyFlowLife | Potência Sustentável</title>
+<meta name="description" content="MyFlowLife: potência sustentável. Métodos FemFlow e MaleFlow, planos e eBooks com design moderno e carrossel estilo Netflix.">
+<style>
+:root {
+  --cor1: #9CBCC1;
+  --cor2: #A3C6C7;
+  --cor3: #F8F8F8;
+  --texto: #335953;
+  --vidro: rgba(255,255,255,0.6);
+  --borda: rgba(0,0,0,0.12);
+}
+
+/* ===== BASE ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  color: var(--texto);
+  background: linear-gradient(135deg, var(--cor1), var(--cor2), var(--cor3));
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+  overflow-x: hidden;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+/* camadas de luz suaves */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(800px 400px at 20% 10%, rgba(255,255,255,0.25), transparent 60%),
+              radial-gradient(900px 500px at 80% 90%, rgba(255,255,255,0.18), transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+  animation: bgFloat 22s infinite alternate ease-in-out;
+}
+@keyframes bgFloat { 0% { transform: translateY(0) } 100% { transform: translateY(-16px) }}
+
+/* ===== SPLASH ===== */
+#splash {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #f8f8f8;
+  font-family: 'Helvetica Rounded', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  z-index: 999;
+  transition: opacity 2.2s ease, transform 2.2s ease;
+}
+#splash.fade-out {
+  opacity: 0;
+  transform: scale(1.05) translateY(-10px);
+  pointer-events: none;
+}
+#splash h1 { font-size: 2.4rem; margin-bottom: .35rem; letter-spacing: 1.2px; color:#000; }
+#splash h2 { font-size: 1.05rem; letter-spacing: .6px; color:#1e1e1e; opacity:.9; }
+
+/* ===== HEADER (brand) ===== */
+header {
+  text-align: center;
+  padding: 2.2rem 1rem 1rem;
+  font-family: 'Helvetica Rounded', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  opacity: 0;
+  transition: opacity 1s ease;
+  position: relative;
+  z-index: 1;
+}
+header.ready { opacity: 1; }
+header h1 { font-size: 2.4rem; letter-spacing: 1px; text-transform: capitalize; }
+header p  { font-size: 1.05rem; margin-top: .25rem; opacity: .9; }
+
+/* ===== SEÇÕES GENÉRICAS ===== */
+section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 2rem;
+  padding: 2rem 1.2rem;
+  opacity: 0;
+  transition: opacity 1s ease;
+  position: relative;
+  z-index: 1;
+}
+section.ready { opacity: 1; }
+
+/* ===== CARDS PRODUTOS ===== */
+.card {
+  background: var(--vidro);
+  border: 1px solid var(--borda);
+  backdrop-filter: blur(12px) saturate(140%);
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  width: 100%;
+  max-width: 420px;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  transition: transform .3s ease, box-shadow .3s ease;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12), inset 0 0 28px rgba(255,255,255,0.12);
+  cursor: pointer;
+}
+.card img {
+  width: 220px; height: 220px; object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.12));
+  transition: transform .35s ease, filter .35s ease;
+}
+.card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
+.card:hover img { transform: scale(1.05); filter: drop-shadow(0 12px 26px rgba(0,0,0,0.18)); }
+
+/* ===== VIDEO ===== */
+.video-section {
+  text-align: center;
+  margin: 3.2rem auto;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.video-section.ready { opacity: 1; }
+.video-section h2 {
+  font-family: 'Helvetica Rounded', Helvetica, Arial, sans-serif;
+  font-size: 1.6rem;
+  margin-bottom: 1.6rem;
+  background: linear-gradient(90deg, #335953, #cc6a5a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.video-section video {
+  width: 100%; max-width: 360px; aspect-ratio: 9/16;
+  border-radius: 20px; object-fit: cover;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  transition: transform .45s ease, box-shadow .45s ease;
+}
+.video-section video:hover { transform: scale(1.02); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+
+/* ===== PLANOS ===== */
+.planos { gap: 2rem; margin: 3rem 0; }
+.plano {
+  background: var(--vidro);
+  border: 1px solid var(--borda);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 280px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transition: transform .3s ease, box-shadow .3s ease;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.1);
+}
+.plano:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,0.15); }
+.plano h3 { margin: 0 0 .5rem 0; }
+.plano p { margin: 0.5rem 0 1.2rem; }
+.plano button {
+  background: rgba(255,255,255,0.35);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: .8rem 1.4rem;
+  font-weight: 600;
+  color: var(--texto);
+  cursor: pointer;
+  transition: all .3s ease;
+}
+.plano button:hover { background:#fff; transform: translateY(-2px); box-shadow:0 8px 22px rgba(0,0,0,0.12); }
+
+/* ===== EBOOKS (Netflix Style) ===== */
+.ebooks-section {
+  margin: 4rem auto 5rem;
+  max-width: 1200px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.ebooks-section.ready { opacity: 1; }
+.ebooks-section h2 {
+  font-family: 'Helvetica Rounded', Helvetica, Arial, sans-serif;
+  font-size: 1.6rem;
+  margin-bottom: 1.4rem;
+  background: linear-gradient(90deg, #335953, #cc6a5a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.ebooks-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.scroller {
+  display: flex; gap: 1rem;
+  overflow-x: auto; scroll-behavior: smooth;
+  padding: 1rem; width: 100%;
+}
+.scroller::-webkit-scrollbar { height: 8px; }
+.scroller::-webkit-scrollbar-thumb { background: rgba(0,0,0,.08); border-radius: 10px; }
+
+.card-ebook {
+  flex: 0 0 auto;
+  width: 190px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.68);
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.card-ebook:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 32px rgba(0,0,0,0.14); }
+.card-ebook .cover { width:100%; aspect-ratio:3/4; overflow:hidden; background:#fff; }
+.card-ebook .cover img { width:100%; height:100%; object-fit:cover; transition: transform .35s ease; }
+.card-ebook:hover .cover img { transform: scale(1.05); }
+.card-ebook .meta { display:flex; justify-content:space-between; align-items:center; padding:.6rem .8rem .8rem; }
+.card-ebook .meta .price { font-weight:600; opacity:.9; }
+.card-ebook .meta .price small { font-weight:400; opacity:.75; }
+
+.cta {
+  text-decoration:none; color: var(--texto);
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(0,0,0,0.1);
+  padding: .4rem .8rem; border-radius: 10px;
+  font-weight: 600; font-size: .85rem;
+  transition: all .25s ease;
+}
+.cta:hover { background:#fff; transform: translateY(-1px); }
+
+/* ===== SETAS ===== */
+.arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-size: 2rem; background: rgba(255,255,255,0.6);
+  border-radius: 50%; width: 42px; height: 42px;
+  display: grid; place-items: center; cursor: pointer; user-select: none;
+  transition: all .25s ease; backdrop-filter: blur(10px);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+.arrow:hover { background: rgba(255,255,255,0.85); }
+.arrow.left { left: 8px; }
+.arrow.right { right: 8px; }
+
+/* ===== BOTÕES FLUTUANTES ===== */
+.btn-newsletter, .btn-flutuante {
+  position: fixed; bottom: 24px; z-index: 999;
+  font-family: 'Inter', sans-serif; font-size: .9rem; text-transform: lowercase;
+  border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.12);
+  color: #335953; backdrop-filter: blur(10px);
+  border-radius: 100px; padding: .55rem 1.1rem;
+  transition: all .35s ease; opacity: .9; text-decoration:none;
+}
+.btn-newsletter:hover, .btn-flutuante:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+.btn-newsletter { right: 24px; }
+.btn-flutuante { right: 130px; }
+@media (max-width: 768px) {
+  .btn-newsletter, .btn-flutuante { left: 50%; transform: translateX(-50%); }
+  .btn-newsletter { bottom: 70px; right: auto; }
+}
+
+/* ===== FOOTER ===== */
+footer {
+  text-align: center; padding: 1rem; font-size: .85rem; color: rgba(0,0,0,0.6);
+}
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div id="splash">
+  <h1>MyFlowLife</h1>
+  <h2>Potência Sustentável</h2>
+</div>
+
+<header id="header">
+  <h1>MyFlowLife</h1>
+  <p>Potência Sustentável • Conecte corpo, mente e performance</p>
+</header>
+
+<!-- Produtos -->
+<section id="produtos">
+  <div class="card" onclick="window.open('https://www.femflow.com.br','_blank')" aria-label="Abrir FemFlow">
+    <img src="assets/logo-femflow.png" alt="FemFlow">
+    <p>O método feminino baseado no ciclo hormonal: treinos, respiração e equilíbrio.</p>
+  </div>
+  <div class="card" onclick="window.open('https://www.maleflow.com.br','_blank')" aria-label="Abrir MaleFlow">
+    <img src="assets/logo-maleflow.png" alt="MaleFlow">
+    <p>A pirâmide da potência masculina: consistência, intensidade e evolução.</p>
+  </div>
+</section>
+
+<!-- Vídeo -->
+<div class="video-section" id="video">
+  <h2>dicas e inspiração</h2>
+  <video autoplay muted loop playsinline controls poster="videos/myflowlifetrailer-thumb.jpg">
+    <source src="videos/myflowlifetrailer.webm" type="video/webm">
+    <source src="videos/myflowlifetrailer.mp4" type="video/mp4">
+    Seu navegador não suporta a reprodução de vídeos.
+  </video>
+</div>
+
+<!-- Planos -->
+<div class="planos" id="planos">
+  <div class="plano">
+    <h3>Plano gratuito</h3>
+    <p>7 dias de acesso livre ao método MyFlowLife.</p>
+    <button onclick="window.open('https://automacao.chatideal.com.br/meu-typebot-z4uzbgk','_blank')">começar agora</button>
+  </div>
+  <div class="plano">
+    <h3>Plano strong</h3>
+    <p>App + WhatsApp, +300 vídeos e treinos para até 2 modalidades.</p>
+    <p><strong>R$ 159,90</strong></p>
+    <button onclick="window.open('https://automacao.chatideal.com.br/meu-typebot-z4uzbgk','_blank')">assinar</button>
+  </div>
+  <div class="plano">
+    <h3>Plano premium</h3>
+    <p>Mentoria com 3+ modalidades e suporte direto.</p>
+    <p><strong>R$ 259,90</strong></p>
+    <button onclick="window.open('https://automacao.chatideal.com.br/meu-typebot-z4uzbgk','_blank')">assinar premium</button>
+  </div>
+</div>
+
+<!-- Ebooks -->
+<section class="ebooks-section">
+  <h2>últimos ebooks publicados</h2>
+  <div class="ebooks-row">
+    <div class="arrow left" id="prev" aria-label="Anterior">&#10094;</div>
+    <div class="scroller" id="destaque" aria-live="polite"></div>
+    <div class="arrow right" id="next" aria-label="Próximo">&#10095;</div>
+  </div>
+</section>
+
+<!-- Botões fixos -->
+<a href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" class="btn-flutuante" target="_blank" rel="noopener">começar</a>
+<a href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" class="btn-newsletter" target="_blank" rel="noopener">newsletter</a>
+
+<footer>© 2025 MyFlowLife. Todos os direitos reservados.</footer>
+
+<!-- ===== Scripts ===== -->
+<script>
+// Splash único e tolerante
+document.addEventListener('DOMContentLoaded', () => {
+  const splash = document.getElementById('splash');
+  const sections = ['header','produtos','video','planos','.ebooks-section']
+    .map(sel => document.querySelector(sel));
+  setTimeout(() => splash.classList.add('fade-out'), 800);
+  setTimeout(() => {
+    splash.style.display = 'none';
+    sections.forEach(el => el && el.classList.add('ready'));
+  }, 2200);
+});
+</script>
+
+<script>
+// Carregamento dinâmico de eBooks (com fallback)
+async function carregarEbooks() {
+  const caminhos = [
+    "ebooks/ebooks.json",
+    "./ebooks/ebooks.json",
+    "/ebooks/ebooks.json",
+    "https://raw.githubusercontent.com/carolinebarros1010/myflowlife/myflowlife.com.br/ebooks/ebooks.json"
+  ];
+  let ebooks = null;
+  for (const caminho of caminhos) {
+    try {
+      const resposta = await fetch(caminho, { cache: "no-store" });
+      if (resposta.ok) {
+        ebooks = await resposta.json();
+        console.log("✅ eBooks carregados de:", caminho);
+        break;
+      }
+    } catch (e) {
+      console.warn("Falha ao tentar:", caminho);
+    }
+  }
+  const faixa = document.getElementById("destaque");
+  faixa.innerHTML = "";
+  if (!ebooks || !Array.isArray(ebooks) || !ebooks.length) {
+    const aviso = document.createElement('div');
+    aviso.style.cssText = "margin: 1rem auto; opacity:.8;";
+    aviso.textContent = "Em breve novos eBooks por aqui.";
+    faixa.appendChild(aviso);
+    return;
+  }
+  ebooks.forEach((ebook) => {
+    const card = document.createElement("article");
+    card.classList.add("card-ebook");
+    const capaSrc = (ebook.capa && ebook.capa.startsWith("http")) ? ebook.capa : `ebooks/${ebook.capa}`;
+    const action = ebook.tipo === "download" ? "Baixar" : "Comprar";
+    const link = ebook.tipo === "download" ? (ebook.link.startsWith("http") ? ebook.link : `ebooks/${ebook.link}`) : ebook.link;
+    card.innerHTML = `
+      <div class="cover"><img src="${capaSrc}" alt="${ebook.nome || 'eBook'}"></div>
+      <div class="meta">
+        <span class="price"><small>R$</small> ${ebook.preco || '0,00'}</span>
+        <a class="cta" href="#" onclick="return goCadastro('${link}','${ebook.nome || ''}','${ebook.tipo || ''}')">${action}</a>
+      </div>`;
+    faixa.appendChild(card);
+  });
+}
+function goCadastro(url, ebook, tipo) {
+  try { localStorage.setItem("ebook", ebook || ""); localStorage.setItem("tipo", tipo || ""); } catch(_) {}
+  window.open(url, "_blank"); return false;
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const scroller = document.getElementById("destaque");
+  const next = document.getElementById("next");
+  const prev = document.getElementById("prev");
+  if (next && scroller) next.onclick = () => scroller.scrollBy({ left: 400, behavior: "smooth" });
+  if (prev && scroller) prev.onclick = () => scroller.scrollBy({ left: -400, behavior: "smooth" });
+  carregarEbooks().catch(() => {
+    const faixa = document.getElementById("destaque");
+    if (faixa) faixa.innerHTML = "<div style='margin:1rem auto;opacity:.8;'>Em breve novos eBooks por aqui.</div>";
+  });
+});
+</script>
+
+</body>
+</html>
