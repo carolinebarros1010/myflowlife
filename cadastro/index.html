@@ -208,21 +208,21 @@ button:hover {
 
   <div class="success" id="success">Cadastro enviado com sucesso!</div>
 
-  <script>
- document.addEventListener('DOMContentLoaded', () => {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
   const splash = document.getElementById('splash');
   const logo = document.querySelector('.logo');
   const card = document.querySelector('.card');
 
-  // fade-out começa mais cedo
-  setTimeout(() => splash.classList.add('fade-out'), 800);
+  // Inicia o fade-out do splash após 0.6s
+  setTimeout(() => splash.classList.add('fade-out'), 600);
 
-  // termina a transição mais rápido (agora 2.8 s totais)
+  // Remove o splash e exibe o conteúdo após 1.6s
   setTimeout(() => {
     splash.style.display = 'none';
     logo.style.opacity = '1';
     card.classList.add('ready');
-  }, 2800);
+  }, 1600);
 });
 
   // controle de origem e ebook
