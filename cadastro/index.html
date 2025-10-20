@@ -194,7 +194,14 @@ button:hover {
 
   <form id="form" class="card">
     <input type="text" id="nome" name="nome" placeholder="Nome" required pattern="^[A-Za-zÀ-ÿ0-9\s'.-]{2,}$">
-    <input type="email" id="email" name="email" placeholder="Email" required pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$">
+    <input 
+  type="email" 
+  id="email" 
+  name="email" 
+  placeholder="Email" 
+  required 
+  pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$">
+
     <input type="text" id="telefone" name="telefone" placeholder="(11) 98234-7127" required pattern="^[0-9()\\s-]{8,15}$">
     <button type="submit">Continuar</button>
   </form>
