@@ -93,7 +93,7 @@
 <footer>© 2025 MyFlowLife. Todos os direitos reservados.</footer>
 
 <script>
-/* Splash + reveals seguros (não travam se faltar seção) */
+/* Splash + reveals seguros */
 document.addEventListener('DOMContentLoaded', () => {
   const splash = document.getElementById('splash');
   const brand  = document.querySelector('.brand-minimal');
@@ -101,7 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => splash?.classList.add('fade-out'), 800);
   setTimeout(() => { splash?.remove(); if (brand) brand.style.opacity = '1'; }, 1600);
 
-  // ativa reveals somente nos elementos existentes
   ['hero','produtos','video','planos','ebooks'].forEach(id => {
     const el = document.getElementById(id);
     if (el) setTimeout(() => el.classList.add('ready'), 1700);
@@ -134,21 +133,17 @@ async function carregarEbooks(){
     card.className='card';
     card.style.animationDelay = `${0.08*i}s`;
 
-    // capa: aceita caminho absoluto ou relativo
     const capa = eb.capa?.startsWith('http') ? eb.capa : `ebooks/${eb.capa}`;
     const rotulo = (eb.tipo === 'download') ? 'Baixar' : 'Comprar';
 
-    // link: se for download e não começar com http, prefixa /ebooks/
-    let link = eb.link || '#';
-    if(eb.tipo === 'download' && !/^https?:\/\//i.test(link)){
-      link = `ebooks/${link}`;
-    }
+    // link tratado — sem href direto, chamando goCadastro()
+    const destino = eb.link?.startsWith('http') ? eb.link : `ebooks/${eb.link}`;
 
     card.innerHTML = `
       <div class="cover"><img src="${capa}" alt="${eb.nome || ''}" loading="lazy"></div>
       <div class="meta">
         <div class="price"><small>R$</small> ${eb.preco || '0,00'}</div>
-        <a class="cta" href="${link}" target="_blank" rel="noopener">${rotulo}</a>
+        <a class="cta" href="#" onclick="return goCadastro('${destino}','${eb.nome}','${eb.tipo}')">${rotulo}</a>
       </div>`;
     wrap.appendChild(card);
   });
@@ -164,19 +159,15 @@ carregarEbooks();
   prev.addEventListener('click', ()=> scroller.scrollBy({left:-400, behavior:'smooth'}));
   next.addEventListener('click', ()=> scroller.scrollBy({left: 400, behavior:'smooth'}));
 })();
-</script>
- <script>
+
+/* Função goCadastro — conecta com o fluxo da página de cadastro */
 function goCadastro(url, ebook, tipo) {
-  // Guarda informações no localStorage
   localStorage.setItem("ebook", ebook);
   localStorage.setItem("tipo", tipo);
   localStorage.setItem("origem", "myflowlife");
   localStorage.setItem("origemURL", url);
 
-  // Monta o caminho para a página de cadastro
   const cadastroPage = "cadastro/index.html";
-
-  // Redireciona o usuário para o cadastro com parâmetros úteis
   const redirectURL = `${cadastroPage}?ebook=${encodeURIComponent(ebook)}&tipo=${encodeURIComponent(tipo)}&origem=myflowlife&origemURL=${encodeURIComponent(url)}`;
   window.location.href = redirectURL;
 
