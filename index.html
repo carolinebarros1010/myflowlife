@@ -596,72 +596,67 @@ body::before {
 </div>
   
 <!-- ====== EBOOKS ====== -->
+<!-- ====== EBOOKS ====== -->
 <section class="ebooks-section">
   <h2>últimos ebooks publicados</h2>
+
   <div class="carrossel-container">
     <div class="arrow left" id="prev">&#10094;</div>
 
-    <div class="faixa-ebooks" id="destaque">
-      <article class="card">
-        <div class="cover"><img src="./ebooks/capahipopressivos.png" alt="Exercícios Hipopressivos"></div>
-        <div class="meta">
-          <div class="price"><small>R$</small> 19,90</div>
-          <a class="cta" href="#" onclick="return goCadastro('https://pay.hotmart.com/N102180089S','hipopressivos','premium')">Comprar</a>
-        </div>
-      </article>
-
-      <article class="card">
-        <div class="cover"><img src="./ebooks/capafemflow15.png" alt="FemFlow 15 Dias"></div>
-        <div class="meta">
-          <div class="price"><small>R$</small> 39,90</div>
-          <a class="cta" href="#" onclick="return goCadastro('https://pay.hotmart.com/O102103923F','femflow15','premium')">Comprar</a>
-        </div>
-      </article>
-
-      <article class="card">
-        <div class="cover"><img src="./ebooks/capatpmzem.png" alt="Protocolo Respiração Consciente TPM"></div>
-        <div class="meta">
-          <div class="price"><small>R$</small> 0,00</div>
-          <a class="cta" href="#" onclick="return goCadastro('ebooks/downloads/protocolo_tpm_zen.pdf','tpmzen','download')">Baixar</a>
-        </div>
-      </article>
-
-      <article class="card">
-        <div class="cover"><img src="./ebooks/capaaguaequilibrio.png" alt="Guia Essencial Hidratação"></div>
-        <div class="meta">
-          <div class="price"><small>R$</small> 9,90</div>
-          <a class="cta" href="#" onclick="return goCadastro('https://pay.hotmart.com/E102161861P','aguaequilibrio','premium')">Comprar</a>
-        </div>
-      </article>
-
-      <article class="card">
-        <div class="cover"><img src="./ebooks/capafemflow4semanas.png" alt="FemFlow 4 Semanas"></div>
-        <div class="meta">
-          <div class="price"><small>R$</small> 99,90</div>
-          <a class="cta" href="#" onclick="return goCadastro('https://pay.hotmart.com/T102397575W','femflow4','premium')">Comprar</a>
-        </div>
-      </article>
-
-      <article class="card">
-        <div class="cover"><img src="./ebooks/capaefeitoEPOC.png" alt="Efeito EPOC"></div>
-        <div class="meta">
-          <div class="price"><small>R$</small> 0,00</div>
-          <a class="cta" href="#" onclick="return goCadastro('ebooks/downloads/efeito_epoc.pdf','epoc','download')">Baixar</a>
-        </div>
-      </article>
-
-      <article class="card">
-        <div class="cover"><img src="./ebooks/placeholder.png" alt="Nutrição alinhada com o ciclo hormonal"></div>
-        <div class="meta">
-          <div class="price"><small>R$</small> 0,00</div>
-          <a class="cta" href="#" onclick="return goCadastro('ebooks/downloads/nutricao_ciclo_hormonal.pdf','nutricao','download')">Baixar</a>
-        </div>
-      </article>
-    </div>
+    <div class="faixa-ebooks" id="destaque"></div>
 
     <div class="arrow right" id="next">&#10095;</div>
   </div>
 </section>
+
+<script>
+  // lista de eBooks disponíveis
+  const ebooks = [
+    { capa: "capahipopressivos.png", nome: "Exercícios Hipopressivos", preco: "19,90", link: "https://pay.hotmart.com/N102180089S", tipo: "premium" },
+    { capa: "capafemflow15.png", nome: "FemFlow 15 Dias", preco: "39,90", link: "https://pay.hotmart.com/O102103923F", tipo: "premium" },
+    { capa: "capatpmzem.png", nome: "Protocolo Respiração Consciente TPM", preco: "0,00", link: "ebooks/downloads/protocolo_tpm_zen.pdf", tipo: "download" },
+    { capa: "capaaguaequilibrio.png", nome: "Guia Essencial Hidratação", preco: "9,90", link: "https://pay.hotmart.com/E102161861P", tipo: "premium" },
+    { capa: "capafemflow4semanas.png", nome: "FemFlow 4 Semanas", preco: "99,90", link: "https://pay.hotmart.com/T102397575W", tipo: "premium" },
+    { capa: "capaefeitoEPOC.png", nome: "Efeito EPOC", preco: "0,00", link: "ebooks/downloads/efeito_epoc.pdf", tipo: "download" },
+    { capa: "placeholder.png", nome: "Nutrição alinhada com o ciclo hormonal", preco: "0,00", link: "ebooks/downloads/nutricao_ciclo_hormonal.pdf", tipo: "download" }
+  ];
+
+  const faixa = document.getElementById("destaque");
+
+  // gera os cards automaticamente
+  ebooks.forEach((ebook, index) => {
+    const article = document.createElement("article");
+    article.classList.add("card");
+    article.style.animationDelay = `${0.1 * index}s`;
+
+    article.innerHTML = `
+      <div class="cover"><img src="./ebooks/${ebook.capa}" alt="${ebook.nome}"></div>
+      <div class="meta">
+        <div class="price"><small>R$</small> ${ebook.preco}</div>
+        <a class="cta" href="#" onclick="return goCadastro('${ebook.link}','${ebook.nome}','${ebook.tipo}')">
+          ${ebook.tipo === "download" ? "Baixar" : "Comprar"}
+        </a>
+      </div>
+    `;
+
+    faixa.appendChild(article);
+  });
+
+  // controles de navegação
+  document.getElementById("next").onclick = () =>
+    faixa.scrollBy({ left: 400, behavior: "smooth" });
+  document.getElementById("prev").onclick = () =>
+    faixa.scrollBy({ left: -400, behavior: "smooth" });
+
+  // função para abrir e registrar o acesso
+  function goCadastro(url, ebook, tipo) {
+    localStorage.setItem("ebook", ebook);
+    localStorage.setItem("tipo", tipo);
+    window.open(url, "_blank");
+    return false;
+  }
+</script>
+
 
 <script>
   const faixa = document.querySelector('.faixa-ebooks');
@@ -675,7 +670,6 @@ body::before {
     return false;
   }
 </script>
-
 
 
 <script>
