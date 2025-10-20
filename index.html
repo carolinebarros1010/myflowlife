@@ -165,5 +165,23 @@ carregarEbooks();
   next.addEventListener('click', ()=> scroller.scrollBy({left: 400, behavior:'smooth'}));
 })();
 </script>
+ <script>
+function goCadastro(url, ebook, tipo) {
+  // Guarda informações no localStorage
+  localStorage.setItem("ebook", ebook);
+  localStorage.setItem("tipo", tipo);
+  localStorage.setItem("origem", "myflowlife");
+  localStorage.setItem("origemURL", url);
+
+  // Monta o caminho para a página de cadastro
+  const cadastroPage = "cadastro/index.html";
+
+  // Redireciona o usuário para o cadastro com parâmetros úteis
+  const redirectURL = `${cadastroPage}?ebook=${encodeURIComponent(ebook)}&tipo=${encodeURIComponent(tipo)}&origem=myflowlife&origemURL=${encodeURIComponent(url)}`;
+  window.location.href = redirectURL;
+
+  return false;
+}
+</script>
 </body>
 </html>
