@@ -750,7 +750,12 @@ body::before {
 
 <script>
 async function carregarEbooks() {
-  const caminhos = ["ebooks/ebooks.json", "./ebooks/ebooks.json", "/ebooks/ebooks.json"];
+  const caminhos = [
+  "ebooks/ebooks.json",
+  "./ebooks/ebooks.json",
+  "/ebooks/ebooks.json",
+  "https://raw.githubusercontent.com/carolinebarros1010/myflowlife/myflowlife.com.br/ebooks/ebooks.json"
+];
   let ebooks = null;
   for (const caminho of caminhos) {
     try {
