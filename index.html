@@ -165,7 +165,16 @@ section.ready {
 .video-section.ready {
   opacity: 1;
 }
+section {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 1s ease 1.5s, transform 1s ease 1.5s;
+}
 
+section.ready {
+  opacity: 1;
+  transform: translateY(0);
+}
 .video-section video {
   width: 100%;
   max-width: 360px;
