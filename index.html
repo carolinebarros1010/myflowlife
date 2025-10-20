@@ -1,271 +1,175 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>MyFlowLife | Potência Sustentável</title>
-<meta name="description" content="MyFlowLife: potência sustentável. Métodos FemFlow e MaleFlow, planos e eBooks com design moderno e carrossel estilo Netflix.">
+
+<!-- Fonte de texto (corpo). Títulos usam Helvetica/Helvetica Rounded local -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
-:root {
-  --cor1: #9CBCC1;
-  --cor2: #A3C6C7;
-  --cor3: #F8F8F8;
-  --texto: #335953;
-  --vidro: rgba(255,255,255,0.6);
-  --borda: rgba(0,0,0,0.12);
+:root{
+  --bg1:#9CBCC1; /* teal suave */
+  --bg2:#A3C6C7;
+  --bg3:#F8F8F8;
+  --text:#335953;
+  --glass: rgba(255,255,255,.65);
+  --line: rgba(0,0,0,.10);
+  --shadow: 0 10px 24px rgba(0,0,0,.08), 0 4px 10px rgba(0,0,0,.06);
+  --shadow-deep: 0 20px 50px rgba(0,0,0,.12), 0 8px 20px rgba(0,0,0,.08);
 }
 
-/* ===== BASE ===== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  color: var(--texto);
-  background: linear-gradient(135deg, var(--cor1), var(--cor2), var(--cor3));
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+body{
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+  background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
   background-size: 400% 400%;
   animation: gradientShift 20s ease infinite;
-  overflow-x: hidden;
+  overflow-x:hidden;
 }
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-/* camadas de luz suaves */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(800px 400px at 20% 10%, rgba(255,255,255,0.25), transparent 60%),
-              radial-gradient(900px 500px at 80% 90%, rgba(255,255,255,0.18), transparent 65%);
-  pointer-events: none;
-  z-index: 0;
-  animation: bgFloat 22s infinite alternate ease-in-out;
-}
-@keyframes bgFloat { 0% { transform: translateY(0) } 100% { transform: translateY(-16px) }}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-/* ===== SPLASH ===== */
-#splash {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: #f8f8f8;
-  font-family: 'Helvetica Rounded', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  z-index: 999;
-  transition: opacity 2.2s ease, transform 2.2s ease;
+body::before{
+  content:'';
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(800px 400px at 20% -10%, rgba(255,255,255,.35), transparent 60%),
+    radial-gradient(700px 350px at 80% 110%, rgba(255,255,255,.20), transparent 60%);
+  mix-blend-mode: screen;
 }
-#splash.fade-out {
-  opacity: 0;
-  transform: scale(1.05) translateY(-10px);
-  pointer-events: none;
-}
-#splash h1 { font-size: 2.4rem; margin-bottom: .35rem; letter-spacing: 1.2px; color:#000; }
-#splash h2 { font-size: 1.05rem; letter-spacing: .6px; color:#1e1e1e; opacity:.9; }
 
-/* ===== HEADER (brand) ===== */
-header {
-  text-align: center;
-  padding: 2.2rem 1rem 1rem;
-  font-family: 'Helvetica Rounded', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  opacity: 0;
-  transition: opacity 1s ease;
-  position: relative;
-  z-index: 1;
+/* Splash */
+#splash{
+  position:fixed; inset:0; z-index:999;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:#f8f8f8;
+  font-family:'Helvetica Rounded Bold','Helvetica Rounded','Helvetica Neue',Helvetica,Arial,sans-serif;
+  text-transform:uppercase; font-weight:bold; color:#111;
+  transition: opacity 1.6s ease, transform 1.6s ease;
 }
-header.ready { opacity: 1; }
-header h1 { font-size: 2.4rem; letter-spacing: 1px; text-transform: capitalize; }
-header p  { font-size: 1.05rem; margin-top: .25rem; opacity: .9; }
+#splash.fade-out{ opacity:0; transform: scale(1.03) translateY(-8px); pointer-events:none; }
+#splash h1{letter-spacing:1.5px; margin:.2rem 0; font-size:2.2rem}
+#splash h2{letter-spacing:.8px; margin:0; font-size:1.05rem}
 
-/* ===== SEÇÕES GENÉRICAS ===== */
-section {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: stretch;
-  gap: 2rem;
-  padding: 2rem 1.2rem;
-  opacity: 0;
-  transition: opacity 1s ease;
-  position: relative;
-  z-index: 1;
+/* Header minimal */
+.topbar{
+  position:sticky; top:0; z-index:40;
+  background: linear-gradient(to bottom, rgba(255,255,255,.96), rgba(255,255,255,.88));
+  border-bottom:1px solid var(--line);
+  backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
 }
-section.ready { opacity: 1; }
-
-/* ===== CARDS PRODUTOS ===== */
-.card {
-  background: var(--vidro);
-  border: 1px solid var(--borda);
-  backdrop-filter: blur(12px) saturate(140%);
-  border-radius: 20px;
-  padding: 2rem 1.5rem;
-  width: 100%;
-  max-width: 420px;
-  min-height: 420px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
-  transition: transform .3s ease, box-shadow .3s ease;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.12), inset 0 0 28px rgba(255,255,255,0.12);
-  cursor: pointer;
+.topbar-inner{
+  max-width:1200px; margin:0 auto; padding:.85rem 1rem;
+  display:flex; align-items:center; justify-content:space-between;
 }
-.card img {
-  width: 220px; height: 220px; object-fit: contain;
-  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.12));
-  transition: transform .35s ease, filter .35s ease;
+.brand-minimal{
+  font-family:'Helvetica Rounded Bold','Helvetica Rounded','Helvetica Neue',Helvetica,Arial,sans-serif;
+  font-weight:bold; color:#000; letter-spacing:1px; text-transform:capitalize;
+  font-size:1.15rem; opacity:0; transition:opacity .6s ease;
 }
-.card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
-.card:hover img { transform: scale(1.05); filter: drop-shadow(0 12px 26px rgba(0,0,0,0.18)); }
-
-/* ===== VIDEO ===== */
-.video-section {
-  text-align: center;
-  margin: 3.2rem auto;
-  opacity: 0;
-  transition: opacity 1s ease;
-}
-.video-section.ready { opacity: 1; }
-.video-section h2 {
-  font-family: 'Helvetica Rounded', Helvetica, Arial, sans-serif;
-  font-size: 1.6rem;
-  margin-bottom: 1.6rem;
-  background: linear-gradient(90deg, #335953, #cc6a5a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.video-section video {
-  width: 100%; max-width: 360px; aspect-ratio: 9/16;
-  border-radius: 20px; object-fit: cover;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-  transition: transform .45s ease, box-shadow .45s ease;
-}
-.video-section video:hover { transform: scale(1.02); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
-
-/* ===== PLANOS ===== */
-.planos { gap: 2rem; margin: 3rem 0; }
-.plano {
-  background: var(--vidro);
-  border: 1px solid var(--borda);
-  border-radius: 16px;
-  padding: 2rem;
-  width: 280px;
-  text-align: center;
-  backdrop-filter: blur(10px);
-  transition: transform .3s ease, box-shadow .3s ease;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.1);
-}
-.plano:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,0.15); }
-.plano h3 { margin: 0 0 .5rem 0; }
-.plano p { margin: 0.5rem 0 1.2rem; }
-.plano button {
-  background: rgba(255,255,255,0.35);
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 12px;
-  padding: .8rem 1.4rem;
-  font-weight: 600;
-  color: var(--texto);
-  cursor: pointer;
-  transition: all .3s ease;
-}
-.plano button:hover { background:#fff; transform: translateY(-2px); box-shadow:0 8px 22px rgba(0,0,0,0.12); }
-
-/* ===== EBOOKS (Netflix Style) ===== */
-.ebooks-section {
-  margin: 4rem auto 5rem;
-  max-width: 1200px;
-  text-align: center;
-  opacity: 0;
-  transition: opacity 1s ease;
-}
-.ebooks-section.ready { opacity: 1; }
-.ebooks-section h2 {
-  font-family: 'Helvetica Rounded', Helvetica, Arial, sans-serif;
-  font-size: 1.6rem;
-  margin-bottom: 1.4rem;
-  background: linear-gradient(90deg, #335953, #cc6a5a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.ebooks-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-.scroller {
-  display: flex; gap: 1rem;
-  overflow-x: auto; scroll-behavior: smooth;
-  padding: 1rem; width: 100%;
-}
-.scroller::-webkit-scrollbar { height: 8px; }
-.scroller::-webkit-scrollbar-thumb { background: rgba(0,0,0,.08); border-radius: 10px; }
-
-.card-ebook {
-  flex: 0 0 auto;
-  width: 190px;
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(255,255,255,0.68);
-  border: 1px solid rgba(0,0,0,0.08);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  transition: transform .3s ease, box-shadow .3s ease;
-}
-.card-ebook:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 32px rgba(0,0,0,0.14); }
-.card-ebook .cover { width:100%; aspect-ratio:3/4; overflow:hidden; background:#fff; }
-.card-ebook .cover img { width:100%; height:100%; object-fit:cover; transition: transform .35s ease; }
-.card-ebook:hover .cover img { transform: scale(1.05); }
-.card-ebook .meta { display:flex; justify-content:space-between; align-items:center; padding:.6rem .8rem .8rem; }
-.card-ebook .meta .price { font-weight:600; opacity:.9; }
-.card-ebook .meta .price small { font-weight:400; opacity:.75; }
-
-.cta {
-  text-decoration:none; color: var(--texto);
-  background: rgba(255,255,255,0.5);
-  border: 1px solid rgba(0,0,0,0.1);
-  padding: .4rem .8rem; border-radius: 10px;
-  font-weight: 600; font-size: .85rem;
+.actions{display:flex; gap:.5rem}
+.hbtn{
+  text-decoration:none; color:var(--text);
+  background:var(--glass); border:1px solid var(--line);
+  border-radius:999px; padding:.5rem .8rem; box-shadow: var(--shadow);
   transition: all .25s ease;
 }
-.cta:hover { background:#fff; transform: translateY(-1px); }
+.hbtn:hover{transform:translateY(-1px); box-shadow:var(--shadow-deep); background:#fff}
 
-/* ===== SETAS ===== */
-.arrow {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  font-size: 2rem; background: rgba(255,255,255,0.6);
-  border-radius: 50%; width: 42px; height: 42px;
-  display: grid; place-items: center; cursor: pointer; user-select: none;
-  transition: all .25s ease; backdrop-filter: blur(10px);
-  border: 1px solid rgba(0,0,0,0.08);
-}
-.arrow:hover { background: rgba(255,255,255,0.85); }
-.arrow.left { left: 8px; }
-.arrow.right { right: 8px; }
+/* Seções genéricas + reveal */
+.section{max-width:1200px; margin:2.2rem auto; padding:0 1rem; position:relative}
+.reveal{opacity:0; transform: translateY(14px); transition: opacity .9s ease, transform .9s ease}
+.reveal.ready{opacity:1; transform:none}
 
-/* ===== BOTÕES FLUTUANTES ===== */
-.btn-newsletter, .btn-flutuante {
-  position: fixed; bottom: 24px; z-index: 999;
-  font-family: 'Inter', sans-serif; font-size: .9rem; text-transform: lowercase;
-  border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.12);
-  color: #335953; backdrop-filter: blur(10px);
-  border-radius: 100px; padding: .55rem 1.1rem;
-  transition: all .35s ease; opacity: .9; text-decoration:none;
+/* FemFlow / MaleFlow cards */
+.products{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:22px}
+.pcard{
+  background:var(--glass); border:1px solid var(--line); border-radius:20px;
+  padding:1.4rem; box-shadow:var(--shadow); text-align:center; cursor:pointer;
+  transition:transform .25s ease, box-shadow .25s ease;
+  min-height:320px; display:flex; flex-direction:column; justify-content:center; align-items:center;
 }
-.btn-newsletter:hover, .btn-flutuante:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
-.btn-newsletter { right: 24px; }
-.btn-flutuante { right: 130px; }
-@media (max-width: 768px) {
-  .btn-newsletter, .btn-flutuante { left: 50%; transform: translateX(-50%); }
-  .btn-newsletter { bottom: 70px; right: auto; }
+.pcard:hover{transform:translateY(-4px); box-shadow:var(--shadow-deep)}
+.pcard img{width:220px; height:220px; object-fit:contain; filter: drop-shadow(0 8px 18px rgba(0,0,0,.12));}
+
+/* Video */
+.video-wrap{text-align:center}
+.video-wrap h2{margin:0 0 1rem; font-family:'Helvetica Rounded','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:1.4rem}
+.video-player{
+  width:100%; max-width:360px; aspect-ratio:9/16; border-radius:20px; object-fit:cover;
+  box-shadow:0 10px 30px rgba(0,0,0,.22);
 }
 
-/* ===== FOOTER ===== */
-footer {
-  text-align: center; padding: 1rem; font-size: .85rem; color: rgba(0,0,0,0.6);
+/* Planos */
+.plans{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px}
+.plan{
+  background:var(--glass); border:1px solid var(--line); border-radius:16px; padding:1.4rem;
+  text-align:center; box-shadow:var(--shadow); transition:transform .25s ease, box-shadow .25s ease;
+}
+.plan:hover{transform:translateY(-4px); box-shadow:var(--shadow-deep)}
+.plan h3{margin:.2rem 0 .4rem; font-size:1.05rem}
+.plan p{margin:.1rem 0 .9rem}
+.plan .btn{ @apply .hbtn; } /* (só semântico; usa .hbtn) */
+
+/* EBOOKS – estilo Netflix */
+.ebooks{ margin:3rem auto 4rem; }
+.ebooks h2{
+  font-family:'Helvetica Rounded','Helvetica Neue',Helvetica,Arial,sans-serif;
+  font-size:1.4rem; letter-spacing:.8px; margin:0 0 1rem;
+  background: linear-gradient(90deg, #335953, #cc6a5a);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.row{
+  position:relative; padding:0 2.2rem;
+}
+.scroller{
+  display:flex; gap:14px; overflow-x:auto; scroll-behavior:smooth; padding: .2rem 0 1rem;
+}
+.scroller::-webkit-scrollbar{height:8px}
+.scroller::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1); border-radius:10px}
+
+.arrow{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:38px; height:38px; border-radius:50%; display:grid; place-items:center;
+  background:var(--glass); border:1px solid var(--line); cursor:pointer; user-select:none;
+  box-shadow: var(--shadow); transition: all .2s ease; opacity:0;
+}
+.row:hover .arrow{opacity:1}
+.arrow:hover{ transform: translateY(-50%) scale(1.06); background:#fff }
+.arrow.left{left:6px} .arrow.right{right:6px}
+
+.card{
+  width:200px; flex:0 0 auto; border-radius:16px; overflow:hidden;
+  background:#fff; box-shadow:var(--shadow);
+  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+  opacity:0; transform: translateY(8px); animation: fadeCard .8s ease forwards;
+}
+@keyframes fadeCard{to{opacity:1; transform:translateY(0)}}
+.cover{width:100%; aspect-ratio:3/4; overflow:hidden}
+.cover img{width:100%; height:100%; object-fit:cover; filter:brightness(.99) contrast(1.02); transition:transform .35s ease}
+.card:hover .cover img{transform:scale(1.04)}
+.meta{display:flex; align-items:center; justify-content:space-between; padding:.7rem .8rem .85rem}
+.price{font-weight:600; opacity:.9}
+.price small{font-weight:400; opacity:.8}
+.cta{
+  text-decoration:none; color:var(--text);
+  background:var(--glass); border:1px solid var(--line);
+  padding:.4rem .75rem; border-radius:10px; box-shadow:var(--shadow);
+  transition: all .2s ease;
+}
+.cta:hover{ background:#fff; transform:translateY(-1px); box-shadow:var(--shadow-deep) }
+
+footer{ text-align:center; padding:1.2rem; font-size:.85rem; color:rgba(0,0,0,.6) }
+
+/* Responsivo */
+@media (max-width:920px){ .card{width:180px} .pcard img{width:200px;height:200px} }
+@media (max-width:600px){
+  .brand-minimal{font-size:1rem}
+  .card{width:160px}
+  .arrow{display:none}
 }
 </style>
 </head>
@@ -277,147 +181,148 @@ footer {
   <h2>Potência Sustentável</h2>
 </div>
 
-<header id="header">
-  <h1>MyFlowLife</h1>
-  <p>Potência Sustentável • Conecte corpo, mente e performance</p>
-</header>
-
-<!-- Produtos -->
-<section id="produtos">
-  <div class="card" onclick="window.open('https://www.femflow.com.br','_blank')" aria-label="Abrir FemFlow">
-    <img src="assets/logo-femflow.png" alt="FemFlow">
-    <p>O método feminino baseado no ciclo hormonal: treinos, respiração e equilíbrio.</p>
+<!-- Header -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand-minimal">MyFlowLife</div>
+    <div class="actions">
+      <a class="hbtn" href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" target="_blank" rel="noopener">newsletter</a>
+      <a class="hbtn" href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" target="_blank" rel="noopener">começar</a>
+    </div>
   </div>
-  <div class="card" onclick="window.open('https://www.maleflow.com.br','_blank')" aria-label="Abrir MaleFlow">
-    <img src="assets/logo-maleflow.png" alt="MaleFlow">
-    <p>A pirâmide da potência masculina: consistência, intensidade e evolução.</p>
+</div>
+
+<!-- FemFlow / MaleFlow -->
+<section id="produtos" class="section reveal">
+  <div class="products">
+    <div class="pcard" onclick="window.open('https://www.femflow.com.br','_blank')" role="link" aria-label="Ir para FemFlow">
+      <img src="assets/logo-femflow.png" alt="FemFlow" loading="lazy">
+      <p>Treinos e respiração guiados pelo ciclo hormonal — equilíbrio e performance.</p>
+    </div>
+    <div class="pcard" onclick="window.open('https://www.maleflow.com.br','_blank')" role="link" aria-label="Ir para MaleFlow">
+      <img src="assets/logo-maleflow.png" alt="MaleFlow" loading="lazy">
+      <p>Consistência, intensidade e evolução: a pirâmide da potência masculina.</p>
+    </div>
   </div>
 </section>
 
 <!-- Vídeo -->
-<div class="video-section" id="video">
-  <h2>dicas e inspiração</h2>
-  <video autoplay muted loop playsinline controls poster="videos/myflowlifetrailer-thumb.jpg">
-    <source src="videos/myflowlifetrailer.webm" type="video/webm">
-    <source src="videos/myflowlifetrailer.mp4" type="video/mp4">
-    Seu navegador não suporta a reprodução de vídeos.
+<section id="video" class="section reveal video-wrap">
+  <h2>Dicas e inspiração</h2>
+  <video class="video-player" autoplay muted loop playsinline controls
+         poster="assets/myflowlifetrailer-thumb.jpg">
+    <source src="assets/myflowlifetrailer.webm" type="video/webm">
+    <source src="assets/myflowlifetrailer.mp4" type="video/mp4">
   </video>
-</div>
+</section>
 
 <!-- Planos -->
-<div class="planos" id="planos">
-  <div class="plano">
-    <h3>Plano gratuito</h3>
-    <p>7 dias de acesso livre ao método MyFlowLife.</p>
-    <button onclick="window.open('https://automacao.chatideal.com.br/meu-typebot-z4uzbgk','_blank')">começar agora</button>
-  </div>
-  <div class="plano">
-    <h3>Plano strong</h3>
-    <p>App + WhatsApp, +300 vídeos e treinos para até 2 modalidades.</p>
-    <p><strong>R$ 159,90</strong></p>
-    <button onclick="window.open('https://automacao.chatideal.com.br/meu-typebot-z4uzbgk','_blank')">assinar</button>
-  </div>
-  <div class="plano">
-    <h3>Plano premium</h3>
-    <p>Mentoria com 3+ modalidades e suporte direto.</p>
-    <p><strong>R$ 259,90</strong></p>
-    <button onclick="window.open('https://automacao.chatideal.com.br/meu-typebot-z4uzbgk','_blank')">assinar premium</button>
-  </div>
-</div>
-
-<!-- Ebooks -->
-<section class="ebooks-section">
-  <h2>últimos ebooks publicados</h2>
-  <div class="ebooks-row">
-    <div class="arrow left" id="prev" aria-label="Anterior">&#10094;</div>
-    <div class="scroller" id="destaque" aria-live="polite"></div>
-    <div class="arrow right" id="next" aria-label="Próximo">&#10095;</div>
+<section id="planos" class="section reveal">
+  <div class="plans">
+    <div class="plan">
+      <h3>Plano gratuito</h3>
+      <p>7 dias para sentir o fluxo.</p>
+      <a class="hbtn" href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" target="_blank" rel="noopener">começar agora</a>
+    </div>
+    <div class="plan">
+      <h3>Plano strong</h3>
+      <p>App + WhatsApp, 300+ vídeos e periodização para até 2 modalidades.</p>
+      <p><strong>R$ 159,90</strong></p>
+      <a class="hbtn" href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" target="_blank" rel="noopener">assinar</a>
+    </div>
+    <div class="plan">
+      <h3>Plano premium</h3>
+      <p>Mentoria 3+ modalidades, treinos híbridos, suporte direto.</p>
+      <p><strong>R$ 259,90</strong></p>
+      <a class="hbtn" href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" target="_blank" rel="noopener">assinar premium</a>
+    </div>
   </div>
 </section>
 
-<!-- Botões fixos -->
-<a href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" class="btn-flutuante" target="_blank" rel="noopener">começar</a>
-<a href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" class="btn-newsletter" target="_blank" rel="noopener">newsletter</a>
+<!-- Ebooks (Netflix) -->
+<section id="ebooks" class="section reveal ebooks">
+  <h2>últimos ebooks publicados</h2>
+  <div class="row">
+    <div class="arrow left" id="prev">&#10094;</div>
+    <div class="scroller" id="ebooksScroller"></div>
+    <div class="arrow right" id="next">&#10095;</div>
+  </div>
+</section>
 
 <footer>© 2025 MyFlowLife. Todos os direitos reservados.</footer>
 
-<!-- ===== Scripts ===== -->
 <script>
-// Splash único e tolerante
+/* Splash + reveals seguros (não travam se faltar seção) */
 document.addEventListener('DOMContentLoaded', () => {
   const splash = document.getElementById('splash');
-  const sections = ['header','produtos','video','planos','.ebooks-section']
-    .map(sel => document.querySelector(sel));
-  setTimeout(() => splash.classList.add('fade-out'), 800);
-  setTimeout(() => {
-    splash.style.display = 'none';
-    sections.forEach(el => el && el.classList.add('ready'));
-  }, 2200);
-});
-</script>
+  const brand  = document.querySelector('.brand-minimal');
 
-<script>
-// Carregamento dinâmico de eBooks (com fallback)
-async function carregarEbooks() {
-  const caminhos = [
-    "ebooks/ebooks.json",
-    "./ebooks/ebooks.json",
-    "/ebooks/ebooks.json",
-    "https://raw.githubusercontent.com/carolinebarros1010/myflowlife/myflowlife.com.br/ebooks/ebooks.json"
+  setTimeout(() => splash?.classList.add('fade-out'), 800);
+  setTimeout(() => { splash?.remove(); if (brand) brand.style.opacity = '1'; }, 1600);
+
+  // ativa reveals somente nos elementos existentes
+  ['produtos','video','planos','ebooks'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) setTimeout(() => el.classList.add('ready'), 1700);
+  });
+});
+
+/* Carregar eBooks com fallback para RAW do GitHub */
+async function carregarEbooks(){
+  const urls = [
+    'ebooks/ebooks.json',
+    './ebooks/ebooks.json',
+    '/ebooks/ebooks.json',
+    'https://raw.githubusercontent.com/carolinebarros1010/myflowlife/myflowlife.com.br/ebooks/ebooks.json'
   ];
-  let ebooks = null;
-  for (const caminho of caminhos) {
-    try {
-      const resposta = await fetch(caminho, { cache: "no-store" });
-      if (resposta.ok) {
-        ebooks = await resposta.json();
-        console.log("✅ eBooks carregados de:", caminho);
-        break;
-      }
-    } catch (e) {
-      console.warn("Falha ao tentar:", caminho);
-    }
+  let data=null;
+  for(const u of urls){
+    try{
+      const r = await fetch(u, {cache:'no-store'});
+      if(r.ok){ data = await r.json(); break; }
+    }catch(e){}
   }
-  const faixa = document.getElementById("destaque");
-  faixa.innerHTML = "";
-  if (!ebooks || !Array.isArray(ebooks) || !ebooks.length) {
-    const aviso = document.createElement('div');
-    aviso.style.cssText = "margin: 1rem auto; opacity:.8;";
-    aviso.textContent = "Em breve novos eBooks por aqui.";
-    faixa.appendChild(aviso);
-    return;
-  }
-  ebooks.forEach((ebook) => {
-    const card = document.createElement("article");
-    card.classList.add("card-ebook");
-    const capaSrc = (ebook.capa && ebook.capa.startsWith("http")) ? ebook.capa : `ebooks/${ebook.capa}`;
-    const action = ebook.tipo === "download" ? "Baixar" : "Comprar";
-    const link = ebook.tipo === "download" ? (ebook.link.startsWith("http") ? ebook.link : `ebooks/${ebook.link}`) : ebook.link;
-    card.innerHTML = `
-      <div class="cover"><img src="${capaSrc}" alt="${ebook.nome || 'eBook'}"></div>
-      <div class="meta">
-        <span class="price"><small>R$</small> ${ebook.preco || '0,00'}</span>
-        <a class="cta" href="#" onclick="return goCadastro('${link}','${ebook.nome || ''}','${ebook.tipo || ''}')">${action}</a>
-      </div>`;
-    faixa.appendChild(card);
-  });
-}
-function goCadastro(url, ebook, tipo) {
-  try { localStorage.setItem("ebook", ebook || ""); localStorage.setItem("tipo", tipo || ""); } catch(_) {}
-  window.open(url, "_blank"); return false;
-}
-document.addEventListener("DOMContentLoaded", () => {
-  const scroller = document.getElementById("destaque");
-  const next = document.getElementById("next");
-  const prev = document.getElementById("prev");
-  if (next && scroller) next.onclick = () => scroller.scrollBy({ left: 400, behavior: "smooth" });
-  if (prev && scroller) prev.onclick = () => scroller.scrollBy({ left: -400, behavior: "smooth" });
-  carregarEbooks().catch(() => {
-    const faixa = document.getElementById("destaque");
-    if (faixa) faixa.innerHTML = "<div style='margin:1rem auto;opacity:.8;'>Em breve novos eBooks por aqui.</div>";
-  });
-});
-</script>
+  if(!data){ console.warn('ebooks.json não encontrado'); return; }
 
+  const wrap = document.getElementById('ebooksScroller');
+  if(!wrap) return;
+  wrap.innerHTML='';
+
+  data.forEach((eb,i)=>{
+    const card = document.createElement('article');
+    card.className='card';
+    card.style.animationDelay = `${0.08*i}s`;
+
+    // capa: aceita caminho absoluto ou relativo
+    const capa = eb.capa?.startsWith('http') ? eb.capa : `ebooks/${eb.capa}`;
+    const rotulo = (eb.tipo === 'download') ? 'Baixar' : 'Comprar';
+
+    // link: se for download e não começar com http, prefixa /ebooks/
+    let link = eb.link || '#';
+    if(eb.tipo === 'download' && !/^https?:\/\//i.test(link)){
+      link = `ebooks/${link}`;
+    }
+
+    card.innerHTML = `
+      <div class="cover"><img src="${capa}" alt="${eb.nome || ''}" loading="lazy"></div>
+      <div class="meta">
+        <div class="price"><small>R$</small> ${eb.preco || '0,00'}</div>
+        <a class="cta" href="${link}" target="_blank" rel="noopener">${rotulo}</a>
+      </div>`;
+    wrap.appendChild(card);
+  });
+}
+carregarEbooks();
+
+/* Controles do carrossel */
+(function(){
+  const scroller = document.getElementById('ebooksScroller');
+  const prev = document.getElementById('prev');
+  const next = document.getElementById('next');
+  if(!scroller || !prev || !next) return;
+  prev.addEventListener('click', ()=> scroller.scrollBy({left:-400, behavior:'smooth'}));
+  next.addEventListener('click', ()=> scroller.scrollBy({left: 400, behavior:'smooth'}));
+})();
+</script>
 </body>
 </html>
