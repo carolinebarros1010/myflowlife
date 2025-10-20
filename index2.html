@@ -273,11 +273,139 @@ body::before {
   0% { transform: translateY(0) scale(1); }
   100% { transform: translateY(-20px) scale(1.03); }
 }
+/* ===== BOTÃO FIXO MINIMALISTA ===== */
+.btn-newsletter,
+.btn-flutuante {
+  position: fixed;
+  z-index: 999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.8px;
+  font-weight: 500;
+  text-transform: lowercase;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.12);
+  color: #335953;
+  backdrop-filter: blur(10px);
+  border-radius: 100px;
+  padding: 0.55rem 1.1rem;
+  transition: all 0.35s ease;
+  opacity: 0.85;
+}
+
+/* Newsletter — canto inferior direito */
+.btn-newsletter {
+  bottom: 24px;
+  right: 24px;
+}
+
+/* Hover — leve brilho */
+.btn-newsletter:hover,
+.btn-flutuante:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.5);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* Botão flutuante mobile — central */
+.btn-flutuante {
+  display: none;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.15);
+  color: #335953;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+/* Responsivo: mobile exibe o botão flutuante */
+@media (max-width: 768px) {
+  .btn-flutuante {
+    display: inline-flex;
+  }
+  .btn-newsletter {
+    bottom: 72px;
+    right: 20px;
+  }
+/* ===== BOTÃO FIXO MINIMALISTA ===== */
+.btn-newsletter,
+.btn-flutuante {
+  position: fixed;
+  z-index: 999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.8px;
+  font-weight: 500;
+  text-transform: lowercase;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.12);
+  color: #335953;
+  backdrop-filter: blur(10px);
+  border-radius: 100px;
+  padding: 0.55rem 1.1rem;
+  transition: all 0.35s ease;
+  opacity: 0.85;
+}
+
+/* Newsletter — canto inferior direito */
+.btn-newsletter {
+  bottom: 24px;
+  right: 24px;
+}
+
+/* Hover — leve brilho */
+.btn-newsletter:hover,
+.btn-flutuante:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.5);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* Botão flutuante mobile — central */
+.btn-flutuante {
+  display: none;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.15);
+  color: #335953;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+/* Responsivo: mobile exibe o botão flutuante */
+@media (max-width: 768px) {
+  .btn-flutuante {
+    display: inline-flex;
+  }
+  .btn-newsletter {
+    bottom: 72px;
+    right: 20px;
+  }
+}
+
 
 </style>
 </head>
-
 <body>
+  <div class="brand-minimal">
+  MyFlowLife
+</div>
+
+<a href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" 
+   class="btn-newsletter" target="_blank">
+  newsletter
+</a>
+
+<a href="https://automacao.chatideal.com.br/meu-typebot-z4uzbgk" 
+   class="btn-flutuante" target="_blank">
+  começar
+</a>
+
+
 <div id="splash">
   <h1>MyFlowLife</h1>
   <h2>Potência Sustentável</h2>
@@ -356,7 +484,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 1800);
 });
 </script>
+  
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const splash = document.getElementById('splash');
+  const floatButtons = document.querySelectorAll('.btn-newsletter, .btn-flutuante');
+  const brand = document.querySelector('.brand-minimal');
+
+  // Esconde tudo até o splash terminar
+  floatButtons.forEach(btn => btn.style.opacity = '0');
+  brand.style.opacity = '0';
+
+  // Fade-out do splash
+  setTimeout(() => splash.classList.add('fade-out'), 800);
+
+  // Exibe os elementos gradualmente após o splash
+  setTimeout(() => {
+    splash.style.display = 'none';
+    floatButtons.forEach(btn => btn.style.opacity = '0.9');
+    brand.style.opacity = '0.9';
+  }, 1800);
+});
+</script>
 
 
 
