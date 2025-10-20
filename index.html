@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => { splash?.remove(); if (brand) brand.style.opacity = '1'; }, 1600);
 
   // ativa reveals somente nos elementos existentes
-  ['produtos','video','planos','ebooks'].forEach(id => {
+  ['hero','produtos','video','planos','ebooks'].forEach(id => {
     const el = document.getElementById(id);
     if (el) setTimeout(() => el.classList.add('ready'), 1700);
   });
