@@ -108,17 +108,39 @@ section.ready {
   backdrop-filter: blur(14px) saturate(140%);
   border-radius: 20px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.15), inset 0 0 30px rgba(255,255,255,0.1);
-  padding: 2rem;
-  max-width: 420px;
-  flex: 1 1 320px;
-  text-align: center;
-}
-.card img {
+  padding: 2rem 1.5rem;
   width: 100%;
-  max-width: 320px;
-  border-radius: 18px;
-  margin-bottom: 1rem;
+  max-width: 420px;
+  min-height: 420px; /* 🔹 altura uniforme */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
+.card img {
+  width: 220px;
+  height: 220px;
+  object-fit: contain; /* 🔹 garante proporção */
+  border-radius: 18px;
+  margin: 0.5rem auto 1rem;
+  display: block;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.12));
+  transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+}
+
+.card:hover img {
+  transform: scale(1.05);
+  filter: drop-shadow(0 12px 26px rgba(0,0,0,0.18));
+}
+
 
 /* ====== VÍDEO ====== */
 .video-section {
