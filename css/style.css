@@ -9,6 +9,57 @@
   --shadow-deep:0 20px 50px rgba(0,0,0,.12),0 8px 20px rgba(0,0,0,.08);
 }
 
+.brand-minimal {
+  position: fixed;
+  top: 20px;
+  left: 24px;
+  font-family: 'Helvetica Rounded Bold', Helvetica, Arial, sans-serif;
+  font-size: 1.1rem;
+  color: #000;
+  letter-spacing: 0.8px;
+  opacity: 0.9;
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+.brand-minimal:hover {
+  opacity: 1;
+}
+
+/* Botão delicado e translúcido */
+.btn-newsletter {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.8px;
+  font-weight: 500;
+  text-transform: lowercase;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.12);
+  color: #335953;
+  backdrop-filter: blur(10px);
+  border-radius: 100px;
+  padding: 0.55rem 1.1rem;
+  transition: all 0.35s ease;
+  opacity: 0.85;
+  z-index: 999;
+}
+.btn-newsletter:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.5);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .brand-minimal { top: 16px; left: 16px; font-size: 1rem; }
+  .btn-newsletter { bottom: 20px; right: 20px; }
+}
+
+
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
