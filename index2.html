@@ -190,6 +190,20 @@ section.ready {
   background: #fff;
   transform: translateY(-2px);
 }
+  .card img {
+  width: 100%;
+  max-width: 220px;
+  margin: 0.5rem auto 1rem;
+  display: block;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.12));
+  transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+.card:hover img {
+  transform: scale(1.04);
+  filter: drop-shadow(0 10px 22px rgba(0,0,0,0.18));
+}
+
 
 /* ====== EBOOKS ====== */
 .ebooks {
@@ -251,19 +265,21 @@ footer {
   <p>Potência Sustentável • Conecte corpo, mente e performance</p>
 </header>
 
+<!-- Dentro da seção de produtos -->
 <section id="produtos">
   <div class="card">
     <h2>FemFlow</h2>
-    <img src="ebooks/down/femflow-thumb.jpg" alt="FemFlow">
+    <img src="assets/logo-femflow.png" alt="FemFlow Logo">
     <p>O método feminino baseado no ciclo hormonal. Treinos, respiração e equilíbrio para cada fase do mês.</p>
   </div>
 
   <div class="card">
     <h2>MaleFlow</h2>
-    <img src="ebooks/down/maleflow-thumb.jpg" alt="MaleFlow">
+    <img src="assets/logo-maleflow.png" alt="MaleFlow Logo">
     <p>A pirâmide da potência masculina: consistência, intensidade e evolução com base na ciência do treino.</p>
   </div>
 </section>
+
 
 <div class="video-section" id="video">
   <h2>Dicas e Inspiração</h2>
