@@ -624,9 +624,9 @@ body::before {
   </div>
 </div>
   
-<!-- ====== EBOOKS ====== -->
+<!-- ====== SEÇÃO EBOOKS (MyFlowLife Style) ====== -->
 <section class="ebooks-section">
-  <h2>últimos ebooks publicados</h2>
+  <h2>Últimos eBooks Publicados</h2>
 
   <div class="carrossel-container">
     <div class="arrow left" id="prev">&#10094;</div>
@@ -634,132 +634,149 @@ body::before {
     <div class="arrow right" id="next">&#10095;</div>
   </div>
 </section>
-  
-</script>
-<!-- ====== EBOOKS ====== -->
-<section class="ebooks-section">
-  <h2>últimos ebooks publicados</h2>
-
-  <div class="ebooks-row">
-    <div class="arrow left" id="prev">&#10094;</div>
-    <div class="scroller" id="destaque"></div>
-    <div class="arrow right" id="next">&#10095;</div>
-  </div>
-</section>
 
 <style>
+/* ====== EBOOKS SECTION ====== */
 .ebooks-section {
-  margin: 4rem auto 5rem;
-  max-width: 1200px;
-  text-align: center;
+  margin: 4rem auto;
+  width: 100%;
+  max-width: 1400px;
+  text-align: left;
+  padding: 0 1rem;
 }
 
 .ebooks-section h2 {
   font-family: 'Helvetica Rounded Bold', Helvetica, Arial, sans-serif;
   font-size: 1.6rem;
-  text-transform: lowercase;
   letter-spacing: 1px;
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.2rem;
+  color: #335953;
   background: linear-gradient(90deg, #335953, #cc6a5a);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.ebooks-row {
+/* ====== CARROSSEL ====== */
+.carrossel-container {
   position: relative;
-  max-width: 100%;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
+  overflow: hidden;
 }
 
-.scroller {
+.faixa-ebooks {
   display: flex;
-  gap: 1rem;
+  gap: 1.2rem;
   overflow-x: auto;
   scroll-behavior: smooth;
-  padding: 1rem;
-  width: 100%;
+  padding-bottom: 1rem;
+  scrollbar-width: none;
 }
+.faixa-ebooks::-webkit-scrollbar { display: none; }
 
-.scroller::-webkit-scrollbar { height: 8px; }
-.scroller::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,.08);
-  border-radius: 10px;
-}
-
-.arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.6);
-  border: 1px solid rgba(0,0,0,0.08);
-  display: grid; place-items: center;
-  cursor: pointer; user-select: none;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  transition: all 0.25s ease;
-  backdrop-filter: blur(10px);
-}
-.arrow:hover {
-  transform: translateY(-50%) scale(1.05);
-  background: rgba(255,255,255,0.9);
-}
-.arrow.left { left: 8px; }
-.arrow.right { right: 8px; }
-
-.card {
-  width: 200px;
+/* ====== CARD MODERNO ====== */
+.faixa-ebooks .card {
   flex: 0 0 auto;
+  width: 210px;
   border-radius: 16px;
   overflow: hidden;
-  background: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(12px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  transition: transform .3s ease, box-shadow .3s ease;
-  opacity: 0; transform: translateY(10px);
-  animation: fadeCard .8s ease forwards;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 0.8s ease forwards;
 }
-@keyframes fadeCard { to { opacity:1; transform:translateY(0); } }
-
-.cover { width:100%; aspect-ratio:3/4; background:#fff; overflow:hidden; }
-.cover img { width:100%; height:100%; object-fit:cover; transition: transform .3s ease; }
-.card:hover .cover img { transform: scale(1.05); }
-
-.meta {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: .7rem .8rem .85rem;
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
 }
-.price {
-  font-weight: 600; opacity: .9;
-}
-.price small { font-weight:400; opacity:.8; }
 
-.cta {
-  text-decoration:none;
+.faixa-ebooks .cover {
+  width: 100%;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.faixa-ebooks .cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.faixa-ebooks .card:hover .cover img {
+  transform: scale(1.07);
+}
+
+.faixa-ebooks .meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .7rem .8rem .9rem;
+}
+.faixa-ebooks .price {
+  font-weight: 600;
   color: var(--texto);
-  background: rgba(255,255,255,0.6);
+  opacity: .9;
+}
+.faixa-ebooks .price small {
+  font-weight: 400;
+  opacity: .7;
+}
+
+.faixa-ebooks .cta {
+  text-decoration: none;
+  color: #335953;
+  background: rgba(255,255,255,0.35);
   border: 1px solid rgba(0,0,0,0.1);
   padding: .4rem .8rem;
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  transition: all 0.25s ease;
+  font-weight: 600;
+  font-size: .85rem;
+  transition: all .3s ease;
 }
-.cta:hover {
-  background:#fff;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+.faixa-ebooks .cta:hover {
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
-@media (max-width: 600px) {
+/* ====== SETAS ====== */
+.arrow {
+  position: absolute;
+  top: 45%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  color: var(--texto);
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  opacity: 0;
+}
+.carrossel-container:hover .arrow { opacity: 1; }
+
+.arrow.left { left: 0.5rem; }
+.arrow.right { right: 0.5rem; }
+
+.arrow:hover {
+  background: #fff;
+  transform: translateY(-50%) scale(1.08);
+}
+
+/* ====== MOBILE ====== */
+@media (max-width: 768px) {
+  .faixa-ebooks .card { width: 160px; }
   .arrow { display: none; }
-  .card { width: 160px; }
 }
 </style>
 
-<!-- ====== SCRIPT FINAL CORRIGIDO ====== -->
 <script>
 async function carregarEbooks() {
   const caminhos = [
@@ -821,36 +838,9 @@ function goCadastro(url, ebook, tipo) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const splash = document.getElementById('splash');
-  const header = document.getElementById('header');
-  const produtos = document.getElementById('produtos');
-  const video = document.getElementById('video');
-  const planos = document.getElementById('planos');
-  const ebooks = document.querySelector('.ebooks-section');
-  const brand = document.querySelector('.brand-minimal');
-  const floatButtons = document.querySelectorAll('.btn-newsletter, .btn-flutuante');
-
-  // Oculta tudo até o splash terminar
-  [header, produtos, video, planos, ebooks].forEach(el => el.classList.remove('ready'));
-  brand.style.opacity = '0';
-  floatButtons.forEach(btn => btn.style.opacity = '0');
-
-  // Fade-out do splash
-  setTimeout(() => splash.classList.add('fade-out'), 800);
-
-  // Exibe gradualmente após o splash
-  setTimeout(() => {
-    splash.style.display = 'none';
-    [header, produtos, video, planos, ebooks].forEach(el => el.classList.add('ready'));
-    brand.style.opacity = '0.9';
-    floatButtons.forEach(btn => btn.style.opacity = '0.9');
-  }, 1800);
-
-  // Setas do carrossel
   const scroller = document.getElementById("destaque");
   document.getElementById("next").onclick = () => scroller.scrollBy({ left: 400, behavior: "smooth" });
   document.getElementById("prev").onclick = () => scroller.scrollBy({ left: -400, behavior: "smooth" });
-
   carregarEbooks();
 });
 </script>
