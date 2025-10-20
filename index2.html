@@ -259,6 +259,20 @@ footer {
   transform: translateY(-3px);
   box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 60%),
+              radial-gradient(circle at 70% 70%, rgba(255,255,255,0.15), transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+  animation: bgFloat 20s infinite alternate ease-in-out;
+}
+@keyframes bgFloat {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-20px) scale(1.03); }
+}
 
 </style>
 </head>
@@ -319,16 +333,30 @@ footer {
   </div>
 </div>
   
-<section class="ebooks-section">
-  <h2>Últimos eBooks publicados</h2>
+<section class="ebooks-section" id="ebooks">
+  <h2>últimos ebooks publicados</h2>
   <iframe 
     src="ebooks/index.html#destaque"
-    title="Últimos eBooks"
+    title="últimos ebooks"
     frameborder="0"
     loading="lazy"
     class="ebooks-frame">
   </iframe>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const splash = document.getElementById('splash');
+  const sections = ['header','produtos','video','planos','ebooks'].map(id => document.getElementById(id));
+
+  setTimeout(() => splash.classList.add('fade-out'), 800);
+  setTimeout(() => {
+    splash.style.display = 'none';
+    sections.forEach(el => el.classList.add('ready'));
+  }, 1800);
+});
+</script>
+
 
 
 
