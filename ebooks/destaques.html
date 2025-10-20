@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Destaques MyFlowLife</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+    .faixa-ebooks {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 0 1rem 1rem;
+      scrollbar-width: none;
+    }
+    .faixa-ebooks::-webkit-scrollbar {
+      display: none;
+    }
+    .ebook-card {
+      flex: 0 0 auto;
+      width: 160px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .ebook-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .ebook-card img {
+      width: 100%;
+      display: block;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .ebook-card p {
+      text-align: center;
+      font-size: 0.9rem;
+      margin: 0.4rem 0;
+      color: #335953;
+    }
+  </style>
+</head>
+<body>
+  <div class="faixa-ebooks" id="destaque">
+    <div class="ebook-card">
+      <img src="covers/fem-nutricao.jpg" alt="Nutrição e Ciclo Hormonal">
+      <p>Nutrição e Ciclo Hormonal</p>
+    </div>
+    <div class="ebook-card">
+      <img src="covers/fem-respira.jpg" alt="RespiraFlow">
+      <p>RespiraFlow</p>
+    </div>
+    <div class="ebook-card">
+      <img src="covers/male-potencia.jpg" alt="Potência Masculina">
+      <p>Potência Masculina</p>
+    </div>
+    <!-- novos ebooks adicionados aqui -->
+  </div>
+</body>
+</html>
