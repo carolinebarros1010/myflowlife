@@ -369,11 +369,19 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
 }
 
 /* adiciona uma moldura suave apenas ao conteúdo */
+.ricardo-foto {
+  background: rgba(156, 188, 193, 0.5);
+  backdrop-filter: blur(6px);
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
 .ricardo-foto img {
   width: 260px;
   height: auto;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+  display: block;
 }
 
 .ricardo-texto {
