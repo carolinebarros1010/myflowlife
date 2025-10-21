@@ -319,8 +319,7 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   .hero-title{ font-size:1.8rem; }
   .hero-sub{ font-size:.98rem; }
 }
-
-/* ====== SEÇÃO RICARDO JR AJUSTADA AO FUNDO DO SITE ====== */
+/* ====== SEÇÃO RICARDO JR TRANSPARENTE ====== */
 .ricardo-hero {
   position: relative;
   width: 100%;
@@ -329,18 +328,10 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #9CBCC1, #A3C6C7, #F8F8F8);
-  background-size: 400% 400%;
-  animation: gradientShift 20s ease infinite;
+  background: transparent; /* 🔹 sem cor própria */
 }
 
-/* Herda o mesmo movimento do site */
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
+/* Remove o fundo extra — deixa o gradiente do site aparecer */
 .ricardo-container {
   position: relative;
   z-index: 2;
@@ -351,18 +342,18 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   max-width: 1100px;
   width: 100%;
   padding: 2.5rem;
-  background: none;
-  border-radius: 0;
+  background: transparent;
+  border: none;
   box-shadow: none;
 }
 
-/* Moldura suave e translúcida na foto */
+/* Moldura translúcida e leve na foto */
 .ricardo-foto {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(6px);
   border-radius: 20px;
   padding: 10px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
 .ricardo-foto img {
@@ -372,6 +363,7 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   display: block;
 }
 
+/* Texto sobre fundo claro-animado */
 .ricardo-texto {
   flex: 1;
   color: #1d3b38;
@@ -404,6 +396,7 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   color: #335953;
 }
 
+/* Botões */
 .ricardo-botoes {
   display: flex;
   gap: 1rem;
