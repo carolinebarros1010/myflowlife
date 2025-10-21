@@ -320,8 +320,7 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   .hero-sub{ font-size:.98rem; }
 }
 
-/* ====== SEÇÃO RICARDO JR COM FUNDO ANIMADO ====== */
-/* ====== SEÇÃO RICARDO JR AJUSTADA ====== */
+/* ====== SEÇÃO RICARDO JR AJUSTADA AO FUNDO DO SITE ====== */
 .ricardo-hero {
   position: relative;
   width: 100%;
@@ -330,24 +329,13 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-/* Fundo fluido e mais escuro, sem branco */
-.animated-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(-45deg, #1d3b38, #335953, #cc6a5a, #2b4642);
+  background: linear-gradient(135deg, #9CBCC1, #A3C6C7, #F8F8F8);
   background-size: 400% 400%;
-  animation: fluxo 18s ease infinite;
-  z-index: 0;
-  opacity: 0.45;
-  filter: blur(50px);
+  animation: gradientShift 20s ease infinite;
 }
 
-@keyframes fluxo {
+/* Herda o mesmo movimento do site */
+@keyframes gradientShift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
@@ -363,14 +351,14 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   max-width: 1100px;
   width: 100%;
   padding: 2.5rem;
-  background: none; /* remove fundo */
-  border-radius: 0; /* sem caixa */
-  box-shadow: none; /* sem sombra de bloco */
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
-/* adiciona uma moldura suave apenas ao conteúdo */
+/* Moldura suave e translúcida na foto */
 .ricardo-foto {
-  background: rgba(156, 188, 193, 0.5);
+  background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(6px);
   border-radius: 20px;
   padding: 10px;
@@ -386,25 +374,25 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
 
 .ricardo-texto {
   flex: 1;
-  color: #f0f4f4;
+  color: #1d3b38;
   font-family: 'Inter', sans-serif;
   max-width: 600px;
 }
 
 .ricardo-texto h1 {
   font-size: 2rem;
-  color: #ffffff;
+  color: #1d3b38;
   font-family: 'Helvetica Rounded Bold', Helvetica, Arial, sans-serif;
   margin-bottom: 0.5rem;
 }
 
 .ricardo-texto h1 span {
-  color: #EFBDA6;
+  color: #CC6A5A;
 }
 
 .ricardo-texto h2 {
   font-size: 1.3rem;
-  color: #F4E1D7;
+  color: #335953;
   font-weight: 600;
   margin-bottom: 1.5rem;
 }
@@ -413,7 +401,7 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   font-size: 1rem;
   line-height: 1.6;
   margin-bottom: 1rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: #335953;
 }
 
 .ricardo-botoes {
@@ -471,5 +459,4 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
     font-size: 1.6rem;
   }
 }
-
 
