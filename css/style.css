@@ -321,28 +321,30 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
 }
 
 /* ====== SEÇÃO RICARDO JR COM FUNDO ANIMADO ====== */
+/* ====== SEÇÃO RICARDO JR AJUSTADA ====== */
 .ricardo-hero {
   position: relative;
   width: 100%;
-  padding: 6rem 2rem;
+  padding: 5rem 2rem;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+/* Fundo fluido e mais escuro, sem branco */
 .animated-bg {
   position: absolute;
   top: 0;
   left: 0;
   width: 200%;
   height: 200%;
-  background: linear-gradient(-45deg, #335953, #cc6a5a, #f4e1d7, #e7f1ee);
+  background: linear-gradient(-45deg, #1d3b38, #335953, #cc6a5a, #2b4642);
   background-size: 400% 400%;
-  animation: fluxo 16s ease infinite;
+  animation: fluxo 18s ease infinite;
   z-index: 0;
-  opacity: 0.3;
-  filter: blur(40px);
+  opacity: 0.45;
+  filter: blur(50px);
 }
 
 @keyframes fluxo {
@@ -358,50 +360,54 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   align-items: center;
   justify-content: space-between;
   gap: 3rem;
-  max-width: 1200px;
+  max-width: 1150px;
   width: 100%;
   flex-wrap: wrap;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 24px;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.15);
-  padding: 3rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+  padding: 3.5rem 2rem;
 }
 
 .ricardo-foto {
-  flex: 1 1 360px;
+  flex: 1 1 320px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .ricardo-foto img {
-  width: 340px;
+  width: 260px; /* Reduzida */
   height: auto;
-  filter: drop-shadow(0 12px 25px rgba(0, 0, 0, 0.25));
-  transform: scale(1.02);
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.3));
+  transition: transform 0.4s ease;
+}
+
+.ricardo-foto img:hover {
+  transform: scale(1.04);
 }
 
 .ricardo-texto {
-  flex: 1 1 520px;
+  flex: 1 1 480px;
   font-family: 'Inter', sans-serif;
-  color: #1e1e1e;
+  color: #f0f4f4;
 }
 
 .ricardo-texto h1 {
   font-size: 2rem;
-  color: #335953;
+  color: #ffffff;
   font-family: 'Helvetica Rounded Bold', Helvetica, Arial, sans-serif;
   margin-bottom: 0.5rem;
 }
 
 .ricardo-texto h1 span {
-  color: #cc6a5a;
+  color: #EFBDA6;
 }
 
 .ricardo-texto h2 {
   font-size: 1.3rem;
-  color: #1e1e1e;
+  color: #F4E1D7;
   font-weight: 600;
   margin-bottom: 1.5rem;
 }
@@ -410,7 +416,7 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   font-size: 1rem;
   line-height: 1.6;
   margin-bottom: 1rem;
-  color: rgba(0, 0, 0, 0.85);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .ricardo-botoes {
@@ -420,7 +426,7 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #335953, #2d4d47);
+  background: linear-gradient(135deg, #CC6A5A, #EFBDA6);
   color: #fff;
   border-radius: 40px;
   padding: 0.8rem 1.6rem;
@@ -430,14 +436,15 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
 }
 
 .btn-primary:hover {
-  background: #cc6a5a;
+  background: #ffffff;
+  color: #335953;
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
 .btn-outline {
-  border: 2px solid #335953;
-  color: #335953;
+  border: 2px solid #EFBDA6;
+  color: #EFBDA6;
   border-radius: 40px;
   padding: 0.8rem 1.6rem;
   font-weight: 600;
@@ -446,8 +453,8 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
 }
 
 .btn-outline:hover {
-  background: #335953;
-  color: #fff;
+  background: #EFBDA6;
+  color: #1d3b38;
   transform: translateY(-3px);
 }
 
@@ -458,11 +465,10 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
     text-align: center;
   }
   .ricardo-foto img {
-    width: 260px;
+    width: 200px;
   }
   .ricardo-texto h1 {
-    font-size: 1.7rem;
+    font-size: 1.6rem;
   }
 }
-
 
