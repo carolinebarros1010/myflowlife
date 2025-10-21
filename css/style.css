@@ -320,3 +320,149 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   .hero-sub{ font-size:.98rem; }
 }
 
+/* ====== SEÇÃO RICARDO JR COM FUNDO ANIMADO ====== */
+.ricardo-hero {
+  position: relative;
+  width: 100%;
+  padding: 6rem 2rem;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.animated-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(-45deg, #335953, #cc6a5a, #f4e1d7, #e7f1ee);
+  background-size: 400% 400%;
+  animation: fluxo 16s ease infinite;
+  z-index: 0;
+  opacity: 0.3;
+  filter: blur(40px);
+}
+
+@keyframes fluxo {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.ricardo-container {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem;
+  max-width: 1200px;
+  width: 100%;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+  padding: 3rem;
+}
+
+.ricardo-foto {
+  flex: 1 1 360px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ricardo-foto img {
+  width: 340px;
+  height: auto;
+  filter: drop-shadow(0 12px 25px rgba(0, 0, 0, 0.25));
+  transform: scale(1.02);
+}
+
+.ricardo-texto {
+  flex: 1 1 520px;
+  font-family: 'Inter', sans-serif;
+  color: #1e1e1e;
+}
+
+.ricardo-texto h1 {
+  font-size: 2rem;
+  color: #335953;
+  font-family: 'Helvetica Rounded Bold', Helvetica, Arial, sans-serif;
+  margin-bottom: 0.5rem;
+}
+
+.ricardo-texto h1 span {
+  color: #cc6a5a;
+}
+
+.ricardo-texto h2 {
+  font-size: 1.3rem;
+  color: #1e1e1e;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.ricardo-texto p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.ricardo-botoes {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #335953, #2d4d47);
+  color: #fff;
+  border-radius: 40px;
+  padding: 0.8rem 1.6rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.4s ease;
+}
+
+.btn-primary:hover {
+  background: #cc6a5a;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.btn-outline {
+  border: 2px solid #335953;
+  color: #335953;
+  border-radius: 40px;
+  padding: 0.8rem 1.6rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.4s ease;
+}
+
+.btn-outline:hover {
+  background: #335953;
+  color: #fff;
+  transform: translateY(-3px);
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+  .ricardo-container {
+    flex-direction: column-reverse;
+    text-align: center;
+  }
+  .ricardo-foto img {
+    width: 260px;
+  }
+  .ricardo-texto h1 {
+    font-size: 1.7rem;
+  }
+}
+
+
