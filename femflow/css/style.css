@@ -1,4 +1,4 @@
-    /* ===== Paleta FemFlow ===== */
+  @charset "UTF-8";
     :root{
       --creme:#F4E1D7; --pessego:#EFBDA6; --terracota:#CC6A5A;
       --teal:#335953; --grafite:#1f2937; --fundo:#fffaf7; --borda:#f1d9cf;
@@ -7,21 +7,16 @@
       --border:  var(--creme);
       --soft:    var(--creme);
     }
-
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--fundo);color:var(--grafite);font-family:Lato,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
     a{color:var(--teal);text-decoration:none}
-
     .container{width:min(1120px,92vw);margin-inline:auto}
-
     .topbar{background:linear-gradient(90deg,var(--pessego),var(--terracota));color:#fff;padding:.5rem 0;font-size:.95rem}
     .topbar .container{display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap}
-
     header{position:sticky;top:0;z-index:50;background:rgba(255,250,247,.85);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--borda)}
     .nav{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.5rem 0}
     .logo-img{height:auto;max-height:72px;width:auto;display:block}
     .cta-header{padding:.7rem 1.1rem;background:var(--terracota);color:#fff;border-radius:999px;font-weight:800;box-shadow:0 6px 16px rgba(204,106,90,.25)}
-
     /* Hero */
     .hero{display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"text image";gap:2rem;align-items:center;padding:3rem 0}
     .hero-text{grid-area:text}
@@ -35,7 +30,6 @@
     .btn-ghost{background:#fff;border-color:var(--borda);color:var(--grafite)}
     .hero-media{grid-area:image;border-radius:18px;overflow:hidden;box-shadow:0 20px 40px rgba(51,89,83,.18);aspect-ratio:4/3;background:#fff}
     .hero-media picture,.hero-media img{width:100%;height:100%;display:block;object-fit:cover}
-
     /* ========= COMO FUNCIONA (vídeo + 3 cards) ========= */
     .ff-section{background:#FFF7F4;border-top:1px solid var(--creme);border-bottom:1px solid var(--creme)}
     .ff-container{width:min(1120px,92vw);margin:0 auto;padding:2rem 1rem 2.2rem}
@@ -53,7 +47,6 @@
       .hero{grid-template-columns:1fr;grid-template-areas:"image" "text"}
       .ff-layout{grid-template-columns:1fr}
     }
-
     /* Ofertas 2x2 */
     .ofertas-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
     .oferta{
@@ -101,7 +94,6 @@
     .bio-topo{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
     .bio-topo a img{width:28px;height:28px;transition:transform .3s ease, filter .3s ease}
     .bio-topo a:hover img{transform:scale(1.2);filter:drop-shadow(0 0 6px var(--terracota))}
-
     /* Responsivo */
     @media (max-width:980px){
       .grid-3{grid-template-columns:1fr 1fr}
@@ -117,7 +109,6 @@
   gap:1.25rem;
   align-items:stretch;                /* faz a coluna dos cards igualar a altura do vídeo */
 }
-
 .ff-video{
   border-radius:18px;
   overflow:hidden;
@@ -125,21 +116,18 @@
   box-shadow:0 16px 28px rgba(51,89,83,.15);
   aspect-ratio: 9 / 16;               /* define a altura da linha do grid */
 }
-
 .ff-video video{
   width:100%;
   height:100%;
   object-fit:cover;
   display:block;
 }
-
 .ff-stack{
   display:grid;
   grid-template-rows: repeat(3, 1fr); /* 3 cards ocupam exatamente a altura do vídeo */
   gap:1rem;
   height:100%;
 }
-
 .ff-card{
   background:#fff;
   border:1px solid var(--creme);
@@ -149,12 +137,10 @@
   display:flex;                       /* conteúdo bem distribuído dentro do card */
   flex-direction:column;
 }
-
 .ff-card h3{ margin:.1rem 0 .5rem; color:var(--teal); font-size:1.05rem; }
 .ff-card p{ margin:.25rem 0; color:#223b37; line-height:1.55; }
 .ff-card a{ font-weight:800; color:var(--terracota); text-decoration:none; }
 .ff-card a:hover{ text-decoration:underline; }
-
 /* Mobile: empilha e solta a altura fixa */
 @media (max-width:980px){
   .ff-layout{ grid-template-columns:1fr; }
@@ -172,7 +158,6 @@
   font-family: 'Lato', sans-serif;
   transition: background 0.3s ease;
 }
-
 .btn-femflow-ciclo:hover {
   background-color: #CC6A5A;
 }
@@ -184,7 +169,6 @@
   justify-content: center;
   margin-top: 1rem;
 }
-
 /* Botões individuais */
 .button-group .botao {
   padding: 0.8rem 1.5rem;
@@ -197,14 +181,12 @@
   cursor: pointer;
   white-space: nowrap;
 }
-
 /* Responsividade */
 @media (max-width: 480px) {
   .button-group {
     flex-direction: column;
     align-items: stretch;
   }
-
   .button-group .botao {
     width: 100%;
     text-align: center;
@@ -216,7 +198,6 @@
   flex-wrap: wrap;
   justify-content: center;
 }
-
 .cta-header {
   padding: 0.8rem 1.2rem;
   border-radius: 2rem;
@@ -226,15 +207,14 @@
   font-weight: bold;
   white-space: nowrap;
 }
-
 /* Responsivo no mobile */
 @media (max-width: 480px) {
   .nav-links {
     flex-direction: column;
     align-items: center;
   }
-
   .cta-header {
     width: 100%;
     text-align: center;
   }
+}
