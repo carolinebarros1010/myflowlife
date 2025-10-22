@@ -298,14 +298,18 @@ fetch('../ebooks/ebooks.json')
   .then(data => {
     const grid = document.querySelector('.ebooks-grid');
     data.forEach(ebook => {
+      const origem = `femflow-${ebook.titulo.toLowerCase().replace(/\s+/g, '-')}`;
+      const linkCadastro = `../cadastro/?origem=${encodeURIComponent(origem)}`;
       const card = document.createElement('div');
       card.className = 'ebook-card';
       card.innerHTML = `
-        <img src="${ebook.imagem}" alt="${ebook.titulo}" class="ebook-thumb">
+        <img src="../ebooks/${ebook.imagem}" alt="${ebook.titulo}" class="ebook-thumb">
         <div class="ebook-body">
           <h3>${ebook.titulo}</h3>
           <p>${ebook.descricao}</p>
-          <a href="${ebook.link}" class="ebook-btn" target="_blank">Baixar</a>
+          <a href="${linkCadastro}" class="ebook-btn" target="_blank" rel="noopener">
+            Baixar e cadastrar
+          </a>
         </div>
       `;
       grid.appendChild(card);
