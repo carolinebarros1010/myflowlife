@@ -350,6 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `;
         grid.appendChild(card);
+        setTimeout(() => card.classList.add('visible'), 100);
       });
     })
     .catch(err => console.error('Erro ao carregar eBooks:', err));
