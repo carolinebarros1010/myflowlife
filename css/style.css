@@ -320,6 +320,19 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   .hero-sub{ font-size:.98rem; }
 }
 /* ====== SEÇÃO RICARDO JR TRANSPARENTE ====== */
+
+/* ====== ANIMAÇÃO DE ENTRADA PARA O BLOCO RICARDO ====== */
+.ricardo-hero {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1.4s ease, transform 1.4s ease;
+}
+
+.ricardo-hero.ready {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .ricardo-hero {
   position: relative;
   width: 100%;
