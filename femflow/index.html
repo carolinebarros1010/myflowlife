@@ -313,7 +313,7 @@
     
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  fetch('./ebooks/ebooks.json')
+  fetch('../ebooks/ebooks.json')
     .then(r => r.json())
     .then(data => {
       const grid = document.querySelector('.ebooks-grid');
