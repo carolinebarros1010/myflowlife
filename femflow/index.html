@@ -200,6 +200,25 @@
         </div>
       </div>
     </section>
+    <style>
+#responsavel .bio picture {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  max-width: 180px; /* controle o tamanho */
+  aspect-ratio: 3/4; /* mantém proporção vertical */
+}
+
+#responsavel .bio picture img {
+  width: 100%;
+  height: auto; /* garante proporção original */
+  object-fit: contain; /* mostra a imagem inteira */
+  object-position: top center; /* foca no topo (cabeça) */
+  border-radius: 12px;
+}
+</style>
 
     <section class="section" id="Parceria">
       <h2>Círculo de Apoio</h2>
