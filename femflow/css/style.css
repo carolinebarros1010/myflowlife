@@ -217,32 +217,95 @@
     width: 100%;
     text-align: center;
   }
-  .ebooks-grid {
+/* ==== Grade dos eBooks FemFlow (ajuste de proporção) ==== */
+.ebooks-section {
+  background: #fffaf7;
+  padding: 2.5rem 1rem 3rem;
+  text-align: center;
+}
+
+.ebooks-section h2 {
+  font-family: 'Playfair Display', serif;
+  color: #335953;
+  font-size: 1.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.ebooks-section p {
+  font-family: 'Lato', sans-serif;
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ebooks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.2rem;
-  margin-top: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  justify-items: center;
+  align-items: stretch;
 }
+
 .ebook-card {
-  background:#fff;
-  border:1px solid var(--creme);
-  border-radius:14px;
-  box-shadow:0 6px 14px rgba(51,89,83,.08);
-  overflow:hidden;
-  transition:.25s ease;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(51, 89, 83, 0.12);
+  overflow: hidden;
+  width: 100%;
+  max-width: 250px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-.ebook-card:hover { transform:translateY(-3px); box-shadow:0 10px 22px rgba(51,89,83,.12); }
-.ebook-thumb { width:100%; height:260px; object-fit:cover; }
-.ebook-body { padding:1rem; }
-.ebook-body h3 { color:var(--teal); font-size:1.05rem; margin:0 0 .4rem; }
-.ebook-body p { font-size:.9rem; color:#374151; margin:0 0 .8rem; line-height:1.4; }
+
+.ebook-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(204, 106, 90, 0.18);
+}
+
+.ebook-thumb {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 2px solid #f2f2f2;
+}
+
+.ebook-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ebook-body h3 {
+  font-family: 'Lato', sans-serif;
+  font-size: 1rem;
+  color: #335953;
+  margin-bottom: 0.3rem;
+  font-weight: 700;
+}
+
+.ebook-body p {
+  color: #cc6a5a;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
+}
+
 .ebook-btn {
-  display:inline-block;
-  padding:.6rem 1.1rem;
-  border-radius:999px;
-  background:var(--terracota);
-  color:#fff;
-  font-weight:700;
-  text-decoration:none;
+  background: linear-gradient(90deg, #cc6a5a, #335953);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.ebook-btn:hover {
+  background: linear-gradient(90deg, #335953, #cc6a5a);
+  transform: scale(1.03);
 }
 }
