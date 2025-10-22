@@ -702,6 +702,137 @@
   document.getElementById("cta-4semanas")?.addEventListener("click", () => rastrearLeadFemFlow("4semanas"));
   document.getElementById("cta-strong")?.addEventListener("click", () => rastrearLeadFemFlow("strong"));
 </script>
+<!-- ===== UNIVERSO MYFLOWLIFE INTEGRAÇÃO ===== -->
+<link rel="stylesheet" href="../css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ===== SPLASH E ANIMAÇÃO DE ENTRADA =====
+  const splash = document.getElementById('splash');
+  const floatButtons = document.querySelectorAll('.btn, .cta-header');
+  floatButtons.forEach(b => b.style.opacity = '0');
+
+  setTimeout(() => splash?.classList.add('fade-out'), 800);
+  setTimeout(() => {
+    splash?.remove();
+    floatButtons.forEach(b => b.style.opacity = '1');
+  }, 1600);
+
+  // ===== FADE-IN SUAVE POR ROLAGEM =====
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.hero, .ff-section, .section, .card, .oferta').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity .8s ease, transform .8s ease';
+    observer.observe(el);
+  });
+
+  const style = document.createElement('style');
+  style.innerHTML = `.visible {opacity:1!important;transform:translateY(0)!important;}`;
+  document.head.appendChild(style);
+});
+
+// ===== FUNÇÃO GO CADASTRO =====
+function goCadastro(url, ebook, tipo) {
+  localStorage.setItem("ebook", ebook);
+  localStorage.setItem("tipo", tipo);
+  localStorage.setItem("origem", "femflow");
+  localStorage.setItem("origemURL", url);
+
+  const cadastroPage = "../cadastro/index.html";
+  const redirectURL = `${cadastroPage}?ebook=${encodeURIComponent(ebook)}&tipo=${encodeURIComponent(tipo)}&origem=femflow&origemURL=${encodeURIComponent(url)}`;
+  window.location.href = redirectURL;
+  return false;
+}
+
+// ===== CARROSSEL EBOOKS =====
+async function carregarEbooks() {
+  const urls = [
+    '../ebooks/ebooks.json',
+    'https://raw.githubusercontent.com/carolinebarros1010/myflowlife/main/ebooks/ebooks.json'
+  ];
+  let data = null;
+  for (const u of urls) {
+    try {
+      const r = await fetch(u, { cache: 'no-store' });
+      if (r.ok) { data = await r.json(); break; }
+    } catch {}
+  }
+  if (!data) return console.warn('ebooks.json não encontrado');
+
+  const faixa = document.getElementById('destaque');
+  if (!faixa) return;
+  faixa.innerHTML = '';
+
+  data.forEach((eb, i) => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.style.animationDelay = `${0.08 * i}s`;
+
+    const capa = eb.capa?.startsWith('http') ? eb.capa : `../ebooks/${eb.capa}`;
+    const rotulo = (eb.tipo === 'download') ? 'Baixar' : 'Comprar';
+    let link = eb.link || '#';
+    if (eb.tipo === 'download' && !/^https?:\/\//i.test(link)) link = `../ebooks/${link}`;
+
+    card.innerHTML = `
+      <div class="cover"><img src="${capa}" alt="${eb.nome || ''}" loading="lazy"></div>
+      <div class="meta">
+        <div class="price"><small>R$</small> ${eb.preco || '0,00'}</div>
+        <a class="cta" href="#" onclick="return goCadastro('${link}','${eb.nome}','${eb.tipo}')">${rotulo}</a>
+      </div>`;
+    faixa.appendChild(card);
+  });
+}
+
+carregarEbooks();
+
+// ===== LGPD =====
+(function(){
+  const CONSENT_KEY = 'femflow_consent_v2';
+  const bannerHTML = `
+    <div id="lgpd-banner" style="
+      position:fixed;bottom:0;left:0;right:0;z-index:9999;
+      background:linear-gradient(90deg,#335953,#CC6A5A);
+      color:#fff;text-align:center;padding:16px 12px;
+      font-family:'Lato',sans-serif;display:flex;flex-wrap:wrap;
+      justify-content:center;align-items:center;gap:12px;">
+      <span style="font-size:.95rem;">Usamos cookies e pixels para medir desempenho e melhorar sua experiência.</span>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="lgpd-accept" style="background:#fff;color:#335953;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;">ACEITAR</button>
+        <button id="lgpd-deny" style="background:transparent;color:#fff;border:1px solid #fff;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;">RECUSAR</button>
+      </div>
+    </div>`;
+  if (!document.getElementById('lgpd-banner')) document.body.insertAdjacentHTML('beforeend', bannerHTML);
+
+  const banner = document.getElementById('lgpd-banner');
+  function hideBanner(){ banner.style.display='none'; }
+  function grant(){
+    gtag?.('consent','update',{ad_storage:'granted',analytics_storage:'granted'});
+    fbq?.('consent','grant');
+    localStorage.setItem(CONSENT_KEY,'granted'); hideBanner();
+  }
+  function deny(){
+    gtag?.('consent','update',{ad_storage:'denied',analytics_storage:'denied'});
+    fbq?.('consent','revoke');
+    localStorage.setItem(CONSENT_KEY,'denied'); hideBanner();
+  }
+  const saved = localStorage.getItem(CONSENT_KEY);
+  if (saved==='granted') grant();
+  else if (saved==='denied') deny();
+  else banner.style.display='flex';
+  document.getElementById('lgpd-accept')?.addEventListener('click',grant);
+  document.getElementById('lgpd-deny')?.addEventListener('click',deny);
+})();
+</script>
 
 </body>
 </html>
