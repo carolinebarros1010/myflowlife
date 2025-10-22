@@ -310,7 +310,14 @@
         </article>
         </div>
     </section>
-    
+
+    <!-- ==== EBOOKS FEMFLOW ==== -->
+<section class="ebooks-section" id="ebooks">
+  <h2>eBooks e Guias FemFlow</h2>
+  <p>Materiais práticos para entender seu corpo, modular energia e evoluir com leveza.</p>
+  <div class="ebooks-grid"></div>
+</section>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   fetch('../ebooks/ebooks.json')
@@ -327,14 +334,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const origem = `femflow-ebook-${slug}`;
         const linkCadastro =
           ebook.tipo === 'download'
-            ? `./${ebook.link}`
+            ? `../${ebook.link}`
             : `../cadastro/?origem=${encodeURIComponent(origem)}&link=${encodeURIComponent(ebook.link)}`;
 
         const precoLabel = ebook.preco === "0,00" ? "Gratuito" : `R$ ${ebook.preco}`;
         const card = document.createElement('div');
         card.className = 'ebook-card';
         card.innerHTML = `
-          <img src="./ebooks/${ebook.capa}" alt="${ebook.nome}" class="ebook-thumb">
+          <img src="../ebooks/${ebook.capa}" alt="${ebook.nome}" class="ebook-thumb">
           <div class="ebook-body">
             <h3>${ebook.nome}</h3>
             <p>${precoLabel}</p>
@@ -349,7 +356,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(err => console.error('Erro ao carregar eBooks:', err));
 });
 </script>
-
 
     <section class="section" id="beneficios">
       <h2>Benefícios que as alunas relatam</h2>
@@ -522,7 +528,12 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("cta-4semanas")?.addEventListener("click", () => rastrearLeadFemFlow("4semanas"));
   document.getElementById("cta-strong")?.addEventListener("click", () => rastrearLeadFemFlow("strong"));
 </script>
-
+<!-- ===== Seção dos eBooks ===== -->
+<section class="ebooks-section" id="ebooks">
+  <h2>eBooks e Guias FemFlow</h2>
+  <p>Materiais práticos para entender seu corpo, modular energia e evoluir com leveza.</p>
+  <div class="ebooks-grid"></div>
+</section>
 </body>
 </html>
 
