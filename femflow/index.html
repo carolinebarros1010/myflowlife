@@ -292,18 +292,28 @@
         </div>
     </section>
     
-<section id="ebooks" class="section" style="background:#fffaf8;">
-  <div class="container">
-    <h2 style="color:var(--primary);font-family:'Playfair Display',serif;margin-bottom:1rem;">
-      eBooks FemFlow
-    </h2>
-    <p class="sub">Guias rápidos sobre treino, respiração e saúde feminina</p>
-    
-    <div class="ebooks-grid">
-      <!-- Cards serão carregados dinamicamente -->
-    </div>
-  </div>
-</section>
+<script>
+fetch('../ebooks/ebooks.json')
+  .then(r => r.json())
+  .then(data => {
+    const grid = document.querySelector('.ebooks-grid');
+    data.forEach(ebook => {
+      const card = document.createElement('div');
+      card.className = 'ebook-card';
+      card.innerHTML = `
+        <img src="${ebook.imagem}" alt="${ebook.titulo}" class="ebook-thumb">
+        <div class="ebook-body">
+          <h3>${ebook.titulo}</h3>
+          <p>${ebook.descricao}</p>
+          <a href="${ebook.link}" class="ebook-btn" target="_blank">Baixar</a>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  })
+  .catch(err => console.error('Erro ao carregar eBooks:', err));
+</script>
+
 
     <section class="section" id="beneficios">
       <h2>Benefícios que as alunas relatam</h2>
