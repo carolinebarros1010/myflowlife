@@ -311,8 +311,9 @@
         </div>
     </section>
     
+<script>
 document.addEventListener("DOMContentLoaded", () => {
-  fetch('../ebooks/ebooks.json')
+  fetch('./ebooks/ebooks.json')
     .then(r => r.json())
     .then(data => {
       const grid = document.querySelector('.ebooks-grid');
@@ -326,14 +327,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const origem = `femflow-ebook-${slug}`;
         const linkCadastro =
           ebook.tipo === 'download'
-            ? `../${ebook.link}`
+            ? `./${ebook.link}`
             : `../cadastro/?origem=${encodeURIComponent(origem)}&link=${encodeURIComponent(ebook.link)}`;
 
         const precoLabel = ebook.preco === "0,00" ? "Gratuito" : `R$ ${ebook.preco}`;
         const card = document.createElement('div');
         card.className = 'ebook-card';
         card.innerHTML = `
-          <img src="../ebooks/${ebook.capa}" alt="${ebook.nome}" class="ebook-thumb">
+          <img src="./ebooks/${ebook.capa}" alt="${ebook.nome}" class="ebook-thumb">
           <div class="ebook-body">
             <h3>${ebook.nome}</h3>
             <p>${precoLabel}</p>
@@ -347,6 +348,8 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .catch(err => console.error('Erro ao carregar eBooks:', err));
 });
+</script>
+
 
     <section class="section" id="beneficios">
       <h2>Benefícios que as alunas relatam</h2>
