@@ -464,5 +464,23 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
   .ricardo-texto h1 {
     font-size: 1.6rem;
   }
+
+  /* Garante que os botões fiquem clicáveis */
+.planos button {
+  position: relative;
+  z-index: 5;
+  cursor: pointer;
+}
+
+/* Caso algum container esteja sobrepondo (ex: fundo animado ou blur) */
+.planos, .plano {
+  position: relative;
+  z-index: 2;
+}
+
+/* E previne que elementos acima capturem o clique */
+.animated-bg, .blur-layer, .decorativo {
+  pointer-events: none;
+}
 }
 
