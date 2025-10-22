@@ -311,49 +311,45 @@
     </section>
 
     <!-- ==== EBOOKS FEMFLOW ==== -->
-<section class="ebooks-section" id="ebooks">
-  <h2>eBooks e Guias FemFlow</h2>
-  <p>Materiais práticos para entender seu corpo, modular energia e evoluir com leveza.</p>
-  <div class="ebooks-grid"></div>
-</section>
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  fetch('../ebooks/ebooks.json')
+  fetch("../ebooks/ebooks.json")
     .then(r => r.json())
     .then(data => {
-      const grid = document.querySelector('.ebooks-grid');
-      if (!grid) {
-        console.error('Elemento .ebooks-grid não encontrado.');
-        return;
-      }
+      const carousel = document.querySelector(".ebooks-carousel");
+      if (!carousel) return;
 
-      data.forEach(ebook => {
-        const slug = ebook.nome.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      data.forEach((ebook, i) => {
+        const slug = ebook.nome.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
         const origem = `femflow-ebook-${slug}`;
         const linkCadastro =
-          ebook.tipo === 'download'
+          ebook.tipo === "download"
             ? `../${ebook.link}`
             : `../cadastro/?origem=${encodeURIComponent(origem)}&link=${encodeURIComponent(ebook.link)}`;
-
         const precoLabel = ebook.preco === "0,00" ? "Gratuito" : `R$ ${ebook.preco}`;
-        const card = document.createElement('div');
-        card.className = 'ebook-card';
+        const card = document.createElement("div");
+        card.className = "ebook-card";
         card.innerHTML = `
           <img src="../ebooks/${ebook.capa}" alt="${ebook.nome}" class="ebook-thumb">
           <div class="ebook-body">
             <h3>${ebook.nome}</h3>
             <p>${precoLabel}</p>
             <a href="${linkCadastro}" class="ebook-btn" target="_blank" rel="noopener">
-              ${ebook.tipo === 'download' ? 'Baixar agora' : 'Cadastrar e acessar'}
+              ${ebook.tipo === "download" ? "Baixar agora" : "Acessar"}
             </a>
           </div>
         `;
-        grid.appendChild(card);
-        setTimeout(() => card.classList.add('visible'), 100);
+        carousel.appendChild(card);
+        setTimeout(() => card.classList.add("visible"), i * 80);
       });
+
+      // Navegação
+      const leftBtn = document.querySelector(".carousel-btn.left");
+      const rightBtn = document.querySelector(".carousel-btn.right");
+      leftBtn.addEventListener("click", () => carousel.scrollBy({ left: -300, behavior: "smooth" }));
+      rightBtn.addEventListener("click", () => carousel.scrollBy({ left: 300, behavior: "smooth" }));
     })
-    .catch(err => console.error('Erro ao carregar eBooks:', err));
+    .catch(err => console.error("Erro ao carregar eBooks:", err));
 });
 </script>
     
