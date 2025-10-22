@@ -311,37 +311,42 @@
         </div>
     </section>
     
-<script>
-fetch('../ebooks/ebooks.json')
-  .then(r => r.json())
-  .then(data => {
-    const grid = document.querySelector('.ebooks-grid');
-    data.forEach(ebook => {
-      const slug = ebook.nome.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
-      const origem = `femflow-ebook-${slug}`;
-      const linkCadastro =
-        ebook.tipo === 'download'
-          ? `../${ebook.link}`
-          : `../cadastro/?origem=${encodeURIComponent(origem)}&link=${encodeURIComponent(ebook.link)}`;
+document.addEventListener("DOMContentLoaded", () => {
+  fetch('../ebooks/ebooks.json')
+    .then(r => r.json())
+    .then(data => {
+      const grid = document.querySelector('.ebooks-grid');
+      if (!grid) {
+        console.error('Elemento .ebooks-grid não encontrado.');
+        return;
+      }
 
-      const precoLabel = ebook.preco === "0,00" ? "Gratuito" : `R$ ${ebook.preco}`;
-      const card = document.createElement('div');
-      card.className = 'ebook-card';
-      card.innerHTML = `
-        <img src="../ebooks/${ebook.capa}" alt="${ebook.nome}" class="ebook-thumb">
-        <div class="ebook-body">
-          <h3>${ebook.nome}</h3>
-          <p>${precoLabel}</p>
-          <a href="${linkCadastro}" class="ebook-btn" target="_blank" rel="noopener">
-            ${ebook.tipo === 'download' ? 'Baixar agora' : 'Cadastrar e acessar'}
-          </a>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-  })
-  .catch(err => console.error('Erro ao carregar eBooks:', err));
-</script>
+      data.forEach(ebook => {
+        const slug = ebook.nome.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+        const origem = `femflow-ebook-${slug}`;
+        const linkCadastro =
+          ebook.tipo === 'download'
+            ? `../${ebook.link}`
+            : `../cadastro/?origem=${encodeURIComponent(origem)}&link=${encodeURIComponent(ebook.link)}`;
+
+        const precoLabel = ebook.preco === "0,00" ? "Gratuito" : `R$ ${ebook.preco}`;
+        const card = document.createElement('div');
+        card.className = 'ebook-card';
+        card.innerHTML = `
+          <img src="../ebooks/${ebook.capa}" alt="${ebook.nome}" class="ebook-thumb">
+          <div class="ebook-body">
+            <h3>${ebook.nome}</h3>
+            <p>${precoLabel}</p>
+            <a href="${linkCadastro}" class="ebook-btn" target="_blank" rel="noopener">
+              ${ebook.tipo === 'download' ? 'Baixar agora' : 'Cadastrar e acessar'}
+            </a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    })
+    .catch(err => console.error('Erro ao carregar eBooks:', err));
+});
 
     <section class="section" id="beneficios">
       <h2>Benefícios que as alunas relatam</h2>
