@@ -356,6 +356,24 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(err => console.error('Erro ao carregar eBooks:', err));
 });
 </script>
+    
+    <script>
+// === Efeito de entrada dos eBooks ===
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const cards = document.querySelectorAll('.ebook-card');
+  cards.forEach(card => observer.observe(card));
+});
+</script>
+
 
     <section class="section" id="beneficios">
       <h2>Benefícios que as alunas relatam</h2>
