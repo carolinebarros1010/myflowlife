@@ -311,6 +311,18 @@
     </section>
 
     <!-- ==== EBOOKS FEMFLOW ==== -->
+<!-- ==== EBOOKS FEMFLOW ==== -->
+<section class="ebooks-section" id="ebooks">
+  <h2>Biblioteca FemFlow</h2>
+  <p>Deslize para o lado e explore nossos eBooks e guias digitais.</p>
+
+  <div class="carousel-container">
+    <button class="carousel-btn left" aria-label="voltar">&#10094;</button>
+    <div class="ebooks-carousel"></div>
+    <button class="carousel-btn right" aria-label="avançar">&#10095;</button>
+  </div>
+</section>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   fetch("../ebooks/ebooks.json")
@@ -352,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(err => console.error("Erro ao carregar eBooks:", err));
 });
 </script>
-    
+
     <script>
 // === Efeito de entrada dos eBooks ===
 const observer = new IntersectionObserver((entries) => {
