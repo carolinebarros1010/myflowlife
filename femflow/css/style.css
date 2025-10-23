@@ -47,38 +47,147 @@
       .hero{grid-template-columns:1fr;grid-template-areas:"image" "text"}
       .ff-layout{grid-template-columns:1fr}
     }
-    /* Ofertas 2x2 */
-    .ofertas-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
-    .oferta{
-      border:2px solid var(--creme); border-radius:16px; background:#fffdfd;
-      padding:1.25rem; transition:.25s ease; box-shadow:0 6px 18px rgba(244,225,215,.3);
-      display:flex; flex-direction:column; justify-content:space-between;
-    }
-    .oferta:hover{border-color:var(--pessego); box-shadow:0 10px 26px rgba(239,189,166,.35); transform:translateY(-2px)}
-    .oferta.destaque{border-color:var(--pessego); background:#fffaf8; box-shadow:0 10px 28px rgba(239,189,166,.4)}
-    .oferta-head h3{margin:.25rem 0 .25rem;color:var(--primary)}
-    .oferta-head .sub{margin:0;color:#475569}
-    .badge{display:inline-block;font-size:.72rem;letter-spacing:.02em;color:#5b231c;background:rgba(204,106,90,.09);border:1px dashed #CC6A5A;border-radius:999px;padding:.25rem .55rem;font-weight:800}
-    .features{margin:.75rem 0;padding-left:1.1rem;color:#374151}
-    .features li{margin:.25rem 0}
-    .price{font-weight:900;font-size:1.6rem;color:var(--primary);margin:.25rem 0 .65rem}
-    .price span{font-size:.9rem;font-weight:700;color:#64748b;margin-left:.25rem}
+  /* ===== OFERTAS / PLANOS MODERNOS FEMFLOW ===== */
+.ofertas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.8rem;
+  padding: 1rem 0;
+}
 
-    /* Botão padrão das ofertas */
-    .offer-btn{
-      display:block;width:100%;text-align:center;padding:.9rem 1.2rem;border-radius:12px;
-      font-weight:900;background:var(--primary);color:#fff;text-decoration:none;
-      box-shadow:0 6px 14px rgba(51,89,83,.18);
-      transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
-    }
-    .offer-btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(51,89,83,.24);filter:brightness(0.97)}
-    /* Destaque para 7 dias */
-    .offer-btn.highlight{
-      background:linear-gradient(135deg,#335953 0%,#CC6A5A 100%);
-      box-shadow:0 6px 18px rgba(204,106,90,.25);letter-spacing:.3px;animation:pulseSoft 2.8s infinite ease-in-out;
-    }
-    .offer-btn.highlight:hover{filter:brightness(1.05);transform:translateY(-1px);box-shadow:0 10px 22px rgba(204,106,90,.35)}
-    @keyframes pulseSoft{0%,100%{box-shadow:0 6px 18px rgba(204,106,90,.25)}50%{box-shadow:0 10px 25px rgba(204,106,90,.35)}}
+.oferta {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 2rem 1.8rem;
+  transition: all 0.4s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  color: #1d3b38;
+  position: relative;
+}
+
+.oferta:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+}
+
+/* Cabeçalho */
+.oferta-head h3 {
+  font-family: 'Helvetica Rounded Bold', Helvetica, Arial, sans-serif;
+  color: #335953;
+  font-size: 1.3rem;
+  margin-bottom: 0.3rem;
+}
+
+.oferta-head .sub {
+  font-size: 0.95rem;
+  color: rgba(0,0,0,0.75);
+  margin-bottom: 0.8rem;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #CC6A5A;
+  border: 1px solid #CC6A5A;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  margin-bottom: 0.4rem;
+  background: rgba(255,255,255,0.3);
+}
+
+/* Benefícios */
+.features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.features li {
+  margin: 0.4rem 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: rgba(0,0,0,0.85);
+}
+
+/* Preço */
+.price {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #335953;
+  margin-bottom: 1.2rem;
+}
+
+.price span {
+  font-weight: 400;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+/* Botão */
+.offer-btn {
+  display: inline-block;
+  border: none;
+  border-radius: 40px;
+  padding: 0.75rem 1.6rem;
+  background: linear-gradient(135deg, #335953, #CC6A5A);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.offer-btn:hover {
+  background: #fff;
+  color: #335953;
+  transform: translateY(-3px);
+}
+
+/* Destaque */
+.oferta.destaque {
+  border-color: rgba(204,106,90,0.3);
+  background: linear-gradient(135deg, rgba(51,89,83,0.1), rgba(204,106,90,0.25));
+}
+
+.oferta.premium {
+  border-color: rgba(204,106,90,0.35);
+  background: linear-gradient(135deg, rgba(51,89,83,0.1), rgba(204,106,90,0.3));
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .ofertas-grid {
+    grid-template-columns: 1fr;
+  }
+  .oferta {
+    padding: 1.8rem 1.4rem;
+  }
+}
+/* ===== SELINHO POPULAR 🔥 ANIMADO ===== */
+.badge.pulse {
+  background: linear-gradient(135deg, #CC6A5A, #EFBDA6);
+  color: #fff;
+  border: none;
+  box-shadow: 0 0 10px rgba(204,106,90,0.5);
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(204,106,90,0.4);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(239,189,166,0.8);
+    opacity: 0.95;
+  }
+}
+
 
     /* Seções gerais */
     .section{padding:2.5rem 0}
