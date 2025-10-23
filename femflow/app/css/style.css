@@ -173,8 +173,9 @@ label {
   }
 }
 .voltar-container {
-  text-align: center;
-  margin-top: 1rem;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
 }
 
 .btn-voltar {
