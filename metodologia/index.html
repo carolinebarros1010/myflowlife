@@ -67,30 +67,7 @@ body {
 }
 
 /* ===== Botões fixos ===== */
-.btn-newsletter, .btn-flutuante {
-  position: fixed;
-  bottom: 24px;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  text-transform: lowercase;
-  border: 1px solid rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.12);
-  color: var(--texto);
-  backdrop-filter: blur(10px);
-  border-radius: 100px;
-  padding: 0.55rem 1.1rem;
-  transition: all 0.35s ease;
-  opacity: 0.85;
-  z-index: 999;
-}
-.btn-newsletter:hover, .btn-flutuante:hover {
-  background: rgba(255,255,255,0.25);
-  border-color: rgba(255,255,255,0.5);
-  transform: translateY(-2px);
-  opacity: 1;
-}
-.btn-newsletter { right: 140px; }
-.btn-flutuante { right: 24px; }
+
 
 /* ===== Conteúdo ===== */
 main {
@@ -240,13 +217,74 @@ section.metodo p {
   opacity: 1;
 }
 
-/* Responsivo */
+/* === Newsletter na metodologia: canto superior direito === */
+.btn-newsletter {
+  position: fixed !important;
+  top: max(12px, env(safe-area-inset-top));
+  right: calc(12px + env(safe-area-inset-right));
+  left: auto !important;
+  bottom: auto !important;
+
+  font-family: 'Inter', sans-serif;
+  font-size: .9rem;
+  letter-spacing: .6px;
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.12);
+  color: #335953;
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  padding: .55rem 1.1rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  transition: all .3s ease;
+  z-index: 1001;
+}
+
+.btn-newsletter:hover {
+  background: rgba(255,255,255,.25);
+  border-color: rgba(255,255,255,.5);
+  transform: translateY(-2px);
+  color: #1d3b38;
+}
+
+/* mobile */
 @media (max-width: 768px) {
   .btn-newsletter {
-    top: 0.8rem;
-    left: 0.8rem;
-    font-size: 0.85rem;
-    padding: 0.5rem 1rem;
+    top: max(10px, env(safe-area-inset-top));
+    right: calc(10px + env(safe-area-inset-right));
+    font-size: .85rem;
+    padding: .5rem 1rem;
+  }
+}
+
+  /* estética (mantém o estilo myflowlife) */
+  font-family: 'Inter', sans-serif;
+  font-size: .9rem;
+  letter-spacing: .6px;
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.12);
+  color: #335953;
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  padding: .55rem 1.1rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  transition: all .3s ease;
+  z-index: 1001; /* acima de cards/efeitos */
+}
+
+.btn-newsletter:hover {
+  background: rgba(255,255,255,.25);
+  border-color: rgba(255,255,255,.5);
+  transform: translateY(-2px);
+  color: #1d3b38;
+}
+
+/* mobile: afasta do notch e não deixa enorme */
+@media (max-width: 768px) {
+  .btn-newsletter {
+    top: max(10px, env(safe-area-inset-top));
+    right: calc(10px + env(safe-area-inset-right));
+    font-size: .85rem;
+    padding: .5rem 1rem;
   }
 }
 
