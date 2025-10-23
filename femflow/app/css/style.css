@@ -91,6 +91,23 @@ label {
   font-size: 0.9rem;
   color: var(--grafite);
 }
+.btn-hotmart {
+  background-color: #CC6A5A;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  margin-top: 1rem;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-hotmart:hover {
+  background-color: #A85445;
+}
+
 
 /* Sections for ciclo page */
 .section {
@@ -154,4 +171,22 @@ label {
   .container {
     max-width: 600px;
   }
+}
+.voltar-container {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.btn-voltar {
+  background: none;
+  border: none;
+  color: #335953;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.btn-voltar:hover {
+  color: #CC6A5A;
 }
