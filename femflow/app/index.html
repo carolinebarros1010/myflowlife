@@ -15,20 +15,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png" />
     <script>
-      // register service worker
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          // registra o service worker relativo ao diretório atual
-          navigator.serviceWorker.register('service-worker.js');
-        });
-      }
-      // redirect to ciclo page if no ID stored
+          // redirect to ciclo page if no ID stored
       document.addEventListener('DOMContentLoaded', () => {
         const id = localStorage.getItem('femflow_id');
         if (!id) {
-          window.location.href = 'ciclo.html';
-        }
-      });
+         document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('femflow_id')) {
+    document.querySelector('.container').style.display = 'none';
+    window.location.href = 'ciclo.html';
+  }
+});
     </script>
   </head>
   <body>
