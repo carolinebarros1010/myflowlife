@@ -1,119 +1,76 @@
-// Memória e lógica cíclica FemFlow
-// Guarda os dados de progressão e ciclo no localStorage utilizando a chave femflow_<ID>
+// ===============================
+// FemFlow - Memória Local & Sincronização
+// ===============================
 
-// Helper: Calcula diferença de dias entre duas datas no formato yyyy-mm-dd
-function diasEntre(dat1, dat2) {
-  const d1 = new Date(dat1);
-  const d2 = new Date(dat2);
-  const ms = d2.getTime() - d1.getTime();
-  return Math.floor(ms / (1000 * 60 * 60 * 24));
+// 🔹 Salva dados gerais da aluna no localStorage
+function salvarMemoria(id, dados) {
+  const chave = `femflow_memoria_${id}`;
+  let memoria = carregarMemoria(id) || {};
+  Object.assign(memoria, dados);
+  localStorage.setItem(chave, JSON.stringify(memoria));
 }
 
-// Determina a fase hormonal dada a posição no ciclo e a duração média
-function determinarFase(dia, duracao) {
-  // Ajusta divisões proporcionalmente à duração
-  const proporcao = duracao / 28;
-  if (dia <= 5 * proporcao) return 'Menstrual';
-  if (dia <= 14 * proporcao) return 'Folicular';
-  if (dia <= 17 * proporcao) return 'Ovulatória';
-  return 'Lútea';
-}
-
-// Inicia programa para um novo ID: salva dados iniciais e retorna fase inicial
-function iniciarPrograma(id, dataUltimaMenstruacao, duracaoCiclo) {
-  const hoje = new Date();
-  const isoHoje = hoje.toISOString().slice(0, 10);
-  const diasDesdeUltima = diasEntre(dataUltimaMenstruacao, isoHoje);
-  const faseAtual = determinarFase(((diasDesdeUltima % duracaoCiclo) || duracaoCiclo), duracaoCiclo);
-  const memoria = {
-    id: id,
-    inicioPrograma: isoHoje,
-    diaCicloNoInicio: diasDesdeUltima,
-    duracaoCiclo: parseInt(duracaoCiclo, 10),
-    diaPrograma: 1,
-    treinos: []
-  };
-  localStorage.setItem(`femflow_${id}`, JSON.stringify(memoria));
-  localStorage.setItem('femflow_id', id);
-  return faseAtual;
-}
-
-// Carrega memória para um ID ou retorna null
+// 🔹 Carrega memória da aluna
 function carregarMemoria(id) {
-  const data = localStorage.getItem(`femflow_${id}`);
-  return data ? JSON.parse(data) : null;
+  const chave = `femflow_memoria_${id}`;
+  const memoria = localStorage.getItem(chave);
+  return memoria ? JSON.parse(memoria) : null;
 }
 
-// Atualiza e salva memória
-function salvarMemoria(id, memoria) {
-  localStorage.setItem(`femflow_${id}`, JSON.stringify(memoria));
-}
+// 🔹 Salva um treino no histórico local e envia ao servidor
+function salvarTreino(id, data, fase, diaPrograma, pse) {
+  if (!id) return console.error("ID inválido para salvar treino.");
 
-// Calcula o dia do programa atual (1-based)
-function calcularDiaPrograma(memoria) {
-  // Retorna o dia do programa salvo em memória (1..30)
-  return memoria.diaPrograma || 1;
-}
+  const chave = `femflow_memoria_${id}`;
+  let memoria = carregarMemoria(id);
 
-// Calcula o dia do ciclo fisiológico atual
-function calcularDiaCiclo(memoria) {
-  const diaPrograma = calcularDiaPrograma(memoria);
-  const diaCicloAtual = (memoria.diaCicloNoInicio + diaPrograma - 1) % memoria.duracaoCiclo;
-  return diaCicloAtual === 0 ? memoria.duracaoCiclo : diaCicloAtual;
-}
+  // garante inicialização
+  if (!memoria) {
+    memoria = { treinos: [], ultimoTreino: 1 };
+  }
 
-// Retorna objeto do treino atual com fase e nomes dos arquivos
-function obterTreinoAtual(id) {
-  const memoria = carregarMemoria(id);
-  if (!memoria) return null;
-  // atualiza diaPrograma em memória para garantir consistência
-  const diaProg = calcularDiaPrograma(memoria);
-  memoria.diaPrograma = diaProg;
-  // calcula dia de ciclo real
-  const diaCiclo = calcularDiaCiclo(memoria);
-  const fase = determinarFase(diaCiclo, memoria.duracaoCiclo);
-  // determina nome de arquivos (videos e pdfs)
-  const faseKey = fase.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-const video = `videos/video_${faseKey}.mp4`;
-const pdf = `download/treino_${faseKey}.pdf`;
-  // salvar novamente diaPrograma e fase
-  salvarMemoria(id, memoria);
-  return { id: id, diaPrograma: diaProg, diaCiclo: diaCiclo, fase: fase, video: video, pdf: pdf };
-}
+  // adiciona o novo treino
+  memoria.treinos.push({
+    data,
+    fase,
+    diaPrograma,
+    pse
+  });
 
-// Registra PSE e salva no histórico; envia para Google Sheets
-function registrarTreino(id, pse) {
-  const memoria = carregarMemoria(id);
-  if (!memoria) return;
-  const hoje = new Date().toISOString().slice(0, 10);
-  const diaProg = calcularDiaPrograma(memoria);
-  const diaCiclo = calcularDiaCiclo(memoria);
-  const fase = determinarFase(diaCiclo, memoria.duracaoCiclo);
+  // atualiza último treino
+  memoria.ultimoTreino = diaPrograma;
+  localStorage.setItem(chave, JSON.stringify(memoria));
 
-  // Atualiza o array de treinos na memória local
-  memoria.treinos = memoria.treinos.filter(t => t.diaPrograma !== diaProg);
-  memoria.treinos.push({ diaPrograma: diaProg, fase: fase, pse: pse, data: hoje });
-  salvarMemoria(id, memoria);
+  console.log(`💾 Treino salvo localmente (${memoria.treinos.length} registrados)`);
 
-  // Envia PSE para Google Sheets via Apps Script
-  fetch('https://script.google.com/macros/s/AKfycbwBut7gbyeXaZVFvBxIZOxd7mBcc9g1n2d2YGP1n0XGAdaFoVwtSmTkciE1u2XKg6m0/exec', {
+  // 🔹 Envia dados ao Google Sheets (Apps Script)
+  fetch('https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec', {
     method: 'POST',
-    mode: 'no-cors',
-    body: JSON.stringify({
-      id: id,
-      data: hoje,
-      fase: fase,
-      diaPrograma: diaProg,
-      pse: pse
-    })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, data, fase, diaPrograma, pse })
+  })
+  .then(res => {
+    if (!res.ok && res.type !== 'opaque') {
+      throw new Error(`Erro HTTP ${res.status}`);
+    }
+    console.log("✅ Sincronizado com servidor.");
+  })
+  .catch(err => {
+    console.warn("⚠️ Falha ao sincronizar com servidor:", err);
   });
 }
 
-// Avança para o próximo treino: incrementa diaPrograma e recarrega a página
-function avancarTreino(id) {
+// 🔹 Reseta memória (caso necessário futuramente)
+function limparMemoria(id) {
+  const chave = `femflow_memoria_${id}`;
+  localStorage.removeItem(chave);
+  console.log(`🧹 Memória apagada para ID: ${id}`);
+}
+
+// 🔹 Retorna percentual de progresso (para evolução.html)
+function calcularProgresso(id, totalTreinos = 30) {
   const memoria = carregarMemoria(id);
-  if (!memoria) return;
-  const atual = memoria.diaPrograma || 1;
-  memoria.diaPrograma = atual + 1;
-  salvarMemoria(id, memoria);
+  if (!memoria || !memoria.treinos) return 0;
+  const concluido = memoria.treinos.length;
+  return Math.min(Math.round((concluido / totalTreinos) * 100), 100);
 }
