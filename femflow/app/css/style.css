@@ -20,7 +20,10 @@ html, body {
   display: flex;
   flex-direction: column;
 }
-
+#statusID {
+  text-align: center;
+  font-weight: 500;
+}
 /* Container used to center content */
 .container {
   width: 100%;
