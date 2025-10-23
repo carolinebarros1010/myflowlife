@@ -172,27 +172,30 @@ label {
     max-width: 600px;
   }
 }
-.voltar-container {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
+.recuperar-box {
+  margin-top: 1rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.btn-voltar {
-  background: rgba(51, 89, 83, 0.08); /* leve sombra teal */
+.btn-recuperar {
+  background: none;
   border: none;
   color: #335953;
-  font-size: 0.95rem;
   font-weight: 600;
-  border-radius: 8px;
-  padding: 0.6rem 1.2rem;
+  text-decoration: underline;
   cursor: pointer;
-  transition: transform 0.1s ease, background 0.2s ease;
+  font-size: 0.95rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  transition: background 0.2s ease;
   touch-action: manipulation;
 }
 
-.btn-voltar:active {
-  background: rgba(204, 106, 90, 0.15); /* terracota suave ao toque */
-  transform: scale(0.97);
+.btn-recuperar:active {
+  background: rgba(204,106,90,0.15);
 }
+
 
