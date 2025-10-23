@@ -26,6 +26,24 @@
         <input type="number" id="duracao" min="21" max="35" value="28" />
         <button class="btn" id="btnIniciar">Iniciar Programa</button>
       </div>
+      <div class="alternativas-ciclo">
+  <p>Não sabe sua fase?</p>
+  <button class="btn-mini" onclick="abrirQuiz('irregular')">Ciclo irregular</button>
+  <button class="btn-mini" onclick="abrirQuiz('diu')">DIU hormonal</button>
+  <button class="btn-mini" onclick="abrirQuiz('menopausa')">Pré/menopausa</button>
+</div>
+
+<!-- Modal do quiz -->
+<div id="quizModal" class="quiz-modal" style="display:none;">
+  <div class="quiz-content">
+    <h3 id="quizTitulo">Identifique sua fase</h3>
+    <p id="quizPergunta"></p>
+
+    <div id="quizRespostas" class="quiz-respostas"></div>
+
+    <button class="btn" id="btnProxima" onclick="proximaPergunta()">Próxima</button>
+  </div>
+</div>
       <!-- Divider -->
       <hr style="margin:1.5rem 0; border:none; border-top:1px solid rgba(0,0,0,0.1);" />
       <!-- Bottom section: enter ID -->
