@@ -9,9 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <!-- Biblioteca Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
+
   <body>
     <header>
       <h1>Minha Evolução</h1>
@@ -19,8 +19,17 @@
     </header>
 
     <div class="container">
-      <!-- Gráfico de PSE -->
+      <!-- Progresso geral -->
       <div class="section" style="text-align:center;">
+        <h3>🌿 Progresso do seu programa</h3>
+        <p id="progressoTexto" style="font-weight:600; color:#335953;">Calculando...</p>
+        <div id="barraProgresso" style="width:100%; background:#eee; border-radius:12px; height:16px; overflow:hidden;">
+          <div id="progressoBarra" style="width:0%; height:100%; background:linear-gradient(90deg,#CC6A5A,#EFBDA6); transition:width 1s;"></div>
+        </div>
+      </div>
+
+      <!-- Gráfico de PSE -->
+      <div class="section" style="text-align:center; margin-top:1.5rem;">
         <h3>📈 Evolução do Esforço Percebido (PSE)</h3>
         <canvas id="graficoPSE" width="300" height="200"></canvas>
       </div>
@@ -44,6 +53,14 @@
           return;
         }
 
+        // === PROGRESSO ===
+        const progresso = calcularProgresso(id, 30);
+        const barra = document.getElementById("progressoBarra");
+        const texto = document.getElementById("progressoTexto");
+        barra.style.width = progresso + "%";
+        texto.innerText = `Você completou ${progresso}% do programa`;
+
+        // === EVOLUÇÃO PSE ===
         const memoria = carregarMemoria(id);
         const lista = document.getElementById('listaEvolucao');
         const ctx = document.getElementById('graficoPSE');
@@ -53,10 +70,7 @@
           return;
         }
 
-        // Ordenar por dia do programa
         const treinos = memoria.treinos.slice().sort((a,b) => a.diaPrograma - b.diaPrograma);
-
-        // Montar lista textual
         lista.innerHTML = '';
         const labels = [];
         const pseValues = [];
@@ -66,8 +80,8 @@
           li.style.padding = '0.5rem';
           li.style.borderBottom = '1px solid rgba(0,0,0,0.1)';
           let cor;
-          if (t.pse <= 3) cor = 'var(--teal)'; 
-          else if (t.pse <= 7) cor = 'var(--pessego)'; 
+          if (t.pse <= 3) cor = 'var(--teal)';
+          else if (t.pse <= 7) cor = 'var(--pessego)';
           else cor = 'var(--terracota)';
 
           li.innerHTML = `<strong>Dia ${t.diaPrograma}</strong> – Fase ${t.fase} – PSE <span style="color:${cor}">${t.pse}</span>`;
@@ -77,7 +91,7 @@
           pseValues.push(t.pse);
         });
 
-        // Criar gráfico
+        // === Gráfico Chart.js ===
         new Chart(ctx, {
           type: 'line',
           data: {
@@ -96,20 +110,17 @@
           },
           options: {
             scales: {
-              y: { 
-                min: 0, 
-                max: 10, 
-                title: { display: true, text: 'PSE' } 
+              y: {
+                min: 0,
+                max: 10,
+                title: { display: true, text: 'PSE' }
               },
-              x: { 
-                title: { display: true, text: 'Dias do Programa' } 
+              x: {
+                title: { display: true, text: 'Dias do Programa' }
               }
             },
             plugins: {
-              legend: { display: false },
-              title: {
-                display: false
-              }
+              legend: { display: false }
             },
             responsive: true,
             maintainAspectRatio: false
@@ -119,4 +130,3 @@
     </script>
   </body>
 </html>
-
