@@ -197,5 +197,64 @@ label {
 .btn-recuperar:active {
   background: rgba(204,106,90,0.15);
 }
+.instalar-app {
+  text-align: center;
+  background: #fff;
+  padding: 2rem 1rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  margin-top: 2rem;
+}
+
+.instalar-app h3 {
+  color: #335953;
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 0.5rem;
+}
+
+.instalar-app p {
+  color: #444;
+  margin-bottom: 1rem;
+}
+
+.btn-install {
+  background: #335953;
+  color: #fff;
+  font-weight: bold;
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.3s ease;
+  display: none; /* só aparece se o app for instalável */
+}
+
+.btn-install:active {
+  transform: scale(0.97);
+  background: #2b4b45;
+}
+
+.btn-hotmart {
+  background-color: #CC6A5A;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+}
+
+.btn-hotmart:active {
+  transform: scale(0.97);
+  background-color: #A85445;
+}
+
+.qrcode-container {
+  margin-top: 1.5rem;
+}
+
 
 
