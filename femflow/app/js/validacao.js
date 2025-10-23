@@ -31,7 +31,7 @@ function recuperarID() {
   status.innerText = '🔄 Verificando...';
   status.style.color = '#335953';
 
-  fetch('https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbyJA_kLQrDT-vLgqRhdGcgJ4IbsouXE8yM5jjDzxksWBuOmw7JbUZ47ExyiDhFjdKo9tg/exec', {
     method: 'POST',
     mode: 'no-cors',
     body: JSON.stringify({ action: 'recuperarID', nome: nome, email: email })
