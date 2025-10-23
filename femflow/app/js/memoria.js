@@ -81,7 +81,7 @@ function obterTreinoAtual(id) {
   return { id: id, diaPrograma: diaProg, diaCiclo: diaCiclo, fase: fase, video: video, pdf: pdf };
 }
 
-// Registra PSE e salva no histórico; também envia para Google Sheets (stubbed)
+// Registra PSE e salva no histórico; envia para Google Sheets
 function registrarTreino(id, pse) {
   const memoria = carregarMemoria(id);
   if (!memoria) return;
@@ -89,18 +89,24 @@ function registrarTreino(id, pse) {
   const diaProg = calcularDiaPrograma(memoria);
   const diaCiclo = calcularDiaCiclo(memoria);
   const fase = determinarFase(diaCiclo, memoria.duracaoCiclo);
-  // remove antigo registro se houver
+
+  // Atualiza o array de treinos na memória local
   memoria.treinos = memoria.treinos.filter(t => t.diaPrograma !== diaProg);
   memoria.treinos.push({ diaPrograma: diaProg, fase: fase, pse: pse, data: hoje });
   salvarMemoria(id, memoria);
-  // exemplo de envio para Google Sheets (ajustar endpoint):
-  /*
-  fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+
+  // Envia PSE para Google Sheets via Apps Script
+  fetch('https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec', {
     method: 'POST',
     mode: 'no-cors',
-    body: JSON.stringify({ id: id, data: hoje, fase: fase, diaPrograma: diaProg, pse: pse })
+    body: JSON.stringify({
+      id: id,
+      data: hoje,
+      fase: fase,
+      diaPrograma: diaProg,
+      pse: pse
+    })
   });
-  */
 }
 
 // Avança para o próximo treino: incrementa diaPrograma e recarrega a página
