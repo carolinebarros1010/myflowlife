@@ -96,7 +96,7 @@ function registrarTreino(id, pse) {
   salvarMemoria(id, memoria);
 
   // Envia PSE para Google Sheets via Apps Script
-  fetch('https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbyrSiF2ev6gNmmSB2BtsWgFNV24-0nZWjl5MqBd7RwceMfs0ClQGOqG_AQ1McfvWcQ/exec', {
     method: 'POST',
     mode: 'no-cors',
     body: JSON.stringify({
