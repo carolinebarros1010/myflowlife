@@ -74,8 +74,8 @@ function obterTreinoAtual(id) {
   const fase = determinarFase(diaCiclo, memoria.duracaoCiclo);
   // determina nome de arquivos (videos e pdfs)
   const faseKey = fase.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const video = `videos/video_${faseKey}_${diaProg}.mp4`;
-  const pdf = `download/treino_${faseKey}_${diaProg}.pdf`;
+const video = `videos/video_${faseKey}.mp4`;
+const pdf = `download/treino_${faseKey}.pdf`;
   // salvar novamente diaPrograma e fase
   salvarMemoria(id, memoria);
   return { id: id, diaPrograma: diaProg, diaCiclo: diaCiclo, fase: fase, video: video, pdf: pdf };
