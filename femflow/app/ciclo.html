@@ -35,6 +35,18 @@
         <input type="text" id="inputID" placeholder="FF-AAAA-XXXX" />
         <button class="btn btn-secondary" id="btnValidar">Continuar</button>
               </div>
+      <!-- Botão para abrir recuperação de ID -->
+<p style="text-align:center; margin-top:1rem;">
+  <button class="btn-recuperar" onclick="mostrarRecuperar()">🔑 Esqueceu seu ID?</button>
+</p>
+
+<!-- Formulário de recuperação -->
+<div id="recuperarBox" class="recuperar-box" style="display:none;">
+  <input type="text" id="nomeRec" placeholder="Seu nome completo" required>
+  <input type="email" id="emailRec" placeholder="Seu e-mail cadastrado" required>
+  <button class="btn" style="background:var(--terracota);" onclick="recuperarID()">Recuperar ID</button>
+  <p id="statusRec" style="margin-top:0.5rem; font-size:0.9rem;"></p>
+</div>
     </div>
     <script src="js/memoria.js"></script>
     <script src="js/validacao.js"></script>
