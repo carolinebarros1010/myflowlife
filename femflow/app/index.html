@@ -56,5 +56,55 @@
     console.log('📱 App instalável detectado');
   });
 </script>
+    <!-- === FEMFLOW INSTALL & PAYMENT SECTION === -->
+<section class="instalar-app">
+  <h3>💫 Tenha o FemFlow no seu celular</h3>
+  <p>Instale o app e acompanhe seus treinos e ciclo — mesmo offline.</p>
+
+  <!-- Botão de instalação PWA -->
+  <button id="installButton" class="btn-install">📲 Instalar o App FemFlow</button>
+
+  <hr style="border:none; border-top:1px solid rgba(0,0,0,0.1); margin:1.5rem 0;">
+
+  <!-- Botão de pagamento Hotmart -->
+  <button class="btn-hotmart" onclick="window.open('https://pay.hotmart.com/Q102567067C','_blank')">
+    💪 Adquira seu treino completo
+  </button>
+
+  <!-- QR Code -->
+  <div class="qrcode-container">
+    <p style="margin-bottom:0.5rem;">ou escaneie e instale direto:</p>
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://carolinebarros1010.github.io/myflowlife/femflow/app/" 
+         alt="QR Code FemFlow" width="160" height="160">
+  </div>
+</section>
+
+<!-- Script de instalação do PWA -->
+<script>
+  let deferredPrompt;
+  const installButton = document.getElementById('installButton');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installButton.style.display = 'block';
+  });
+
+  installButton.addEventListener('click', async () => {
+    installButton.disabled = true;
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('✅ App FemFlow instalado!');
+        installButton.innerText = "App instalado 🌸";
+      } else {
+        installButton.disabled = false;
+      }
+      deferredPrompt = null;
+    }
+  });
+</script>
+
       </body>
 </html>
