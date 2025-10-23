@@ -3,103 +3,126 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FemFlow Cyclic Trainer</title>
-    <link rel="manifest" href="./manifest.json" />
-    <meta name="theme-color" content="#CC6A5A" />
-<link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png" />
-    <link rel="stylesheet" href="./css/style.css" />
-
- <!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png" />
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const id = localStorage.getItem('femflow_id');
-    if (!id) {
-      const container = document.querySelector('.container');
-      if (container) container.style.display = 'none';
-      window.location.href = 'ciclo.html';
-    }
-  });
-</script>
+    <title>Treino Diário - FemFlow</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   </head>
+
   <body>
     <header>
-      <img src="assets/icons/icon-192.png" alt="FemFlow logo" style="width:64px;height:64px;" />
-      <h1>FemFlow</h1>
-      <p class="subtitle">Cyclic Trainer</p>
+      <h1>Treino Diário</h1>
     </header>
+
     <div class="container">
-      <button class="btn" onclick="location.href='ciclo.html'">🔍 Identificar e ajustar ciclo</button>
-      <button class="btn btn-secondary" onclick="location.href='treino.html'">💪 Treino diário</button>
-      <button class="btn" style="background:var(--pessego);" onclick="location.href='evolucao.html'">📊 Minha evolução</button>
-      <button class="btn btn-hotmart" onclick="window.open('https://pay.hotmart.com/Q102567067C','_blank')">💫 Adquira seu Acesso</button>
+      <div id="treinoContainer" class="section" style="text-align:center;">
+        <h3 id="tituloTreino">Carregando treino...</h3>
+        <video id="videoTreino" width="100%" height="auto" controls playsinline></video>
+      </div>
+
+      <div class="section">
+        <label for="pseInput">Avalie o esforço (PSE de 0 a 10)</label>
+        <input type="range" id="pseInput" min="0" max="10" step="1" value="5" />
+        <p id="pseValor" style="text-align:center;">PSE: 5</p>
+      </div>
+
+      <div class="botoes-treino">
+        <button class="btn" onclick="registrarPSE()">Registrar PSE</button>
+        <button class="btn btn-secondary" onclick="proximoTreino()">Próximo treino</button>
+      </div>
+
+      <button class="btn" style="margin-top:1.5rem;" onclick="location.href='index.html'">🏠 Voltar ao início</button>
     </div>
+
+    <script src="js/memoria.js"></script>
     <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(() => console.log('✅ Service Worker registrado'))
-      .catch((err) => console.error('SW erro:', err));
-  }
+      // --- Protege acesso (só entra se tiver ID válido)
+      const id = localStorage.getItem('femflow_id');
+      if (!id) window.location.href = 'ciclo.html';
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    window.deferredPrompt = e;
-    console.log('📱 App instalável detectado');
-  });
-</script>
-    <!-- === FEMFLOW INSTALL & PAYMENT SECTION === -->
-<section class="instalar-app">
-  <h3>💫 Tenha o FemFlow no seu celular</h3>
-  <p>Instale o app e acompanhe seus treinos e ciclo — mesmo offline.</p>
-
-  <!-- Botão de instalação PWA -->
-  <button id="installButton" class="btn-install">📲 Instalar o App FemFlow</button>
-
-  <hr style="border:none; border-top:1px solid rgba(0,0,0,0.1); margin:1.5rem 0;">
-
-  <!-- Botão de pagamento Hotmart -->
-  <button class="btn-hotmart" onclick="window.open('https://pay.hotmart.com/Q102567067C','_blank')">
-    💪 Adquira seu treino completo
-  </button>
-
-  <!-- QR Code -->
-  <div class="qrcode-container">
-    <p style="margin-bottom:0.5rem;">ou escaneie e instale direto:</p>
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://carolinebarros1010.github.io/myflowlife/femflow/app/" 
-         alt="QR Code FemFlow" width="160" height="160">
-  </div>
-</section>
-
-<!-- Script de instalação do PWA -->
-<script>
-  let deferredPrompt;
-  const installButton = document.getElementById('installButton');
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installButton.style.display = 'block';
-  });
-
-  installButton.addEventListener('click', async () => {
-    installButton.disabled = true;
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        console.log('✅ App FemFlow instalado!');
-        installButton.innerText = "App instalado 🌸";
-      } else {
-        installButton.disabled = false;
+      // --- Exibe fase atual no topo
+      const faseAtual = localStorage.getItem("fase_sugerida");
+      if (faseAtual) {
+        const header = document.querySelector('header');
+        const faseInfo = document.createElement('p');
+        faseInfo.innerText = `🌿 Fase atual: ${faseAtual}`;
+        faseInfo.style.color = "#335953";
+        faseInfo.style.fontWeight = "600";
+        faseInfo.style.marginTop = "0.3rem";
+        header.appendChild(faseInfo);
       }
-      deferredPrompt = null;
-    }
-  });
-</script>
 
-      </body>
+      // --- Atualiza valor visual do PSE
+      const pseInput = document.getElementById('pseInput');
+      const pseValor = document.getElementById('pseValor');
+      pseInput.addEventListener('input', () => {
+        pseValor.innerText = `PSE: ${pseInput.value}`;
+      });
+
+      // --- Carrega vídeo e dados do treino
+      const video = document.getElementById('videoTreino');
+      video.onerror = () => {
+        alert("Vídeo indisponível offline. Tente novamente com internet ativa.");
+      };
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const diaPrograma = obterDiaPrograma();
+        const fase = localStorage.getItem("fase_sugerida") || "Folicular";
+
+        const titulo = document.getElementById("tituloTreino");
+        titulo.innerText = `Treino do Dia ${diaPrograma} – Fase ${fase}`;
+
+        // Caminho do vídeo conforme fase e dia
+        const videoPath = `videos/video_${fase.toLowerCase()}_${diaPrograma}.mp4`;
+        video.src = videoPath;
+      });
+
+      // --- Função para registrar PSE local e enviar ao servidor
+      function registrarPSE() {
+        const pse = Number(document.getElementById('pseInput').value);
+        const fase = localStorage.getItem("fase_sugerida") || "Folicular";
+        const diaPrograma = obterDiaPrograma();
+        const data = new Date().toISOString().split('T')[0];
+
+        salvarTreino(id, data, fase, diaPrograma, pse);
+
+        alert("✅ PSE registrado com sucesso!");
+      }
+
+      // --- Avança o treino para o próximo dia
+      function proximoTreino() {
+        const diaAtual = obterDiaPrograma();
+        const proximo = diaAtual + 1;
+        salvarMemoria(id, { ultimoTreino: proximo });
+        location.reload();
+      }
+
+      // --- Auxiliar: obtém o dia atual do programa
+      function obterDiaPrograma() {
+        const memoria = carregarMemoria(id);
+        return memoria?.ultimoTreino || 1;
+      }
+    </script>
+
+    <style>
+      .botoes-treino {
+        display: flex;
+        justify-content: space-around;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      #pseInput {
+        width: 100%;
+        accent-color: var(--terracota);
+      }
+
+      #pseValor {
+        font-weight: 600;
+        color: var(--teal);
+      }
+    </style>
+  </body>
 </html>
