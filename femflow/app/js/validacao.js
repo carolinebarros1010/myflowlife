@@ -13,3 +13,36 @@ function validarID(id) {
       return false;
     });
 }
+function mostrarRecuperar() {
+  document.getElementById('recuperarBox').style.display = 'block';
+}
+
+function recuperarID() {
+  const nome = document.getElementById('nomeRec').value.trim();
+  const email = document.getElementById('emailRec').value.trim();
+  const status = document.getElementById('statusRec');
+
+  if (!nome || !email) {
+    status.innerText = 'Por favor, preencha nome e e-mail.';
+    status.style.color = '#CC6A5A';
+    return;
+  }
+
+  status.innerText = '🔄 Verificando...';
+  status.style.color = '#335953';
+
+  fetch('https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec', {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify({ action: 'recuperarID', nome: nome, email: email })
+  })
+  .then(() => {
+    status.innerText = '📩 Se o e-mail estiver cadastrado, o ID foi reenviado!';
+    status.style.color = '#335953';
+  })
+  .catch(() => {
+    status.innerText = '⚠️ Erro ao tentar recuperar. Tente novamente.';
+    status.style.color = '#CC6A5A';
+  });
+}
+
