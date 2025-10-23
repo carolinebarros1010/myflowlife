@@ -182,6 +182,45 @@ footer{ padding:3rem 0 4rem; background:linear-gradient(180deg,#eef3f2,#fff); }
   transition: transform .6s ease, opacity .6s ease; opacity:.0; pointer-events:none;
 }
 .btn-splash:hover::after{ transform: translateY(15%) rotate(8deg); opacity:.9; }
+/* === Correção fotos seção Responsável Técnico e Círculo de Apoio === */
+
+.bio picture img {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--primary);
+  display: block;
+  margin: 0 auto;
+}
+
+/* texto ao lado ou abaixo, mantendo proporção */
+.bio {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.bio-texto {
+  flex: 1;
+  min-width: 250px;
+}
+
+/* Ícone do Instagram: normaliza tamanho e remove moldura circular */
+.bio-texto img[alt="Instagram"] {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 0;
+  object-fit: contain;
+  background: none;
+  box-shadow: none;
+}
+
 
 /* ===== Responsivo ===== */
 @media (max-width:980px){
@@ -194,4 +233,5 @@ footer{ padding:3rem 0 4rem; background:linear-gradient(180deg,#eef3f2,#fff); }
   .grid-3{ grid-template-columns:1fr; }
   .footgrid{ grid-template-columns:1fr; }
 }
+
 
