@@ -549,6 +549,77 @@ footer{text-align:center;padding:1.2rem;font-size:.85rem;color:rgba(0,0,0,.6)}
 .plano:nth-child(3) {
   transition-delay: 0.6s;
 }
+/* ====== AJUSTE DO LOGO FIXO ====== */
+.brand-minimal {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 999;
+  font-family: 'Helvetica Rounded Bold', Helvetica, Arial, sans-serif;
+  font-size: clamp(1.3rem, 2vw, 1.8rem);
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(6px);
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+}
+
+/* Evita sobreposição em títulos e seções */
+@media (max-width: 768px) {
+  .brand-minimal {
+    font-size: 1.2rem;
+    top: 0.6rem;
+    left: 0.6rem;
+  }
+
+  h1, h2, .section h2 {
+    margin-top: 3rem; /* afasta o conteúdo inicial */
+  }
+}
+/* ====== AJUSTES GERAIS MOBILE ====== */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden; /* impede rolagem lateral */
+  }
+
+  section {
+    padding: 2rem 1rem;
+  }
+
+  .ricardo-container,
+  .planos,
+  .ebooks-section {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .ricardo-texto {
+    max-width: 90%;
+  }
+
+  video.video-player {
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+  }
+
+  .btn-primary, .btn-outline {
+    width: 80%;
+    text-align: center;
+  }
+}
+
+/* Remove qualquer barra lateral invisível */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  touch-action: pan-y;
+}
+
 
 
 
