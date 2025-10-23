@@ -207,6 +207,49 @@ section.metodo p {
   color: #1d3b38;
   transform: translateY(-2px);
 }
+  /* ===== BOTÃO NEWSLETTER — TOPO ESQUERDO ===== */
+.btn-newsletter {
+  position: fixed;
+  top: 1rem;
+  right: auto;
+  left: 1rem;
+  z-index: 998;
+
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.8px;
+  font-weight: 500;
+  text-transform: lowercase;
+  text-decoration: none;
+
+  border: 1px solid rgba(51,89,83,0.25);
+  background: rgba(255,255,255,0.2);
+  color: #335953;
+  backdrop-filter: blur(10px);
+  border-radius: 100px;
+  padding: 0.55rem 1.1rem;
+
+  transition: all 0.35s ease;
+  opacity: 0.9;
+}
+
+.btn-newsletter:hover {
+  background: rgba(255,255,255,0.35);
+  border-color: rgba(51,89,83,0.4);
+  transform: translateY(-2px);
+  opacity: 1;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .btn-newsletter {
+    top: 0.8rem;
+    left: 0.8rem;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
 </style>
 </head>
 <body>
