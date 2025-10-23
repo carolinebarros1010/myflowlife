@@ -48,8 +48,15 @@
   <p id="statusRec" style="margin-top:0.5rem; font-size:0.9rem;"></p>
 </div>
     </div>
-    <script src="js/memoria.js"></script>
-    <script src="js/validacao.js"></script>
-    <script src="js/ciclo.js"></script>
+    <script src="./js/memoria.js"></script>
+    <script src="./js/validacao.js"></script>
+    <script src="./js/ciclo.js"></script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(() => console.log('✅ Service Worker registrado'))
+      .catch((err) => console.error('SW erro:', err));
+  }
+</script>
       </body>
 </html>
