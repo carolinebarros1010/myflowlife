@@ -59,3 +59,86 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+let perguntas = [];
+let indicePergunta = 0;
+let pontuacao = 0;
+
+function abrirQuiz(tipo) {
+  document.getElementById("quizModal").style.display = "flex";
+  indicePergunta = 0;
+  pontuacao = 0;
+
+  // define as perguntas por tipo
+  if (tipo === "irregular") {
+    perguntas = [
+      { q: "Você tem sensações de inchaço e retenção de líquidos frequentes?", p: 1 },
+      { q: "Seu humor oscila com frequência sem motivo claro?", p: 2 },
+      { q: "Sente mais energia em certos dias do mês?", p: 3 },
+      { q: "Tem variação de temperatura corporal ou sono?", p: 4 },
+      { q: "Tem menstruação, mas sem padrão previsível?", p: 5 }
+    ];
+  } else if (tipo === "diu") {
+    perguntas = [
+      { q: "Sente cólicas ou leve sangramento mensal?", p: 1 },
+      { q: "Percebe mudanças sutis de energia ou disposição?", p: 2 },
+      { q: "Tem sensibilidade nos seios ou irritabilidade?", p: 3 },
+      { q: "Seu sono varia durante o mês?", p: 4 },
+      { q: "Nota dias com mais foco e produtividade?", p: 5 }
+    ];
+  } else if (tipo === "menopausa") {
+    perguntas = [
+      { q: "Tem ondas de calor ou suor noturno?", p: 1 },
+      { q: "Percebe queda de energia ou fadiga crônica?", p: 2 },
+      { q: "Seu sono está mais leve ou irregular?", p: 3 },
+      { q: "Sente ansiedade ou irritabilidade aumentada?", p: 4 },
+      { q: "Tem ressecamento corporal ou da pele?", p: 5 }
+    ];
+  }
+
+  mostrarPergunta();
+}
+
+function mostrarPergunta() {
+  const atual = perguntas[indicePergunta];
+  document.getElementById("quizPergunta").innerText = atual.q;
+  const respostasDiv = document.getElementById("quizRespostas");
+  respostasDiv.innerHTML = `
+    <button onclick="responder(1)">Sim</button>
+    <button onclick="responder(0)">Não</button>
+  `;
+}
+
+function responder(valor) {
+  pontuacao += valor;
+  proximaPergunta();
+}
+
+function proximaPergunta() {
+  indicePergunta++;
+  if (indicePergunta < perguntas.length) {
+    mostrarPergunta();
+  } else {
+    concluirQuiz();
+  }
+}
+function concluirQuiz() {
+  document.getElementById("quizModal").style.display = "none";
+
+  // Determina a fase com base na pontuação
+  let fase = "";
+  if (pontuacao <= 2) fase = "Folicular";
+  else if (pontuacao <= 3) fase = "Ovulatória";
+  else if (pontuacao <= 4) fase = "Lútea";
+  else fase = "Menstrual";
+
+  // Guarda a fase no localStorage
+  localStorage.setItem("fase_sugerida", fase);
+
+  // Feedback visual rápido
+  const msg = `Pelo seu perfil, seu corpo está mais próximo da fase ${fase}. 🌸`;
+  alert(msg);
+
+  // Redireciona para a tela de ID (cadastro) já com a fase
+  window.location.href = `cadastro.html?fase=${encodeURIComponent(fase)}`;
+}
+
