@@ -414,84 +414,19 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     </div>
   </footer>
-
-  <script>
-    // ===== Todos os planos via Typebot (lead) =====
-    (function(){
-      const TYPEBOT_URL = "https://automacao.chatideal.com.br/anamnese-g44p1wv";
-
-      function buildLeadLink(plan){
-        const redirect = new URL(window.location.origin + "/obrigado");
-        redirect.searchParams.set("plan", plan);
-        const url = new URL(TYPEBOT_URL);
-        url.searchParams.set("redirectUrl", redirect.toString());
-        url.searchParams.set("plan", plan);
-        return url.toString();
-      }
-
-      const buttons = [
-        { id: "cta-7dias",   plan: "7dias" },
-        { id: "cta-15dias",  plan: "15dias" },
-        { id: "cta-strong",  plan: "strong" },
-        { id: "cta-4semanas", plan: "4semanas" }
-      ];
-
-      buttons.forEach(b => {
-        const el = document.getElementById(b.id);
-        if (el) {
-          el.href = buildLeadLink(b.plan);
-          el.target = "_blank";
-          el.rel = "noopener";
-        }
-              buttons.forEach(b => {
-        const el = document.getElementById(b.id);
-        if (el) {
-          el.href = buildLeadLink(b.plan);
-          el.target = "_blank";
-          el.rel = "noopener";
-
-          el.addEventListener('click', () => {
-            if (typeof fbq === 'function') fbq('track', 'Lead', {plan: b.plan});
-            if (typeof gtag === 'function') gtag('event', 'generate_lead', {method: b.plan});
-          });
-        }
-      });
-
-      });
-    })();
-  </script>
-  <!-- ===== Banner LGPD FemFlow ===== -->
-<div id="lgpd-banner" style="
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(90deg, #335953, #CC6A5A);
-  color: #fff; text-align: center;
-  padding: 16px 12px; font-family: 'Lato', sans-serif;
-  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
-  gap: 12px; z-index: 9999;
-  box-shadow: 0 -4px 10px rgba(0,0,0,.15);
-">
-  <span style="font-size: 0.95rem;">
-    Usamos cookies e pixels para medir desempenho e melhorar sua experiência.
-  </span>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;">
-    <button id="lgpd-accept" style="
-      background:#fff;color:#335953;border:none;border-radius:8px;
-      padding:8px 16px;font-weight:700;cursor:pointer;">ACEITAR</button>
-    <button id="lgpd-deny" style="
-      background:transparent;color:#fff;border:1px solid #fff;
-      border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;">RECUSAR</button>
-  </div>
-</div>
-
+  
+<!-- ================= FEMFLOW SCRIPT UNIFICADO ================= -->
 <script>
 (function(){
+  /* === Configurações Globais === */
   const CONSENT_KEY = 'femflow_consent_v1';
+  const TYPEBOT_URL = 'https://automacao.chatideal.com.br/fem-direto-personal-planos-staw063';
   const banner = document.getElementById('lgpd-banner');
 
+  /* === Funções LGPD === */
   function hideBanner(){ banner.style.display = 'none'; }
 
   function grant(){
-    // Atualiza consentimento no GA4 / Tag Manager
     if (typeof gtag === 'function') {
       gtag('consent', 'update', {
         ad_user_data: 'granted',
@@ -500,7 +435,6 @@ document.addEventListener("DOMContentLoaded", () => {
         analytics_storage: 'granted'
       });
     }
-    // Meta Pixel
     if (typeof fbq === 'function') {
       fbq('consent', 'grant');
       fbq('track', 'PageView');
@@ -523,39 +457,64 @@ document.addEventListener("DOMContentLoaded", () => {
     hideBanner();
   }
 
-  // Estado salvo
   const saved = localStorage.getItem(CONSENT_KEY);
   if (saved === 'granted') grant();
   else if (saved === 'denied') deny();
-  else banner.style.display = 'flex';
+  else if (banner) banner.style.display = 'flex';
 
-  // Botões
-  document.getElementById('lgpd-accept').addEventListener('click', grant);
-  document.getElementById('lgpd-deny').addEventListener('click', deny);
-})();
-</script>
-<!-- ===== Fim Banner LGPD FemFlow ===== -->
-  <script>
-  // Função para enviar evento de Lead ao clicar nos botões
-  function rastrearLeadFemFlow(plano) {
-    fbq('track', 'Lead', {plan: plano});
-    console.log('Evento Lead enviado para o Meta Pixel:', plano);
+  document.getElementById('lgpd-accept')?.addEventListener('click', grant);
+  document.getElementById('lgpd-deny')?.addEventListener('click', deny);
+
+  /* === Rastreamento + Redirecionamento === */
+  function goCadastro(destino, plano, origem){
+    try {
+      // Salva dados
+      localStorage.setItem('planoSelecionado', plano);
+      localStorage.setItem('origemCadastro', origem);
+      localStorage.setItem('timestampCadastro', new Date().toISOString());
+
+      // Rastreia lead
+      if (typeof fbq === 'function') fbq('track', 'Lead', {plan: plano, origem});
+      if (typeof gtag === 'function') gtag('event', 'generate_lead', {method: plano});
+
+      // Monta URL final com parâmetros
+      const params = new URLSearchParams({ origem, plano, ref: 'femflow-site' });
+      const destinoFinal = destino.includes('?')
+        ? `${destino}&${params.toString()}`
+        : `${destino}?${params.toString()}`;
+
+      setTimeout(() => { window.location.href = destinoFinal; }, 200);
+      return false;
+    } catch(e){
+      console.error('Erro no goCadastro:', e);
+      window.location.href = destino;
+      return false;
+    }
   }
 
-  // Adiciona o rastreamento em cada botão
-  document.getElementById("cta-7dias")?.addEventListener("click", () => rastrearLeadFemFlow("7dias"));
-  document.getElementById("cta-15dias")?.addEventListener("click", () => rastrearLeadFemFlow("15dias"));
-  document.getElementById("cta-4semanas")?.addEventListener("click", () => rastrearLeadFemFlow("4semanas"));
-  document.getElementById("cta-strong")?.addEventListener("click", () => rastrearLeadFemFlow("strong"));
+  /* === Aplicar comportamento aos botões === */
+  const botoes = [
+    { id: 'cta-7dias', plano: '7dias' },
+    { id: 'cta-strong', plano: 'strong' },
+    { id: 'cta-premium', plano: 'premium' }
+  ];
+
+  botoes.forEach(b => {
+    const el = document.getElementById(b.id);
+    if (!el) return;
+
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      goCadastro(TYPEBOT_URL, b.plano, 'femflow');
+    });
+  });
+
+})();
 </script>
-<script>
-function goCadastro(destino, plano, origem) {
-  localStorage.setItem('plano_origem', plano);
-  localStorage.setItem('origem', origem);
-  window.location.href = destino;
-  return false;
-}
-</script>
+<!-- ============================================================ -->
+
+
+
 
 </body>
 </html>
