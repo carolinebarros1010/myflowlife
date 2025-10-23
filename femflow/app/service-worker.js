@@ -1,24 +1,20 @@
 // FemFlow Service Worker
 const CACHE_NAME = 'femflow-cache-v1';
 const ASSETS = [
-  // core pages
-  'index.html',
-  'ciclo.html',
-  'treino.html',
-  'evolucao.html',
-  'cadastro.html',
-  // styles and manifest
-  'css/style.css',
-  'manifest.json',
-  // scripts
-  'js/memoria.js',
-  'js/ciclo.js',
-  'js/treino.js',
-  'js/validacao.js',
-  'js/cadastro.js',
-  // icons
-  'assets/icons/icon-192.png',
-  'assets/icons/icon-512.png'
+  './index.html',
+  './ciclo.html',
+  './treino.html',
+  './evolucao.html',
+  './cadastro.html',
+  './css/style.css',
+  './manifest.json',
+  './js/memoria.js',
+  './js/ciclo.js',
+  './js/treino.js',
+  './js/validacao.js',
+  './js/cadastro.js',
+  './assets/icons/icon-192.png',
+  './assets/icons/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -51,9 +47,24 @@ self.addEventListener('fetch', event => {
       }).catch(() => {
         // fallback for navigation requests
         if (event.request.mode === 'navigate') {
-          return caches.match('/femflow/app/index.html');
+          return caches.match('./index.html');
         }
       });
     })
   );
+});
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+  );
+  self.skipWaiting(); // força ativação imediata
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
+  );
+  self.clients.claim(); // aplica o novo SW instantaneamente
 });
