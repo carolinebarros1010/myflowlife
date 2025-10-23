@@ -1,9 +1,9 @@
-[
+[  
   {
-    "capa": "capahipopressivos.png",
-    "nome": "Exercícios Hipopressivos",
-    "preco": "19,90",
-    "link": "https://pay.hotmart.com/N102180089S",
+    "capa": "capafemflow4semanas.png",
+    "nome": "FemFlow 4 Semanas",
+    "preco": "99,90",
+    "link": "https://pay.hotmart.com/T102397575W",
     "tipo": "premium"
   },
   {
@@ -27,13 +27,13 @@
     "link": "https://pay.hotmart.com/E102161861P",
     "tipo": "premium"
   },
-  {
-    "capa": "capafemflow4semanas.png",
-    "nome": "FemFlow 4 Semanas",
-    "preco": "99,90",
-    "link": "https://pay.hotmart.com/T102397575W",
+    {
+    "capa": "capahipopressivos.png",
+    "nome": "Exercícios Hipopressivos",
+    "preco": "19,90",
+    "link": "https://pay.hotmart.com/N102180089S",
     "tipo": "premium"
-  },
+  },  
   {
     "capa": "capaefeitoEPOC.png",
     "nome": "Efeito EPOC",
