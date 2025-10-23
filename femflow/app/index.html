@@ -4,8 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FemFlow Cyclic Trainer</title>
-    <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#CC6A5A" />
+<link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png" />
+    <link rel="stylesheet" href="./css/style.css" />
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,5 +42,18 @@
       <button class="btn btn-secondary" onclick="location.href='treino.html'">💪 Treino diário</button>
       <button class="btn" style="background:var(--pessego);" onclick="location.href='evolucao.html'">📊 Minha evolução</button>
     </div>
-  </body>
+    <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(() => console.log('✅ Service Worker registrado'))
+      .catch((err) => console.error('SW erro:', err));
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.deferredPrompt = e;
+    console.log('📱 App instalável detectado');
+  });
+</script>
+      </body>
 </html>
