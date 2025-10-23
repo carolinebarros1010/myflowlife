@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FemFlow Cyclic Trainer</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script>
+      // register service worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          // registra o service worker relativo ao diretório atual
+          navigator.serviceWorker.register('service-worker.js');
+        });
+      }
+      // redirect to ciclo page if no ID stored
+      document.addEventListener('DOMContentLoaded', () => {
+        const id = localStorage.getItem('femflow_id');
+        if (!id) {
+          window.location.href = 'ciclo.html';
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <header>
+      <img src="assets/icons/icon-192.png" alt="FemFlow logo" style="width:64px;height:64px;" />
+      <h1>FemFlow</h1>
+      <p class="subtitle">Cyclic Trainer</p>
+    </header>
+    <div class="container">
+      <button class="btn" onclick="location.href='ciclo.html'">🔍 Identificar e ajustar ciclo</button>
+      <button class="btn btn-secondary" onclick="location.href='treino.html'">💪 Treino diário</button>
+      <button class="btn" style="background:var(--pessego);" onclick="location.href='evolucao.html'">📊 Minha evolução</button>
+    </div>
+  </body>
+</html>
