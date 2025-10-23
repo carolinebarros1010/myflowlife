@@ -138,6 +138,68 @@ section.metodo p {
   }
   section.metodo img { width: 140px; }
 }
+  /* ====== CORREÇÃO DE SOBREPOSIÇÃO DOS BOTÕES ====== */
+.metodologia-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  position: relative;
+  z-index: 5; /* garante que fiquem acima de fundos ou blur */
+}
+
+.metodologia-botoes a {
+  text-decoration: none;
+  border-radius: 40px;
+  padding: 0.8rem 1.6rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  display: inline-block;
+}
+
+/* Mantém coerência visual com MyFlowLife */
+.btn-primary {
+  background: linear-gradient(135deg, #335953, #CC6A5A);
+  color: #fff;
+  border: none;
+}
+.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-3px);
+}
+
+.btn-outline {
+  border: 2px solid #EFBDA6;
+  color: #EFBDA6;
+  background: transparent;
+}
+.btn-outline:hover {
+  background: #EFBDA6;
+  color: #335953;
+  transform: translateY(-3px);
+}
+  .btn-voltar-fixo {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  background: rgba(255, 255, 255, 0.25);
+  color: #335953;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 30px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.btn-voltar-fixo:hover {
+  background: #EFBDA6;
+  color: #1d3b38;
+  transform: translateY(-2px);
+}
 </style>
 </head>
 <body>
@@ -151,6 +213,8 @@ section.metodo p {
 
 <a href="#" class="btn-newsletter" onclick="return goCadastro('#','newsletter','metodologia')">newsletter</a>
 <a href="#" class="btn-flutuante" onclick="return goCadastro('#','comecar','metodologia')">começar agora</a>
+  <a href="https://www.myflowlife.com.br#planos" class="btn-voltar-fixo">← Voltar</a>
+
 
 <main>
   <section class="metodo">
