@@ -4,275 +4,154 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MaleFlow | Performance Masculina</title>
-  <meta name="description" content="Treinamento masculino com ciência, tecnologia e acompanhamento individualizado: plano gratuito, plano Strong (app + Whats), e plano Elite (app ou TrainingPeaks + Whats + premium)." />
+  <meta name="description" content="Força, potência e resistência com tecnologia, método claro e acompanhamento humano. 7 dias grátis, Strong e Premium." />
   <meta property="og:title" content="MaleFlow | Performance Masculina" />
   <meta property="og:description" content="Estrutura de treino para homens: força, potência e resistência com tecnologia e acompanhamento." />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#335953" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <style>
-    /* ======= PALETA MALEFLOW ======= */
-    :root{
-      --primary:#335953;   /* Teal MaleFlow */
-      --gray-900:#1f2937;
-      --gray-700:#4b5563;
-      --gray-600:#5A5A5A;
-      --gray-300:#D9D9D9;
-      --bg:#ffffff;
-      --soft:#f5f7f6;
-      --border:#e6ecea;
-    }
 
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--fundo);color:var(--grafite); font-family:'Rubik', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, sans-serif;
-    }
-    a{color:var(--primary);text-decoration:none}
-    .container{width:min(1120px,92vw);margin-inline:auto}
+  <!-- CSS -->
+  <link rel="stylesheet" href="./style/style.css">
 
-    /* Topbar em tons do MaleFlow */
-    .topbar{background:linear-gradient(90deg,#3A6A63,#2A4945);color:#fff;padding:.5rem 0;font-size:.95rem}
-    .topbar .container{display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap}
+  <!-- ===== Google Tag Manager (substitua o ID) ===== -->
+  <script>
+    (function(w,d,s,l,i){
+      w[l]=w[l]||[]; w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+      var f=d.getElementsByTagName(s)[0], j=d.createElement(s), dl=l!='dataLayer'?'&l='+l:'';
+      j.async=true; j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl; f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-XXXXXXX');
+  </script>
+  <!-- ===== Fim GTM ===== -->
 
-    header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--border)}
-    .nav{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;gap:1rem;flex-wrap:wrap}
-    .brand{display:flex;align-items:center;gap:.75rem;font-weight:900}
-    .logo-img{height:auto;max-height:72px;width:auto;display:block}
-    .cta-header{padding:.7rem 1.1rem;background:var(--primary);color:#fff;border-radius:999px;font-weight:800;box-shadow:0 6px 16px rgba(51,89,83,.25)}
-    @media (max-width:640px){
-      .nav{justify-content:center}
-      .cta-header{width:100%;text-align:center;margin-top:.25rem}
-    }
+  <!-- ===== Meta Pixel (substitua o ID) ===== -->
+  <script>
+    !(function(f,b,e,v,n,t,s){
+      if(f.fbq)return; n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq) n=f.fbq; n.push=n; n.loaded=!0; n.version='2.0'; n.queue=[];
+      t=b.createElement(e); t.async=!0; t.src=v; s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s);
+    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '000000000000000'); // <- troque pelo Pixel real
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=000000000000000&ev=PageView&noscript=1"/></noscript>
+  <!-- ===== Fim Meta Pixel ===== -->
 
-    /* ======= HERO 50/50 — INVERTIDO PARA MALE ======= */
-    .hero{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: "image text"; /* invertido: imagem à esquerda, texto à direita */
-      gap:2rem; align-items:center; padding:3rem 0;
-    }
-    .hero-text{ grid-area:text; }
-    .hero-media{
-      grid-area:image;
-      border-radius:18px; overflow:hidden; box-shadow:0 20px 40px rgba(51,89,83,.18);
-      aspect-ratio: 4 / 3; background:#fff;
-    }
-    .hero-media picture,.hero-media img{width:100%;height:100%;display:block;object-fit:cover}
-    .kicker{letter-spacing:.1em;text-transform:uppercase;color:var(--primary);font-weight:900;font-size:.85rem}
-    h1{font-family:"Playfair Display",serif;line-height:1.05;margin:.4rem 0 1rem;font-size:clamp(1.9rem,3.2vw + 1rem,3.4rem)}
-    .sub{font-size:1.1rem;color:var(--gray-700)}
-    .hero-cta{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.25rem}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:1rem 1.25rem;border-radius:14px;font-weight:900;border:2px solid transparent;transition:.2s ease;cursor:pointer}
-    .btn-primary{background:var(--primary);color:#fff;box-shadow:0 12px 24px rgba(51,89,83,.25)}
-    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 16px 28px rgba(51,89,83,.28)}
-    .btn-ghost{background:#fff;border-color:var(--border);color:var(--gray-900)}
-
-    /* Seções e cards */
-    .section{ padding:2.5rem 0; }
-    .section h2{ font-family:"Playfair Display",serif; font-size:clamp(1.4rem,2vw + .8rem,2.2rem); margin:0 0 .75rem; color:var(--primary) }
-    .grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
-    .card{ background:#fff; border:1px solid var(--border); border-radius:18px; padding:1.2rem; box-shadow:0 10px 24px rgba(51,89,83,.08); }
-
-    /* Ofertas — 3 planos */
-    .offers{ display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
-    .offer{ position:relative; background:linear-gradient(180deg,#fff, #fff 60%, #f2f6f5); border:1px solid var(--border); border-radius:22px; padding:1.25rem; box-shadow:0 16px 30px rgba(51,89,83,.10); }
-    .badge{ position:absolute; top:12px; right:12px; background:var(--primary); color:#fff; font-weight:900; font-size:.75rem; padding:.3rem .6rem; border-radius:999px; }
-    .price{ font-size:1.4rem; font-weight:900; color:var(--primary); }
-    .features{ margin:.6rem 0 1rem; padding:0; list-style:none; }
-    .features li{ position:relative; margin:0 0 .5rem 0; padding-left:1.2rem; }
-    .features li::before{ content:"•"; position:absolute; left:0; top:.15rem; font-weight:700; line-height:1; color:var(--gray-600); }
-    .offer .btn{ width:100%; }
-
-    /* Benefícios */
-    .benefits{ display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
-
-    /* Bio/Parcerias */
-    .bio{ display:grid; grid-template-columns:160px 1fr; gap:1rem; align-items:center; background:#fff; border:1px solid var(--border); border-radius:18px; padding:1rem; }
-    .bio img{ width:160px; height:160px; object-fit:cover; border-radius:16px; box-shadow:0 10px 24px rgba(51,89,83,.12); }
-    .bio .who{ font-weight:900; }
-
-    .bio-texto{display:flex;flex-direction:column;justify-content:flex-start}
-    .bio-topo{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
-    .bio-topo a img{width:28px;height:28px;transition:transform .3s ease, filter .3s ease}
-    .bio-topo a:hover img{transform:scale(1.2);filter:drop-shadow(0 0 6px rgba(51,89,83,.6))}
-
-    /* Bloco vídeo + cards — INVERTÍVEL */
-    .ff-section{background:var(--soft)}
-    .ff-container{max-width:1120px;margin:0 auto;padding:2.5rem 1rem}
-    .ff-title{font-family:"Playfair Display",serif;font-weight:800;font-size:clamp(1.6rem,2.3vw,2.4rem);color:var(--primary);margin:0 0 1.25rem}
-
-    .ff-layout{
-      display:grid;
-      grid-template-columns: 1fr 1.1fr;
-      grid-template-areas: "stack video"; /* padrão: vídeo à direita, cards text esquerda */
-      gap:1.5rem; align-items:start;
-    }
-    .ff-video{grid-area:video;border-radius:18px;overflow:hidden;background:#000;aspect-ratio:9/16;max-width:340px;margin:0 auto;position:relative}
-    .ff-video video{width:100%;height:100%;object-fit:contain;display:block;background:#000;border-radius:18px}
-    ..ff-video{
-  /* position:relative;  <- pode remover */
-  border-radius:18px;
-  overflow:hidden;
-  background:#000;
-  aspect-ratio:9/16;
-  max-width:340px;
-  margin:0 auto;
-}
-    .ff-video video{ z-index:1; position:relative; }
-    .ff-stack{grid-area:stack;display:flex;flex-direction:column;gap:1rem}
-    .ff-card{background:#fff;border:1px solid var(--border);border-radius:18px;padding:1.25rem;box-shadow:0 10px 24px rgba(51,89,83,.06)}
-    .ff-card h3{font-size:1.1rem;margin:0 0 .5rem;color:var(--gray-900);font-weight:800}
-    .ff-card p{color:var(--gray-700);line-height:1.55;margin:0}
-    .ff-link{display:inline-block;margin-top:.75rem;font-weight:800;color:var(--primary)}
-    .ff-link:hover{text-decoration:underline}
-
-    /* Responsivo */
-    @media (max-width:980px){
-      .hero{grid-template-columns:1fr;grid-template-areas:"image" "text";}
-      .offers{ grid-template-columns:1fr 1fr; }
-      .grid-3, .benefits{ grid-template-columns:1fr 1fr; }
-      .bio{ grid-template-columns:1fr; }
-      .ff-layout{grid-template-columns:1fr;grid-template-areas:"video" "stack";}
-    }
-    @media (max-width:640px){
-      .offers, .grid-3, .benefits{ grid-template-columns:1fr; }
-    }
-
-    /* Rodapé */
-    footer{ padding:3rem 0 4rem; background:linear-gradient(180deg, #eef3f2, #fff); }
-    .footgrid{ display:grid; grid-template-columns:2fr 1fr 1fr; gap:1rem; }
-    .small{ font-size:.9rem; color:#6b7280; }
-    .footnote{ margin-top:1rem; font-size:.85rem; color:#6b7280; }
-    @media (max-width:980px){ .footgrid{grid-template-columns:1fr 1fr} }
-    @media (max-width:640px){ .footgrid{grid-template-columns:1fr} }
-  
-  /* ====== VÍDEO MALEFLOW ====== */
-.video-wrap {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 3rem 1rem;
-  background: linear-gradient(135deg, #33595315, #cc6a5a15);
-}
-
-.ff-video {
-  position: relative;
-  width: 100%;
-  max-width: 420px;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-}
-
-.ff-video:hover {
-  transform: scale(1.02);
-  box-shadow: 0 18px 50px rgba(0,0,0,0.3);
-}
-
-.video-player {
-  width: 100%;
-  height: auto;
-  border-radius: 20px;
-  object-fit: cover;
-}
-
-/* ====== MOBILE ====== */
-@media (max-width: 768px) {
-  .ff-video {
-    max-width: 95%;
-  }
-}
-
-  
-  </style>
+  <!-- ===== GA4 (substitua o ID) ===== -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+  <!-- ===== Fim GA4 ===== -->
 </head>
+
 <body class="male">
+  <!-- GTM (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+  <!-- ===== Splash ===== -->
+  <div id="splash">
+    <h1 class="brand-splash">MaleFlow</h1>
+    <h2>Performance masculina com método e constância</h2>
+  </div>
+
+  <!-- Topbar -->
   <div class="topbar">
     <div class="container">
-      <span>🎁 <b>Plano Start gratuito</b> • </span>
-      <span>💬 Acompanhamento humano • </span>
-      <span>🔒 Pagamento seguro</span>
+      <span>🎁 <b>7 dias grátis</b> para sentir o método • </span>
+      <span>💬 Suporte humano • </span>
+      <span>🔒 Pagamento 100% seguro</span>
     </div>
   </div>
 
+  <!-- Header -->
   <header>
     <div class="container nav">
       <div class="brand">
-        <!-- Troque o caminho da logo para a do MaleFlow -->
         <img src="./assets/logo-maleflow.png" alt="Logo MaleFlow" class="logo-img" />
       </div>
-      <a class="cta-header" href="#ofertas">Começar agora</a>
+      <nav class="nav-links">
+        <a class="cta-header" href="#ofertas">Começar agora</a>
+      </nav>
     </div>
   </header>
 
+  <!-- Main -->
   <main class="container">
-    <!-- HERO (invertido: imagem esquerda / texto direita) -->
+    <!-- HERO (imagem esquerda / texto direita) -->
     <section class="hero" id="inicio">
-      <div class="hero-media">
+      <div class="hero-media reveal">
         <picture>
           <source srcset="./assets/male-hero.webp" type="image/webp">
           <img src="./assets/male-hero.png" alt="Treinamento masculino de performance" loading="eager" width="960" height="720">
         </picture>
       </div>
-      <div class="hero-text">
+      <div class="hero-text reveal">
         <div class="kicker">Método masculino • performance real</div>
         <h1>Força, potência e resistência — com tecnologia e acompanhamento.</h1>
-        <p class="sub">Treinos pensados para o corpo masculino, com estrutura clara, controle de carga por PSE e integração com app ou TrainingPeaks (Garmin).</p>
+        <p class="sub">Treinos pensados para o corpo masculino, com PSE, progressões simples e integração com App ou TrainingPeaks.</p>
         <div class="hero-cta">
-          <a class="btn btn-primary" href="#ofertas">Ver planos</a>
+          <a class="btn btn-primary btn-splash" href="#ofertas">Ver planos</a>
           <a class="btn btn-ghost" href="#metodologia-maleflow">Metodologia</a>
         </div>
       </div>
     </section>
 
-    <!-- BLOCO VÍDEO + CARDS (padrão invertido já com vídeo à esquerda / cards à direita) -->
-  <section class="ff-section" id="metodologia-maleflow">
-  <div class="ff-container">
-    <h2 class="ff-title">Metodologia MaleFlow</h2>
+    <!-- METODOLOGIA (vídeo + 3 cards) -->
+    <section class="ff-section" id="metodologia-maleflow">
+      <div class="ff-container">
+        <h2 class="ff-title">Metodologia MaleFlow</h2>
 
-    <div class="ff-layout inverse">
-      <!-- TEXTO / CARDS -->
-      <div class="ff-stack">
-        <article class="ff-card">
-          <h3>O problema escondido</h3>
-          <p>Você treina, mas sente que não evolui como deveria. Falta de constância, sobrecarga e lesões silenciosas tornam cada semana uma batalha. Essa é a dor mais comum dos homens que buscam performance.</p>
-        </article>
+        <div class="ff-layout">
+          <!-- Cards -->
+          <div class="ff-stack">
+            <article class="ff-card reveal">
+              <h3>O problema escondido</h3>
+              <p>Você treina, mas não consolida evolução. Sobrecarga sem controle, constância frágil e dores “silenciosas”. Essa é a trava mais comum.</p>
+            </article>
 
-        <article class="ff-card">
-          <h3>A dúvida que trava</h3>
-          <p>Será que o problema está no treino, no descanso ou na intensidade? A maioria não sabe — e por isso continua preso ao mesmo ciclo: força perdida, cansaço acumulado e resultados inconstantes.</p>
-        </article>
+            <article class="ff-card reveal">
+              <h3>A dúvida que trava</h3>
+              <p>Treino? Descanso? Intensidade? Sem métrica simples e plano claro, a semana vira roleta de esforço e frustração.</p>
+            </article>
 
-        <article class="ff-card">
-          <h3>A solução MaleFlow</h3>
-          <p>Nós sabemos o que está por trás disso — existe um sistema específico, validado em prática, que resolve essas falhas. A metodologia é exclusiva, não revelada em detalhes, mas aplicada de forma clara no seu plano. O resultado? Evolução real, sem adivinhação.</p>
-          <a class="ff-link" href="#ofertas">Quero ter acesso</a>
-        </article>
+            <article class="ff-card reveal">
+              <h3>A solução MaleFlow</h3>
+              <p>Um sistema específico, validado na prática, que distribui carga, usa PSE e sincroniza força + cardio. Resultado? Evolução real e sustentável.</p>
+              <a class="ff-link" href="#ofertas">Quero acesso</a>
+            </article>
+          </div>
+
+          <!-- Vídeo 9:16 -->
+          <div class="ff-video reveal">
+            <video class="video-player" autoplay muted loop playsinline controls poster="./assets/male-video-poster.jpg">
+              <source src="./assets/male-video.webm" type="video/webm">
+              <source src="./assets/male-video.mp4" type="video/mp4">
+              Seu navegador não suporta vídeos.
+            </video>
+          </div>
+        </div>
       </div>
+    </section>
 
-         <!-- ====== SEÇÃO VÍDEO MALEFLOW ====== -->
-<section id="video" class="video-wrap">
-  <div class="ff-video">
-    <video class="video-player" autoplay muted loop playsinline controls>
-      <source src="assets/male-video.webm" type="video/webm">
-      <source src="assets/male-video.mp4" type="video/mp4">
-      Seu navegador não suporta vídeos.
-    </video>
-  </div>
-</section>
-
-
-    <!-- RESPONSÁVEL (mantido) -->
+    <!-- Responsável técnico -->
     <section class="section" id="responsavel">
       <h2>Responsável Técnico</h2>
-      <div class="bio">
+      <div class="bio reveal">
         <picture>
-          <img src="./assets/Blank-Template-Instagram.jpg" alt="Responsável pelo Método" loading="lazy" />
+          <img src="./assets/ricardo-male.jpg" alt="Responsável pelo Método" loading="lazy" />
         </picture>
-
         <div class="bio-texto">
           <div class="bio-topo">
             <div class="who">Ricardo — CREF-208228-G/SP</div>
@@ -280,7 +159,7 @@
               <img src="./assets/instagram-logo.png" alt="Instagram" />
             </a>
           </div>
-          <p>Educador físico e treinador responsável pelo MaleFlow. Metodologia com foco em força, potência, condicionamento e constância sustentável.</p>
+          <p>Treinador responsável pelo MaleFlow. Foco em força, potência, condicionamento e constância sustentável.</p>
           <p class="small">Atendimento online e programas estruturados. Dúvidas?
             <a href="https://wa.me/551151942268" target="_blank" rel="noopener noreferrer">Fale no WhatsApp</a>.
           </p>
@@ -288,14 +167,13 @@
       </div>
     </section>
 
-    <!-- PARCERIAS (mantidas) -->
-    <section class="section" id="Parceria">
-      <h2>Parcerias</h2>
-      <div class="bio">
+    <!-- Círculo de Apoio -->
+    <section class="section" id="apoio">
+      <h2>Círculo de Apoio</h2>
+      <div class="bio reveal">
         <picture>
           <img src="./assets/nutrifernanda.png" alt="Nutricionista" loading="lazy" />
         </picture>
-
         <div class="bio-texto">
           <div class="bio-topo">
             <div class="who">Fernanda Secco — CRN 347513</div>
@@ -305,87 +183,104 @@
           </div>
           <p>Nutrição esportiva aplicada à performance e recuperação. Protocolos alinhados ao objetivo de força e composição corporal.</p>
           <p class="small">Atendimento online. Dúvidas?
-            <a href="https://wa.me/5511986956313" target="_blank" rel="noopener noreferrer">Fale no WhatsApp</a>.
+            <a href="https://wa.me/5511986956313" target="_blank" rel="noopener noreferrer">WhatsApp</a>.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- OFERTAS (3 PRODUTOS) -->
-    <section class="section" id="ofertas">
-      <h2>Escolha seu plano</h2>
-      <div class="offers">
-        <!-- GRATUITO -->
-        <article class="offer">
-          <div class="badge">Gratuito</div>
-          <h3>Plano Start</h3>
-          <p>Entre no método sem custo e organize sua rotina de treino.</p>
-          <p class="price">R$ 0</p>
+    <!-- PLANOS (3 produtos) -->
+    <section class="section card" id="ofertas">
+      <h2 style="color:var(--primary);margin:0 0 .75rem;">Planos MaleFlow</h2>
+      <p class="muted" style="margin:.25rem 0 1.5rem;">
+        Escolha seu ponto de partida — do Start gratuito à mentoria completa.  
+        Treinos guiados, progressões claras e ajustes de carga por PSE.
+      </p>
+
+      <div class="ofertas-grid">
+        <!-- 7 DIAS GRÁTIS -->
+        <article class="oferta reveal">
+          <div class="oferta-head">
+            <span class="badge">Grátis</span>
+            <h3>Start 7 Dias</h3>
+            <p class="sub">Experimente o método com acesso guiado</p>
+          </div>
           <ul class="features">
-            <li>Guia de 7 dias para criar hábito</li>
-            <li>Exercícios base (força + mobilidade)</li>
-            <li>Orientações simples de recuperação</li>
+            <li>Plano gratuito por 7 dias no app</li>
+            <li>Treinos leves + mobilidade + respiração</li>
+            <li>Introdução ao método MaleFlow</li>
           </ul>
-          <a class="btn btn-primary" href="https://automacao.chatideal.com.br/maleflowfluxo-xt1qnhw">Começar grátis</a>
+          <div class="price">R$ 0<span>/único</span></div>
+          <a id="cta-7dias"
+             href="https://automacao.chatideal.com.br/male-direto-personal-planos-mjffyu9"
+             class="offer-btn highlight btn-splash">Começar agora</a>
         </article>
 
-        <!-- STRONG 119,90 (2 modalidades: App + Whats) -->
-        <article class="offer">
-          <div class="badge">Strong</div>
-          <h3>Plano Strong</h3>
-          <p>Para quem quer consistência com duas frentes de suporte.</p>
-          <p class="price">R$ 119,90</p>
+        <!-- STRONG -->
+        <article class="oferta destaque reveal">
+          <div class="oferta-head">
+            <span class="badge pulse">🔥 Popular</span>
+            <h3>Plano Strong</h3>
+            <p class="sub">Aplicação do método em até 2 modalidades</p>
+          </div>
           <ul class="features">
-            <li>Acesso ao App (treinos estruturados)</li>
-            <li>Suporte via WhatsApp</li>
-            <li>Progressão por PSE e metas semanais</li>
+            <li>Acompanhamento via App + WhatsApp</li>
+            <li>Até 2 modalidades (ex.: força + corrida)</li>
+            <li>Planilha adaptada + ajustes semanais</li>
           </ul>
-          <a class="btn btn-primary" href="https://automacao.chatideal.com.br/maleflowfluxo-xt1qnhw" data-link="https://automacao.chatideal.com.br/maleflowfluxo-xt1qnhw">Garantir meu Strong</a>
+          <div class="price">R$ 159,90<span>/mês</span></div>
+          <a id="cta-strong"
+             href="https://automacao.chatideal.com.br/male-direto-personal-planos-mjffyu9"
+             class="offer-btn highlight btn-splash">Garantir Strong</a>
         </article>
 
-        <!-- ELITE 199,90 (3 modalidades + premium) -->
-        <article class="offer">
-          <div class="badge">Elite</div>
-          <h3>Plano Elite</h3>
-          <p>O pacote completo para performance e controle total.</p>
-          <p class="price">R$ 199,90</p>
+        <!-- PREMIUM -->
+        <article class="oferta premium reveal">
+          <div class="oferta-head">
+            <span class="badge">Exclusivo</span>
+            <h3>Plano Premium</h3>
+            <p class="sub">Mentoria individual e treinos híbridos</p>
+          </div>
           <ul class="features">
-            <li>Acesso ao <b>App</b> <u>ou</u> <b>TrainingPeaks (Garmin)</b></li>
-            <li>Assessoria no WhatsApp (dúvidas e ajustes)</li>
-            <li>Camada Premium: feedbacks e revisão mensal</li>
+            <li>Suporte direto + ajustes personalizados</li>
+            <li>App ou TrainingPeaks (Garmin)</li>
+            <li>3+ modalidades integradas ao objetivo</li>
           </ul>
-          <a class="btn btn-primary" href="https://automacao.chatideal.com.br/maleflowfluxo-xt1qnhw" data-link="https://automacao.chatideal.com.br/maleflowfluxo-xt1qnhw">Quero o Elite</a>
+          <div class="price">R$ 259,90<span>/mês</span></div>
+          <a id="cta-premium"
+             href="https://automacao.chatideal.com.br/male-direto-personal-planos-mjffyu9"
+             class="offer-btn highlight btn-splash">Quero o Premium</a>
         </article>
       </div>
     </section>
 
-    <!-- BENEFÍCIOS -->
+    <!-- Benefícios -->
     <section class="section" id="beneficios">
       <h2>O que os alunos relatam</h2>
-      <div class="benefits">
-        <div class="card"><h3>Mais força útil</h3><p>Base sólida nos grandes movimentos, com técnica e progressão.</p></div>
-        <div class="card"><h3>Condição em dia</h3><p>Cardio com propósito: VO₂, limiar e submáximo bem distribuídos.</p></div>
-        <div class="card"><h3>Resultados estáveis</h3><p>Rotina clara, métricas simples e ajustes contínuos.</p></div>
+      <div class="benefits grid-3">
+        <div class="card reveal"><h3>Mais força útil</h3><p>Base sólida nos grandes movimentos, com técnica e progressão.</p></div>
+        <div class="card reveal"><h3>Condição em dia</h3><p>Cardio com propósito: VO₂, limiar e submáximo bem distribuídos.</p></div>
+        <div class="card reveal"><h3>Resultados estáveis</h3><p>Rotina clara, métricas simples e ajustes contínuos.</p></div>
       </div>
     </section>
+  </main>
 
-
-
+  <!-- Footer -->
   <footer>
     <div class="container footgrid">
       <div>
         <div class="brand">
           <img src="./assets/logo-maleflow.png" alt="Logo MaleFlow" class="logo-img" />
         </div>
-        <p class="small">© 2025 MaleFlow / MyFlowLife. Conteúdo educativo; não substitui aconselhamento médico. Consulte um(a) profissional antes de iniciar.</p>
-        <p class="footnote">LGPD: coletamos dados apenas para entrega do plano e comunicações relacionadas. Você pode solicitar exclusão a qualquer momento.</p>
+        <p class="small">© 2025 MaleFlow / MyFlowLife. Conteúdo educativo; não substitui aconselhamento médico.</p>
+        <p class="footnote">LGPD: coletamos dados apenas para entrega do plano e comunicações relacionadas. Solicite exclusão a qualquer momento.</p>
       </div>
       <div>
         <h4>Planos</h4>
         <ul class="small">
           <li><a href="#ofertas">Start (Grátis)</a></li>
           <li><a href="#ofertas">Strong</a></li>
-          <li><a href="#ofertas">Elite</a></li>
+          <li><a href="#ofertas">Premium</a></li>
         </ul>
       </div>
       <div>
@@ -398,24 +293,100 @@
     </div>
   </footer>
 
-  <script>
-    const MAP = {
-      CHECKOUT_STRONG: '#',            // Substituir pelo checkout (Hotmart/Mercado Pago)
-      CHECKOUT_ELITE:  '#',            // Substituir pelo checkout (Hotmart/Mercado Pago)
-    };
+  <!-- ===== Banner LGPD (simples) ===== -->
+  <div id="lgpd-banner" class="lgpd">
+    <span>Usamos cookies e pixels para medir desempenho e melhorar sua experiência.</span>
+    <div class="lgpd-actions">
+      <button id="lgpd-accept">ACEITAR</button>
+      <button id="lgpd-deny" class="ghost">RECUSAR</button>
+    </div>
+  </div>
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('[data-link]').forEach(a => {
-        const key = a.getAttribute('data-link');
-        const url = MAP[key];
-        if (!url || url === '#') return;
-        a.setAttribute('href', url);
-        if (/^https?:\/\//i.test(url)) {
-          a.setAttribute('target', '_blank');
-          a.setAttribute('rel', 'noopener noreferrer');
-        }
+  <!-- ====== JS ÚNICO: splash, fade-in, LGPD, cadastro ====== -->
+  <script>
+  (function(){
+    const TYPEBOT_URL = 'https://automacao.chatideal.com.br/male-direto-personal-planos-mjffyu9';
+
+    // Splash
+    window.addEventListener('load', () => {
+      const sp = document.getElementById('splash');
+      setTimeout(()=> sp?.classList.add('fade-out'), 600);
+      setTimeout(()=> sp?.remove(), 1800);
+    });
+
+    // Fade-in por IntersectionObserver
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.classList.add('ready'); io.unobserve(e.target); }
+      });
+    },{threshold:0.15});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+    // LGPD básico
+    const CONSENT_KEY='maleflow_consent_v1';
+    const banner = document.getElementById('lgpd-banner');
+    function hideBanner(){ banner.style.display='none'; }
+    function grant(){
+      if (typeof gtag==='function'){
+        gtag('consent','update',{
+          ad_user_data:'granted',ad_personalization:'granted',ad_storage:'granted',analytics_storage:'granted'
+        });
+      }
+      if (typeof fbq==='function'){ fbq('consent','grant'); fbq('track','PageView'); }
+      localStorage.setItem(CONSENT_KEY,'granted'); hideBanner();
+    }
+    function deny(){
+      if (typeof gtag==='function'){
+        gtag('consent','update',{
+          ad_user_data:'denied',ad_personalization:'denied',ad_storage:'denied',analytics_storage:'denied'
+        });
+      }
+      if (typeof fbq==='function'){ fbq('consent','revoke'); }
+      localStorage.setItem(CONSENT_KEY,'denied'); hideBanner();
+    }
+    const saved = localStorage.getItem(CONSENT_KEY);
+    if (saved==='granted') grant();
+    else if (saved==='denied') deny();
+    else banner.style.display='flex';
+    document.getElementById('lgpd-accept')?.addEventListener('click',grant);
+    document.getElementById('lgpd-deny')?.addEventListener('click',deny);
+
+    // goCadastro: memoriza e redireciona
+    function goCadastro(destino, plano, origem){
+      try{
+        localStorage.setItem('planoSelecionado', plano);
+        localStorage.setItem('origemCadastro', origem);
+        localStorage.setItem('timestampCadastro', new Date().toISOString());
+        if (typeof fbq==='function') fbq('track','Lead',{plan:plano,origem});
+        if (typeof gtag==='function') gtag('event','generate_lead',{method:plano});
+
+        const params = new URLSearchParams({origem,plano,ref:'maleflow-site'});
+        const final = destino.includes('?') ? `${destino}&${params}` : `${destino}?${params}`;
+        setTimeout(()=>{ window.location.href = final; }, 160);
+        return false;
+      }catch(err){
+        console.warn('goCadastro falhou:', err);
+        window.location.href = destino;
+        return false;
+      }
+    }
+    window.goCadastro = goCadastro; // opcional, caso chame via onclick
+
+    // Amarra os botões por ID (sem duplicidade)
+    const map = [
+      {id:'cta-7dias',   plano:'7dias'},
+      {id:'cta-strong',  plano:'strong'},
+      {id:'cta-premium', plano:'premium'}
+    ];
+    map.forEach(b=>{
+      const el = document.getElementById(b.id);
+      if(!el) return;
+      el.addEventListener('click', (e)=>{
+        e.preventDefault();
+        goCadastro(TYPEBOT_URL, b.plano, 'maleflow');
       });
     });
+  })();
   </script>
 </body>
 </html>
