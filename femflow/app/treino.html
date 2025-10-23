@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Treino Diário - FemFlow</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <header>
+      <h1 id="tituloTreino">Treino FemFlow</h1>
+      <p class="subtitle" id="subTreino"></p>
+    </header>
+    <div class="container">
+      <video id="videoTreino" controls style="width:100%; border-radius: var(--radius); max-height:50vh; background:#000;">
+        <source src="" type="video/mp4" />
+        Seu navegador não suporta vídeo.
+      </video>
+      <div class="pse-card">
+        <label for="pseInput">Como foi o esforço de hoje? (0 = muito leve, 10 = exaustivo)</label>
+        <input type="range" id="pseInput" min="0" max="10" value="5" step="1" />
+        <button class="btn" id="btnSalvarPse">Salvar PSE</button>
+        <p id="pseFeedback" style="margin-top:0.5rem;"></p>
+      </div>
+    </div>
+    <!-- Floating buttons for PDF and next -->
+    <a id="btnPdf" class="float-btn" download title="Baixar treino PDF">📄</a>
+    <button id="btnNext" class="float-btn" title="Próximo treino">⏭️</button>
+    <script src="js/memoria.js"></script>
+    <script src="js/treino.js"></script>
+  </body>
+</html>

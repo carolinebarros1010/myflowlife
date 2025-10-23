@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Identifique seu Ciclo - FemFlow</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <header>
+      <h1>Identifique seu Ciclo</h1>
+      <p class="subtitle">Ajuste seu treino ao seu ritmo</p>
+    </header>
+    <div class="container">
+      <!-- Top section: ciclo inputs -->
+      <div class="section" id="cicloSection">
+        <h3>Configurar novo ciclo</h3>
+        <label for="dataUltima">Data da última menstruação</label>
+        <input type="date" id="dataUltima" />
+        <label for="duracao">Duração média do ciclo (dias)</label>
+        <input type="number" id="duracao" min="21" max="35" value="28" />
+        <button class="btn" id="btnIniciar">Iniciar Programa</button>
+      </div>
+      <!-- Divider -->
+      <hr style="margin:1.5rem 0; border:none; border-top:1px solid rgba(0,0,0,0.1);" />
+      <!-- Bottom section: enter ID -->
+      <div class="section" id="idSection">
+        <h3>Já tem um ID?</h3>
+        <label for="inputID">Digite seu ID FemFlow</label>
+        <input type="text" id="inputID" placeholder="FF-AAAA-XXXX" />
+        <button class="btn btn-secondary" id="btnValidar">Continuar</button>
+      </div>
+    </div>
+    <script src="js/memoria.js"></script>
+    <script src="js/validacao.js"></script>
+    <script src="js/ciclo.js"></script>
+  </body>
+</html>

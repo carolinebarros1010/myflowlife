@@ -1,0 +1,157 @@
+/* FemFlow App Style Sheet */
+
+/* Colour palette based on FemFlow brand */
+:root {
+  --creme: #F4E1D7;
+  --pessego: #EFBDA6;
+  --terracota: #CC6A5A;
+  --teal: #335953;
+  --grafite: #2A2D2C;
+  --radius: 14px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Lato', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--creme);
+  color: var(--grafite);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Container used to center content */
+.container {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+header {
+  text-align: center;
+  padding: 2rem 0 1rem;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  margin: 0.5rem 0;
+  color: var(--teal);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--terracota);
+  margin-bottom: 1rem;
+}
+
+/* Button styles */
+.btn {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.9rem 1.2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 1rem;
+  color: #fff;
+  background: var(--teal);
+  transition: transform 0.2s, background 0.2s;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  background: var(--terracota);
+}
+
+.btn-secondary {
+  background: var(--terracota);
+}
+
+/* Input styles */
+input[type="date"],
+input[type="number"],
+input[type="text"] {
+  width: 100%;
+  padding: 0.8rem;
+  margin: 0.5rem 0;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: var(--radius);
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+label {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--grafite);
+}
+
+/* Sections for ciclo page */
+.section {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Floating action buttons on treino page */
+.float-btn {
+  position: fixed;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 1.4rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  transition: transform 0.2s;
+}
+.float-btn:hover {
+  transform: scale(1.08);
+}
+
+#btnPdf {
+  bottom: 100px;
+  background: var(--teal);
+}
+
+#btnNext {
+  bottom: 30px;
+  background: var(--terracota);
+}
+
+/* PSE card */
+.pse-card {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.pse-card input[type="range"] {
+  width: 100%;
+}
+
+.pse-card button {
+  margin-top: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (min-width: 600px) {
+  .container {
+    max-width: 600px;
+  }
+}
