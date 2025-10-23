@@ -255,6 +255,60 @@ label {
 .qrcode-container {
   margin-top: 1.5rem;
 }
+.alternativas-ciclo {
+  text-align: center;
+  margin-top: 1.2rem;
+}
+
+.btn-mini {
+  background: #335953;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+  margin: 0.3rem;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.btn-mini:active {
+  transform: scale(0.97);
+  background: #2b4b45;
+}
+
+.quiz-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.quiz-content {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 340px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.quiz-respostas button {
+  display: block;
+  margin: 0.5rem auto;
+  background: #EFBDA6;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  color: #335953;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 
 
 
