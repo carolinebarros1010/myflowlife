@@ -178,15 +178,20 @@ label {
 }
 
 .btn-voltar {
-  background: none;
+  background: rgba(51, 89, 83, 0.08); /* leve sombra teal */
   border: none;
   color: #335953;
-  font-size: 0.9rem;
-  text-decoration: underline;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: transform 0.1s ease, background 0.2s ease;
+  touch-action: manipulation;
 }
 
-.btn-voltar:hover {
-  color: #CC6A5A;
+.btn-voltar:active {
+  background: rgba(204, 106, 90, 0.15); /* terracota suave ao toque */
+  transform: scale(0.97);
 }
+
