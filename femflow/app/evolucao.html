@@ -53,11 +53,28 @@
         font-weight: 600;
         line-height: 1.5;
         animation: aparecer 1.2s ease-in-out;
+        text-align: center;
       }
 
       @keyframes aparecer {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
+      }
+
+      .btn-novo-ciclo {
+        background: var(--teal);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.8rem 1.4rem;
+        margin-top: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease-in-out;
+      }
+
+      .btn-novo-ciclo:hover {
+        background: var(--terracota);
       }
     </style>
   </head>
@@ -93,11 +110,13 @@
         <ul id="listaEvolucao" style="list-style:none; padding:0;"></ul>
       </div>
 
-      <!-- Mensagem final do ciclo -->
+      <!-- Mensagem final e botão de novo ciclo -->
       <div id="mensagemFinal" class="mensagem-final" style="display:none;">
         ✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.  
         Respire, celebre e permita que o seu corpo descanse.  
         Um novo ciclo recomeçará automaticamente nos próximos dias 🌸
+        <br />
+        <button class="btn-novo-ciclo" id="novoCicloBtn">🔄 Iniciar novo ciclo agora</button>
       </div>
 
       <button class="btn" onclick="location.href='index.html'">🏠 Voltar ao início</button>
@@ -116,6 +135,7 @@
         const barra = document.getElementById("progressoBarra");
         const texto = document.getElementById("progressoTexto");
         const msgFinal = document.getElementById("mensagemFinal");
+        const btnNovoCiclo = document.getElementById("novoCicloBtn");
 
         // Atualiza barra de progresso
         barra.style.width = progresso + "%";
@@ -124,6 +144,12 @@
         if (progresso === 100) {
           barra.style.animation = "pulse 1.8s infinite";
           msgFinal.style.display = "block";
+
+          // Função do botão de novo ciclo
+          btnNovoCiclo.addEventListener("click", () => {
+            limparMemoria(id);
+            window.location.href = "ciclo.html";
+          });
         }
 
         // Carregar memória e renderizar gráfico
@@ -155,7 +181,7 @@
           pseValues.push(t.pse);
         });
 
-        // Criação do gradiente dinâmico
+        // Gradiente dinâmico
         const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
         const maxPSE = Math.max(...pseValues);
         const intensidade = Math.min(maxPSE / 10, 1);
@@ -163,7 +189,7 @@
         gradient.addColorStop(0.5, `rgba(239,189,166,${0.25 + intensidade * 0.25})`);
         gradient.addColorStop(1, `rgba(51,89,83,${0.2 + intensidade * 0.2})`);
 
-        // Gráfico com gradiente reativo
+        // Gráfico
         new Chart(ctx, {
           type: 'line',
           data: {
