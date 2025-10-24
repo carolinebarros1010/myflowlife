@@ -93,7 +93,6 @@
         barra.style.width = progresso + "%";
         texto.innerText = `Você completou ${progresso}% do programa`;
 
-        // Efeito de respiração se completou 100%
         if (progresso === 100) {
           barra.style.animation = "pulse 1.8s infinite";
         }
@@ -121,15 +120,22 @@
           if (t.pse <= 3) cor = 'var(--teal)';
           else if (t.pse <= 7) cor = 'var(--pessego)';
           else cor = 'var(--terracota)';
-
           li.innerHTML = `<strong>Dia ${t.diaPrograma}</strong> – Fase ${t.fase} – PSE <span style="color:${cor}">${t.pse}</span>`;
           lista.appendChild(li);
-
           labels.push('Dia ' + t.diaPrograma);
           pseValues.push(t.pse);
         });
 
-        // === Gráfico Chart.js ===
+        // === Gráfico Chart.js com gradiente dinâmico ===
+        const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
+        const maxPSE = Math.max(...pseValues);
+        const intensidade = Math.min(maxPSE / 10, 1);
+
+        // Gradiente reage à intensidade máxima de PSE
+        gradient.addColorStop(0, `rgba(204,106,90,${0.3 + intensidade * 0.3})`); // terracota
+        gradient.addColorStop(0.5, `rgba(239,189,166,${0.25 + intensidade * 0.25})`); // pêssego
+        gradient.addColorStop(1, `rgba(51,89,83,${0.2 + intensidade * 0.2})`); // teal
+
         new Chart(ctx, {
           type: 'line',
           data: {
@@ -138,12 +144,16 @@
               label: 'PSE',
               data: pseValues,
               borderColor: '#CC6A5A',
-              backgroundColor: 'rgba(204,106,90,0.15)',
+              backgroundColor: gradient,
               borderWidth: 2,
               fill: true,
               tension: 0.3,
-              pointBackgroundColor: '#335953',
-              pointRadius: 4
+              pointBackgroundColor: pseValues.map(v =>
+                v <= 3 ? '#335953' :
+                v <= 7 ? '#EFBDA6' : '#CC6A5A'
+              ),
+              pointRadius: 5,
+              pointHoverRadius: 6
             }]
           },
           options: {
@@ -157,9 +167,7 @@
                 title: { display: true, text: 'Dias do Programa' }
               }
             },
-            plugins: {
-              legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             responsive: true,
             maintainAspectRatio: false
           }
