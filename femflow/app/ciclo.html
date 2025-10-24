@@ -66,15 +66,14 @@
   <button class="btn btn-secondary" onclick="abrirQuiz('menopausa')">Estou na menopausa</button>
 </div>
 
-<!-- 🔸 Container do quiz de sintomas -->
-<div id="quizContainer" class="quiz-container" style="display:none; margin-top:1.5rem;">
-  <h3>Responda algumas perguntas rápidas</h3>
-  <form id="quizForm">
-    <div id="quizPerguntas"></div>
-    <button type="button" class="btn" onclick="enviarQuiz()">Enviar Respostas</button>
-  </form>
+<!-- 🌸 Modal do Quiz Hormonal -->
+<div id="quizModal" class="quiz-modal">
+  <div class="quiz-content">
+    <h3 id="quizPergunta">Pergunta aqui...</h3>
+    <div id="quizRespostas" class="quiz-respostas"></div>
+    <button class="btn" style="margin-top:1rem;" onclick="document.getElementById('quizModal').style.display='none'">Fechar</button>
+  </div>
 </div>
-      </div>
 
       <hr style="margin:1.5rem 0; border:none; border-top:1px solid rgba(0,0,0,0.1);" />
 
