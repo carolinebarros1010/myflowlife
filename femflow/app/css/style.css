@@ -351,6 +351,28 @@ label {
   background: var(--terracota);
   color: #fff;
 }
+/* Campos uniformes da recuperação de ID */
+.input-recuperar {
+  width: 100%;
+  max-width: 320px;
+  display: block;
+  margin: 0.5rem auto;
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: 'Lato', sans-serif;
+  color: var(--teal);
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.input-recuperar:focus {
+  outline: none;
+  border-color: var(--pessego);
+  box-shadow: 0 0 0 2px rgba(239,189,166,0.3);
+}
+
 
 
 
