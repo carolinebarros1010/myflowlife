@@ -106,27 +106,27 @@
         color: var(--teal);
       }
     </style>
-    <script>
+  <script>
 function GOcadastro() {
   try {
-    // Captura parâmetros UTM (caso existam)
+    // Captura parâmetros UTM ou origem
     const params = new URLSearchParams(window.location.search);
     const origem = params.get("utm_source") || params.get("origem") || "direto";
 
-    // Salva a origem localmente (para estatísticas)
+    // Salva a origem localmente (para rastrear)
     localStorage.setItem("femflow_origem", origem);
 
-    // Redireciona para o formulário de cadastro (captura de lead)
-    const urlCadastro = `https://carolinebarros1010.github.io/myflowlife/cadastro/index.html?origem=${origem}`;
-    window.open(urlCadastro, "_blank");
+    // Envia os dados do lead (simula o formulário)
+    console.log("🩷 Lead captado:", origem);
 
     // Aguarda 2 segundos e redireciona para o Hotmart
     setTimeout(() => {
+      console.log("💳 Redirecionando para o Hotmart...");
       window.location.href = "https://pay.hotmart.com/Q102567067C?off=y4z291v3";
     }, 2000);
-  } catch (e) {
-    console.error("Erro ao processar GOcadastro:", e);
-    // fallback direto para o Hotmart
+  } catch (err) {
+    console.error("Erro ao processar GOcadastro:", err);
+    // Fallback direto
     window.location.href = "https://pay.hotmart.com/Q102567067C?off=y4z291v3";
   }
 }
