@@ -80,17 +80,40 @@
           const data = new Date().toISOString();
 
           // Usa o novo controle de 30 dias e reinício
-          salvarTreino(id, data, fase, diaPrograma, pse);
+         salvarTreino(id, data, fase, diaPrograma, pse);
 
-          const progresso = calcularProgresso(id);
-          console.log(`Progresso atual: ${progresso}%`);
+const progresso = calcularProgresso(id);
+console.log(`Progresso atual: ${progresso}%`);
 
-          // Atualiza contador local
-          if (diaPrograma < 30) {
-            localStorage.setItem('dia_ciclo', diaPrograma + 1);
-            alert(`✅ Treino do dia ${diaPrograma} salvo!`);
-            location.reload();
-          }
+// 🌸 Mensagem final de encerramento
+if (diaPrograma === 30) {
+  alert("✨ Parabéns! Você concluiu o seu ciclo de 30 dias FemFlow.\nRespire, celebre e prepare-se para o próximo ciclo!");
+  
+  // Tarja discreta de encerramento
+  const banner = document.createElement("div");
+  banner.innerHTML = "🌸 Ciclo completo! Seu novo ciclo será liberado automaticamente.";
+  banner.style.cssText = `
+    background: var(--pessego);
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+    font-weight: 600;
+  `;
+  document.querySelector(".container").prepend(banner);
+  
+  // Impede avanço além de 30
+  localStorage.setItem('dia_ciclo', 30);
+  return;
+}
+
+// Atualiza contador local
+if (diaPrograma < 30) {
+  localStorage.setItem('dia_ciclo', diaPrograma + 1);
+  alert(`✅ Treino do dia ${diaPrograma} salvo!`);
+  location.reload();
+}
         });
 
         // 🔹 Verifica se houve reinício automático
