@@ -1,76 +1,80 @@
-// ===============================
-// FemFlow - Memória Local & Sincronização
-// ===============================
+// ===== FEMFLOW MEMÓRIA =====
 
-// 🔹 Salva dados gerais da aluna no localStorage
-function salvarMemoria(id, dados) {
-  const chave = `femflow_memoria_${id}`;
-  let memoria = carregarMemoria(id) || {};
-  Object.assign(memoria, dados);
-  localStorage.setItem(chave, JSON.stringify(memoria));
-}
-
-// 🔹 Carrega memória da aluna
+// Carrega memória local de cada aluna
 function carregarMemoria(id) {
-  const chave = `femflow_memoria_${id}`;
-  const memoria = localStorage.getItem(chave);
-  return memoria ? JSON.parse(memoria) : null;
+  const data = localStorage.getItem(`femflow_${id}`);
+  return data ? JSON.parse(data) : { treinos: [] };
 }
 
-// 🔹 Salva um treino no histórico local e envia ao servidor
-function salvarTreino(id, data, fase, diaPrograma, pse) {
-  if (!id) return console.error("ID inválido para salvar treino.");
+// Salva memória atualizada
+function salvarMemoria(id, memoria) {
+  localStorage.setItem(`femflow_${id}`, JSON.stringify(memoria));
+}
 
-  const chave = `femflow_memoria_${id}`;
-  let memoria = carregarMemoria(id);
+// Retorna o próximo dia do programa, limitado a 30
+function proximoDiaPrograma(id) {
+  const memoria = carregarMemoria(id);
+  if (!memoria || !memoria.treinos) return 1;
 
-  // garante inicialização
-  if (!memoria) {
-    memoria = { treinos: [], ultimoTreino: 1 };
+  const ultimoTreino = memoria.treinos[memoria.treinos.length - 1];
+  const diaAtual = ultimoTreino ? ultimoTreino.diaPrograma : 0;
+
+  // ✅ Garante que não ultrapasse 30 dias
+  return diaAtual >= 30 ? 30 : diaAtual + 1;
+}
+
+// Registra treino com PSE e fase
+function registrarTreino(id, fase, pse) {
+  const memoria = carregarMemoria(id);
+  if (!memoria.treinos) memoria.treinos = [];
+
+  const diaPrograma = proximoDiaPrograma(id);
+
+  // Impede registro acima de 30 dias
+  if (diaPrograma > 30) {
+    alert("✨ Você já concluiu o seu ciclo de 30 dias FemFlow!");
+    return;
   }
 
-  // adiciona o novo treino
   memoria.treinos.push({
-    data,
+    data: new Date().toISOString(),
     fase,
     diaPrograma,
     pse
   });
 
-  // atualiza último treino
-  memoria.ultimoTreino = diaPrograma;
-  localStorage.setItem(chave, JSON.stringify(memoria));
+  salvarMemoria(id, memoria);
 
-  console.log(`💾 Treino salvo localmente (${memoria.treinos.length} registrados)`);
-
-  // 🔹 Envia dados ao Google Sheets (Apps Script)
-  fetch('https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, data, fase, diaPrograma, pse })
-  })
-  .then(res => {
-    if (!res.ok && res.type !== 'opaque') {
-      throw new Error(`Erro HTTP ${res.status}`);
-    }
-    console.log("✅ Sincronizado com servidor.");
-  })
-  .catch(err => {
-    console.warn("⚠️ Falha ao sincronizar com servidor:", err);
-  });
+  // Alerta de conclusão no dia 30
+  if (diaPrograma === 30) {
+    alert("🌸 Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.\nRespire, celebre e prepare-se para o próximo ciclo!");
+  }
 }
 
-// 🔹 Reseta memória (caso necessário futuramente)
-function limparMemoria(id) {
-  const chave = `femflow_memoria_${id}`;
-  localStorage.removeItem(chave);
-  console.log(`🧹 Memória apagada para ID: ${id}`);
-}
-
-// 🔹 Retorna percentual de progresso (para evolução.html)
-function calcularProgresso(id, totalTreinos = 30) {
+// Calcula progresso percentual (máx. 100%)
+function calcularProgresso(id, totalDias = 30) {
   const memoria = carregarMemoria(id);
-  if (!memoria || !memoria.treinos) return 0;
-  const concluido = memoria.treinos.length;
-  return Math.min(Math.round((concluido / totalTreinos) * 100), 100);
+  const feitos = memoria && memoria.treinos ? memoria.treinos.length : 0;
+  const progresso = Math.min((feitos / totalDias) * 100, 100);
+  return Math.round(progresso);
 }
+
+// Zera memória para reiniciar programa
+function resetarMemoria(id) {
+  localStorage.removeItem(`femflow_${id}`);
+  alert("🌀 Memória do ciclo reiniciada. Você pode começar um novo programa.");
+}
+
+// Exporta memória completa (opcional)
+function exportarMemoria(id) {
+  const memoria = carregarMemoria(id);
+  const blob = new Blob([JSON.stringify(memoria, null, 2)], { type: "application/json" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `femflow_memoria_${id}.json`;
+  link.click();
+}
+
+// ===== EXEMPLO DE USO =====
+// registrarTreino(id, "Folicular", 6);
+// const progresso = calcularProgresso(id);
