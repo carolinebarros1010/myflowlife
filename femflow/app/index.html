@@ -124,5 +124,101 @@
         color: var(--teal);
       }
     </style>
+    <script>
+// 🌸 Instalação FemFlow – PWA Inteligente
+
+let deferredPrompt;
+
+// === ANDROID: instala automaticamente (ou com botão flutuante) ===
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  // Exibe popup automático após 3 segundos
+  setTimeout(async () => {
+    if (deferredPrompt) {
+      await deferredPrompt.prompt();
+      deferredPrompt = null;
+    }
+  }, 3000);
+
+  // Botão manual caso o prompt falhe
+  const btn = document.createElement('button');
+  btn.textContent = '📲 Instalar FemFlow';
+  btn.className = 'btn';
+  btn.style.cssText = `
+    position:fixed;
+    bottom:1.2rem;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--teal);
+    color:white;
+    font-weight:600;
+    border:none;
+    border-radius:12px;
+    padding:0.8rem 1.4rem;
+    z-index:9999;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  `;
+  btn.onclick = async () => {
+    btn.disabled = true;
+    await deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      btn.textContent = '✅ Instalado com sucesso!';
+      setTimeout(() => btn.remove(), 2500);
+    } else {
+      btn.textContent = '⚠️ Instalação cancelada';
+      btn.disabled = false;
+    }
+  };
+  document.body.appendChild(btn);
+});
+
+// === iPHONE: mostra banner educativo ===
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isInStandalone = ('standalone' in window.navigator) && window.navigator.standalone;
+if (isIOS && !isInStandalone) {
+  const aviso = document.createElement('div');
+  aviso.innerHTML = `
+    <div style="
+      position:fixed;
+      bottom:10px;
+      left:10px;
+      right:10px;
+      background:var(--pessego);
+      color:white;
+      text-align:center;
+      padding:1rem;
+      border-radius:12px;
+      font-weight:600;
+      z-index:9999;
+      box-shadow:0 2px 8px rgba(0,0,0,0.3);
+    ">
+      📲 Para instalar o FemFlow:<br>
+      Toque em <strong>Compartilhar ▢</strong> → <strong>“Adicionar à Tela de Início”</strong>
+    </div>`;
+  document.body.appendChild(aviso);
+}
+
+// === Fallback universal (para browsers sem suporte) ===
+if (!('BeforeInstallPromptEvent' in window)) {
+  const info = document.createElement('div');
+  info.innerHTML = `
+    <div style="
+      margin:1rem;
+      padding:1rem;
+      background:var(--terracota);
+      color:white;
+      border-radius:10px;
+      font-weight:600;
+      text-align:center;
+    ">
+      ⚙️ Dica: adicione este site à tela inicial pelo menu do navegador.
+    </div>`;
+  document.body.appendChild(info);
+}
+</script>
+
   </body>
 </html>
