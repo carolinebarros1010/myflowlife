@@ -237,6 +237,55 @@ label {
   background: #2b4b45;
 }
 
+/* 🌸 Estilo do cabeçalho de identificação do ciclo */
+.header-ciclo {
+  text-align: center;
+  margin-top: 1.2rem;
+  margin-bottom: 1rem;
+  font-family: 'Helvetica Rounded', sans-serif;
+}
+
+.titulo-ciclo {
+  font-size: 1.8rem;             /* reduzido */
+  color: var(--teal);            /* mantém teal */
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.5px;
+}
+
+.subtitulo-ciclo {
+  font-size: 1rem;
+  color: var(--terracota);       /* subtexto mais quente */
+  margin-top: 0;
+  font-weight: 500;
+}
+
+/* 🌿 Box de configuração de ciclo */
+#cicloSection {
+  background: #FBE9E1;           /* pêssego bem claro */
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  margin-top: 0.8rem;            /* aproxima do título */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+#cicloSection label {
+  font-family: 'Helvetica Rounded', sans-serif;
+  color: var(--teal);
+  font-weight: 500;
+}
+
+#cicloSection input {
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.1);
+  padding: 0.5rem 0.8rem;
+  width: 100%;
+  max-width: 280px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+
 .btn-hotmart {
   background-color: #CC6A5A;
   color: #fff;
