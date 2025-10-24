@@ -18,7 +18,7 @@
     <header>
       <h1>Cadastro FemFlow</h1>
       <p class="subtitle">Prepare-se para iniciar seu programa cíclico</p>
-      <p id="faseAtual" class="fase-info"></p>
+      <p id="faseAtual" class="fase-info animada"></p>
     </header>
 
     <div class="container">
@@ -60,12 +60,11 @@
         const faseStorage = localStorage.getItem('fase_sugerida');
         const fase = faseURL || faseStorage;
 
+        const campoFase = document.getElementById('faseAtual');
         if (fase) {
-          document.getElementById('faseAtual').innerText =
-            `🌿 Fase atual estimada: ${fase}`;
+          campoFase.innerText = `🌿 Fase atual estimada: ${fase}`;
         } else {
-          document.getElementById('faseAtual').innerText =
-            '🌸 Fase não identificada ainda';
+          campoFase.innerText = '🌸 Fase não identificada ainda';
         }
       });
     </script>
@@ -74,12 +73,33 @@
       .fase-info {
         font-weight: 700;
         font-size: 1rem;
-        color: var(--teal);
+        color: white;
         margin-top: 0.5rem;
-        background: rgba(239, 189, 166, 0.2);
         display: inline-block;
-        padding: 0.4rem 1rem;
+        padding: 0.5rem 1.2rem;
         border-radius: 12px;
+        background: linear-gradient(90deg, var(--terracota), var(--teal));
+        box-shadow: 0 0 10px rgba(204, 106, 90, 0.2);
+        transition: all 0.8s ease;
+      }
+
+      .animada {
+        animation: fluxoCores 6s ease-in-out infinite alternate;
+      }
+
+      @keyframes fluxoCores {
+        0% {
+          background: linear-gradient(90deg, var(--terracota), var(--pessego));
+          box-shadow: 0 0 10px rgba(204,106,90,0.3);
+        }
+        50% {
+          background: linear-gradient(90deg, var(--pessego), var(--teal));
+          box-shadow: 0 0 15px rgba(51,89,83,0.3);
+        }
+        100% {
+          background: linear-gradient(90deg, var(--teal), var(--terracota));
+          box-shadow: 0 0 12px rgba(239,189,166,0.3);
+        }
       }
 
       p {
