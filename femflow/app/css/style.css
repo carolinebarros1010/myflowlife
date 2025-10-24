@@ -284,10 +284,10 @@ label {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.6);
-  display: flex;
+  display: none; /* inicia oculto */
   justify-content: center;
   align-items: center;
-  z-index: 10;
+  z-index: 1000;
 }
 
 .quiz-content {
@@ -303,13 +303,19 @@ label {
 .quiz-respostas button {
   display: block;
   margin: 0.5rem auto;
-  background: #EFBDA6;
+  background: #EFBDA6; /* pêssego */
   border: none;
   border-radius: 8px;
   padding: 0.6rem 1rem;
-  color: #335953;
+  color: #335953; /* teal */
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quiz-respostas button:hover {
+  background: #CC6A5A; /* terracota */
+  color: white;
 }
 .btn-novo-ciclo {
   background: var(--teal);
