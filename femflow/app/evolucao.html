@@ -10,6 +10,39 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .texto-progresso {
+        font-weight: 700;
+        color: var(--teal);
+        margin-bottom: 0.6rem;
+        letter-spacing: 0.5px;
+      }
+
+      .barra-progresso {
+        position: relative;
+        width: 100%;
+        height: 18px;
+        border-radius: 20px;
+        background: rgba(240, 236, 233, 0.8);
+        overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 2px 6px rgba(51,89,83,0.1);
+      }
+
+      .preenchimento-progresso {
+        width: 0%;
+        height: 100%;
+        border-radius: 20px;
+        background: linear-gradient(90deg, var(--terracota), var(--pessego), var(--teal));
+        box-shadow: 0 0 10px rgba(204,106,90,0.4);
+        transition: width 1.2s ease-in-out;
+      }
+
+      @keyframes pulse {
+        0% { box-shadow: 0 0 8px rgba(204,106,90,0.3); }
+        50% { box-shadow: 0 0 20px rgba(204,106,90,0.6); }
+        100% { box-shadow: 0 0 8px rgba(204,106,90,0.3); }
+      }
+    </style>
   </head>
 
   <body>
@@ -22,9 +55,9 @@
       <!-- Progresso geral -->
       <div class="section" style="text-align:center;">
         <h3>🌿 Progresso do seu programa</h3>
-        <p id="progressoTexto" style="font-weight:600; color:#335953;">Calculando...</p>
-        <div id="barraProgresso" style="width:100%; background:#eee; border-radius:12px; height:16px; overflow:hidden;">
-          <div id="progressoBarra" style="width:0%; height:100%; background:linear-gradient(90deg,#CC6A5A,#EFBDA6); transition:width 1s;"></div>
+        <p id="progressoTexto" class="texto-progresso">Calculando...</p>
+        <div class="barra-progresso">
+          <div id="progressoBarra" class="preenchimento-progresso"></div>
         </div>
       </div>
 
@@ -59,6 +92,11 @@
         const texto = document.getElementById("progressoTexto");
         barra.style.width = progresso + "%";
         texto.innerText = `Você completou ${progresso}% do programa`;
+
+        // Efeito de respiração se completou 100%
+        if (progresso === 100) {
+          barra.style.animation = "pulse 1.8s infinite";
+        }
 
         // === EVOLUÇÃO PSE ===
         const memoria = carregarMemoria(id);
