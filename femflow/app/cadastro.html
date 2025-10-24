@@ -36,14 +36,7 @@
           Clique abaixo para adquirir seu plano e receber automaticamente seu ID
           por e-mail:
         </p>
-        <button
-          class="btn"
-          onclick="window.open('https://pay.hotmart.com/Q102567067C?off=y4z291v3','_blank')"
-          style="background: var(--terracota);"
-        >
-          🔗 Adquirir plano
-        </button>
-
+                <button class="btn" style="background:var(--terracota);" onclick="GOcadastro()">🔗 Adquirir plano</button>
         <h3 style="margin-top:1.5rem;">📩 Já possui um ID?</h3>
         <p>Volte à tela anterior e insira-o na página de ciclo.</p>
         <button class="btn btn-secondary" onclick="location.href='ciclo.html'">
@@ -113,5 +106,30 @@
         color: var(--teal);
       }
     </style>
+    <script>
+function GOcadastro() {
+  try {
+    // Captura parâmetros UTM (caso existam)
+    const params = new URLSearchParams(window.location.search);
+    const origem = params.get("utm_source") || params.get("origem") || "direto";
+
+    // Salva a origem localmente (para estatísticas)
+    localStorage.setItem("femflow_origem", origem);
+
+    // Redireciona para o formulário de cadastro (captura de lead)
+    const urlCadastro = `https://carolinebarros1010.github.io/myflowlife/cadastro/index.html?origem=${origem}`;
+    window.open(urlCadastro, "_blank");
+
+    // Aguarda 2 segundos e redireciona para o Hotmart
+    setTimeout(() => {
+      window.location.href = "https://pay.hotmart.com/Q102567067C?off=y4z291v3";
+    }, 2000);
+  } catch (e) {
+    console.error("Erro ao processar GOcadastro:", e);
+    // fallback direto para o Hotmart
+    window.location.href = "https://pay.hotmart.com/Q102567067C?off=y4z291v3";
+  }
+}
+</script>
   </body>
 </html>
