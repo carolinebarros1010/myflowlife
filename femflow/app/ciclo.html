@@ -58,6 +58,22 @@
         <label for="duracao">Duração média do ciclo (dias)</label>
         <input type="number" id="duracao" min="21" max="35" value="28" />
         <button class="btn" id="btnIniciar">Iniciar Programa</button>
+        <!-- 🔹 Opções para ciclo irregular, DIU ou menopausa -->
+<div class="section" id="alternativasCiclo" style="margin-top:1.5rem;">
+  <p style="font-weight:600; margin-bottom:0.5rem;">Ou selecione sua condição:</p>
+  <button class="btn btn-secondary" onclick="abrirQuiz('irregular')">Sou irregular</button>
+  <button class="btn btn-secondary" onclick="abrirQuiz('diu')">Uso DIU</button>
+  <button class="btn btn-secondary" onclick="abrirQuiz('menopausa')">Estou na menopausa</button>
+</div>
+
+<!-- 🔸 Container do quiz de sintomas -->
+<div id="quizContainer" class="quiz-container" style="display:none; margin-top:1.5rem;">
+  <h3>Responda algumas perguntas rápidas</h3>
+  <form id="quizForm">
+    <div id="quizPerguntas"></div>
+    <button type="button" class="btn" onclick="enviarQuiz()">Enviar Respostas</button>
+  </form>
+</div>
       </div>
 
       <hr style="margin:1.5rem 0; border:none; border-top:1px solid rgba(0,0,0,0.1);" />
