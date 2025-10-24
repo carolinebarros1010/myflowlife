@@ -335,6 +335,22 @@ label {
   50%  { box-shadow: 0 0 12px 4px rgba(239,189,166,0.3); transform: scale(1.03); }
   100% { box-shadow: 0 0 0 0 rgba(51,89,83,0.4); transform: scale(1); }
 }
+/* Botões menores e mais discretos para opções secundárias */
+.btn-pequeno {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  background: var(--pessego);
+  color: var(--teal);
+  font-weight: 600;
+  margin: 0.3rem;
+  transition: all 0.3s ease;
+}
+
+.btn-pequeno:hover {
+  background: var(--terracota);
+  color: #fff;
+}
 
 
 
