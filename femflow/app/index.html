@@ -219,51 +219,5 @@ if (!('BeforeInstallPromptEvent' in window)) {
   document.body.appendChild(info);
 }
 </script>
-<script>
-let deferredPrompt;
-
-// Android: wait for beforeinstallprompt, then prompt automatically after 3 s
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // prompt automatically after 3 s
-  setTimeout(async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      deferredPrompt = null;
-    }
-  }, 3000);
-  // optional floating install button
-  const btn = document.createElement('button');
-  btn.textContent = '📲 Instalar FemFlow';
-  btn.className = 'btn';
-  btn.style.cssText = 'position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);z-index:9999;';
-  btn.onclick = async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const result = await deferredPrompt.userChoice;
-      if (result.outcome === 'accepted') {
-        btn.remove();
-      }
-    }
-  };
-  document.body.appendChild(btn);
-});
-
-// iOS: show instruction banner if not installed
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-const isStandalone = ('standalone' in window.navigator) && window.navigator.standalone;
-if (isIOS && !isStandalone) {
-  const banner = document.createElement('div');
-  banner.innerHTML = `
-    <div style="position:fixed;bottom:10px;left:10px;right:10px;background:var(--pessego);
-    color:white;padding:1rem;border-radius:12px;z-index:9999;">
-      📲 Para instalar FemFlow: toque em <strong>Compartilhar ▢</strong>
-      e escolha <strong>“Adicionar à Tela de Início”</strong>.
-    </div>`;
-  document.body.appendChild(banner);
-}
-</script>
-
   </body>
 </html>
