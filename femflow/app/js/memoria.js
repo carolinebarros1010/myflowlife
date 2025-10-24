@@ -1,80 +1,121 @@
-// ===== FEMFLOW MEMÓRIA =====
+// ===============================
+// FemFlow - Memória Local & Sincronização
+// ===============================
 
-// Carrega memória local de cada aluna
+// 🔹 Salva dados gerais da aluna no localStorage
+function salvarMemoria(id, dados) {
+  const chave = `femflow_memoria_${id}`;
+  let memoria = carregarMemoria(id) || {};
+  Object.assign(memoria, dados);
+  localStorage.setItem(chave, JSON.stringify(memoria));
+}
+
+// 🔹 Carrega memória da aluna
 function carregarMemoria(id) {
-  const data = localStorage.getItem(`femflow_${id}`);
-  return data ? JSON.parse(data) : { treinos: [] };
+  const chave = `femflow_memoria_${id}`;
+  const memoria = localStorage.getItem(chave);
+  return memoria ? JSON.parse(memoria) : null;
 }
 
-// Salva memória atualizada
-function salvarMemoria(id, memoria) {
-  localStorage.setItem(`femflow_${id}`, JSON.stringify(memoria));
-}
-
-// Retorna o próximo dia do programa, limitado a 30
-function proximoDiaPrograma(id) {
-  const memoria = carregarMemoria(id);
-  if (!memoria || !memoria.treinos) return 1;
-
-  const ultimoTreino = memoria.treinos[memoria.treinos.length - 1];
-  const diaAtual = ultimoTreino ? ultimoTreino.diaPrograma : 0;
-
-  // ✅ Garante que não ultrapasse 30 dias
-  return diaAtual >= 30 ? 30 : diaAtual + 1;
-}
-
-// Registra treino com PSE e fase
-function registrarTreino(id, fase, pse) {
-  const memoria = carregarMemoria(id);
-  if (!memoria.treinos) memoria.treinos = [];
-
-  const diaPrograma = proximoDiaPrograma(id);
-
-  // Impede registro acima de 30 dias
-  if (diaPrograma > 30) {
-    alert("✨ Você já concluiu o seu ciclo de 30 dias FemFlow!");
+// 🔹 Salva um treino no histórico local e envia ao servidor
+function salvarTreino(id, data, fase, diaPrograma, pse) {
+  if (!id) {
+    console.error("ID inválido para salvar treino.");
     return;
   }
 
-  memoria.treinos.push({
-    data: new Date().toISOString(),
-    fase,
-    diaPrograma,
-    pse
-  });
+  const chave = `femflow_memoria_${id}`;
+  let memoria = carregarMemoria(id);
 
-  salvarMemoria(id, memoria);
+  // garante inicialização
+  if (!memoria) memoria = { treinos: [], ultimoTreino: 1 };
+  if (!memoria.treinos) memoria.treinos = [];
 
-  // Alerta de conclusão no dia 30
+  // 🔸 Impede registro acima de 30 dias
+  if (diaPrograma > 30) {
+    alert("✨ Você já concluiu o seu ciclo de 30 dias FemFlow!");
+    verificarAutoReinicio(id, memoria);
+    return;
+  }
+
+  // adiciona o novo treino
+  memoria.treinos.push({ data, fase, diaPrograma, pse });
+  memoria.ultimoTreino = diaPrograma;
+  memoria.dataUltimoTreino = new Date().toISOString();
+  localStorage.setItem(chave, JSON.stringify(memoria));
+
+  console.log(`💾 Treino salvo localmente (${memoria.treinos.length} registrados)`);
+
+  // 🔹 Mensagem de conclusão no dia 30
   if (diaPrograma === 30) {
     alert("🌸 Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.\nRespire, celebre e prepare-se para o próximo ciclo!");
+    // salva data de conclusão para controle do reinício
+    memoria.dataConclusao = new Date().toISOString();
+    salvarMemoria(id, memoria);
+  }
+
+  // 🔹 Envia dados ao Google Sheets (Apps Script)
+  fetch('https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, data, fase, diaPrograma, pse })
+  })
+  .then(res => {
+    if (!res.ok && res.type !== 'opaque') {
+      throw new Error(`Erro HTTP ${res.status}`);
+    }
+    console.log("✅ Sincronizado com servidor.");
+  })
+  .catch(err => {
+    console.warn("⚠️ Falha ao sincronizar com servidor:", err);
+  });
+}
+
+// 🔹 Auto-reinício inteligente de ciclo (3 dias após o último treino)
+function verificarAutoReinicio(id, memoria) {
+  if (!memoria || !memoria.dataConclusao) return;
+
+  const dataConclusao = new Date(memoria.dataConclusao);
+  const hoje = new Date();
+  const diasPassados = Math.floor((hoje - dataConclusao) / (1000 * 60 * 60 * 24));
+
+  if (diasPassados >= 3) {
+    alert("🌀 Novo ciclo disponível!\nO aplicativo detectou que seu último ciclo terminou há 3 dias.\nSeu programa foi reiniciado automaticamente.");
+    limparMemoria(id);
+    localStorage.setItem(`femflow_reiniciado_${id}`, new Date().toISOString());
+  } else {
+    const restantes = 3 - diasPassados;
+    console.log(`⏳ O próximo ciclo será reiniciado automaticamente em ${restantes} dia(s).`);
   }
 }
 
-// Calcula progresso percentual (máx. 100%)
-function calcularProgresso(id, totalDias = 30) {
+// 🔹 Retorna percentual de progresso (para evolução.html)
+function calcularProgresso(id, totalTreinos = 30) {
   const memoria = carregarMemoria(id);
-  const feitos = memoria && memoria.treinos ? memoria.treinos.length : 0;
-  const progresso = Math.min((feitos / totalDias) * 100, 100);
-  return Math.round(progresso);
+  if (!memoria || !memoria.treinos) return 0;
+  const concluido = memoria.treinos.length;
+  return Math.min(Math.round((concluido / totalTreinos) * 100), 100);
 }
 
-// Zera memória para reiniciar programa
-function resetarMemoria(id) {
-  localStorage.removeItem(`femflow_${id}`);
+// 🔹 Reseta memória (manual)
+function limparMemoria(id) {
+  const chave = `femflow_memoria_${id}`;
+  localStorage.removeItem(chave);
+  console.log(`🧹 Memória apagada para ID: ${id}`);
   alert("🌀 Memória do ciclo reiniciada. Você pode começar um novo programa.");
 }
 
-// Exporta memória completa (opcional)
+// 🔹 Exporta memória em arquivo JSON (backup opcional)
 function exportarMemoria(id) {
   const memoria = carregarMemoria(id);
+  if (!memoria) {
+    alert("Nenhuma memória encontrada para exportar.");
+    return;
+  }
   const blob = new Blob([JSON.stringify(memoria, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = `femflow_memoria_${id}.json`;
   link.click();
+  console.log("📦 Memória exportada com sucesso.");
 }
-
-// ===== EXEMPLO DE USO =====
-// registrarTreino(id, "Folicular", 6);
-// const progresso = calcularProgresso(id);
