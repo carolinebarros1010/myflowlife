@@ -219,5 +219,15 @@ if (!('BeforeInstallPromptEvent' in window)) {
   document.body.appendChild(info);
 }
 </script>
+    <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      for (const reg of regs) reg.update();
+    });
+  });
+}
+</script>
+
   </body>
 </html>
