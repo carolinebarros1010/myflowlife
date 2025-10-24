@@ -42,6 +42,23 @@
         50% { box-shadow: 0 0 20px rgba(204,106,90,0.6); }
         100% { box-shadow: 0 0 8px rgba(204,106,90,0.3); }
       }
+
+      .mensagem-final {
+        background: rgba(239, 189, 166, 0.3);
+        border-left: 4px solid var(--terracota);
+        color: var(--teal);
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        font-weight: 600;
+        line-height: 1.5;
+        animation: aparecer 1.2s ease-in-out;
+      }
+
+      @keyframes aparecer {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
     </style>
   </head>
 
@@ -65,13 +82,22 @@
       <div class="section" style="text-align:center; margin-top:1.5rem;">
         <h3>📈 Evolução do Esforço Percebido (PSE)</h3>
         <canvas id="graficoPSE" width="300" height="200"></canvas>
+        <p id="legendaPSE" style="font-size:0.85rem; color:#666; margin-top:0.5rem;">
+          🩵 Leve • 🍑 Moderado • ❤️ Intenso
+        </p>
       </div>
 
       <!-- Histórico textual -->
       <div id="evolucaoContainer" class="section">
         <h3>📋 Histórico de Treinos</h3>
-        <p>Veja seu progresso de PSE ao longo do programa.</p>
         <ul id="listaEvolucao" style="list-style:none; padding:0;"></ul>
+      </div>
+
+      <!-- Mensagem final do ciclo -->
+      <div id="mensagemFinal" class="mensagem-final" style="display:none;">
+        ✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.  
+        Respire, celebre e permita que o seu corpo descanse.  
+        Um novo ciclo recomeçará automaticamente nos próximos dias 🌸
       </div>
 
       <button class="btn" onclick="location.href='index.html'">🏠 Voltar ao início</button>
@@ -86,18 +112,21 @@
           return;
         }
 
-        // === PROGRESSO ===
         const progresso = calcularProgresso(id, 30);
         const barra = document.getElementById("progressoBarra");
         const texto = document.getElementById("progressoTexto");
+        const msgFinal = document.getElementById("mensagemFinal");
+
+        // Atualiza barra de progresso
         barra.style.width = progresso + "%";
         texto.innerText = `Você completou ${progresso}% do programa`;
 
         if (progresso === 100) {
           barra.style.animation = "pulse 1.8s infinite";
+          msgFinal.style.display = "block";
         }
 
-        // === EVOLUÇÃO PSE ===
+        // Carregar memória e renderizar gráfico
         const memoria = carregarMemoria(id);
         const lista = document.getElementById('listaEvolucao');
         const ctx = document.getElementById('graficoPSE');
@@ -126,16 +155,15 @@
           pseValues.push(t.pse);
         });
 
-        // === Gráfico Chart.js com gradiente dinâmico ===
+        // Criação do gradiente dinâmico
         const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
         const maxPSE = Math.max(...pseValues);
         const intensidade = Math.min(maxPSE / 10, 1);
+        gradient.addColorStop(0, `rgba(204,106,90,${0.3 + intensidade * 0.3})`);
+        gradient.addColorStop(0.5, `rgba(239,189,166,${0.25 + intensidade * 0.25})`);
+        gradient.addColorStop(1, `rgba(51,89,83,${0.2 + intensidade * 0.2})`);
 
-        // Gradiente reage à intensidade máxima de PSE
-        gradient.addColorStop(0, `rgba(204,106,90,${0.3 + intensidade * 0.3})`); // terracota
-        gradient.addColorStop(0.5, `rgba(239,189,166,${0.25 + intensidade * 0.25})`); // pêssego
-        gradient.addColorStop(1, `rgba(51,89,83,${0.2 + intensidade * 0.2})`); // teal
-
+        // Gráfico com gradiente reativo
         new Chart(ctx, {
           type: 'line',
           data: {
