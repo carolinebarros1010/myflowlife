@@ -6,18 +6,19 @@
     <title>Identifique seu Ciclo - FemFlow</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="css/style.css" />
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   </head>
+
   <body>
     <header>
-           <h1>Identifique seu Ciclo</h1>
+      <h1>Identifique seu Ciclo</h1>
       <p class="subtitle">Ajuste seu treino ao seu ritmo</p>
     </header>
+
     <div class="container">
-      <!-- Top section: ciclo inputs -->
+      <!-- Configurar ciclo -->
       <div class="section" id="cicloSection">
         <h3>Configurar novo ciclo</h3>
         <label for="dataUltima">Data da última menstruação</label>
@@ -26,56 +27,188 @@
         <input type="number" id="duracao" min="21" max="35" value="28" />
         <button class="btn" id="btnIniciar">Iniciar Programa</button>
       </div>
-      <div class="alternativas-ciclo">
-  <p>Não sabe sua fase?</p>
-  <button class="btn-mini" onclick="abrirQuiz('irregular')">Ciclo irregular</button>
-  <button class="btn-mini" onclick="abrirQuiz('diu')">DIU hormonal</button>
-  <button class="btn-mini" onclick="abrirQuiz('menopausa')">Pré/menopausa</button>
-</div>
 
-<!-- Modal do quiz -->
-<div id="quizModal" class="quiz-modal" style="display:none;">
-  <div class="quiz-content">
-    <h3 id="quizTitulo">Identifique sua fase</h3>
-    <p id="quizPergunta"></p>
-
-    <div id="quizRespostas" class="quiz-respostas"></div>
-
-    <button class="btn" id="btnProxima" onclick="proximaPergunta()">Próxima</button>
-  </div>
-</div>
-      <!-- Divider -->
       <hr style="margin:1.5rem 0; border:none; border-top:1px solid rgba(0,0,0,0.1);" />
-      <!-- Bottom section: enter ID -->
+
+      <!-- Entrar com ID -->
       <div class="section" id="idSection">
         <h3>Já tem um ID?</h3>
         <label for="inputID">Digite seu ID FemFlow</label>
         <input type="text" id="inputID" placeholder="FF-AAAA-XXXX" />
-       <button class="btn btn-secondary" onclick="processarLogin()">Continuar</button>
+        <button class="btn btn-secondary" id="btnValidar">Continuar</button>
         <p id="statusID" style="margin-top:1rem; font-size:0.9rem;"></p>
-              </div>
-      <!-- Botão para abrir recuperação de ID -->
-<p style="text-align:center; margin-top:1rem;">
-  <button class="btn-recuperar" onclick="mostrarRecuperar()">🔑 Esqueceu seu ID?</button>
-</p>
+      </div>
 
-<!-- Formulário de recuperação -->
-<div id="recuperarBox" class="recuperar-box" style="display:none;">
-  <input type="text" id="nomeRec" placeholder="Seu nome completo" required>
-  <input type="email" id="emailRec" placeholder="Seu e-mail cadastrado" required>
-  <button class="btn" style="background:var(--terracota);" onclick="recuperarID()">Recuperar ID</button>
-  <p id="statusRec" style="margin-top:0.5rem; font-size:0.9rem;"></p>
-</div>
+      <!-- Botão para abrir quiz -->
+      <div class="alternativas-ciclo">
+        <p>Não sabe sua fase?</p>
+        <button class="btn-mini" onclick="abrirQuiz('irregular')">Ciclo irregular</button>
+        <button class="btn-mini" onclick="abrirQuiz('diu')">DIU hormonal</button>
+        <button class="btn-mini" onclick="abrirQuiz('menopausa')">Pré/menopausa</button>
+      </div>
+
+      <!-- Recuperar ID -->
+      <p style="text-align:center; margin-top:1rem;">
+        <button class="btn-recuperar" onclick="mostrarRecuperar()">🔑 Esqueceu seu ID?</button>
+      </p>
+
+      <div id="recuperarBox" class="recuperar-box" style="display:none;">
+        <input type="text" id="nomeRec" placeholder="Seu nome completo" required>
+        <input type="email" id="emailRec" placeholder="Seu e-mail cadastrado" required>
+        <button class="btn" style="background:var(--terracota);" onclick="recuperarID()">Recuperar ID</button>
+        <p id="statusRec" style="margin-top:0.5rem; font-size:0.9rem;"></p>
+      </div>
+
+      <!-- Modal do quiz -->
+      <div id="quizModal" class="quiz-modal" style="display:none;">
+        <div class="quiz-content">
+          <h3 id="quizTitulo">Identifique sua fase</h3>
+          <p id="quizPergunta"></p>
+          <div id="quizRespostas" class="quiz-respostas"></div>
+          <button class="btn" id="btnProxima" onclick="proximaPergunta()">Próxima</button>
+        </div>
+      </div>
     </div>
-    <script src="./js/memoria.js"></script>
-    <script src="./js/validacao.js"></script>
-    <script src="./js/ciclo.js"></script>
+
+    <!-- Scripts -->
+    <script src="js/memoria.js"></script>
+    <script src="js/validacao.js"></script>
     <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(() => console.log('✅ Service Worker registrado'))
-      .catch((err) => console.error('SW erro:', err));
-  }
-</script>
-      </body>
+      // ======== Cálculo do ciclo regular ========
+      document.getElementById('btnIniciar').addEventListener('click', () => {
+        const dataUltima = document.getElementById('dataUltima').value;
+        const duracao = parseInt(document.getElementById('duracao').value);
+
+        if (!dataUltima || isNaN(duracao)) {
+          alert("Por favor, preencha a data e a duração do ciclo.");
+          return;
+        }
+
+        const hoje = new Date();
+        const ultima = new Date(dataUltima);
+        const diasPassados = Math.floor((hoje - ultima) / (1000 * 60 * 60 * 24)) % duracao;
+
+        let fase;
+        if (diasPassados <= 4) fase = "Menstrual";
+        else if (diasPassados <= 13) fase = "Folicular";
+        else if (diasPassados <= 16) fase = "Ovulatória";
+        else fase = "Lútea";
+
+        localStorage.setItem("fase_sugerida", fase);
+        localStorage.setItem("dia_ciclo", diasPassados + 1);
+
+        alert(`🩸 Sua fase atual é ${fase}. (Dia ${diasPassados + 1} do ciclo)`);
+        window.location.href = "cadastro.html?fase=" + encodeURIComponent(fase);
+      });
+
+      // ======== Quiz para irregulares, DIU e menopausa ========
+      let perguntas = [], indicePergunta = 0, pontuacao = 0;
+      function abrirQuiz(tipo) {
+        document.getElementById("quizModal").style.display = "flex";
+        indicePergunta = 0; pontuacao = 0;
+        perguntas = tipo === "irregular" ? [
+          { q: "Você sente inchaço frequente?", p: 1 },
+          { q: "Seu humor oscila bastante?", p: 2 },
+          { q: "Percebe dias de mais energia?", p: 3 },
+          { q: "Seu sono varia durante o mês?", p: 4 },
+          { q: "Seu ciclo é imprevisível?", p: 5 }
+        ] : tipo === "diu" ? [
+          { q: "Sente cólicas leves?", p: 1 },
+          { q: "Tem leve sangramento mensal?", p: 2 },
+          { q: "Nota variação de energia?", p: 3 },
+          { q: "Sente sensibilidade nos seios?", p: 4 },
+          { q: "Seu sono muda durante o mês?", p: 5 }
+        ] : [
+          { q: "Tem ondas de calor?", p: 1 },
+          { q: "Sente fadiga constante?", p: 2 },
+          { q: "Tem irritabilidade ou ansiedade?", p: 3 },
+          { q: "Seu sono está leve?", p: 4 },
+          { q: "Nota ressecamento corporal?", p: 5 }
+        ];
+        mostrarPergunta();
+      }
+
+      function mostrarPergunta() {
+        const atual = perguntas[indicePergunta];
+        document.getElementById("quizPergunta").innerText = atual.q;
+        const respostasDiv = document.getElementById("quizRespostas");
+        respostasDiv.innerHTML = `
+          <button onclick="responder(1)">Sim</button>
+          <button onclick="responder(0)">Não</button>
+        `;
+      }
+
+      function responder(valor) {
+        pontuacao += valor;
+        proximaPergunta();
+      }
+
+      function proximaPergunta() {
+        indicePergunta++;
+        if (indicePergunta < perguntas.length) mostrarPergunta();
+        else concluirQuiz();
+      }
+
+      function concluirQuiz() {
+        document.getElementById("quizModal").style.display = "none";
+        let fase;
+        if (pontuacao <= 2) fase = "Folicular";
+        else if (pontuacao <= 3) fase = "Ovulatória";
+        else if (pontuacao <= 4) fase = "Lútea";
+        else fase = "Menstrual";
+
+        localStorage.setItem("fase_sugerida", fase);
+        localStorage.setItem("dia_ciclo", 1);
+
+        alert(`🌸 Seu corpo está mais próximo da fase ${fase}.`);
+        window.location.href = "cadastro.html?fase=" + encodeURIComponent(fase);
+      }
+    </script>
+
+    <style>
+      .alternativas-ciclo {
+        text-align: center;
+        margin-top: 1.2rem;
+      }
+      .btn-mini {
+        background: #335953;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+        margin: 0.3rem;
+        cursor: pointer;
+      }
+      .quiz-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+      }
+      .quiz-content {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        max-width: 340px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      }
+      .quiz-respostas button {
+        display: block;
+        margin: 0.5rem auto;
+        background: #EFBDA6;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        color: #335953;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </body>
 </html>
