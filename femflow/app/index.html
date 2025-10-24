@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Treino Diário - FemFlow</title>
-    <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -33,14 +33,14 @@
         <button class="btn btn-secondary" onclick="proximoTreino()">Próximo treino</button>
       </div>
 
-      <button class="btn" style="margin-top:1.5rem;" onclick="location.href='index.html'">🏠 Voltar ao início</button>
+      <button class="btn" style="margin-top:1.5rem;" onclick="location.href='./index.html'">🏠 Voltar ao início</button>
     </div>
 
-    <script src="js/memoria.js"></script>
+    <script src="./js/memoria.js"></script>
     <script>
       // --- Protege acesso (só entra se tiver ID válido)
       const id = localStorage.getItem('femflow_id');
-      if (!id) window.location.href = 'ciclo.html';
+      if (!id) window.location.href = './ciclo.html';
 
       // --- Exibe fase atual no topo
       const faseAtual = localStorage.getItem("fase_sugerida");
