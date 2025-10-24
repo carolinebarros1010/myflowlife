@@ -38,6 +38,7 @@
         <input type="range" id="pse" min="0" max="10" value="5" step="1" />
         <p>PSE: <span id="valorPSE">5</span></p>
         <button class="btn" id="salvarTreinoBtn">Salvar treino</button>
+        <button class="btn btn-secondary" id="proximoTreinoBtn">Próximo treino</button>
       </div>
 
       <button class="btn btn-secondary" onclick="location.href='evolucao.html'">📊 Ver evolução</button>
@@ -59,64 +60,78 @@
           ? memoria.treinos[memoria.treinos.length - 1].diaPrograma + 1
           : parseInt(diaMemoria);
 
-        // 🔹 Atualiza interface
+        // Atualiza interface
         document.getElementById('faseAtual').innerText = `Fase: ${fase}`;
         document.getElementById('diaPrograma').innerText = `Dia do programa: ${diaPrograma}`;
 
-        // 🔹 Carrega vídeo da fase
+        // Carrega vídeo correspondente
         const video = document.getElementById('videoTreino');
         const faseLower = fase.toLowerCase();
         video.querySelector('source').src = `videos/video_${faseLower}_${diaPrograma}.mp4`;
         video.load();
 
-        // 🔹 PSE visual
+        // Controle de PSE
         const range = document.getElementById('pse');
         const valor = document.getElementById('valorPSE');
         range.addEventListener('input', () => valor.innerText = range.value);
 
-        // 🔹 Salvar treino e registrar progresso
+        // ======= Salvar treino =======
         document.getElementById('salvarTreinoBtn').addEventListener('click', () => {
           const pse = parseInt(range.value);
           const data = new Date().toISOString();
 
-          // Usa o novo controle de 30 dias e reinício
-         salvarTreino(id, data, fase, diaPrograma, pse);
+          salvarTreino(id, data, fase, diaPrograma, pse);
+          const progresso = calcularProgresso(id);
+          console.log(`Progresso atual: ${progresso}%`);
 
-const progresso = calcularProgresso(id);
-console.log(`Progresso atual: ${progresso}%`);
+          // 🌸 ENCERRAMENTO DO CICLO NO DIA 30
+          if (diaPrograma === 30) {
+            alert("✨ Parabéns! Você concluiu o seu ciclo de 30 dias FemFlow.\nRespire, celebre e prepare-se para o próximo ciclo!");
 
-// 🌸 Mensagem final de encerramento
-if (diaPrograma === 30) {
-  alert("✨ Parabéns! Você concluiu o seu ciclo de 30 dias FemFlow.\nRespire, celebre e prepare-se para o próximo ciclo!");
-  
-  // Tarja discreta de encerramento
-  const banner = document.createElement("div");
-  banner.innerHTML = "🌸 Ciclo completo! Seu novo ciclo será liberado automaticamente.";
-  banner.style.cssText = `
-    background: var(--pessego);
-    color: white;
-    text-align: center;
-    padding: 1rem;
-    border-radius: 10px;
-    margin-top: 1rem;
-    font-weight: 600;
-  `;
-  document.querySelector(".container").prepend(banner);
-  
-  // Impede avanço além de 30
-  localStorage.setItem('dia_ciclo', 30);
-  return;
-}
+            // 🔒 Desativa botão "Próximo Treino" se existir
+            const botaoProximo = document.getElementById("proximoTreinoBtn");
+            if (botaoProximo) {
+              botaoProximo.disabled = true;
+              botaoProximo.style.opacity = "0.5";
+              botaoProximo.innerText = "🌸 Ciclo Concluído";
+              botaoProximo.style.transition = "all 0.4s ease";
+            }
 
-// Atualiza contador local
-if (diaPrograma < 30) {
-  localStorage.setItem('dia_ciclo', diaPrograma + 1);
-  alert(`✅ Treino do dia ${diaPrograma} salvo!`);
-  location.reload();
-}
+            // 🌺 Mensagem visual
+            const banner = document.createElement("div");
+            banner.innerHTML = "🌸 Ciclo completo! Redirecionando para o início...";
+            banner.style.cssText = `
+              background: var(--pessego);
+              color: white;
+              text-align: center;
+              padding: 1rem;
+              border-radius: 10px;
+              margin-top: 1rem;
+              font-weight: 600;
+              box-shadow: 0 0 10px rgba(204,106,90,0.3);
+            `;
+            document.querySelector(".container").prepend(banner);
+
+            // Garante travamento
+            localStorage.setItem('dia_ciclo', 30);
+
+            // Redireciona para o menu após 5s
+            setTimeout(() => {
+              window.location.href = "index.html";
+            }, 5000);
+
+            return;
+          }
+
+          // 🔹 Fluxo normal até o dia 29
+          if (diaPrograma < 30) {
+            localStorage.setItem('dia_ciclo', diaPrograma + 1);
+            alert(`✅ Treino do dia ${diaPrograma} salvo!`);
+            location.reload();
+          }
         });
 
-        // 🔹 Verifica se houve reinício automático
+        // Verifica reinício automático
         const reiniciado = localStorage.getItem(`femflow_reiniciado_${id}`);
         if (reiniciado) {
           const dataReinicio = new Date(reiniciado).toLocaleDateString("pt-BR");
