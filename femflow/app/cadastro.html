@@ -6,15 +6,92 @@
     <title>Cadastro FemFlow</title>
     <link rel="stylesheet" href="/femflow/app/css/style.css" />
     <link rel="manifest" href="/femflow/app/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
   </head>
+
   <body>
     <header>
       <h1>Cadastro FemFlow</h1>
+      <p class="subtitle">Prepare-se para iniciar seu programa cíclico</p>
+      <p id="faseAtual" class="fase-info"></p>
     </header>
+
     <div class="container">
-      <p>Para acessar o aplicativo FemFlow, realize a compra do seu plano no site oficial. Após a confirmação do pagamento, você receberá um e-mail com seu <strong>ID FemFlow</strong> e poderá iniciar o seu programa cíclico.</p>
-      <p>Já tem um ID? Volte e insira-o na página de ciclo para desbloquear o programa.</p>
-      <button class="btn" onclick="location.href='index.html'">Voltar</button>
+      <div class="section">
+        <h3>🔸 Como funciona o acesso</h3>
+        <p>
+          Após a confirmação da sua compra, você receberá um e-mail com seu
+          <strong>ID FemFlow</strong>.  
+          Esse ID libera os treinos, o gráfico de evolução e o acompanhamento
+          personalizado conforme sua fase hormonal.
+        </p>
+
+        <h3 style="margin-top:1.5rem;">💳 Acesse seu plano</h3>
+        <p>
+          Clique abaixo para adquirir seu plano e receber automaticamente seu ID
+          por e-mail:
+        </p>
+        <button
+          class="btn"
+          onclick="window.open('https://pay.hotmart.com/Q102567067C','_blank')"
+          style="background: var(--terracota);"
+        >
+          🔗 Adquirir plano
+        </button>
+
+        <h3 style="margin-top:1.5rem;">📩 Já possui um ID?</h3>
+        <p>Volte à tela anterior e insira-o na página de ciclo.</p>
+        <button class="btn btn-secondary" onclick="location.href='ciclo.html'">
+          🔙 Voltar
+        </button>
+      </div>
     </div>
+
+    <script>
+      // === Exibir fase atual ===
+      document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const faseURL = urlParams.get('fase');
+        const faseStorage = localStorage.getItem('fase_sugerida');
+        const fase = faseURL || faseStorage;
+
+        if (fase) {
+          document.getElementById('faseAtual').innerText =
+            `🌿 Fase atual estimada: ${fase}`;
+        } else {
+          document.getElementById('faseAtual').innerText =
+            '🌸 Fase não identificada ainda';
+        }
+      });
+    </script>
+
+    <style>
+      .fase-info {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--teal);
+        margin-top: 0.5rem;
+        background: rgba(239, 189, 166, 0.2);
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 12px;
+      }
+
+      p {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #444;
+      }
+
+      h3 {
+        font-size: 1.1rem;
+        color: var(--teal);
+      }
+    </style>
   </body>
 </html>
