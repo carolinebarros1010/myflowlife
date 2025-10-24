@@ -10,27 +10,116 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   </head>
+
   <body>
     <header>
-      <h1 id="tituloTreino">Treino FemFlow</h1>
-      <p class="subtitle" id="subTreino"></p>
+      <h1>Treino Diário</h1>
+      <p class="subtitle">Seu corpo, seu ritmo</p>
+      <p id="avisoCiclo" class="tarja-novo-ciclo" style="display:none;">🩵 Novo ciclo iniciado automaticamente!</p>
     </header>
+
     <div class="container">
-      <video id="videoTreino" controls style="width:100%; border-radius: var(--radius); max-height:50vh; background:#000;">
-        <source src="" type="video/mp4" />
-        Seu navegador não suporta vídeo.
-      </video>
-      <div class="pse-card">
-        <label for="pseInput">Como foi o esforço de hoje? (0 = muito leve, 10 = exaustivo)</label>
-        <input type="range" id="pseInput" min="0" max="10" value="5" step="1" />
-        <button class="btn" id="btnSalvarPse">Salvar PSE</button>
-        <p id="pseFeedback" style="margin-top:0.5rem;"></p>
+      <div class="section" id="infoTreino">
+        <h3 id="faseAtual">Fase: -</h3>
+        <h4 id="diaPrograma">Dia do programa: -</h4>
       </div>
+
+      <!-- Vídeo do treino -->
+      <div class="section" style="text-align:center;">
+        <video id="videoTreino" width="100%" controls style="border-radius:12px; max-width:480px;">
+          <source src="" type="video/mp4" />
+          Seu navegador não suporta vídeos HTML5.
+        </video>
+      </div>
+
+      <!-- Registro de PSE -->
+      <div class="section" style="text-align:center;">
+        <h3>Como foi seu esforço hoje?</h3>
+        <input type="range" id="pse" min="0" max="10" value="5" step="1" />
+        <p>PSE: <span id="valorPSE">5</span></p>
+        <button class="btn" id="salvarTreinoBtn">Salvar treino</button>
+      </div>
+
+      <button class="btn btn-secondary" onclick="location.href='evolucao.html'">📊 Ver evolução</button>
     </div>
-    <!-- Floating buttons for PDF and next -->
-    <a id="btnPdf" class="float-btn" download title="Baixar treino PDF">📄</a>
-    <button id="btnNext" class="float-btn" title="Próximo treino">⏭️</button>
+
     <script src="js/memoria.js"></script>
-    <script src="js/treino.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const id = localStorage.getItem('femflow_id');
+        if (!id) {
+          window.location.href = 'ciclo.html';
+          return;
+        }
+
+        const fase = localStorage.getItem('fase_sugerida') || "Desconhecida";
+        const diaMemoria = localStorage.getItem('dia_ciclo') || 1;
+        const memoria = carregarMemoria(id);
+        const diaPrograma = (memoria && memoria.treinos && memoria.treinos.length > 0)
+          ? memoria.treinos[memoria.treinos.length - 1].diaPrograma + 1
+          : parseInt(diaMemoria);
+
+        // 🔹 Atualiza interface
+        document.getElementById('faseAtual').innerText = `Fase: ${fase}`;
+        document.getElementById('diaPrograma').innerText = `Dia do programa: ${diaPrograma}`;
+
+        // 🔹 Carrega vídeo da fase
+        const video = document.getElementById('videoTreino');
+        const faseLower = fase.toLowerCase();
+        video.querySelector('source').src = `videos/video_${faseLower}_${diaPrograma}.mp4`;
+        video.load();
+
+        // 🔹 PSE visual
+        const range = document.getElementById('pse');
+        const valor = document.getElementById('valorPSE');
+        range.addEventListener('input', () => valor.innerText = range.value);
+
+        // 🔹 Salvar treino e registrar progresso
+        document.getElementById('salvarTreinoBtn').addEventListener('click', () => {
+          const pse = parseInt(range.value);
+          const data = new Date().toISOString();
+
+          // Usa o novo controle de 30 dias e reinício
+          salvarTreino(id, data, fase, diaPrograma, pse);
+
+          const progresso = calcularProgresso(id);
+          console.log(`Progresso atual: ${progresso}%`);
+
+          // Atualiza contador local
+          if (diaPrograma < 30) {
+            localStorage.setItem('dia_ciclo', diaPrograma + 1);
+            alert(`✅ Treino do dia ${diaPrograma} salvo!`);
+            location.reload();
+          }
+        });
+
+        // 🔹 Verifica se houve reinício automático
+        const reiniciado = localStorage.getItem(`femflow_reiniciado_${id}`);
+        if (reiniciado) {
+          const dataReinicio = new Date(reiniciado).toLocaleDateString("pt-BR");
+          const aviso = document.getElementById('avisoCiclo');
+          aviso.innerText = `🩵 Novo ciclo iniciado automaticamente em ${dataReinicio}`;
+          aviso.style.display = "block";
+        }
+      });
+    </script>
+
+    <style>
+      .tarja-novo-ciclo {
+        background: linear-gradient(90deg, var(--pessego), var(--teal));
+        color: white;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        margin-top: 0.6rem;
+        display: inline-block;
+        animation: fadeInTarja 2s ease-in-out;
+      }
+
+      @keyframes fadeInTarja {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
   </body>
 </html>
