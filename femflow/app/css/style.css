@@ -528,19 +528,33 @@ input[type="text"] {
 }
 
 /* Botão principal */
-#btnIniciar {
+/* Botões principais centralizados */
+#btnIniciar,
+#btnValidar {
+  display: block;
   background: #335953;
   color: white;
   font-weight: 600;
   border: none;
   border-radius: 12px;
-  padding: 0.9rem;
-  margin-top: 1rem;
+  padding: 0.9rem 2rem;
+  margin: 1rem auto 0 auto;   /* centraliza horizontalmente */
+  width: auto;                /* largura conforme o conteúdo */
+  text-align: center;
   transition: background 0.3s ease;
+}
+
+/* Cores individuais */
+#btnValidar {
+  background: #CC6A5A;
 }
 
 #btnIniciar:hover {
   background: #2b4b45;
+}
+
+#btnValidar:hover {
+  background: #b65a48;
 }
 
 /* Três botões fora do box */
@@ -583,20 +597,6 @@ input[type="text"] {
   margin-bottom: 1rem;
 }
 
-#btnValidar {
-  background: #CC6A5A;
-  color: #fff;
-  font-weight: 600;
-  border: none;
-  border-radius: 12px;
-  padding: 0.9rem;
-  margin-top: 1rem;
-  transition: background 0.3s ease;
-}
-
-#btnValidar:hover {
-  background: #b65a48;
-}
 
 /* Link Esqueceu ID */
 .btn-recuperar {
