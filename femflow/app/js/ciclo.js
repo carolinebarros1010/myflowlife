@@ -141,4 +141,28 @@ function concluirQuiz() {
   // Redireciona para a tela de ID (cadastro) já com a fase
   window.location.href = `cadastro.html?fase=${encodeURIComponent(fase)}`;
 }
+// === FEMFLOW — INSTALAÇÃO PWA ===
+let deferredPrompt;
+const btnInstall = document.getElementById('btnInstall');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  btnInstall.style.display = 'inline-block'; // mostra o botão
+});
+
+btnInstall.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`Resultado da instalação: ${outcome}`);
+    deferredPrompt = null;
+    btnInstall.style.display = 'none';
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('✅ FemFlow foi instalado como PWA!');
+  btnInstall.style.display = 'none';
+});
 
