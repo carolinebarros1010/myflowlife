@@ -469,10 +469,36 @@ input:focus {
   color: #fff;
 }
 /* === FEMFLOW — NOVO VISUAL CICLO.HTML (Layout Imagem 25) === */
+/* Fundo com efeito da imagem 25 — gradiente quente e camada de brilho suave */
 body {
   background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+  min-height: 100vh;
   font-family: "Helvetica Rounded", "Arial Rounded MT Bold", sans-serif;
   color: #335953;
+  overflow-x: hidden;
+}
+
+/* Camada de luz difusa (simula o efeito aquarelado) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+      circle at 30% 20%, rgba(255, 255, 255, 0.45) 0%, transparent 60%
+    ),
+    radial-gradient(
+      circle at 80% 80%, rgba(255, 240, 230, 0.4) 0%, transparent 70%
+    ),
+    radial-gradient(
+      circle at 50% 100%, rgba(239, 189, 166, 0.3) 0%, transparent 80%
+    );
+  filter: blur(40px) saturate(110%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Cabeçalho principal */
@@ -623,6 +649,11 @@ input[type="text"] {
 @keyframes fadeIn {
   to { opacity: 1; transform: translateY(0); }
   from { opacity: 0; transform: translateY(10px); }
+}
+@media (max-width: 600px) {
+  body::before {
+    filter: blur(25px) saturate(120%);
+  }
 }
 
 
