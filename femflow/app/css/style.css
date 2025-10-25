@@ -114,11 +114,18 @@ label {
 
 /* Sections for ciclo page */
 .section {
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  padding: 1rem;
-  margin-bottom: 1rem;
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+.section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
 /* Floating action buttons on treino page */
@@ -246,18 +253,17 @@ label {
 }
 
 .titulo-ciclo {
-  font-size: 1.8rem;             /* reduzido */
-  color: var(--teal);            /* mantém teal */
-  font-weight: 700;
-  margin-bottom: 0.3rem;
-  letter-spacing: 0.5px;
+  font-size: 1.6rem;
+  color: var(--teal);
+  margin-bottom: 0.2rem;
+  letter-spacing: 0.3px;
 }
 
 .subtitulo-ciclo {
-  font-size: 1rem;
-  color: #CC6A5A;       /* subtexto mais quente */
+  font-size: 0.95rem;
+  color: var(--terracota);
   margin-top: 0;
-  font-weight: 500;
+  opacity: 0.8;
 }
 
 /* 🌿 Box de configuração de ciclo */
@@ -427,18 +433,6 @@ body {
   backdrop-filter: blur(3px);
 }
 
-.section, .pse-card, .recuperar-box, .instalar-app {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-  border: 1px solid rgba(255,255,255,0.25);
-  transition: all 0.3s ease;
-}
-.section:hover, .pse-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
 
 /* Botões com gradiente suave */
 .btn {
