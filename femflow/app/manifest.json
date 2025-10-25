@@ -33,13 +33,13 @@
   ],
   "screenshots": [
     {
-      "src": "/femflow/app/assets/screenshots/femflow-home.webp",
+      "src": "/femflow/app/assets/screenshots/femflow-home.png",
       "sizes": "1080x1920",
       "type": "image/webp",
       "form_factor": "narrow"
     },
     {
-      "src": "/femflow/app/assets/screenshots/femflow-dashboard.webp",
+      "src": "/femflow/app/assets/screenshots/femflow-dashboard.png",
       "sizes": "1920x1080",
       "type": "image/webp",
       "form_factor": "wide"
