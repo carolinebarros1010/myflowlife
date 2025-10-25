@@ -14,7 +14,9 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: 'Lato', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--creme);
+  body {
+  background: linear-gradient(180deg, #F4E1D7 0%, #FBE9E1 100%);
+}
   color: var(--grafite);
   min-height: 100vh;
   display: flex;
@@ -318,18 +320,6 @@ label {
   margin-top: 1.2rem;
 }
 
-.btn-mini {
-  background: #335953;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 0.8rem;
-  font-size: 0.85rem;
-  margin: 0.3rem;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
 .btn-mini:active {
   transform: scale(0.97);
   background: #2b4b45;
@@ -460,18 +450,25 @@ input:focus {
 }
 
 /* Botões de condição menores */
-.btn-pequeno, .btn-mini {
-  background: rgba(239,189,166,0.75);
+.btn-mini {
+  background: linear-gradient(135deg, #EFBDA6, #F4E1D7);
   color: var(--teal);
+  border: none;
   border-radius: 10px;
+  padding: 0.55rem 1rem;
+  font-size: 0.9rem;
+  margin: 0.3rem;
   font-weight: 600;
-  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  transition: all 0.25s ease;
 }
-.btn-pequeno:hover, .btn-mini:hover {
+.btn-mini:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0,0,0,0.12);
   background: var(--terracota);
   color: #fff;
-  transform: scale(1.03);
 }
+
 
 /* Modal quiz vidro */
 .quiz-content {
@@ -480,6 +477,14 @@ input:focus {
   border: 1px solid rgba(255,255,255,0.3);
   border-radius: 20px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+.section, .container {
+  animation: fadeIn 0.6s ease forwards;
+  opacity: 0;
+}
+@keyframes fadeIn {
+  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
 }
 
 
