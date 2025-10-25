@@ -18,31 +18,31 @@
       <p id="avisoCiclo" class="tarja-novo-ciclo" style="display:none;">🩵 Novo ciclo iniciado automaticamente!</p>
     </header>
 
-    <div class="container">
-      <div class="section" id="infoTreino">
-        <h3 id="faseAtual">Fase: -</h3>
-        <h4 id="diaPrograma">Dia do programa: -</h4>
-      </div>
+  <div class="container">
+  <!-- 🎥 Box do vídeo -->
+  <div class="section treino-box">
+    <h3 id="faseAtual">Fase: -</h3>
+    <h4 id="diaPrograma">Dia do programa: -</h4>
 
-      <!-- Vídeo do treino -->
-      <div class="section" style="text-align:center;">
-        <video id="videoTreino" width="100%" controls style="border-radius:12px; max-width:480px;">
-          <source src="" type="video/mp4" />
-          Seu navegador não suporta vídeos HTML5.
-        </video>
-      </div>
+    <video id="videoTreino" width="100%" controls playsinline>
+      <source src="" type="video/mp4" />
+      Seu navegador não suporta vídeos HTML5.
+    </video>
+  </div>
 
-      <!-- Registro de PSE -->
-      <div class="section" style="text-align:center;">
-        <h3>Como foi seu esforço hoje?</h3>
-        <input type="range" id="pse" min="0" max="10" value="5" step="1" />
-        <p>PSE: <span id="valorPSE">5</span></p>
-        <button class="btn" id="salvarTreinoBtn">Salvar treino</button>
-        <button class="btn btn-secondary" id="proximoTreinoBtn">Próximo treino</button>
-      </div>
-
-      <button class="btn btn-secondary" onclick="location.href='evolucao.html'">📊 Ver evolução</button>
+  <!-- 💪 Controle de PSE -->
+  <div class="section pse-box">
+    <h3>Como foi seu esforço hoje?</h3>
+    <input type="range" id="pse" min="0" max="10" value="5" step="1" />
+    <p>PSE: <span id="valorPSE">5</span></p>
+    <div class="botoes-pse">
+      <button id="salvarTreinoBtn">Salvar treino</button>
+      <button id="proximoTreinoBtn" class="secundario">Próximo treino</button>
     </div>
+  </div>
+
+  <button id="evolucaoBtn" onclick="location.href='evolucao.html'">📊 Ver evolução</button>
+</div>
 
     <script src="js/memoria.js"></script>
     <script>
