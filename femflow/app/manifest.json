@@ -31,4 +31,18 @@
   ],
   "prefer_related_applications": true
 }
+"screenshots": [
+  {
+    "src": "/femflow/app/assets/screenshots/femflow-home.png",
+    "sizes": "1080x1920",
+    "type": "image/png",
+    "form_factor": "narrow"
+  },
+  {
+    "src": "/femflow/app/assets/screenshots/femflow-dashboard.png",
+    "sizes": "1920x1080",
+    "type": "image/png",
+    "form_factor": "wide"
+  }
+],
 
