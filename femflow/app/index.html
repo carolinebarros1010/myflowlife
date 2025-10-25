@@ -13,28 +13,36 @@
 
   <body>
     <header>
-      <h1>Treino Diário</h1>
-    </header>
+  <h1>Treino Diário</h1>
+  <p class="subtitle">Seu corpo, seu ritmo 🌿</p>
+</header>
 
-    <div class="container">
-      <div id="treinoContainer" class="section" style="text-align:center;">
-        <h3 id="tituloTreino">Carregando treino...</h3>
-        <video id="videoTreino" width="100%" height="auto" controls playsinline></video>
-      </div>
+<div class="container">
+  <!-- 🎥 Treino -->
+  <div class="section treino-inicial">
+    <h3 id="tituloTreino">Carregando treino...</h3>
+    <video id="videoTreino" width="100%" height="auto" controls playsinline>
+      <source src="" type="video/mp4" />
+      Seu navegador não suporta vídeos HTML5.
+    </video>
+  </div>
 
-      <div class="section">
-        <label for="pseInput">Avalie o esforço (PSE de 0 a 10)</label>
-        <input type="range" id="pseInput" min="0" max="10" step="1" value="5" />
-        <p id="pseValor" style="text-align:center;">PSE: 5</p>
-      </div>
+  <!-- 💪 PSE -->
+  <div class="section pse-inicial">
+    <label for="pseInput">Avalie o esforço (PSE de 0 a 10)</label>
+    <input type="range" id="pseInput" min="0" max="10" step="1" value="5" />
+    <p id="pseValor">PSE: 5</p>
+  </div>
 
-      <div class="botoes-treino">
-        <button class="btn" onclick="registrarPSE()">Registrar PSE</button>
-        <button class="btn btn-secondary" onclick="proximoTreino()">Próximo treino</button>
-      </div>
+  <!-- Botões -->
+  <div class="botoes-treino">
+    <button id="btnRegistrar" onclick="registrarPSE()">Registrar PSE</button>
+    <button id="btnProximo" onclick="proximoTreino()">Próximo treino</button>
+  </div>
 
-      <button class="btn" style="margin-top:1.5rem;" onclick="location.href='./index.html'">🏠 Voltar ao início</button>
-    </div>
+  <button id="btnInicio" onclick="location.href='ciclo.html'">🔁 Voltar ao ciclo</button>
+</div>
+
 
     <script src="./js/memoria.js"></script>
     <script>
