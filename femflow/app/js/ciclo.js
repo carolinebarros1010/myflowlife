@@ -174,6 +174,17 @@ function concluirQuiz() {
   let fase = "";
   if (pontuacao <= 2) fase = "Folicular";
   else if (pontuacao <= 3) fase = "Ovulatória";
-  else if (pontuacao
+else if (pontuacao <= 4) fase = "Lútea";
+  else fase = "Menstrual";
+
+  // Guarda a fase no localStorage
+  localStorage.setItem("fase_sugerida", fase);
+
+  // Mensagem de feedback
+  alert(`Pelo seu perfil, seu corpo está mais próximo da fase ${fase}. 🌸`);
+
+  // Redireciona para cadastro (com a fase como parâmetro)
+  window.location.href = `cadastro.html?fase=${encodeURIComponent(fase)}`;
+}
 
 
