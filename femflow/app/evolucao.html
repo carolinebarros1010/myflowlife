@@ -85,42 +85,40 @@
       <p class="subtitle">Acompanhe como seu corpo responde ao treino</p>
     </header>
 
-    <div class="container">
-      <!-- Progresso geral -->
-      <div class="section" style="text-align:center;">
-        <h3>🌿 Progresso do seu programa</h3>
-        <p id="progressoTexto" class="texto-progresso">Calculando...</p>
-        <div class="barra-progresso">
-          <div id="progressoBarra" class="preenchimento-progresso"></div>
-        </div>
-      </div>
-
-      <!-- Gráfico de PSE -->
-      <div class="section" style="text-align:center; margin-top:1.5rem;">
-        <h3>📈 Evolução do Esforço Percebido (PSE)</h3>
-        <canvas id="graficoPSE" width="300" height="200"></canvas>
-        <p id="legendaPSE" style="font-size:0.85rem; color:#666; margin-top:0.5rem;">
-          🩵 Leve • 🍑 Moderado • ❤️ Intenso
-        </p>
-      </div>
-
-      <!-- Histórico textual -->
-      <div id="evolucaoContainer" class="section">
-        <h3>📋 Histórico de Treinos</h3>
-        <ul id="listaEvolucao" style="list-style:none; padding:0;"></ul>
-      </div>
-
-      <!-- Mensagem final e botão de novo ciclo -->
-      <div id="mensagemFinal" class="mensagem-final" style="display:none;">
-        ✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.  
-        Respire, celebre e permita que o seu corpo descanse.  
-        Um novo ciclo recomeçará automaticamente nos próximos dias 🌸
-        <br />
-        <button class="btn-novo-ciclo" id="novoCicloBtn">🔄 Iniciar novo ciclo agora</button>
-      </div>
-
-      <button class="btn" onclick="location.href='index.html'">🏠 Voltar ao início</button>
+   <div class="container">
+  <!-- 📊 Progresso geral -->
+  <div class="section progresso-box">
+    <h3>🌿 Progresso do seu programa</h3>
+    <p id="progressoTexto" class="texto-progresso">Calculando...</p>
+    <div class="barra-progresso">
+      <div id="progressoBarra" class="preenchimento-progresso"></div>
     </div>
+  </div>
+
+  <!-- 📈 Gráfico de PSE -->
+  <div class="section grafico-box">
+    <h3>📈 Evolução do Esforço Percebido (PSE)</h3>
+    <canvas id="graficoPSE" width="300" height="200"></canvas>
+    <p id="legendaPSE">🩵 Leve • 🍑 Moderado • ❤️ Intenso</p>
+  </div>
+
+  <!-- 📋 Histórico -->
+  <div class="section historico-box">
+    <h3>📋 Histórico de Treinos</h3>
+    <ul id="listaEvolucao"></ul>
+  </div>
+
+  <!-- ✨ Mensagem final -->
+  <div id="mensagemFinal" class="mensagem-final" style="display:none;">
+    ✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.<br>
+    Respire, celebre e permita que o seu corpo descanse.  
+    <br>
+    <button class="btn-novo-ciclo" id="novoCicloBtn">🔄 Iniciar novo ciclo</button>
+  </div>
+
+  <!-- 🏠 Voltar -->
+  <button id="voltarInicioBtn" onclick="location.href='index.html'">🏠 Voltar ao início</button>
+</div>
 
     <script src="js/memoria.js"></script>
     <script>
