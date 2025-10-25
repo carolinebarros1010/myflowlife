@@ -655,6 +655,222 @@ input[type="text"] {
     filter: blur(25px) saturate(120%);
   }
 }
+/* === FEMFLOW — CADASTRO ESTILO IMAGEM 25 === */
+body {
+  background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-family: "Helvetica Rounded", "Arial Rounded MT Bold", sans-serif;
+  color: #335953;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Efeito aquarelado */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 25% 20%, rgba(255,255,255,0.45) 0%, transparent 60%),
+              radial-gradient(circle at 80% 80%, rgba(255,240,230,0.4) 0%, transparent 70%),
+              radial-gradient(circle at 50% 100%, rgba(239,189,166,0.3) 0%, transparent 80%);
+  filter: blur(40px) saturate(110%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Caixa central */
+.cadastro-box {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  padding: 2.2rem;
+  max-width: 420px;
+  margin: 4rem auto;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+/* Textos */
+.cadastro-box h3 {
+  color: #335953;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+}
+
+.cadastro-box p {
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Botões */
+#btnPlano,
+#btnVoltar {
+  display: block;
+  margin: 1rem auto 0 auto;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 0.9rem 2rem;
+  cursor: pointer;
+  text-align: center;
+  width: auto;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+#btnPlano {
+  background: #335953;
+  color: white;
+}
+
+#btnPlano:hover {
+  background: #2b4b45;
+  transform: translateY(-2px);
+}
+
+#btnVoltar {
+  background: #CC6A5A;
+  color: white;
+}
+
+#btnVoltar:hover {
+  background: #b65a48;
+  transform: translateY(-2px);
+}
+/* === FEMFLOW — TREINO (Imagem 25) === */
+body {
+  background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-family: "Helvetica Rounded", "Arial Rounded MT Bold", sans-serif;
+  color: #335953;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Luz aquarelada */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 25% 20%, rgba(255,255,255,0.45) 0%, transparent 60%),
+              radial-gradient(circle at 80% 80%, rgba(255,240,230,0.4) 0%, transparent 70%),
+              radial-gradient(circle at 50% 100%, rgba(239,189,166,0.3) 0%, transparent 80%);
+  filter: blur(40px) saturate(110%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Cabeçalho */
+header {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+header h1 {
+  font-size: 1.8rem;
+  color: #335953;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.subtitle {
+  color: #CC6A5A;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* Boxes */
+.section {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 1.5rem;
+  margin: 1.2rem auto;
+  max-width: 420px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+/* Box do vídeo */
+.treino-box video {
+  border-radius: 16px;
+  margin-top: 1rem;
+  box-shadow: 0 4px 16px rgba(51,89,83,0.2);
+  border: 2px solid rgba(51,89,83,0.25);
+}
+
+/* Controle de PSE */
+.pse-box input[type="range"] {
+  width: 100%;
+  accent-color: #CC6A5A;
+  margin: 0.8rem 0;
+}
+
+.pse-box p span {
+  font-weight: 700;
+  color: #335953;
+}
+
+/* Botões PSE */
+.botoes-pse {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.botoes-pse button {
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.botoes-pse button:hover {
+  transform: translateY(-2px);
+}
+
+#salvarTreinoBtn {
+  background: #335953;
+  color: white;
+}
+
+#salvarTreinoBtn:hover {
+  background: #2b4b45;
+}
+
+#proximoTreinoBtn.secundario {
+  background: #CC6A5A;
+  color: white;
+}
+
+#proximoTreinoBtn.secundario:hover {
+  background: #b65a48;
+}
+
+/* Botão inferior */
+#evolucaoBtn {
+  display: block;
+  margin: 2rem auto;
+  background: transparent;
+  border: 2px solid #335953;
+  color: #335953;
+  font-weight: 600;
+  padding: 0.8rem 1.4rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+#evolucaoBtn:hover {
+  background: #335953;
+  color: white;
+}
 
 
 
