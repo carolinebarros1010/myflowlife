@@ -50,61 +50,73 @@
 </header>
 
     <div class="container">
-      <!-- Seção superior: ciclo -->
-      <div class="section" id="cicloSection">
-        <h3>Configurar novo ciclo</h3>
-        <label for="dataUltima">Data da última menstruação</label>
-        <input type="date" id="dataUltima" />
-        <label for="duracao">Duração média do ciclo (dias)</label>
-        <input type="number" id="duracao" min="21" max="35" value="28" />
-        <button class="btn" id="btnIniciar">Iniciar Programa</button>
-        <!-- 🔹 Opções para ciclo irregular, DIU ou menopausa -->
-<div class="section" id="alternativasCiclo" style="margin-top:1.5rem;">
-    <button class="btn btn-pequeno" onclick="abrirQuiz('irregular')">Sou irregular</button>
-  <button class="btn btn-pequeno" onclick="abrirQuiz('diu')">Uso DIU</button>
-  <button class="btn btn-pequeno" onclick="abrirQuiz('menopausa')">Estou na menopausa</button>
-</div>
+  <!-- ============================= -->
+  <!-- 🌿 SEÇÃO SUPERIOR: CONFIGURAR NOVO CICLO -->
+  <!-- ============================= -->
+  <div class="section" id="cicloSection">
+    <h3>Configurar novo ciclo</h3>
 
-<!-- 🌸 Modal do Quiz Hormonal -->
-<div id="quizModal" class="quiz-modal">
-  <div class="quiz-content">
-    <h3 id="quizPergunta">Pergunta aqui...</h3>
-    <div id="quizRespostas" class="quiz-respostas"></div>
-    <button class="btn" style="margin-top:1rem;" onclick="document.getElementById('quizModal').style.display='none'">Fechar</button>
+    <label for="dataUltima">Data da última menstruação</label>
+    <input type="date" id="dataUltima" placeholder="Selecione a data" />
+
+    <label for="duracao">Duração média do ciclo (dias)</label>
+    <input type="number" id="duracao" min="21" max="35" value="28" />
+
+    <button id="btnIniciar">Iniciar Programa</button>
+  </div>
+
+  <!-- ============================= -->
+  <!-- 🔹 BOTÕES LADO A LADO – OPÇÕES DE CICLO -->
+  <!-- ============================= -->
+  <div class="opcoes-ciclo">
+    <button class="btn-pequeno" onclick="abrirQuiz('irregular')">Sou irregular</button>
+    <button class="btn-pequeno" onclick="abrirQuiz('diu')">Uso DIU</button>
+    <button class="btn-pequeno" onclick="abrirQuiz('menopausa')">Estou na menopausa</button>
+  </div>
+
+  <!-- ============================= -->
+  <!-- 🌸 MODAL DO QUIZ HORMONAL -->
+  <!-- ============================= -->
+  <div id="quizModal" class="quiz-modal">
+    <div class="quiz-content">
+      <h3 id="quizPergunta">Pergunta aqui...</h3>
+      <div id="quizRespostas" class="quiz-respostas"></div>
+      <button class="btn" style="margin-top:1rem;"
+        onclick="document.getElementById('quizModal').style.display='none'">Fechar</button>
+    </div>
+  </div>
+
+  <!-- ============================= -->
+  <!-- 🩷 SEÇÃO INFERIOR: ACESSO COM ID -->
+  <!-- ============================= -->
+  <div class="section" id="idSection">
+    <h3>Já tem um ID?</h3>
+    <input type="text" id="inputID" placeholder="FF-AAAA-XXXX" />
+    <button id="btnValidar">Continuar</button>
+    <p id="statusID" style="margin-top:0.5rem; font-size:0.9rem;"></p>
+  </div>
+
+  <!-- 🔑 LINK DE RECUPERAÇÃO DE ID -->
+  <p style="text-align:center; margin-top:1rem;">
+    <button class="btn-recuperar" onclick="mostrarRecuperar()">🔑 Esqueceu seu ID?</button>
+  </p>
+
+  <!-- 📩 BOX DE RECUPERAÇÃO DE ID -->
+  <div id="recuperarBox" class="recuperar-box" style="display:none;">
+    <input type="text" id="nomeRec" placeholder="Seu nome completo" required />
+    <input type="email" id="emailRec" placeholder="Seu e-mail cadastrado" required />
+    <button class="btn" style="background:var(--terracota);" onclick="recuperarID()">Recuperar ID</button>
+    <p id="statusRec" style="margin-top:0.5rem; font-size:0.9rem;"></p>
   </div>
 </div>
-
-      <hr style="margin:1.5rem 0; border:none; border-top:1px solid rgba(0,0,0,0.1);" />
-
-      <!-- Seção inferior: inserir ID -->
-      <div class="section" id="idSection">
-        <h3>Já tem um ID?</h3>
-                <input type="text" id="inputID" placeholder="FF-AAAA-XXXX" />
-        <button class="btn btn-secondary" id="btnValidar">Continuar</button>
-        <p id="statusID" style="margin-top:0.5rem; font-size:0.9rem;"></p>
-      </div>
-
-      <!-- Recuperação de ID -->
-      <p style="text-align:center; margin-top:1rem;">
-        <button class="btn-recuperar" onclick="mostrarRecuperar()">🔑 Esqueceu seu ID?</button>
-      </p>
-
-      <div id="recuperarBox" class="recuperar-box" style="display:none;">
-        <input type="text" id="nomeRec" placeholder="Seu nome completo" required>
-        <input type="email" id="emailRec" placeholder="Seu e-mail cadastrado" required>
-        <button class="btn" style="background:var(--terracota);" onclick="recuperarID()">Recuperar ID</button>
-        <p id="statusRec" style="margin-top:0.5rem; font-size:0.9rem;"></p>
-      </div>
-    </div>
-
     <!-- Tela de boas-vindas -->
     <div id="welcomeOverlay" class="welcome-overlay">
       <p>✨ Bem-vinda ao seu ciclo FemFlow!</p>
     </div>
 
-    <script src="js/memoria.js"></script>
-    <script src="js/validacao.js"></script>
-    <script src="js/ciclo.js"></script>
+    <script src="./js/memoria.js"></script>
+    <script src="./js/validacao.js"></script>
+    <script src="./js/ciclo.js"></script>
 
     <script>
       async function validarID(id) {
