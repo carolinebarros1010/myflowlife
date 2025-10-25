@@ -871,6 +871,246 @@ header h1 {
   background: #335953;
   color: white;
 }
+/* === FEMFLOW — EVOLUÇÃO (Imagem 25) === */
+body {
+  background: linear-gradient(180deg,#FCE3D5 0%,#EFBDA6 100%);
+  background-attachment: fixed;
+  font-family: "Helvetica Rounded","Arial Rounded MT Bold",sans-serif;
+  color:#335953;
+  min-height:100vh;
+  position:relative;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background:radial-gradient(circle at 25% 20%,rgba(255,255,255,0.45)0%,transparent60%),
+             radial-gradient(circle at 80% 80%,rgba(255,240,230,0.4)0%,transparent70%),
+             radial-gradient(circle at 50% 100%,rgba(239,189,166,0.3)0%,transparent80%);
+  filter:blur(40px)saturate(110%);
+  pointer-events:none;
+  z-index:-1;
+}
+
+/* Seções */
+.section{
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(12px);
+  border-radius:18px;
+  padding:1.6rem;
+  margin:1.2rem auto;
+  max-width:420px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.05);
+  text-align:center;
+}
+.section h3{color:#335953;margin-bottom:.6rem;font-weight:700;}
+
+/* Barra de progresso */
+.barra-progresso{
+  position:relative;width:100%;height:18px;
+  border-radius:20px;
+  background:rgba(240,236,233,0.8);
+  overflow:hidden;
+}
+.preenchimento-progresso{
+  height:100%;
+  width:0%;
+  border-radius:20px;
+  background:linear-gradient(90deg,#CC6A5A,#EFBDA6,#335953);
+  box-shadow:0 0 10px rgba(204,106,90,0.4);
+  transition:width 1.2s ease-in-out;
+}
+.texto-progresso{font-weight:700;color:#335953;}
+
+/* Gráfico */
+.grafico-box canvas{
+  width:100%!important;
+  max-width:340px;
+  margin:auto;
+  border-radius:12px;
+  background:rgba(255,255,255,0.5);
+  box-shadow:0 4px 10px rgba(51,89,83,0.15);
+  padding:.5rem;
+}
+#graficoPSE{margin-top:.8rem;}
+#legendaPSE{font-size:.85rem;color:#666;margin-top:.4rem;}
+
+/* Histórico */
+#listaEvolucao{list-style:none;padding:0;margin-top:.6rem;text-align:left;}
+#listaEvolucao li{
+  padding:.5rem;
+  border-bottom:1px solid rgba(0,0,0,0.1);
+  font-size:.9rem;
+}
+
+/* Mensagem final */
+.mensagem-final{
+  background:rgba(239,189,166,0.25);
+  border-left:4px solid var(--terracota,#CC6A5A);
+  color:#335953;
+  padding:1rem;
+  border-radius:12px;
+  margin:1.5rem auto;
+  font-weight:600;
+  line-height:1.5;
+  text-align:center;
+  max-width:420px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Botões */
+.btn-novo-ciclo{
+  background:#335953;
+  color:white;
+  border:none;
+  border-radius:12px;
+  padding:0.9rem 1.6rem;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:1rem;
+  animation:pulsar 3s ease-in-out infinite;
+  transition:background 0.3s ease;
+}
+.btn-novo-ciclo:hover{background:#CC6A5A;}
+@keyframes pulsar{
+  0%{box-shadow:0 0 0 0 rgba(51,89,83,0.4);}
+  50%{box-shadow:0 0 12px 6px rgba(239,189,166,0.3);}
+  100%{box-shadow:0 0 0 0 rgba(51,89,83,0.4);}
+}
+
+/* Botão voltar */
+#voltarInicioBtn{
+  display:block;
+  margin:2rem auto;
+  background:transparent;
+  border:2px solid #335953;
+  color:#335953;
+  font-weight:600;
+  padding:0.8rem 1.4rem;
+  border-radius:12px;
+  transition:all 0.3s ease;
+}
+#voltarInicioBtn:hover{
+  background:#335953;
+  color:white;
+}
+/* === FEMFLOW — INDEX (Imagem 25) === */
+body {
+  background: linear-gradient(180deg,#FCE3D5 0%,#EFBDA6 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-family: "Helvetica Rounded","Arial Rounded MT Bold",sans-serif;
+  color:#335953;
+  min-height:100vh;
+  position:relative;
+}
+
+/* Efeito aquarelado */
+body::before {
+  content:"";
+  position:fixed; inset:0;
+  background:radial-gradient(circle at 25% 20%,rgba(255,255,255,0.45)0%,transparent60%),
+             radial-gradient(circle at 80% 80%,rgba(255,240,230,0.4)0%,transparent70%),
+             radial-gradient(circle at 50% 100%,rgba(239,189,166,0.3)0%,transparent80%);
+  filter:blur(40px) saturate(110%);
+  pointer-events:none;
+  z-index:-1;
+}
+
+/* Cabeçalho */
+header {
+  text-align:center;
+  margin-top:1.8rem;
+}
+header h1 {
+  color:#335953;
+  font-size:1.9rem;
+  font-weight:700;
+}
+.subtitle {
+  color:#CC6A5A;
+  font-weight:500;
+  font-size:1rem;
+  margin-top:0.3rem;
+}
+
+/* Box vídeo */
+.section {
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(12px);
+  border-radius:18px;
+  padding:1.5rem;
+  margin:1.2rem auto;
+  max-width:420px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.05);
+  text-align:center;
+}
+
+video {
+  border-radius:14px;
+  box-shadow:0 4px 12px rgba(51,89,83,0.25);
+  border:2px solid rgba(51,89,83,0.2);
+}
+
+/* PSE */
+#pseInput {
+  width:100%;
+  accent-color:#CC6A5A;
+  margin:0.8rem 0;
+}
+#pseValor {
+  font-weight:600;
+  color:#335953;
+}
+
+/* Botões principais */
+.botoes-treino {
+  display:flex;
+  justify-content:center;
+  gap:0.8rem;
+  margin-top:1rem;
+}
+.botoes-treino button {
+  border:none;
+  border-radius:12px;
+  padding:0.8rem 1.6rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:background 0.3s ease,transform 0.2s ease;
+}
+#btnRegistrar {
+  background:#335953;
+  color:white;
+}
+#btnRegistrar:hover {
+  background:#2b4b45;
+  transform:translateY(-2px);
+}
+#btnProximo {
+  background:#CC6A5A;
+  color:white;
+}
+#btnProximo:hover {
+  background:#b65a48;
+  transform:translateY(-2px);
+}
+
+/* Botão inferior */
+#btnInicio {
+  display:block;
+  margin:2rem auto;
+  background:transparent;
+  border:2px solid #335953;
+  color:#335953;
+  font-weight:600;
+  padding:0.8rem 1.4rem;
+  border-radius:12px;
+  transition:all 0.3s ease;
+}
+#btnInicio:hover {
+  background:#335953;
+  color:white;
+}
 
 
 
