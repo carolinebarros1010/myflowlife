@@ -1111,6 +1111,48 @@ video {
   background:#335953;
   color:white;
 }
+/* === FEMFLOW — BOTÃO DE INSTALAÇÃO PWA === */
+.instalar-app {
+  text-align:center;
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(12px);
+  border-radius:18px;
+  padding:2rem 1.5rem;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);
+  max-width:420px;
+  margin:2rem auto;
+}
+
+.instalar-app h3 {
+  color:#335953;
+  font-family:"Helvetica Rounded","Arial Rounded MT Bold",sans-serif;
+  font-weight:700;
+  margin-bottom:0.5rem;
+}
+
+.instalar-app p {
+  color:#444;
+  font-size:0.95rem;
+  margin-bottom:1rem;
+  line-height:1.4;
+}
+
+.btn-install {
+  background:linear-gradient(135deg,#335953,#CC6A5A);
+  color:white;
+  font-weight:600;
+  border:none;
+  border-radius:12px;
+  padding:0.9rem 1.8rem;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  display:none; /* aparece só se o app for instalável */
+}
+
+.btn-install:hover {
+  transform:translateY(-2px);
+  background:linear-gradient(135deg,#2b4b45,#b65a48);
+}
 
 
 
