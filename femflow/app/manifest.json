@@ -11,16 +11,6 @@
   "theme_color": "#335953",
   "background_color": "#FCE3D5",
   "categories": ["health", "fitness", "education", "lifestyle"],
-{
-  "name": "FemFlow – Ciclo Inteligente",
-  "short_name": "FemFlow",
-  "description": "Treine em harmonia com o seu ciclo. Programa de 30 dias sincronizado ao seu corpo e energia.",
-  "start_url": "/femflow/app/index.html",
-  "scope": "/femflow/app/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#F4E1D7",
-  "theme_color": "#335953",
   "icons": [
     {
       "src": "/femflow/app/assets/icons/icon-192.webp",
@@ -40,19 +30,18 @@
       "type": "image/png",
       "purpose": "monochrome"
     }
-  ]
-}
+  ],
   "screenshots": [
     {
-      "src": "/femflow/app/assets/screenshots/femflow-home.avif",
+      "src": "/femflow/app/assets/screenshots/femflow-home.webp",
       "sizes": "1080x1920",
-      "type": "image/avif",
+      "type": "image/webp",
       "form_factor": "narrow"
     },
     {
-      "src": "/femflow/app/assets/screenshots/femflow-dashboard.avif",
+      "src": "/femflow/app/assets/screenshots/femflow-dashboard.webp",
       "sizes": "1920x1080",
-      "type": "image/avif",
+      "type": "image/webp",
       "form_factor": "wide"
     }
   ],
