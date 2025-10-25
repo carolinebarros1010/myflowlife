@@ -11,7 +11,7 @@
   "theme_color": "#335953",
   "background_color": "#FCE3D5",
   "categories": ["health", "fitness", "education", "lifestyle"],
- "icons": [
+"icons": [
   {
     "src": "/femflow/app/assets/icons/icon-192.avif",
     "sizes": "192x192",
@@ -23,6 +23,12 @@
     "sizes": "512x512",
     "type": "image/avif",
     "purpose": "any maskable"
+  },
+  {
+    "src": "/femflow/app/assets/icons/icon-mono.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "monochrome"
   }
 ],
   "screenshots": [
