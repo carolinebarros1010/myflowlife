@@ -468,7 +468,145 @@ input:focus {
   background: var(--terracota);
   color: #fff;
 }
+/* === FEMFLOW — NOVO VISUAL CICLO.HTML (Layout Imagem 25) === */
+body {
+  background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+  font-family: "Helvetica Rounded", "Arial Rounded MT Bold", sans-serif;
+  color: #335953;
+}
 
+/* Cabeçalho principal */
+.header-ciclo {
+  text-align: center;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.titulo-ciclo {
+  font-size: 1.8rem;
+  color: #335953;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.subtitulo-ciclo {
+  font-size: 1rem;
+  color: #CC6A5A;
+  font-weight: 500;
+  margin-top: 0;
+}
+
+/* Box principal de configuração */
+#cicloSection {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  padding: 1.8rem;
+  margin-bottom: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#cicloSection h3 {
+  color: #335953;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* Campos */
+input[type="date"],
+input[type="number"],
+input[type="text"] {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  color: #335953;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* Botão principal */
+#btnIniciar {
+  background: #335953;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  padding: 0.9rem;
+  margin-top: 1rem;
+  transition: background 0.3s ease;
+}
+
+#btnIniciar:hover {
+  background: #2b4b45;
+}
+
+/* Três botões fora do box */
+.opcoes-ciclo {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-bottom: 1.8rem;
+}
+
+.opcoes-ciclo .btn-pequeno {
+  background: transparent;
+  border: 1px solid rgba(51, 89, 83, 0.6);
+  color: #335953;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.opcoes-ciclo .btn-pequeno:hover {
+  background: #335953;
+  color: white;
+}
+
+/* Box “Já tem um ID” */
+#idSection {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  padding: 1.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#idSection h3 {
+  color: #335953;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+#btnValidar {
+  background: #CC6A5A;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  padding: 0.9rem;
+  margin-top: 1rem;
+  transition: background 0.3s ease;
+}
+
+#btnValidar:hover {
+  background: #b65a48;
+}
+
+/* Link Esqueceu ID */
+.btn-recuperar {
+  color: #335953;
+  font-weight: 600;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
 
 /* Modal quiz vidro */
 .quiz-content {
