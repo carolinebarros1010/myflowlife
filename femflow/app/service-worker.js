@@ -1,8 +1,9 @@
-// 🌸 FemFlow Service Worker v3
-const CACHE_NAME = 'femflow-cache-v3';
+// 🌸 FemFlow Service Worker v4 (final)
+const CACHE_NAME = 'femflow-cache-v4';
 
 const ASSETS = [
   // Core pages
+  './',
   './index.html',
   './ciclo.html',
   './treino.html',
@@ -10,7 +11,7 @@ const ASSETS = [
   './cadastro.html',
 
   // Styles & manifest
-  './css/style.css',
+  './style.css',
   './manifest.json',
 
   // Scripts
@@ -21,21 +22,24 @@ const ASSETS = [
   './js/cadastro.js',
 
   // Icons (necessários para PWA)
-  './assets/icons/icon-192.png',
-  './assets/icons/icon-512.png'
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // 🪴 Instalação inicial: cria cache com os arquivos base
 self.addEventListener('install', (event) => {
+  console.log('📦 Instalando FemFlow PWA...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(ASSETS))
       .then(() => self.skipWaiting())
+      .catch((err) => console.warn('⚠️ Falha ao criar cache inicial:', err))
   );
 });
 
-// 🔁 Ativa nova versão e limpa caches antigos automaticamente
+// 🔁 Ativa nova versão e remove caches antigos
 self.addEventListener('activate', (event) => {
+  console.log('✨ FemFlow Service Worker ativo.');
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
@@ -47,11 +51,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ⚙️ Intercepta requisições (cache first + atualização em background)
+// ⚙️ Estratégia de fetch: cache first, update em background
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return; // evita cachear POST/PUT
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request)
+      const networkFetch = fetch(event.request)
         .then((networkResponse) => {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, networkResponse.clone());
@@ -59,20 +65,18 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => cachedResponse);
-      return cachedResponse || fetchPromise;
+
+      return cachedResponse || networkFetch;
     })
   );
 });
 
-// 🔄 Atualização automática silenciosa
+// 🔄 Atualização manual (usada via postMessage)
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data?.type === 'SKIP_WAITING') {
+    console.log('🔁 Forçando atualização do Service Worker.');
     self.skipWaiting();
   }
-});
-
-// 💡 Log interno (debug)
-self.addEventListener('message', (event) => {
   if (event.data === 'checkVersion') {
     console.log(`[FemFlow] Cache ativo: ${CACHE_NAME}`);
   }
