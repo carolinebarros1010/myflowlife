@@ -1,10 +1,10 @@
 {
-  "id": "/femflow/app/index.html",
+  "id": "/femflow/app/home.html",
   "name": "FemFlow – Ciclo Inteligente",
   "short_name": "FemFlow",
-  "description": "Treine em harmonia com o seu ciclo. Programa de 30 dias sincronizado ao seu corpo, energia e fases hormonais.",
+  "description": Treine em harmonia com o seu ciclo. Programa de 30 dias sincronizado ao seu corpo, energia e fases hormonais.",
   "lang": "pt-BR",
-  "start_url": "/femflow/app/index.html",
+  "start_url": "/femflow/app/home.html",
   "scope": "/femflow/app/",
   "display": "standalone",
   "orientation": "portrait",
