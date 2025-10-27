@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bem-vinda — MyFlowLife</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    body {
+      background: linear-gradient(180deg, #F8F9F8 0%, #EAF2F0 100%);
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-size: cover;
+      font-family: "Helvetica Rounded", "Arial Rounded MT Bold", sans-serif;
+      color: #335953;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 25% 20%, rgba(255,255,255,0.6) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(200,240,230,0.3) 0%, transparent 70%), radial-gradient(circle at 50% 100%, rgba(240,250,245,0.4) 0%, transparent 80%);
+      filter: blur(40px) saturate(120%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    .logo-myflowlife {
+      text-align: center;
+      font-family: "Helvetica Rounded", "Arial Rounded MT Bold", sans-serif;
+      font-weight: bold;
+      font-size: 2.2rem;
+      letter-spacing: 1.2px;
+      color: #335953;
+      margin-top: 2rem;
+      margin-bottom: 0.2rem;
+    }
+    .tagline {
+      text-align: center;
+      color: #CC6A5A;
+      font-weight: 500;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+    .video-container {
+      position: relative;
+      max-width: 420px;
+      margin: 0 auto 2rem auto;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .catalogo {
+      margin-top: 2rem;
+    }
+    .cards {
+      display: flex;
+      overflow-x: auto;
+      gap: 1rem;
+      padding: 1rem;
+      scroll-snap-type: x mandatory;
+    }
+    .card {
+      flex: 0 0 180px;
+      scroll-snap-align: center;
+      background: rgba(255,255,255,0.7);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.03);
+    }
+    .card img {
+      width: 100%;
+      border-radius: 16px 16px 0 0;
+    }
+    .card h4 {
+      margin: 0.6rem;
+      color: #335953;
+      font-size: 1rem;
+    }
+    .price {
+      color: #CC6A5A;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .btn-continuar {
+      display: block;
+      margin: 2rem auto;
+      background: linear-gradient(135deg, #335953, #CC6A5A);
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      padding: 0.9rem 1.8rem;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .btn-continuar:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1 class="logo-myflowlife">MYFLOWLIFE</h1>
+  <p class="tagline">Cuidar do corpo é viver o ciclo em harmonia 🌿</p>
+
+  <div class="video-container">
+    <video poster="assets/capa_video.jpg" controls>
+      <source src="assets/videos/boasvindas.webm" type="video/webm">
+      <source src="assets/videos/boasvindas.mp4" type="video/mp4">
+      Seu navegador não suporta vídeo.
+    </video>
+  </div>
+
+  <section class="catalogo">
+    <h2 style="text-align:center;color:#335953;">📚 Seus eBooks FemFlow</h2>
+    <div class="cards" id="ebooksContainer">
+      <!-- Cards serão injetados aqui -->
+    </div>
+  </section>
+
+  <button class="btn-continuar" onclick="window.location.href='ciclo.html'">
+    ✨ Continuar para o Programa FemFlow
+  </button>
+
+  <script>
+    async function carregarEbooks(){
+      const urls = [
+        '../../ebooks/ebooks.json',
+        '../ebooks/ebooks.json',
+        'ebooks/ebooks.json',
+        'https://raw.githubusercontent.com/carolinebarros1010/myflowlife/myflowlife.com.br/ebooks/ebooks.json'
+      ];
+      let data = null;
+      for(const u of urls){
+        try{
+          const r = await fetch(u, {cache: 'no-store'});
+          if(r.ok){
+            data = await r.json();
+            break;
+          }
+        } catch(e){}
+      }
+      if(!data) return;
+      const container = document.getElementById('ebooksContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      data.forEach((eb, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const capa = eb.capa && eb.capa.startsWith('http') ? eb.capa : '../../ebooks/' + eb.capa;
+        const preco = eb.preco ? 'R$ ' + eb.preco : '';
+        card.innerHTML = `
+          <img src="${capa}" alt="${eb.nome || ''}">
+          <h4>${eb.nome || ''}</h4>
+          <div class="price">${preco}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+    carregarEbooks();
+  </script>
+</body>
+</html>
