@@ -77,154 +77,160 @@
         background: var(--terracota);
       }
     </style>
-  </head>
+ </head>
+<body>
+  <header>
+    <h1>Minha Evolução</h1>
+    <p class="subtitle">Acompanhe como seu corpo responde ao treino</p>
+  </header>
 
-  <body>
-    <header>
-      <h1>Minha Evolução</h1>
-      <p class="subtitle">Acompanhe como seu corpo responde ao treino</p>
-    </header>
-
-   <div class="container">
-  <!-- 📊 Progresso geral -->
-  <div class="section progresso-box">
-    <h3>🌿 Progresso do seu programa</h3>
-    <p id="progressoTexto" class="texto-progresso">Calculando...</p>
-    <div class="barra-progresso">
-      <div id="progressoBarra" class="preenchimento-progresso"></div>
+  <div class="container">
+    <!-- 📊 Progresso geral -->
+    <div class="section progresso-box">
+      <h3>🌿 Progresso do seu programa</h3>
+      <p id="progressoTexto" class="texto-progresso">Calculando...</p>
+      <div class="barra-progresso">
+        <div id="progressoBarra" class="preenchimento-progresso"></div>
+      </div>
     </div>
+
+    <!-- 📈 Gráfico de PSE -->
+    <div class="section grafico-box">
+      <h3>📈 Evolução do Esforço Percebido (PSE)</h3>
+      <canvas id="graficoPSE"></canvas>
+      <p id="legendaPSE">🩵 Leve • 🍑 Moderado • ❤️ Intenso</p>
+    </div>
+
+    <!-- 📋 Histórico -->
+    <div class="section historico-box">
+      <h3>📋 Histórico de Treinos</h3>
+      <ul id="listaTreinos"></ul>
+
+      <h3>📘 Histórico Diário</h3>
+      <ul id="listaDiario"></ul>
+    </div>
+
+    <!-- ✨ Mensagem final -->
+    <div id="mensagemFinal" class="mensagem-final" style="display:none;">
+      ✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.<br>
+      Respire, celebre e permita que o seu corpo descanse.<br>
+      <button class="btn-novo-ciclo" id="novoCicloBtn">🔄 Iniciar novo ciclo</button>
+    </div>
+
+    <!-- 🏠 Voltar -->
+    <button id="voltarInicioBtn" onclick="location.href='index.html'">🏠 Voltar ao início</button>
   </div>
 
-  <!-- 📈 Gráfico de PSE -->
-  <div class="section grafico-box">
-    <h3>📈 Evolução do Esforço Percebido (PSE)</h3>
-    <canvas id="graficoPSE" width="300" height="200"></canvas>
-    <p id="legendaPSE">🩵 Leve • 🍑 Moderado • ❤️ Intenso</p>
-  </div>
+  <script src="js/memoria.js"></script>
 
-  <!-- 📋 Histórico -->
-  <div class="section historico-box">
-    <h3>📋 Histórico de Treinos</h3>
-    <ul id="listaEvolucao"></ul>
-  </div>
+  <script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbySHNV5pFXSzkySZ3AHQXTSeH5pmcgsmdJvA6QP9tNQDHiXMKF4yzdT9n9HqLjrGVjl/exec";
 
-  <!-- ✨ Mensagem final -->
-  <div id="mensagemFinal" class="mensagem-final" style="display:none;">
-    ✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.<br>
-    Respire, celebre e permita que o seu corpo descanse.  
-    <br>
-    <button class="btn-novo-ciclo" id="novoCicloBtn">🔄 Iniciar novo ciclo</button>
-  </div>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const id = localStorage.getItem('femflow_id');
+    if (!id) {
+      window.location.href = 'ciclo.html';
+      return;
+    }
 
-  <!-- 🏠 Voltar -->
-  <button id="voltarInicioBtn" onclick="location.href='index.html'">🏠 Voltar ao início</button>
-</div>
+    // Atualiza progresso local
+    const progresso = calcularProgresso(id, 30);
+    const barra = document.getElementById("progressoBarra");
+    const texto = document.getElementById("progressoTexto");
+    const msgFinal = document.getElementById("mensagemFinal");
+    const btnNovoCiclo = document.getElementById("novoCicloBtn");
 
-    <script src="js/memoria.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const id = localStorage.getItem('femflow_id');
-        if (!id) {
-          window.location.href = 'ciclo.html';
-          return;
-        }
+    barra.style.width = progresso + "%";
+    texto.innerText = `Você completou ${progresso}% do programa`;
 
-        const progresso = calcularProgresso(id, 30);
-        const barra = document.getElementById("progressoBarra");
-        const texto = document.getElementById("progressoTexto");
-        const msgFinal = document.getElementById("mensagemFinal");
-        const btnNovoCiclo = document.getElementById("novoCicloBtn");
-
-        // Atualiza barra de progresso
-        barra.style.width = progresso + "%";
-        texto.innerText = `Você completou ${progresso}% do programa`;
-
-        if (progresso === 100) {
-          barra.style.animation = "pulse 1.8s infinite";
-          msgFinal.style.display = "block";
-
-          // Função do botão de novo ciclo
-          btnNovoCiclo.addEventListener("click", () => {
-            limparMemoria(id);
-            window.location.href = "ciclo.html";
-          });
-        }
-
-        // Carregar memória e renderizar gráfico
-        const memoria = carregarMemoria(id);
-        const lista = document.getElementById('listaEvolucao');
-        const ctx = document.getElementById('graficoPSE');
-
-        if (!memoria || !memoria.treinos || memoria.treinos.length === 0) {
-          lista.innerHTML = '<li>Você ainda não iniciou o programa.</li>';
-          return;
-        }
-
-        const treinos = memoria.treinos.slice().sort((a,b) => a.diaPrograma - b.diaPrograma);
-        lista.innerHTML = '';
-        const labels = [];
-        const pseValues = [];
-
-        treinos.forEach(t => {
-          const li = document.createElement('li');
-          li.style.padding = '0.5rem';
-          li.style.borderBottom = '1px solid rgba(0,0,0,0.1)';
-          let cor;
-          if (t.pse <= 3) cor = 'var(--teal)';
-          else if (t.pse <= 7) cor = 'var(--pessego)';
-          else cor = 'var(--terracota)';
-          li.innerHTML = `<strong>Dia ${t.diaPrograma}</strong> – Fase ${t.fase} – PSE <span style="color:${cor}">${t.pse}</span>`;
-          lista.appendChild(li);
-          labels.push('Dia ' + t.diaPrograma);
-          pseValues.push(t.pse);
-        });
-
-        // Gradiente dinâmico
-        const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
-        const maxPSE = Math.max(...pseValues);
-        const intensidade = Math.min(maxPSE / 10, 1);
-        gradient.addColorStop(0, `rgba(204,106,90,${0.3 + intensidade * 0.3})`);
-        gradient.addColorStop(0.5, `rgba(239,189,166,${0.25 + intensidade * 0.25})`);
-        gradient.addColorStop(1, `rgba(51,89,83,${0.2 + intensidade * 0.2})`);
-
-        // Gráfico
-        new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [{
-              label: 'PSE',
-              data: pseValues,
-              borderColor: '#CC6A5A',
-              backgroundColor: gradient,
-              borderWidth: 2,
-              fill: true,
-              tension: 0.3,
-              pointBackgroundColor: pseValues.map(v =>
-                v <= 3 ? '#335953' :
-                v <= 7 ? '#EFBDA6' : '#CC6A5A'
-              ),
-              pointRadius: 5,
-              pointHoverRadius: 6
-            }]
-          },
-          options: {
-            scales: {
-              y: {
-                min: 0,
-                max: 10,
-                title: { display: true, text: 'PSE' }
-              },
-              x: {
-                title: { display: true, text: 'Dias do Programa' }
-              }
-            },
-            plugins: { legend: { display: false } },
-            responsive: true,
-            maintainAspectRatio: false
-          }
-        });
+    if (progresso === 100) {
+      barra.style.animation = "pulse 1.8s infinite";
+      msgFinal.style.display = "block";
+      btnNovoCiclo.addEventListener("click", () => {
+        limparMemoria(id);
+        window.location.href = "ciclo.html";
       });
-    </script>
-  </body>
+    }
+
+    // 🔹 Carregar histórico completo (PSE + Diário)
+    try {
+      const url = `${scriptURL}?action=historico&id=${encodeURIComponent(id)}&n=30`;
+      const response = await fetch(url, { method: "GET", mode: "cors" });
+      const historico = await response.json();
+      console.log("📊 Histórico completo:", historico);
+
+      const listaTreinos = document.getElementById("listaTreinos");
+      const listaDiario = document.getElementById("listaDiario");
+      listaTreinos.innerHTML = "";
+      listaDiario.innerHTML = "";
+
+      // --- Renderizar histórico de treinos ---
+      if (historico.treinos?.length) {
+        historico.treinos.forEach(t => {
+          const item = document.createElement("li");
+          item.textContent = `${new Date(t.data).toLocaleDateString("pt-BR")} • Fase: ${t.fase} • PSE: ${t.pse}`;
+          listaTreinos.appendChild(item);
+        });
+      } else {
+        listaTreinos.innerHTML = "<li>Nenhum treino registrado.</li>";
+      }
+
+      // --- Renderizar histórico diário ---
+      if (historico.diario?.length) {
+        historico.diario.forEach(d => {
+          const item = document.createElement("li");
+          item.textContent = `${new Date(d.data).toLocaleDateString("pt-BR")} • Tipo: ${d.tipo} • Descanso: ${d.descanso ? "Sim" : "Não"}`;
+          listaDiario.appendChild(item);
+        });
+      } else {
+        listaDiario.innerHTML = "<li>Nenhum registro diário encontrado.</li>";
+      }
+
+      // --- Atualizar gráfico com dados reais ---
+      const ctx = document.getElementById("graficoPSE").getContext("2d");
+      const pseValues = historico.treinos.map(t => Number(t.pse) || 0);
+      const labels = historico.treinos.map((t, i) => `Dia ${i + 1}`);
+
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            label: "PSE",
+            data: pseValues,
+            borderColor: "#CC6A5A",
+            backgroundColor: "rgba(239,189,166,0.3)",
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: pseValues.map(v =>
+              v <= 3 ? "#335953" :
+              v <= 7 ? "#EFBDA6" : "#CC6A5A"
+            ),
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              min: 0,
+              max: 10,
+              title: { display: true, text: "PSE" }
+            },
+            x: {
+              title: { display: true, text: "Dias do Programa" }
+            }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+    } catch (error) {
+      console.error("❌ Erro ao buscar histórico:", error);
+    }
+  });
+  </script>
+</body>
 </html>
