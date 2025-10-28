@@ -129,7 +129,7 @@
       async function validarID(id) {
         try {
           const response = await fetch(
-            `https://script.google.com/macros/s/AKfycbySHNV5pFXSzkySZ3AHQXTSeH5pmcgsmdJvA6QP9tNQDHiXMKF4yzdT9n9HqLjrGVjl/exec?id=${encodeURIComponent(id)}`,
+            `https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec?id=${encodeURIComponent(id)}`,
             { method: "GET", mode: "cors" }
           );
           const data = await response.json();
@@ -190,7 +190,7 @@
         status.innerText = '🔄 Verificando...';
         status.style.color = '#335953';
 
-        fetch('https://script.google.com/macros/s/AKfycbySHNV5pFXSzkySZ3AHQXTSeH5pmcgsmdJvA6QP9tNQDHiXMKF4yzdT9n9HqLjrGVjl/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec', {
           method: 'POST',
           mode: 'no-cors',
           body: JSON.stringify({ action: 'recuperarID', nome: nome, email: email })
