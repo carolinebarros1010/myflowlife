@@ -1,7 +1,7 @@
 async function validarID(id) {
   try {
     const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbyrSiF2ev6gNmmSB2BtsWgFNV24-0nZWjl5MqBd7RwceMfs0ClQGOqG_AQ1McfvWcQ/exec?id=' +
+      'https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec?id=' +
         encodeURIComponent(id)
     );
 
@@ -62,7 +62,7 @@ function recuperarID() {
   status.innerText = '🔄 Verificando...';
   status.style.color = '#335953';
 
-  fetch('https://script.google.com/macros/s/AKfycbwBut7gbyeXaZVFvBxIZOxd7mBcc9g1n2d2YGP1n0XGAdaFoVwtSmTkciE1u2XKg6m0/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
