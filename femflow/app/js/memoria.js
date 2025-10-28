@@ -54,7 +54,7 @@ function salvarTreino(id, data, fase, diaPrograma, pse) {
   }
 
   // 🔹 Envia dados ao Google Sheets (Apps Script)
-  fetch('https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id, data, fase, diaPrograma, pse })
@@ -105,7 +105,7 @@ function salvarTreinoDetalhado(id, fase, apelido, pse) {
   salvarTreino(id, dataISO, fase, "dia", pse);
 
   // envia ao servidor com action: treino_detalhado
-  fetch('https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -132,7 +132,7 @@ function salvarTreinoDetalhado(id, fase, apelido, pse) {
 async function sincronizarPesos(id) {
   if (!id) return;
   try {
-    const resp = await fetch(`https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec?action=evolucao&id=${id}`);
+    const resp = await fetch(`https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec?action=evolucao&id=${id}`);
     if (!resp.ok && resp.type !== "opaque") throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     const ultimos = data.ultimo || {};
