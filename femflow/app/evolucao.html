@@ -76,6 +76,30 @@
       .btn-novo-ciclo:hover {
         background: var(--terracota);
       }
+
+      .peso-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(240, 236, 233, 0.5);
+        padding: 0.7rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+      }
+
+      .peso-item strong {
+        color: var(--teal);
+      }
+
+      .peso-item span {
+        color: var(--terracota);
+        font-weight: 600;
+      }
+
+      .peso-lista {
+        margin-top: 1rem;
+      }
     </style>
  </head>
 <body>
@@ -99,6 +123,12 @@
       <h3>📈 Evolução do Esforço Percebido (PSE)</h3>
       <canvas id="graficoPSE"></canvas>
       <p id="legendaPSE">🩵 Leve • 🍑 Moderado • ❤️ Intenso</p>
+    </div>
+
+    <!-- ⚖️ Histórico de Cargas -->
+    <div class="section cargas-box">
+      <h3>🏋️ Histórico de Cargas (Últimos Pesos)</h3>
+      <div id="listaCargas" class="peso-lista"></div>
     </div>
 
     <!-- 📋 Histórico -->
@@ -152,19 +182,17 @@
       });
     }
 
-    // 🔹 Carregar histórico completo (PSE + Diário)
+    // 🔹 Histórico de PSE + Diário
     try {
       const url = `${scriptURL}?action=historico&id=${encodeURIComponent(id)}&n=30`;
-      const response = await fetch(url, { method: "GET", mode: "cors" });
+      const response = await fetch(url);
       const historico = await response.json();
-      console.log("📊 Histórico completo:", historico);
 
       const listaTreinos = document.getElementById("listaTreinos");
       const listaDiario = document.getElementById("listaDiario");
       listaTreinos.innerHTML = "";
       listaDiario.innerHTML = "";
 
-      // --- Renderizar histórico de treinos ---
       if (historico.treinos?.length) {
         historico.treinos.forEach(t => {
           const item = document.createElement("li");
@@ -175,7 +203,6 @@
         listaTreinos.innerHTML = "<li>Nenhum treino registrado.</li>";
       }
 
-      // --- Renderizar histórico diário ---
       if (historico.diario?.length) {
         historico.diario.forEach(d => {
           const item = document.createElement("li");
@@ -186,7 +213,7 @@
         listaDiario.innerHTML = "<li>Nenhum registro diário encontrado.</li>";
       }
 
-      // --- Atualizar gráfico com dados reais ---
+      // --- Atualizar gráfico de PSE ---
       const ctx = document.getElementById("graficoPSE").getContext("2d");
       const pseValues = historico.treinos.map(t => Number(t.pse) || 0);
       const labels = historico.treinos.map((t, i) => `Dia ${i + 1}`);
@@ -214,21 +241,35 @@
         options: {
           responsive: true,
           scales: {
-            y: {
-              min: 0,
-              max: 10,
-              title: { display: true, text: "PSE" }
-            },
-            x: {
-              title: { display: true, text: "Dias do Programa" }
-            }
+            y: { min: 0, max: 10, title: { display: true, text: "PSE" } },
+            x: { title: { display: true, text: "Dias do Programa" } }
           },
           plugins: { legend: { display: false } }
         }
       });
-
     } catch (error) {
       console.error("❌ Erro ao buscar histórico:", error);
+    }
+
+    // 🔹 Histórico de Cargas (pesos)
+    try {
+      const resp = await fetch(`${scriptURL}?action=evolucao&id=${encodeURIComponent(id)}`);
+      const data = await resp.json();
+      const lista = document.getElementById("listaCargas");
+      lista.innerHTML = "";
+
+      if (data.ultimo && Object.keys(data.ultimo).length > 0) {
+        Object.entries(data.ultimo).forEach(([nome, info]) => {
+          const item = document.createElement("div");
+          item.className = "peso-item";
+          item.innerHTML = `<strong>${nome}</strong><span>${info.peso || "-"} kg</span>`;
+          lista.appendChild(item);
+        });
+      } else {
+        lista.innerHTML = "<p>Nenhum registro de carga encontrado.</p>";
+      }
+    } catch (err) {
+      console.warn("⚠️ Erro ao carregar histórico de cargas:", err);
     }
   });
   </script>
