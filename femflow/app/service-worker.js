@@ -9,6 +9,8 @@ const ASSETS = [
   './treino.html',
   './evolucao.html',
   './cadastro.html',
+  './home.html',
+  './login.html',
 
   // Styles & manifest
   './style.css',
