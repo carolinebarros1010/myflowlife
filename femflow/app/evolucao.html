@@ -11,94 +11,66 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      .texto-progresso {
-        font-weight: 700;
-        color: var(--teal);
-        margin-bottom: 0.6rem;
-        letter-spacing: 0.5px;
-      }
+      .texto-progresso { font-weight: 700; color: var(--teal); margin-bottom: 0.6rem; letter-spacing: 0.5px; }
 
       .barra-progresso {
-        position: relative;
-        width: 100%;
-        height: 18px;
-        border-radius: 20px;
-        background: rgba(240, 236, 233, 0.8);
-        overflow: hidden;
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 2px 6px rgba(51,89,83,0.1);
+        position: relative; width: 100%; height: 18px;
+        border-radius: 20px; background: rgba(240,236,233,0.8);
+        overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 2px 6px rgba(51,89,83,0.1);
       }
 
       .preenchimento-progresso {
-        width: 0%;
-        height: 100%;
-        border-radius: 20px;
-        background: linear-gradient(90deg, var(--terracota), var(--pessego), var(--teal));
-        box-shadow: 0 0 10px rgba(204,106,90,0.4);
+        width: 0%; height: 100%; border-radius: 20px;
+        background: linear-gradient(90deg,var(--terracota),var(--pessego),var(--teal));
         transition: width 1.2s ease-in-out;
       }
 
-      @keyframes pulse {
-        0% { box-shadow: 0 0 8px rgba(204,106,90,0.3); }
-        50% { box-shadow: 0 0 20px rgba(204,106,90,0.6); }
-        100% { box-shadow: 0 0 8px rgba(204,106,90,0.3); }
-      }
+      @keyframes pulse { 0%{box-shadow:0 0 8px rgba(204,106,90,0.3);} 50%{box-shadow:0 0 20px rgba(204,106,90,0.6);} 100%{box-shadow:0 0 8px rgba(204,106,90,0.3);} }
 
       .mensagem-final {
-        background: rgba(239, 189, 166, 0.3);
+        background: rgba(239,189,166,0.3);
         border-left: 4px solid var(--terracota);
         color: var(--teal);
-        padding: 1rem;
-        border-radius: 10px;
-        margin-top: 1.5rem;
-        font-weight: 600;
-        line-height: 1.5;
-        animation: aparecer 1.2s ease-in-out;
-        text-align: center;
+        padding: 1rem; border-radius: 10px; margin-top: 1.5rem;
+        font-weight: 600; text-align: center; animation: aparecer 1.2s ease-in-out;
       }
 
-      @keyframes aparecer {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
+      @keyframes aparecer { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0);} }
 
       .btn-novo-ciclo {
-        background: var(--teal);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 0.8rem 1.4rem;
-        margin-top: 1rem;
-        font-weight: 600;
-        cursor: pointer;
+        background: var(--teal); color: white; border: none; border-radius: 12px;
+        padding: 0.8rem 1.4rem; margin-top: 1rem; font-weight: 600; cursor: pointer;
         transition: background 0.3s ease-in-out;
       }
-
-      .btn-novo-ciclo:hover {
-        background: var(--terracota);
-      }
+      .btn-novo-ciclo:hover { background: var(--terracota); }
 
       .peso-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: rgba(240, 236, 233, 0.5);
-        padding: 0.7rem 1rem;
-        border-radius: 10px;
-        margin-bottom: 0.5rem;
+        display: flex; justify-content: space-between; align-items: center;
+        background: rgba(240,236,233,0.5);
+        padding: 0.7rem 1rem; border-radius: 10px;
+        margin-bottom: 0.5rem; font-size: 0.95rem;
+      }
+      .peso-item strong { color: var(--teal); }
+      .peso-item span { color: var(--terracota); font-weight: 600; }
+      .peso-lista { margin-top: 1rem; }
+
+      /* Responsivo */
+      canvas { width: 100% !important; height: auto !important; }
+      @media (max-width:600px){
+        h1{font-size:1.6rem;}
+        .section h3{font-size:1rem;}
+        .peso-item{font-size:0.85rem; padding:0.5rem 0.8rem;}
+      }
+
+      select {
+        width: 100%;
+        padding: 0.6rem;
+        border-radius: 8px;
+        border: 1px solid rgba(51,89,83,0.3);
         font-size: 0.95rem;
-      }
-
-      .peso-item strong {
         color: var(--teal);
-      }
-
-      .peso-item span {
-        color: var(--terracota);
-        font-weight: 600;
-      }
-
-      .peso-lista {
-        margin-top: 1rem;
+        background: rgba(240,236,233,0.6);
+        margin-bottom: 1rem;
       }
     </style>
  </head>
@@ -109,26 +81,31 @@
   </header>
 
   <div class="container">
-    <!-- 📊 Progresso geral -->
+    <!-- 🌿 Progresso -->
     <div class="section progresso-box">
       <h3>🌿 Progresso do seu programa</h3>
       <p id="progressoTexto" class="texto-progresso">Calculando...</p>
-      <div class="barra-progresso">
-        <div id="progressoBarra" class="preenchimento-progresso"></div>
-      </div>
+      <div class="barra-progresso"><div id="progressoBarra" class="preenchimento-progresso"></div></div>
     </div>
 
-    <!-- 📈 Gráfico de PSE -->
+    <!-- 📈 Gráfico PSE -->
     <div class="section grafico-box">
       <h3>📈 Evolução do Esforço Percebido (PSE)</h3>
       <canvas id="graficoPSE"></canvas>
       <p id="legendaPSE">🩵 Leve • 🍑 Moderado • ❤️ Intenso</p>
     </div>
 
-    <!-- ⚖️ Histórico de Cargas -->
+    <!-- 🏋️ Histórico de Cargas -->
     <div class="section cargas-box">
       <h3>🏋️ Histórico de Cargas (Últimos Pesos)</h3>
       <div id="listaCargas" class="peso-lista"></div>
+    </div>
+
+    <!-- 📊 Gráfico de Força -->
+    <div class="section grafico-carga-box">
+      <h3>📊 Evolução de Carga por Exercício</h3>
+      <select id="selectExercicio"></select>
+      <canvas id="graficoCarga"></canvas>
     </div>
 
     <!-- 📋 Histórico -->
@@ -158,119 +135,120 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     const id = localStorage.getItem('femflow_id');
-    if (!id) {
-      window.location.href = 'ciclo.html';
-      return;
-    }
+    if (!id) { window.location.href = 'ciclo.html'; return; }
 
-    // Atualiza progresso local
+    // 🌿 Progresso
     const progresso = calcularProgresso(id, 30);
     const barra = document.getElementById("progressoBarra");
     const texto = document.getElementById("progressoTexto");
-    const msgFinal = document.getElementById("mensagemFinal");
-    const btnNovoCiclo = document.getElementById("novoCicloBtn");
-
     barra.style.width = progresso + "%";
     texto.innerText = `Você completou ${progresso}% do programa`;
-
     if (progresso === 100) {
       barra.style.animation = "pulse 1.8s infinite";
-      msgFinal.style.display = "block";
-      btnNovoCiclo.addEventListener("click", () => {
+      document.getElementById("mensagemFinal").style.display = "block";
+      document.getElementById("novoCicloBtn").addEventListener("click", () => {
         limparMemoria(id);
         window.location.href = "ciclo.html";
       });
     }
 
-    // 🔹 Histórico de PSE + Diário
-    try {
-      const url = `${scriptURL}?action=historico&id=${encodeURIComponent(id)}&n=30`;
-      const response = await fetch(url);
-      const historico = await response.json();
+    // 📊 Histórico PSE + Diário
+    const url = `${scriptURL}?action=historico&id=${encodeURIComponent(id)}&n=30`;
+    const response = await fetch(url);
+    const historico = await response.json();
 
-      const listaTreinos = document.getElementById("listaTreinos");
-      const listaDiario = document.getElementById("listaDiario");
-      listaTreinos.innerHTML = "";
-      listaDiario.innerHTML = "";
+    const listaTreinos = document.getElementById("listaTreinos");
+    const listaDiario = document.getElementById("listaDiario");
+    listaTreinos.innerHTML = "";
+    listaDiario.innerHTML = "";
 
-      if (historico.treinos?.length) {
-        historico.treinos.forEach(t => {
-          const item = document.createElement("li");
-          item.textContent = `${new Date(t.data).toLocaleDateString("pt-BR")} • Fase: ${t.fase} • PSE: ${t.pse}`;
-          listaTreinos.appendChild(item);
-        });
-      } else {
-        listaTreinos.innerHTML = "<li>Nenhum treino registrado.</li>";
-      }
-
-      if (historico.diario?.length) {
-        historico.diario.forEach(d => {
-          const item = document.createElement("li");
-          item.textContent = `${new Date(d.data).toLocaleDateString("pt-BR")} • Tipo: ${d.tipo} • Descanso: ${d.descanso ? "Sim" : "Não"}`;
-          listaDiario.appendChild(item);
-        });
-      } else {
-        listaDiario.innerHTML = "<li>Nenhum registro diário encontrado.</li>";
-      }
-
-      // --- Atualizar gráfico de PSE ---
-      const ctx = document.getElementById("graficoPSE").getContext("2d");
-      const pseValues = historico.treinos.map(t => Number(t.pse) || 0);
-      const labels = historico.treinos.map((t, i) => `Dia ${i + 1}`);
-
-      new Chart(ctx, {
-        type: "line",
-        data: {
-          labels,
-          datasets: [{
-            label: "PSE",
-            data: pseValues,
-            borderColor: "#CC6A5A",
-            backgroundColor: "rgba(239,189,166,0.3)",
-            borderWidth: 2,
-            fill: true,
-            tension: 0.3,
-            pointBackgroundColor: pseValues.map(v =>
-              v <= 3 ? "#335953" :
-              v <= 7 ? "#EFBDA6" : "#CC6A5A"
-            ),
-            pointRadius: 4,
-            pointHoverRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: { min: 0, max: 10, title: { display: true, text: "PSE" } },
-            x: { title: { display: true, text: "Dias do Programa" } }
-          },
-          plugins: { legend: { display: false } }
-        }
+    if (historico.treinos?.length) {
+      historico.treinos.forEach(t => {
+        const li = document.createElement("li");
+        li.textContent = `${new Date(t.data).toLocaleDateString("pt-BR")} • Fase: ${t.fase} • PSE: ${t.pse}`;
+        listaTreinos.appendChild(li);
       });
-    } catch (error) {
-      console.error("❌ Erro ao buscar histórico:", error);
+    } else listaTreinos.innerHTML = "<li>Nenhum treino registrado.</li>";
+
+    if (historico.diario?.length) {
+      historico.diario.forEach(d => {
+        const li = document.createElement("li");
+        li.textContent = `${new Date(d.data).toLocaleDateString("pt-BR")} • Tipo: ${d.tipo} • Descanso: ${d.descanso ? "Sim" : "Não"}`;
+        listaDiario.appendChild(li);
+      });
+    } else listaDiario.innerHTML = "<li>Nenhum registro diário encontrado.</li>";
+
+    // 📈 Gráfico PSE
+    const ctx = document.getElementById("graficoPSE").getContext("2d");
+    const pseValues = historico.treinos.map(t => Number(t.pse) || 0);
+    const labels = historico.treinos.map((t, i) => `Dia ${i + 1}`);
+    new Chart(ctx, {
+      type: "line",
+      data: { labels, datasets: [{
+        label: "PSE",
+        data: pseValues,
+        borderColor: "#CC6A5A",
+        backgroundColor: "rgba(239,189,166,0.3)",
+        fill: true, tension: 0.3, borderWidth: 2,
+        pointBackgroundColor: pseValues.map(v => v <= 3 ? "#335953" : v <= 7 ? "#EFBDA6" : "#CC6A5A"),
+        pointRadius: 4, pointHoverRadius: 6
+      }]},
+      options: { responsive:true, scales:{ y:{min:0,max:10,title:{display:true,text:"PSE"}}, x:{title:{display:true,text:"Dias"}}}, plugins:{legend:{display:false}} }
+    });
+
+    // 🏋️ Histórico de cargas e gráfico de força
+    const resp = await fetch(`${scriptURL}?action=evolucao&id=${encodeURIComponent(id)}`);
+    const data = await resp.json();
+    const lista = document.getElementById("listaCargas");
+    const select = document.getElementById("selectExercicio");
+    const grafCtx = document.getElementById("graficoCarga").getContext("2d");
+
+    if (!data.ultimo || Object.keys(data.ultimo).length === 0) {
+      lista.innerHTML = "<p>Nenhum registro de carga encontrado.</p>";
+      return;
     }
 
-    // 🔹 Histórico de Cargas (pesos)
-    try {
-      const resp = await fetch(`${scriptURL}?action=evolucao&id=${encodeURIComponent(id)}`);
-      const data = await resp.json();
-      const lista = document.getElementById("listaCargas");
-      lista.innerHTML = "";
+    // render lista
+    Object.entries(data.ultimo).forEach(([nome, info]) => {
+      const div = document.createElement("div");
+      div.className = "peso-item";
+      div.innerHTML = `<strong>${nome}</strong><span>${info.peso || "-"} kg</span>`;
+      lista.appendChild(div);
+    });
 
-      if (data.ultimo && Object.keys(data.ultimo).length > 0) {
-        Object.entries(data.ultimo).forEach(([nome, info]) => {
-          const item = document.createElement("div");
-          item.className = "peso-item";
-          item.innerHTML = `<strong>${nome}</strong><span>${info.peso || "-"} kg</span>`;
-          lista.appendChild(item);
-        });
-      } else {
-        lista.innerHTML = "<p>Nenhum registro de carga encontrado.</p>";
-      }
-    } catch (err) {
-      console.warn("⚠️ Erro ao carregar histórico de cargas:", err);
-    }
+    // preencher select
+    select.innerHTML = "<option value=''>Selecione um exercício</option>";
+    Object.keys(data.ultimo).forEach(nome => {
+      const opt = document.createElement("option");
+      opt.value = nome;
+      opt.textContent = nome;
+      select.appendChild(opt);
+    });
+
+    let chartCarga = null;
+    select.addEventListener("change", async () => {
+      const exercicio = select.value;
+      if (!exercicio) return;
+      const histResp = await fetch(`${scriptURL}?action=historico&id=${encodeURIComponent(id)}&n=120`);
+      const histData = await histResp.json();
+      const treinos = histData.treinos.filter(t => t.exercicio === exercicio || (t.nome && t.nome.includes(exercicio)));
+
+      const pesos = treinos.map(t => Number(t.peso) || 0);
+      const datas = treinos.map(t => new Date(t.data).toLocaleDateString("pt-BR"));
+
+      if (chartCarga) chartCarga.destroy();
+      chartCarga = new Chart(grafCtx, {
+        type: "line",
+        data: { labels: datas, datasets: [{
+          label: exercicio,
+          data: pesos,
+          borderColor: "#335953",
+          backgroundColor: "rgba(51,89,83,0.2)",
+          borderWidth: 2, fill: true, tension: 0.3, pointRadius: 4
+        }]},
+        options: { responsive:true, scales:{ y:{title:{display:true,text:"Peso (kg)"}}, x:{title:{display:true,text:"Data"}}}, plugins:{legend:{display:false}} }
+      });
+    });
   });
   </script>
 </body>
