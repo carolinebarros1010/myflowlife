@@ -17,7 +17,7 @@ function carregarMemoria(id) {
   return memoria ? JSON.parse(memoria) : null;
 }
 
-// 🔹 Salva um treino no histórico local e envia ao servidor
+// 🔹 Salva um treino simples (modo atual - PSE)
 function salvarTreino(id, data, fase, diaPrograma, pse) {
   if (!id) {
     console.error("ID inválido para salvar treino.");
@@ -49,7 +49,6 @@ function salvarTreino(id, data, fase, diaPrograma, pse) {
   // 🔹 Mensagem de conclusão no dia 30
   if (diaPrograma === 30) {
     alert("🌸 Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.\nRespire, celebre e prepare-se para o próximo ciclo!");
-    // salva data de conclusão para controle do reinício
     memoria.dataConclusao = new Date().toISOString();
     salvarMemoria(id, memoria);
   }
@@ -64,11 +63,92 @@ function salvarTreino(id, data, fase, diaPrograma, pse) {
     if (!res.ok && res.type !== 'opaque') {
       throw new Error(`Erro HTTP ${res.status}`);
     }
-    console.log("✅ Sincronizado com servidor.");
+    console.log("✅ Sincronizado com servidor (modo simples).");
   })
   .catch(err => {
     console.warn("⚠️ Falha ao sincronizar com servidor:", err);
   });
+}
+
+// 🔹 Salva treino detalhado (com lista de exercícios, séries, peso, PSE)
+function salvarTreinoDetalhado(id, fase, apelido, pse) {
+  if (!id) {
+    alert("ID inválido. Faça login novamente.");
+    return;
+  }
+
+  const dataISO = new Date().toISOString();
+  const boxes = document.querySelectorAll(".box");
+  const exercicios = [];
+
+  boxes.forEach((box, idx) => {
+    box.querySelectorAll(".ex").forEach(ex => {
+      const linkEl = ex.querySelector("a");
+      if (!linkEl) return;
+      const nome = linkEl.textContent.trim();
+      const link = linkEl.href;
+      const texto = ex.textContent;
+      const match = texto.match(/(\d+)\s*[x×]\s*(\d+|[\d]+s)/i);
+      const series = match ? match[1] : "";
+      const reps = match ? match[2] : "";
+      const peso = ex.querySelector(".peso")?.value?.trim() || "";
+      exercicios.push({ box: idx + 1, nome, link, series, reps, peso });
+    });
+  });
+
+  if (!exercicios.length) {
+    alert("Nenhum exercício encontrado para salvar.");
+    return;
+  }
+
+  // salva localmente
+  salvarTreino(id, dataISO, fase, "dia", pse);
+
+  // envia ao servidor com action: treino_detalhado
+  fetch('https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: "treino_detalhado",
+      id,
+      data: dataISO,
+      fase,
+      apelido,
+      pse,
+      exercicios
+    })
+  })
+  .then(res => {
+    if (!res.ok && res.type !== 'opaque') throw new Error(`HTTP ${res.status}`);
+    alert("✅ Treino detalhado salvo com sucesso!");
+  })
+  .catch(err => {
+    console.warn("⚠️ Erro ao enviar treino detalhado:", err);
+    alert("Falha ao sincronizar com o servidor. Tente novamente.");
+  });
+}
+
+// 🔹 Sincroniza pesos antigos (preenche inputs automaticamente)
+async function sincronizarPesos(id) {
+  if (!id) return;
+  try {
+    const resp = await fetch(`https://script.google.com/macros/s/AKfycbyCmJdo7UL3YcizKDA41PRz4_dyVFnAkdZuR-d3QXUsPbA5GA3hq13d0U8v0ldav9i3Fw/exec?action=evolucao&id=${id}`);
+    if (!resp.ok && resp.type !== "opaque") throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const ultimos = data.ultimo || {};
+
+    document.querySelectorAll(".ex").forEach(ex => {
+      const nome = ex.textContent.split("—")[0].trim();
+      const pesoInput = ex.querySelector(".peso");
+      if (ultimos[nome] && pesoInput) {
+        pesoInput.value = ultimos[nome].peso || "";
+      }
+    });
+
+    console.log("📈 Pesos sincronizados com sucesso.");
+  } catch (err) {
+    console.warn("⚠️ Erro ao sincronizar pesos:", err);
+  }
 }
 
 // 🔹 Auto-reinício inteligente de ciclo (3 dias após o último treino)
@@ -119,3 +199,4 @@ function exportarMemoria(id) {
   link.click();
   console.log("📦 Memória exportada com sucesso.");
 }
+
