@@ -1,202 +1,280 @@
-// ===============================
-// FemFlow - Memória Local & Sincronização
-// ===============================
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FemFlow - Flow Center</title>
+  <link rel="stylesheet" href="style.css">
 
-// 🔹 Salva dados gerais da aluna no localStorage
-function salvarMemoria(id, dados) {
-  const chave = `femflow_memoria_${id}`;
-  let memoria = carregarMemoria(id) || {};
-  Object.assign(memoria, dados);
-  localStorage.setItem(chave, JSON.stringify(memoria));
-}
-
-// 🔹 Carrega memória da aluna
-function carregarMemoria(id) {
-  const chave = `femflow_memoria_${id}`;
-  const memoria = localStorage.getItem(chave);
-  return memoria ? JSON.parse(memoria) : null;
-}
-
-// 🔹 Salva um treino simples (modo atual - PSE)
-function salvarTreino(id, data, fase, diaPrograma, pse) {
-  if (!id) {
-    console.error("ID inválido para salvar treino.");
-    return;
-  }
-
-  const chave = `femflow_memoria_${id}`;
-  let memoria = carregarMemoria(id);
-
-  // garante inicialização
-  if (!memoria) memoria = { treinos: [], ultimoTreino: 1 };
-  if (!memoria.treinos) memoria.treinos = [];
-
-  // 🔸 Impede registro acima de 30 dias
-  if (diaPrograma > 30) {
-    alert("✨ Você já concluiu o seu ciclo de 30 dias FemFlow!");
-    verificarAutoReinicio(id, memoria);
-    return;
-  }
-
-  // adiciona o novo treino
-  memoria.treinos.push({ data, fase, diaPrograma, pse });
-  memoria.ultimoTreino = diaPrograma;
-  memoria.dataUltimoTreino = new Date().toISOString();
-  localStorage.setItem(chave, JSON.stringify(memoria));
-
-  console.log(`💾 Treino salvo localmente (${memoria.treinos.length} registrados)`);
-
-  // 🔹 Mensagem de conclusão no dia 30
-  if (diaPrograma === 30) {
-    alert("🌸 Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.\nRespire, celebre e prepare-se para o próximo ciclo!");
-    memoria.dataConclusao = new Date().toISOString();
-    salvarMemoria(id, memoria);
-  }
-
-  // 🔹 Envia dados ao Google Sheets (Apps Script)
-  fetch('https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, data, fase, diaPrograma, pse })
-  })
-  .then(res => {
-    if (!res.ok && res.type !== 'opaque') {
-      throw new Error(`Erro HTTP ${res.status}`);
+  <style>
+    body {
+      font-family: 'Lato', sans-serif;
+      background-color: #fffaf8;
+      color: #333;
+      margin: 0;
+      text-align: center;
     }
-    console.log("✅ Sincronizado com servidor (modo simples).");
-  })
-  .catch(err => {
-    console.warn("⚠️ Falha ao sincronizar com servidor:", err);
-  });
-}
 
-// 🔹 Salva treino detalhado (com lista de exercícios, séries, peso, PSE)
-function salvarTreinoDetalhado(id, fase, apelido, pse) {
-  if (!id) {
-    alert("ID inválido. Faça login novamente.");
-    return;
-  }
+    /* LOGO */
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 15px;
+    }
+    .logo-img {
+      width: 160px;
+      height: auto;
+      opacity: 0.95;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+    .logo-img:hover { transform: scale(1.05); opacity: 1; }
 
-  const dataISO = new Date().toISOString();
-  const boxes = document.querySelectorAll(".box");
-  const exercicios = [];
+    /* SAUDAÇÃO */
+    #saudacaoBox {
+      font-family: 'Playfair Display', serif;
+      color: #335953;
+      font-size: 1.15em;
+      margin-top: 10px;
+      text-align: center;
+      transition: opacity 0.4s ease;
+    }
 
-  boxes.forEach((box, idx) => {
-    box.querySelectorAll(".ex").forEach(ex => {
-      const linkEl = ex.querySelector("a");
-      if (!linkEl) return;
-      const nome = linkEl.textContent.trim();
-      const link = linkEl.href;
-      const texto = ex.textContent;
-      const match = texto.match(/(\d+)\s*[x×]\s*(\d+|[\d]+s)/i);
-      const series = match ? match[1] : "";
-      const reps = match ? match[2] : "";
-      const peso = ex.querySelector(".peso")?.value?.trim() || "";
-      exercicios.push({ box: idx + 1, nome, link, series, reps, peso });
+    /* CÍRCULO DAS FASES */
+    #fase-circular {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      margin-top: 15px;
+      position: relative;
+    }
+    .fase-ciclo {
+      width: 180px;
+      height: 180px;
+      transform: rotate(-45deg);
+    }
+    .fase-label {
+      position: absolute;
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      color: #335953;
+      font-size: 1.2em;
+      animation: fadein 1s ease;
+    }
+    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+    /* BOTÕES */
+    .respire-titulo {
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      color: #335953;
+      letter-spacing: 0.3px;
+      margin-top: 30px;
+    }
+    button.respire-btn {
+      width: 90%;
+      max-width: 320px;
+      margin: 10px auto;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 25px;
+      font-size: 1.1em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    button.respire-btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    }
+    #btn-tpm { background: #D67660; color: #fff; }
+    #btn-ciclo { background: #EABAA3; color: #5A4032; }
+    #btn-foco { background: #335953; color: #fff; }
+
+    /* MODAL DE RESPIRAÇÃO */
+    #breath-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.95);
+      z-index: 10;
+    }
+    #breath-circle {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background-color: #f4cccc;
+      transition: transform 4s ease-in-out, background-color 2s ease;
+    }
+    #breath-label {
+      margin-top: 25px;
+      font-size: 1.5em;
+      color: #555;
+      font-weight: 500;
+    }
+    #closeBreath {
+      margin-top: 25px;
+      background: #335953;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-family: 'Lato';
+    }
+
+    .subtexto {
+      font-size: 0.9em;
+      text-align: center;
+      color: #8B6B5E;
+      margin-top: 15px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- LOGO -->
+  <div class="logo-container">
+    <img src="../../assets/logofemflowterracota.png" alt="FemFlow Logo" class="logo-img">
+  </div>
+
+  <!-- VOLTAR -->
+  <button onclick="window.location.href='../../index.html'"
+    style="position:absolute;top:15px;left:15px;background:#335953;color:#fff;
+    border:none;border-radius:20px;padding:6px 14px;font-family:'Lato';
+    font-size:0.9em;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,0.2);">
+    ← Voltar
+  </button>
+
+  <!-- SAUDAÇÃO E CÍRCULO -->
+  <div id="saudacaoBox">Bem-vinda 🌸</div>
+
+  <div id="fase-circular">
+    <svg viewBox="0 0 200 200" class="fase-ciclo">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="#D67660" stroke-width="20"
+        stroke-dasharray="157" stroke-dashoffset="0"></circle>
+      <circle cx="100" cy="100" r="90" fill="none" stroke="#EABAA3" stroke-width="20"
+        stroke-dasharray="157" stroke-dashoffset="157"></circle>
+      <circle cx="100" cy="100" r="90" fill="none" stroke="#335953" stroke-width="20"
+        stroke-dasharray="157" stroke-dashoffset="314"></circle>
+      <circle cx="100" cy="100" r="90" fill="none" stroke="#F3D6C6" stroke-width="20"
+        stroke-dasharray="157" stroke-dashoffset="471"></circle>
+    </svg>
+    <div class="fase-label">
+      <p id="fase-atual-label">Fase atual: —</p>
+    </div>
+  </div>
+
+  <!-- BOTÕES DE RESPIRAÇÃO -->
+  <h3 class="respire-titulo">🌸 Respire conforme seu momento</h3>
+  <button id="btn-tpm" class="respire-btn" onclick="iniciarRespiracaoVisual('tpm')">Zen TPM</button>
+  <button id="btn-ciclo" class="respire-btn" onclick="iniciarRespiracaoVisual('ciclo')">Equilíbrio Cíclico</button>
+  <button id="btn-foco" class="respire-btn" onclick="iniciarRespiracaoVisual('foco')">Foco Ovulatório</button>
+
+  <p class="subtexto">Respirar é se reconectar — leve o tempo do seu corpo.</p>
+
+  <!-- MODAL RESPIRAÇÃO -->
+  <div id="breath-modal">
+    <div id="breath-circle"></div>
+    <div id="breath-label">Respire...</div>
+    <button id="closeBreath">Fechar</button>
+  </div>
+
+  <!-- SCRIPT FEMFLOW -->
+  <script src="../scripts/femflow-core.js"></script>
+  <script>
+    // 🔄 Logo dinâmico ao carregar a página
+    document.addEventListener("DOMContentLoaded", () => {
+      FEMFLOW.carregarLogoContextual();
     });
-  });
 
-  if (!exercicios.length) {
-    alert("Nenhum exercício encontrado para salvar.");
-    return;
-  }
+    // 🧘‍♀️ Controle de respiração visual
+    let intervaloResp;
 
-  // salva localmente
-  salvarTreino(id, dataISO, fase, "dia", pse);
+    function iniciarRespiracaoVisual(tipo) {
+      clearInterval(intervaloResp);
+      const modal = document.getElementById('breath-modal');
+      const circle = document.getElementById('breath-circle');
+      const label = document.getElementById('breath-label');
 
-  // envia ao servidor com action: treino_detalhado
-  fetch('https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: "treino_detalhado",
-      id,
-      data: dataISO,
-      fase,
-      apelido,
-      pse,
-      exercicios
-    })
-  })
-  .then(res => {
-    if (!res.ok && res.type !== 'opaque') throw new Error(`HTTP ${res.status}`);
-    alert("✅ Treino detalhado salvo com sucesso!");
-  })
-  .catch(err => {
-    console.warn("⚠️ Erro ao enviar treino detalhado:", err);
-    alert("Falha ao sincronizar com o servidor. Tente novamente.");
-  });
-}
+      const config = {
+        tpm: { in: 4000, out: 6000, color: '#D67660', label: 'Zen TPM' },
+        ciclo: { in: 4000, out: 4000, color: '#EABAA3', label: 'Equilíbrio Cíclico' },
+        foco: { in: 2000, out: 4000, color: '#335953', label: 'Foco Ovulatório' }
+      };
 
-// 🔹 Sincroniza pesos antigos (preenche inputs automaticamente)
-async function sincronizarPesos(id) {
-  if (!id) return;
-  try {
-    const resp = await fetch(`https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec?action=evolucao&id=${id}`);
-    if (!resp.ok && resp.type !== "opaque") throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-    const ultimos = data.ultimo || {};
+      const fase = config[tipo];
+      if (!fase) return;
 
-    document.querySelectorAll(".ex").forEach(ex => {
-      const nome = ex.textContent.split("—")[0].trim();
-      const pesoInput = ex.querySelector(".peso");
-      if (ultimos[nome] && pesoInput) {
-        pesoInput.value = ultimos[nome].peso || "";
+      modal.style.display = 'flex';
+      label.textContent = fase.label;
+      circle.style.backgroundColor = fase.color;
+
+      let inspirando = true;
+      function ciclo() {
+        if (inspirando) {
+          circle.style.transform = 'scale(1.15)';
+          label.textContent = 'Inspire...';
+          navigator.vibrate([100, fase.in / 2]);
+          setTimeout(() => inspirando = false, fase.in);
+        } else {
+          circle.style.transform = 'scale(0.85)';
+          label.textContent = 'Expire...';
+          navigator.vibrate([50, fase.out / 2]);
+          setTimeout(() => inspirando = true, fase.out);
+        }
       }
+
+      ciclo();
+      intervaloResp = setInterval(ciclo, fase.in + fase.out);
+    }
+
+    document.getElementById('closeBreath').addEventListener('click', () => {
+      clearInterval(intervaloResp);
+      document.getElementById('breath-modal').style.display = 'none';
     });
+  </script>
 
-    console.log("📈 Pesos sincronizados com sucesso.");
-  } catch (err) {
-    console.warn("⚠️ Erro ao sincronizar pesos:", err);
+  function atualizarFaseCiclo(fase) {
+    const label = document.getElementById('fase-atual-label');
+    const cores = { menstrual:'#D67660', folicular:'#EABAA3', ovulatoria:'#335953', lutea:'#F3D6C6' };
+    const emojis = { menstrual:'🌑', folicular:'🌒', ovulatoria:'🌕', lutea:'🌘' };
+    if (!fase) return label.textContent = 'Fase atual: —';
+    label.textContent = `Fase atual: ${fase.charAt(0).toUpperCase() + fase.slice(1)} ${emojis[fase]}`;
+    label.style.color = cores[fase];
   }
-}
 
-// 🔹 Auto-reinício inteligente de ciclo (3 dias após o último treino)
-function verificarAutoReinicio(id, memoria) {
-  if (!memoria || !memoria.dataConclusao) return;
+  document.addEventListener("DOMContentLoaded", async () => {
+    const id = localStorage.getItem("idFemFlow") || new URLSearchParams(window.location.search).get("id");
+    const saudacaoBox = document.getElementById("saudacaoBox");
 
-  const dataConclusao = new Date(memoria.dataConclusao);
-  const hoje = new Date();
-  const diasPassados = Math.floor((hoje - dataConclusao) / (1000 * 60 * 60 * 24));
+    if (!id) {
+      saudacaoBox.textContent = "Bem-vinda 🌸";
+      return;
+    }
 
-  if (diasPassados >= 3) {
-    alert("🌀 Novo ciclo disponível!\nO aplicativo detectou que seu último ciclo terminou há 3 dias.\nSeu programa foi reiniciado automaticamente.");
-    limparMemoria(id);
-    localStorage.setItem(`femflow_reiniciado_${id}`, new Date().toISOString());
-  } else {
-    const restantes = 3 - diasPassados;
-    console.log(`⏳ O próximo ciclo será reiniciado automaticamente em ${restantes} dia(s).`);
-  }
-}
+    try {
+      const response = await fetch(`${FEMFLOW.SCRIPT_URL}?id=${id}`, { mode: "cors" });
+      const data = await response.json();
 
-// 🔹 Retorna percentual de progresso (para evolução.html)
-function calcularProgresso(id, totalTreinos = 30) {
-  const memoria = carregarMemoria(id);
-  if (!memoria || !memoria.treinos) return 0;
-  const concluido = memoria.treinos.length;
-  return Math.min(Math.round((concluido / totalTreinos) * 100), 100);
-}
-
-// 🔹 Reseta memória (manual)
-function limparMemoria(id) {
-  const chave = `femflow_memoria_${id}`;
-  localStorage.removeItem(chave);
-  console.log(`🧹 Memória apagada para ID: ${id}`);
-  alert("🌀 Memória do ciclo reiniciada. Você pode começar um novo programa.");
-}
-
-// 🔹 Exporta memória em arquivo JSON (backup opcional)
-function exportarMemoria(id) {
-  const memoria = carregarMemoria(id);
-  if (!memoria) {
-    alert("Nenhuma memória encontrada para exportar.");
-    return;
-  }
-  const blob = new Blob([JSON.stringify(memoria, null, 2)], { type: "application/json" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `femflow_memoria_${id}.json`;
-  link.click();
-  console.log("📦 Memória exportada com sucesso.");
-}
+      if (data?.nome) saudacaoBox.textContent = `Olá, ${data.nome.split(" ")[0]} 🌿`;
+      if (data?.fase_atual) {
+        const fase = data.fase_atual.toLowerCase();
+        atualizarFaseCiclo(fase);
+        localStorage.setItem("fase_sugerida", fase);
+      }
+    } catch (err) {
+      console.error("Erro ao buscar dados da aluna:", err);
+      saudacaoBox.textContent = "Bem-vinda 🌸";
+    }
+  });
+  </script>
+</body>
+</html>
 
