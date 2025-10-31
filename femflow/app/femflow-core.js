@@ -4,7 +4,7 @@
    ========================== */
 
 const FEMFLOW = {
-  SCRIPT_URL: "https://script.google.com/macros/s/SEU_DEPLOY_ID/exec",
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec",
   LOGO: "../../assets/logofemlowverde.png",
 
   /* ----------- ⚙️ INICIALIZAÇÃO ------------ */
@@ -13,6 +13,8 @@ const FEMFLOW = {
     this.inserirLogo();
     this.criarModalPSE();
     this.inserirBotaoVoltar();
+     this.carregarLogoContextual();
+     
   },
 
   inserirLogo() {
@@ -219,8 +221,6 @@ async carregarLogoContextual() {
 
 /* ----------- 🚀 AUTOEXECUÇÃO ------------ */
 document.addEventListener("DOMContentLoaded", () => FEMFLOW.initTreino());
-
-this.carregarLogoContextual();
 
 
 /* ----------- ✨ ANIMAÇÕES ------------ */
