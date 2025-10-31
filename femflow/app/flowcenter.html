@@ -42,6 +42,14 @@
       margin-top: 15px;
       position: relative;
     }
+    #saudacaoBox {
+  font-family: 'Playfair Display', serif;
+  color: #335953;
+  font-size: 1.15em;
+  margin-top: 10px;
+  text-align: center;
+  transition: opacity 0.4s ease;
+}
 
     .fase-ciclo {
       width: 180px;
@@ -136,8 +144,16 @@
 
   <!-- LOGO -->
   <div class="logo-container">
-    <img src="assets/logofemflowterracota.png" alt="FemFlow Logo" class="logo-img">
+    <img src="../../assets/logofemflowterracota.png" alt="FemFlow Logo" class="logo-img">
   </div>
+  
+  <button onclick="window.location.href='../../index.html'" 
+  style="position:absolute;top:15px;left:15px;background:#335953;color:#fff;
+  border:none;border-radius:20px;padding:6px 14px;font-family:'Lato';
+  font-size:0.9em;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,0.2);">
+  ← Voltar
+</button>
+
 
   <!-- CÍRCULO DAS FASES -->
   <div id="fase-circular">
@@ -207,6 +223,13 @@
       ciclo();
       setInterval(ciclo, fase.in + fase.out);
     }
+    let intervaloResp;
+function iniciarRespiracaoVisual(tipo) {
+  clearInterval(intervaloResp);
+  ...
+  intervaloResp = setInterval(ciclo, fase.in + fase.out);
+}
+
 
     function atualizarFaseCiclo(fase) {
       const label = document.getElementById('fase-atual-label');
@@ -236,5 +259,47 @@
     const faseAtual = localStorage.getItem('fase_sugerida');
     atualizarFaseCiclo(faseAtual);
   </script>
+  <script src="../scripts/femflow-core.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const id = localStorage.getItem("idFemFlow") || new URLSearchParams(window.location.search).get("id");
+  const saudacaoBox = document.createElement("div");
+  saudacaoBox.id = "saudacaoBox";
+  saudacaoBox.style.cssText = `
+    font-family:'Playfair Display',serif;
+    color:#335953;
+    margin-top:10px;
+    font-size:1.2em;
+    font-weight:500;
+  `;
+  document.body.prepend(saudacaoBox);
+
+  if (!id) {
+    saudacaoBox.textContent = "Bem-vinda 🌸";
+    return;
+  }
+
+  try {
+    // Busca dados da aluna no Apps Script
+    const response = await fetch(`${FEMFLOW.SCRIPT_URL}?id=${id}`);
+    const data = await response.json();
+
+    if (data && data.nome) {
+      const nome = data.nome.split(" ")[0]; // primeiro nome
+      saudacaoBox.textContent = `Olá, ${nome} 🌿`;
+    }
+
+    if (data && data.fase_atual) {
+      const fase = data.fase_atual.toLowerCase();
+      atualizarFaseCiclo(fase); // já existente no FlowCenter
+      localStorage.setItem("fase_sugerida", fase);
+    }
+
+  } catch (err) {
+    console.error("Erro ao buscar dados da aluna:", err);
+    saudacaoBox.textContent = "Bem-vinda 🌸";
+  }
+});
+</script>
 </body>
 </html>
