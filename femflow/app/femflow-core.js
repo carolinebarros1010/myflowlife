@@ -1,22 +1,56 @@
-/* ==========================
-   FEMFLOW CORE SCRIPT 2.0
-   Autor: Ricardo Fernandes
-   ========================== */
+/* ===========================================================
+   🌸 FEMFLOW CORE SCRIPT v2.1
+   Autor: Ricardo Fernandes • 2025
+   Integração direta com FemFlow Core (Hotmart + App)
+   =========================================================== */
 
 const FEMFLOW = {
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec",
+  /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
+  SCRIPT_URL:
+    "https://script.google.com/macros/s/AKfycbzmHvGjUwLjOIgDAARCxPgvGbTxGsH5zo9U8wx6a8LScWfiCtyiuz6w_cKdc4e9_WOL/exec",
+
+  /* ----------- 🎨 LOGO PADRÃO ------------ */
   LOGO: "../../assets/logofemlowverde.png",
 
   /* ----------- ⚙️ INICIALIZAÇÃO ------------ */
   initTreino() {
-    console.log("💫 FemFlow carregado com sucesso");
+    console.log("💫 FemFlow Core JS conectado com sucesso");
     this.inserirLogo();
     this.criarModalPSE();
     this.inserirBotaoVoltar();
-     this.carregarLogoContextual();
-     
+    this.carregarLogoContextual();
   },
 
+  /* ----------- 🌸 LOGIN OU CADASTRO (APP) ------------ */
+  async loginOuCadastro(nome, email) {
+    try {
+      const resp = await fetch(this.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "loginOuCadastro",
+          nome,
+          email,
+        }),
+      });
+      const data = await resp.json();
+      if (data.status === "ok" || data.status === "created") {
+        this.toast(`🌸 Bem-vinda, ${data.nome}!`);
+        console.log("Perfil:", data);
+        localStorage.setItem("femflow_id", data.id);
+        localStorage.setItem("femflow_nome", data.nome);
+        localStorage.setItem("femflow_email", data.email);
+        return data;
+      } else {
+        this.toast("⚠️ Erro no cadastro/login.", true);
+      }
+    } catch (err) {
+      console.error("Erro em loginOuCadastro:", err);
+      this.toast("❌ Falha de conexão com o servidor.", true);
+    }
+  },
+
+  /* ----------- 🖼️ INSERIR LOGO ------------ */
   inserirLogo() {
     const header = document.createElement("div");
     header.innerHTML = `
@@ -25,37 +59,36 @@ const FEMFLOW = {
       </div>`;
     document.body.prepend(header);
   },
-   
-   /* ----------- 🎨 LOGO DINÂMICO ------------ */
-async carregarLogoContextual() {
-  try {
-    const resp = await fetch("../../assets/logos.json");
-    const logos = await resp.json();
-    let logoEscolhido = logos.principal;
 
-    const hora = new Date().getHours();
-    const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  /* ----------- 🎨 LOGO DINÂMICO ------------ */
+  async carregarLogoContextual() {
+    try {
+      const resp = await fetch("../../assets/logos.json");
+      const logos = await resp.json();
+      let logoEscolhido = logos.principal;
 
-    if (darkMode) logoEscolhido = logos.escuro;
-    else if (hora >= 18 || hora < 6) logoEscolhido = logos.escuro;
-    else logoEscolhido = logos.principal;
+      const hora = new Date().getHours();
+      const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-    // Detecta contexto (página interna)
-    if (window.location.pathname.includes("treino"))
-      logoEscolhido = logos.secundario;
-    if (window.location.pathname.includes("boasvindas"))
-      logoEscolhido = logos.boasvindas;
+      if (darkMode) logoEscolhido = logos.escuro;
+      else if (hora >= 18 || hora < 6) logoEscolhido = logos.escuro;
+      else logoEscolhido = logos.principal;
 
-    // Atualiza logo visível
-    const logoImg = document.querySelector(".logo-img");
-    if (logoImg) logoImg.src = "../../" + logoEscolhido;
+      if (window.location.pathname.includes("treino"))
+        logoEscolhido = logos.secundario;
+      if (window.location.pathname.includes("boasvindas"))
+        logoEscolhido = logos.boasvindas;
 
-    console.log("🌸 Logo carregado:", logoEscolhido);
-  } catch (err) {
-    console.error("Erro ao carregar logos:", err);
-  }
-},
+      const logoImg = document.querySelector(".logo-img");
+      if (logoImg) logoImg.src = "../../" + logoEscolhido;
 
+      console.log("🌸 Logo carregado:", logoEscolhido);
+    } catch (err) {
+      console.error("Erro ao carregar logos:", err);
+    }
+  },
+
+  /* ----------- 🔙 BOTÃO VOLTAR ------------ */
   inserirBotaoVoltar() {
     const voltar = document.createElement("button");
     voltar.textContent = "← Voltar ao ciclo";
@@ -77,16 +110,17 @@ async carregarLogoContextual() {
     document.body.appendChild(voltar);
   },
 
-  /* ----------- 💾 SALVAR ------------ */
+  /* ----------- 💾 SALVAR TREINO / PSE ------------ */
   async salvarTreino({
-    id = "FF-TESTE",
-    fase = "Folicular",
+    id = localStorage.getItem("femflow_id") || "FF-TESTE",
+    fase = "folicular",
     treino = "A",
     tipo_dia = "treino",
     pse = "N/A",
     observacao = "",
   } = {}) {
     const payload = {
+      action: tipo_dia === "descanso" ? "descanso" : "pse",
       id,
       data: new Date().toISOString(),
       fase,
@@ -102,7 +136,11 @@ async carregarLogoContextual() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (resp.ok) this.toast("✔️ Registro salvo com sucesso!");
+      const result = await resp.json();
+      console.log("📤 Retorno FemFlow Core:", result);
+
+      if (result.status?.includes("ok") || result.status?.includes("registrado"))
+        this.toast("✔️ Registro salvo com sucesso!");
       else this.toast("⚠️ Erro ao salvar. Tente novamente.", true);
     } catch (err) {
       console.error("Erro no envio:", err);
@@ -110,8 +148,8 @@ async carregarLogoContextual() {
     }
   },
 
-  /* ----------- 🌙 DESCANSO ------------ */
-  async salvarDescanso(fase = "Menstrual") {
+  /* ----------- 🌙 SALVAR DESCANSO ------------ */
+  async salvarDescanso(fase = "menstrual") {
     await this.salvarTreino({
       tipo_dia: "descanso",
       fase,
@@ -193,7 +231,7 @@ async carregarLogoContextual() {
     document.getElementById("pseModal").style.display = "flex";
   },
 
-  /* ----------- 🔥 HIIT ------------ */
+  /* ----------- 🔥 HIIT SIMPLES ------------ */
   iniciarHIIT(on = 30, off = 30, ciclos = 8) {
     this.toast(`🔥 HIIT iniciado: ${on}s ON / ${off}s OFF x${ciclos}`);
   },
@@ -222,10 +260,12 @@ async carregarLogoContextual() {
 /* ----------- 🚀 AUTOEXECUÇÃO ------------ */
 document.addEventListener("DOMContentLoaded", () => FEMFLOW.initTreino());
 
-
 /* ----------- ✨ ANIMAÇÕES ------------ */
 const style = document.createElement("style");
 style.innerHTML = `
-@keyframes fadeIn { from {opacity:0; transform:scale(0.9);} to {opacity:1; transform:scale(1);} }
-`;
+@keyframes fadeIn {
+  from {opacity:0; transform:scale(0.9);}
+  to {opacity:1; transform:scale(1);}
+}`;
 document.head.appendChild(style);
+
