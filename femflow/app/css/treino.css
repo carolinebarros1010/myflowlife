@@ -1,0 +1,160 @@
+/* 🌸 FemFlow Treino – Design fluido, bicolor e responsivo */
+:root {
+  --terracota: #CC6A5A;
+  --teal: #335953;
+  --pessego: #EFBDA6;
+  --bege: #f9f7f6;
+  --texto: #444;
+  --fonte-titulo: "Playfair Display", serif;
+  --fonte-corpo: "Lato", sans-serif;
+}
+
+body {
+  background: var(--bege);
+  font-family: var(--fonte-corpo);
+  color: var(--texto);
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+header {
+  background: linear-gradient(90deg, var(--terracota), var(--pessego));
+  color: white;
+  padding: 1.5rem 0 1rem;
+  border-radius: 0 0 40px 40px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+}
+header h1 {
+  font-family: var(--fonte-titulo);
+  font-size: 1.8rem;
+  margin: 0;
+}
+header .subtitle {
+  margin: 0.3rem 0 0.8rem;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+.tarja-novo-ciclo {
+  background: linear-gradient(90deg, var(--pessego), var(--teal));
+  padding: 0.4rem 0.9rem;
+  border-radius: 10px;
+  display: inline-block;
+  font-weight: 600;
+  animation: fadeInTarja 1.5s ease;
+}
+@keyframes fadeInTarja {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  padding: 1.2rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ===== SEÇÕES ===== */
+.section {
+  background: white;
+  border-radius: 20px;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+}
+.section h3 {
+  font-family: var(--fonte-titulo);
+  color: var(--teal);
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+.section h4 {
+  font-size: 1rem;
+  color: var(--terracota);
+  font-weight: 600;
+  margin-top: 0.2rem;
+  margin-bottom: 0.6rem;
+}
+
+/* ===== VÍDEO ===== */
+video {
+  border-radius: 20px;
+  margin-top: 0.8rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ===== PSE ===== */
+.pse-box input[type=range] {
+  width: 80%;
+  margin: 1rem auto;
+  accent-color: var(--terracota);
+}
+.pse-box span {
+  color: var(--teal);
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.botoes-pse {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 1.2rem;
+}
+button {
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-family: var(--fonte-corpo);
+  font-weight: 600;
+}
+#salvarTreinoBtn {
+  background: var(--terracota);
+  color: #fff;
+}
+#salvarTreinoBtn:hover {
+  background: #b75744;
+  transform: scale(1.04);
+}
+button.secundario {
+  background: var(--teal);
+  color: #fff;
+}
+button.secundario:hover {
+  background: var(--terracota);
+  transform: scale(1.04);
+}
+
+/* ===== BOTÃO EVOLUÇÃO ===== */
+#evolucaoBtn {
+  background: var(--pessego);
+  color: var(--teal);
+  width: 90%;
+  max-width: 400px;
+  margin: 1rem auto;
+  display: block;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+#evolucaoBtn:hover {
+  background: var(--terracota);
+  color: #fff;
+}
+
+/* ===== ANIMAÇÕES ===== */
+@keyframes pulseBtn {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+#salvarTreinoBtn {
+  animation: pulseBtn 4s infinite ease-in-out;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 480px) {
+  header h1 { font-size: 1.5rem; }
+  .section { padding: 1rem; }
+  button { padding: 8px 16px; font-size: 0.95rem; }
+}
