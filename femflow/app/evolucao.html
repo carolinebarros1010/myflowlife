@@ -131,7 +131,10 @@
   <script src="js/memoria.js"></script>
 
   <script>
-  const scriptURL = "https://script.google.com/macros/s/AKfycbyovJHpMBqGhKmGFSePjHk-v5xAk8XB9NEfBG735nZjSz08f-jMfKE3OMkPVIZHObb0/exec";
+const scriptURL = FEMFLOW.SCRIPT_URL;
+    
+    
+    
 
   document.addEventListener('DOMContentLoaded', async () => {
     const id = localStorage.getItem('femflow_id');
@@ -249,7 +252,10 @@
         options: { responsive:true, scales:{ y:{title:{display:true,text:"Peso (kg)"}}, x:{title:{display:true,text:"Data"}}}, plugins:{legend:{display:false}} }
       });
     });
-  });
-  </script>
+  );
+  </scrip>t>
+    
+<script src="femflow-core.js"></script>
+  
 </body>
 </html>
