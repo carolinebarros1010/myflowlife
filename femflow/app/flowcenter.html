@@ -1,139 +1,113 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FemFlow - Flow Center</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 
   <style>
+    :root {
+      --terracota: #CC6A5A;
+      --bege: #F6E9E1;
+    }
+
     body {
       font-family: 'Lato', sans-serif;
-      background-color: #fffaf8;
-      color: #333;
+      background-color: var(--bege);
+      color: #5A4032;
       margin: 0;
+      padding: 0;
       text-align: center;
     }
 
-    /* LOGO */
     .logo-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-top: 15px;
+      margin: 20px 0 10px;
     }
     .logo-img {
-      width: 160px;
-      height: auto;
+      width: 130px;
       opacity: 0.95;
-      transition: transform 0.5s ease, opacity 0.5s ease;
     }
-    .logo-img:hover { transform: scale(1.05); opacity: 1; }
 
-    /* SAUDAÇÃO */
-    #saudacaoBox {
+    h1 {
       font-family: 'Playfair Display', serif;
-      color: #335953;
-      font-size: 1.15em;
-      margin-top: 10px;
-      text-align: center;
-      transition: opacity 0.4s ease;
+      color: var(--terracota);
+      font-size: 1.8em;
+      margin-bottom: 5px;
     }
 
-    /* CÍRCULO DAS FASES */
-    #fase-circular {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      margin-top: 15px;
+    p.sub {
+      font-size: 1em;
+      color: #7C6058;
+      margin: 0 0 20px;
+    }
+
+    /* ====== CÍRCULO DAS FASES ====== */
+    .circle-wrapper {
       position: relative;
+      width: 240px;
+      height: 240px;
+      margin: 0 auto;
     }
-    .fase-ciclo {
-      width: 180px;
-      height: 180px;
-      transform: rotate(-45deg);
+    svg#circleFases {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
     }
-    .fase-label {
+    .fase-text {
       position: absolute;
-      text-align: center;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       font-family: 'Playfair Display', serif;
-      color: #335953;
       font-size: 1.2em;
-      animation: fadein 1s ease;
+      color: var(--terracota);
     }
-    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-
-    /* BOTÕES */
-    .respire-titulo {
-      text-align: center;
-      font-family: 'Playfair Display', serif;
+    .phase-name {
       font-weight: 600;
-      color: #335953;
-      letter-spacing: 0.3px;
-      margin-top: 30px;
+      color: #5A4032;
     }
-    button.respire-btn {
-      width: 90%;
+
+    /* ====== BOTÕES ====== */
+    .btn {
+      display: block;
+      width: 85%;
       max-width: 320px;
-      margin: 10px auto;
+      margin: 18px auto;
       padding: 14px 20px;
       border: none;
       border-radius: 25px;
-      font-size: 1.1em;
-      font-weight: 500;
+      font-size: 1.05em;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: all 0.3s ease;
     }
-    button.respire-btn:hover {
-      transform: scale(1.03);
-      box-shadow: 0 6px 14px rgba(0,0,0,0.08);
-    }
-    #btn-tpm { background: #D67660; color: #fff; }
-    #btn-ciclo { background: #EABAA3; color: #5A4032; }
-    #btn-foco { background: #335953; color: #fff; }
+    .btn:hover { transform: scale(1.03); }
 
-    /* MODAL DE RESPIRAÇÃO */
-    #breath-modal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      background: rgba(255, 255, 255, 0.95);
-      z-index: 10;
-    }
-    #breath-circle {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      background-color: #f4cccc;
-      transition: transform 4s ease-in-out, background-color 2s ease;
-    }
-    #breath-label {
-      margin-top: 25px;
-      font-size: 1.5em;
-      color: #555;
-      font-weight: 500;
-    }
-    #closeBreath {
-      margin-top: 25px;
-      background: #335953;
+    #btnRespiracao {
+      background: var(--terracota);
       color: #fff;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 16px;
-      cursor: pointer;
-      font-family: 'Lato';
+    }
+    #btnTreino {
+      background: #fff;
+      border: 2px solid var(--terracota);
+      color: var(--terracota);
     }
 
-    .subtexto {
+    .fase-atual {
+      margin-top: 25px;
+      font-size: 1.05em;
+      font-weight: 500;
+      color: #7C6058;
+    }
+
+    .footer {
+      margin-top: 30px;
       font-size: 0.9em;
-      text-align: center;
-      color: #8B6B5E;
-      margin-top: 15px;
-      opacity: 0.8;
+      color: #A87E72;
     }
   </style>
 </head>
@@ -141,133 +115,87 @@
 <body>
   <!-- LOGO -->
   <div class="logo-container">
-    <img src="../../assets/logofemflowterracota.png" alt="FemFlow Logo" class="logo-img">
+    <img src="../../assets/logofemflowterracota.png" alt="FemFlow Logo" class="logo-img" />
   </div>
 
-  <!-- VOLTAR -->
-  <button onclick="window.location.href='../../index.html'"
-    style="position:absolute;top:15px;left:15px;background:#335953;color:#fff;
-    border:none;border-radius:20px;padding:6px 14px;font-family:'Lato';
-    font-size:0.9em;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,0.2);">
-    ← Voltar
-  </button>
+  <h1>FemFlow</h1>
+  <p class="sub">Centro do seu ciclo</p>
 
-  <!-- SAUDAÇÃO E CÍRCULO -->
-  <div id="saudacaoBox">Bem-vinda 🌸</div>
-
-  <div id="fase-circular">
-    <svg viewBox="0 0 200 200" class="fase-ciclo">
-      <circle cx="100" cy="100" r="90" fill="none" stroke="#D67660" stroke-width="20"
-        stroke-dasharray="157" stroke-dashoffset="0"></circle>
-      <circle cx="100" cy="100" r="90" fill="none" stroke="#EABAA3" stroke-width="20"
-        stroke-dasharray="157" stroke-dashoffset="157"></circle>
-      <circle cx="100" cy="100" r="90" fill="none" stroke="#335953" stroke-width="20"
-        stroke-dasharray="157" stroke-dashoffset="314"></circle>
-      <circle cx="100" cy="100" r="90" fill="none" stroke="#F3D6C6" stroke-width="20"
-        stroke-dasharray="157" stroke-dashoffset="471"></circle>
+  <!-- ====== CÍRCULO DAS FASES ====== -->
+  <div class="circle-wrapper">
+    <svg id="circleFases" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="#E8C7BB" stroke-width="22" />
+      <circle id="arcFase" cx="100" cy="100" r="90" fill="none"
+              stroke="var(--terracota)" stroke-width="22"
+              stroke-dasharray="565" stroke-dashoffset="565"
+              stroke-linecap="round" />
     </svg>
-    <div class="fase-label">
-      <p id="fase-atual-label">Fase atual: —</p>
+    <div class="fase-text">
+      <div id="faseLabel" class="phase-name">Fase —</div>
     </div>
   </div>
 
-  <!-- BOTÕES DE RESPIRAÇÃO -->
-  <h3 class="respire-titulo">🌸 Respire conforme seu momento</h3>
-  <button id="btn-tpm" class="respire-btn" onclick="iniciarRespiracaoVisual('tpm')">Zen TPM</button>
-  <button id="btn-ciclo" class="respire-btn" onclick="iniciarRespiracaoVisual('ciclo')">Equilíbrio Cíclico</button>
-  <button id="btn-foco" class="respire-btn" onclick="iniciarRespiracaoVisual('foco')">Foco Ovulatório</button>
+  <p class="fase-atual" id="faseDescricao">Identificando sua fase...</p>
 
-  <p class="subtexto">Respirar é se reconectar — leve o tempo do seu corpo.</p>
+  <!-- ====== BOTÕES ====== -->
+  <button id="btnRespiracao" class="btn" onclick="location.href='respiracao.html'">🧘 Respiração Diária</button>
+  <button id="btnTreino" class="btn" onclick="iniciarTreino()">🏃 Iniciar Treino</button>
 
-  <!-- MODAL RESPIRAÇÃO -->
-  <div id="breath-modal">
-    <div id="breath-circle"></div>
-    <div id="breath-label">Respire...</div>
-    <button id="closeBreath">Fechar</button>
-  </div>
+  <p class="footer">🌸 Conecte-se com seu ritmo natural</p>
 
-  <!-- SCRIPT FEMFLOW -->
   <script src="../scripts/femflow-core.js"></script>
 
   <script>
-  let intervaloResp;
+    // 🌿 Atualiza círculo conforme a fase
+    function atualizarFaseVisual(fase) {
+      const faseLabel = document.getElementById('faseLabel');
+      const faseDescricao = document.getElementById('faseDescricao');
+      const arc = document.getElementById('arcFase');
 
-  function iniciarRespiracaoVisual(tipo) {
-    clearInterval(intervaloResp);
-    const modal = document.getElementById('breath-modal');
-    const circle = document.getElementById('breath-circle');
-    const label = document.getElementById('breath-label');
+      const fases = {
+        menstrual: { cor: '#CC6A5A', angulo: 0, texto: 'Fase Menstrual', desc: 'Período de recolhimento e renovação.' },
+        folicular: { cor: '#E8C7BB', angulo: 140, texto: 'Fase Folicular', desc: 'Momento de energia crescente e foco.' },
+        ovulatoria: { cor: '#B55A4C', angulo: 280, texto: 'Fase Ovulatória', desc: 'Pico de vitalidade e expressão.' },
+        lutea: { cor: '#8E4C40', angulo: 420, texto: 'Fase Lútea', desc: 'Reflexão e preparação para o novo ciclo.' }
+      };
 
-    const config = {
-      tpm: { in: 4000, out: 6000, color: '#D67660', label: 'Zen TPM' },
-      ciclo: { in: 4000, out: 4000, color: '#EABAA3', label: 'Equilíbrio Cíclico' },
-      foco: { in: 2000, out: 4000, color: '#335953', label: 'Foco Ovulatório' }
-    };
+      const f = fases[fase] || fases.folicular;
+      faseLabel.textContent = f.texto;
+      faseDescricao.textContent = f.desc;
 
-    const fase = config[tipo];
-    if (!fase) return;
+      arc.style.stroke = f.cor;
+      arc.style.strokeDashoffset = 565 - (f.angulo / 360) * 565;
+    }
 
-    modal.style.display = 'flex';
-    label.textContent = fase.label;
-    circle.style.backgroundColor = fase.color;
-
-    let inspirando = true;
-    function ciclo() {
-      if (inspirando) {
-        circle.style.transform = 'scale(1.15)';
-        label.textContent = 'Inspire...';
-        navigator.vibrate([100, fase.in / 2]);
-        setTimeout(() => inspirando = false, fase.in);
-      } else {
-        circle.style.transform = 'scale(0.85)';
-        label.textContent = 'Expire...';
-        navigator.vibrate([50, fase.out / 2]);
-        setTimeout(() => inspirando = true, fase.out);
+    // 🩷 Buscar fase pelo ID FemFlow
+    document.addEventListener('DOMContentLoaded', async () => {
+      const id = localStorage.getItem('femflow_id');
+      if (!id) {
+        document.getElementById('faseDescricao').textContent = 'Faça login ou cadastre-se.';
+        return;
       }
-    }
 
-    ciclo();
-    intervaloResp = setInterval(ciclo, fase.in + fase.out);
-  }
+      try {
+        const resp = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`);
+        const data = await resp.json();
 
-  document.getElementById('closeBreath').addEventListener('click', () => {
-    clearInterval(intervaloResp);
-    document.getElementById('breath-modal').style.display = 'none';
-  });
-
-  function atualizarFaseCiclo(fase) {
-    const label = document.getElementById('fase-atual-label');
-    const cores = { menstrual:'#D67660', folicular:'#EABAA3', ovulatoria:'#335953', lutea:'#F3D6C6' };
-    const emojis = { menstrual:'🌑', folicular:'🌒', ovulatoria:'🌕', lutea:'🌘' };
-    if (!fase) return label.textContent = 'Fase atual: —';
-    label.textContent = `Fase atual: ${fase.charAt(0).toUpperCase() + fase.slice(1)} ${emojis[fase]}`;
-    label.style.color = cores[fase];
-  }
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    const id = localStorage.getItem("idFemFlow") || new URLSearchParams(window.location.search).get("id");
-    const saudacaoBox = document.getElementById("saudacaoBox");
-
-    if (!id) {
-      saudacaoBox.textContent = "Bem-vinda 🌸";
-      return;
-    }
-
-    try {
-      const response = await fetch(`${FEMFLOW.SCRIPT_URL}?id=${id}`, { mode: "cors" });
-      const data = await response.json();
-
-      if (data?.nome) saudacaoBox.textContent = `Olá, ${data.nome.split(" ")[0]} 🌿`;
-      if (data?.fase_atual) {
-        const fase = data.fase_atual.toLowerCase();
-        atualizarFaseCiclo(fase);
-        localStorage.setItem("fase_sugerida", fase);
+        if (data?.nivel) {
+          const fase = localStorage.getItem('fase_sugerida') || data.fase || 'folicular';
+          atualizarFaseVisual(fase.toLowerCase());
+        }
+      } catch (err) {
+        console.error('Erro ao carregar fase:', err);
+        document.getElementById('faseDescricao').textContent = 'Não foi possível carregar sua fase.';
       }
-    } catch (err) {
-      console.error("Erro ao buscar dados da aluna:", err);
-      saudacaoBox.textContent = "Bem-vinda 🌸";
+    });
+
+    // 🚀 Iniciar treino
+    function iniciarTreino() {
+      FEMFLOW.toast('Iniciando treino do dia 🌸');
+      setTimeout(() => {
+        window.location.href = 'treino.html';
+      }, 1200);
     }
-  });
   </script>
 </body>
 </html>
