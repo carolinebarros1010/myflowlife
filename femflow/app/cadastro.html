@@ -16,30 +16,40 @@
 <body>
   <header>
     <h1>Cadastro FemFlow</h1>
-    <p class="subtitle">Prepare-se para iniciar seu programa cíclico</p>
+    <p class="subtitle">Entre para o seu ciclo 🌿</p>
     <p id="faseAtual" class="fase-info animada"></p>
   </header>
 
   <!-- CONTAINER PRINCIPAL -->
   <div class="container">
     <div class="cadastro-box">
-      <h3>💳 Acesse seu plano FemFlow</h3>
+      <h3>💫 Crie seu acesso FemFlow</h3>
       <p>
-        Após a confirmação da sua compra, você receberá por e-mail seu
-        <strong>ID FemFlow</strong>.<br>
-        Esse ID libera seus treinos, o gráfico de evolução e o acompanhamento
-        personalizado conforme sua fase hormonal.
+        Informe seu nome e e-mail para iniciar o programa.
+        Se você já é aluna, o sistema localizará automaticamente o seu ID FemFlow.
       </p>
 
-      <p style="margin-top:1rem;">
-        Clique abaixo para adquirir seu plano e receber automaticamente seu ID:
+      <div class="form">
+        <label for="nome">Nome completo</label>
+        <input id="nome" type="text" placeholder="Digite seu nome" required />
+
+        <label for="email">E-mail</label>
+        <input id="email" type="email" placeholder="Digite seu e-mail" required />
+
+        <button id="btnEntrar">🌸 Entrar no FemFlow</button>
+      </div>
+
+      <hr style="margin:2rem 0;opacity:0.3;">
+
+      <h3>💳 Deseja adquirir um plano?</h3>
+      <p>
+        Após a confirmação da sua compra, você receberá por e-mail seu
+        <strong>ID FemFlow</strong> que libera os treinos e o acompanhamento cíclico.
       </p>
 
       <button id="btnPlano" onclick="GOcadastro()">🔗 Adquirir plano</button>
 
-      <h3 style="margin-top:2rem;">📩 Já possui um ID?</h3>
-      <p>Volte à tela anterior e insira-o na página de ciclo.</p>
-      <button id="btnVoltar" onclick="location.href='ciclo.html'">🔙 Voltar</button>
+      <button id="btnVoltar" style="margin-top:1.5rem;" onclick="location.href='index.html'">🔙 Voltar</button>
     </div>
   </div>
 
@@ -50,74 +60,43 @@
       const faseURL = urlParams.get('fase');
       const faseStorage = localStorage.getItem('fase_sugerida');
       const fase = faseURL || faseStorage;
-
       const campoFase = document.getElementById('faseAtual');
-      if (fase) {
-        campoFase.innerText = `🌿 Fase atual estimada: ${fase}`;
-      } else {
-        campoFase.innerText = '🌸 Fase não identificada ainda';
-      }
+      campoFase.innerText = fase
+        ? `🌿 Fase atual estimada: ${fase}`
+        : '🌸 Fase não identificada ainda';
     });
   </script>
 
-  <!-- ESTILO LOCAL -->
-  <style>
-    .fase-info {
-      font-weight: 700;
-      font-size: 1rem;
-      color: white;
-      margin-top: 0.5rem;
-      display: inline-block;
-      padding: 0.5rem 1.2rem;
-      border-radius: 12px;
-      background: linear-gradient(90deg, var(--terracota), var(--teal));
-      box-shadow: 0 0 10px rgba(204, 106, 90, 0.2);
-      transition: all 0.8s ease;
-    }
-
-    .animada {
-      animation: fluxoCores 6s ease-in-out infinite alternate;
-    }
-
-    @keyframes fluxoCores {
-      0% {
-        background: linear-gradient(90deg, var(--terracota), var(--pessego));
-        box-shadow: 0 0 10px rgba(204,106,90,0.3);
-      }
-      50% {
-        background: linear-gradient(90deg, var(--pessego), var(--teal));
-        box-shadow: 0 0 15px rgba(51,89,83,0.3);
-      }
-      100% {
-        background: linear-gradient(90deg, var(--teal), var(--terracota));
-        box-shadow: 0 0 12px rgba(239,189,166,0.3);
-      }
-    }
-
-    p {
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: #444;
-    }
-
-    h3 {
-      font-size: 1.1rem;
-      color: var(--teal);
-    }
-  </style>
-
-  <!-- SCRIPT PRINCIPAL -->
+  <!-- INTERAÇÃO PRINCIPAL -->
   <script>
+    document.getElementById("btnEntrar").addEventListener("click", async () => {
+      const nome = document.getElementById("nome").value.trim();
+      const email = document.getElementById("email").value.trim();
+
+      if (!nome || !email) {
+        FEMFLOW.toast("⚠️ Informe nome e e-mail para continuar.", true);
+        return;
+      }
+
+      FEMFLOW.toast("⏳ Verificando cadastro...");
+
+      const result = await FEMFLOW.loginOuCadastro(nome, email);
+
+      if (result?.status === "ok" || result?.status === "created") {
+        FEMFLOW.toast("🌸 Acesso liberado!");
+        setTimeout(() => {
+          window.location.href = "boasvindas.html";
+        }, 1500);
+      } else {
+        FEMFLOW.toast("❌ Não foi possível validar o acesso.", true);
+      }
+    });
+
     function GOcadastro() {
       try {
-        // Captura parâmetros UTM ou origem
         const params = new URLSearchParams(window.location.search);
         const origem = params.get("utm_source") || params.get("origem") || "direto";
-
-        // Salva a origem localmente (para rastrear)
         localStorage.setItem("femflow_origem", origem);
-
-        // Log e redirecionamento
         console.log("🩷 Lead captado:", origem);
         setTimeout(() => {
           console.log("💳 Redirecionando para o Hotmart...");
@@ -130,7 +109,60 @@
     }
   </script>
 
-  <!-- Importa o núcleo FemFlow -->
+  <!-- ESTILO LOCAL -->
+  <style>
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin: 1.5rem 0;
+    }
+    .form input {
+      padding: 0.7rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: "Lato", sans-serif;
+    }
+    .form button {
+      background: linear-gradient(135deg, var(--teal), var(--terracota));
+      color: white;
+      border: none;
+      padding: 0.8rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .form button:hover {
+      transform: scale(1.03);
+      opacity: 0.95;
+    }
+    .fase-info {
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
+      margin-top: 0.5rem;
+      display: inline-block;
+      padding: 0.5rem 1.2rem;
+      border-radius: 12px;
+      background: linear-gradient(90deg, var(--terracota), var(--teal));
+      box-shadow: 0 0 10px rgba(204, 106, 90, 0.2);
+      transition: all 0.8s ease;
+    }
+    .animada {
+      animation: fluxoCores 6s ease-in-out infinite alternate;
+    }
+    @keyframes fluxoCores {
+      0% { background: linear-gradient(90deg, var(--terracota), var(--pessego)); }
+      50% { background: linear-gradient(90deg, var(--pessego), var(--teal)); }
+      100% { background: linear-gradient(90deg, var(--teal), var(--terracota)); }
+    }
+  </style>
+
+  <!-- Núcleo FemFlow -->
   <script src="scripts/femflow-core.js"></script>
 </body>
 </html>
