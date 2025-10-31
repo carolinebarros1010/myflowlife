@@ -23,6 +23,36 @@ const FEMFLOW = {
       </div>`;
     document.body.prepend(header);
   },
+   
+   /* ----------- 🎨 LOGO DINÂMICO ------------ */
+async carregarLogoContextual() {
+  try {
+    const resp = await fetch("../../assets/logos.json");
+    const logos = await resp.json();
+    let logoEscolhido = logos.principal;
+
+    const hora = new Date().getHours();
+    const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    if (darkMode) logoEscolhido = logos.escuro;
+    else if (hora >= 18 || hora < 6) logoEscolhido = logos.escuro;
+    else logoEscolhido = logos.principal;
+
+    // Detecta contexto (página interna)
+    if (window.location.pathname.includes("treino"))
+      logoEscolhido = logos.secundario;
+    if (window.location.pathname.includes("boasvindas"))
+      logoEscolhido = logos.boasvindas;
+
+    // Atualiza logo visível
+    const logoImg = document.querySelector(".logo-img");
+    if (logoImg) logoImg.src = "../../" + logoEscolhido;
+
+    console.log("🌸 Logo carregado:", logoEscolhido);
+  } catch (err) {
+    console.error("Erro ao carregar logos:", err);
+  }
+},
 
   inserirBotaoVoltar() {
     const voltar = document.createElement("button");
@@ -189,6 +219,9 @@ const FEMFLOW = {
 
 /* ----------- 🚀 AUTOEXECUÇÃO ------------ */
 document.addEventListener("DOMContentLoaded", () => FEMFLOW.initTreino());
+
+this.carregarLogoContextual();
+
 
 /* ----------- ✨ ANIMAÇÕES ------------ */
 const style = document.createElement("style");
