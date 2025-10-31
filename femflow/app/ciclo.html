@@ -173,31 +173,46 @@
         document.getElementById('recuperarBox').style.display = 'block';
       }
 
-      function recuperarID() {
-        const nome = document.getElementById('nomeRec').value.trim();
-        const email = document.getElementById('emailRec').value.trim();
-        const status = document.getElementById('statusRec');
+     <script>
+async function recuperarID() {
+  const nome = document.getElementById('nomeRec').value.trim();
+  const email = document.getElementById('emailRec').value.trim();
+  const status = document.getElementById('statusRec');
 
-        if (!nome || !email) {
-          status.innerText = 'Por favor, preencha nome e e-mail.';
-          status.style.color = '#CC6A5A';
-          return;
-        }
+  if (!nome || !email) {
+    status.innerText = 'Por favor, preencha nome e e-mail.';
+    status.style.color = '#CC6A5A';
+    return;
+  }
 
-        status.innerText = '🔄 Verificando...';
-        status.style.color = '#335953';
+  status.innerText = '🔄 Verificando...';
+  status.style.color = '#335953';
 
-      fetch(FEMFLOW.SCRIPT_URL, {method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'recuperarID', nome: nome, email: email })
-                                })
-        .then(() => {
-          status.innerText = '📩 Se o e-mail estiver cadastrado, o ID foi reenviado!';
-          status.style.color = '#335953';
-        })
-        .catch(() => {
-          status.innerText = '⚠️ Erro ao tentar recuperar. Tente novamente.';
-          status.style.color = '#CC6A5A';
-        });
+  try {
+    const response = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "recuperarID",
+        nome,
+        email
+      }),
+    });
 
+    if (response.ok) {
+      status.innerText = '📩 Se o e-mail estiver cadastrado, o ID foi reenviado!';
+      status.style.color = '#335953';
+    } else {
+      status.innerText = '⚠️ Não foi possível verificar o e-mail. Tente novamente.';
+      status.style.color = '#CC6A5A';
+    }
+  } catch (err) {
+    console.error("Erro ao recuperar ID:", err);
+    status.innerText = '❌ Falha de conexão. Verifique sua internet.';
+    status.style.color = '#CC6A5A';
+  }
+}
+</script>
     </script>
   <script src="femflow-core.js"></script>
   </body>
