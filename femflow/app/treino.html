@@ -1,163 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Treino Diário - FemFlow</title>
-    <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="css/style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Treino Diário - FemFlow</title>
 
-  <body>
-    <header>
-      <h1>Treino Diário</h1>
-      <p class="subtitle">Seu corpo, seu ritmo</p>
-      <p id="avisoCiclo" class="tarja-novo-ciclo" style="display:none;">🩵 Novo ciclo iniciado automaticamente!</p>
-    </header>
+  <!-- 🔗 PWA e estilos -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
 
+<body>
+  <header>
+    <h1>Treino Diário</h1>
+    <p class="subtitle">Seu corpo, seu ritmo</p>
+    <p id="avisoCiclo" class="tarja-novo-ciclo" style="display:none;">
+      🩵 Novo ciclo iniciado automaticamente!
+    </p>
+  </header>
+
+  <!-- 🧘 CONTAINER PRINCIPAL -->
   <div class="container">
-  <!-- 🎥 Box do vídeo -->
-  <div class="section treino-box">
-    <h3 id="faseAtual">Fase: -</h3>
-    <h4 id="diaPrograma">Dia do programa: -</h4>
+    <!-- 🎥 Vídeo -->
+    <div class="section treino-box">
+      <h3 id="faseAtual">Fase: -</h3>
+      <h4 id="diaPrograma">Dia do programa: -</h4>
 
-    <video id="videoTreino" width="100%" controls playsinline>
-      <source src="" type="video/mp4" />
-      Seu navegador não suporta vídeos HTML5.
-    </video>
-  </div>
-
-  <!-- 💪 Controle de PSE -->
-  <div class="section pse-box">
-    <h3>Como foi seu esforço hoje?</h3>
-    <input type="range" id="pse" min="0" max="10" value="5" step="1" />
-    <p>PSE: <span id="valorPSE">5</span></p>
-    <div class="botoes-pse">
-      <button id="salvarTreinoBtn">Salvar treino</button>
-      <button id="proximoTreinoBtn" class="secundario">Próximo treino</button>
+      <video id="videoTreino" width="100%" controls playsinline>
+        <source src="" type="video/mp4" />
+        Seu navegador não suporta vídeos HTML5.
+      </video>
     </div>
+
+    <!-- 💪 Controle de PSE -->
+    <div class="section pse-box">
+      <h3>Como foi seu esforço hoje?</h3>
+      <input type="range" id="pse" min="0" max="10" value="5" step="1" />
+      <p>PSE: <span id="valorPSE">5</span></p>
+
+      <div class="botoes-pse">
+        <button id="salvarTreinoBtn">💾 Salvar treino</button>
+        <button id="descansoBtn" class="secundario">🌿 Descanso ativo</button>
+      </div>
+    </div>
+
+    <button id="evolucaoBtn" onclick="location.href='evolucao.html'">📊 Ver evolução</button>
   </div>
 
-  <button id="evolucaoBtn" onclick="location.href='evolucao.html'">📊 Ver evolução</button>
-</div>
+  <!-- 🌸 CORE DO FEMFLOW -->
+  <script src="scripts/femflow-core.js"></script>
 
-    <script src="js/memoria.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const id = localStorage.getItem('femflow_id');
-        if (!id) {
-          window.location.href = 'ciclo.html';
-          return;
-        }
+  <!-- ⚙️ LÓGICA DO TREINO -->
+  <script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const id = localStorage.getItem('femflow_id');
+    if (!id) return (window.location.href = 'ciclo.html');
 
-        const fase = localStorage.getItem('fase_sugerida') || "Desconhecida";
-        const diaMemoria = localStorage.getItem('dia_ciclo') || 1;
-        const memoria = carregarMemoria(id);
-        const diaPrograma = (memoria && memoria.treinos && memoria.treinos.length > 0)
-          ? memoria.treinos[memoria.treinos.length - 1].diaPrograma + 1
-          : parseInt(diaMemoria);
+    const fase = localStorage.getItem('fase_sugerida') || "Desconhecida";
+    const diaCiclo = parseInt(localStorage.getItem('dia_ciclo') || 1);
+    const diaPrograma = diaCiclo > 30 ? 1 : diaCiclo;
 
-        // Atualiza interface
-        document.getElementById('faseAtual').innerText = `Fase: ${fase}`;
-        document.getElementById('diaPrograma').innerText = `Dia do programa: ${diaPrograma}`;
+    // Atualiza interface
+    document.getElementById('faseAtual').innerText = `🌿 Fase: ${fase}`;
+    document.getElementById('diaPrograma').innerText = `Dia do programa: ${diaPrograma}`;
 
-        // Carrega vídeo correspondente
-        const video = document.getElementById('videoTreino');
-        const faseLower = fase.toLowerCase();
-        video.querySelector('source').src = `videos/video_${faseLower}_${diaPrograma}.mp4`;
-        video.load();
+    // 🎥 Carrega vídeo correspondente
+    const video = document.getElementById('videoTreino');
+    const faseLower = fase.toLowerCase();
+    const videoPath = `videos/${faseLower}/video_${faseLower}_${diaPrograma}.mp4`;
+    video.querySelector('source').src = videoPath;
+    video.load();
 
-        // Controle de PSE
-        const range = document.getElementById('pse');
-        const valor = document.getElementById('valorPSE');
-        range.addEventListener('input', () => valor.innerText = range.value);
+    // 🧠 Controle de PSE
+    const range = document.getElementById('pse');
+    const valor = document.getElementById('valorPSE');
+    range.addEventListener('input', () => valor.innerText = range.value);
 
-        // ======= Salvar treino =======
-        document.getElementById('salvarTreinoBtn').addEventListener('click', () => {
-          const pse = parseInt(range.value);
-          const data = new Date().toISOString();
-
-          salvarTreino(id, data, fase, diaPrograma, pse);
-          const progresso = calcularProgresso(id);
-          console.log(`Progresso atual: ${progresso}%`);
-
-          // 🌸 ENCERRAMENTO DO CICLO NO DIA 30
-          if (diaPrograma === 30) {
-            alert("✨ Parabéns! Você concluiu o seu ciclo de 30 dias FemFlow.\nRespire, celebre e prepare-se para o próximo ciclo!");
-
-            // 🔒 Desativa botão "Próximo Treino" se existir
-            const botaoProximo = document.getElementById("proximoTreinoBtn");
-            if (botaoProximo) {
-              botaoProximo.disabled = true;
-              botaoProximo.style.opacity = "0.5";
-              botaoProximo.innerText = "🌸 Ciclo Concluído";
-              botaoProximo.style.transition = "all 0.4s ease";
-            }
-
-            // 🌺 Mensagem visual
-            const banner = document.createElement("div");
-            banner.innerHTML = "🌸 Ciclo completo! Redirecionando para o início...";
-            banner.style.cssText = `
-              background: var(--pessego);
-              color: white;
-              text-align: center;
-              padding: 1rem;
-              border-radius: 10px;
-              margin-top: 1rem;
-              font-weight: 600;
-              box-shadow: 0 0 10px rgba(204,106,90,0.3);
-            `;
-            document.querySelector(".container").prepend(banner);
-
-            // Garante travamento
-            localStorage.setItem('dia_ciclo', 30);
-
-            // Redireciona para o menu após 5s
-            setTimeout(() => {
-              window.location.href = "index.html";
-            }, 5000);
-
-            return;
-          }
-
-          // 🔹 Fluxo normal até o dia 29
-          if (diaPrograma < 30) {
-            localStorage.setItem('dia_ciclo', diaPrograma + 1);
-            alert(`✅ Treino do dia ${diaPrograma} salvo!`);
-            location.reload();
-          }
+    // 💾 SALVAR TREINO
+    document.getElementById('salvarTreinoBtn').addEventListener('click', async () => {
+      const pse = parseInt(range.value);
+      FEMFLOW.abrirPSE(async (pseSelecionado) => {
+        await FEMFLOW.salvarTreino({
+          id,
+          fase,
+          treino: `Dia ${diaPrograma}`,
+          tipo_dia: "treino",
+          pse: pseSelecionado
         });
 
-        // Verifica reinício automático
-        const reiniciado = localStorage.getItem(`femflow_reiniciado_${id}`);
-        if (reiniciado) {
-          const dataReinicio = new Date(reiniciado).toLocaleDateString("pt-BR");
-          const aviso = document.getElementById('avisoCiclo');
-          aviso.innerText = `🩵 Novo ciclo iniciado automaticamente em ${dataReinicio}`;
-          aviso.style.display = "block";
+        FEMFLOW.toast(`✅ Treino ${diaPrograma} salvo com sucesso!`);
+        localStorage.setItem('dia_ciclo', diaPrograma + 1);
+
+        if (diaPrograma >= 30) {
+          FEMFLOW.toast("🌸 Ciclo concluído! Reiniciando...");
+          localStorage.setItem('dia_ciclo', 1);
+          setTimeout(() => (window.location.href = "index.html"), 3500);
+        } else {
+          setTimeout(() => location.reload(), 1500);
         }
       });
-    </script>
+    });
 
-    <style>
-      .tarja-novo-ciclo {
-        background: linear-gradient(90deg, var(--pessego), var(--teal));
-        color: white;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-        border-radius: 12px;
-        margin-top: 0.6rem;
-        display: inline-block;
-        animation: fadeInTarja 2s ease-in-out;
-      }
+    // 🌿 BOTÃO DESCANSO
+    document.getElementById('descansoBtn').addEventListener('click', async () => {
+      await FEMFLOW.salvarDescanso(fase);
+      FEMFLOW.toast("🌿 Dia de descanso registrado!");
+      localStorage.setItem('dia_ciclo', diaPrograma + 1);
+      setTimeout(() => location.reload(), 2000);
+    });
 
-      @keyframes fadeInTarja {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-    </style>
-  </body>
+    // 🩵 Mensagem se houve reinício automático
+    const reiniciado = localStorage.getItem(`femflow_reiniciado_${id}`);
+    if (reiniciado) {
+      const dataReinicio = new Date(reiniciado).toLocaleDateString("pt-BR");
+      const aviso = document.getElementById('avisoCiclo');
+      aviso.innerText = `🩵 Novo ciclo iniciado em ${dataReinicio}`;
+      aviso.style.display = "block";
+    }
+  });
+  </script>
+
+  <!-- 💅 ESTILOS LOCAIS -->
+  <style>
+    .tarja-novo-ciclo {
+      background: linear-gradient(90deg, var(--pessego), var(--teal));
+      color: white;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      margin-top: 0.6rem;
+      display: inline-block;
+      animation: fadeInTarja 2s ease-in-out;
+    }
+
+    @keyframes fadeInTarja {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .botoes-pse {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 1rem;
+    }
+
+    button.secundario {
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button.secundario:hover {
+      background: var(--terracota);
+      transform: scale(1.05);
+    }
+  </style>
+</body>
 </html>
