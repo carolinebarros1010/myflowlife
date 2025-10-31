@@ -1,157 +1,136 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cadastro FemFlow</title>
-    <link rel="stylesheet" href="/femflow/app/css/style.css" />
-    <link rel="manifest" href="/femflow/app/manifest.json" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro FemFlow</title>
 
-  <body>
-    <header>
-      <h1>Cadastro FemFlow</h1>
-      <p class="subtitle">Prepare-se para iniciar seu programa cíclico</p>
-      <p id="faseAtual" class="fase-info animada"></p>
-    </header>
+  <!-- Estilos e fontes -->
+  <link rel="stylesheet" href="/femflow/app/css/style.css" />
+  <link rel="manifest" href="/femflow/app/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+</head>
 
-    <div class="<div class="container">
-  <div class="cadastro-box">
-    <h3>💳 Acesse seu plano FemFlow</h3>
-    <p>
-      Após a confirmação da sua compra, você receberá por e-mail seu
-      <strong>ID FemFlow</strong>.  
-      Esse ID libera seus treinos, o gráfico de evolução e o acompanhamento
-      personalizado conforme sua fase hormonal.
-    </p>
+<body>
+  <header>
+    <h1>Cadastro FemFlow</h1>
+    <p class="subtitle">Prepare-se para iniciar seu programa cíclico</p>
+    <p id="faseAtual" class="fase-info animada"></p>
+  </header>
 
-    <p style="margin-top:1rem;">
-      Clique abaixo para adquirir seu plano e receber automaticamente seu ID:
-    </p>
+  <!-- CONTAINER PRINCIPAL -->
+  <div class="container">
+    <div class="cadastro-box">
+      <h3>💳 Acesse seu plano FemFlow</h3>
+      <p>
+        Após a confirmação da sua compra, você receberá por e-mail seu
+        <strong>ID FemFlow</strong>.<br>
+        Esse ID libera seus treinos, o gráfico de evolução e o acompanhamento
+        personalizado conforme sua fase hormonal.
+      </p>
 
-    <button id="btnPlano" onclick="GOcadastro()">Adquirir plano</button>
+      <p style="margin-top:1rem;">
+        Clique abaixo para adquirir seu plano e receber automaticamente seu ID:
+      </p>
 
-    <h3 style="margin-top:2rem;">📩 Já possui um ID?</h3>
-    <p>Volte à tela anterior e insira-o na página de ciclo.</p>
-    <button id="btnVoltar" onclick="location.href='ciclo.html'">Voltar</button>
-  </div>
-</div>
-iner">
-      <div class="section">
-        <h3>🔸 Como funciona o acesso</h3>
-        <p>
-          Após a confirmação da sua compra, você receberá um e-mail com seu
-          <strong>ID FemFlow</strong>.  
-          Esse ID libera os treinos, o gráfico de evolução e o acompanhamento
-          personalizado conforme sua fase hormonal.
-        </p>
+      <button id="btnPlano" onclick="GOcadastro()">🔗 Adquirir plano</button>
 
-        <h3 style="margin-top:1.5rem;">💳 Acesse seu plano</h3>
-        <p>
-          Clique abaixo para adquirir seu plano e receber automaticamente seu ID
-          por e-mail:
-        </p>
-                <button class="btn" style="background:var(--terracota);" onclick="GOcadastro()">🔗 Adquirir plano</button>
-        <h3 style="margin-top:1.5rem;">📩 Já possui um ID?</h3>
-        <p>Volte à tela anterior e insira-o na página de ciclo.</p>
-        <button class="btn btn-secondary" onclick="location.href='ciclo.html'">
-          🔙 Voltar
-        </button>
-      </div>
+      <h3 style="margin-top:2rem;">📩 Já possui um ID?</h3>
+      <p>Volte à tela anterior e insira-o na página de ciclo.</p>
+      <button id="btnVoltar" onclick="location.href='ciclo.html'">🔙 Voltar</button>
     </div>
+  </div>
 
-    <script>
-      // === Exibir fase atual ===
-      document.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const faseURL = urlParams.get('fase');
-        const faseStorage = localStorage.getItem('fase_sugerida');
-        const fase = faseURL || faseStorage;
-
-        const campoFase = document.getElementById('faseAtual');
-        if (fase) {
-          campoFase.innerText = `🌿 Fase atual estimada: ${fase}`;
-        } else {
-          campoFase.innerText = '🌸 Fase não identificada ainda';
-        }
-      });
-    </script>
-
-    <style>
-      .fase-info {
-        font-weight: 700;
-        font-size: 1rem;
-        color: white;
-        margin-top: 0.5rem;
-        display: inline-block;
-        padding: 0.5rem 1.2rem;
-        border-radius: 12px;
-        background: linear-gradient(90deg, var(--terracota), var(--teal));
-        box-shadow: 0 0 10px rgba(204, 106, 90, 0.2);
-        transition: all 0.8s ease;
-      }
-
-      .animada {
-        animation: fluxoCores 6s ease-in-out infinite alternate;
-      }
-
-      @keyframes fluxoCores {
-        0% {
-          background: linear-gradient(90deg, var(--terracota), var(--pessego));
-          box-shadow: 0 0 10px rgba(204,106,90,0.3);
-        }
-        50% {
-          background: linear-gradient(90deg, var(--pessego), var(--teal));
-          box-shadow: 0 0 15px rgba(51,89,83,0.3);
-        }
-        100% {
-          background: linear-gradient(90deg, var(--teal), var(--terracota));
-          box-shadow: 0 0 12px rgba(239,189,166,0.3);
-        }
-      }
-
-      p {
-        font-size: 0.95rem;
-        line-height: 1.6;
-        color: #444;
-      }
-
-      h3 {
-        font-size: 1.1rem;
-        color: var(--teal);
-      }
-    </style>
+  <!-- SCRIPT: Exibe fase atual -->
   <script>
-function GOcadastro() {
-  try {
-    // Captura parâmetros UTM ou origem
-    const params = new URLSearchParams(window.location.search);
-    const origem = params.get("utm_source") || params.get("origem") || "direto";
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const faseURL = urlParams.get('fase');
+      const faseStorage = localStorage.getItem('fase_sugerida');
+      const fase = faseURL || faseStorage;
 
-    // Salva a origem localmente (para rastrear)
-    localStorage.setItem("femflow_origem", origem);
+      const campoFase = document.getElementById('faseAtual');
+      if (fase) {
+        campoFase.innerText = `🌿 Fase atual estimada: ${fase}`;
+      } else {
+        campoFase.innerText = '🌸 Fase não identificada ainda';
+      }
+    });
+  </script>
 
-    // Envia os dados do lead (simula o formulário)
-    console.log("🩷 Lead captado:", origem);
+  <!-- ESTILO LOCAL -->
+  <style>
+    .fase-info {
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
+      margin-top: 0.5rem;
+      display: inline-block;
+      padding: 0.5rem 1.2rem;
+      border-radius: 12px;
+      background: linear-gradient(90deg, var(--terracota), var(--teal));
+      box-shadow: 0 0 10px rgba(204, 106, 90, 0.2);
+      transition: all 0.8s ease;
+    }
 
-    // Aguarda 2 segundos e redireciona para o Hotmart
-    setTimeout(() => {
-      console.log("💳 Redirecionando para o Hotmart...");
-      window.location.href = "https://pay.hotmart.com/Q102567067C?off=y4z291v3";
-    }, 2000);
-  } catch (err) {
-    console.error("Erro ao processar GOcadastro:", err);
-    // Fallback direto
-    window.location.href = "https://pay.hotmart.com/Q102567067C?off=y4z291v3";
-  }
-}
-  <script src="femflow-core.js"></script>
-<
-  </body>
+    .animada {
+      animation: fluxoCores 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes fluxoCores {
+      0% {
+        background: linear-gradient(90deg, var(--terracota), var(--pessego));
+        box-shadow: 0 0 10px rgba(204,106,90,0.3);
+      }
+      50% {
+        background: linear-gradient(90deg, var(--pessego), var(--teal));
+        box-shadow: 0 0 15px rgba(51,89,83,0.3);
+      }
+      100% {
+        background: linear-gradient(90deg, var(--teal), var(--terracota));
+        box-shadow: 0 0 12px rgba(239,189,166,0.3);
+      }
+    }
+
+    p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #444;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      color: var(--teal);
+    }
+  </style>
+
+  <!-- SCRIPT PRINCIPAL -->
+  <script>
+    function GOcadastro() {
+      try {
+        // Captura parâmetros UTM ou origem
+        const params = new URLSearchParams(window.location.search);
+        const origem = params.get("utm_source") || params.get("origem") || "direto";
+
+        // Salva a origem localmente (para rastrear)
+        localStorage.setItem("femflow_origem", origem);
+
+        // Log e redirecionamento
+        console.log("🩷 Lead captado:", origem);
+        setTimeout(() => {
+          console.log("💳 Redirecionando para o Hotmart...");
+          window.location.href = "https://pay.hotmart.com/Q102567067C?off=y4z291v3";
+        }, 2000);
+      } catch (err) {
+        console.error("Erro ao processar GOcadastro:", err);
+        window.location.href = "https://pay.hotmart.com/Q102567067C?off=y4z291v3";
+      }
+    }
+  </script>
+
+  <!-- Importa o núcleo FemFlow -->
+  <script src="scripts/femflow-core.js"></script>
+</body>
 </html>
