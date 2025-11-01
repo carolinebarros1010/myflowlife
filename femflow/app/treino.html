@@ -20,124 +20,40 @@
       padding: 0;
       text-align: center;
     }
-
     header {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 12px;
-      background: linear-gradient(90deg, var(--terracota), var(--pessego));
-      color: white;
-      padding: 1rem;
-      border-radius: 0 0 30px 30px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      display: flex; align-items: center; gap: 10px;
+      background: linear-gradient(90deg,var(--terracota),var(--pessego));
+      color:#fff; padding:1rem;
+      border-radius:0 0 30px 30px;
+      box-shadow:0 3px 10px rgba(0,0,0,0.1);
     }
-
-    header img {
-      width: 45px;
-      height: 45px;
-      border-radius: 10px;
+    header img{width:45px;height:45px;}
+    header h1{font-family:"Playfair Display",serif;font-size:1.3rem;margin:0;}
+    .container{padding:1.2rem;max-width:500px;margin:0 auto;}
+    .box{
+      background:#fff;border-radius:20px;margin-bottom:1.2rem;padding:1rem 1.2rem;text-align:left;
+      box-shadow:0 3px 10px rgba(0,0,0,0.08);animation:fadeIn 0.6s ease;
     }
-
-    header h1 {
-      font-family: "Playfair Display", serif;
-      font-size: 1.4rem;
-      margin: 0;
+    .box h2{font-family:"Playfair Display",serif;color:var(--teal);font-size:1.1rem;margin-top:0;}
+    .box a{color:var(--terracota);font-weight:700;text-decoration:none;}
+    .motivacional{font-style:italic;color:var(--teal);line-height:1.6;}
+    .exercicio{border-bottom:1px solid rgba(0,0,0,0.05);padding:0.6rem 0;}
+    .hiit{background:var(--terracota);color:#fff;border-radius:15px;padding:1rem;text-align:center;font-weight:600;box-shadow:0 4px 12px rgba(204,106,90,0.25);}
+    .btn{background:var(--teal);color:white;font-weight:600;border:none;border-radius:20px;padding:12px 24px;margin-top:1.5rem;cursor:pointer;width:90%;max-width:350px;box-shadow:0 3px 8px rgba(0,0,0,0.2);}
+    .btn:hover{background:var(--terracota);}
+    .timer-global, .timer-descanso {
+      display:flex;align-items:center;justify-content:center;
+      border-radius:50%;font-weight:700;color:var(--teal);
+      background:rgba(51,89,83,0.1);margin:1rem auto;
+      width:100px;height:100px;font-size:1.4rem;
+      box-shadow:inset 0 0 10px rgba(51,89,83,0.15);
+      cursor:pointer;transition:all .3s ease;
     }
-
-    .container {
-      padding: 1.2rem;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    .box {
-      background: #fff;
-      border-radius: 20px;
-      margin-bottom: 1.2rem;
-      padding: 1rem 1.2rem;
-      text-align: left;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-      animation: fadeIn 0.6s ease;
-    }
-
-    .box h2 {
-      font-family: "Playfair Display", serif;
-      color: var(--teal);
-      font-size: 1.1rem;
-      margin-top: 0;
-    }
-
-    .box a {
-      color: var(--terracota);
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .box a:hover {
-      text-decoration: underline;
-    }
-
-    .motivacional {
-      font-style: italic;
-      line-height: 1.6;
-      color: var(--teal);
-      padding-top: 0.5rem;
-    }
-
-    .exercicio {
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      padding: 0.6rem 0;
-    }
-
-    .hiit {
-      background: var(--terracota);
-      color: white;
-      border-radius: 15px;
-      padding: 1rem;
-      text-align: center;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(204,106,90,0.25);
-    }
-
-    .timer {
-      background: rgba(51,89,83,0.1);
-      border-radius: 12px;
-      text-align: center;
-      font-weight: 700;
-      color: var(--teal);
-      padding: 0.4rem;
-      margin-top: 0.5rem;
-    }
-
-    .btn {
-      background: var(--teal);
-      color: white;
-      font-weight: 600;
-      border: none;
-      border-radius: 20px;
-      padding: 12px 24px;
-      margin-top: 1.5rem;
-      cursor: pointer;
-      width: 90%;
-      max-width: 350px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-      transition: background 0.3s ease;
-    }
-
-    .btn:hover {
-      background: var(--terracota);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 480px) {
-      header h1 { font-size: 1.2rem; }
-      .btn { padding: 10px 20px; font-size: 0.95rem; }
-    }
+    .timer-descanso{width:60px;height:60px;font-size:1rem;}
+    .timer-descanso.ativo{background:var(--terracota);color:white;animation:pulse 1s infinite;}
+    @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){header h1{font-size:1.2rem;}.btn{padding:10px 20px;font-size:.95rem;}}
   </style>
 </head>
 
@@ -153,103 +69,155 @@
 
   <script src="scripts/femflow-core.js"></script>
 
-  <script>
-  (async () => {
-    const id = localStorage.getItem('femflow_id');
-    if (!id) {
-      FEMFLOW.toast("⚠️ ID não encontrado, faça login novamente.");
-      window.location.href = "ciclo.html";
-      return;
-    }
+<script>
+(async () => {
+  const id = localStorage.getItem('femflow_id');
+  if (!id) {
+    FEMFLOW.toast("⚠️ ID não encontrado, faça login novamente.");
+    window.location.href = "ciclo.html";
+    return;
+  }
 
-    try {
-      // 🔹 Busca treino completo do Apps Script
-      const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${id}`;
-      const response = await fetch(url);
-      const treinoData = await response.json();
+  try {
+    const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${id}`;
+    const response = await fetch(url);
+    const treinoData = await response.json();
+    if (!treinoData || !treinoData.boxes) { FEMFLOW.toast("Erro ao carregar treino."); return; }
 
-      if (!treinoData || !treinoData.boxes) {
-        FEMFLOW.toast("Erro ao carregar treino.");
-        return;
+    const container = document.getElementById("containerTreino");
+    container.innerHTML = "";
+
+    treinoData.boxes.forEach((box) => {
+      const div = document.createElement("div");
+      div.className = "box";
+      div.innerHTML = `<h2>${box.titulo}</h2>`;
+
+      // 🌿 Texto motivacional
+      if (box.tipo === "texto") div.innerHTML += `<p class="motivacional">${box.mensagem}</p>`;
+
+      // 🧘 Timer Global (Box 1)
+      if (box.titulo.toLowerCase().includes("aquecimento") || box.titulo.toLowerCase().includes("mobilidade")) {
+        const timerGlobal = document.createElement("div");
+        timerGlobal.className = "timer-global";
+        let tempo = box.tempo_total || 300;
+        timerGlobal.textContent = formatarTempo(tempo);
+        let ativo = false, intervalo;
+        timerGlobal.addEventListener("click", () => {
+          if (!ativo) {
+            ativo = true;
+            FEMFLOW.toast("🕊️ Timer iniciado");
+            intervalo = setInterval(() => {
+              tempo--;
+              timerGlobal.textContent = formatarTempo(tempo);
+              if (tempo <= 0) {
+                clearInterval(intervalo);
+                ativo = false;
+                vibrarFim(); // ✅ vibração ao fim
+                FEMFLOW.toast("✨ Tempo concluído!");
+              }
+            }, 1000);
+          } else {
+            clearInterval(intervalo);
+            ativo = false;
+            tempo = box.tempo_total || 300;
+            timerGlobal.textContent = formatarTempo(tempo);
+            FEMFLOW.toast("🔁 Timer reiniciado");
+          }
+        });
+        div.appendChild(timerGlobal);
       }
 
-      const container = document.getElementById("containerTreino");
-      container.innerHTML = ""; // limpa o conteúdo atual
-
-      treinoData.boxes.forEach((box) => {
-        const div = document.createElement("div");
-        div.className = "box";
-
-        // 🌸 Título do box
-        div.innerHTML = `<h2>${box.titulo}</h2>`;
-
-        // 🌿 Texto motivacional
-        if (box.tipo === "texto") {
-          div.innerHTML += `<p class="motivacional">${box.mensagem}</p>`;
-        }
-
-        // 💪 Box de exercícios
-        if (box.tipo === "exercicios" && box.itens) {
-          const list = document.createElement("div");
-          box.itens.forEach((ex, i) => {
-            const e = document.createElement("div");
-            e.className = "exercicio";
-            e.innerHTML = `
-              <h4>${i + 1}. <a href="${ex.link}" target="_blank">${ex.exercicio}</a></h4>
-              <p>🔁 ${ex.series} séries × ${ex.reps} repetições</p>
-            `;
-            list.appendChild(e);
+      // 💪 Exercícios com timer de descanso
+      if (box.tipo === "exercicios" && box.itens) {
+        box.itens.forEach((ex, i) => {
+          const e = document.createElement("div");
+          e.className = "exercicio";
+          e.innerHTML = `<h4>${i+1}. <a href="${ex.link}" target="_blank">${ex.exercicio}</a></h4>
+                         <p>🔁 ${ex.series} séries × ${ex.reps} reps</p>`;
+          // ⏱️ Timer de descanso
+          const restTimer = document.createElement("div");
+          restTimer.className = "timer-descanso";
+          let t = treinoData.regras?.intervalo || 60;
+          let ativo = false, intervalo;
+          restTimer.textContent = t;
+          restTimer.addEventListener("click", () => {
+            if (!ativo) {
+              ativo = true; restTimer.classList.add("ativo");
+              intervalo = setInterval(() => {
+                t--; restTimer.textContent = t;
+                if (t <= 0) {
+                  clearInterval(intervalo);
+                  restTimer.classList.remove("ativo");
+                  ativo = false;
+                  t = treinoData.regras?.intervalo || 60;
+                  restTimer.textContent = t;
+                  vibrarFim(); // ✅ vibração ao fim do descanso
+                  FEMFLOW.toast("💨 Intervalo concluído");
+                }
+              }, 1000);
+            } else {
+              clearInterval(intervalo);
+              ativo = false;
+              restTimer.classList.remove("ativo");
+              t = treinoData.regras?.intervalo || 60;
+              restTimer.textContent = t;
+              FEMFLOW.toast("🔁 Timer reiniciado");
+            }
           });
-          div.appendChild(list);
-
-          // 🕒 Timer do box
-          const timer = document.createElement("div");
-          timer.className = "timer";
-          timer.textContent = `${Math.floor((box.tempo_total || 300)/60)} min`;
-          div.appendChild(timer);
-        }
-
-        // 🔥 HIIT
-        if (box.tipo === "hiit") {
-          div.innerHTML += `
-            <div class="hiit">
-              <b>${box.titulo}</b><br>${box.descricao || ""}
-              <small><br>⏱️ ${Math.floor((box.tempo_total || 360)/60)} min</small>
-            </div>
-          `;
-        }
-
-        // 💗 Cardio leve ou resfriamento
-        if (box.tipo === "cardio" || box.tipo === "resfriamento") {
-          div.innerHTML += `<p class="motivacional">${box.mensagem || box.descricao}</p>`;
-        }
-
-        container.appendChild(div);
-      });
-
-      // ✅ Botão de finalização
-      const btn = document.createElement("button");
-      btn.className = "btn";
-      btn.textContent = "✅ Concluir Treino";
-      btn.onclick = async () => {
-        await FEMFLOW.salvarTreino({
-          tipo_dia: "treino",
-          fase: treinoData.fase,
-          treino: `Dia ${treinoData.diaCiclo} - ${treinoData.fase}`,
-          pse: 5,
-          observacao: "Treino completo"
+          e.appendChild(restTimer);
+          div.appendChild(e);
         });
-        FEMFLOW.toast("✅ Treino salvo com sucesso!");
-        setTimeout(() => (window.location.href = "flowcenter.html"), 2500);
-      };
-      container.appendChild(btn);
-    } catch (err) {
-      console.error(err);
-      FEMFLOW.toast("❌ Erro ao conectar com o servidor.");
+      }
+
+      // 🔥 HIIT
+      if (box.tipo === "hiit")
+        div.innerHTML += `<div class="hiit"><b>${box.titulo}</b><br>${box.descricao}<br><small>⏱️ ${Math.floor((box.tempo_total||360)/60)} min</small></div>`;
+
+      // 💗 Cardio / Resfriamento
+      if (box.tipo === "cardio" || box.tipo === "resfriamento")
+        div.innerHTML += `<p class="motivacional">${box.mensagem || box.descricao}</p>`;
+
+      container.appendChild(div);
+    });
+
+    // ✅ Botão final
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.textContent = "✅ Concluir Treino";
+    btn.onclick = async () => {
+      await FEMFLOW.salvarTreino({
+        tipo_dia: "treino",
+        fase: treinoData.fase,
+        treino: `Dia ${treinoData.diaCiclo} - ${treinoData.fase}`,
+        pse: 5,
+        observacao: "Treino completo"
+      });
+      FEMFLOW.toast("✅ Treino salvo com sucesso!");
+      vibrarFim();
+      setTimeout(() => (window.location.href = "flowcenter.html"), 2500);
+    };
+    container.appendChild(btn);
+
+  } catch (err) {
+    console.error(err);
+    FEMFLOW.toast("❌ Erro ao conectar com o servidor.");
+  }
+
+  // ⏱️ Função auxiliar — formata segundos
+  function formatarTempo(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  }
+
+  // 📳 Vibração leve (segura)
+  function vibrarFim() {
+    if (navigator.vibrate) {
+      navigator.vibrate([150, 100, 150]); // vibra 150ms, pausa 100ms, vibra 150ms
     }
-  })();
-  </script>
+  }
+})();
+</script>
 </body>
 </html>
-
 
