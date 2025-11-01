@@ -1,146 +1,103 @@
-// =====================================================
-// 🌸 FEMFLOW TREINO JS v2.0
-// =====================================================
+document.addEventListener("DOMContentLoaded", async () => {
+  const id = localStorage.getItem("femflow_id");
+  if (!id) return (window.location.href = "ciclo.html");
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const id = localStorage.getItem('femflow_id');
-  if (!id) return (window.location.href = 'ciclo.html');
+  const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${encodeURIComponent(id)}`;
+  const resp = await fetch(url);
+  const data = await resp.json();
 
-  const treino = await carregarTreinoDoServidor(id);
-  if (!treino) return (window.location.href = 'ciclo.html');
+  if (!data || !data.boxes) {
+    FEMFLOW.toast("Erro ao carregar treino.");
+    return;
+  }
 
-  // Atualiza cabeçalho
-  document.getElementById('tituloTreino').innerText = `Dia ${treino.diaCiclo}`;
-  document.getElementById('subTreino').innerText = `Fase ${treino.fase}`;
+  const container = document.querySelector(".container");
+  container.innerHTML = "";
 
-  // Renderiza boxes dinamicamente
-  const container = document.getElementById('containerTreino');
-  treino.boxes.forEach(box => {
-    if (box.tipo === 'aquecimento') renderizarBoxAquecimento(container, box);
-    if (box.tipo === 'exercicios') renderizarBoxExercicio(container, box);
-    if (box.tipo === 'resfriamento') renderizarBoxResfriamento(container, box);
+  // Cabeçalho
+  const header = document.createElement("h2");
+  header.innerHTML = `🌸 ${data.fase.toUpperCase()} • ${data.nivel}`;
+  container.appendChild(header);
+
+  // Renderiza boxes
+  data.boxes.forEach((box) => {
+    const div = document.createElement("div");
+    div.className = "box";
+
+    if (box.tipo === "texto") {
+      div.innerHTML = `<h3>${box.titulo}</h3><p>${box.mensagem}</p>`;
+    }
+
+    if (box.tipo === "exercicios") {
+      div.innerHTML = `<h3>${box.titulo}</h3>`;
+      box.itens.forEach((ex) => {
+        const item = document.createElement("div");
+        item.className = "exercicio";
+        item.innerHTML = `
+          <a href="${ex.link}" target="_blank">${ex.exercicio}</a><br>
+          <small>${ex.series}x${ex.reps} • ${ex.tempo}s</small>
+          <button class="timer-btn" data-time="${ex.tempo}">▶️ Timer</button>
+        `;
+        div.appendChild(item);
+      });
+    }
+
+    if (box.tipo === "hiit" || box.tipo === "cardio") {
+      div.innerHTML = `<h3>${box.titulo}</h3><p>${box.descricao}</p><button class="timer-btn" data-time="${box.tempo_total}">🔥 Iniciar</button>`;
+    }
+
+    if (box.tipo === "resfriamento") {
+      div.innerHTML = `<h3>${box.titulo}</h3><p>${box.mensagem}</p><button class="timer-btn" data-time="300">🕊️ Iniciar 5 min</button>`;
+    }
+
+    container.appendChild(div);
   });
 
-  // PSE (já integrado com FEMFLOW)
-  configurarPSE(id, treino.fase);
+  // Botão PSE
+  const pseDiv = document.createElement("div");
+  pseDiv.innerHTML = `
+    <h3>Como foi seu esforço hoje?</h3>
+    <input type="range" min="0" max="10" value="5" id="pseRange" />
+    <p>PSE: <span id="pseValor">5</span></p>
+    <button id="btnSalvar">💾 Salvar Treino</button>
+  `;
+  container.appendChild(pseDiv);
+
+  document.getElementById("pseRange").addEventListener("input", (e) => {
+    document.getElementById("pseValor").innerText = e.target.value;
+  });
+
+  document.getElementById("btnSalvar").addEventListener("click", async () => {
+    const pse = document.getElementById("pseRange").value;
+    await FEMFLOW.salvarTreino({
+      id,
+      fase: data.fase,
+      tipo_dia: "treino",
+      pse
+    });
+    FEMFLOW.toast("Treino salvo! 🌸");
+    localStorage.setItem("dia_ciclo", data.diaCiclo + 1);
+    setTimeout(() => (window.location.href = "flowcenter.html"), 2000);
+  });
+
+  // 🎵 Timer com vibração curta ao final
+  container.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("timer-btn")) return;
+    const tempo = Number(e.target.dataset.time);
+    let restante = tempo;
+    const btn = e.target;
+    btn.disabled = true;
+
+    const int = setInterval(() => {
+      btn.textContent = `⏳ ${restante}s`;
+      restante--;
+      if (restante < 0) {
+        clearInterval(int);
+        btn.textContent = "✅ Finalizado";
+        btn.disabled = false;
+        navigator.vibrate([200, 100, 200]);
+      }
+    }, 1000);
+  });
 });
 
-/* =====================================================
-   🔹 BUSCA TREINO NO SERVIDOR
-===================================================== */
-async function carregarTreinoDoServidor(id) {
-  try {
-    const resp = await fetch(`${FEMFLOW.SCRIPT_URL}?action=getTreino&id=${id}`);
-    const data = await resp.json();
-    console.log("🎯 Dados recebidos:", data);
-    return data;
-  } catch (err) {
-    console.error("Erro ao buscar treino:", err);
-    FEMFLOW.toast("❌ Falha ao carregar treino.");
-    return null;
-  }
-}
-
-/* =====================================================
-   🔹 RENDERIZAR BOX AQUECIMENTO
-===================================================== */
-function renderizarBoxAquecimento(container, box) {
-  const div = document.createElement('div');
-  div.className = 'box aquecimento';
-  div.innerHTML = `
-    <h3>🔥 ${box.titulo}</h3>
-    <div class="tip">
-      🌿 ${box.texto || "Use este momento para respirar e preparar o corpo. Concentre-se no movimento."}
-    </div>
-    <div class="ex-lista">
-      ${box.itens.map(ex => `
-        <div class="ex">
-          <div class="ex-head">
-            <span>${ex.exercicio}</span>
-            <a href="${ex.link}" target="_blank">🎥</a>
-          </div>
-          <div class="ex-grid">
-            <label>Séries</label><input type="number" value="${ex.series}">
-            <label>Reps</label><input type="number" value="${ex.reps}">
-          </div>
-        </div>
-      `).join('')}
-    </div>
-    <div class="timer-box">
-      <p>⏳ Tempo total: <span id="tempoRestante">05:00</span></p>
-    </div>
-  `;
-  container.appendChild(div);
-  iniciarTimer(300);
-}
-
-/* =====================================================
-   🔹 TIMER REGRESSIVO 5 MIN
-===================================================== */
-function iniciarTimer(segundos) {
-  const display = document.getElementById("tempoRestante");
-  let tempo = segundos;
-  const intervalo = setInterval(() => {
-    const min = String(Math.floor(tempo / 60)).padStart(2, "0");
-    const sec = String(tempo % 60).padStart(2, "0");
-    display.textContent = `${min}:${sec}`;
-    if (tempo <= 0) {
-      clearInterval(intervalo);
-      display.textContent = "✅ Concluído!";
-      FEMFLOW.toast("🌿 Aquecimento finalizado, siga para o próximo box.");
-    }
-    tempo--;
-  }, 1000);
-}
-
-/* =====================================================
-   🔹 RENDERIZAR BOX PRINCIPAL
-===================================================== */
-function renderizarBoxExercicio(container, box) {
-  const div = document.createElement('div');
-  div.className = 'box treino';
-  div.innerHTML = `
-    <h3>${box.titulo}</h3>
-    ${box.itens.map(ex => `
-      <div class="ex">
-        <div class="ex-head">
-          <span>${ex.exercicio}</span>
-          <a href="${ex.link}" target="_blank">🎥</a>
-        </div>
-        <div class="ex-grid">
-          <label>Séries</label><input type="number" value="${ex.series}">
-          <label>Reps</label><input type="number" value="${ex.reps}">
-        </div>
-      </div>
-    `).join('')}
-  `;
-  container.appendChild(div);
-}
-
-/* =====================================================
-   🔹 RENDERIZAR BOX FINAL
-===================================================== */
-function renderizarBoxResfriamento(container, box) {
-  const div = document.createElement('div');
-  div.className = 'box resfriamento';
-  div.innerHTML = `
-    <h3>${box.titulo}</h3>
-    <p>${box.texto || "Respire e alongue-se. Seu corpo agradece. 🧘"}</p>
-    <button id="btnSalvarPse">💾 Salvar Treino</button>
-  `;
-  container.appendChild(div);
-}
-
-/* =====================================================
-   🔹 CONFIGURAÇÃO DE PSE
-===================================================== */
-function configurarPSE(id, fase) {
-  const btn = document.getElementById('btnSalvarPse');
-  if (!btn) return;
-  btn.addEventListener('click', async () => {
-    const pse = parseInt(prompt("Qual foi seu esforço hoje (0–10)?"));
-    if (isNaN(pse)) return;
-    await FEMFLOW.salvarTreino({ id, fase, tipo_dia: "treino", pse });
-    FEMFLOW.toast("✅ Treino salvo!");
-  });
-}
