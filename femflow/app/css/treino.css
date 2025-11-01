@@ -158,3 +158,178 @@ button.secundario:hover {
   .section { padding: 1rem; }
   button { padding: 8px 16px; font-size: 0.95rem; }
 }
+/* 🌸 FemFlow – Layout de Boxes Dinâmicos */
+
+/* ===== BOX BASE ===== */
+.box {
+  background: #fff;
+  border-radius: 18px;
+  margin: 1rem 0;
+  padding: 1.2rem 1rem 1.5rem;
+  text-align: left;
+  position: relative;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+.box h3 {
+  font-family: "Playfair Display", serif;
+  color: var(--teal);
+  font-size: 1.1rem;
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.box h3::before {
+  content: "💠";
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+/* ===== BOX TEXTO / PREPARAÇÃO ===== */
+.box.texto {
+  background: linear-gradient(90deg, var(--pessego), #fff);
+  border-left: 5px solid var(--terracota);
+  color: var(--teal);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  box-shadow: 0 3px 10px rgba(239,189,166,0.25);
+}
+.box.texto p {
+  margin: 0.5rem 0 0;
+}
+
+/* ===== BOX TREINO ===== */
+.box.treino {
+  border-left: 5px solid var(--teal);
+}
+.box.treino .ex {
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding: 0.6rem 0;
+}
+.box.treino .ex:last-child {
+  border-bottom: none;
+}
+.ex-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: var(--terracota);
+}
+.ex-head a {
+  text-decoration: none;
+  color: var(--teal);
+  font-size: 1.2rem;
+  transition: 0.2s;
+}
+.ex-head a:hover {
+  transform: scale(1.2);
+  color: var(--terracota);
+}
+.ex-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.3rem;
+  align-items: center;
+  margin-top: 0.3rem;
+}
+.ex-grid label {
+  font-size: 0.8rem;
+  color: #777;
+}
+.ex-grid input {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  text-align: center;
+  width: 100%;
+}
+.subtimer {
+  font-weight: 700;
+  color: var(--teal);
+  background: #f6f6f6;
+  border-radius: 10px;
+  padding: 5px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.subtimer:hover {
+  background: #e8e8e8;
+}
+.subtimer.ativo {
+  background: var(--terracota);
+  color: #fff;
+  animation: pulseTimer 1s infinite;
+}
+@keyframes pulseTimer {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* ===== HIIT / CARDIO ===== */
+.hiit {
+  border-radius: 18px;
+  padding: 1.3rem;
+  margin: 1rem 0;
+  color: white;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+  box-shadow: 0 5px 15px rgba(204,106,90,0.25);
+  animation: hiitGlow 4s infinite alternate ease-in-out;
+}
+@keyframes hiitGlow {
+  0% { box-shadow: 0 0 8px rgba(204,106,90,0.2); }
+  50% { box-shadow: 0 0 18px rgba(204,106,90,0.45); }
+  100% { box-shadow: 0 0 8px rgba(204,106,90,0.2); }
+}
+.hiit small {
+  display: block;
+  margin-top: 0.3rem;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+/* ===== RESFRIAMENTO ===== */
+.box.resfriamento {
+  background: linear-gradient(90deg, var(--bege), #fff);
+  border-left: 5px solid var(--pessego);
+  color: var(--teal);
+  font-style: italic;
+}
+.box.resfriamento h3::before { content: "🧘"; }
+
+/* ===== TOQUES DE VIDA ===== */
+.subtle {
+  font-size: 0.85rem;
+  color: #777;
+  text-align: right;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+.tip {
+  background: #fefaf9;
+  border-radius: 14px;
+  padding: 0.8rem;
+  color: var(--teal);
+  font-size: 0.9rem;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+  line-height: 1.5;
+}
+
+/* ===== ANIMAÇÃO DE ENTRADA ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.box, .hiit {
+  animation: fadeUp 0.6s ease both;
+}
