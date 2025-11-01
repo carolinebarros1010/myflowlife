@@ -3,271 +3,126 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Treino Diário - FemFlow</title>
-
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-
+  <title>FemFlow • Treino Diário</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       background: var(--bege);
-      font-family: var(--fonte-corpo);
+      font-family: "Lato", sans-serif;
       color: var(--texto);
       margin: 0;
       padding: 0;
       text-align: center;
     }
     header {
-      display: flex; align-items: center; gap: 10px;
-      background: linear-gradient(90deg,var(--terracota),var(--pessego));
-      color:#fff; padding:1rem;
-      border-radius:0 0 30px 30px;
-      box-shadow:0 3px 10px rgba(0,0,0,0.1);
+      background: linear-gradient(90deg, var(--terracota), var(--pessego));
+      color: white;
+      padding: 1rem 0.5rem;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
-    header img{width:45px;height:45px;}
-    header h1{font-family:"Playfair Display",serif;font-size:1.3rem;margin:0;}
-    .container{padding:1.2rem;max-width:500px;margin:0 auto;}
-    .box{
-      background:#fff;border-radius:20px;margin-bottom:1.2rem;padding:1rem 1.2rem;text-align:left;
-      box-shadow:0 3px 10px rgba(0,0,0,0.08);animation:fadeIn 0.6s ease;
+    header img.logo {
+      width: 40px;
+      height: auto;
     }
-    .box h2{font-family:"Playfair Display",serif;color:var(--teal);font-size:1.1rem;margin-top:0;}
-    .box a{color:var(--terracota);font-weight:700;text-decoration:none;}
-    .motivacional{font-style:italic;color:var(--teal);line-height:1.6;}
-    .exercicio{border-bottom:1px solid rgba(0,0,0,0.05);padding:0.6rem 0;}
-    .hiit{background:var(--terracota);color:#fff;border-radius:15px;padding:1rem;text-align:center;font-weight:600;box-shadow:0 4px 12px rgba(204,106,90,0.25);}
-    .btn{background:var(--teal);color:white;font-weight:600;border:none;border-radius:20px;padding:12px 24px;margin-top:1.5rem;cursor:pointer;width:90%;max-width:350px;box-shadow:0 3px 8px rgba(0,0,0,0.2);}
-    .btn:hover{background:var(--terracota);}
-    .timer-global, .timer-descanso {
-      display:flex;align-items:center;justify-content:center;
-      border-radius:50%;font-weight:700;color:var(--teal);
-      background:rgba(51,89,83,0.1);margin:1rem auto;
-      width:100px;height:100px;font-size:1.4rem;
-      box-shadow:inset 0 0 10px rgba(51,89,83,0.15);
-      cursor:pointer;transition:all .3s ease;
+    h1 {
+      font-size: 1.4rem;
+      font-family: "Playfair Display", serif;
+      margin: 0;
     }
-    .timer-descanso{width:60px;height:60px;font-size:1rem;}
-    .timer-descanso.ativo{background:var(--terracota);color:white;animation:pulse 1s infinite;}
-    @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-    @media(max-width:480px){header h1{font-size:1.2rem;}.btn{padding:10px 20px;font-size:.95rem;}}
+    .container {
+      max-width: 500px;
+      margin: 1rem auto;
+      padding: 0 1rem 2rem;
+    }
+    .box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 1rem;
+      margin: 1rem 0;
+      text-align: left;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+      animation: fadeUp 0.6s ease both;
+    }
+    .box h3 {
+      color: var(--teal);
+      font-family: "Playfair Display", serif;
+      margin-top: 0;
+    }
+    .exercicio {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .exercicio a {
+      color: var(--terracota);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .exercicio small {
+      color: #555;
+      display: block;
+      margin-top: 4px;
+    }
+    .timer-btn {
+      margin-top: 6px;
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 600;
+    }
+    .timer-btn:hover {
+      background: var(--terracota);
+    }
+    .pse-box {
+      background: #fff;
+      border-radius: 18px;
+      padding: 1rem;
+      margin-top: 2rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--terracota);
+    }
+    #btnSalvar {
+      background: var(--terracota);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 18px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+    #btnSalvar:hover {
+      background: var(--teal);
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
-
 <body>
   <header>
-    <img src="assets/logofemflowverde.png" alt="FemFlow Logo" />
+    <img src="assets/logofemflowverde.png" class="logo" alt="FemFlow" />
     <h1>Treino Diário</h1>
   </header>
 
-  <div class="container" id="containerTreino">
-    <p>Carregando treino do dia...</p>
+  <div class="container">
+    <p>Carregando treino...</p>
   </div>
 
-  <script src="scripts/femflow-core.js"></script>
-
-<script>
-(async () => {
-  const id = localStorage.getItem('femflow_id');
-  if (!id) {
-    FEMFLOW.toast("⚠️ ID não encontrado, faça login novamente.");
-    window.location.href = "ciclo.html";
-    return;
-  }
-
-  try {
-    const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${id}`;
-    const response = await fetch(url);
-    const treinoData = await response.json();
-    if (!treinoData || !treinoData.boxes) { FEMFLOW.toast("Erro ao carregar treino."); return; }
-
-    const container = document.getElementById("containerTreino");
-    container.innerHTML = "";
-
-    treinoData.boxes.forEach((box) => {
-      const div = document.createElement("div");
-      div.className = "box";
-      div.innerHTML = `<h2>${box.titulo}</h2>`;
-
-      // 🌿 Texto motivacional
-      if (box.tipo === "texto") div.innerHTML += `<p class="motivacional">${box.mensagem}</p>`;
-
-      // 🧘 Timer Global (Aquecimento/Mobilidade)
-      if (box.titulo.toLowerCase().includes("aquecimento") || box.titulo.toLowerCase().includes("mobilidade")) {
-        const timerGlobal = criarTimerGlobal(box.tempo_total || 300, "🕊️ Timer iniciado", "✨ Tempo concluído!");
-        div.appendChild(timerGlobal);
-      }
-
-      // 💪 Exercícios com timer de descanso
-      if (box.tipo === "exercicios" && box.itens) {
-        box.itens.forEach((ex, i) => {
-          const e = document.createElement("div");
-          e.className = "exercicio";
-          e.innerHTML = `<h4>${i+1}. <a href="${ex.link}" target="_blank">${ex.exercicio}</a></h4>
-                         <p>🔁 ${ex.series} séries × ${ex.reps} reps</p>`;
-          const restTimer = criarTimerDescanso(treinoData.regras?.intervalo || 60);
-          e.appendChild(restTimer);
-          div.appendChild(e);
-        });
-      }
-
-      // 🔥 HIIT
-      if (box.tipo === "hiit")
-        div.innerHTML += `<div class="hiit"><b>${box.titulo}</b><br>${box.descricao}<br><small>⏱️ ${Math.floor((box.tempo_total||360)/60)} min</small></div>`;
-
-      // 💗 Cardio
-      if (box.tipo === "cardio")
-        div.innerHTML += `<p class="motivacional">${box.mensagem || box.descricao}</p>`;
-
-      // 🌿 RESFRIAMENTO + PSE
-      if (box.tipo === "resfriamento") {
-        div.innerHTML += `
-          <p class="motivacional">
-            Finalize com leveza:
-            <br>🚶 Caminhada leve – 5 min<br>
-            🌬️ Respiração 4x4<br>
-            🤸 Alongamento leve de corpo inteiro
-          </p>
-        `;
-        const timerFinal = criarTimerGlobal(300, "🌿 Resfriamento iniciado", "✨ Resfriamento concluído");
-        div.appendChild(timerFinal);
-
-        // 🔸 PSE slider (0–10)
-        const pseDiv = document.createElement("div");
-        pseDiv.innerHTML = `
-          <h3 style="margin-top:1.5rem;color:var(--teal)">🩶 Esforço Percebido (0–10)</h3>
-          <input type="range" id="pseInput" min="0" max="10" value="5" style="width:100%;accent-color:var(--terracota)">
-          <p id="pseLabel" style="font-weight:700;color:var(--terracota)">PSE: 5 - Moderado</p>
-        `;
-        div.appendChild(pseDiv);
-
-        const range = pseDiv.querySelector("#pseInput");
-        const label = pseDiv.querySelector("#pseLabel");
-        range.addEventListener("input", () => {
-          const val = parseInt(range.value);
-          let cor = val <= 3 ? "var(--teal)" : val <= 7 ? "var(--pessego)" : "var(--terracota)";
-          let texto = val <= 3 ? "Leve e confortável" : val <= 7 ? "Moderado e consistente" : "Alto esforço, recupere bem";
-          label.style.color = cor;
-          label.textContent = `PSE: ${val} - ${texto}`;
-        });
-
-        // 🔸 Botão "Encerrar Treino"
-        const btnEncerrar = document.createElement("button");
-        btnEncerrar.className = "btn";
-        btnEncerrar.textContent = "💾 Encerrar Treino";
-        btnEncerrar.addEventListener("click", async () => {
-          const pseVal = parseInt(range.value);
-          await FEMFLOW.salvarTreino({
-            id,
-            fase: treinoData.fase,
-            treino: `Dia ${treinoData.diaCiclo} - ${treinoData.fase}`,
-            tipo_dia: "treino",
-            pse: pseVal,
-            observacao: `Treino finalizado com PSE ${pseVal} (${label.textContent.split('-')[1].trim()})`
-          });
-          FEMFLOW.toast("✅ Treino salvo com sucesso!");
-          vibrarFim();
-          setTimeout(() => (window.location.href = "flowcenter.html"), 3000);
-        });
-        div.appendChild(btnEncerrar);
-      }
-
-      container.appendChild(div);
-    });
-
-  } catch (err) {
-    console.error(err);
-    FEMFLOW.toast("❌ Erro ao conectar com o servidor.");
-  }
-
-  // ==========================
-  // 🔧 Funções auxiliares
-  // ==========================
-
-  // Timer global – usado no aquecimento e resfriamento
-  function criarTimerGlobal(tempoInicial, msgStart, msgEnd) {
-    const timer = document.createElement("div");
-    timer.className = "timer-global";
-    let tempo = tempoInicial;
-    timer.textContent = formatarTempo(tempo);
-    let ativo = false, intervalo;
-    timer.addEventListener("click", () => {
-      if (!ativo) {
-        ativo = true;
-        FEMFLOW.toast(msgStart);
-        intervalo = setInterval(() => {
-          tempo--;
-          timer.textContent = formatarTempo(tempo);
-          if (tempo <= 0) {
-            clearInterval(intervalo);
-            ativo = false;
-            vibrarFim();
-            FEMFLOW.toast(msgEnd);
-          }
-        }, 1000);
-      } else {
-        clearInterval(intervalo);
-        ativo = false;
-        tempo = tempoInicial;
-        timer.textContent = formatarTempo(tempo);
-        FEMFLOW.toast("🔁 Timer reiniciado");
-      }
-    });
-    return timer;
-  }
-
-  // Timer de descanso entre exercícios
-  function criarTimerDescanso(segundos) {
-    const restTimer = document.createElement("div");
-    restTimer.className = "timer-descanso";
-    let t = segundos;
-    let ativo = false, intervalo;
-    restTimer.textContent = t;
-    restTimer.addEventListener("click", () => {
-      if (!ativo) {
-        ativo = true; restTimer.classList.add("ativo");
-        intervalo = setInterval(() => {
-          t--; restTimer.textContent = t;
-          if (t <= 0) {
-            clearInterval(intervalo);
-            restTimer.classList.remove("ativo");
-            ativo = false;
-            t = segundos;
-            restTimer.textContent = t;
-            vibrarFim();
-            FEMFLOW.toast("💨 Intervalo concluído");
-          }
-        }, 1000);
-      } else {
-        clearInterval(intervalo);
-        ativo = false;
-        restTimer.classList.remove("ativo");
-        t = segundos;
-        restTimer.textContent = t;
-        FEMFLOW.toast("🔁 Timer reiniciado");
-      }
-    });
-    return restTimer;
-  }
-
-  // 🧭 Formatar mm:ss
-  function formatarTempo(s) {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, "0")}`;
-  }
-
-  // 📳 Vibração
-  function vibrarFim() {
-    if (navigator.vibrate) {
-      navigator.vibrate([200, 150, 200]);
-    }
-  }
-})();
-</script>
+  <script src="femflow.core.js"></script>
+  <script src="treino.js"></script>
 </body>
 </html>
 
