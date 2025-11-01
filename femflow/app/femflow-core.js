@@ -1,5 +1,5 @@
 /* ===========================================================
-   🌸 FEMFLOW CORE SCRIPT v2.1
+   🌸 FEMFLOW CORE SCRIPT v2.2
    Autor: Ricardo Fernandes • 2025
    Integração direta com FemFlow Core (Hotmart + App)
    =========================================================== */
@@ -7,22 +7,31 @@
 const FEMFLOW = {
   /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
   SCRIPT_URL:
+    localStorage.getItem("femflow_script") ||
     "https://script.google.com/macros/s/AKfycbzmHvGjUwLjOIgDAARCxPgvGbTxGsH5zo9U8wx6a8LScWfiCtyiuz6w_cKdc4e9_WOL/exec",
 
   /* ----------- 🎨 LOGO PADRÃO ------------ */
   LOGO: "../../assets/logofemlowverde.png",
 
-  /* ----------- ⚙️ INICIALIZAÇÃO ------------ */
+  /* ----------- ⚙️ INICIALIZAÇÃO GERAL ------------ */
   initTreino() {
-    console.log("💫 FemFlow Core JS conectado com sucesso");
+    console.log("💫 FemFlow Core v2.2 conectado com sucesso");
     this.inserirLogo();
     this.criarModalPSE();
     this.inserirBotaoVoltar();
     this.carregarLogoContextual();
+    this.autoCiclo();
   },
 
-  /* ----------- 🌸 LOGIN OU CADASTRO (APP) ------------ */
+  /* =======================================================
+     🔹 1. LOGIN / CADASTRO
+  ======================================================= */
   async loginOuCadastro(nome, email) {
+    if (!nome || !email) {
+      this.toast("⚠️ Informe nome e e-mail para continuar.", true);
+      return;
+    }
+
     try {
       const resp = await fetch(this.SCRIPT_URL, {
         method: "POST",
@@ -34,12 +43,14 @@ const FEMFLOW = {
         }),
       });
       const data = await resp.json();
+
       if (data.status === "ok" || data.status === "created") {
         this.toast(`🌸 Bem-vinda, ${data.nome}!`);
-        console.log("Perfil:", data);
+        console.log("Perfil carregado:", data);
         localStorage.setItem("femflow_id", data.id);
         localStorage.setItem("femflow_nome", data.nome);
         localStorage.setItem("femflow_email", data.email);
+        this.router("home");
         return data;
       } else {
         this.toast("⚠️ Erro no cadastro/login.", true);
@@ -50,17 +61,19 @@ const FEMFLOW = {
     }
   },
 
-  /* ----------- 🖼️ INSERIR LOGO ------------ */
+  /* =======================================================
+     🔹 2. INTERFACE VISUAL
+  ======================================================= */
   inserirLogo() {
+    if (!document.body) return;
     const header = document.createElement("div");
     header.innerHTML = `
       <div style="display:flex;justify-content:center;margin:15px 0;">
-        <img src="${this.LOGO}" alt="FemFlow" style="width:130px;height:auto;">
+        <img src="${this.LOGO}" alt="FemFlow" class="logo-img" style="width:130px;height:auto;">
       </div>`;
     document.body.prepend(header);
   },
 
-  /* ----------- 🎨 LOGO DINÂMICO ------------ */
   async carregarLogoContextual() {
     try {
       const resp = await fetch("../../assets/logos.json");
@@ -88,29 +101,32 @@ const FEMFLOW = {
     }
   },
 
-  /* ----------- 🔙 BOTÃO VOLTAR ------------ */
   inserirBotaoVoltar() {
     const voltar = document.createElement("button");
-    voltar.textContent = "← Voltar ao ciclo";
+    voltar.textContent = "← Voltar";
     voltar.style.cssText = `
-      position:fixed;
-      top:15px;
-      left:15px;
-      background:#335953;
-      color:#fff;
-      border:none;
-      padding:8px 14px;
-      border-radius:20px;
-      font-family:'Lato',sans-serif;
-      font-size:14px;
-      box-shadow:0 3px 6px rgba(0,0,0,0.2);
-      z-index:999;
+      position:fixed; top:15px; left:15px;
+      background:#335953; color:#fff; border:none;
+      padding:8px 14px; border-radius:20px;
+      font-family:'Lato',sans-serif; font-size:14px;
+      box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:999; cursor:pointer;
     `;
-    voltar.onclick = () => (window.location.href = "../../index.html");
+
+    const map = {
+      "flowcenter.html": "index.html",
+      "treino.html": "flowcenter.html",
+      "evolucao.html": "flowcenter.html",
+      "ciclo.html": "index.html",
+    };
+
+    const page = location.pathname.split("/").pop();
+    voltar.onclick = () => this.router(map[page] || "index");
     document.body.appendChild(voltar);
   },
 
-  /* ----------- 💾 SALVAR TREINO / PSE ------------ */
+  /* =======================================================
+     🔹 3. SALVAR TREINO / DESCANSO / PSE
+  ======================================================= */
   async salvarTreino({
     id = localStorage.getItem("femflow_id") || "FF-TESTE",
     fase = "folicular",
@@ -139,16 +155,16 @@ const FEMFLOW = {
       const result = await resp.json();
       console.log("📤 Retorno FemFlow Core:", result);
 
-      if (result.status?.includes("ok") || result.status?.includes("registrado"))
+      if (result.status?.includes("ok") || result.status?.includes("registrado")) {
         this.toast("✔️ Registro salvo com sucesso!");
-      else this.toast("⚠️ Erro ao salvar. Tente novamente.", true);
+        navigator.vibrate?.([100]);
+      } else this.toast("⚠️ Erro ao salvar. Tente novamente.", true);
     } catch (err) {
       console.error("Erro no envio:", err);
       this.toast("❌ Falha de conexão. Verifique a internet.", true);
     }
   },
 
-  /* ----------- 🌙 SALVAR DESCANSO ------------ */
   async salvarDescanso(fase = "menstrual") {
     await this.salvarTreino({
       tipo_dia: "descanso",
@@ -157,49 +173,32 @@ const FEMFLOW = {
       pse: "N/A",
       observacao: "Descanso ativo",
     });
-    setTimeout(() => (window.location.href = "../../boasvindas.html"), 1800);
+    setTimeout(() => this.router("flowcenter"), 1800);
   },
 
-  /* ----------- 😌 MODAL PSE ------------ */
+  /* =======================================================
+     🔹 4. MODAL PSE
+  ======================================================= */
   criarModalPSE() {
+    if (document.getElementById("pseModal")) return;
+
     const modal = document.createElement("div");
     modal.id = "pseModal";
     modal.style.cssText = `
-      display:none;
-      position:fixed;
-      top:0;left:0;
-      width:100%;height:100%;
-      background:rgba(0,0,0,0.7);
-      justify-content:center;
-      align-items:center;
-      z-index:1000;
-      font-family:'Lato',sans-serif;
-    `;
+      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.7); justify-content:center; align-items:center;
+      z-index:1000; font-family:'Lato',sans-serif;`;
+
     modal.innerHTML = `
-      <div style="
-        background:#fff;
-        padding:25px;
-        border-radius:20px;
-        text-align:center;
-        width:85%;
-        max-width:340px;
-        box-shadow:0 3px 12px rgba(0,0,0,0.2);
-        animation:fadeIn 0.4s ease;">
-        <h3 style="color:#335953;font-family:'Playfair Display';margin-bottom:10px;">
-          Escala PSE 🌿
-        </h3>
+      <div style="background:#fff; padding:25px; border-radius:20px; text-align:center;
+                  width:85%; max-width:340px; box-shadow:0 3px 12px rgba(0,0,0,0.2); animation:fadeIn 0.4s ease;">
+        <h3 style="color:#335953;font-family:'Playfair Display';margin-bottom:10px;">Escala PSE 🌿</h3>
         <p style="margin-bottom:15px;">Como foi a intensidade do treino?</p>
         <div id="pseBtns" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;"></div>
-        <button id="cancelarPSE" style="
-          margin-top:15px;
-          background:#aaa;
-          color:#fff;
-          border:none;
-          padding:8px 16px;
-          border-radius:15px;
-          cursor:pointer;">Cancelar</button>
-      </div>
-    `;
+        <button id="cancelarPSE" style="margin-top:15px;background:#aaa;color:#fff;border:none;
+                padding:8px 16px;border-radius:15px;cursor:pointer;">Cancelar</button>
+      </div>`;
+
     document.body.appendChild(modal);
 
     const pseBtns = modal.querySelector("#pseBtns");
@@ -207,21 +206,15 @@ const FEMFLOW = {
       const btn = document.createElement("button");
       btn.textContent = i;
       btn.style.cssText = `
-        background:#335953;
-        color:#fff;
-        border:none;
-        border-radius:50%;
-        width:40px;
-        height:40px;
-        font-size:16px;
-        cursor:pointer;
-      `;
+        background:#335953; color:#fff; border:none; border-radius:50%;
+        width:40px; height:40px; font-size:16px; cursor:pointer;`;
       btn.onclick = () => {
         modal.style.display = "none";
         FEMFLOW.onPSESelecionado && FEMFLOW.onPSESelecionado(i);
       };
       pseBtns.appendChild(btn);
     }
+
     modal.querySelector("#cancelarPSE").onclick = () =>
       (modal.style.display = "none");
   },
@@ -231,17 +224,21 @@ const FEMFLOW = {
     document.getElementById("pseModal").style.display = "flex";
   },
 
-  /* ----------- 🔥 HIIT SIMPLES ------------ */
+  /* =======================================================
+     🔹 5. HIIT SIMPLES
+  ======================================================= */
   iniciarHIIT(on = 30, off = 30, ciclos = 8) {
-    this.toast(`🔥 HIIT iniciado: ${on}s ON / ${off}s OFF x${ciclos}`);
+    this.toast(`🔥 HIIT iniciado: ${on}s ON / ${off}s OFF ×${ciclos}`);
   },
 
-  /* ----------- 🌸 TOAST ------------ */
-  toast(msg, erro = false) {
+  /* =======================================================
+     🔹 6. TOAST UNIVERSAL
+  ======================================================= */
+  toast(msg, erro = false, top = false) {
     const toast = document.createElement("div");
     toast.textContent = msg;
     toast.style.position = "fixed";
-    toast.style.bottom = "25px";
+    toast.style[ top ? "top" : "bottom" ] = "25px";
     toast.style.left = "50%";
     toast.style.transform = "translateX(-50%)";
     toast.style.background = erro ? "#d9534f" : "#335953";
@@ -254,6 +251,40 @@ const FEMFLOW = {
     toast.style.boxShadow = "0 3px 8px rgba(0,0,0,0.2)";
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
+  },
+
+  /* =======================================================
+     🔹 7. AUTO CICLO – Reseta automaticamente ao completar
+  ======================================================= */
+  autoCiclo() {
+    const ciclo = Number(localStorage.getItem("ciclo_duracao") || 28);
+    let dia = Number(localStorage.getItem("dia_ciclo") || 1);
+    if (dia > ciclo) {
+      this.toast("🌸 Novo ciclo iniciado automaticamente!");
+      dia = 1;
+      localStorage.setItem("dia_ciclo", 1);
+      localStorage.setItem(
+        `femflow_reiniciado_${localStorage.getItem("femflow_id")}`,
+        new Date().toISOString()
+      );
+    }
+  },
+
+  /* =======================================================
+     🔹 8. ROTEADOR – Navegação horizontal inteligente
+  ======================================================= */
+  router(destino) {
+    const map = {
+      home: "index.html",
+      cadastro: "cadastro.html",
+      ciclo: "ciclo.html",
+      flowcenter: "flowcenter.html",
+      treino: "treino.html",
+      evolucao: "evolucao.html",
+    };
+    const url = map[destino] || "index.html";
+    console.log(`➡️ Navegando para: ${url}`);
+    window.location.href = url;
   },
 };
 
@@ -268,4 +299,3 @@ style.innerHTML = `
   to {opacity:1; transform:scale(1);}
 }`;
 document.head.appendChild(style);
-
