@@ -178,6 +178,26 @@
     });
 
     carregarTreino();
+ /* ===== GESTO DE DESLIZAR (TOQUE) ===== */
+    let startX = 0;
+    let endX = 0;
+    const sensibilidade = 50; // px mínimos de movimento para contar swipe
+
+    track.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+    });
+
+    track.addEventListener("touchmove", (e) => {
+      endX = e.touches[0].clientX;
+    });
+
+    track.addEventListener("touchend", () => {
+      const diff = startX - endX;
+      if (Math.abs(diff) > sensibilidade) {
+        if (diff > 0) nextBox(); // deslizou para esquerda
+        else prevBox(); // deslizou para direita
+      }
+    });
   </script>
 </body>
 </html>
