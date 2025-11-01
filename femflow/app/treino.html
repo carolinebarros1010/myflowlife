@@ -8,6 +8,7 @@
   <!-- 🔗 PWA e estilos -->
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/treino.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -17,22 +18,12 @@
   <header>
     <h1>Treino Diário</h1>
     <p class="subtitle">Seu corpo, seu ritmo</p>
-    <p id="avisoCiclo" class="tarja-novo-ciclo" style="display:none;">
-      🩵 Novo ciclo iniciado automaticamente!
-    </p>
+    <p id="avisoCiclo" class="tarja-novo-ciclo" style="display:none;"></p>
   </header>
 
-  <!-- 🧘 CONTAINER PRINCIPAL -->
   <div class="container">
-    <!-- 🎥 Vídeo -->
-    <div class="section treino-box">
-      <h3 id="faseAtual">Fase: -</h3>
-      <h4 id="diaPrograma">Dia do programa: -</h4>
-
-      <video id="videoTreino" width="100%" controls playsinline>
-        <source src="" type="video/mp4" />
-        Seu navegador não suporta vídeos HTML5.
-      </video>
+    <div id="treinoDia" class="section treino-box">
+      <p>Carregando treino...</p>
     </div>
 
     <!-- 💪 Controle de PSE -->
@@ -45,124 +36,148 @@
         <button id="salvarTreinoBtn">💾 Salvar treino</button>
         <button id="descansoBtn" class="secundario">🌿 Descanso ativo</button>
       </div>
-    </div>
 
-    <button id="evolucaoBtn" onclick="location.href='evolucao.html'">📊 Ver evolução</button>
+      <button id="flowBtn" style="margin-top:10px" onclick="location.href='flowcenter.html'">← Voltar ao FlowCenter</button>
+      <button id="evolucaoBtn" style="margin-top:10px" onclick="location.href='evolucao.html'">📊 Ver evolução</button>
+    </div>
   </div>
 
-  <!-- 🌸 CORE DO FEMFLOW -->
   <script src="scripts/femflow-core.js"></script>
 
-  <!-- ⚙️ LÓGICA DO TREINO -->
   <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    const id = localStorage.getItem('femflow_id');
-    if (!id) return (window.location.href = 'ciclo.html');
+    const $treino = document.getElementById('treinoDia');
+    const $pse = document.getElementById('pse');
+    const $pseVal = document.getElementById('valorPSE');
+    $pse.addEventListener('input', () => $pseVal.textContent = $pse.value);
 
-    const fase = localStorage.getItem('fase_sugerida') || "Desconhecida";
-    const diaCiclo = parseInt(localStorage.getItem('dia_ciclo') || 1);
-    const diaPrograma = diaCiclo > 30 ? 1 : diaCiclo;
+    // ======== FUNÇÕES DE RENDERIZAÇÃO ========
+    function criarBoxHTML(box) {
+      if (box.tipo === 'texto') {
+        return `
+          <div class="box texto">
+            <h3>${box.titulo}</h3>
+            <p>${box.mensagem}</p>
+          </div>`;
+      }
 
-    // Atualiza interface
-    document.getElementById('faseAtual').innerText = `🌿 Fase: ${fase}`;
-    document.getElementById('diaPrograma').innerText = `Dia do programa: ${diaPrograma}`;
+      if (box.tipo === 'exercicios' || box.tipo === 'forca') {
+        const itens = (box.itens || []).map(it => `
+          <div class="ex">
+            <div class="ex-head">
+              <b>${it.exercicio}</b>
+              ${it.link ? `<a href="${it.link}" target="_blank">🎥</a>` : ''}
+            </div>
+            <div class="ex-grid">
+              <label>Séries</label><input value="${it.series || ''}" />
+              <label>Reps</label><input value="${it.reps || ''}" />
+              <label>Timer</label><div class="subtimer" data-total="${it.tempo || 45}">00:${String(it.tempo || 45).padStart(2, '0')}</div>
+            </div>
+          </div>`).join('');
+        return `
+          <div class="box treino">
+            <h3>${box.titulo}</h3>
+            ${itens}
+            ${box.interval ? `<p class="subtle">Intervalos sugeridos: ${box.interval}s</p>` : ''}
+          </div>`;
+      }
 
-    // 🎥 Carrega vídeo correspondente
-    const video = document.getElementById('videoTreino');
-    const faseLower = fase.toLowerCase();
-    const videoPath = `videos/${faseLower}/video_${faseLower}_${diaPrograma}.mp4`;
-    video.querySelector('source').src = videoPath;
-    video.load();
+      if (box.tipo === 'hiit' || box.tipo === 'cardio') {
+        return `
+          <div class="hiit" style="background:${box.tipo === 'cardio' ? 'var(--pessego)' : 'var(--terracota)'}">
+            <b>${box.titulo}</b><br>
+            ${box.descricao}<br>
+            <small><i>${box.tipo === 'hiit' ? '🔥 Potência Feminina' : '💓 Ritmo leve e consciente'}</i></small>
+          </div>`;
+      }
 
-    // 🧠 Controle de PSE
-    const range = document.getElementById('pse');
-    const valor = document.getElementById('valorPSE');
-    range.addEventListener('input', () => valor.innerText = range.value);
+      if (box.tipo === 'resfriamento') {
+        return `
+          <div class="box resfriamento">
+            <h3>${box.titulo}</h3>
+            <p>${box.mensagem}</p>
+          </div>`;
+      }
 
-    // 💾 SALVAR TREINO
-    document.getElementById('salvarTreinoBtn').addEventListener('click', async () => {
-      const pse = parseInt(range.value);
-      FEMFLOW.abrirPSE(async (pseSelecionado) => {
+      return '';
+    }
+
+    function iniciarTimers() {
+      document.querySelectorAll('.subtimer').forEach(el => {
+        const total = parseInt(el.dataset.total || 0, 10);
+        if (!total) return;
+        let restante = total;
+        el.textContent = `00:${String(restante).padStart(2, '0')}`;
+        el.addEventListener('click', () => {
+          el.classList.add('ativo');
+          const iv = setInterval(() => {
+            restante--;
+            el.textContent = `00:${String(Math.max(restante, 0)).padStart(2, '0')}`;
+            if (restante <= 0) {
+              clearInterval(iv);
+              el.classList.remove('ativo');
+              navigator.vibrate([100, 200, 100]); // vibra ao fim do timer
+            }
+          }, 1000);
+        });
+      });
+    }
+
+    async function carregarTreino() {
+      const id = localStorage.getItem('femflow_id');
+      if (!id) return (location.href = 'ciclo.html');
+
+      try {
+        const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${encodeURIComponent(id)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data || data.error) throw new Error(data?.error || 'Erro desconhecido');
+
+        localStorage.setItem('fase_sugerida', data.fase);
+        localStorage.setItem('dia_ciclo', data.diaCiclo + 1);
+
+        const header = `
+          <h3>🌿 Fase: ${data.fase}</h3>
+          <h4>Dia ${data.diaCiclo} • ${data.nivel}</h4>
+          <p class="subtle">Plano ${data.plano} • Descansos (7d): ${data.descansos_usados}/${data.descansos_semana}</p>
+        `;
+
+        const boxesHTML = data.boxes.map(criarBoxHTML).join('');
+        $treino.innerHTML = header + boxesHTML;
+
+        iniciarTimers();
+
+      } catch (err) {
+        console.error(err);
+        $treino.innerHTML = `<p style="color:var(--terracota)">❌ Falha ao carregar treino. Tente novamente.</p>`;
+      }
+    }
+
+    // ======== AÇÕES ========
+    document.getElementById('salvarTreinoBtn').addEventListener('click', () => {
+      const id = localStorage.getItem('femflow_id');
+      const fase = localStorage.getItem('fase_sugerida') || 'desconhecida';
+      FEMFLOW.abrirPSE(async (pse) => {
         await FEMFLOW.salvarTreino({
           id,
           fase,
-          treino: `Dia ${diaPrograma}`,
+          treino: `Dia ${localStorage.getItem('dia_ciclo') || 1}`,
           tipo_dia: "treino",
-          pse: pseSelecionado
+          pse
         });
-
-        FEMFLOW.toast(`✅ Treino ${diaPrograma} salvo com sucesso!`);
-        localStorage.setItem('dia_ciclo', diaPrograma + 1);
-
-        if (diaPrograma >= 30) {
-          FEMFLOW.toast("🌸 Ciclo concluído! Reiniciando...");
-          localStorage.setItem('dia_ciclo', 1);
-          setTimeout(() => (window.location.href = "index.html"), 3500);
-        } else {
-          setTimeout(() => location.reload(), 1500);
-        }
+        FEMFLOW.toast("✅ Treino salvo!");
+        setTimeout(() => location.reload(), 1200);
       });
     });
 
-    // 🌿 BOTÃO DESCANSO
     document.getElementById('descansoBtn').addEventListener('click', async () => {
+      const fase = localStorage.getItem('fase_sugerida') || 'desconhecida';
       await FEMFLOW.salvarDescanso(fase);
-      FEMFLOW.toast("🌿 Dia de descanso registrado!");
-      localStorage.setItem('dia_ciclo', diaPrograma + 1);
-      setTimeout(() => location.reload(), 2000);
+      FEMFLOW.toast("🌿 Descanso registrado!");
+      setTimeout(() => location.reload(), 1200);
     });
 
-    // 🩵 Mensagem se houve reinício automático
-    const reiniciado = localStorage.getItem(`femflow_reiniciado_${id}`);
-    if (reiniciado) {
-      const dataReinicio = new Date(reiniciado).toLocaleDateString("pt-BR");
-      const aviso = document.getElementById('avisoCiclo');
-      aviso.innerText = `🩵 Novo ciclo iniciado em ${dataReinicio}`;
-      aviso.style.display = "block";
-    }
-  });
+    carregarTreino();
   </script>
-
-  <!-- 💅 ESTILOS LOCAIS -->
-  <style>
-    .tarja-novo-ciclo {
-      background: linear-gradient(90deg, var(--pessego), var(--teal));
-      color: white;
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-      border-radius: 12px;
-      margin-top: 0.6rem;
-      display: inline-block;
-      animation: fadeInTarja 2s ease-in-out;
-    }
-
-    @keyframes fadeInTarja {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .botoes-pse {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 1rem;
-    }
-
-    button.secundario {
-      background: var(--teal);
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.3s ease;
-    }
-
-    button.secundario:hover {
-      background: var(--terracota);
-      transform: scale(1.05);
-    }
-  </style>
 </body>
 </html>
