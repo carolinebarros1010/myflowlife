@@ -22,7 +22,7 @@
         max-width: 400px;
         padding: 2rem;
         border-radius: 18px;
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(12px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         text-align: center;
@@ -99,8 +99,25 @@
         font-size: 0.9rem;
         color: #335953;
       }
+
+      .loader {
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid #cc6a5a;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-left: 8px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
     </style>
   </head>
+
   <body>
     <div class="login-card">
       <img src="../assets/logoterracotabege.png" alt="FemFlow logo" class="logo" />
@@ -110,7 +127,7 @@
       <!-- Login form -->
       <div id="loginBox">
         <div class="form-group">
-          <input type="email" id="loginEmail" placeholder="Seu e-mail" />
+          <input type="text" id="loginEmail" placeholder="E-mail ou ID FemFlow" />
         </div>
         <div class="form-group">
           <input type="password" id="loginSenha" placeholder="Sua senha" />
@@ -122,37 +139,51 @@
       <p id="mensagem" class="message"></p>
     </div>
 
+    <!-- FemFlow Core primeiro -->
+    <script src="scripts/femflow-core.js"></script>
+
     <script>
       const scriptURL = FEMFLOW?.SCRIPT_URL || "https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec";
 
       async function entrar() {
-        const email = document.getElementById("loginEmail").value.trim();
+        const identificador = document.getElementById("loginEmail").value.trim();
         const senha = document.getElementById("loginSenha").value.trim();
         const msgEl = document.getElementById("mensagem");
-        msgEl.textContent = "Verificando...";
+
+        msgEl.textContent = "Conectando ao seu ciclo...";
         msgEl.style.color = "#335953";
+        msgEl.insertAdjacentHTML("beforeend", '<span class="loader"></span>');
+
+        if (!identificador || !senha) {
+          msgEl.textContent = "Digite seu e-mail ou ID e senha.";
+          msgEl.style.color = "#d35470";
+          return;
+        }
 
         try {
-          const res = await fetch(scriptURL, {
-            method: "POST",
-            body: JSON.stringify({ action: "login", email, senha }),
-          });
+          const isEmail = identificador.includes("@");
+          const params = isEmail
+            ? `?action=validar&email=${encodeURIComponent(identificador)}`
+            : `?action=validar&id=${encodeURIComponent(identificador)}`;
+
+          const res = await fetch(`${scriptURL}${params}`);
           const data = await res.json();
 
           if (data.status === "ok") {
-            msgEl.textContent = `Bem-vinda, ${data.nome}!`;
-            msgEl.style.color = "#28a745";
             localStorage.setItem("femflow_id", data.id);
-            setTimeout(() => {
-              window.location.href = "./ciclo.html";
-            }, 1000);
+            msgEl.textContent = `✨ Bem-vinda de volta, ${data.nome || "aluna"}!`;
+            msgEl.style.color = "#28a745";
+            setTimeout(() => (window.location.href = "./home.html"), 1200);
+          } else if (data.status === "notfound") {
+            msgEl.textContent = "❌ Nenhuma conta encontrada. Faça sua anamnese para começar.";
+            msgEl.style.color = "#d35470";
           } else {
-            msgEl.textContent = data.msg || "E-mail ou senha incorretos.";
+            msgEl.textContent = "⚠️ E-mail, ID ou senha incorretos.";
             msgEl.style.color = "#d35470";
           }
         } catch (error) {
           console.error(error);
-          msgEl.textContent = "Erro de rede. Tente novamente.";
+          msgEl.textContent = "Erro de conexão. Tente novamente.";
           msgEl.style.color = "#d35470";
         }
       }
@@ -161,8 +192,6 @@
         window.location.href = "anamnese.html";
       }
     </script>
-
-    <script src="scripts/femflow-core.js"></script>
   </body>
 </html>
 
