@@ -135,23 +135,59 @@
       stage.append(label,input,warn); return;
     }
 
-    if(item.type==="senha"||item.type==="senhaConfirm"){
-      const label=document.createElement("div"); label.className="q-title"; label.textContent=item.q;
-      const input=document.createElement("input"); input.type="password"; input.id=item.field;
-      const warn=document.createElement("div"); warn.className="warn";
-      input.addEventListener("input",()=>{
-        if(item.type==="senha"){next.disabled=!input.value.trim();}
-        else{
-          const s1=document.getElementById("senha")?.value||"", s2=input.value.trim();
-          if(s1&&s2){
-            if(s1===s2){warn.textContent="✔️ Senhas coincidem"; warn.className="warn ok"; next.disabled=false;}
-            else{warn.textContent="❌ As senhas não coincidem"; warn.className="warn err"; next.disabled=true;}
-          }else next.disabled=true;
-        }
-      });
-      stage.append(label,input,warn); return;
-    }
+  if(item.type==="senha" || item.type==="senhaConfirm"){
+  const label = document.createElement("div");
+  label.className = "q-title";
+  label.textContent = item.q;
 
+  const input = document.createElement("input");
+  input.type = "password";
+  input.id = item.field;
+  input.placeholder = item.type === "senha" ? "Crie uma senha forte" : "Confirme sua senha";
+  const warn = document.createElement("div");
+  warn.className = "warn";
+
+  // variável global para armazenar senha principal
+  window.senhaTemp = window.senhaTemp || "";
+
+  input.addEventListener("input", () => {
+    const val = input.value.trim();
+
+    if (item.type === "senha") {
+      window.senhaTemp = val;
+      if (val.length >= 6) {
+        warn.textContent = "✔️ Senha válida";
+        warn.className = "warn ok";
+        next.disabled = false;
+      } else {
+        warn.textContent = "❌ Mínimo de 6 caracteres";
+        warn.className = "warn err";
+        next.disabled = true;
+      }
+    } else {
+      const s1 = window.senhaTemp;
+      const s2 = val;
+      if (!s1 || !s2) {
+        warn.textContent = "❌ Digite e confirme sua senha";
+        warn.className = "warn err";
+        next.disabled = true;
+        return;
+      }
+      if (s1 === s2) {
+        warn.textContent = "✔️ Senhas coincidem";
+        warn.className = "warn ok";
+        next.disabled = false;
+      } else {
+        warn.textContent = "❌ As senhas não coincidem";
+        warn.className = "warn err";
+        next.disabled = true;
+      }
+    }
+  });
+
+  stage.append(label, input, warn);
+  return;
+}
     if(item.type==="gif-pick"){
       const title=document.createElement("div"); title.className="q-title"; title.textContent=item.q;
       const grid=document.createElement("div"); grid.className="grid";
