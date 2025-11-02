@@ -3,62 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FemFlow • Home</title>
+  <title>FemFlow • Vitrine de Programas</title>
   <style>
     :root {
       --terracota:#CC6A5A; --pessego:#F4A386; --teal:#335953; --bege:#FBF6F0;
     }
     body {
-      margin: 0;
-      font-family: "Lato", sans-serif;
-      background: linear-gradient(180deg,#F4E1D7 0%,#EFBDA6 100%);
-      color: var(--teal);
+      margin:0; font-family:"Lato",sans-serif;
+      background:linear-gradient(180deg,#F4E1D7 0%,#EFBDA6 100%);
+      color:var(--teal);
     }
     header {
-      display:flex; justify-content:space-between; align-items:center;
-      padding:1rem 1.5rem; background:rgba(255,255,255,0.8); backdrop-filter:blur(10px);
+      display:flex;justify-content:space-between;align-items:center;
+      padding:1rem 1.5rem;background:rgba(255,255,255,0.8);backdrop-filter:blur(10px);
       box-shadow:0 4px 10px rgba(0,0,0,.08);
     }
     header img {height:48px;}
     header button {
-      background:linear-gradient(135deg,var(--teal),var(--terracota));
-      color:#fff; border:none; border-radius:12px; padding:0.6rem 1rem; cursor:pointer; font-weight:bold;
+      background:linear-gradient(135deg,var(--teal),var(--terracota));color:#fff;
+      border:none;border-radius:12px;padding:0.6rem 1rem;cursor:pointer;font-weight:bold;
     }
-    header button:hover {transform:scale(1.05);}
-    .welcome {text-align:center; margin-top:1.2rem;}
-    .welcome h2{color:var(--terracota); font-family:"Playfair Display",serif;}
-    .welcome p{font-size:1rem; opacity:.9;}
+    header button:hover{transform:scale(1.05);}
+    .welcome{text-align:center;margin-top:1.2rem;}
+    .welcome h2{color:var(--terracota);font-family:"Playfair Display",serif;margin-bottom:.2rem;}
+    .welcome p{font-size:1rem;opacity:.9;}
     .video-container{width:100%;max-width:800px;margin:1.5rem auto;border-radius:20px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.15);}
     video{width:100%;display:block;}
-    .catalog{padding:1rem 1.5rem;}
-    .catalog h3{color:var(--teal);font-family:"Playfair Display",serif;}
-    .scroll-container{display:flex;overflow-x:auto;gap:1rem;scroll-behavior:smooth;}
-    .item{flex:0 0 220px;background:white;border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.1);overflow:hidden;cursor:pointer;transition:.3s;}
-    .item:hover{transform:scale(1.05);}
-    .item img{width:100%;height:140px;object-fit:cover;}
-    .info{text-align:center;padding:.8rem;}
-    .info h4{margin:0;font-size:1rem;color:var(--terracota);font-family:"Playfair Display",serif;}
-    .info p{margin:.4rem 0 0;font-size:.85rem;color:#666;}
-    .cta{margin:2rem auto;text-align:center;}
+    .cta{text-align:center;margin:1.5rem auto;}
     .cta button{
-      background:linear-gradient(135deg,var(--teal),var(--terracota));
-      color:#fff;border:none;border-radius:14px;padding:0.9rem 1.4rem;font-weight:bold;font-size:1rem;
-      cursor:pointer;transition:.3s;
+      background:linear-gradient(135deg,var(--teal),var(--terracota));color:#fff;
+      border:none;border-radius:14px;padding:0.9rem 1.4rem;font-weight:bold;font-size:1rem;
+      cursor:pointer;transition:.3s;margin:0 6px;
     }
     .cta button:hover{transform:scale(1.05);}
     footer{text-align:center;padding:1rem;font-size:.8rem;opacity:.6;}
+
+    /* === Vitrine estilo Netflix === */
+    .ebooks-section{padding:1rem 1.5rem;}
+    .ebooks-section h2{color:var(--teal);font-family:"Playfair Display",serif;}
+    .ebooks-section p{opacity:.8;margin-bottom:1rem;}
+    .carousel-container{position:relative;}
+    .ebooks-carousel{
+      display:flex;overflow-x:auto;scroll-behavior:smooth;gap:1rem;padding-bottom:1rem;
+    }
+    .ebook-card{
+      flex:0 0 220px;background:white;border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.1);
+      overflow:hidden;transform:scale(.96);opacity:0;transition:.3s;
+    }
+    .ebook-card.visible{opacity:1;transform:scale(1);}
+    .ebook-thumb{width:100%;height:140px;object-fit:cover;}
+    .ebook-body{text-align:center;padding:.8rem;}
+    .ebook-body h3{margin:0;font-size:1rem;color:var(--terracota);font-family:"Playfair Display",serif;}
+    .ebook-body p{margin:.3rem 0;font-size:.9rem;color:#555;}
+    .ebook-btn{
+      display:inline-block;margin-top:.5rem;padding:.5rem 1rem;background:linear-gradient(135deg,var(--teal),var(--terracota));
+      color:#fff;border-radius:10px;text-decoration:none;font-weight:bold;font-size:.9rem;
+    }
+    .carousel-btn{
+      position:absolute;top:40%;transform:translateY(-50%);
+      background:rgba(51,89,83,0.7);color:#fff;border:none;font-size:1.8rem;
+      width:40px;height:60px;border-radius:8px;cursor:pointer;transition:.3s;
+    }
+    .carousel-btn:hover{background:rgba(204,106,90,0.8);}
+    .carousel-btn.left{left:-5px;}
+    .carousel-btn.right{right:-5px;}
   </style>
 </head>
 
 <body>
   <header>
-    <img src="../assets/logofemflowterracota.png" alt="FemFlow logo">
+    <img src="../assets/logofemflowterracota.png" alt="FemFlow logo" />
     <button id="logoutBtn" style="display:none;">Sair</button>
   </header>
 
-  <div class="welcome" id="welcomeBox">
+  <div class="welcome">
     <h2 id="welcomeTitle">🌸 Bem-vinda ao FemFlow</h2>
-    <p id="welcomeSub">Seu equilíbrio hormonal em movimento</p>
+    <p id="welcomeSub">Explore nossos programas e encontre o seu ciclo ideal</p>
   </div>
 
   <div class="video-container">
@@ -68,14 +88,20 @@
     </video>
   </div>
 
-  <div class="catalog">
-    <h3>💖 Explore nossos programas</h3>
-    <div class="scroll-container" id="catalogScroll"></div>
-  </div>
+  <!-- ==== Vitrine FemFlow ==== -->
+  <section class="ebooks-section" id="ebooks">
+    <h2>💖 Vitrine de Programas FemFlow</h2>
+    <p>Deslize para o lado e explore nossos programas e planilhas de treino.</p>
+    <div class="carousel-container">
+      <button class="carousel-btn left" aria-label="voltar">&#10094;</button>
+      <div class="ebooks-carousel"></div>
+      <button class="carousel-btn right" aria-label="avançar">&#10095;</button>
+    </div>
+  </section>
 
   <div class="cta" id="ctaArea">
-    <button onclick="irParaCadastro()">Cadastre-se agora</button>
-    <button onclick="irParaLogin()" style="margin-left:10px;">Já tenho conta</button>
+    <button onclick="irParaCadastro()">Cadastre-se</button>
+    <button onclick="irParaLogin()">Entrar</button>
   </div>
 
   <footer>
@@ -84,63 +110,82 @@
 
   <script src="scripts/femflow-core.js"></script>
   <script>
-    async function initHome() {
-      const id = localStorage.getItem("femflow_id");
-      const catalog = document.getElementById("catalogScroll");
-      renderCatalog(catalog);
-
-      // 🔹 Sem login → modo público
-      if (!id) {
-        document.getElementById("logoutBtn").style.display = "none";
-        document.getElementById("welcomeTitle").textContent = "🌸 Bem-vinda ao FemFlow";
-        document.getElementById("welcomeSub").textContent = "Explore nossos programas e descubra seu fluxo natural";
-        return;
-      }
-
-      // 🔹 Com login → modo aluna
-      try {
-        const res = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${encodeURIComponent(id)}`);
-        const data = await res.json();
-        if (data.status === "ok") {
-          document.getElementById("logoutBtn").style.display = "inline-block";
-          document.getElementById("ctaArea").style.display = "none";
-          document.getElementById("welcomeTitle").textContent = `🌸 Bem-vinda de volta, ${data.nome || "aluna"}`;
-          document.getElementById("welcomeSub").textContent = `Nível: ${data.nivel || "iniciante"} • Fase: ${data.fase || "folicular"}`;
-          
-          // Adiciona botão “Acessar meu ciclo”
-          const btn = document.createElement("button");
-          btn.textContent = "Acessar meu ciclo";
-          btn.onclick = () => window.location.href = "flowcenter.html";
-          document.getElementById("ctaArea").appendChild(btn);
-        } else {
-          localStorage.removeItem("femflow_id");
-        }
-      } catch (e) {
-        console.error("Erro ao carregar perfil:", e);
-      }
+  async function initHome(){
+    const id = localStorage.getItem("femflow_id");
+    if(!id){
+      document.getElementById("logoutBtn").style.display="none";
+      return;
     }
+    try{
+      const res = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${encodeURIComponent(id)}`);
+      const data = await res.json();
+      if(data.status==="ok"){
+        document.getElementById("logoutBtn").style.display="inline-block";
+        document.getElementById("ctaArea").style.display="none";
+        document.getElementById("welcomeTitle").textContent=`🌸 Bem-vinda, ${data.nome||"aluna"}`;
+        document.getElementById("welcomeSub").textContent=`Nível: ${data.nivel||"iniciante"} • Fase: ${data.fase||"folicular"}`;
+        const btn=document.createElement("button");
+        btn.textContent="Acessar meu ciclo";
+        btn.onclick=()=>window.location.href="flowcenter.html";
+        document.getElementById("ctaArea").appendChild(btn);
+      }
+    }catch(e){console.error(e);}
+  }
 
-    function renderCatalog(el) {
-      const produtos = [
-        {titulo:"FemFlow 30 por 15",desc:"Treinos cíclicos por 30 dias",img:"../assets/capas/femflow30.jpg",link:"https://pay.hotmart.com/XXXX"},
-        {titulo:"RespiraFlow",desc:"Protocolos de respiração e foco",img:"../assets/capas/respiraflow.jpg",link:"https://pay.hotmart.com/YYYY"},
-        {titulo:"MyFlowLife Pro",desc:"Acesso completo e plano personalizado",img:"../assets/capas/myflowlifepro.jpg",link:"https://pay.hotmart.com/ZZZZ"}
-      ];
-      el.innerHTML = produtos.map(p=>`
-        <div class="item" onclick="window.open('${p.link}','_blank')">
-          <img src="${p.img}" alt="${p.titulo}" />
-          <div class="info">
-            <h4>${p.titulo}</h4>
-            <p>${p.desc}</p>
-          </div>
-        </div>`).join("");
-    }
+  function irParaLogin(){window.location.href="login.html";}
+  function irParaCadastro(){window.location.href="anamnese.html";}
+  function logout(){localStorage.removeItem("femflow_id");window.location.reload();}
 
-    function irParaLogin(){window.location.href="login.html";}
-    function irParaCadastro(){window.location.href="anamnese.html";}
-    function logout(){localStorage.removeItem("femflow_id");window.location.href="home.html";}
+  // === Carregar eBooks da vitrine ===
+  document.addEventListener("DOMContentLoaded",()=>{
+    fetch("../ebooks/ebooks.json")
+      .then(r=>r.json())
+      .then(data=>{
+        const carousel=document.querySelector(".ebooks-carousel");
+        data.forEach((ebook,i)=>{
+          const slug=ebook.nome.toLowerCase().replace(/\s+/g,"-").replace(/[^\w-]/g,"");
+          const origem=`femflow-ebook-${slug}`;
+          const linkCadastro=ebook.tipo==="download"
+            ? `../${ebook.link}`
+            : `../cadastro/?origem=${encodeURIComponent(origem)}&link=${encodeURIComponent(ebook.link)}`;
+          const precoLabel=ebook.preco==="0,00"?"Gratuito":`R$ ${ebook.preco}`;
+          const card=document.createElement("div");
+          card.className="ebook-card";
+          card.innerHTML=`
+            <img src="../ebooks/${ebook.capa}" alt="${ebook.nome}" class="ebook-thumb">
+            <div class="ebook-body">
+              <h3>${ebook.nome}</h3>
+              <p>${precoLabel}</p>
+              <a href="${linkCadastro}" class="ebook-btn" target="_blank" rel="noopener">
+                ${ebook.tipo==="download"?"Baixar agora":"Acessar"}
+              </a>
+            </div>`;
+          carousel.appendChild(card);
+          setTimeout(()=>card.classList.add("visible"),i*80);
+        });
 
-    initHome();
+        const leftBtn=document.querySelector(".carousel-btn.left");
+        const rightBtn=document.querySelector(".carousel-btn.right");
+        leftBtn.addEventListener("click",()=>carousel.scrollBy({left:-300,behavior:"smooth"}));
+        rightBtn.addEventListener("click",()=>carousel.scrollBy({left:300,behavior:"smooth"}));
+      })
+      .catch(err=>console.error("Erro ao carregar eBooks:",err));
+  });
+
+  // Efeito de entrada
+  const observer=new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){entry.target.classList.add("visible");observer.unobserve(entry.target);}
+    });
+  },{threshold:0.2});
+  document.addEventListener("DOMContentLoaded",()=>{
+    const cards=document.querySelectorAll(".ebook-card");
+    cards.forEach(card=>observer.observe(card));
+  });
+
+  initHome();
   </script>
 </body>
 </html>
+
+
