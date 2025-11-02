@@ -8,7 +8,7 @@ const FEMFLOW = {
   /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
   SCRIPT_URL:
     localStorage.getItem("femflow_script") ||
-    "https://script.google.com/macros/s/AKfycbzQLUfoN_5V_Lj7QU7a6-ehWgLyroGsQ0T4xQu7TjwDHWST6SNmvy-rFFELIR1MoE4/exec",
+    "https://script.google.com/macros/s/AKfycby40fnXDsOQjHQp1wWE4D5ijcT1fAg9uAgArsFUEzSAfSF1EjywA9H2rFtMAXtKc2Jh/exec",
 
   /* ----------- 🎨 LOGO PADRÃO ------------ */
   LOGO: "../../assets/logofemlowverde.png",
