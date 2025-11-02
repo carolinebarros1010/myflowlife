@@ -2,133 +2,241 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Anamnese FemFlow</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FemFlow • Anamnese</title>
   <style>
-    body {
-      background: linear-gradient(180deg,#F4E1D7,#EFBDA6);
-      font-family: "Lato", sans-serif;
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100vh; margin: 0; color: #335953;
+    :root{
+      --terracota:#CC6A5A; --pessego:#F4A386; --teal:#335953; --bege:#FBF6F0;
     }
-    .quiz {
-      width: 90%; max-width: 400px;
-      background: #fff; padding: 2rem;
-      border-radius: 18px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      text-align: center;
-      transition: all 0.4s ease;
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(180deg,#F4E1D7 0%, #EFBDA6 100%);
+      font-family: "Lato", system-ui, -apple-system, Arial, sans-serif; color:var(--teal);
+      padding:16px;
     }
-    h2 { color: #cc6a5a; font-family: "Playfair Display", serif; }
-    button {
-      background: linear-gradient(135deg,#335953,#cc6a5a);
-      color:#fff;border:none;border-radius:12px;
-      padding:12px 24px;margin-top:1rem;width:100%;max-width:260px;
-      font-weight:600;cursor:pointer;
+    .card{
+      width:100%; max-width:420px; background:#fff; border-radius:20px; padding:22px;
+      box-shadow:0 10px 28px rgba(0,0,0,.12); text-align:center;
     }
-    button:hover { opacity:0.9; }
-    .progress {height:6px;background:#eee;border-radius:3px;margin-bottom:1rem;}
-    .bar {height:6px;width:0;background:#cc6a5a;border-radius:3px;transition:width 0.3s;}
+    .logo{width:120px; margin:0 auto 10px; display:block}
+    h1{font-family:"Playfair Display", serif; color:var(--terracota); font-size:1.5rem; margin:6px 0 2px}
+    .sub{font-size:.92rem; opacity:.9; margin:0 0 14px}
+    .progress{height:6px; background:#eee; border-radius:6px; overflow:hidden; margin:12px 0 18px}
+    .bar{height:6px; width:0; background:var(--terracota); transition:width .3s ease}
+    .q-title{font-weight:700; font-size:1.05rem; margin:6px 0 12px}
+    .grid{
+      display:grid; gap:12px;
+      grid-template-columns:repeat(2,1fr);
+    }
+    .choice{
+      border:2px solid rgba(0,0,0,.06); border-radius:16px; padding:10px;
+      cursor:pointer; transition:.2s; background:#fff;
+    }
+    .choice:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.10)}
+    .choice.sel{border-color:var(--terracota); box-shadow:0 4px 14px rgba(204,106,90,.25)}
+    .gif{width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; background:#f6f6f6; display:block}
+    .lbl{margin-top:8px; font-weight:700}
+    .btn{
+      margin-top:14px; width:100%; padding:12px 16px; border:0; border-radius:14px;
+      background: linear-gradient(135deg,var(--teal), var(--terracota)); color:#fff;
+      font-weight:800; letter-spacing:.2px; cursor:pointer; transition:.2s;
+    }
+    .btn:disabled{opacity:.45; cursor:not-allowed}
+    .pill{
+      display:inline-block; padding:6px 10px; border-radius:100px;
+      background:rgba(51,89,83,.08); color:var(--teal); font-size:.82rem; margin-bottom:8px;
+    }
+    .small{font-size:.88rem; opacity:.85}
   </style>
 </head>
 <body>
-  <div class="quiz">
-    <img src="../assets/logoterracotabege.png" alt="FemFlow" style="width:120px;margin-bottom:1rem;">
+  <div class="card">
+    <img class="logo" src="../assets/logoterracotabege.png" alt="FemFlow" />
+    <div class="pill">Onboarding • 10 passos</div>
+    <h1>Seu perfil FemFlow</h1>
+    <p class="sub">Responda rapidinho para ajustarmos o treino ao seu ciclo 🌸</p>
+
     <div class="progress"><div class="bar" id="bar"></div></div>
-    <h2 id="pergunta"></h2>
-    <div id="opcoes"></div>
-    <button id="proximo">Próxima</button>
-    <p id="resultado" style="margin-top:1rem;font-weight:600;"></p>
+
+    <div id="stage">
+      <!-- conteúdo das perguntas é inserido via JS -->
+    </div>
+
+    <button class="btn" id="btnNext" disabled>Próxima</button>
+
+    <p class="small" id="helper" style="margin-top:10px;"></p>
   </div>
 
+  <!-- FemFlow Core: precisa expor FEMFLOW.SCRIPT_URL e FEMFLOW.toast() -->
   <script src="scripts/femflow-core.js"></script>
   <script>
-    const perguntas = [
-      { q: "Você menstrua regularmente?", a: ["Sim", "Não"], v: [1, 0] },
-      { q: "Usa algum anticoncepcional hormonal?", a: ["Sim", "Não"], v: [0, 1] },
-      { q: "Há quanto tempo treina com regularidade?", a: ["Menos de 3 meses", "3 a 12 meses", "Mais de 1 ano"], v: [1, 2, 3] },
-      { q: "Quantos dias por semana costuma treinar?", a: ["1–2", "3–4", "5 ou mais"], v: [1, 2, 3] },
-      { q: "Quanto tempo dura sua sessão média de treino?", a: ["Menos de 40 min", "40–70 min", "Mais de 70 min"], v: [1, 2, 3] },
-      { q: "Você faz alongamento ou mobilidade regularmente?", a: ["Sim", "Não"], v: [2, 0] },
-      { q: "Como avalia sua força atual?", a: ["Baixa", "Média", "Alta"], v: [1, 2, 3] },
-      { q: "Tem dores menstruais fortes?", a: ["Sim", "Moderadas", "Não"], v: [0, 1, 2] },
-      { q: "Como está seu nível de energia diário?", a: ["Baixo", "Moderado", "Alto"], v: [1, 2, 3] },
-      { q: "Pratica outros esportes além da musculação?", a: ["Não", "Ocasionalmente", "Sim, com frequência"], v: [1, 2, 3] }
-    ];
+  // Fallback rápido se FEMFLOW não estiver disponível (para testes locais)
+  if(typeof FEMFLOW === "undefined"){
+    window.FEMFLOW = {
+      SCRIPT_URL: "https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec",
+      toast: (m)=>alert(m)
+    };
+  }
 
-    let i = 0, pontuacao = 0, respostas = [];
-    const perguntaEl = document.getElementById("pergunta");
-    const opcoesEl = document.getElementById("opcoes");
-    const bar = document.getElementById("bar");
-    const btn = document.getElementById("proximo");
-    const res = document.getElementById("resultado");
+  // ---------- Modelo de perguntas ----------
+  // v = pontuação do item escolhido
+  // type "gif-pick" = primeira tela com GIFs; type "choice" = botões discretos
+  const Q = [
+    {
+      type:"gif-pick",
+      q:"Você está treinando atualmente ou está parada?",
+      opts:[
+        {label:"Estou treinando", gif:"../assets/gifs/treinando.gif", emoji:"💪", v:3},
+        {label:"Estou parada",   gif:"../assets/gifs/parada.gif",    emoji:"😔", v:1}
+      ],
+      helper:"Isso nos ajuda a ajustar a carga inicial."
+    },
+    { type:"choice", q:"Você menstrua regularmente?", opts:["Sim","Não"], v:[2,1] },
+    { type:"choice", q:"Usa anticoncepcional hormonal?", opts:["Sim","Não"], v:[1,2] },
+    { type:"choice", q:"Há quanto tempo treina com regularidade?", opts:["< 3 meses","3–12 meses","> 1 ano"], v:[1,2,3] },
+    { type:"choice", q:"Quantos dias por semana costuma treinar?", opts:["1–2","3–4","5+"], v:[1,2,3] },
+    { type:"choice", q:"Quanto dura sua sessão média?", opts:["< 40 min","40–70 min","> 70 min"], v:[1,2,3] },
+    { type:"choice", q:"Faz mobilidade/alongamento regularmente?", opts:["Sim","Não"], v:[2,0] },
+    { type:"choice", q:"Como avalia sua força hoje?", opts:["Baixa","Média","Alta"], v:[1,2,3] },
+    { type:"choice", q:"Dores menstruais nos últimos ciclos?", opts:["Fortes","Moderadas","Leves/Não"], v:[0,1,2] },
+    { type:"choice", q:"Pratica outro esporte além da musculação?", opts:["Não","Ocasionalmente","Com frequência"], v:[1,2,3] }
+  ];
 
-    function renderPergunta(){
-      const p = perguntas[i];
-      bar.style.width = `${(i/perguntas.length)*100}%`;
-      perguntaEl.textContent = p.q;
-      opcoesEl.innerHTML = "";
-      p.a.forEach((alt,idx)=>{
-        const b = document.createElement("button");
-        b.textContent = alt;
-        b.style.background="#EABAA3";
-        b.style.border="none"; b.style.margin="6px"; b.style.padding="10px 14px"; b.style.borderRadius="10px";
-        b.onclick = ()=>{ pontuacao += p.v[idx]; respostas.push(alt); i++; next(); };
-        opcoesEl.appendChild(b);
-      });
-    }
+  let idx = 0;
+  let score = 0;
+  let answers = [];
+  let currentPicked = null;
 
-    function next(){
-      if(i < perguntas.length) renderPergunta();
-      else finalizar();
-    }
+  const stage = document.getElementById("stage");
+  const bar   = document.getElementById("bar");
+  const next  = document.getElementById("btnNext");
+  const helper= document.getElementById("helper");
 
-    async function finalizar(){
-      bar.style.width = "100%";
-      perguntaEl.textContent = "Análise concluída 🌸";
-      opcoesEl.innerHTML = "";
-      btn.style.display = "none";
+  function perc(){ return Math.round((idx/Q.length)*100); }
+  function setBar(){ bar.style.width = perc()+"%"; }
 
-      const media = pontuacao / perguntas.length;
-      let nivel = "iniciante";
-      if(media >= 2.2 && media < 2.7) nivel = "intermediaria";
-      if(media >= 2.7) nivel = "avancada";
-      res.textContent = `Seu perfil é ${nivel.toUpperCase()} (${pontuacao} pontos)`;
+  function render(){
+    setBar();
+    next.disabled = true;
+    currentPicked = null;
+    const item = Q[idx] || {};
+    helper.textContent = item.helper || "";
+    stage.innerHTML = "";
 
-      // Dados básicos
-      const nome = localStorage.getItem("femflow_nome") || prompt("Seu nome completo:");
-      const email = localStorage.getItem("femflow_email") || prompt("Seu e-mail:");
+    const title = document.createElement("div");
+    title.className = "q-title";
+    title.textContent = item.q || "";
+    stage.appendChild(title);
 
-      // Envia para o servidor
-      const payload = {
-        action: "loginOuCadastro",
-        nome, email,
-        perfil: nivel,
-        pontuacao,
-        anamnese: JSON.stringify(respostas)
-      };
+    if(item.type === "gif-pick"){
+      const grid = document.createElement("div");
+      grid.className = "grid";
+      item.opts.forEach((o, i)=>{
+        const card = document.createElement("div");
+        card.className = "choice";
+        const img = document.createElement("img");
+        img.className = "gif";
+        // Se o GIF não existir, mostramos um emoji grande como fallback
+        img.onerror = ()=>{ img.replaceWith(Object.assign(document.createElement("div"),{textContent:o.emoji||"🌸", style:"font-size:64px; line-height:1; padding:18px 0;"})); };
+        img.src = o.gif || "";
+        img.alt = o.label;
 
-      try {
-        const resp = await fetch(FEMFLOW.SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+        const lbl = document.createElement("div");
+        lbl.className = "lbl";
+        lbl.textContent = o.label;
+
+        card.appendChild(img); card.appendChild(lbl);
+        card.addEventListener("click", ()=>{
+          document.querySelectorAll(".choice").forEach(c=>c.classList.remove("sel"));
+          card.classList.add("sel");
+          currentPicked = {label:o.label, v:o.v};
+          next.disabled = false;
+          if(navigator.vibrate) navigator.vibrate(20);
         });
-        const data = await resp.json();
-        if(data.status === "ok" || data.status === "created"){
-          localStorage.setItem("femflow_id", data.id);
-          localStorage.setItem("femflow_nivel", nivel);
-          FEMFLOW.toast("🌿 Perfil salvo com sucesso!");
-          setTimeout(()=> window.location.href = "ciclo.html", 1200);
-        } else FEMFLOW.toast("⚠️ Erro ao registrar perfil", true);
-      } catch(err){
-        console.error(err);
-        FEMFLOW.toast("❌ Falha de conexão", true);
-      }
+        grid.appendChild(card);
+      });
+      stage.appendChild(grid);
+      return;
     }
 
-    btn.onclick = next;
-    renderPergunta();
+    // type: "choice" (botões simples)
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    item.opts.forEach((label, i)=>{
+      const b = document.createElement("div");
+      b.className = "choice";
+      b.innerHTML = `<div class="lbl">${label}</div>`;
+      b.addEventListener("click", ()=>{
+        document.querySelectorAll(".choice").forEach(c=>c.classList.remove("sel"));
+        b.classList.add("sel");
+        currentPicked = {label, v:item.v[i]};
+        next.disabled = false;
+        if(navigator.vibrate) navigator.vibrate(20);
+      });
+      grid.appendChild(b);
+    });
+    stage.appendChild(grid);
+  }
+
+  async function finish(){
+    // nível por média ponderada
+    const media = score / Q.length;
+    let nivel = "iniciante";
+    if(media >= 2.2 && media < 2.7) nivel = "intermediaria";
+    if(media >= 2.7) nivel = "avancada";
+
+    // pega nome/email (se já vieram do login anterior, usamos; senão, perguntamos)
+    const nome  = (localStorage.getItem("femflow_nome")  || "").trim() || prompt("Seu nome completo:");
+    const email = (localStorage.getItem("femflow_email") || "").trim() || prompt("Seu e-mail:");
+
+    if(!email || !nome){
+      FEMFLOW.toast("Informe nome e e-mail para concluir o cadastro.");
+      return;
+    }
+
+    // manda para o Apps Script (não autentica, só grava/atualiza o perfil)
+    const payload = {
+      action: "loginOuCadastro",
+      nome, email,
+      perfil: nivel,
+      pontuacao: score,
+      anamnese: JSON.stringify(answers)
+    };
+
+    try{
+      const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json();
+      if(data.status === "ok" || data.status === "created"){
+        localStorage.setItem("femflow_email", email);
+        localStorage.setItem("femflow_nome", nome);
+        FEMFLOW.toast("🌸 Perfil criado! Agora faça login para continuar.");
+        setTimeout(()=>{ window.location.href = "login.html"; }, 1400);
+      }else{
+        FEMFLOW.toast("⚠️ Não foi possível concluir. Tente novamente.");
+      }
+    }catch(err){
+      console.error(err);
+      FEMFLOW.toast("❌ Falha de conexão.");
+    }
+  }
+
+  next.addEventListener("click", ()=>{
+    if(currentPicked){
+      score += Number(currentPicked.v||0);
+      answers.push(currentPicked.label);
+    }
+    idx++;
+    if(idx < Q.length) render(); else finish();
+  });
+
+  // start
+  render();
   </script>
 </body>
 </html>
+
