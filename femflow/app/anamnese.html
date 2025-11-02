@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Anamnese FemFlow</title>
+  <style>
+    body {
+      background: linear-gradient(180deg,#F4E1D7,#EFBDA6);
+      font-family: "Lato", sans-serif;
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; margin: 0; color: #335953;
+    }
+    .quiz {
+      width: 90%; max-width: 400px;
+      background: #fff; padding: 2rem;
+      border-radius: 18px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: all 0.4s ease;
+    }
+    h2 { color: #cc6a5a; font-family: "Playfair Display", serif; }
+    button {
+      background: linear-gradient(135deg,#335953,#cc6a5a);
+      color:#fff;border:none;border-radius:12px;
+      padding:12px 24px;margin-top:1rem;width:100%;max-width:260px;
+      font-weight:600;cursor:pointer;
+    }
+    button:hover { opacity:0.9; }
+    .progress {height:6px;background:#eee;border-radius:3px;margin-bottom:1rem;}
+    .bar {height:6px;width:0;background:#cc6a5a;border-radius:3px;transition:width 0.3s;}
+  </style>
+</head>
+<body>
+  <div class="quiz">
+    <img src="../assets/logoterracotabege.png" alt="FemFlow" style="width:120px;margin-bottom:1rem;">
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <h2 id="pergunta"></h2>
+    <div id="opcoes"></div>
+    <button id="proximo">Próxima</button>
+    <p id="resultado" style="margin-top:1rem;font-weight:600;"></p>
+  </div>
+
+  <script src="scripts/femflow-core.js"></script>
+  <script>
+    const perguntas = [
+      { q: "Você menstrua regularmente?", a: ["Sim", "Não"], v: [1, 0] },
+      { q: "Usa algum anticoncepcional hormonal?", a: ["Sim", "Não"], v: [0, 1] },
+      { q: "Há quanto tempo treina com regularidade?", a: ["Menos de 3 meses", "3 a 12 meses", "Mais de 1 ano"], v: [1, 2, 3] },
+      { q: "Quantos dias por semana costuma treinar?", a: ["1–2", "3–4", "5 ou mais"], v: [1, 2, 3] },
+      { q: "Quanto tempo dura sua sessão média de treino?", a: ["Menos de 40 min", "40–70 min", "Mais de 70 min"], v: [1, 2, 3] },
+      { q: "Você faz alongamento ou mobilidade regularmente?", a: ["Sim", "Não"], v: [2, 0] },
+      { q: "Como avalia sua força atual?", a: ["Baixa", "Média", "Alta"], v: [1, 2, 3] },
+      { q: "Tem dores menstruais fortes?", a: ["Sim", "Moderadas", "Não"], v: [0, 1, 2] },
+      { q: "Como está seu nível de energia diário?", a: ["Baixo", "Moderado", "Alto"], v: [1, 2, 3] },
+      { q: "Pratica outros esportes além da musculação?", a: ["Não", "Ocasionalmente", "Sim, com frequência"], v: [1, 2, 3] }
+    ];
+
+    let i = 0, pontuacao = 0, respostas = [];
+    const perguntaEl = document.getElementById("pergunta");
+    const opcoesEl = document.getElementById("opcoes");
+    const bar = document.getElementById("bar");
+    const btn = document.getElementById("proximo");
+    const res = document.getElementById("resultado");
+
+    function renderPergunta(){
+      const p = perguntas[i];
+      bar.style.width = `${(i/perguntas.length)*100}%`;
+      perguntaEl.textContent = p.q;
+      opcoesEl.innerHTML = "";
+      p.a.forEach((alt,idx)=>{
+        const b = document.createElement("button");
+        b.textContent = alt;
+        b.style.background="#EABAA3";
+        b.style.border="none"; b.style.margin="6px"; b.style.padding="10px 14px"; b.style.borderRadius="10px";
+        b.onclick = ()=>{ pontuacao += p.v[idx]; respostas.push(alt); i++; next(); };
+        opcoesEl.appendChild(b);
+      });
+    }
+
+    function next(){
+      if(i < perguntas.length) renderPergunta();
+      else finalizar();
+    }
+
+    async function finalizar(){
+      bar.style.width = "100%";
+      perguntaEl.textContent = "Análise concluída 🌸";
+      opcoesEl.innerHTML = "";
+      btn.style.display = "none";
+
+      const media = pontuacao / perguntas.length;
+      let nivel = "iniciante";
+      if(media >= 2.2 && media < 2.7) nivel = "intermediaria";
+      if(media >= 2.7) nivel = "avancada";
+      res.textContent = `Seu perfil é ${nivel.toUpperCase()} (${pontuacao} pontos)`;
+
+      // Dados básicos
+      const nome = localStorage.getItem("femflow_nome") || prompt("Seu nome completo:");
+      const email = localStorage.getItem("femflow_email") || prompt("Seu e-mail:");
+
+      // Envia para o servidor
+      const payload = {
+        action: "loginOuCadastro",
+        nome, email,
+        perfil: nivel,
+        pontuacao,
+        anamnese: JSON.stringify(respostas)
+      };
+
+      try {
+        const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await resp.json();
+        if(data.status === "ok" || data.status === "created"){
+          localStorage.setItem("femflow_id", data.id);
+          localStorage.setItem("femflow_nivel", nivel);
+          FEMFLOW.toast("🌿 Perfil salvo com sucesso!");
+          setTimeout(()=> window.location.href = "ciclo.html", 1200);
+        } else FEMFLOW.toast("⚠️ Erro ao registrar perfil", true);
+      } catch(err){
+        console.error(err);
+        FEMFLOW.toast("❌ Falha de conexão", true);
+      }
+    }
+
+    btn.onclick = next;
+    renderPergunta();
+  </script>
+</body>
+</html>
