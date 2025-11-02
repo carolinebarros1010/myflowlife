@@ -256,16 +256,33 @@
     setTimeout(()=>window.location.href="login.html",4000);
   }
 
-  next.onclick=()=>{
-    const item=Q[idx];
-    if(["info","email","telefone","senha","senhaConfirm"].includes(item.type)){
-      const val=document.getElementById(item.field)?.value.trim();
-      if(val){answers.push(val);}
-    }else if(currentPicked){score+=Number(currentPicked.v||0); answers.push(currentPicked.label);}
-    idx++; if(idx<Q.length)render(); else finish();
-  };
+ next.onclick = () => {
+  const item = Q[idx];
 
-  render();
+  // Captura respostas
+  if (["info", "email", "telefone", "senha", "senhaConfirm"].includes(item.type)) {
+    const val = document.getElementById(item.field)?.value.trim();
+    if (val) answers.push(val);
+  } else if (currentPicked) {
+    score += Number(currentPicked.v || 0);
+    answers.push(currentPicked.label);
+  }
+
+  // Incrementa índice e decide próximo passo
+  idx++;
+
+  // 🚫 Corrigido: só chama finish() uma vez, sem travar
+  if (idx < Q.length) {
+    render();
+  } else {
+    try {
+      finish();
+    } catch (err) {
+      console.error("Erro no finish:", err);
+      FEMFLOW.toast("❌ Ocorreu um erro ao finalizar a anamnese.");
+    }
+  }
+};
   </script>
 </body>
 </html>
