@@ -104,7 +104,7 @@
   function perc(){return Math.round((idx/Q.length)*100);}
   function setBar(){bar.style.width=perc()+"%";}
 
-  function validarEmail(v){return /^[^\\s@]+@[\\w.-]+\\.[a-z]{2,}$/i.test(v);}
+  function validarEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(v);}
   function validarTelefone(v){
     const digits=v.replace(/\D/g,"");
     return digits.length>=10 && digits.length<=11;
