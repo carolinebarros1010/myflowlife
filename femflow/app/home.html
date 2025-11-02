@@ -1,137 +1,146 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FemFlow • Home</title>
-  <link rel="stylesheet" href="../style.css">
   <style>
+    :root {
+      --terracota:#CC6A5A; --pessego:#F4A386; --teal:#335953; --bege:#FBF6F0;
+    }
     body {
       margin: 0;
-      background: linear-gradient(180deg,#F4E1D7 0%,#EFBDA6 100%);
       font-family: "Lato", sans-serif;
-      color: #335953;
+      background: linear-gradient(180deg,#F4E1D7 0%,#EFBDA6 100%);
+      color: var(--teal);
     }
     header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:1rem 1.5rem; background:rgba(255,255,255,0.8); backdrop-filter:blur(10px);
+      box-shadow:0 4px 10px rgba(0,0,0,.08);
     }
-    .logo { width: 100px; }
-    .tagline { font-size: 1rem; color: #335953; }
-    video { width: 100%; border-radius: 16px; margin-top: 10px; }
-    .section-title {
-      font-family: "Playfair Display", serif;
-      color: #CC6A5A; font-size: 1.2rem;
-      margin: 16px 0 8px 16px;
+    header img {height:48px;}
+    header button {
+      background:linear-gradient(135deg,var(--teal),var(--terracota));
+      color:#fff; border:none; border-radius:12px; padding:0.6rem 1rem; cursor:pointer; font-weight:bold;
     }
-    .catalogo-container {
-      display: flex; gap: 12px; overflow-x: auto;
-      padding: 0 16px 16px;
-      scroll-snap-type: x mandatory;
+    header button:hover {transform:scale(1.05);}
+    .welcome {text-align:center; margin-top:1.2rem;}
+    .welcome h2{color:var(--terracota); font-family:"Playfair Display",serif;}
+    .welcome p{font-size:1rem; opacity:.9;}
+    .video-container{width:100%;max-width:800px;margin:1.5rem auto;border-radius:20px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.15);}
+    video{width:100%;display:block;}
+    .catalog{padding:1rem 1.5rem;}
+    .catalog h3{color:var(--teal);font-family:"Playfair Display",serif;}
+    .scroll-container{display:flex;overflow-x:auto;gap:1rem;scroll-behavior:smooth;}
+    .item{flex:0 0 220px;background:white;border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.1);overflow:hidden;cursor:pointer;transition:.3s;}
+    .item:hover{transform:scale(1.05);}
+    .item img{width:100%;height:140px;object-fit:cover;}
+    .info{text-align:center;padding:.8rem;}
+    .info h4{margin:0;font-size:1rem;color:var(--terracota);font-family:"Playfair Display",serif;}
+    .info p{margin:.4rem 0 0;font-size:.85rem;color:#666;}
+    .cta{margin:2rem auto;text-align:center;}
+    .cta button{
+      background:linear-gradient(135deg,var(--teal),var(--terracota));
+      color:#fff;border:none;border-radius:14px;padding:0.9rem 1.4rem;font-weight:bold;font-size:1rem;
+      cursor:pointer;transition:.3s;
     }
-    .plano-card {
-      background: #fff;
-      border-radius: 14px;
-      min-width: 180px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-      scroll-snap-align: start;
-      text-align: center;
-      padding-bottom: 10px;
-    }
-    .plano-card img {
-      width: 100%;
-      height: 120px;
-      border-radius: 14px 14px 0 0;
-      object-fit: cover;
-    }
-    .plano-card h4 { margin: 8px 0 4px; font-size: 0.95rem; color: #335953; }
-    .plano-card p { margin: 0; font-size: 0.85rem; color: #666; }
-    .plano-card button {
-      margin-top: 8px;
-      background: linear-gradient(135deg,#335953,#CC6A5A);
-      color: #fff;
-      border: none; border-radius: 12px;
-      padding: 8px 12px; font-weight: bold; cursor: pointer;
-    }
+    .cta button:hover{transform:scale(1.05);}
+    footer{text-align:center;padding:1rem;font-size:.8rem;opacity:.6;}
   </style>
 </head>
-<body>
 
+<body>
   <header>
-    <img src="../assets/logofemflowterracota.png" class="logo" alt="FemFlow">
-    <div>
-      <div class="tagline">Carregando perfil...</div>
-      <small id="licencaStatus"></small>
-    </div>
+    <img src="../assets/logofemflowterracota.png" alt="FemFlow logo">
+    <button id="logoutBtn" style="display:none;">Sair</button>
   </header>
 
-  <video autoplay muted playsinline controls poster="../assets/videos/cover_welcome.jpg">
-    <source src="../assets/videos/boasvindas.mp4" type="video/mp4">
-    Seu navegador não suporta vídeo.
-  </video>
+  <div class="welcome" id="welcomeBox">
+    <h2 id="welcomeTitle">🌸 Bem-vinda ao FemFlow</h2>
+    <p id="welcomeSub">Seu equilíbrio hormonal em movimento</p>
+  </div>
 
-  <h2 class="section-title">Meus Programas</h2>
-  <div id="meusProgramas" class="catalogo-container"></div>
+  <div class="video-container">
+    <video autoplay muted controls poster="../assets/capas/boasvindas.jpg">
+      <source src="../assets/videos/boasvindas.mp4" type="video/mp4" />
+      Seu navegador não suporta vídeo.
+    </video>
+  </div>
 
-  <h2 class="section-title">Catálogo FemFlow</h2>
-  <div id="catalogo" class="catalogo-container"></div>
+  <div class="catalog">
+    <h3>💖 Explore nossos programas</h3>
+    <div class="scroll-container" id="catalogScroll"></div>
+  </div>
+
+  <div class="cta" id="ctaArea">
+    <button onclick="irParaCadastro()">Cadastre-se agora</button>
+    <button onclick="irParaLogin()" style="margin-left:10px;">Já tenho conta</button>
+  </div>
+
+  <footer>
+    FemFlow • MyFlowLife © 2025 — Todos os direitos reservados.
+  </footer>
 
   <script src="scripts/femflow-core.js"></script>
   <script>
-  async function initHome(){
-    const id = FEMFLOW.read("femflow_id");
-    if(!id){ window.location.href="login.html"; return; }
+    async function initHome() {
+      const id = localStorage.getItem("femflow_id");
+      const catalog = document.getElementById("catalogScroll");
+      renderCatalog(catalog);
 
-    try {
-      const perfil = await FEMFLOW.get({ action:"validar", id });
-      if(perfil.status !== "ok"){
-        FEMFLOW.toast("Conta não encontrada. Faça a anamnese.");
-        localStorage.removeItem("femflow_id");
-        window.location.href = "anamnese.html";
+      // 🔹 Sem login → modo público
+      if (!id) {
+        document.getElementById("logoutBtn").style.display = "none";
+        document.getElementById("welcomeTitle").textContent = "🌸 Bem-vinda ao FemFlow";
+        document.getElementById("welcomeSub").textContent = "Explore nossos programas e descubra seu fluxo natural";
         return;
       }
 
-      document.querySelector(".tagline").innerHTML =
-        `🌸 Bem-vinda, <b>${perfil.nome}</b> — Fase <b>${perfil.fase}</b>`;
-      document.getElementById("licencaStatus").textContent =
-        perfil.licenca ? "Licença Ativa ✅" : "Sem licença 🔒";
-
-      // Renderiza programa ativo se licenciado
-      const progDiv = document.getElementById("meusProgramas");
-      if(perfil.licenca){
-        const card = document.createElement("div");
-        card.className = "plano-card";
-        card.innerHTML = `
-          <img src="../assets/capas/${perfil.enfase||'geral'}.jpg" alt="Meu Programa">
-          <h4>${perfil.nivel.toUpperCase()} • ${perfil.enfase||'Geral'}</h4>
-          <p>Dia ${perfil.diaCiclo} do ciclo</p>
-          <button onclick="window.location.href='${perfil.link_planilha}'">Abrir Programa</button>
-        `;
-        progDiv.appendChild(card);
+      // 🔹 Com login → modo aluna
+      try {
+        const res = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${encodeURIComponent(id)}`);
+        const data = await res.json();
+        if (data.status === "ok") {
+          document.getElementById("logoutBtn").style.display = "inline-block";
+          document.getElementById("ctaArea").style.display = "none";
+          document.getElementById("welcomeTitle").textContent = `🌸 Bem-vinda de volta, ${data.nome || "aluna"}`;
+          document.getElementById("welcomeSub").textContent = `Nível: ${data.nivel || "iniciante"} • Fase: ${data.fase || "folicular"}`;
+          
+          // Adiciona botão “Acessar meu ciclo”
+          const btn = document.createElement("button");
+          btn.textContent = "Acessar meu ciclo";
+          btn.onclick = () => window.location.href = "flowcenter.html";
+          document.getElementById("ctaArea").appendChild(btn);
+        } else {
+          localStorage.removeItem("femflow_id");
+        }
+      } catch (e) {
+        console.error("Erro ao carregar perfil:", e);
       }
-
-      // Renderiza catálogo padrão (Hotmart)
-      const catDiv = document.getElementById("catalogo");
-      const produtos = [
-        { titulo:"30 Dias Glúteo", img:"../assets/capas/gluteo.jpg", hotmart:"https://pay.hotmart.com/XXXX1", preco:"R$129" },
-        { titulo:"Transição 15", img:"../assets/capas/transicao15.jpg", hotmart:"https://pay.hotmart.com/XXXX2", preco:"R$79" },
-        { titulo:"Performance Feminina", img:"../assets/capas/performance.jpg", hotmart:"https://pay.hotmart.com/XXXX3", preco:"R$149" }
-      ];
-      produtos.forEach(p=>{
-        const c=document.createElement("div"); c.className="plano-card";
-        c.innerHTML=`<img src="${p.img}" alt="${p.titulo}">
-          <h4>${p.titulo}</h4><p>${p.preco}</p>
-          <button onclick="window.open('${p.hotmart}','_blank')">Ver / Comprar</button>`;
-        catDiv.appendChild(c);
-      });
-
-    } catch (err){
-      console.error(err);
-      FEMFLOW.toast("Erro ao carregar perfil. Verifique conexão.");
     }
-  }
 
-  initHome();
+    function renderCatalog(el) {
+      const produtos = [
+        {titulo:"FemFlow 30 por 15",desc:"Treinos cíclicos por 30 dias",img:"../assets/capas/femflow30.jpg",link:"https://pay.hotmart.com/XXXX"},
+        {titulo:"RespiraFlow",desc:"Protocolos de respiração e foco",img:"../assets/capas/respiraflow.jpg",link:"https://pay.hotmart.com/YYYY"},
+        {titulo:"MyFlowLife Pro",desc:"Acesso completo e plano personalizado",img:"../assets/capas/myflowlifepro.jpg",link:"https://pay.hotmart.com/ZZZZ"}
+      ];
+      el.innerHTML = produtos.map(p=>`
+        <div class="item" onclick="window.open('${p.link}','_blank')">
+          <img src="${p.img}" alt="${p.titulo}" />
+          <div class="info">
+            <h4>${p.titulo}</h4>
+            <p>${p.desc}</p>
+          </div>
+        </div>`).join("");
+    }
+
+    function irParaLogin(){window.location.href="login.html";}
+    function irParaCadastro(){window.location.href="anamnese.html";}
+    function logout(){localStorage.removeItem("femflow_id");window.location.href="home.html";}
+
+    initHome();
   </script>
 </body>
 </html>
