@@ -16,6 +16,7 @@
         background: linear-gradient(180deg, #f4e1d7 0%, #efbda6 100%);
         color: #335953;
       }
+
       .login-card {
         width: 90%;
         max-width: 400px;
@@ -26,22 +27,29 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         text-align: center;
       }
+
       .login-card img.logo {
         width: 130px;
         margin-bottom: 1rem;
       }
+
       .login-card h2 {
         margin: 0;
         font-size: 1.6rem;
         color: #cc6a5a;
         font-family: "Playfair Display", serif;
       }
+
       .login-card .subtitle {
         font-size: 0.9rem;
         color: #335953;
         margin: 0.2rem 0 1.5rem;
       }
-      .form-group { margin-bottom: 0.9rem; }
+
+      .form-group {
+        margin-bottom: 0.9rem;
+      }
+
       .form-group input {
         width: 100%;
         padding: 0.7rem 0.8rem;
@@ -53,10 +61,12 @@
         outline: none;
         transition: border-color 0.2s, box-shadow 0.2s;
       }
+
       .form-group input:focus {
         border-color: #cc6a5a;
         box-shadow: 0 0 0 3px rgba(204, 106, 90, 0.25);
       }
+
       button {
         width: 100%;
         padding: 0.8rem;
@@ -70,7 +80,11 @@
         background: linear-gradient(135deg, #335953, #cc6a5a);
         transition: transform 0.3s, background 0.3s;
       }
-      button:hover { transform: scale(1.03); }
+
+      button:hover {
+        transform: scale(1.03);
+      }
+
       .toggle {
         font-size: 0.85rem;
         color: #cc6a5a;
@@ -78,6 +92,7 @@
         cursor: pointer;
         text-decoration: underline;
       }
+
       .message {
         margin-top: 1rem;
         min-height: 1.4rem;
@@ -86,111 +101,68 @@
       }
     </style>
   </head>
-
   <body>
     <div class="login-card">
       <img src="../assets/logoterracotabege.png" alt="FemFlow logo" class="logo" />
       <h2>Bem-vinda ao FemFlow</h2>
-      <p class="subtitle">Acesse ou crie sua conta para iniciar seu ciclo</p>
+      <p class="subtitle">Acesse sua conta para continuar seu ciclo 🌸</p>
 
-      <!-- Login -->
+      <!-- Login form -->
       <div id="loginBox">
         <div class="form-group">
           <input type="email" id="loginEmail" placeholder="Seu e-mail" />
         </div>
+        <div class="form-group">
+          <input type="password" id="loginSenha" placeholder="Sua senha" />
+        </div>
         <button onclick="entrar()">Entrar</button>
-        <p class="toggle" onclick="mostrarCadastro()">Ainda não tem conta? Cadastre-se</p>
-      </div>
-
-      <!-- Cadastro -->
-      <div id="cadastroBox" style="display: none;">
-        <div class="form-group">
-          <input type="text" id="nome" placeholder="Nome completo" />
-        </div>
-        <div class="form-group">
-          <input type="email" id="email" placeholder="E-mail" />
-        </div>
-        <button onclick="registrar()">Criar conta</button>
-        <p class="toggle" onclick="mostrarLogin()">Já tem conta? Fazer login</p>
+        <p class="toggle" onclick="irParaAnamnese()">Ainda não tem conta? Faça sua anamnese</p>
       </div>
 
       <p id="mensagem" class="message"></p>
     </div>
 
-    <script src="scripts/femflow-core.js"></script>
     <script>
-      /* ---------- Alternância entre login e cadastro ---------- */
-      function mostrarCadastro() {
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("cadastroBox").style.display = "block";
-        document.getElementById("mensagem").textContent = "";
-      }
-      function mostrarLogin() {
-        document.getElementById("cadastroBox").style.display = "none";
-        document.getElementById("loginBox").style.display = "block";
-        document.getElementById("mensagem").textContent = "";
-      }
+      const scriptURL = FEMFLOW?.SCRIPT_URL || "https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec";
 
-      /* ---------- Registro simplificado ---------- */
-      async function registrar() {
-        const nome = document.getElementById("nome").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const msgEl = document.getElementById("mensagem");
-
-        if (!nome || !email) {
-          msgEl.textContent = "Preencha nome e e-mail.";
-          msgEl.style.color = "#cc6a5a";
-          return;
-        }
-
-        msgEl.textContent = "Criando sua conta...";
-        msgEl.style.color = "#335953";
-
-        const data = await FEMFLOW.loginOuCadastro(nome, email);
-        if (data && data.id) {
-          msgEl.textContent = `Conta criada! ID: ${data.id}`;
-          msgEl.style.color = "#335953";
-          setTimeout(() => (window.location.href = "ciclo.html"), 1500);
-        } else {
-          msgEl.textContent = "Erro ao criar conta.";
-          msgEl.style.color = "#cc6a5a";
-        }
-      }
-
-      /* ---------- Login simplificado ---------- */
       async function entrar() {
         const email = document.getElementById("loginEmail").value.trim();
+        const senha = document.getElementById("loginSenha").value.trim();
         const msgEl = document.getElementById("mensagem");
-
-        if (!email) {
-          msgEl.textContent = "Informe seu e-mail.";
-          msgEl.style.color = "#cc6a5a";
-          return;
-        }
-
         msgEl.textContent = "Verificando...";
         msgEl.style.color = "#335953";
 
         try {
-          const resp = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&email=${encodeURIComponent(email)}`);
-          const data = await resp.json();
+          const res = await fetch(scriptURL, {
+            method: "POST",
+            body: JSON.stringify({ action: "login", email, senha }),
+          });
+          const data = await res.json();
+
           if (data.status === "ok") {
-            localStorage.setItem("femflow_id", data.id);
-            localStorage.setItem("femflow_nome", data.nome);
             msgEl.textContent = `Bem-vinda, ${data.nome}!`;
             msgEl.style.color = "#28a745";
-            setTimeout(() => (window.location.href = "ciclo.html"), 1000);
+            localStorage.setItem("femflow_id", data.id);
+            setTimeout(() => {
+              window.location.href = "./ciclo.html";
+            }, 1000);
           } else {
-            msgEl.textContent = "E-mail não encontrado.";
-            msgEl.style.color = "#cc6a5a";
+            msgEl.textContent = data.msg || "E-mail ou senha incorretos.";
+            msgEl.style.color = "#d35470";
           }
-        } catch (err) {
-          console.error(err);
-          msgEl.textContent = "Erro de conexão.";
-          msgEl.style.color = "#cc6a5a";
+        } catch (error) {
+          console.error(error);
+          msgEl.textContent = "Erro de rede. Tente novamente.";
+          msgEl.style.color = "#d35470";
         }
       }
+
+      function irParaAnamnese() {
+        window.location.href = "anamnese.html";
+      }
     </script>
+
+    <script src="scripts/femflow-core.js"></script>
   </body>
 </html>
 
