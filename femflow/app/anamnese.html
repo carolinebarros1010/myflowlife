@@ -65,12 +65,48 @@
     <button class="btn" id="btnNext" disabled>Próxima</button>
   </div>
 
-  <script src="scripts/femflow-core.js"></script>
-  <script>
-  if(typeof FEMFLOW==="undefined"){
-    window.FEMFLOW={SCRIPT_URL:"https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec",toast:(m)=>alert(m)};
-  }
+<script src="scripts/femflow-core.js"></script>
+<script>
+/* ======================================================
+   ✅ Fallback inteligente para FemFlow Core + Debug
+   ====================================================== */
+if (typeof FEMFLOW === "undefined" || !FEMFLOW.SCRIPT_URL) {
+  console.warn("⚠️ femflow-core.js não carregado — usando fallback local.");
+  window.FEMFLOW = {
+    SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxblNEoTTf7YLHZQMJBmVPK26VIJreOGgRblQYlBNP2JO4lyQblLLA9PtHeE32MTtY/exec", // 👉 coloque aqui seu DEPLOY_ID real
+    toast: (m) => alert(m)
+  };
+}
 
+// 🔍 Ativar logs de depuração
+const DEBUG_MODE = true;
+function debugLog(...args) {
+  if (DEBUG_MODE) console.log("📡 FEMFLOW DEBUG:", ...args);
+}
+
+// 🚀 Função auxiliar para enviar ao Apps Script com logs
+async function sendToFemFlow(payload) {
+  debugLog("Enviando para Script URL:", FEMFLOW.SCRIPT_URL, payload);
+  const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const data = await resp.json();
+  debugLog("Resposta recebida:", data);
+  return data;
+}
+
+// 🔥 Garante inicialização mesmo que o core falhe
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    render(); // renderiza primeira pergunta
+    debugLog("Anamnese iniciada com sucesso.");
+  } catch (err) {
+    console.error("Erro ao iniciar FemFlow:", err);
+    FEMFLOW.toast("Falha ao iniciar anamnese.");
+  }
+});
   const Q=[
     {type:"info", q:"Seu nome completo", field:"nome", placeholder:"Ex: Maria Oliveira"},
     {type:"email", q:"Seu e-mail (para login futuro)", field:"email", placeholder:"Ex: maria@email.com"},
@@ -219,28 +255,65 @@
     stage.append(title,grid);
   }
 
-  async function finish(){
-    const media=score/Q.length;
-    let nivel="iniciante"; if(media>=2.2&&media<2.7) nivel="intermediaria"; if(media>=2.7) nivel="avancada";
-    const nome=document.getElementById("nome")?.value.trim();
-    const email=document.getElementById("email")?.value.trim();
-    const telefone=document.getElementById("telefone")?.value.trim();
-    const senha=document.getElementById("senha")?.value.trim();
-    if(!nome||!email||!senha){FEMFLOW.toast("Preencha nome, e-mail e senha."); return;}
-    if(!validarEmail(email)){FEMFLOW.toast("Digite um e-mail válido."); return;}
-    if(!validarTelefone(telefone)){FEMFLOW.toast("Digite um telefone válido com DDD."); return;}
+ // ======================================================
+// 🚀 Envio final da anamnese para o Apps Script
+// ======================================================
+async function finish() {
+  const media = score / Q.length;
+  let nivel = "iniciante";
+  if (media >= 2.2 && media < 2.7) nivel = "intermediaria";
+  if (media >= 2.7) nivel = "avancada";
 
-    const payload={action:"loginOuCadastro",nome,email,telefone,senha,perfil:nivel,pontuacao:score,anamnese:JSON.stringify(answers)};
-    try{
-      const resp=await fetch(FEMFLOW.SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-      const data=await resp.json();
-      if(data.status==="ok"||data.status==="created"){
-        showSuccess(nome, data.id);
-      } else {
-        FEMFLOW.toast("⚠️ Erro ao cadastrar.");
-      }
-    }catch(err){console.error(err); FEMFLOW.toast("❌ Falha de conexão.");}
+  const nome = document.getElementById("nome")?.value.trim();
+  const email = document.getElementById("email")?.value.trim();
+  const telefone = document.getElementById("telefone")?.value.trim();
+  const senha = document.getElementById("senha")?.value.trim();
+
+  if (!nome || !email || !senha) {
+    FEMFLOW.toast("Preencha nome, e-mail e senha.");
+    return;
   }
+  if (!validarEmail(email)) {
+    FEMFLOW.toast("Digite um e-mail válido.");
+    return;
+  }
+  if (!validarTelefone(telefone)) {
+    FEMFLOW.toast("Digite um telefone válido com DDD.");
+    return;
+  }
+
+  // 🔹 Monta o payload
+  const payload = {
+    action: "loginOuCadastro",
+    nome,
+    email,
+    telefone,
+    senha,
+    perfil: nivel,
+    pontuacao: score,
+    anamnese: JSON.stringify(answers)
+  };
+
+  // 🔹 Log de envio no console
+  debugLog("🚀 Enviando anamnese:", payload);
+
+  try {
+    // Usa a função com logs integrada
+    const data = await sendToFemFlow(payload);
+
+    if (data && (data.status === "ok" || data.status === "created")) {
+      debugLog("✅ Cadastro confirmado:", data);
+      showSuccess(nome, data.id);
+    } else {
+      console.error("⚠️ Retorno inesperado:", data);
+      FEMFLOW.toast("Erro ao cadastrar. Tente novamente.");
+    }
+  } catch (err) {
+    console.error("❌ Erro ao enviar dados:", err);
+    FEMFLOW.toast("Falha de conexão com o servidor.");
+  }
+}
+
 
   // 💫 Função de sucesso com ID FemFlow
   function showSuccess(nome, idFemflow){
