@@ -1,61 +1,45 @@
 /* ===========================================================
-   🌸 FEMFLOW CORE SCRIPT v2.2
+   🌸 FEMFLOW CORE SCRIPT v3.0
    Autor: Ricardo Fernandes • 2025
-   Integração direta com FemFlow Core (Hotmart + App)
    =========================================================== */
 
-const FEMFLOW = {
-      // ======================================================
-// 🔥 Conexão Firebase (Firestore Client SDK)
+// ======================================================
+// 🔥 Firebase — Importação e inicialização
 // ======================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
   authDomain: "femflow-ebec2.firebaseapp.com",
   projectId: "femflow-ebec2",
-  storageBucket: "femflow-ebec2.firebasestorage.app",
+  storageBucket: "femflow-ebec2.appspot.com",
   messagingSenderId: "1043953159611",
   appId: "1:1043953159611:web:d12b82f744740f3124c89e",
   measurementId: "G-6F644L5VTW"
 };
-  /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ======================================================
+// 🌸 Núcleo FEMFLOW
+// ======================================================
+export const FEMFLOW = {
   SCRIPT_URL:
     localStorage.getItem("femflow_script") ||
     "https://script.google.com/macros/s/AKfycbxblNEoTTf7YLHZQMJBmVPK26VIJreOGgRblQYlBNP2JO4lyQblLLA9PtHeE32MTtY/exec",
 
-  /* ----------- 🎨 LOGO PADRÃO ------------ */
-  LOGO: "../../assets/logofemlowverde.png",
+  LOGO: "assets/logofemflowverde.png",
 
-  /* ----------- ⚙️ INICIALIZAÇÃO GERAL ------------ */
   initTreino() {
-    console.log("💫 FemFlow Core v2.2 conectado com sucesso");
+    console.log("💫 FemFlow Core v3.0 conectado com sucesso");
     this.inserirLogo();
     this.criarModalPSE();
     this.inserirBotaoVoltar();
     this.carregarLogoContextual();
     this.autoCiclo();
   },
-
-   // ======================================================
-// 🔥 Conexão Firebase (Firestore Client SDK)
-// ======================================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
-  authDomain: "femflow-ebec2.firebaseapp.com",
-  projectId: "femflow-ebec2",
-  storageBucket: "femflow-ebec2.firebasestorage.app",
-  messagingSenderId: "1043953159611",
-  appId: "1:1043953159611:web:d12b82f744740f3124c89e",
-  measurementId: "G-6F644L5VTW"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
 
   /* =======================================================
      🔹 1. LOGIN / CADASTRO
@@ -70,14 +54,10 @@ const db = getFirestore(app);
       const resp = await fetch(this.SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "loginOuCadastro",
-          nome,
-          email,
-        }),
+        body: JSON.stringify({ action: "loginOuCadastro", nome, email }),
       });
-      const data = await resp.json();
 
+      const data = await resp.json();
       if (data.status === "ok" || data.status === "created") {
         this.toast(`🌸 Bem-vinda, ${data.nome}!`);
         console.log("Perfil carregado:", data);
@@ -86,9 +66,7 @@ const db = getFirestore(app);
         localStorage.setItem("femflow_email", data.email);
         this.router("home");
         return data;
-      } else {
-        this.toast("⚠️ Erro no cadastro/login.", true);
-      }
+      } else this.toast("⚠️ Erro no cadastro/login.", true);
     } catch (err) {
       console.error("Erro em loginOuCadastro:", err);
       this.toast("❌ Falha de conexão com o servidor.", true);
@@ -99,13 +77,14 @@ const db = getFirestore(app);
      🔹 2. INTERFACE VISUAL
   ======================================================= */
   inserirLogo() {
-    if (!document.body) return;
-    const header = document.createElement("div");
-    header.innerHTML = `
-      <div style="display:flex;justify-content:center;margin:15px 0;">
-        <img src="${this.LOGO}" alt="FemFlow" class="logo-img" style="width:130px;height:auto;">
-      </div>`;
-    document.body.prepend(header);
+    if (!document.querySelector(".logo-img")) {
+      const header = document.createElement("div");
+      header.innerHTML = `
+        <div style="display:flex;justify-content:center;margin:15px 0;">
+          <img src="${this.LOGO}" alt="FemFlow" class="logo-img" style="width:130px;height:auto;">
+        </div>`;
+      document.body.prepend(header);
+    }
   },
 
   async carregarLogoContextual() {
@@ -113,18 +92,12 @@ const db = getFirestore(app);
       const resp = await fetch("../../assets/logos.json");
       const logos = await resp.json();
       let logoEscolhido = logos.principal;
-
       const hora = new Date().getHours();
       const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-      if (darkMode) logoEscolhido = logos.escuro;
-      else if (hora >= 18 || hora < 6) logoEscolhido = logos.escuro;
-      else logoEscolhido = logos.principal;
-
-      if (window.location.pathname.includes("treino"))
-        logoEscolhido = logos.secundario;
-      if (window.location.pathname.includes("boasvindas"))
-        logoEscolhido = logos.boasvindas;
+      if (darkMode || hora >= 18 || hora < 6) logoEscolhido = logos.escuro;
+      if (window.location.pathname.includes("treino")) logoEscolhido = logos.secundario;
+      if (window.location.pathname.includes("boasvindas")) logoEscolhido = logos.boasvindas;
 
       const logoImg = document.querySelector(".logo-img");
       if (logoImg) logoImg.src = "../../" + logoEscolhido;
@@ -143,8 +116,7 @@ const db = getFirestore(app);
       background:#335953; color:#fff; border:none;
       padding:8px 14px; border-radius:20px;
       font-family:'Lato',sans-serif; font-size:14px;
-      box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:999; cursor:pointer;
-    `;
+      box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:999; cursor:pointer;`;
 
     const map = {
       "flowcenter.html": "index.html",
@@ -186,6 +158,7 @@ const db = getFirestore(app);
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       const result = await resp.json();
       console.log("📤 Retorno FemFlow Core:", result);
 
@@ -209,20 +182,25 @@ const db = getFirestore(app);
     });
     setTimeout(() => this.router("flowcenter"), 1800);
   },
-// ======================================================
-// 🔹 Buscar exercícios direto do Firestore
-// ======================================================
-FEMFLOW.buscarExerciciosFirebase = async (nivel, fase, dia) => {
-  const caminho = `exercicios/${nivel}/fases/${fase}/dias/${dia}/exercicios`;
-  const colRef = collection(db, caminho);
-  const snapshot = await getDocs(colRef);
-  const lista = [];
-  snapshot.forEach(doc => {
-    lista.push(doc.data());
-  });
-  console.log(`📦 ${lista.length} exercícios carregados do Firestore`);
-  return lista;
-};
+
+  // ======================================================
+  // 🔹 Buscar exercícios direto do Firestore
+  // ======================================================
+  async buscarExerciciosFirebase(nivel, fase, dia) {
+    try {
+      const caminho = `exercicios/${nivel}/fases/${fase}/dias/${dia}/exercicios`;
+      const colRef = collection(db, caminho);
+      const snapshot = await getDocs(colRef);
+      const lista = [];
+      snapshot.forEach(doc => lista.push(doc.data()));
+      console.log(`📦 ${lista.length} exercícios carregados do Firestore`);
+      return lista;
+    } catch (err) {
+      console.error("Erro ao buscar exercícios:", err);
+      this.toast("⚠️ Não foi possível carregar os exercícios.");
+      return [];
+    }
+  },
 
   /* =======================================================
      🔹 4. MODAL PSE
@@ -311,10 +289,7 @@ FEMFLOW.buscarExerciciosFirebase = async (nivel, fase, dia) => {
       this.toast("🌸 Novo ciclo iniciado automaticamente!");
       dia = 1;
       localStorage.setItem("dia_ciclo", 1);
-      localStorage.setItem(
-        `femflow_reiniciado_${localStorage.getItem("femflow_id")}`,
-        new Date().toISOString()
-      );
+      localStorage.setItem(`femflow_reiniciado_${localStorage.getItem("femflow_id")}`, new Date().toISOString());
     }
   },
 
@@ -347,3 +322,4 @@ style.innerHTML = `
   to {opacity:1; transform:scale(1);}
 }`;
 document.head.appendChild(style);
+
