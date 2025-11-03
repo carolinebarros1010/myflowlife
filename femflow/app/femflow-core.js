@@ -108,27 +108,38 @@ export const FEMFLOW = {
     }
   },
 
-  inserirBotaoVoltar() {
-    const voltar = document.createElement("button");
-    voltar.textContent = "← Voltar";
-    voltar.style.cssText = `
-      position:fixed; top:15px; left:15px;
-      background:#335953; color:#fff; border:none;
-      padding:8px 14px; border-radius:20px;
-      font-family:'Lato',sans-serif; font-size:14px;
-      box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:999; cursor:pointer;`;
+ inserirBotaoVoltar() {
+  const voltar = document.createElement("button");
+  voltar.textContent = "← Voltar";
+  voltar.style.cssText = `
+    position:fixed; top:15px; left:15px;
+    background:#335953; color:#fff; border:none;
+    padding:8px 14px; border-radius:20px;
+    font-family:'Lato',sans-serif; font-size:14px;
+    box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:999; cursor:pointer;
+  `;
 
-    const map = {
-      "flowcenter.html": "index.html",
-      "treino.html": "flowcenter.html",
-      "evolucao.html": "flowcenter.html",
-      "ciclo.html": "index.html",
-    };
+  // 🔹 Mapeamento completo e robusto
+  const map = {
+    "flowcenter.html": "index.html",
+    "treino.html": "flowcenter.html",
+    "evolucao.html": "flowcenter.html",
+    "respiracao.html": "flowcenter.html",
+    "ciclo.html": "index.html",
+    "home.html": "index.html",
+    "boasvindas.html": "index.html"
+  };
 
-    const page = location.pathname.split("/").pop();
-    voltar.onclick = () => this.router(map[page] || "index");
-    document.body.appendChild(voltar);
-  },
+  const page = location.pathname.split("/").pop().toLowerCase();
+  let destino = map[page];
+
+  // Fallback inteligente: se for página de treino (ex: /modulos/.../treino.html)
+  if (!destino && page.includes("treino")) destino = "flowcenter.html";
+
+  voltar.onclick = () => this.router(destino || "index");
+  document.body.appendChild(voltar);
+}
+
 
   /* =======================================================
      🔹 3. SALVAR TREINO / DESCANSO / PSE
