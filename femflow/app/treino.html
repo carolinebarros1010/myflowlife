@@ -108,9 +108,18 @@
     <p>Carregando treino do dia...</p>
   </div>
 
-  <!-- ✅ CORRETO: usar a pasta scripts -->
-  <script src="scripts/femflow-core.js"></script>
-  <script src="scripts/treino.js"></script>
+<script type="module">
+  import { FEMFLOW } from './scripts/femflow-core.js';
+  import './scripts/treino.js';
+
+  // Torna o FEMFLOW acessível globalmente
+  window.FEMFLOW = FEMFLOW;
+
+  // Garante inicialização
+  document.addEventListener("DOMContentLoaded", () => {
+    FEMFLOW.initTreino();
+  });
+</script>
 </body>
 </html>
 
