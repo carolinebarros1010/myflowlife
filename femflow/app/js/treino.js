@@ -4,9 +4,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!id) { FEMFLOW.toast("⚠️ Faça login novamente."); location.href="ciclo.html"; return; }
 
   try{
-    const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${encodeURIComponent(id)}`;
-    const resp = await fetch(url);
-    const data = await resp.json();
+   const fase = localStorage.getItem("fase_atual") || "folicular";
+const nivel = localStorage.getItem("nivel_atual") || "iniciante";
+const dia = `dia_${localStorage.getItem("dia_ciclo") || 1}`;
+
+const exercicios = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, dia);
+const data = { boxes: [{ tipo: "exercicios", titulo: "Treino do Dia", itens: exercicios }] };
     if(!data || !data.boxes){ FEMFLOW.toast("Erro ao carregar treino."); return; }
 
     const container = document.getElementById("containerTreino");
