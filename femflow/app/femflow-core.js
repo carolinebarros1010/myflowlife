@@ -5,6 +5,21 @@
    =========================================================== */
 
 const FEMFLOW = {
+      // ======================================================
+// 🔥 Conexão Firebase (Firestore Client SDK)
+// ======================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
+  authDomain: "femflow-ebec2.firebaseapp.com",
+  projectId: "femflow-ebec2",
+  storageBucket: "femflow-ebec2.firebasestorage.app",
+  messagingSenderId: "1043953159611",
+  appId: "1:1043953159611:web:d12b82f744740f3124c89e",
+  measurementId: "G-6F644L5VTW"
+};
   /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
   SCRIPT_URL:
     localStorage.getItem("femflow_script") ||
@@ -22,6 +37,25 @@ const FEMFLOW = {
     this.carregarLogoContextual();
     this.autoCiclo();
   },
+
+   // ======================================================
+// 🔥 Conexão Firebase (Firestore Client SDK)
+// ======================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
+  authDomain: "femflow-ebec2.firebaseapp.com",
+  projectId: "femflow-ebec2",
+  storageBucket: "femflow-ebec2.firebasestorage.app",
+  messagingSenderId: "1043953159611",
+  appId: "1:1043953159611:web:d12b82f744740f3124c89e",
+  measurementId: "G-6F644L5VTW"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 
   /* =======================================================
      🔹 1. LOGIN / CADASTRO
@@ -175,6 +209,20 @@ const FEMFLOW = {
     });
     setTimeout(() => this.router("flowcenter"), 1800);
   },
+// ======================================================
+// 🔹 Buscar exercícios direto do Firestore
+// ======================================================
+FEMFLOW.buscarExerciciosFirebase = async (nivel, fase, dia) => {
+  const caminho = `exercicios/${nivel}/fases/${fase}/dias/${dia}/exercicios`;
+  const colRef = collection(db, caminho);
+  const snapshot = await getDocs(colRef);
+  const lista = [];
+  snapshot.forEach(doc => {
+    lista.push(doc.data());
+  });
+  console.log(`📦 ${lista.length} exercícios carregados do Firestore`);
+  return lista;
+};
 
   /* =======================================================
      🔹 4. MODAL PSE
