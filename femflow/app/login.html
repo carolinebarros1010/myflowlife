@@ -22,9 +22,9 @@
       max-width: 400px;
       padding: 2rem;
       border-radius: 20px;
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(10px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
       text-align: center;
       position: relative;
     }
@@ -71,7 +71,7 @@
 
     button {
       width: 100%;
-      padding: 0.85rem;
+      padding: 0.9rem;
       border: none;
       border-radius: 14px;
       background: linear-gradient(135deg, #335953, #cc6a5a);
@@ -115,11 +115,11 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Recuperar senha modal */
+    /* 🔑 Recuperar senha */
     #recuperarBox {
       display: none;
-      margin-top: 1rem;
       animation: fadeIn 0.4s ease;
+      margin-top: 1rem;
     }
 
     @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
@@ -133,6 +133,7 @@
     <h2>Bem-vinda ao FemFlow</h2>
     <p class="subtitle">Acesse sua conta para continuar seu ciclo 🌸</p>
 
+    <!-- Login -->
     <div id="loginBox">
       <div class="form-group">
         <input type="text" id="loginEmail" placeholder="E-mail ou ID FemFlow" />
@@ -145,9 +146,9 @@
       <p class="toggle" onclick="irParaAnamnese()">Ainda não tem conta? Faça sua anamnese</p>
     </div>
 
-    <!-- Recuperar senha -->
+    <!-- Recuperar Senha -->
     <div id="recuperarBox">
-      <p style="font-size:0.95rem;">Digite o e-mail cadastrado para recuperar sua senha:</p>
+      <p style="font-size:0.95rem;">Digite o e-mail cadastrado para receber as instruções:</p>
       <input type="email" id="recEmail" placeholder="Seu e-mail" />
       <button style="margin-top:0.6rem;" onclick="recuperarSenha()">Enviar</button>
       <p class="toggle" onclick="voltarLogin()">Voltar ao login</p>
@@ -159,12 +160,13 @@
   <script src="scripts/femflow-core.js"></script>
   <script>
     const scriptURL = FEMFLOW?.SCRIPT_URL ||
-      "https://script.google.com/macros/s/AKfycbxblNEoTTf7YLHZQMJBmVPK26VIJreOGgRblQYlBNP2JO4lyQblLLA9PtHeE32MTtY/exec";
+      "https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec"; // ⚙️ substitua pelo seu deploy real
 
     async function entrar() {
       const identificador = document.getElementById("loginEmail").value.trim();
       const senha = document.getElementById("loginSenha").value.trim();
       const msg = document.getElementById("mensagem");
+
       msg.innerHTML = "Conectando..." + '<span class="loader"></span>';
       msg.style.color = "#335953";
 
@@ -175,7 +177,8 @@
       }
 
       try {
-        const params = identificador.includes("@")
+        const isEmail = identificador.includes("@");
+        const params = isEmail
           ? `?action=validar&email=${encodeURIComponent(identificador)}`
           : `?action=validar&id=${encodeURIComponent(identificador)}`;
 
@@ -188,8 +191,11 @@
           msg.textContent = `✨ Bem-vinda de volta, ${data.nome || "aluna"}!`;
           msg.style.color = "#28a745";
           setTimeout(() => (window.location.href = "home.html"), 1500);
+        } else if (data.status === "notfound") {
+          msg.textContent = "❌ Nenhuma conta encontrada. Faça sua anamnese.";
+          msg.style.color = "#cc6a5a";
         } else {
-          msg.textContent = "❌ Credenciais incorretas ou conta não encontrada.";
+          msg.textContent = "⚠️ E-mail, ID ou senha incorretos.";
           msg.style.color = "#cc6a5a";
         }
       } catch (err) {
