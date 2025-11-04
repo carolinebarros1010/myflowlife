@@ -215,11 +215,11 @@ async function finish(){
 
   try {
     // 3) CORS-friendly: evite preflight definindo Content-Type simples (text/plain)
-    const r = await fetch(SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
+   const r = await fetch(SCRIPT_URL, {
+  method: "POST",
+  headers: { "Content-Type": "text/plain;charset=utf-8" }, // evita preflight
+  body: JSON.stringify(payload)
+});
 
     // 4) trate HTTP != 2xx explicitamente
     if (!r.ok) {
@@ -228,8 +228,9 @@ async function finish(){
     }
 
     // 5) Apps Script às vezes devolve text/plain; seja tolerante
-    let data;
-    const ct = (r.headers.get("content-type") || "").toLowerCase();
+  let data;
+const ct = (r.headers.get("content-type") || "").toLowerCase();
+data = ct.includes("application/json") ? await r.json() : JSON.parse(await r.text());
     if (ct.includes("application/json")) {
       data = await r.json();
     } else {
