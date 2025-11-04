@@ -50,6 +50,28 @@
     text-align:center;
   }
   p{text-align:center;line-height:1.6;font-size:1.05rem;}
+  video{
+    display:block;
+    width:100%;
+    max-width:720px;
+    border-radius:18px;
+    margin:10px auto 20px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.15);
+  }
+  .explicacao{
+    background:rgba(255,250,247,0.9);
+    border-left:4px solid var(--terra);
+    padding:14px 18px;
+    border-radius:12px;
+    margin:0 auto 20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  }
+  .explicacao h3{
+    font-family:'Playfair Display',serif;
+    color:var(--terra);
+    margin-top:0;
+    text-align:center;
+  }
   .timer-box{
     display:flex;justify-content:center;align-items:center;
     gap:10px;background:rgba(255,250,247,0.85);
@@ -116,17 +138,32 @@
     h1{font-size:1.5rem;}
     .btn{padding:8px 14px;font-size:0.85rem;}
     .cta{padding:12px 22px;font-size:0.9rem;}
-    .timer-box{font-size:0.95rem;}
   }
 </style>
 </head>
 <body>
 <header>
-  <img src="./assets/logofemflowterracota.png" alt="Logo FemFlow"/>
+  <img src="https://i.ibb.co/hFKkqByd/logo-femflow.png" alt="Logo FemFlow"/>
   <a href="https://www.femflow.com.br" class="btn" target="_blank">Treino Personalizado</a>
 </header>
 
 <main>
+
+  <!-- BLOCO DO VÍDEO -->
+  <video autoplay loop muted playsinline>
+    <source src="SEU_VIDEO_AQUI.webp" type="video/webp">
+    Seu navegador não suporta vídeo WebP.
+  </video>
+
+  <!-- BLOCO EXPLICAÇÃO -->
+  <div class="explicacao">
+    <h3>💡 Por que fortalecer os glúteos previne dores no joelho</h3>
+    <p>Os glúteos são os grandes estabilizadores do quadril — a base de sustentação das pernas.  
+    Quando estão fracos, o corpo transfere o esforço para os joelhos e a lombar.  
+    Fortalecer o glúteo melhora o alinhamento do quadril, controla a rotação do fêmur e reduz o impacto nas articulações a cada passo, salto ou corrida.  
+    <strong>Resultado:</strong> menos dor, mais estabilidade e um movimento mais potente e seguro.</p>
+  </div>
+
   <section>
     <h1>Desafio dos 9 Min por 10 Dias</h1>
 
@@ -143,21 +180,9 @@
     <h2>Rotina do Desafio</h2>
     <p style="text-align:center;"><span class="pill">3 Séries</span> • 1 min por exercício • Repita 3x</p>
     <ol>
-      <li>
-        <a class="link-exercicio" href="https://youtube.com/shorts/SmSvy4TGxiw?si=hIwHfDuKQLcexuea" target="_blank">
-          1 min — Elevação Pélvica para Quadríceps
-        </a>
-      </li>
-      <li>
-        <a class="link-exercicio" href="https://youtube.com/shorts/3NHh5pHljrE?si=5vDTla4B4Vi90bMM" target="_blank">
-          1 min — Elevação Pélvica para Posterior
-        </a>
-      </li>
-      <li>
-        <a class="link-exercicio" href="https://youtube.com/shorts/WWMQDiH32N4?si=TofklP_R1vn97mef" target="_blank">
-          1 min — Elevação Pélvica para Glúteo
-        </a>
-      </li>
+      <li><a class="link-exercicio" href="https://youtube.com/shorts/SmSvy4TGxiw?si=hIwHfDuKQLcexuea" target="_blank">1 min — Elevação Pélvica para Quadríceps</a></li>
+      <li><a class="link-exercicio" href="https://youtube.com/shorts/3NHh5pHljrE?si=5vDTla4B4Vi90bMM" target="_blank">1 min — Elevação Pélvica para Posterior</a></li>
+      <li><a class="link-exercicio" href="https://youtube.com/shorts/WWMQDiH32N4?si=TofklP_R1vn97mef" target="_blank">1 min — Elevação Pélvica para Glúteo</a></li>
     </ol>
     <p style="text-align:center;"><strong>Quem sobreviver, repete por 10 dias!</strong> 🌸</p>
 
@@ -173,32 +198,24 @@
 </main>
 
 <script>
-  // Define a data de término do desafio (exemplo: 10 dias a partir de hoje)
   const fimDesafio = new Date();
   fimDesafio.setDate(fimDesafio.getDate() + 10);
 
   function atualizarContagem() {
     const agora = new Date().getTime();
     const distancia = fimDesafio - agora;
-
     const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
     const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutos = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
     const segundos = Math.floor((distancia % (1000 * 60)) / 1000);
-
     document.getElementById("dias").innerText = dias;
     document.getElementById("horas").innerText = horas;
     document.getElementById("minutos").innerText = minutos;
     document.getElementById("segundos").innerText = segundos;
-
-    if (distancia < 0) {
-      document.querySelector(".timer-box").innerHTML = "🔥 Desafio encerrado! 🔥";
-    }
+    if (distancia < 0) document.querySelector(".timer-box").innerHTML = "🔥 Desafio encerrado! 🔥";
   }
-
   atualizarContagem();
   setInterval(atualizarContagem, 1000);
 </script>
-
 </body>
 </html>
