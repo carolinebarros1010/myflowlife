@@ -188,10 +188,11 @@ function render(){
 }
 
 async function finish(){
+  // 1) calcula o nível como você já faz
   const media = score / Q.length;
   let nivel = "iniciante";
-  if(media >= 2.2 && media < 2.7) nivel = "intermediaria";
-  if(media >= 2.7) nivel = "avancada";
+  if (media >= 2.2 && media < 2.7) nivel = "intermediaria";
+  if (media >= 2.7) nivel = "avancada";
 
   const mensagens = {
     iniciante: { emoji:"🌱", titulo:"Bem-vinda à sua jornada!", frase:"Cada passo que você dá fortalece corpo e mente. No FemFlow, o começo é o ponto mais poderoso.", cor:"#cc6a5a" },
@@ -200,41 +201,66 @@ async function finish(){
   };
   const perfil = mensagens[nivel];
 
+  // 2) mesmo payload de antes
   const payload = {
-    action:"loginOuCadastro",
-    nome:dados.nome,
-    email:dados.email,
-    telefone:dados.telefone,
-    senha:dados.senha,
-    perfil:nivel,
-    pontuacao:score,
-    anamnese:JSON.stringify(answers)
+    action: "loginOuCadastro",
+    nome: dados.nome,
+    email: dados.email,
+    telefone: dados.telefone,
+    senha: dados.senha,
+    perfil: nivel,
+    pontuacao: score,
+    anamnese: JSON.stringify(answers)
   };
 
-  try{
-    const r = await fetch(SCRIPT_URL, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
-    const data = await r.json();
-    if(data.status === "ok" || data.status === "created"){
+  try {
+    // 3) CORS-friendly: evite preflight definindo Content-Type simples (text/plain)
+    const r = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+
+    // 4) trate HTTP != 2xx explicitamente
+    if (!r.ok) {
+      const t = await r.text().catch(()=> "");
+      throw new Error(`HTTP ${r.status} – ${t.slice(0,240)}`);
+    }
+
+    // 5) Apps Script às vezes devolve text/plain; seja tolerante
+    let data;
+    const ct = (r.headers.get("content-type") || "").toLowerCase();
+    if (ct.includes("application/json")) {
+      data = await r.json();
+    } else {
+      const raw = await r.text();
+      data = JSON.parse(raw);
+    }
+
+    // 6) fluxo de sucesso
+    if (data.status === "ok" || data.status === "created") {
       stage.innerHTML = `
         <div class="slide active" style="animation:fadeIn .6s ease;">
           <img class="q-media" src="./assets/gifs/success_flow.webp" alt="ok"/>
           <div class="q-title" style="color:${perfil.cor}">${perfil.emoji} ${perfil.titulo}</div>
-          <p style="font-size:1.05rem;margin-top:.3rem;">Seu perfil inicial é <b style="color:${perfil.cor};text-transform:capitalize;">${nivel}</b></p>
+          <p style="font-size:1.05rem;margin-top:.3rem;">Seu perfil inicial é
+            <b style="color:${perfil.cor};text-transform:capitalize;">${nivel}</b></p>
           <p style="opacity:.9;margin-top:.4rem;">${perfil.frase}</p>
           <p style="margin-top:1rem;">ID FemFlow: <b>${data.id}</b></p>
           <p style="opacity:.7">Você será redirecionada para o login...</p>
         </div>`;
-      next.style.display = "none";
+      document.getElementById("btnNext").style.display = "none";
       bar.style.width = "100%";
       setTimeout(()=>location.href="login.html", 4500);
     } else {
-      alert("Erro no cadastro. Tente novamente.");
+      alert("Erro no cadastro: " + (data.msg || data.status || "desconhecido"));
     }
-  } catch(e){
-    alert("Falha de conexão.");
+
+  } catch (err) {
+    console.error("finish()", err);
+    alert("Falha de conexão. Detalhes: " + (err.message || err));
   }
 }
-
 next.onclick = ()=>{
   const active=document.querySelector(".slide.active");
   if(active){ active.classList.remove("active"); active.style.opacity=0; active.style.transform="translateX(-26px)"; }
