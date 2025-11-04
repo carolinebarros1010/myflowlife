@@ -40,7 +40,6 @@
     transition:all 0.3s ease;
   }
   .btn:hover{background:#b96b4e;}
-
   main{max-width:780px;margin:0 auto;padding:20px;}
   h1{
     font-family:'Playfair Display',serif;
@@ -50,6 +49,14 @@
     text-align:center;
   }
   p{text-align:center;line-height:1.6;font-size:1.05rem;}
+  .foto-topo{
+    display:block;
+    width:100%;
+    max-width:720px;
+    border-radius:18px;
+    margin:20px auto 14px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.1);
+  }
   video{
     display:block;
     width:100%;
@@ -149,7 +156,10 @@
 
 <main>
 
-  <!-- BLOCO DO VÍDEO -->
+  <!-- FOTO DE DESTAQUE -->
+  <img src="SUA_IMAGEM_AQUI.jpg" alt="Desafio FemFlow" class="foto-topo"/>
+
+  <!-- VÍDEO -->
   <video autoplay loop muted playsinline>
     <source src="SEU_VIDEO_AQUI.webp" type="video/webp">
     Seu navegador não suporta vídeo WebP.
@@ -173,7 +183,9 @@
 
     <p>Topa o desafio? 💪<br>
     São apenas <strong>9 minutos por dia</strong> durante <strong>10 dias</strong> para ativar seus glúteos e quadríceps, fortalecer o core e sentir o poder do seu corpo em movimento!</p>
-    <p>Quem topar, marca <strong>#desafio9min</strong> e compartilha com outra <em>“Louca”</em> que toparia! 🔥</p>
+
+    <p>Quem topar, marca <strong>#desafio9min</strong> e <strong>@femflow.consultoria</strong> no Instagram 📸<br>
+    Compartilhe sua evolução e inspire outras “Loucas” a entrarem no desafio! 🔥</p>
   </section>
 
   <section class="card">
@@ -200,7 +212,6 @@
 <script>
   const fimDesafio = new Date();
   fimDesafio.setDate(fimDesafio.getDate() + 10);
-
   function atualizarContagem() {
     const agora = new Date().getTime();
     const distancia = fimDesafio - agora;
@@ -219,3 +230,4 @@
 </script>
 </body>
 </html>
+
