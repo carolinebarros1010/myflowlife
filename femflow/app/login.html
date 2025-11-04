@@ -2,152 +2,41 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
   <title>Login • FemFlow</title>
-
   <style>
-    :root {
-      --terracota: #cc6a5a;
-      --teal: #335953;
-      --pessego: #efbda6;
-      --bege: #f4e1d7;
+    :root{--terracota:#cc6a5a;--teal:#335953;--pessego:#efbda6;--bege:#f4e1d7;}
+    body{
+      margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+      font-family:"Lato",sans-serif;background:linear-gradient(180deg,var(--bege) 0%,var(--pessego) 100%);color:var(--teal);
+      -webkit-font-smoothing:antialiased;
     }
-
-    body {
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: "Lato", sans-serif;
-      background: linear-gradient(180deg, var(--bege) 0%, var(--pessego) 100%);
-      color: var(--teal);
-      -webkit-font-smoothing: antialiased;
+    .card{
+      width:90%;max-width:400px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+      border-radius:22px;padding:2rem 1.8rem;box-shadow:0 8px 24px rgba(0,0,0,.12);text-align:center;animation:fadeIn .6s ease;
     }
-
-    .card {
-      width: 90%;
-      max-width: 400px;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(10px);
-      border-radius: 22px;
-      padding: 2rem 1.8rem;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      text-align: center;
-      transition: transform 0.3s ease;
-      animation: fadeIn 0.6s ease forwards;
+    img.logo{width:130px;margin-bottom:1rem}
+    h2{font-family:"Playfair Display",serif;font-size:1.6rem;color:var(--terracota);margin:.2rem 0}
+    .subtitle{font-size:.95rem;margin-bottom:1.4rem}
+    .form-group{margin-bottom:1rem;text-align:left}
+    input{
+      width:100%;padding:.85rem;border-radius:12px;border:1px solid #ddd;font-size:1rem;color:var(--teal);
+      background:#fff;outline:none;transition:border-color .2s,box-shadow .2s
     }
-
-    img.logo {
-      width: 130px;
-      margin-bottom: 1rem;
+    input:focus{border-color:var(--terracota);box-shadow:0 0 0 3px rgba(204,106,90,.25)}
+    button{
+      width:100%;padding:.95rem;border:none;border-radius:14px;font-weight:700;font-size:1rem;color:#fff;
+      background:linear-gradient(135deg,var(--teal),var(--terracota));cursor:pointer;transition:transform .25s ease
     }
-
-    h2 {
-      font-family: "Playfair Display", serif;
-      font-size: 1.6rem;
-      color: var(--terracota);
-      margin: 0.2rem 0;
-    }
-
-    p.subtitle {
-      font-size: 0.95rem;
-      margin-bottom: 1.4rem;
-      color: var(--teal);
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-      text-align: left;
-    }
-
-    input {
-      width: 100%;
-      padding: 0.8rem;
-      border-radius: 12px;
-      border: 1px solid #ddd;
-      font-size: 1rem;
-      color: var(--teal);
-      background: #fff;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    input:focus {
-      border-color: var(--terracota);
-      box-shadow: 0 0 0 3px rgba(204, 106, 90, 0.25);
-    }
-
-    button {
-      width: 100%;
-      padding: 0.95rem;
-      margin-top: 0.4rem;
-      border: none;
-      border-radius: 14px;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      color: #fff;
-      background: linear-gradient(135deg, var(--teal), var(--terracota));
-      transition: transform 0.3s ease, opacity 0.2s;
-    }
-
-    button:hover {
-      transform: scale(1.03);
-    }
-
-    .toggle {
-      margin-top: 1rem;
-      font-size: 0.85rem;
-      color: var(--terracota);
-      cursor: pointer;
-      text-decoration: underline;
-      display: block;
-    }
-
-    .message {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      min-height: 1.3rem;
-    }
-
-    .loader {
-      border: 3px solid rgba(255,255,255,0.3);
-      border-top: 3px solid var(--terracota);
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-      margin-left: 8px;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
-
-    /* 🔑 Recuperar Senha */
-    #recuperarBox {
-      display: none;
-      animation: fadeIn 0.4s ease;
-      margin-top: 1rem;
-    }
-
-    /* 📱 Responsividade */
-    @media (max-width: 420px) {
-      .card {
-        padding: 1.5rem 1.2rem;
-        border-radius: 18px;
-      }
-      img.logo { width: 100px; margin-bottom: 0.8rem; }
-      h2 { font-size: 1.35rem; }
-      p.subtitle { font-size: 0.9rem; }
-      input, button { font-size: 0.95rem; }
-      .toggle { font-size: 0.8rem; }
-    }
+    button:hover{transform:scale(1.03)}
+    .toggle{display:block;margin-top:1rem;font-size:.85rem;color:var(--terracota);text-decoration:underline;cursor:pointer}
+    .message{margin-top:1rem;font-size:.9rem;min-height:1.3rem}
+    .loader{border:3px solid rgba(0,0,0,.08);border-top:3px solid var(--terracota);border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;margin-left:8px}
+    #recuperarBox{display:none;animation:fadeIn .4s ease;margin-top:1rem}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:420px){.card{padding:1.5rem 1.2rem}img.logo{width:100px}h2{font-size:1.4rem}.subtitle{font-size:.9rem}}
   </style>
 </head>
-
 <body>
   <div class="card">
     <img src="../assets/logoterracotaebege.jpg" alt="FemFlow logo" class="logo" />
@@ -169,118 +58,75 @@
 
     <!-- Recuperar Senha -->
     <div id="recuperarBox">
-      <p style="font-size:0.95rem;">Digite o e-mail cadastrado para receber as instruções:</p>
+      <p style="font-size:.95rem;">Digite o e-mail cadastrado para receber as instruções:</p>
       <input type="email" id="recEmail" placeholder="Seu e-mail" />
-      <button style="margin-top:0.6rem;" onclick="recuperarSenha()">Enviar</button>
+      <button style="margin-top:.6rem" onclick="recuperarSenha()">Enviar</button>
       <span class="toggle" onclick="voltarLogin()">Voltar ao login</span>
     </div>
 
     <p id="mensagem" class="message"></p>
   </div>
 
-  <script src="scripts/femflow-core.js"></script>
   <script>
-    const scriptURL = FEMFLOW?.SCRIPT_URL ||
-      "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec"; // ⚙️ coloque seu deploy real
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
 
-    async function entrar() {
+    async function entrar(){
       const identificador = document.getElementById("loginEmail").value.trim();
       const senha = document.getElementById("loginSenha").value.trim();
       const msg = document.getElementById("mensagem");
+      msg.innerHTML = "Conectando..." + '<span class="loader"></span>'; msg.style.color="#335953";
 
-      msg.innerHTML = "Conectando..." + '<span class="loader"></span>';
-      msg.style.color = "#335953";
+      if(!identificador || !senha){ msg.textContent="Digite e-mail/ID e senha."; msg.style.color="#cc6a5a"; return; }
 
-      if (!identificador || !senha) {
-        msg.textContent = "Digite e-mail/ID e senha.";
-        msg.style.color = "#cc6a5a";
-        return;
-      }
-
-      try {
+      try{
         const isEmail = identificador.includes("@");
         const params = isEmail
           ? `?action=validar&email=${encodeURIComponent(identificador)}`
           : `?action=validar&id=${encodeURIComponent(identificador)}`;
 
-        const res = await fetch(`${scriptURL}${params}`);
+        const res = await fetch(`${SCRIPT_URL}${params}`);
         const data = await res.json();
 
-        if (data.status === "ok") {
+        if(data.status==="ok"){
           localStorage.setItem("femflow_id", data.id);
-          localStorage.setItem("femflow_nome", data.nome);
-          msg.textContent = `✨ Bem-vinda de volta, ${data.nome || "aluna"}!`;
-          msg.style.color = "#28a745";
-          setTimeout(() => (window.location.href = "home.html"), 1500);
-        } else if (data.status === "notfound") {
-          msg.textContent = "❌ Nenhuma conta encontrada. Faça sua anamnese.";
-          msg.style.color = "#cc6a5a";
+          localStorage.setItem("femflow_nome", data.nome||"");
+          msg.textContent = `✨ Bem-vinda, ${data.nome||"aluna"}!`; msg.style.color="#2e7d32";
+          setTimeout(()=>location.href="home.html",1200);
+        } else if(data.status==="notfound"){
+          msg.textContent="❌ Conta não encontrada. Faça sua anamnese."; msg.style.color="#cc6a5a";
         } else {
-          msg.textContent = "⚠️ E-mail, ID ou senha incorretos.";
-          msg.style.color = "#cc6a5a";
+          msg.textContent="⚠️ E-mail, ID ou senha incorretos."; msg.style.color="#cc6a5a";
         }
-      } catch (err) {
-        console.error(err);
-        msg.textContent = "⚠️ Falha de conexão. Tente novamente.";
-        msg.style.color = "#cc6a5a";
+      }catch(e){
+        console.error(e); msg.textContent="⚠️ Falha de conexão. Tente novamente."; msg.style.color="#cc6a5a";
       }
     }
 
-    function mostrarRecuperar() {
-      document.getElementById("loginBox").style.display = "none";
-      document.getElementById("recuperarBox").style.display = "block";
-      document.getElementById("mensagem").textContent = "";
+    function mostrarRecuperar(){
+      document.getElementById("loginBox").style.display="none";
+      document.getElementById("recuperarBox").style.display="block";
+      document.getElementById("mensagem").textContent="";
     }
-
-    function voltarLogin() {
-      document.getElementById("recuperarBox").style.display = "none";
-      document.getElementById("loginBox").style.display = "block";
-      document.getElementById("mensagem").textContent = "";
+    function voltarLogin(){
+      document.getElementById("recuperarBox").style.display="none";
+      document.getElementById("loginBox").style.display="block";
+      document.getElementById("mensagem").textContent="";
     }
-
-    async function recuperarSenha() {
+    async function recuperarSenha(){
       const email = document.getElementById("recEmail").value.trim();
       const msg = document.getElementById("mensagem");
+      if(!email){ msg.textContent="Digite seu e-mail."; msg.style.color="#cc6a5a"; return; }
 
-      if (!email) {
-        msg.textContent = "Digite seu e-mail.";
-        msg.style.color = "#cc6a5a";
-        return;
-      }
-
-      msg.innerHTML = "Verificando..." + '<span class="loader"></span>';
-      msg.style.color = "#335953";
-
-      try {
-        const res = await fetch(scriptURL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "recuperarSenha", email })
-        });
+      msg.innerHTML="Verificando..."+'<span class="loader"></span>'; msg.style.color="#335953";
+      try{
+        const res = await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"recuperarSenha",email})});
         const data = await res.json();
-
-        if (data.status === "ok") {
-          msg.textContent = "📩 E-mail de recuperação enviado!";
-          msg.style.color = "#28a745";
-          setTimeout(voltarLogin, 2500);
-        } else if (data.status === "notfound") {
-          msg.textContent = "⚠️ E-mail não encontrado.";
-          msg.style.color = "#cc6a5a";
-        } else {
-          msg.textContent = "❌ Erro ao enviar e-mail.";
-          msg.style.color = "#cc6a5a";
-        }
-      } catch (err) {
-        console.error(err);
-        msg.textContent = "❌ Falha de rede. Tente novamente.";
-        msg.style.color = "#cc6a5a";
-      }
+        if(data.status==="ok"){ msg.textContent="📩 E-mail de recuperação enviado!"; msg.style.color="#2e7d32"; setTimeout(voltarLogin,2200); }
+        else if(data.status==="notfound"){ msg.textContent="⚠️ E-mail não encontrado."; msg.style.color="#cc6a5a"; }
+        else { msg.textContent="❌ Erro ao enviar e-mail."; msg.style.color="#cc6a5a"; }
+      }catch(e){ console.error(e); msg.textContent="❌ Falha de rede. Tente novamente."; msg.style.color="#cc6a5a"; }
     }
-
-    function irParaAnamnese() {
-      window.location.href = "anamnese.html";
-    }
+    function irParaAnamnese(){ location.href="anamnese_deluxe.html"; }
   </script>
 </body>
 </html>
-
