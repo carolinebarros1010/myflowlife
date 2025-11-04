@@ -56,7 +56,7 @@
 </head>
 <body>
   <div class="card" id="card">
-    <img class="logo" src="../assets/logofemflowterracota.png" alt="FemFlow" />
+    <img class="logo" src="../assets/logoterracotaebege.jpg" alt="FemFlow" />
     <h1>Seu perfil FemFlow</h1>
     <p class="sub">Antes de começar, conte um pouquinho sobre você 🌸</p>
     <div class="progress"><div class="bar" id="bar"></div></div>
@@ -67,295 +67,162 @@
 
 <script src="scripts/femflow-core.js"></script>
 <script>
-/* ======================================================
-   ✅ Fallback inteligente para FemFlow Core + Debug
-   ====================================================== */
 if (typeof FEMFLOW === "undefined" || !FEMFLOW.SCRIPT_URL) {
-  console.warn("⚠️ femflow-core.js não carregado — usando fallback local.");
   window.FEMFLOW = {
-    SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxblNEoTTf7YLHZQMJBmVPK26VIJreOGgRblQYlBNP2JO4lyQblLLA9PtHeE32MTtY/exec", // 👉 coloque aqui seu DEPLOY_ID real
+    SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxblNEoTTf7YLHZQMJBmVPK26VIJreOGgRblQYlBNP2JO4lyQblLLA9PtHeE32MTtY/exec",
     toast: (m) => alert(m)
   };
 }
 
-// 🔍 Ativar logs de depuração
 const DEBUG_MODE = true;
-function debugLog(...args) {
-  if (DEBUG_MODE) console.log("📡 FEMFLOW DEBUG:", ...args);
+function debugLog(...args){ if (DEBUG_MODE) console.log("📡 FEMFLOW DEBUG:", ...args); }
+
+const Q=[
+  {type:"info", q:"Seu nome completo", field:"nome", placeholder:"Ex: Maria Oliveira"},
+  {type:"email", q:"Seu e-mail (para login futuro)", field:"email", placeholder:"Ex: maria@email.com"},
+  {type:"telefone", q:"Seu telefone com DDD", field:"telefone", placeholder:"Ex: (11) 99999-0000"},
+  {type:"senha", q:"Crie uma senha para seu acesso", field:"senha"},
+  {
+    type:"choice",
+    q:"Você está treinando atualmente?",
+    opts:["Sim, treino com frequência","Não, estou parada"],
+    v:[2,1]
+  },
+  {type:"choice",q:"Você menstrua regularmente?",opts:["Sim","Não"],v:[2,1]},
+  {type:"choice",q:"Usa anticoncepcional hormonal?",opts:["Sim","Não"],v:[1,2]},
+  {type:"choice",q:"Há quanto tempo treina com regularidade?",opts:["❌ Não treino","< 3 meses","3–12 meses","> 1 ano"],v:[0,1,2,3]},
+  {type:"choice",q:"Quantos dias por semana costuma treinar?",opts:["1–2","3–4","5+"],v:[1,2,3]},
+  {type:"choice",q:"Faz mobilidade/alongamento regularmente?",opts:["Sim","Não"],v:[2,0]},
+  {type:"choice",q:"Como avalia sua força hoje?",opts:["Baixa","Média","Alta"],v:[1,2,3]},
+  {type:"choice",q:"Dores menstruais nos últimos ciclos?",opts:["Fortes","Moderadas","Leves/Não"],v:[0,1,2]},
+  {type:"choice",q:"Pratica outro esporte além da musculação?",opts:["Não","Ocasionalmente","Com frequência"],v:[1,2,3]}
+];
+
+let idx=0,score=0,answers=[],dadosBase={},currentPicked=null;
+const stage=document.getElementById("stage");
+const bar=document.getElementById("bar");
+const next=document.getElementById("btnNext");
+
+function perc(){return Math.round((idx/Q.length)*100);}
+function setBar(){bar.style.width=perc()+"%";}
+
+function validarEmail(v){return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/i.test(v);}
+function validarTelefone(v){const d=v.replace(/\\D/g,"");return d.length>=10&&d.length<=11;}
+function mascaraTelefone(v){const d=v.replace(/\\D/g,"").slice(0,11);if(d.length<=10)return d.replace(/(\\d{2})(\\d{4})(\\d{0,4})/,"($1) $2-$3");return d.replace(/(\\d{2})(\\d{5})(\\d{0,4})/,"($1) $2-$3");}
+
+async function verificarEmail(email, warn){
+  try{
+    const resp=await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&email=${encodeURIComponent(email)}`);
+    const data=await resp.json();
+    if(data.status==="ok"){
+      warn.textContent="⚠️ Este e-mail já possui cadastro. Vá para o login.";
+      warn.className="warn err";
+      next.disabled=true;
+      setTimeout(()=>window.location.href="login.html",2500);
+      return false;
+    }
+    warn.textContent="✔️ E-mail disponível";
+    warn.className="warn ok";
+    next.disabled=false;
+    return true;
+  }catch(err){
+    warn.textContent="Erro ao validar e-mail";
+    warn.className="warn err";
+    return false;
+  }
 }
 
-// 🚀 Função auxiliar para enviar ao Apps Script com logs
-async function sendToFemFlow(payload) {
-  debugLog("Enviando para Script URL:", FEMFLOW.SCRIPT_URL, payload);
-  const resp = await fetch(FEMFLOW.SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  const data = await resp.json();
-  debugLog("Resposta recebida:", data);
-  return data;
-}
+function render(){
+  setBar(); next.disabled=true; currentPicked=null;
+  const item=Q[idx]; stage.innerHTML="";
 
-// 🔥 Garante inicialização mesmo que o core falhe
-document.addEventListener("DOMContentLoaded", () => {
-  try {
-    render(); // renderiza primeira pergunta
-    debugLog("Anamnese iniciada com sucesso.");
-  } catch (err) {
-    console.error("Erro ao iniciar FemFlow:", err);
-    FEMFLOW.toast("Falha ao iniciar anamnese.");
-  }
-});
-  const Q=[
-    {type:"info", q:"Seu nome completo", field:"nome", placeholder:"Ex: Maria Oliveira"},
-    {type:"email", q:"Seu e-mail (para login futuro)", field:"email", placeholder:"Ex: maria@email.com"},
-    {type:"telefone", q:"Seu telefone com DDD", field:"telefone", placeholder:"Ex: (11) 99999-0000"},
-    {type:"senha", q:"Crie uma senha para seu acesso", field:"senha"},
-    {type:"senhaConfirm", q:"Confirme sua senha", field:"confirmaSenha"},
-    {
-      type:"gif-pick",
-      q:"Você está treinando atualmente ou está parada?",
-      opts:[
-        {label:"Estou treinando",gif:"../assets/gifs/treinando.gif",emoji:"💪",v:3,treino:true},
-        {label:"Estou parada",gif:"../assets/gifs/parada.gif",emoji:"😔",v:1,treino:false}
-      ]
-    },
-    {type:"choice",q:"Você menstrua regularmente?",opts:["Sim","Não"],v:[2,1]},
-    {type:"choice",q:"Usa anticoncepcional hormonal?",opts:["Sim","Não"],v:[1,2]},
-    {type:"choice",q:"Há quanto tempo treina com regularidade?",opts:["❌ Não treino atualmente","< 3 meses","3–12 meses","> 1 ano"],v:[0,1,2,3]},
-    {type:"choice",q:"Quantos dias por semana costuma treinar?",opts:["1–2","3–4","5+"],v:[1,2,3]},
-    {type:"choice",q:"Quanto dura sua sessão média?",opts:["< 40 min","40–70 min","> 70 min"],v:[1,2,3]},
-    {type:"choice",q:"Faz mobilidade/alongamento regularmente?",opts:["Sim","Não"],v:[2,0]},
-    {type:"choice",q:"Como avalia sua força hoje?",opts:["Baixa","Média","Alta"],v:[1,2,3]},
-    {type:"choice",q:"Dores menstruais nos últimos ciclos?",opts:["Fortes","Moderadas","Leves/Não"],v:[0,1,2]},
-    {type:"choice",q:"Pratica outro esporte além da musculação?",opts:["Não","Ocasionalmente","Com frequência"],v:[1,2,3]}
-  ];
+  if(["info","email","telefone","senha"].includes(item.type)){
+    const label=document.createElement("div"); label.className="q-title"; label.textContent=item.q;
+    const input=document.createElement("input"); input.id=item.field; input.placeholder=item.placeholder||"";
+    if(item.type==="email") input.type="email";
+    if(item.type==="senha") input.type="password";
+    const warn=document.createElement("div"); warn.className="warn";
 
-  let idx=0,score=0,answers=[],currentPicked=null;
-  const stage=document.getElementById("stage");
-  const bar=document.getElementById("bar");
-  const next=document.getElementById("btnNext");
-
-  function perc(){return Math.round((idx/Q.length)*100);}
-  function setBar(){bar.style.width=perc()+"%";}
-
-  function validarEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(v);}
-  function validarTelefone(v){
-    const digits=v.replace(/\D/g,"");
-    return digits.length>=10 && digits.length<=11;
-  }
-  function mascaraTelefone(v){
-    const d=v.replace(/\D/g,"").slice(0,11);
-    if(d.length<=10) return d.replace(/(\d{2})(\d{4})(\d{0,4})/,"($1) $2-$3");
-    return d.replace(/(\d{2})(\d{5})(\d{0,4})/,"($1) $2-$3");
-  }
-
-  function render(){
-    setBar(); next.disabled=true; currentPicked=null;
-    const item=Q[idx]; stage.innerHTML="";
-
-    if(["info","email","telefone"].includes(item.type)){
-      const label=document.createElement("div"); label.className="q-title"; label.textContent=item.q;
-      const input=document.createElement("input"); input.id=item.field; input.placeholder=item.placeholder;
-      if(item.type==="email") input.type="email";
-      const warn=document.createElement("div"); warn.className="warn";
-      input.addEventListener("input",()=>{
-        let val=input.value.trim(),ok=false;
-        if(item.type==="info"){ok=val.length>2;}
-        if(item.type==="email"){ok=validarEmail(val);}
-        if(item.type==="telefone"){input.value=mascaraTelefone(val); ok=validarTelefone(val);}
-        if(ok){warn.textContent="✔️ Válido"; warn.className="warn ok"; next.disabled=false;}
-        else{warn.textContent="❌ Formato inválido"; warn.className="warn err"; next.disabled=true;}
-      });
-      stage.append(label,input,warn); return;
-    }
-
-  if(item.type==="senha" || item.type==="senhaConfirm"){
-  const label = document.createElement("div");
-  label.className = "q-title";
-  label.textContent = item.q;
-
-  const input = document.createElement("input");
-  input.type = "password";
-  input.id = item.field;
-  input.placeholder = item.type === "senha" ? "Crie uma senha forte" : "Confirme sua senha";
-  const warn = document.createElement("div");
-  warn.className = "warn";
-
-  // variável global para armazenar senha principal
-  window.senhaTemp = window.senhaTemp || "";
-
-  input.addEventListener("input", () => {
-    const val = input.value.trim();
-
-    if (item.type === "senha") {
-      window.senhaTemp = val;
-      if (val.length >= 6) {
-        warn.textContent = "✔️ Senha válida";
-        warn.className = "warn ok";
-        next.disabled = false;
-      } else {
-        warn.textContent = "❌ Mínimo de 6 caracteres";
-        warn.className = "warn err";
-        next.disabled = true;
-      }
-    } else {
-      const s1 = window.senhaTemp;
-      const s2 = val;
-      if (!s1 || !s2) {
-        warn.textContent = "❌ Digite e confirme sua senha";
-        warn.className = "warn err";
-        next.disabled = true;
-        return;
-      }
-      if (s1 === s2) {
-        warn.textContent = "✔️ Senhas coincidem";
-        warn.className = "warn ok";
-        next.disabled = false;
-      } else {
-        warn.textContent = "❌ As senhas não coincidem";
-        warn.className = "warn err";
-        next.disabled = true;
-      }
-    }
-  });
-
-  stage.append(label, input, warn);
-  return;
-}
-    if(item.type==="gif-pick"){
-      const title=document.createElement("div"); title.className="q-title"; title.textContent=item.q;
-      const grid=document.createElement("div"); grid.className="grid";
-      item.opts.forEach(o=>{
-        const card=document.createElement("div"); card.className="choice";
-        const img=document.createElement("img"); img.className="gif"; img.src=o.gif;
-        img.onerror=()=>{img.replaceWith(Object.assign(document.createElement("div"),{textContent:o.emoji,style:"font-size:64px;"}));};
-        const lbl=document.createElement("div"); lbl.className="lbl"; lbl.textContent=o.label;
-        card.append(img,lbl);
-        card.onclick=()=>{
-          document.querySelectorAll(".choice").forEach(c=>c.classList.remove("sel"));
-          card.classList.add("sel"); currentPicked={label:o.label,v:o.v}; next.disabled=false;
-        };
-        grid.append(card);
-      });
-      stage.append(title,grid); return;
-    }
-
-    const title=document.createElement("div"); title.className="q-title"; title.textContent=item.q;
-    const grid=document.createElement("div"); grid.className="grid";
-    item.opts.forEach((label,i)=>{
-      const b=document.createElement("div"); b.className="choice"; b.innerHTML=`<div class="lbl">${label}</div>`;
-      b.onclick=()=>{
-        document.querySelectorAll(".choice").forEach(c=>c.classList.remove("sel"));
-        b.classList.add("sel"); currentPicked={label,v:item.v[i]}; next.disabled=false;
-      };
-      grid.appendChild(b);
+    input.addEventListener("input",async()=>{
+      const val=input.value.trim();
+      let ok=false;
+      if(item.type==="info"){ok=val.length>2; dadosBase.nome=val;}
+      if(item.type==="email"){ok=validarEmail(val); if(ok){ok=await verificarEmail(val,warn);} dadosBase.email=val;}
+      if(item.type==="telefone"){input.value=mascaraTelefone(val); ok=validarTelefone(val); dadosBase.telefone=val;}
+      if(item.type==="senha"){ok=val.length>=6; dadosBase.senha=val;}
+      if(ok){warn.textContent="✔️ Válido"; warn.className="warn ok"; next.disabled=false;}
+      else if(!warn.textContent.includes("⚠️")){warn.textContent="❌ Formato inválido"; warn.className="warn err"; next.disabled=true;}
     });
-    stage.append(title,grid);
-  }
-
- // ======================================================
-// 🚀 Envio final da anamnese para o Apps Script
-// ======================================================
-async function finish() {
-  const media = score / Q.length;
-  let nivel = "iniciante";
-  if (media >= 2.2 && media < 2.7) nivel = "intermediaria";
-  if (media >= 2.7) nivel = "avancada";
-
-  const nome = document.getElementById("nome")?.value.trim();
-  const email = document.getElementById("email")?.value.trim();
-  const telefone = document.getElementById("telefone")?.value.trim();
-  const senha = document.getElementById("senha")?.value.trim();
-
-  if (!nome || !email || !senha) {
-    FEMFLOW.toast("Preencha nome, e-mail e senha.");
-    return;
-  }
-  if (!validarEmail(email)) {
-    FEMFLOW.toast("Digite um e-mail válido.");
-    return;
-  }
-  if (!validarTelefone(telefone)) {
-    FEMFLOW.toast("Digite um telefone válido com DDD.");
+    stage.append(label,input,warn);
     return;
   }
 
-  // 🔹 Monta o payload
-  const payload = {
-    action: "loginOuCadastro",
-    nome,
-    email,
-    telefone,
-    senha,
-    perfil: nivel,
-    pontuacao: score,
-    anamnese: JSON.stringify(answers)
+  const title=document.createElement("div"); title.className="q-title"; title.textContent=item.q;
+  const grid=document.createElement("div"); grid.className="grid";
+  item.opts.forEach((label,i)=>{
+    const b=document.createElement("div"); b.className="choice"; b.innerHTML=`<div class="lbl">${label}</div>`;
+    b.onclick=()=>{
+      document.querySelectorAll(".choice").forEach(c=>c.classList.remove("sel"));
+      b.classList.add("sel"); currentPicked={label,v:item.v[i]}; next.disabled=false;
+    };
+    grid.appendChild(b);
+  });
+  stage.append(title,grid);
+}
+
+async function finish(){
+  const media=score/Q.length;
+  let nivel="iniciante"; if(media>=2.2&&media<2.7)nivel="intermediaria"; if(media>=2.7)nivel="avancada";
+
+  const payload={
+    action:"loginOuCadastro",
+    nome:dadosBase.nome,
+    email:dadosBase.email,
+    telefone:dadosBase.telefone,
+    senha:dadosBase.senha,
+    perfil:nivel,
+    pontuacao:score,
+    anamnese:JSON.stringify(answers)
   };
+  debugLog("🚀 Enviando anamnese:",payload);
 
-  // 🔹 Log de envio no console
-  debugLog("🚀 Enviando anamnese:", payload);
-
-  try {
-    // Usa a função com logs integrada
-    const data = await sendToFemFlow(payload);
-
-    if (data && (data.status === "ok" || data.status === "created")) {
-      debugLog("✅ Cadastro confirmado:", data);
-      showSuccess(nome, data.id);
-    } else {
-      console.error("⚠️ Retorno inesperado:", data);
-      FEMFLOW.toast("Erro ao cadastrar. Tente novamente.");
-    }
-  } catch (err) {
-    console.error("❌ Erro ao enviar dados:", err);
-    FEMFLOW.toast("Falha de conexão com o servidor.");
+  try{
+    const resp=await fetch(FEMFLOW.SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const data=await resp.json();
+    if(data.status==="ok"||data.status==="created"){
+      showSuccess(dadosBase.nome,data.id);
+    }else FEMFLOW.toast("Erro ao cadastrar. Tente novamente.");
+  }catch(err){
+    console.error(err); FEMFLOW.toast("Falha de conexão com o servidor.");
   }
 }
 
+function showSuccess(nome,idFemflow){
+  const card=document.getElementById("card");
+  card.innerHTML=`
+    <div class="fade">
+      <img class="logo" src="../assets/logoterracotaebege.jpg" style="width:100px;margin-bottom:10px">
+      <h2 style="color:#335953;">Cadastro concluído 💫</h2>
+      <p style="font-size:0.95rem;color:#555;">Bem-vinda, <strong>${nome.split(" ")[0]}</strong>!</p>
+      <p style="font-size:0.9rem;color:#335953;">Seu ID FemFlow é:<br><strong>${idFemflow}</strong></p>
+      <p style="font-size:0.9rem;color:#777;">Você será redirecionada para o login...</p>
+    </div>`;
+  setTimeout(()=>window.location.href="login.html",4000);
+}
 
-  // 💫 Função de sucesso com ID FemFlow
-  function showSuccess(nome, idFemflow){
-    const card=document.getElementById("card");
-    card.innerHTML=`
-      <div class="fade">
-        <img class="logo" src="../assets/logofemflowterracota.png" style="width:100px;margin-bottom:10px">
-        <h2 style="color:#335953;">Cadastro concluído com sucesso 💫</h2>
-        <p style="font-size:0.95rem;color:#555;">Bem-vinda, <strong>${nome.split(" ")[0]}</strong>!</p>
-        <p style="font-size:0.9rem;color:#335953;">Seu ID FemFlow é:<br><strong>${idFemflow}</strong></p>
-        <p style="font-size:0.9rem;color:#777;">Você será redirecionada para o login...</p>
-      </div>`;
-    setTimeout(()=>window.location.href="login.html",4000);
-  }
-
- next.onclick = () => {
-  const item = Q[idx];
-
-  // Captura respostas
-  if (["info", "email", "telefone", "senha", "senhaConfirm"].includes(item.type)) {
-    const val = document.getElementById(item.field)?.value.trim();
-    if (val) answers.push(val);
-  } else if (currentPicked) {
-    score += Number(currentPicked.v || 0);
-    answers.push(currentPicked.label);
-  }
-
-  // Incrementa índice e decide próximo passo
+next.onclick=()=>{
+  const item=Q[idx];
+  if(["info","email","telefone","senha"].includes(item.type)){
+    const val=document.getElementById(item.field)?.value.trim();
+    if(val)answers.push(val);
+  }else if(currentPicked){score+=Number(currentPicked.v||0);answers.push(currentPicked.label);}
   idx++;
-
-  // 🚫 Corrigido: só chama finish() uma vez, sem travar
-  if (idx < Q.length) {
-    render();
-  } else {
-    try {
-      finish();
-    } catch (err) {
-      console.error("Erro no finish:", err);
-      FEMFLOW.toast("❌ Ocorreu um erro ao finalizar a anamnese.");
-    }
-  }
+  if(idx<Q.length){render();}
+  else finish();
 };
-  </script>
+
+document.addEventListener("DOMContentLoaded",()=>render());
+</script>
 </body>
 </html>
+
