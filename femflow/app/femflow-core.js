@@ -1,5 +1,5 @@
 /* ===========================================================
-   🌸 FEMFLOW CORE SCRIPT v3.0
+   🌸 FEMFLOW CORE SCRIPT v3.0 — Hotmart Ênfase Ready
    Autor: Ricardo Fernandes • 2025
    =========================================================== */
 
@@ -23,6 +23,14 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ======================================================
+// 🔧 Helpers
+// ======================================================
+const norm = (s="") =>
+  s.toString().trim().toLowerCase()
+   .normalize("NFD").replace(/[\u0300-\u036f]/g,"") // remove acentos
+   .replace(/\s+/g,""); // remove espaços
+
+// ======================================================
 // 🌸 Núcleo FEMFLOW
 // ======================================================
 export const FEMFLOW = {
@@ -39,10 +47,16 @@ export const FEMFLOW = {
     this.inserirBotaoVoltar();
     this.carregarLogoContextual();
     this.autoCiclo();
+
+    // Garante chaves mínimas (fallbacks)
+    if (!localStorage.getItem("fase_atual")) localStorage.setItem("fase_atual","folicular");
+    if (!localStorage.getItem("nivel_atual")) localStorage.setItem("nivel_atual","iniciante");
+    if (!localStorage.getItem("enfase_atual")) localStorage.setItem("enfase_atual","geral");
   },
 
   /* =======================================================
      🔹 1. LOGIN / CADASTRO
+     - Recebe do backend nível + ênfase definidos pelo produto Hotmart
   ======================================================= */
   async loginOuCadastro(nome, email) {
     if (!nome || !email) {
@@ -61,16 +75,40 @@ export const FEMFLOW = {
       if (data.status === "ok" || data.status === "created") {
         this.toast(`🌸 Bem-vinda, ${data.nome}!`);
         console.log("Perfil carregado:", data);
+
+        // Persistência básica
         localStorage.setItem("femflow_id", data.id);
         localStorage.setItem("femflow_nome", data.nome);
         localStorage.setItem("femflow_email", data.email);
+
+        // 🔥 Integração Hotmart → nível/ênfase vindo do backend
+        // Espera-se que o Apps Script retorne: nivel_acesso, enfase, fase_atual, dia_ciclo
+        this.aplicarAcessoBackend(data);
+
         this.router("home");
         return data;
-      } else this.toast("⚠️ Erro no cadastro/login.", true);
+      } else {
+        this.toast("⚠️ Erro no cadastro/login.", true);
+      }
     } catch (err) {
       console.error("Erro em loginOuCadastro:", err);
       this.toast("❌ Falha de conexão com o servidor.", true);
     }
+  },
+
+  // Aplica normalizando e com fallback
+  aplicarAcessoBackend(data = {}) {
+    const nivel = norm(data.nivel_acesso || localStorage.getItem("nivel_atual") || "iniciante");
+    const enfase = norm(data.enfase || localStorage.getItem("enfase_atual") || "geral");
+    const fase = norm(data.fase_atual || localStorage.getItem("fase_atual") || "folicular");
+    const dia  = Number(data.dia_ciclo || localStorage.getItem("dia_ciclo") || 1);
+
+    localStorage.setItem("nivel_atual", nivel);
+    localStorage.setItem("enfase_atual", enfase);
+    localStorage.setItem("fase_atual", fase);
+    localStorage.setItem("dia_ciclo", String(dia));
+
+    console.log(`🎯 Acesso aplicado → nível: ${nivel} | ênfase: ${enfase} | fase: ${fase} | dia: ${dia}`);
   },
 
   /* =======================================================
@@ -108,38 +146,37 @@ export const FEMFLOW = {
     }
   },
 
- inserirBotaoVoltar() {
-  const voltar = document.createElement("button");
-  voltar.textContent = "← Voltar";
-  voltar.style.cssText = `
-    position:fixed; top:15px; left:15px;
-    background:#335953; color:#fff; border:none;
-    padding:8px 14px; border-radius:20px;
-    font-family:'Lato',sans-serif; font-size:14px;
-    box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:999; cursor:pointer;
-  `;
+  inserirBotaoVoltar() {
+    const voltar = document.createElement("button");
+    voltar.textContent = "← Voltar";
+    voltar.style.cssText = `
+      position:fixed; top:15px; left:15px;
+      background:#335953; color:#fff; border:none;
+      padding:8px 14px; border-radius:20px;
+      font-family:'Lato',sans-serif; font-size:14px;
+      box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:999; cursor:pointer;
+    `;
 
-  // 🔹 Mapeamento completo e robusto
-  const map = {
-    "flowcenter.html": "index.html",
-    "treino.html": "flowcenter.html",
-    "evolucao.html": "flowcenter.html",
-    "respiracao.html": "flowcenter.html",
-    "ciclo.html": "index.html",
-    "home.html": "index.html",
-    "boasvindas.html": "index.html"
-  };
+    // 🔹 Mapeamento completo e robusto
+    const map = {
+      "flowcenter.html": "index.html",
+      "treino.html": "flowcenter.html",
+      "evolucao.html": "flowcenter.html",
+      "respiracao.html": "flowcenter.html",
+      "ciclo.html": "index.html",
+      "home.html": "index.html",
+      "boasvindas.html": "index.html"
+    };
 
-  const page = location.pathname.split("/").pop().toLowerCase();
-  let destino = map[page];
+    const page = location.pathname.split("/").pop().toLowerCase();
+    let destino = map[page];
 
-  // Fallback inteligente: se for página de treino (ex: /modulos/.../treino.html)
-  if (!destino && page.includes("treino")) destino = "flowcenter.html";
+    // Fallback inteligente: se for página de treino (ex: /modulos/.../treino.html)
+    if (!destino && page.includes("treino")) destino = "flowcenter.html";
 
-  voltar.onclick = () => this.router(destino || "index");
-  document.body.appendChild(voltar);
-}
-
+    voltar.onclick = () => this.router(destino || "index");
+    document.body.appendChild(voltar);
+  }, // ← ✅ vírgula que faltava
 
   /* =======================================================
      🔹 3. SALVAR TREINO / DESCANSO / PSE
@@ -195,40 +232,52 @@ export const FEMFLOW = {
   },
 
   // ======================================================
-  // 🔹 Buscar exercícios direto do Firestore
+  // 🔹 Buscar exercícios direto do Firestore (nível + ênfase do Hotmart)
   // ======================================================
-async buscarExerciciosFirebase(nivel, fase, dia) {
-  try {
-    const caminho = `exercicios/${nivel}/fases/${fase}/dias/${dia}/exercicios`;
-    const colRef = collection(db, caminho);
-    const snapshot = await getDocs(colRef);
-    const lista = [];
-    snapshot.forEach(doc => lista.push(doc.data()));
+  async buscarExerciciosFirebase(nivel, fase, dia, enfase = "geral") {
+    try {
+      // Normaliza entradas (aceita vindas do localStorage ou parâmetros)
+      const nivelN  = norm(nivel || localStorage.getItem("nivel_atual") || "iniciante");
+      const faseN   = norm(fase  || localStorage.getItem("fase_atual")  || "folicular");
+      const diaKey  = dia || `dia_${localStorage.getItem("dia_ciclo") || 1}`;
+      const enfaseN = norm(enfase || localStorage.getItem("enfase_atual") || "geral");
 
-    // 🔹 Agrupamento por "box"
-    const agrupado = {};
-    lista.forEach(ex => {
-      const nomeBox = ex.box || "Sem Box";
-      if (!agrupado[nomeBox]) agrupado[nomeBox] = [];
-      agrupado[nomeBox].push(ex);
-    });
+      const nivelKey = `${nivelN}_${enfaseN}`; // ex.: avancada_quadriceps
+      const caminho = `exercicios/${nivelKey}/fases/${faseN}/dias/${diaKey}/exercicios`;
+      const colRef = collection(db, caminho);
+      const snapshot = await getDocs(colRef);
 
-    // 🔹 Converte em formato compatível com treino.js
-    const boxes = Object.keys(agrupado).map(nome => ({
-      tipo: "exercicios",
-      titulo: nome,
-      itens: agrupado[nome]
-    }));
+      let lista = [];
+      snapshot.forEach(doc => lista.push(doc.data()));
 
-    console.log(`📦 ${lista.length} exercícios carregados (${boxes.length} boxes)`);
-    return boxes;
-  } catch (err) {
-    console.error("Erro ao buscar exercícios:", err);
-    FEMFLOW.toast("⚠️ Não foi possível carregar os exercícios.");
-    return [];
-  }
-}
+      // Fallback: se não houver coleção de ênfase, cai para "geral"
+      if (lista.length === 0 && enfaseN !== "geral") {
+        this.toast(`⚠️ Sem treino de ênfase "${enfaseN}" hoje — usando geral.`);
+        return await this.buscarExerciciosFirebase(nivelN, faseN, diaKey, "geral");
+      }
 
+      // Agrupamento por Box
+      const agrupado = {};
+      lista.forEach(ex => {
+        const nomeBox = ex.box || "Sem Box";
+        if (!agrupado[nomeBox]) agrupado[nomeBox] = [];
+        agrupado[nomeBox].push(ex);
+      });
+
+      const boxes = Object.keys(agrupado).map(nome => ({
+        tipo: "exercicios",
+        titulo: nome,
+        itens: agrupado[nome]
+      }));
+
+      console.log(`📦 ${lista.length} exercícios carregados (${boxes.length} boxes) [${nivelKey}] / fase=${faseN} / ${diaKey}`);
+      return boxes;
+    } catch (err) {
+      console.error("Erro ao buscar exercícios:", err);
+      this.toast("⚠️ Não foi possível carregar os exercícios.");
+      return [];
+    }
+  },
 
   /* =======================================================
      🔹 4. MODAL PSE
@@ -350,4 +399,3 @@ style.innerHTML = `
   to {opacity:1; transform:scale(1);}
 }`;
 document.head.appendChild(style);
-
