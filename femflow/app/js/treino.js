@@ -1,18 +1,12 @@
 // scripts/treino.js
 document.addEventListener("DOMContentLoaded", async () => {
- // ✅ Fallback para teste direto sem login
-let id = localStorage.getItem("femflow_id");
+const id = localStorage.getItem("femflow_id");
 if (!id) {
-  const idPrompt = prompt("Digite o seu ID FemFlow para continuar:");
-  if (idPrompt) {
-    id = idPrompt.trim();
-    localStorage.setItem("femflow_id", id);
-  } else {
-    FEMFLOW.toast("⚠️ ID não informado. Retornando...");
-    location.href = "index.html";
-    return;
-  }
+  FEMFLOW.toast("⚠️ Faça login novamente.");
+  location.href = "ciclo.html";
+  return;
 }
+
 
 
   try{
