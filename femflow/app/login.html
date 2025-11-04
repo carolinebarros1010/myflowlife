@@ -102,7 +102,7 @@
           localStorage.setItem("femflow_id", data.id);
           localStorage.setItem("femflow_nome", data.nome||"");
           msg.textContent = `✨ Bem-vinda, ${data.nome||"aluna"}!`; msg.style.color="#2e7d32";
-          setTimeout(()=>location.href="home.html",1200);
+          setTimeout(()=>location.href="index.html",1200);
         } else if(data.status==="notfound"){
           msg.textContent="❌ Conta não encontrada. Faça sua anamnese."; msg.style.color="#cc6a5a";
         } else {
