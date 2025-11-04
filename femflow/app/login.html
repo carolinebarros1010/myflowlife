@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
   <title>Login • FemFlow</title>
   <style>
-    :root{--terracota:#cc6a5a;--teal:#335953;--pessego:#efbda6;--bege:#f4e1d7;}
+      :root{--terracota:#cc6a5a;--teal:#335953;--pessego:#efbda6;--bege:#f4e1d7;}
+        *,
+*::before,
+*::after {
+  box-sizing: border-box;
+  max-width: 100%;
+}
     body{
       margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
       font-family:"Lato",sans-serif;background:linear-gradient(180deg,var(--bege) 0%,var(--pessego) 100%);color:var(--teal);
@@ -34,7 +40,12 @@
     .loader{border:3px solid rgba(0,0,0,.08);border-top:3px solid var(--terracota);border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;margin-left:8px}
     #recuperarBox{display:none;animation:fadeIn .4s ease;margin-top:1rem}
     @keyframes spin{to{transform:rotate(360deg)}}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    @media(max-width:420px){.card{padding:1.5rem 1.2rem}img.logo{width:100px}h2{font-size:1.4rem}.subtitle{font-size:.9rem}}
+  @media(max-width:420px){.card{width:95%;padding:1.2rem;margin:0 auto;}
+  img.logo{width:100px}
+  h2{font-size:1.35rem}
+  .subtitle{font-size:.9rem}
+}
+
   </style>
 </head>
 <body>
