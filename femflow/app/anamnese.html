@@ -205,31 +205,70 @@ function render(){
 }
 
 async function finish(){
-  const media = score/Q.length; let nivel="iniciante"; if(media>=2.2&&media<2.7)nivel="intermediaria"; if(media>=2.7)nivel="avancada";
-  const payload = {
-    action:"loginOuCadastro",
-    nome:dados.nome, email:dados.email, telefone:dados.telefone, senha:dados.senha,
-    perfil:nivel, pontuacao:score, anamnese:JSON.stringify(answers)
+  const media = score / Q.length;
+  let nivel = "iniciante";
+  if(media >= 2.2 && media < 2.7) nivel = "intermediaria";
+  if(media >= 2.7) nivel = "avancada";
+
+  const mensagens = {
+    iniciante: {
+      emoji: "🌱",
+      titulo: "Bem-vinda à sua jornada!",
+      frase: "Cada passo que você dá fortalece corpo e mente. No FemFlow, o começo é o ponto mais poderoso.",
+      cor: "#cc6a5a"
+    },
+    intermediaria: {
+      emoji: "🌿",
+      titulo: "Você já floresce em movimento!",
+      frase: "O FemFlow vai lapidar sua força e sua fluidez — equilíbrio é o seu novo foco.",
+      cor: "#335953"
+    },
+    avancada: {
+      emoji: "🌸",
+      titulo: "Você é pura potência cíclica!",
+      frase: "Com consistência e autoconsciência, você vai dominar sua performance com leveza.",
+      cor: "#cc6a5a"
+    }
   };
+  const perfil = mensagens[nivel];
+
+  const payload = {
+    action: "loginOuCadastro",
+    nome: dados.nome,
+    email: dados.email,
+    telefone: dados.telefone,
+    senha: dados.senha,
+    perfil: nivel,
+    pontuacao: score,
+    anamnese: JSON.stringify(answers)
+  };
+
   try{
-    const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-    const data=await r.json();
-    if(data.status==="ok"||data.status==="created"){
-      stage.innerHTML=`
-        <div class="slide active">
+    const r = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
+    });
+    const data = await r.json();
+    if(data.status === "ok" || data.status === "created"){
+      stage.innerHTML = `
+        <div class="slide active" style="animation:fadeIn .6s ease;">
           <img class="q-media" src="../assets/gifs/success_flow.webp" alt="ok"/>
-          <div class="q-title">Cadastro concluído 💫</div>
-          <p>Bem-vinda, <b>${dados.nome.split(" ")[0]}</b>!</p>
-          <p>Seu ID FemFlow: <b>${data.id}</b></p>
-          <p style="opacity:.85">Você será redirecionada para o login...</p>
+          <div class="q-title" style="color:${perfil.cor}">${perfil.emoji} ${perfil.titulo}</div>
+          <p style="font-size:1.05rem;margin-top:.3rem;">Seu perfil inicial é <b style="color:${perfil.cor};text-transform:capitalize;">${nivel}</b></p>
+          <p style="opacity:.9;margin-top:.4rem;">${perfil.frase}</p>
+          <p style="margin-top:1rem;">ID FemFlow: <b>${data.id}</b></p>
+          <p style="opacity:.7">Você será redirecionada para o login...</p>
         </div>`;
-      document.getElementById("btnNext").style.display="none";
-      bar.style.width="100%";
-      setTimeout(()=>location.href="login.html",4000);
+      document.getElementById("btnNext").style.display = "none";
+      bar.style.width = "100%";
+      setTimeout(() => location.href = "login.html", 4500);
     } else {
       alert("Erro no cadastro. Tente novamente.");
     }
-  }catch(e){ alert("Falha de conexão."); }
+  } catch(e){
+    alert("Falha de conexão.");
+  }
 }
 
 document.getElementById("btnNext").onclick=()=>{
