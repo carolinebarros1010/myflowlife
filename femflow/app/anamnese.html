@@ -67,73 +67,41 @@
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
 
 /** Perguntas — com emojis e GIF ilustrado (substitua os src pelos seus arquivos ilustrados) */
-const Q=[
-  {type:"info",    q:"👩 Seu nome completo", field:"nome", placeholder:"Ex: Maria Oliveira", gif:"../assets/gifs/wellness_profile.webp"},
-  {type:"email",   q:"✉️ Seu e-mail (para login)", field:"email", placeholder:"Ex: maria@email.com", gif:"../assets/gifs/mail_card.webp"},
-  {type:"telefone",q:"📱 Telefone com DDD", field:"telefone", placeholder:"Ex: (11) 99999-0000", gif:"../assets/gifs/phone_hand.webp"},
-  {type:"senha",   q:"🔒 Crie uma senha (6+)", field:"senha", gif:"../assets/gifs/lock_shield.webp"},
+const Q = [
+  { type:"info",    q:"👩 Seu nome completo", field:"nome", placeholder:"Ex: Maria Oliveira", gif:"./assets/gifs/wellness_profile.webp" },
+  { type:"email",   q:"✉️ Seu e-mail (para login)", field:"email", placeholder:"Ex: maria@email.com", gif:"./assets/gifs/mail_card.webp" },
+  { type:"telefone",q:"📱 Telefone com DDD", field:"telefone", placeholder:"Ex: (11) 99999-0000", gif:"./assets/gifs/phone_hand.webp" },
+  { type:"senha",   q:"🔒 Crie uma senha (6+)", field:"senha", gif:"./assets/gifs/lock_shield.webp" },
 
-  {type:"choice", q:"💪 Você está treinando atualmente?", gif:"../assets/gifs/training_illustration.webp",
-    opts:[
-      {emoji:"🏃‍♀️",label:"Sim, com frequência",v:2},
-      {emoji:"🧘‍♀️",label:"Não, estou parada",v:1}
-    ]
+  { type:"choice", q:"💪 Você está treinando atualmente?", gif:"./assets/gifs/training_illustration.webp",
+    opts:[ {emoji:"🏃‍♀️",label:"Sim, com frequência",v:2}, {emoji:"🧘‍♀️",label:"Não, estou parada",v:1} ]
   },
-  {type:"choice", q:"🩸 Menstruação regular?", gif:"../assets/gifs/cycle_flow.webp",
-    opts:[
-      {emoji:"✅",label:"Sim",v:2},
-      {emoji:"⚠️",label:"Não",v:1}
-    ]
+  { type:"choice", q:"🩸 Menstruação regular?", gif:"./assets/gifs/cycle_flow.webp",
+    opts:[ {emoji:"✅",label:"Sim",v:2}, {emoji:"⚠️",label:"Não",v:1} ]
   },
-  {type:"choice", q:"💊 Usa anticoncepcional hormonal?", gif:"../assets/gifs/pills_box.webp",
-    opts:[
-      {emoji:"✔️",label:"Sim",v:1},
-      {emoji:"❌",label:"Não",v:2}
-    ]
+  { type:"choice", q:"💊 Usa anticoncepcional hormonal?", gif:"./assets/gifs/pills_box.webp",
+    opts:[ {emoji:"✔️",label:"Sim",v:1}, {emoji:"❌",label:"Não",v:2} ]
   },
-  {type:"choice", q:"⏱️ Tempo de treino contínuo", gif:"../assets/gifs/timer_board.webp",
-    opts:[
-      {emoji:"🚫",label:"Não treino",v:0},
-      {emoji:"🌱",label:"< 3 meses",v:1},
-      {emoji:"🌿",label:"3–12 meses",v:2},
-      {emoji:"🌳",label:"> 1 ano",v:3}
-    ]
+  { type:"choice", q:"⏱️ Tempo de treino contínuo", gif:"./assets/gifs/timer_board.webp",
+    opts:[ {emoji:"🚫",label:"Não treino",v:0}, {emoji:"🌱",label:"< 3 meses",v:1}, {emoji:"🌿",label:"3–12 meses",v:2}, {emoji:"🌳",label:"> 1 ano",v:3} ]
   },
-  {type:"choice", q:"📆 Dias de treino/semana", gif:"../assets/gifs/calendar_days.webp",
-    opts:[
-      {emoji:"2️⃣",label:"1–2",v:1},
-      {emoji:"4️⃣",label:"3–4",v:2},
-      {emoji:"5️⃣",label:"5+",v:3}
-    ]
+  { type:"choice", q:"📆 Dias de treino/semana", gif:"./assets/gifs/calendar_days.webp",
+    opts:[ {emoji:"2️⃣",label:"1–2",v:1}, {emoji:"4️⃣",label:"3–4",v:2}, {emoji:"5️⃣",label:"5+",v:3} ]
   },
-  {type:"choice", q:"🧘‍♀️ Faz mobilidade/alongamento?", gif:"../assets/gifs/stretch_flow.webp",
-    opts:[
-      {emoji:"✅",label:"Sim",v:2},
-      {emoji:"❌",label:"Não",v:0}
-    ]
+  { type:"choice", q:"🧘‍♀️ Faz mobilidade/alongamento?", gif:"./assets/gifs/stretch_flow.webp",
+    opts:[ {emoji:"✅",label:"Sim",v:2}, {emoji:"❌",label:"Não",v:0} ]
   },
-  {type:"choice", q:"🏋️ Força hoje — como se sente?", gif:"../assets/gifs/strength_meter.webp",
-    opts:[
-      {emoji:"🥄",label:"Baixa",v:1},
-      {emoji:"⚖️",label:"Média",v:2},
-      {emoji:"🔥",label:"Alta",v:3}
-    ]
+  { type:"choice", q:"🏋️ Força hoje — como se sente?", gif:"./assets/gifs/strength_meter.webp",
+    opts:[ {emoji:"🥄",label:"Baixa",v:1}, {emoji:"⚖️",label:"Média",v:2}, {emoji:"🔥",label:"Alta",v:3} ]
   },
-  {type:"choice", q:"🌙 Dores menstruais nos últimos ciclos?", gif:"../assets/gifs/moon_cycle.webp",
-    opts:[
-      {emoji:"🌶️",label:"Fortes",v:0},
-      {emoji:"🫖",label:"Moderadas",v:1},
-      {emoji:"🍃",label:"Leves/Não",v:2}
-    ]
+  { type:"choice", q:"🌙 Dores menstruais nos últimos ciclos?", gif:"./assets/gifs/moon_cycle.webp",
+    opts:[ {emoji:"🌶️",label:"Fortes",v:0}, {emoji:"🫖",label:"Moderadas",v:1}, {emoji:"🍃",label:"Leves/Não",v:2} ]
   },
-  {type:"choice", q:"🎯 Outro esporte além da musculação?", gif:"../assets/gifs/multi_sport.webp",
-    opts:[
-      {emoji:"🚫",label:"Não",v:1},
-      {emoji:"🎳",label:"Ocasionalmente",v:2},
-      {emoji:"🏊",label:"Com frequência",v:3}
-    ]
+  { type:"choice", q:"🎯 Outro esporte além da musculação?", gif:"./assets/gifs/multi_sport.webp",
+    opts:[ {emoji:"🚫",label:"Não",v:1}, {emoji:"🎳",label:"Ocasionalmente",v:2}, {emoji:"🏊",label:"Com frequência",v:3} ]
   }
 ];
+
 
 let idx=0,score=0,answers=[],dados={},picked=null;
 const stage=document.getElementById("stage"), bar=document.getElementById("bar"), next=document.getElementById("btnNext");
@@ -161,7 +129,17 @@ function slideEl(inner){
 }
 
 function render(){
-  setBar(); next.disabled=true; picked=null; stage.innerHTML="";
+  setBar(); next.disabled=true; picked=null;stage.innerHTML = `
+  <div class="slide active" style="animation:fadeIn .6s ease;">
+    <img class="q-media" src="./assets/gifs/success_flow.webp" alt="ok"/>
+    <div class="q-title" style="color:${perfil.cor}">${perfil.emoji} ${perfil.titulo}</div>
+    <p style="font-size:1.05rem;margin-top:.3rem;">Seu perfil inicial é
+      <b style="color:${perfil.cor};text-transform:capitalize;">${nivel}</b></p>
+    <p style="opacity:.9;margin-top:.4rem;">${perfil.frase}</p>
+    <p style="margin-top:1rem;">ID FemFlow: <b>${data.id}</b></p>
+    <p style="opacity:.7">Você será redirecionada para o login...</p>
+  </div>`;
+
   const item=Q[idx];
 
   if(["info","email","telefone","senha"].includes(item.type)){
