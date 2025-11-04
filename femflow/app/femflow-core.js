@@ -197,21 +197,38 @@ export const FEMFLOW = {
   // ======================================================
   // 🔹 Buscar exercícios direto do Firestore
   // ======================================================
-  async buscarExerciciosFirebase(nivel, fase, dia) {
-    try {
-      const caminho = `exercicios/${nivel}/fases/${fase}/dias/${dia}/exercicios`;
-      const colRef = collection(db, caminho);
-      const snapshot = await getDocs(colRef);
-      const lista = [];
-      snapshot.forEach(doc => lista.push(doc.data()));
-      console.log(`📦 ${lista.length} exercícios carregados do Firestore`);
-      return lista;
-    } catch (err) {
-      console.error("Erro ao buscar exercícios:", err);
-      this.toast("⚠️ Não foi possível carregar os exercícios.");
-      return [];
-    }
-  },
+async buscarExerciciosFirebase(nivel, fase, dia) {
+  try {
+    const caminho = `exercicios/${nivel}/fases/${fase}/dias/${dia}/exercicios`;
+    const colRef = collection(db, caminho);
+    const snapshot = await getDocs(colRef);
+    const lista = [];
+    snapshot.forEach(doc => lista.push(doc.data()));
+
+    // 🔹 Agrupamento por "box"
+    const agrupado = {};
+    lista.forEach(ex => {
+      const nomeBox = ex.box || "Sem Box";
+      if (!agrupado[nomeBox]) agrupado[nomeBox] = [];
+      agrupado[nomeBox].push(ex);
+    });
+
+    // 🔹 Converte em formato compatível com treino.js
+    const boxes = Object.keys(agrupado).map(nome => ({
+      tipo: "exercicios",
+      titulo: nome,
+      itens: agrupado[nome]
+    }));
+
+    console.log(`📦 ${lista.length} exercícios carregados (${boxes.length} boxes)`);
+    return boxes;
+  } catch (err) {
+    console.error("Erro ao buscar exercícios:", err);
+    FEMFLOW.toast("⚠️ Não foi possível carregar os exercícios.");
+    return [];
+  }
+}
+
 
   /* =======================================================
      🔹 4. MODAL PSE
