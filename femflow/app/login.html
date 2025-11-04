@@ -112,20 +112,61 @@
       document.getElementById("loginBox").style.display="block";
       document.getElementById("mensagem").textContent="";
     }
-    async function recuperarSenha(){
-      const email = document.getElementById("recEmail").value.trim();
-      const msg = document.getElementById("mensagem");
-      if(!email){ msg.textContent="Digite seu e-mail."; msg.style.color="#cc6a5a"; return; }
+   async function recuperarSenha() {
+  const email = document.getElementById("recEmail").value.trim();
+  const msg = document.getElementById("mensagem");
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
 
-      msg.innerHTML="Verificando..."+'<span class="loader"></span>'; msg.style.color="#335953";
-      try{
-        const res = await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"recuperarSenha",email})});
-        const data = await res.json();
-        if(data.status==="ok"){ msg.textContent="📩 E-mail de recuperação enviado!"; msg.style.color="#2e7d32"; setTimeout(voltarLogin,2200); }
-        else if(data.status==="notfound"){ msg.textContent="⚠️ E-mail não encontrado."; msg.style.color="#cc6a5a"; }
-        else { msg.textContent="❌ Erro ao enviar e-mail."; msg.style.color="#cc6a5a"; }
-      }catch(e){ console.error(e); msg.textContent="❌ Falha de rede. Tente novamente."; msg.style.color="#cc6a5a"; }
+  if (!email) {
+    msg.textContent = "Digite seu e-mail.";
+    msg.style.color = "#cc6a5a";
+    return;
+  }
+
+  msg.innerHTML = "Verificando... <span class='loader'></span>";
+  msg.style.color = "#335953";
+
+  try {
+    // 👇 CORS-friendly: Content-Type simples evita preflight OPTIONS
+    const r = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "recuperarSenha", email })
+    });
+
+    if (!r.ok) {
+      const t = await r.text().catch(()=> "");
+      throw new Error(`HTTP ${r.status} – ${t.slice(0,200)}`);
     }
+
+    // Apps Script às vezes responde como text/plain
+    let data;
+    const ct = (r.headers.get("content-type") || "").toLowerCase();
+    if (ct.includes("application/json")) data = await r.json();
+    else data = JSON.parse(await r.text());
+
+    if (data.status === "ok") {
+      msg.textContent = "📩 E-mail de recuperação enviado!";
+      msg.style.color = "#2e7d32";
+      setTimeout(() => {
+        document.getElementById("recuperarBox").style.display = "none";
+        document.getElementById("loginBox").style.display = "block";
+        msg.textContent = "";
+      }, 2200);
+    } else if (data.status === "notfound") {
+      msg.textContent = "⚠️ E-mail não encontrado.";
+      msg.style.color = "#cc6a5a";
+    } else {
+      msg.textContent = "❌ Erro ao enviar e-mail.";
+      msg.style.color = "#cc6a5a";
+    }
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "❌ Falha de rede. Tente novamente.";
+    msg.style.color = "#cc6a5a";
+  }
+}
+
     function irParaAnamnese(){ location.href="anamnese_deluxe.html"; }
   </script>
 </body>
