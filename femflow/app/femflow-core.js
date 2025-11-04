@@ -8,7 +8,7 @@ export const FEMFLOW = {
     localStorage.getItem("femflow_script") ||
     "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec",
 
-  LOGO: "../assets/logoterracotaebege.jpg",
+  LOGO: "./assets/logofemflowterracota.png",
 
   async initTreino() {
     console.log("💫 FemFlow Core integrado ao Engine 2025.11C");
