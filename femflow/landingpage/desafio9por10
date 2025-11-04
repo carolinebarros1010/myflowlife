@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Desafio dos 9 Min • FemFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --terra:#d48567;
+    --terra-clara:#e7b29d;
+    --creme:#fffaf7;
+    --text:#4a4a4a;
+  }
+  body{
+    margin:0;padding:0;
+    font-family:'Lato',sans-serif;
+    color:var(--text);
+    background:linear-gradient(-45deg,#f8e1d2,#ffd6c4,#f6bfa7,#ffe3d7);
+    background-size:400% 400%;
+    animation:gradient 15s ease infinite;
+  }
+  @keyframes gradient{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;background:rgba(255,250,247,0.7);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--terra-clara);
+    position:sticky;top:0;z-index:10;
+  }
+  header img{height:54px;width:auto;}
+  .btn{
+    background:var(--terra);color:#fff;border:none;
+    padding:10px 18px;border-radius:999px;font-weight:700;
+    text-decoration:none;font-size:0.9rem;
+    transition:all 0.3s ease;
+  }
+  .btn:hover{background:#b96b4e;}
+
+  main{max-width:780px;margin:0 auto;padding:20px;}
+  h1{
+    font-family:'Playfair Display',serif;
+    color:var(--terra);
+    font-size:1.9rem;
+    margin-bottom:10px;
+    text-align:center;
+  }
+  p{text-align:center;line-height:1.6;font-size:1.05rem;}
+  .timer-box{
+    display:flex;justify-content:center;align-items:center;
+    gap:10px;background:rgba(255,250,247,0.85);
+    border:1px solid var(--terra-clara);
+    border-radius:999px;
+    padding:10px 20px;
+    width:max-content;
+    margin:0 auto 18px;
+    font-weight:700;color:var(--terra);
+  }
+  .timer-box span{font-family:'Playfair Display',serif;font-size:1.2rem;}
+  .card{
+    background:rgba(255,250,247,0.92);
+    border:1px solid var(--terra-clara);
+    border-radius:16px;
+    padding:18px;
+    margin-top:22px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.05);
+  }
+  .card h2{
+    font-family:'Playfair Display',serif;
+    color:var(--terra);
+    text-align:center;
+    margin-top:0;
+  }
+  .pill{
+    background:#f2e8e3;color:var(--terra);
+    padding:4px 10px;border-radius:999px;
+    border:1px solid var(--terra-clara);
+    font-size:.85rem;
+  }
+  ol{
+    list-style-position:inside;
+    padding-left:0;
+    font-size:1rem;
+  }
+  a.link-exercicio{
+    color:var(--terra);font-weight:700;text-decoration:none;
+  }
+  a.link-exercicio:hover{text-decoration:underline;}
+  .cta{
+    display:block;
+    width:max-content;
+    margin:26px auto 0;
+    background:var(--terra);
+    color:#fff;
+    font-weight:700;
+    text-decoration:none;
+    padding:14px 30px;
+    border-radius:999px;
+    font-size:1rem;
+    transition:all 0.3s ease;
+  }
+  .cta:hover{background:#b96b4e;transform:scale(1.05);}
+  footer{
+    text-align:center;
+    color:var(--terra);
+    margin:32px 0 14px;
+    font-style:italic;
+    font-size:0.95rem;
+  }
+  @media (max-width:600px){
+    header img{height:46px;}
+    h1{font-size:1.5rem;}
+    .btn{padding:8px 14px;font-size:0.85rem;}
+    .cta{padding:12px 22px;font-size:0.9rem;}
+    .timer-box{font-size:0.95rem;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <img src="./assets/logofemflowterracota.png" alt="Logo FemFlow"/>
+  <a href="https://www.femflow.com.br" class="btn" target="_blank">Treino Personalizado</a>
+</header>
+
+<main>
+  <section>
+    <h1>Desafio dos 9 Min por 10 Dias</h1>
+
+    <div class="timer-box">
+      ⏳ Faltam <span id="dias"></span> dias • <span id="horas"></span>h <span id="minutos"></span>m <span id="segundos"></span>s
+    </div>
+
+    <p>Topa o desafio? 💪<br>
+    São apenas <strong>9 minutos por dia</strong> durante <strong>10 dias</strong> para ativar seus glúteos e quadríceps, fortalecer o core e sentir o poder do seu corpo em movimento!</p>
+    <p>Quem topar, marca <strong>#desafio9min</strong> e compartilha com outra <em>“Louca”</em> que toparia! 🔥</p>
+  </section>
+
+  <section class="card">
+    <h2>Rotina do Desafio</h2>
+    <p style="text-align:center;"><span class="pill">3 Séries</span> • 1 min por exercício • Repita 3x</p>
+    <ol>
+      <li>
+        <a class="link-exercicio" href="https://youtube.com/shorts/SmSvy4TGxiw?si=hIwHfDuKQLcexuea" target="_blank">
+          1 min — Elevação Pélvica para Quadríceps
+        </a>
+      </li>
+      <li>
+        <a class="link-exercicio" href="https://youtube.com/shorts/3NHh5pHljrE?si=5vDTla4B4Vi90bMM" target="_blank">
+          1 min — Elevação Pélvica para Posterior
+        </a>
+      </li>
+      <li>
+        <a class="link-exercicio" href="https://youtube.com/shorts/WWMQDiH32N4?si=TofklP_R1vn97mef" target="_blank">
+          1 min — Elevação Pélvica para Glúteo
+        </a>
+      </li>
+    </ol>
+    <p style="text-align:center;"><strong>Quem sobreviver, repete por 10 dias!</strong> 🌸</p>
+
+    <a class="cta" href="https://chat.whatsapp.com/LRFP6AHZndvKWrtOQqnsqd?mode=wwt" target="_blank">
+      👉 Participar do Desafio no WhatsApp
+    </a>
+  </section>
+
+  <footer>
+    Treine com o seu ciclo. Viva o fluxo. — FemFlow<br>
+    <small>MyFlowLife — Ciência, Consistência e Movimento.</small>
+  </footer>
+</main>
+
+<script>
+  // Define a data de término do desafio (exemplo: 10 dias a partir de hoje)
+  const fimDesafio = new Date();
+  fimDesafio.setDate(fimDesafio.getDate() + 10);
+
+  function atualizarContagem() {
+    const agora = new Date().getTime();
+    const distancia = fimDesafio - agora;
+
+    const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
+    const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutos = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
+    const segundos = Math.floor((distancia % (1000 * 60)) / 1000);
+
+    document.getElementById("dias").innerText = dias;
+    document.getElementById("horas").innerText = horas;
+    document.getElementById("minutos").innerText = minutos;
+    document.getElementById("segundos").innerText = segundos;
+
+    if (distancia < 0) {
+      document.querySelector(".timer-box").innerHTML = "🔥 Desafio encerrado! 🔥";
+    }
+  }
+
+  atualizarContagem();
+  setInterval(atualizarContagem, 1000);
+</script>
+
+</body>
+</html>
