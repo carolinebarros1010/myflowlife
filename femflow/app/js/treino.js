@@ -49,9 +49,15 @@ const data = { fase, nivel, diaCiclo, regras: { foco: "auto", intervalo: 60 }, b
           const item = document.createElement("div");
           item.className = "exercicio";
           item.innerHTML = `
-            <h4>${i + 1}. <a href="${ex.link || "#"}" target="_blank" rel="noopener">${ex.exercicio || ex.nome}</a></h4>
-            <p>🔁 ${ex.series || 3} séries × ${ex.reps || 12} reps</p>
-          `;
+  <h4>
+    ${i + 1}. 
+    <a href="${ex.link || "#"}" target="_blank" rel="noopener" style="color:var(--terracota);text-decoration:none;font-weight:600;">
+      ${ex.exercicio}
+      ${ex.link ? ' <span style="font-size:0.85em;">🎥</span>' : ''}
+    </a>
+  </h4>
+  <p>🔁 ${ex.series} séries × ${ex.reps} reps</p>
+`;
           item.appendChild(criarTimerDescanso(ex.tempo || data.regras.intervalo || 60));
           div.appendChild(item);
         });
