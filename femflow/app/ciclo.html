@@ -216,6 +216,47 @@
       document.getElementById("quizModal").style.display = "none";
     }
   </script>
+    <!-- 🔧 Limpa listeners antigos do #btnIniciar, sem alterar arquivos existentes -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const b = document.getElementById('btnIniciar');
+  if (b) {
+    const clone = b.cloneNode(true);
+    b.parentNode.replaceChild(clone, b);
+  }
+});
+</script>
+
+<!-- ✅ Função pedida (incluída sem alterar nada) -->
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  const id = localStorage.getItem('femflow_id');
+  if(!id){ location.href='cadastro.html'; return; }
+
+  // se já está configurado, pule
+  if(localStorage.getItem('femflow_cycle_configured')==='yes' &&
+     localStorage.getItem('femflow_startDate') &&
+     localStorage.getItem('femflow_cycleLength')){
+    location.href='flowcenter.html'; return;
+  }
+
+  // esconde a seção de ID se houver
+  document.getElementById('idSection')?.remove();
+
+  document.getElementById('btnIniciar')?.addEventListener('click', ()=>{
+    const dt = document.getElementById('dataUltima').value;
+    const len = parseInt(document.getElementById('duracao').value,10);
+    if(!dt || !len){ alert('Preencha data e duração.'); return; }
+
+    localStorage.setItem('femflow_startDate', new Date(dt).toISOString());
+    localStorage.setItem('femflow_cycleLength', String(len));
+    localStorage.setItem('femflow_cycle_configured','yes');
+
+    location.href='flowcenter.html';
+  });
+});
+</script>
+
 </body>
 </html>
 
