@@ -15,24 +15,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const diaKey = `dia_${diaCiclo}`;
 
     // 🔹 Busca exercícios no Firestore
-    const exercicios = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey);
-    if (!exercicios.length) {
-      FEMFLOW.toast("⚠️ Nenhum exercício encontrado para hoje.", true);
-      return;
-    }
+    const boxes = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey);
+const data = { fase, nivel, diaCiclo, regras: { foco: "auto", intervalo: 60 }, boxes };
 
-    // 🔹 Monta estrutura simulando payload padrão do Apps Script
-    const data = {
-      fase,
-      nivel,
-      diaCiclo,
-      regras: { foco: "auto", intervalo: 60 },
-      boxes: [
-        { tipo: "texto", titulo: "🌿 Boas-vindas", mensagem: "Sinta o corpo, mantenha a respiração nasal e entre no seu flow." },
-        { tipo: "exercicios", titulo: "Treino do Dia", itens: exercicios },
-        { tipo: "resfriamento", titulo: "Box Final — Resfriamento e PSE", tempo_total: 180 }
-      ]
-    };
 
     const container = document.getElementById("containerTreino");
     container.innerHTML = "";
