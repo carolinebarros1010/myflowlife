@@ -1,13 +1,11 @@
-// scripts/treino.js
 document.addEventListener("DOMContentLoaded", async () => {
-const id = localStorage.getItem("femflow_id");
-if (!id) {
-  FEMFLOW.toast("⚠️ Faça login novamente.");
-  location.href = "ciclo.html";
-  return;
-}
+  const id = localStorage.getItem("femflow_id");
+  if (!id) { FEMFLOW.toast("⚠️ Faça login novamente."); location.href="ciclo.html"; return; }
 
-
+  const ok = localStorage.getItem('femflow_cycle_configured')==='yes' &&
+             localStorage.getItem('femflow_startDate') &&
+             localStorage.getItem('femflow_cycleLength');
+  if (!ok) { FEMFLOW.toast("⚠️ Configure seu ciclo."); location.href="ciclo.html"; return; }
 
   try{
     // contexto do dia
