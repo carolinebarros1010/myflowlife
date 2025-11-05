@@ -61,7 +61,10 @@
     <p id="mensagem" class="message"></p>
   </div>
 
-  <!-- Core primeiro (usa FEMFLOW.SCRIPT_URL) -->
+ <script>
+  // Desliga logo e botão Voltar nesta página
+  window.FEMFLOW_SUPPRESS_UI = true;
+</script>
   <script src="./femflow-core.js"></script>
   <script>
     const $ = s => document.querySelector(s);
