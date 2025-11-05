@@ -172,15 +172,110 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Origem dos exercícios
-  if (j.exSource === 'firebase' && j.firebaseQuery) {
-    const { nivel, fase, diaKey } = j.firebaseQuery;
-    let caixas = [];
-    try {
-      caixas = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey);
-    } catch(e) {
-      console.warn('Firebase falhou, usando fallback vazio', e);
-      caixas = [];
-    }
+ if (j.exSource === 'firebase' && j.firebaseQuery) {
+  const { nivel, fase, diaKey } = j.firebaseQuery;
+
+  // 1) Buscar no Firebase: pode vir "caixas prontas" OU "lista plana"
+  let raw = [];
+  try {
+    raw = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey);
+  } catch(e) {
+    console.warn('Firebase falhou, usando fallback vazio', e);
+    raw = [];
+  }
+
+  // 2) Sugestões do backend (fallback quando faltar dado)
+  const sugSeries  = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoSeries ?? 3;
+  const sugTempo   = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoIntervalo ?? 45;
+  const sugRepsMax = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoRepsMax ?? 15;
+
+  // 3) Normalizadores
+  const normLink = (u)=>{
+    if(!u) return '';
+    let s=String(u).trim();
+    if(/^youtu\.be\//i.test(s)) s = 'https://' + s;
+    if(/^www\.youtube\.com\/watch/i.test(s)) s = 'https://' + s;
+    if(/^http/i.test(s)) return s;
+    if(/^(youtu\.be|youtube\.com)\b/i.test(s)) return 'https://' + s;
+    return /^[-\w]+(\.[-\w]+)+/.test(s) ? 'https://' + s : s;
+  };
+  const toInt = (v)=> {
+    if (v==null) return null;
+    const s = String(v).trim();
+    const m = s.match(/^\d+/); // pega inicio numérico
+    return m ? Number(m[0]) : null;
+  };
+  const toReps = (v)=> {
+    if (v==null) return null;
+    const s = String(v).trim();
+    // aceita "8-12", "10", "10–12"
+    return s.replace(/[–—]/g,'-'); // traço longo → '-'
+  };
+
+  // 4) Detecta formato:
+  //    a) Caixas prontas: [{ titulo, itens:[...] }]
+  const isBoxes = Array.isArray(raw) && raw.length && Array.isArray(raw[0]?.itens);
+
+  //    b) Lista plana de exercícios: [{ box, titulo, series, reps, link, ... }]
+  if (isBoxes) {
+    // já vem pronto — só normaliza links/valores faltantes
+    raw.forEach((box, idx) => {
+      const itens = (box.itens||[]).map(ex => ({
+        exercicio: ex.exercicio || ex.titulo || ex.nome || 'Exercício',
+        link: normLink(ex.link || ex.url || ex.video || ''),
+        series: ex.series ?? sugSeries,
+        reps: ex.reps ?? sugRepsMax,
+        tempo: ex.tempo ?? sugTempo
+      }));
+      lista.push({ tipo:'exercicios', titulo: box.titulo || `Box ${idx+1}`, itens });
+
+      // HIIT/Cardio planejados
+      const fx = (j.faixasExtras||[]).filter(f=>f.kind==='hiit' || f.kind==='cardio');
+      if (fx.length && idx < fx.length) {
+        const f = fx[idx];
+        if (f.kind==='hiit')   lista.push({ tipo:'hiit',   titulo:f.titulo,  descricao:f.protocolo, tempo_total:f.tempo_total||360 });
+        if (f.kind==='cardio') lista.push({ tipo:'cardio', titulo:f.titulo,  descricao:f.descricao, tempo_total:f.tempo_total||600 });
+      }
+    });
+
+  } else {
+    // LISTA PLANA → agrupar por 'box'
+    const byBox = new Map();
+    raw.forEach(doc => {
+      const boxName = (doc.box || 'Box 1').toString();
+      if (!byBox.has(boxName)) byBox.set(boxName, []);
+      byBox.get(boxName).push(doc);
+    });
+
+    // Ordena boxes por número (Box 1, Box 2, ...)
+    const extractNum = (s)=> {
+      const m = String(s).match(/(\d+)/);
+      return m ? Number(m[1]) : 9999;
+    };
+    const ordered = [...byBox.entries()].sort((a,b)=> extractNum(a[0]) - extractNum(b[0]));
+
+    ordered.forEach(([boxName, arr], idx) => {
+      const itens = arr.map(ex => ({
+        exercicio: ex.titulo || ex.nome || 'Exercício',
+        link: normLink(ex.link || ex.url || ex.video || ''),
+        series: toInt(ex.series) ?? sugSeries,
+        reps: toReps(ex.reps) ?? sugRepsMax,   // mantém "8-12" se vier string
+        tempo: toInt(ex.tempo) ?? sugTempo
+      }));
+
+      lista.push({ tipo:'exercicios', titulo: boxName || `Box ${idx+1}`, itens });
+
+      // HIIT/Cardio planejados (alinha por índice do box)
+      const fx = (j.faixasExtras||[]).filter(f=>f.kind==='hiit' || f.kind==='cardio');
+      if (fx.length && idx < fx.length) {
+        const f = fx[idx];
+        if (f.kind==='hiit')   lista.push({ tipo:'hiit',   titulo:f.titulo,  descricao:f.protocolo, tempo_total:f.tempo_total||360 });
+        if (f.kind==='cardio') lista.push({ tipo:'cardio', titulo:f.titulo,  descricao:f.descricao, tempo_total:f.tempo_total||600 });
+      }
+    });
+  }
+}
+
 
     const sugSeries  = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoSeries ?? 3;
     const sugTempo   = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoIntervalo ?? 45;
