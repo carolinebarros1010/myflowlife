@@ -36,12 +36,21 @@
     button:hover{transform:scale(1.02)}
     .toggle{font-size:.9rem;color:var(--terracota);margin-top:.8rem;cursor:pointer;text-decoration:underline}
     .message{margin-top:1rem;min-height:1.4rem;font-size:.95rem}
+    .env-warn{
+      position:fixed;top:0;left:0;right:0;padding:.7rem 1rem;text-align:center;
+      background:#fff3cd;color:#856404;border-bottom:1px solid #ffeeba;font-size:.9rem;
+      z-index:1000;display:none
+    }
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
+  <div class="env-warn" id="envWarn">
+    ⚠️ Endpoint não configurado. Defina <code>localStorage.femflow_script</code> com o seu Deployment ID do Apps Script.
+  </div>
+
   <div class="login-card">
-    <img src="assets/logofemflowterracota.png" alt="FemFlow" class="logo"/>
+    <img src="assets/logofemflowterracotasf.png" alt="FemFlow" class="logo"/>
     <h2>Bem-vinda ao FemFlow</h2>
     <p class="subtitle">Acesse ou crie sua conta para iniciar seu ciclo 🌸</p>
 
@@ -88,16 +97,21 @@
     <p id="mensagem" class="message"></p>
   </div>
 
-  <!-- Core primeiro: expõe FEMFLOW.SCRIPT_URL e FEMFLOW.logout() -->
+  <!-- Core primeiro -->
   <script src="./femflow-core.js"></script>
 
   <script>
-    // Endpoint do Apps Script vindo do core (fallback só para dev)
-    const scriptURL = (window.FEMFLOW && FEMFLOW.SCRIPT_URL) ||
-      "https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec";
+    // Resolve o endpoint: Core -> localStorage -> (sem fallback; mostra aviso)
+    const scriptURL = (FEMFLOW && FEMFLOW.SCRIPT_URL) || localStorage.getItem('femflow_script') || null;
 
     const $ = (s)=>document.querySelector(s);
     const msg = $("#mensagem");
+    const warn = $("#envWarn");
+
+    // Se não houver endpoint, avisa e desabilita ações
+    if(!scriptURL){
+      warn.style.display = 'block';
+    }
 
     // ---- Navegação entre boxes ----
     function mostrarLogin(){
@@ -127,7 +141,7 @@
     function setMsg(t, ok=false){ msg.textContent=t; msg.style.color = ok ? "#2e7d32" : "#335953"; }
     function setErr(t){ msg.textContent=t; msg.style.color="#cc6a5a"; }
 
-    // ---- Auto-redirect apenas com sessão válida (evita redirecionar sem clique) ----
+    // ---- Auto-redirect apenas com sessão válida ----
     (async function autoRouteIfLogged(){
       const id = localStorage.getItem('femflow_id');
       const auth = localStorage.getItem('femflow_auth') === 'yes';
@@ -137,8 +151,16 @@
       location.href = 'ciclo.html';
     })();
 
-    // ---- Cadastro local (se quiser manter além da anamnese) ----
+    // ---- Guarda: bloqueia ações se não houver endpoint ----
+    function ensureEndpoint(){ 
+      if(scriptURL) return true;
+      setErr("Endpoint não configurado. Defina localStorage.femflow_script.");
+      return false;
+    }
+
+    // ---- Cadastro local (se mantiver além da anamnese) ----
     async function registrar(){
+      if(!ensureEndpoint()) return;
       const nome = $("#nome")?.value.trim();
       const email = $("#email")?.value.trim();
       const senha = $("#senha")?.value.trim();
@@ -172,6 +194,7 @@
 
     // ---- Login ----
     async function entrar(){
+      if(!ensureEndpoint()) return;
       const email = $("#loginEmail").value.trim();
       const senha = $("#loginSenha").value.trim();
       if(!email || !senha){ setErr("Digite e-mail e senha."); return; }
@@ -186,7 +209,7 @@
         const ct = (r.headers.get("content-type")||"").toLowerCase();
         const data = ct.includes("application/json") ? await r.json() : JSON.parse(await r.text());
 
-      if(data.status==="ok"){
+        if(data.status==="ok"){
           setMsg(`Bem-vinda, ${data.nome||"aluna"}!`, true);
           localStorage.setItem('femflow_id', data.id);
           localStorage.setItem('femflow_nome', data.nome||"");
@@ -204,49 +227,42 @@
 
     // ---- Recuperar senha ----
     async function recuperarSenha(){
-  const email = document.getElementById('recEmail').value.trim();
-  const msgEl = document.getElementById('mensagem');
-  if(!email){ msgEl.textContent='Digite seu e-mail.'; msgEl.style.color='#cc6a5a'; return; }
+      if(!ensureEndpoint()) return;
+      const email = document.getElementById('recEmail').value.trim();
+      const msgEl = document.getElementById('mensagem');
+      if(!email){ msgEl.textContent='Digite seu e-mail.'; msgEl.style.color='#cc6a5a'; return; }
 
-  msgEl.innerHTML = 'Verificando...';
-  msgEl.style.color = '#335953';
+      msgEl.innerHTML = 'Verificando...';
+      msgEl.style.color = '#335953';
 
-  try{
-    const r = await fetch(scriptURL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight
-      body: JSON.stringify({
-        action: 'recuperarsenha',   // <<<<<<<<<<<<<<<<<<<<<< aqui em minúsculas
-        email
-      })
-    });
+      try{
+        const r = await fetch(scriptURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action:'recuperarsenha', email })
+        });
 
-    let data;
-    const ct = (r.headers.get('content-type')||'').toLowerCase();
-    if(ct.includes('application/json')) data = await r.json();
-    else data = JSON.parse(await r.text());
+        const ct = (r.headers.get('content-type')||'').toLowerCase();
+        const data = ct.includes('application/json') ? await r.json() : JSON.parse(await r.text());
 
-    if(data.status === 'ok'){
-      msgEl.textContent = '📩 Se o e-mail existir, você receberá as instruções em instantes.';
-      msgEl.style.color = '#2e7d32';
-      setTimeout(()=>{
-        document.getElementById('recuperarBox').style.display='none';
-        document.getElementById('loginBox').style.display='block';
-        msgEl.textContent='';
-      }, 2000);
-    } else if (data.status === 'notfound'){
-      msgEl.textContent = '⚠️ E-mail não encontrado.';
-      msgEl.style.color = '#cc6a5a';
-    } else {
-      msgEl.textContent = '❌ Erro ao enviar e-mail.';
-      msgEl.style.color = '#cc6a5a';
+        if(data.status === 'ok'){
+          msgEl.textContent = '📩 Se o e-mail existir, você receberá as instruções em instantes.';
+          msgEl.style.color = '#2e7d32';
+          setTimeout(()=>{ mostrarLogin(); msgEl.textContent=''; }, 2000);
+        } else if (data.status === 'notfound'){
+          msgEl.textContent = '⚠️ E-mail não encontrado.';
+          msgEl.style.color = '#cc6a5a';
+        } else {
+          msgEl.textContent = '❌ Erro ao enviar e-mail.';
+          msgEl.style.color = '#cc6a5a';
+        }
+      }catch(e){
+        console.error(e);
+        msgEl.textContent = '❌ Falha de rede. Tente novamente.';
+        msgEl.style.color = '#cc6a5a';
+      }
     }
-  }catch(err){
-    console.error(err);
-    msgEl.textContent = '❌ Falha de rede. Tente novamente.';
-    msgEl.style.color = '#cc6a5a';
-  }
-}
+
     // Binds
     $("#btnEntrar").addEventListener("click", entrar);
     $("#btnCriar")?.addEventListener("click", registrar);
@@ -257,4 +273,3 @@
   </script>
 </body>
 </html>
-
