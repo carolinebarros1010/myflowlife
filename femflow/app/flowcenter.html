@@ -257,8 +257,11 @@
   })();
 </script>
   <!-- Core no caminho solicitado -->
-  <script src="./femflow-core.js"></script>
-  <script>
+<!-- Carregue o core ANTES de usar FEMFLOW -->
+<script src="scripts/femflow-core.js"></script>
+
+<!-- Helpers de entitlement (definições primeiro) -->
+<script>
   // Checa se há direito ativo (programa não expirado)
   function hasEntitlement() {
     const sku = localStorage.getItem('femflow_program');
@@ -290,6 +293,19 @@
       console.warn('syncEntitlement failed', e);
     }
   }
+</script>
+
+<!-- Agora SIM, chame a sync e bloqueie se não houver acesso -->
+<script>
+  (async function(){
+    await syncEntitlement();
+    if (!hasEntitlement()) {
+      // Sem direito ativo: direcione para a Home para escolher um programa
+      location.href = 'home.html';
+      return;
+    }
+    // Se tiver direito ativo, nada a fazer — o Flow Center que você já renderizou segue normal
+  })();
 </script>
 </body>
 </html>
