@@ -226,6 +226,27 @@
     <small>MyFlowLife — Ciência, Consistência e Movimento.</small>
   </footer>
 </main>
+<script>
+  // Tenta tocar assim que possível (muted + playsinline permitem autoplay na maioria dos casos)
+  const v = document.getElementById('heroVideo');
+  function tryPlay(){ v && v.play().catch(()=>{}); }
+  if (document.readyState === 'complete') tryPlay();
+  else window.addEventListener('load', tryPlay);
+
+  // iOS/Safari às vezes só libera após um gesto; garanta na primeira interação
+  ['touchstart','click'].forEach(ev => {
+    window.addEventListener(ev, function once(){
+      tryPlay();
+      window.removeEventListener(ev, once, {once:true});
+    }, {once:true});
+  });
+
+  // Se quiser otimizar o carregamento: tocar apenas quando entrar na viewport
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(entries=>{
+    entries.forEach(e => e.isIntersecting ? tryPlay() : v.pause());
+  }, {threshold: 0.25}) : null;
+  if (io) io.observe(v);
+</script>
 
 <script>
   const fimDesafio = new Date();
