@@ -244,7 +244,20 @@
     $("#toTrain").onclick=()=>location.href="treino.html";
     $("#startBtn").onclick=()=>location.href="respiracao.html";
   </script>
+<script>
+  (async function(){
+    const id = localStorage.getItem('femflow_id');
+    if(!id){ location.href='login.html?ret=flowcenter.html'; return; }
 
+    const hasStart = !!localStorage.getItem('femflow_startDate');
+    const hasLen   = !!localStorage.getItem('femflow_cycleLength');
+    if(!(hasStart && hasLen)){ location.href='ciclo.html'; return; }
+
+    // Opcional: sincronizar direitos (quando tiver o endpoint pronto)
+    // await syncEntitlement();
+    // if(!hasEntitlement()){ location.href='home.html'; return; }
+  })();
+</script>
   <!-- Core no caminho solicitado -->
   <script src="./femflow-core.js"></script>
 </body>
