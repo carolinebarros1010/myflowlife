@@ -1,176 +1,162 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>FemFlow • Home</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="manifest.json"/>
   <meta name="theme-color" content="#335953"/>
-
   <style>
-    :root{
-      --bege:#f8f4f0; --terracota:#cc6a5a; --pessego:#efbda6; --teal:#335953; --texto:#4d3f3a;
-    }
+    :root{ --bege:#fff7f2; --terracota:#cc6a5a; --teal:#335953; --texto:#4d3f3a; }
     *{box-sizing:border-box}
-    body{
-      margin:0; background:linear-gradient(180deg,#fffaf7 0%, #f1ebe6 100%);
-      color:var(--texto); font-family:"Lato",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    }
-    header{padding:18px 16px 8px; text-align:center}
-    .logo{width:150px; height:auto; display:block; margin:8px auto 6px}
-    .tag{margin:0; color:var(--terracota); font-weight:700; letter-spacing:.2px}
-    .saudacao{margin:.2rem 0 1rem; color:var(--teal); font-weight:700}
+    body{margin:0;background:linear-gradient(180deg,#fffdfb 0%, #f3ece6 100%);
+         color:var(--texto);font-family:"Lato",system-ui,Segoe UI,Arial,sans-serif}
+    header{display:flex;justify-content:center;padding:16px 14px}
+    .logo{height:56px}
+    .wrap{max-width:1160px;margin:0 auto;padding:0 14px 22px}
 
-    .cta{
-      display:block; margin:14px auto 18px; padding:12px 18px; width:92%; max-width:420px;
-      border:none; border-radius:14px; background:linear-gradient(135deg,var(--teal),var(--terracota));
-      color:#fff; font-weight:800; letter-spacing:.2px; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,.12);
-    }
+    /* vídeo topo */
+    .video{position:relative;padding-top:56.25%;border-radius:16px;overflow:hidden;
+           box-shadow:0 10px 24px rgba(0,0,0,.12);background:#000}
+    .video iframe,.video video{position:absolute;inset:0;width:100%;height:100%}
 
-    /* grid Netflixzinho */
-    .grid{
-      display:grid; gap:12px; padding:0 14px 22px; margin:0 auto; max-width:960px;
-      grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+    /* título da vitrine */
+    h1{font-size:1.25rem;color:var(--teal);margin:14px 2px 10px;font-weight:900}
+
+    /* carrossel horizontal (scroll lateral) */
+    .rail{
+      display:flex; gap:12px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+      padding:2px 2px 10px; margin:0 -8px 8px; scroll-snap-type:x mandatory;
     }
+    .rail::-webkit-scrollbar{display:none} /* mobile clean */
     .card{
-      background:rgba(255,255,255,.86); backdrop-filter:blur(10px);
-      border-radius:16px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,.08);
-      transition:transform .25s ease, box-shadow .25s ease; cursor:pointer;
-      border:1px solid rgba(204,106,90,.12);
+      flex:0 0 220px; scroll-snap-align:start;
+      background:#fff;border-radius:16px;overflow:hidden;border:1px solid rgba(204,106,90,.14);
+      box-shadow:0 6px 16px rgba(0,0,0,.08);cursor:pointer;transition:transform .2s ease,box-shadow .2s ease
     }
-    .card:hover{ transform:translateY(-3px); box-shadow:0 10px 22px rgba(0,0,0,.12); }
-    .thumb{height:100px; display:flex; align-items:center; justify-content:center; background:#fff}
-    .thumb span{font-size:34px}
-    .card h4{margin:.65rem .8rem .2rem; color:var(--teal)}
-    .card p{margin:0 .8rem .9rem; color:#8a7068; font-size:.92rem}
+    .card:active{transform:scale(.98)}
+    .thumb{position:relative;height:140px;background:#fff;display:flex;align-items:center;justify-content:center}
+    .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .ph{font-weight:900;font-size:28px;color:#fff;z-index:1}
+    .badge{position:absolute;right:10px;top:10px;background:rgba(51,89,83,.92);color:#fff;border-radius:999px;
+           padding:4px 10px;font-size:.8rem;font-weight:800}
+    .info{padding:12px}
+    .ttl{margin:0 0 6px;color:var(--teal);font-weight:900}
+    .desc{margin:0;color:#94786f;font-size:.92rem;min-height:38px}
 
-    /* ID rápido */
-    .idbox{padding:10px 16px 22px; text-align:center}
-    .idbox input{
-      width:72%; max-width:300px; padding:.7rem .8rem; border:1px solid #ddd; border-radius:12px; outline:0;
+    /* CTA Flow Center */
+    .cta{
+      display:block;width:100%;max-width:480px;margin:16px auto 4px;padding:12px 16px;
+      border:0;border-radius:14px;font-weight:900;letter-spacing:.2px;cursor:pointer;
+      background:linear-gradient(135deg,var(--teal),var(--terracota));color:#fff;
+      box-shadow:0 10px 22px rgba(0,0,0,.12)
     }
-    .idbox button{
-      margin-left:8px; padding:.7rem 1rem; border:none; border-radius:12px;
-      background:var(--teal); color:#fff; font-weight:700; cursor:pointer;
-    }
-    footer{padding:18px; text-align:center; color:#a48277; font-size:.9rem}
+    footer{padding:16px 0 24px;text-align:center;color:#9a8077;font-size:.9rem}
   </style>
 </head>
 <body>
-  <header>
-    <img class="logo" src="assets/logofemflowverde.png" alt="FemFlow" />
-    <p class="tag">Cuidar do corpo é viver o ciclo em harmonia 🌿</p>
-    <p id="saudacao" class="saudacao">Bem-vinda</p>
-    <button id="continuarBtn" class="cta">✨ Continuar</button>
-  </header>
+  <header><img class="logo" src="assets/logofemflowverde.png" alt="FemFlow"/></header>
 
-  <section class="grid">
-    <div class="card" onclick="goto('flowcenter.html')">
-      <div class="thumb"><span>🧭</span></div>
-      <h4>Flow Center</h4>
-      <p>Fase atual, dicas e navegação rápida.</p>
+  <main class="wrap">
+    <!-- Vídeo -->
+    <section class="video">
+      <iframe src="https://www.youtube.com/embed/VIDEO_ID?rel=0"
+              title="Boas-vindas FemFlow" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen></iframe>
+    </section>
+
+    <!-- Vitrine (scroll lateral) -->
+    <h1>Programas de 30 dias</h1>
+    <section class="rail" id="railProdutos"></section>
+
+    <!-- CTAs lado a lado -->
+    <div style="display:flex;gap:10px;justify-content:center;margin:16px 0 4px">
+      <button id="btnFlow" class="cta" style="max-width:260px">Ir para o Flow Center</button>
+      <button id="btnCad"  class="cta" style="max-width:260px;background:#fff;color:#335953;border:1px solid #e6d8d2">
+        Cadastro
+      </button>
     </div>
-    <div class="card" onclick="goto('treino.html')">
-      <div class="thumb"><span>🏃‍♀️</span></div>
-      <h4>Treino do Dia</h4>
-      <p>Boxes, timers e PSE integrados.</p>
-    </div>
-    <div class="card" onclick="goto('respiracao.html')">
-      <div class="thumb"><span>🌬️</span></div>
-      <h4>Respiração</h4>
-      <p>Protocolos: Box, Moon, Energy…</p>
-    </div>
-    <div class="card" onclick="goto('evolucao.html')">
-      <div class="thumb"><span>📈</span></div>
-      <h4>Minha Evolução</h4>
-      <p>PSE, histórico e progresso.</p>
-    </div>
-    <div class="card" onclick="goto('ciclo.html')">
-      <div class="thumb"><span>🗓️</span></div>
-      <h4>Identificar Ciclo</h4>
-      <p>Configure data e duração do ciclo.</p>
-    </div>
-    <div class="card" onclick="goto('cadastro.html')">
-      <div class="thumb"><span>🪷</span></div>
-      <h4>Criar/Recuperar Acesso</h4>
-      <p>Entrar com nome + e-mail.</p>
-    </div>
-  </section>
+  </main>
 
-  <div class="idbox">
-    <h4>Já possui um ID FemFlow?</h4>
-    <input id="inputID" placeholder="FF-AAAA-XXXX" />
-    <button onclick="entrarComID()">Entrar</button>
-    <p id="msg" style="margin-top:.5rem"></p>
-  </div>
+  <footer>FemFlow • escolha seu foco e comece hoje</footer>
 
-  <footer>FemFlow • equilíbrio que acompanha seu ciclo</footer>
+ <script src="scripts/femflow-core.js"></script>
+<script>
+  // Saudação (pode manter do seu arquivo)
+  (function(){
+    const nome = (localStorage.getItem('femflow_nome') || '').split(' ')[0];
+    if (nome) document.getElementById('saudacao')?.textContent = `Olá, ${nome} 🌸`;
+  })();
 
-  <!-- Núcleo e lógica -->
-  <script src="scripts/femflow-core.js"></script>
-  <script>
-    // Saudação pelo nome salvo
-    (function(){
-      const nome = (localStorage.getItem('femflow_nome') || '').split(' ')[0];
-      if (nome) document.getElementById('saudacao').textContent = `Olá, ${nome} 🌸`;
-    })();
+  // ===== Catálogo de 9 produtos (troque 'img' quando tiver as capas) =====
+  const PRODUTOS = [
+    { sku:'FF-30D-GLUTEOS',     titulo:'30 dias • Glúteos',             foco:'Glúteos',       img:null, color:'#d98f80', desc:'Ênfase em glúteo médio/máximo' },
+    { sku:'FF-30D-QUADRICEPS',  titulo:'30 dias • Ênfase Quadríceps',   foco:'Pernas',        img:null, color:'#9fb7ac', desc:'Foco em extensão de joelhos' },
+    { sku:'FF-30D-PEITORAL',    titulo:'30 dias • Ênfase Peitoral',     foco:'Peitoral',      img:null, color:'#c8a1a6', desc:'Empurrar, isometrias e controle' },
+    { sku:'FF-30D-COSTAS',      titulo:'30 dias • Ênfase Costas',       foco:'Costas',        img:null, color:'#a0a6c8', desc:'Remadas, escápulas e postura' },
+    { sku:'FF-30D-POSTERIORES', titulo:'30 dias • Posteriores',         foco:'Posteriores',   img:null, color:'#b08fb8', desc:'Hinge e cadeia posterior' },
+    { sku:'FF-30D-PANTURRILHA', titulo:'30 dias • Panturrilhas',        foco:'Panturrilhas',  img:null, color:'#bfa27d', desc:'Sóleo e gastrocnêmio' },
+    { sku:'FF-30D-CORE',        titulo:'30 dias • Core',                foco:'Core',          img:null, color:'#86a9b8', desc:'Antiextensão e antirotação' },
+    { sku:'FF-30D-MOBILIDADE',  titulo:'30 dias • Mobilidade',          foco:'Mobilidade',    img:null, color:'#a7b08f', desc:'Alongamento + liberação + flow' },
+    { sku:'FF-30D-HIIT-LOW',    titulo:'30 dias • HIIT Baixo Impacto',  foco:'Cardio',        img:null, color:'#e0a36b', desc:'Cardio gentil às articulações' }
+  ];
+  const CHECKOUTS = { /* 'FF-30D-GLUTEOS':'ABCD1234' */ };
 
-    function goto(url){ window.location.href = url; }
+  const rail = document.getElementById('railProdutos');
 
-    // Continuação inteligente (usa mesmos sinais do Flow Center)
-    function prontoParaTreinar(){
-      const id = localStorage.getItem('femflow_id');
-      if(!id){ FEMFLOW.toast('⚠️ Faça login/cadastro primeiro.', true); return goto('cadastro.html'); }
+  function cardHTML(p){
+    const initials = p.titulo.replace('30 dias • ','').split(' ').map(s=>s[0]).join('').slice(0,3).toUpperCase();
+    return `
+      <article class="card" data-sku="${p.sku}"
+               style="flex:0 0 220px;scroll-snap-align:start;background:#fff;border-radius:16px;overflow:hidden;border:1px solid rgba(204,106,90,.14);box-shadow:0 6px 16px rgba(0,0,0,.08)">
+        <div class="thumb" style="position:relative;height:140px;display:flex;align-items:center;justify-content:center;background:${p.color}">
+          ${p.img ? `<img src="${p.img}" alt="${p.titulo}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>`
+                  : `<div class="ph" style="font-weight:900;font-size:28px;color:#fff;z-index:1">${initials}</div>`}
+          <span class="badge" style="position:absolute;right:10px;top:10px;background:rgba(51,89,83,.92);color:#fff;border-radius:999px;padding:4px 10px;font-size:.8rem;font-weight:800">${p.foco}</span>
+        </div>
+        <div class="info" style="padding:12px">
+          <h3 class="ttl" style="margin:0 0 6px;color:#335953;font-weight:900">${p.titulo}</h3>
+          <p class="desc" style="margin:0;color:#94786f;font-size:.92rem;min-height:38px">${p.desc||''}</p>
+        </div>
+      </article>`;
+  }
 
-      const hasStart = !!localStorage.getItem('femflow_startDate');
-      const hasLen   = !!localStorage.getItem('femflow_cycleLength');
-      // se já tem ciclo → Flow Center; senão → Ciclo
-      goto( (hasStart && hasLen) ? 'flowcenter.html' : 'ciclo.html' );
-    }
-    document.getElementById('continuarBtn').addEventListener('click', prontoParaTreinar);
+  function render(){
+    rail.innerHTML = PRODUTOS.map(cardHTML).join('');
+    rail.querySelectorAll('.card').forEach(el=>{
+      el.addEventListener('click', ()=>onChoose(el.dataset.sku));
+    });
+  }
 
-    // Entrada com ID
-    async function entrarComID(){
-      const id = document.getElementById('inputID').value.trim();
-      const msg = document.getElementById('msg');
-      if(!id){ msg.textContent='Informe seu ID'; msg.style.color='#cc6a5a'; return; }
-      msg.textContent='Verificando…'; msg.style.color='#335953';
+  function onChoose(sku){
+    const id = localStorage.getItem('femflow_id');
+    const payCode = CHECKOUTS[sku];
+    if(payCode){ location.href = `https://pay.hotmart.com/${payCode}`; return; }
+    if(!id){ location.href = `login.html?sku=${encodeURIComponent(sku)}`; return; }
+    location.href = `flowcenter.html?sku=${encodeURIComponent(sku)}`;
+  }
 
-      try{
-        // validação simples pelo endpoint (modo legado do GET sem action)
-        const url = `${FEMFLOW.SCRIPT_URL}?id=${encodeURIComponent(id)}`;
-        const r = await fetch(url); const j = await r.json();
-        if(j.valido || j.status === 'ok'){
-          localStorage.setItem('femflow_id', id);
-          FEMFLOW.toast('✅ ID confirmado!');
-          setTimeout(prontoParaTreinar, 600);
-        }else{
-          msg.textContent='ID inválido ou não encontrado.'; msg.style.color='#cc6a5a';
-        }
-      }catch(e){
-        console.error(e); msg.textContent='Falha de conexão.'; msg.style.color='#cc6a5a';
-      }
-    }
+  // Botões finais
+  document.getElementById('btnFlow').onclick = ()=> location.href='flowcenter.html';
+  document.getElementById('btnCad').onclick  = ()=> location.href='login.html';
 
-    // Deep link ?id=FF-...
-    (function(){
-      const p = new URLSearchParams(location.search);
-      const got = p.get('id');
-      if(got){ localStorage.setItem('femflow_id', got); prontoParaTreinar(); }
-    })();
+  // Deep link ?id=FF-... (se vier do Hotmart)
+  (function(){
+    const p = new URLSearchParams(location.search);
+    const got = p.get('id');
+    if(got){ localStorage.setItem('femflow_id', got); }
+  })();
 
-    // Registra/atualiza Service Worker
-    if('serviceWorker' in navigator){
-      window.addEventListener('load', async ()=>{
-        try{
-          const reg = await navigator.serviceWorker.register('service-worker.js');
-          reg.postMessage('checkVersion');
-        }catch(e){ console.warn('SW off', e); }
-      });
-    }
-  </script>
+  // SW (como já tinha)
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', async ()=>{
+      try{ const reg = await navigator.serviceWorker.register('service-worker.js'); reg.postMessage('checkVersion'); }
+      catch(e){ console.warn('SW off', e); }
+    });
+  }
+
+  render();
+</script>
 </body>
 </html>
-
