@@ -2,30 +2,10 @@
 const CACHE_NAME = 'femflow-cache-v4';
 
 const ASSETS = [
-  // Core pages
-  './',
-  './index.html',
-  './ciclo.html',
-  './treino.html',
-  './evolucao.html',
-  './cadastro.html',
-  './home.html',
-  './login.html',
-
-  // Styles & manifest
-  './style.css',
-  './manifest.json',
-
-  // Scripts
-  './js/memoria.js',
-  './js/ciclo.js',
-  './js/treino.js',
-  './js/validacao.js',
-  './js/cadastro.js',
-
-  // Icons (necessários para PWA)
-  './icon-192.png',
-  './icon-512.png'
+  './','./index.html','./flowcenter.html','./ciclo.html','./treino.html','./evolucao.html','./cadastro.html',
+  './css/style.css','./manifest.json',
+  './scripts/femflow-core.js','./js/treino.js','./js/ciclo.js','./js/memoria.js','./js/validacao.js',
+  './assets/icons/icon-192.png','./assets/icons/icon-512.png'
 ];
 
 // 🪴 Instalação inicial: cria cache com os arquivos base
