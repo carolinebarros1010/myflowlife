@@ -1,0 +1,265 @@
+<!--
+  MyFlowLife landing page for FemFlow
+  ------------------------------------------------------------
+  Página inicial do FemFlow (MyFlowLife)
+  Exibe o vídeo de boas-vindas, catálogo de planos (Netflix),
+  entrada com ID FemFlow e redirecionamento inteligente.
+-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FemFlow • Bem-vinda</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Helvetica Rounded", "Arial Rounded MT Bold", sans-serif;
+        color: #335953;
+        background: linear-gradient(180deg, #f8f9f8 0%, #eaf2f0 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
+        background: radial-gradient(circle at 25% 15%, rgba(255,255,255,0.6) 0%, transparent 60%),
+                    radial-gradient(circle at 80% 85%, rgba(200,240,230,0.3) 0%, transparent 70%),
+                    radial-gradient(circle at 50% 100%, rgba(240,250,245,0.4) 0%, transparent 80%);
+        filter: blur(40px) saturate(120%);
+      }
+
+      .logo-image {
+        display: block;
+        margin: 2rem auto 0.2rem;
+        width: 160px;
+      }
+      .tagline {
+        text-align: center;
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 2rem;
+        color: #cc6a5a;
+      }
+
+      .video-container {
+        max-width: 420px;
+        margin: 0 auto;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px);
+      }
+      .video-container video {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .section-title {
+        text-align: center;
+        font-family: "Helvetica Rounded", sans-serif;
+        font-size: 1.4rem;
+        margin: 2rem 0 1rem;
+        color: #335953;
+      }
+
+      /* Estilo Netflix */
+      .catalogo-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1rem;
+        justify-content: center;
+        margin: 0 auto;
+        max-width: 800px;
+        padding: 1rem;
+      }
+      .plano-card {
+        background: rgba(255,255,255,0.8);
+        border-radius: 16px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+      .plano-card:hover { transform: scale(1.03); }
+      .plano-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+      .plano-card h4 {
+        margin: 0.6rem 0 0.3rem;
+        font-size: 1rem;
+        color: #335953;
+      }
+      .plano-card p {
+        font-size: 0.9rem;
+        color: #cc6a5a;
+        margin-bottom: 0.6rem;
+      }
+      .plano-card button {
+        background: linear-gradient(135deg, #335953, #cc6a5a);
+        color: white;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 12px;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        transition: transform 0.3s ease;
+      }
+      .plano-card button:hover { transform: scale(1.05); }
+
+      /* ID Section */
+      .entrar {
+        text-align: center;
+        margin-top: 2rem;
+      }
+      .entrar input {
+        padding: 0.6rem;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        width: 70%;
+        max-width: 300px;
+      }
+      .entrar button {
+        background: #335953;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 10px;
+        margin-top: 0.5rem;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .cta {
+        display: block;
+        width: max-content;
+        margin: 3rem auto;
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #ffffff;
+        background: linear-gradient(135deg, #335953, #cc6a5a);
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+      }
+      .cta:hover {
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="../assets/logo femflow verde.png" class="logo-image" alt="FemFlow logo" />
+      <p class="tagline">Cuidar do corpo é viver o ciclo em harmonia 🌿</p>
+    </header>
+
+    <div class="video-container">
+      <video poster="assets/capa_video.jpg" controls>
+        <source src="assets/videos/boasvindas.webm" type="video/webm" />
+        <source src="assets/videos/boasvindas.mp4" type="video/mp4" />
+        Seu navegador não suporta o vídeo.
+      </video>
+    </div>
+
+    <h2 class="section-title">Escolha seu Plano FemFlow</h2>
+
+    <div class="catalogo-container">
+      <div class="plano-card">
+        <img src="assets/capas/30dias.jpg" alt="Plano 30 Dias - Série ABCD">
+        <h4>Plano 30 Dias – Série ABCD</h4>
+        <p>Equilíbrio e força cíclica</p>
+        <button onclick="window.open('https://pay.hotmart.com/Q102567067C?off=y4z291v3','_blank')">
+          💳 Adquirir no Hotmart
+        </button>
+      </div>
+
+      <div class="plano-card">
+        <img src="assets/capas/40dias.jpg" alt="Plano 40 Dias - Série ABCD-EFG">
+        <h4>Plano 40 Dias – Série ABCD-EFG</h4>
+        <p>Potência e estabilidade</p>
+        <button onclick="window.open('https://pay.hotmart.com/Q203456078X','_blank')">
+          💳 Adquirir no Hotmart
+        </button>
+      </div>
+
+      <div class="plano-card">
+        <img src="assets/capas/facajunto.jpg" alt="Faça junto com a gente">
+        <h4>Faça Junto com a Gente</h4>
+        <p>30 vídeos guiados com Thalita 🌿</p>
+        <button onclick="window.open('https://pay.hotmart.com/Q304567098P','_blank')">
+          💳 Adquirir no Hotmart
+        </button>
+      </div>
+    </div>
+
+    <section class="entrar">
+      <h3>Já possui um ID FemFlow?</h3>
+      <input id="inputID" placeholder="Digite seu ID" />
+      <button onclick="entrarComID()">Entrar</button>
+    </section>
+
+    <button class="cta" id="continuarBtn">✨ Continuar para o FemFlow</button>
+
+    <script>
+      // Função para entrada com ID
+      function entrarComID() {
+        const id = document.getElementById('inputID').value.trim();
+        if (!id) return alert('Por favor, insira seu ID.');
+        localStorage.setItem('femflow_id', id);
+        window.location.href = 'flowcenter.html';
+      }
+
+      // Botão continuar: direcionamento inteligente
+      document.getElementById('continuarBtn').addEventListener('click', () => {
+        const id = localStorage.getItem('femflow_id');
+        if (id) {
+          window.location.href = 'flowcenter.html';
+        } else {
+          window.location.href = 'ciclo.html';
+        }
+      });
+
+      // Verifica ID recebido do Hotmart (ex: ?id=FF1234)
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("id")) {
+        localStorage.setItem("femflow_id", params.get("id"));
+        window.location.href = "flowcenter.html";
+      }
+    </script>
+  <script>
+function prontoParaTreinar(){
+  const id = localStorage.getItem('femflow_id');
+  if(!id){ location.href='login.html'; return; }
+  const hasProduct = localStorage.getItem('femflow_hasProduct')==='yes';
+  if(!hasProduct){ alert('Você ainda não possui um plano ativo. Explore os produtos abaixo 💫'); return; }
+  const cfg = localStorage.getItem('femflow_cycle_configured')==='yes';
+  const hasStart = !!localStorage.getItem('femflow_startDate');
+  const hasLen   = !!localStorage.getItem('femflow_cycleLength');
+  location.href = (cfg && hasStart && hasLen) ? 'flowcenter.html' : 'ciclo.html';
+}
+document.getElementById('continuarBtn')?.addEventListener('click', prontoParaTreinar);
+(function(){
+  const p=new URLSearchParams(location.search);
+  if(p.get('id')){
+    localStorage.setItem('femflow_id', p.get('id'));
+    localStorage.setItem('femflow_hasProduct','yes');
+    prontoParaTreinar();
+  }
+})();
+</script>
+</body>
+</html>
