@@ -20,7 +20,6 @@
     <p id="faseAtual" class="fase-info animada"></p>
   </header>
 
-  <!-- CONTAINER PRINCIPAL -->
   <div class="container">
     <div class="cadastro-box">
       <h3>💫 Crie seu acesso FemFlow</h3>
@@ -53,7 +52,6 @@
     </div>
   </div>
 
-  <!-- SCRIPT: Exibe fase atual -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -67,7 +65,6 @@
     });
   </script>
 
-  <!-- INTERAÇÃO PRINCIPAL -->
   <script>
     document.getElementById("btnEntrar").addEventListener("click", async () => {
       const nome = document.getElementById("nome").value.trim();
@@ -79,14 +76,13 @@
       }
 
       FEMFLOW.toast("⏳ Verificando cadastro...");
-
       const result = await FEMFLOW.loginOuCadastro(nome, email);
 
       if (result?.status === "ok" || result?.status === "created") {
         FEMFLOW.toast("🌸 Acesso liberado!");
         setTimeout(() => {
-          window.location.href = "boasvindas.html";
-        }, 1500);
+          window.location.href = "home.html";  /* ← destino alinhado ao fluxo */
+        }, 1200);
       } else {
         FEMFLOW.toast("❌ Não foi possível validar o acesso.", true);
       }
@@ -97,72 +93,38 @@
         const params = new URLSearchParams(window.location.search);
         const origem = params.get("utm_source") || params.get("origem") || "direto";
         localStorage.setItem("femflow_origem", origem);
-        console.log("🩷 Lead captado:", origem);
         setTimeout(() => {
-          console.log("💳 Redirecionando para o Hotmart...");
           window.location.href = "https://pay.hotmart.com/Q102567067C?off=y4z291v3";
-        }, 2000);
-      } catch (err) {
-        console.error("Erro ao processar GOcadastro:", err);
+        }, 1200);
+      } catch {
         window.location.href = "https://pay.hotmart.com/Q102567067C?off=y4z291v3";
       }
     }
   </script>
 
-  <!-- ESTILO LOCAL -->
   <style>
-    .form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-      margin: 1.5rem 0;
-    }
-    .form input {
-      padding: 0.7rem 1rem;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-family: "Lato", sans-serif;
-    }
+    .form { display:flex; flex-direction:column; gap:.8rem; margin:1.5rem 0; }
+    .form input { padding:.7rem 1rem; border:1px solid #ccc; border-radius:10px; font-size:1rem; font-family:"Lato",sans-serif; }
     .form button {
       background: linear-gradient(135deg, var(--teal), var(--terracota));
-      color: white;
-      border: none;
-      padding: 0.8rem;
-      border-radius: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 1rem;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      color: #fff; border:none; padding:.8rem; border-radius:10px; font-size:1rem; cursor:pointer;
+      margin-top:1rem; font-weight:600; transition:all .3s ease;
     }
-    .form button:hover {
-      transform: scale(1.03);
-      opacity: 0.95;
+    .form button:hover { transform:scale(1.03); opacity:.95; }
+    .fase-info{
+      font-weight:700; font-size:1rem; color:#fff; margin-top:.5rem; display:inline-block;
+      padding:.5rem 1.2rem; border-radius:12px; background:linear-gradient(90deg,var(--terracota),var(--teal));
+      box-shadow:0 0 10px rgba(204,106,90,.2); transition:all .8s ease;
     }
-    .fase-info {
-      font-weight: 700;
-      font-size: 1rem;
-      color: white;
-      margin-top: 0.5rem;
-      display: inline-block;
-      padding: 0.5rem 1.2rem;
-      border-radius: 12px;
-      background: linear-gradient(90deg, var(--terracota), var(--teal));
-      box-shadow: 0 0 10px rgba(204, 106, 90, 0.2);
-      transition: all 0.8s ease;
-    }
-    .animada {
-      animation: fluxoCores 6s ease-in-out infinite alternate;
-    }
+    .animada { animation: fluxoCores 6s ease-in-out infinite alternate; }
     @keyframes fluxoCores {
       0% { background: linear-gradient(90deg, var(--terracota), var(--pessego)); }
-      50% { background: linear-gradient(90deg, var(--pessego), var(--teal)); }
-      100% { background: linear-gradient(90deg, var(--teal), var(--terracota)); }
+      50%{ background: linear-gradient(90deg, var(--pessego), var(--teal)); }
+      100%{ background: linear-gradient(90deg, var(--teal), var(--terracota)); }
     }
   </style>
 
-  <!-- Núcleo FemFlow -->
-  <script src="scripts/femflow-core.js"></script>
+  <!-- Núcleo FemFlow (caminho corrigido) -->
+  <script src="./femflow-core.js"></script>
 </body>
 </html>
