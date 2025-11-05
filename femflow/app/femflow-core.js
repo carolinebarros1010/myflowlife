@@ -332,6 +332,7 @@ document.addEventListener("DOMContentLoaded", () => FEMFLOW.initTreino());
 /* ----------- 🔗 Alias global de logout ------------ */
 window.femflowLogout = function(){ FEMFLOW.logout(); };
 
+
 /* ----------- ✨ ANIMAÇÕES ------------ */
 const style = document.createElement("style");
 style.innerHTML = `
@@ -340,3 +341,107 @@ style.innerHTML = `
   to {opacity:1; transform:scale(1);}
 }`;
 document.head.appendChild(style);
+
+/* =======================================================================
+   🔥 Firebase init (compat) + busca de exercícios por nível/fase/dia
+   ======================================================================= */
+(function(){
+  // Evita reinit se já estiver pronto
+  if (window._femflowFirebaseReady) return;
+
+  // TODO: troque pelos valores do seu projeto (Console Firebase > Config Web)
+  const firebaseConfig = {
+    apiKey:        "YOUR_API_KEY",
+    authDomain:    "femflow-ebec2.firebaseapp.com",
+    projectId:     "femflow-ebec2",
+    storageBucket: "femflow-ebec2.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId:         "YOUR_APP_ID"
+  };
+
+  try {
+    // compat API (funciona bem via <script src=...>)
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    window._femflowFirebaseReady = true;
+    console.log("✅ Firebase pronto");
+  } catch(e){
+    console.warn("⚠️ Firebase init falhou", e);
+  }
+})();
+
+/**
+ * FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey, enfase?)
+ * Retorna:
+ *  - lista PLANA de exercícios (cada doc) → [{ box, titulo, series, reps, tempo, link, ... }]
+ *    (seu treino.js já agrupa por `box`)
+ *
+ * Convenções:
+ *  - `nivel`  : "iniciante" | "intermediaria" | "avancada"  (sem acento/espaco)
+ *  - `enfase` : "biceps" | "gluteo" | "costas" | ...
+ *  - `fase`   : "folicular" | "menstrual" | "ovulatoria" | "lutea"
+ *  - `diaKey` : "dia_1" .. "dia_35"
+ */
+if (!window.FEMFLOW) window.FEMFLOW = {};
+FEMFLOW.buscarExerciciosFirebase = async function(nivel, fase, diaKey, enfase){
+  // normalizações simples
+  const norm = s => (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+  nivel  = norm(nivel||localStorage.getItem('nivel_atual')||'iniciante');
+  fase   = norm(fase||localStorage.getItem('fase_atual')||'folicular');
+  diaKey = (diaKey||`dia_${localStorage.getItem('dia_ciclo')||1}`).toLowerCase();
+  enfase = norm(enfase||localStorage.getItem('enfase_atual')||'geral');
+
+  // Coleção: exercicios/{nivel}_{enfase}/fases/{fase}/dias/{diaKey}/exercicios
+  const grupoId = `${nivel}_${enfase}`; // ex.: 'avancada_biceps'
+
+  // Cache leve para evitar leituras repetidas (15 min)
+  const cacheKey = `ff_fb_${grupoId}_${fase}_${diaKey}`;
+  const now = Date.now();
+  try {
+    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+    if (cached && (now - cached.ts) < (15*60*1000)) return cached.data;
+  } catch(_) {}
+
+  if (!window._femflowFirebaseReady || !window.firebase?.firestore) {
+    console.warn("⚠️ Firebase Firestore indisponível — retornando lista vazia");
+    return [];
+  }
+
+  const db = firebase.firestore();
+  const path = db
+    .collection('exercicios').doc(grupoId)
+    .collection('fases').doc(fase)
+    .collection('dias').doc(diaKey)
+    .collection('exercicios');
+
+  // Lê todos os docs do dia
+  const snap = await path.get();
+  const itens = [];
+  snap.forEach(doc => {
+    const d = doc.data() || {};
+    itens.push({
+      id: doc.id,
+      box: (d.box || 'Box 1').toString(),
+      titulo: d.titulo || d.nome || 'Exercício',
+      // Aceita string "4" ou numero 4
+      series: d.series != null ? String(d.series).trim() : null,
+      reps:   d.reps   != null ? String(d.reps).trim()   : null, // pode ser "8-12"
+      tempo:  d.tempo  != null ? Number(String(d.tempo).replace(/\D/g,'')) : null,
+      link:   d.link || d.url || d.video || '',
+      grupo:  d.grupo || '',
+      enfase: d.enfase || '',
+      fase:   d.fase   || fase,
+      nivel:  d.nivel  || nivel,
+      dia:    d.dia    || Number((diaKey.match(/\d+/)||[1])[0])
+    });
+  });
+
+  // Ordena por `box` (Box 1, 2, 3...) e depois por título
+  const bNum = s => { const m = String(s).match(/(\d+)/); return m ? Number(m[1]) : 9999; };
+  itens.sort((a,b)=> (bNum(a.box)-bNum(b.box)) ? (bNum(a.box)-bNum(b.box)) : String(a.titulo).localeCompare(String(b.titulo)));
+
+  // Salva cache
+  try { localStorage.setItem(cacheKey, JSON.stringify({ ts: now, data: itens })); } catch(_){}
+
+  return itens;
+};
+
