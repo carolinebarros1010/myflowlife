@@ -173,12 +173,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Origem dos exercícios
  if (j.exSource === 'firebase' && j.firebaseQuery) {
-  const { nivel, fase, diaKey } = j.firebaseQuery;
+  const { nivel, fase, diaKey, enfase } = j.firebaseQuery;
 
   // 1) Buscar no Firebase: pode vir "caixas prontas" OU "lista plana"
   let raw = [];
   try {
-    raw = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey);
+    raw = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey, enfase);
   } catch(e) {
     console.warn('Firebase falhou, usando fallback vazio', e);
     raw = [];
