@@ -218,23 +218,7 @@
       return "";
     }
 
-    async function carregarTreino() {
-      const fase = localStorage.getItem("fase_sugerida") || "Folicular";
-      boxes = [
-        { tipo: "texto", titulo: "Aquecimento", mensagem: "Prepare sua mente e respire. Acolha o corpo." },
-        { tipo: "exercicios", titulo: "Box 1 — Força", itens: [
-          { exercicio: "Agachamento com halteres", link: "", series: 3, reps: 12, tempo: 45 },
-          { exercicio: "Passada reversa", link: "", series: 3, reps: 10, tempo: 45 }
-        ]},
-        { tipo: "hiit", titulo: "HIIT Terracota", descricao: "6 minutos de potência 30s ON / 30s OFF" },
-        { tipo: "resfriamento", titulo: "Resfriamento", mensagem: "Desacelere. Respire fundo. 🌿" }
-      ];
-
-      track.innerHTML = boxes.map(b => `<div class="carousel-item">${criarBoxHTML(b)}</div>`).join("");
-      updateCarousel();
-    }
-
-    // Salvar treino e descanso
+     // Salvar treino e descanso
     document.getElementById("salvarTreinoBtn").addEventListener("click", async () => {
       const id = localStorage.getItem("femflow_id");
       const fase = localStorage.getItem("fase_sugerida") || "desconhecida";
