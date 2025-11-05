@@ -254,17 +254,7 @@ async function decidirDestinoPosLogin(id, retTarget){
   }catch(e){
     console.error(e); location.href = 'home.html';
   }
-}
-  function femflowLogout(){
-  localStorage.removeItem('femflow_auth');
-  localStorage.removeItem('femflow_id');
-  // (opcional) limpar mais chaves locais:
-  // localStorage.removeItem('femflow_hasProduct');
-  // localStorage.removeItem('femflow_cycle_configured');
-  // localStorage.removeItem('femflow_startDate');
-  // localStorage.removeItem('femflow_cycleLength');
-  location.href = 'login.html';
-}
+}  
 </script>
 </body>
 </html>
