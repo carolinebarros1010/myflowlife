@@ -5,13 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
   <title>Login • FemFlow</title>
   <style>
-      :root{--terracota:#cc6a5a;--teal:#335953;--pessego:#efbda6;--bege:#f4e1d7;}
-        *,
-*::before,
-*::after {
-  box-sizing: border-box;
-  max-width: 100%;
-}
+    :root{--terracota:#cc6a5a;--teal:#335953;--pessego:#efbda6;--bege:#f4e1d7;}
+    *,*::before,*::after{box-sizing:border-box;max-width:100%}
     body{
       margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
       font-family:"Lato",sans-serif;background:linear-gradient(180deg,var(--bege) 0%,var(--pessego) 100%);color:var(--teal);
@@ -35,17 +30,13 @@
       background:linear-gradient(135deg,var(--teal),var(--terracota));cursor:pointer;transition:transform .25s ease
     }
     button:hover{transform:scale(1.03)}
+    button[disabled]{opacity:.6;cursor:not-allowed;transform:none}
     .toggle{display:block;margin-top:1rem;font-size:.85rem;color:var(--terracota);text-decoration:underline;cursor:pointer}
     .message{margin-top:1rem;font-size:.9rem;min-height:1.3rem}
     .loader{border:3px solid rgba(0,0,0,.08);border-top:3px solid var(--terracota);border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;margin-left:8px}
     #recuperarBox{display:none;animation:fadeIn .4s ease;margin-top:1rem}
     @keyframes spin{to{transform:rotate(360deg)}}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  @media(max-width:420px){.card{width:95%;padding:1.2rem;margin:0 auto;}
-  img.logo{width:100px}
-  h2{font-size:1.35rem}
-  .subtitle{font-size:.9rem}
-}
-
+    @media(max-width:420px){.card{width:95%;padding:1.2rem;margin:0 auto} img.logo{width:100px} h2{font-size:1.35rem} .subtitle{font-size:.9rem}}
   </style>
 </head>
 <body>
@@ -57,12 +48,12 @@
     <!-- Login -->
     <div id="loginBox">
       <div class="form-group">
-        <input type="text" id="loginEmail" placeholder="E-mail ou ID FemFlow" />
+        <input type="text" id="loginEmail" placeholder="E-mail ou ID FemFlow" autocomplete="username" />
       </div>
       <div class="form-group">
-        <input type="password" id="loginSenha" placeholder="Sua senha" />
+        <input type="password" id="loginSenha" placeholder="Sua senha" autocomplete="current-password" />
       </div>
-      <button onclick="entrar()">Entrar</button>
+      <button id="btnEntrar" onclick="entrar()">Entrar</button>
       <span class="toggle" onclick="mostrarRecuperar()">🔑 Esqueci minha senha</span>
       <span class="toggle" onclick="irParaAnamnese()">Ainda não tem conta? Faça sua anamnese</span>
     </div>
@@ -70,7 +61,7 @@
     <!-- Recuperar Senha -->
     <div id="recuperarBox">
       <p style="font-size:.95rem;">Digite o e-mail cadastrado para receber as instruções:</p>
-      <input type="email" id="recEmail" placeholder="Seu e-mail" />
+      <input type="email" id="recEmail" placeholder="Seu e-mail" autocomplete="email"/>
       <button style="margin-top:.6rem" onclick="recuperarSenha()">Enviar</button>
       <span class="toggle" onclick="voltarLogin()">Voltar ao login</span>
     </div>
@@ -78,107 +69,152 @@
     <p id="mensagem" class="message"></p>
   </div>
 
+  <!-- Core para usar FEMFLOW.SCRIPT_URL -->
+  <script src="scripts/femflow-core.js"></script>
+
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
+    const msg = document.getElementById("mensagem");
+    const btnEntrar = document.getElementById("btnEntrar");
+    const q = new URLSearchParams(location.search);
+    const ret = q.get('ret'); // página-alvo opcional (ex.: flowcenter.html)
+
+    // Prefill (se veio com ?email= ou ?id=)
+    if(q.get('email')) document.getElementById('loginEmail').value = q.get('email');
+
+    // Enter envia
+    document.getElementById('loginSenha').addEventListener('keydown', e => { if(e.key==='Enter') entrar(); });
+    document.getElementById('loginEmail').addEventListener('keydown', e => { if(e.key==='Enter') entrar(); });
 
     async function entrar(){
       const identificador = document.getElementById("loginEmail").value.trim();
       const senha = document.getElementById("loginSenha").value.trim();
-      const msg = document.getElementById("mensagem");
-      msg.innerHTML = "Conectando..." + '<span class="loader"></span>'; msg.style.color="#335953";
+      msg.innerHTML = "Conectando... <span class='loader'></span>"; msg.style.color="#335953";
 
       if(!identificador || !senha){ msg.textContent="Digite e-mail/ID e senha."; msg.style.color="#cc6a5a"; return; }
+      btnEntrar.disabled = true;
 
       try{
+        // NOTE: enquanto não existir action=login no Apps Script, seguimos com validar
         const isEmail = identificador.includes("@");
         const params = isEmail
           ? `?action=validar&email=${encodeURIComponent(identificador)}`
           : `?action=validar&id=${encodeURIComponent(identificador)}`;
 
-        const res = await fetch(`${SCRIPT_URL}${params}`);
+        const res = await fetch(`${FEMFLOW.SCRIPT_URL}${params}`);
         const data = await res.json();
 
         if(data.status==="ok"){
-          localStorage.setItem("femflow_id", data.id);
-          localStorage.setItem("femflow_nome", data.nome||"");
+          // guarda ID/nome
+          if(data.id)   localStorage.setItem("femflow_id", data.id);
+          if(data.nome) localStorage.setItem("femflow_nome", data.nome);
           msg.textContent = `✨ Bem-vinda, ${data.nome||"aluna"}!`; msg.style.color="#2e7d32";
-          setTimeout(()=>location.href="index.html",1200);
+
+          // decide destino (com checagem de produto + ciclo)
+          await decidirDestinoPosLogin(localStorage.getItem('femflow_id'), ret);
         } else if(data.status==="notfound"){
           msg.textContent="❌ Conta não encontrada. Faça sua anamnese."; msg.style.color="#cc6a5a";
         } else {
           msg.textContent="⚠️ E-mail, ID ou senha incorretos."; msg.style.color="#cc6a5a";
         }
       }catch(e){
-        console.error(e); msg.textContent="⚠️ Falha de conexão. Tente novamente."; msg.style.color="#cc6a5a";
+        console.error(e);
+        msg.textContent="⚠️ Falha de conexão. Tente novamente.";
+        msg.style.color="#cc6a5a";
+      } finally {
+        btnEntrar.disabled = false;
       }
     }
 
     function mostrarRecuperar(){
       document.getElementById("loginBox").style.display="none";
       document.getElementById("recuperarBox").style.display="block";
-      document.getElementById("mensagem").textContent="";
+      msg.textContent="";
     }
     function voltarLogin(){
       document.getElementById("recuperarBox").style.display="none";
       document.getElementById("loginBox").style.display="block";
-      document.getElementById("mensagem").textContent="";
-    }
-   async function recuperarSenha() {
-  const email = document.getElementById("recEmail").value.trim();
-  const msg = document.getElementById("mensagem");
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
-
-  if (!email) {
-    msg.textContent = "Digite seu e-mail.";
-    msg.style.color = "#cc6a5a";
-    return;
-  }
-
-  msg.innerHTML = "Verificando... <span class='loader'></span>";
-  msg.style.color = "#335953";
-
-  try {
-    // 👇 CORS-friendly: Content-Type simples evita preflight OPTIONS
-    const r = await fetch(SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "recuperarSenha", email })
-    });
-
-    if (!r.ok) {
-      const t = await r.text().catch(()=> "");
-      throw new Error(`HTTP ${r.status} – ${t.slice(0,200)}`);
+      msg.textContent="";
     }
 
-    // Apps Script às vezes responde como text/plain
-    let data;
-    const ct = (r.headers.get("content-type") || "").toLowerCase();
-    if (ct.includes("application/json")) data = await r.json();
-    else data = JSON.parse(await r.text());
+    async function recuperarSenha(){
+      const email = document.getElementById("recEmail").value.trim();
+      if (!email) { msg.textContent="Digite seu e-mail."; msg.style.color="#cc6a5a"; return; }
+      msg.innerHTML = "Verificando... <span class='loader'></span>"; msg.style.color = "#335953";
 
-    if (data.status === "ok") {
-      msg.textContent = "📩 E-mail de recuperação enviado!";
-      msg.style.color = "#2e7d32";
-      setTimeout(() => {
-        document.getElementById("recuperarBox").style.display = "none";
-        document.getElementById("loginBox").style.display = "block";
-        msg.textContent = "";
-      }, 2200);
-    } else if (data.status === "notfound") {
-      msg.textContent = "⚠️ E-mail não encontrado.";
-      msg.style.color = "#cc6a5a";
-    } else {
-      msg.textContent = "❌ Erro ao enviar e-mail.";
-      msg.style.color = "#cc6a5a";
+      try{
+        const r = await fetch(FEMFLOW.SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // evita preflight
+          body: JSON.stringify({ action: "recuperarSenha", email })
+        });
+
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+        const ct = (r.headers.get("content-type") || "").toLowerCase();
+        const data = ct.includes("application/json") ? await r.json() : JSON.parse(await r.text());
+
+        if (data.status === "ok") {
+          msg.textContent = "📩 E-mail de recuperação enviado!";
+          msg.style.color = "#2e7d32";
+          setTimeout(voltarLogin, 1800);
+        } else if (data.status === "notfound") {
+          msg.textContent = "⚠️ E-mail não encontrado.";
+          msg.style.color = "#cc6a5a";
+        } else {
+          msg.textContent = "❌ Erro ao enviar e-mail.";
+          msg.style.color = "#cc6a5a";
+        }
+      }catch(err){
+        console.error(err);
+        msg.textContent = "❌ Falha de rede. Tente novamente.";
+        msg.style.color = "#cc6a5a";
+      }
     }
-  } catch (err) {
-    console.error(err);
-    msg.textContent = "❌ Falha de rede. Tente novamente.";
-    msg.style.color = "#cc6a5a";
-  }
-}
 
     function irParaAnamnese(){ location.href="anamnese_deluxe.html"; }
+
+    // ---------- ROTEAMENTO INTELIGENTE ----------
+    // Auto-redirect se já estiver logada
+    (async function autoRouteIfLogged(){
+      const id = localStorage.getItem('femflow_id');
+      if(!id) return;
+      await decidirDestinoPosLogin(id, ret);
+    })();
+
+    // Decide o destino com base em produto ativo + ciclo configurado
+    async function decidirDestinoPosLogin(id, retTarget){
+      try{
+        const url = `${FEMFLOW.SCRIPT_URL}?action=validar&id=${encodeURIComponent(id)}`;
+        const d = await fetch(url).then(r=>r.json());
+
+        const hasProduct = !!(d?.produto_ativo || d?.possui_produto || (Array.isArray(d?.produtos) && d.produtos.length));
+        const cicloOk = localStorage.getItem('femflow_cycle_configured')==='yes' &&
+                        localStorage.getItem('femflow_startDate') &&
+                        localStorage.getItem('femflow_cycleLength');
+
+        if (d?.produto_fim) localStorage.setItem('femflow_produto_fim', d.produto_fim);
+        localStorage.setItem('femflow_hasProduct', hasProduct ? 'yes' : 'no');
+
+        // Se veio com ?ret= e as condições permitem, honrar retorno
+        if (retTarget) {
+          const target = retTarget.toLowerCase();
+          const wantsFlow = target.includes('flowcenter');
+          const wantsCiclo = target.includes('ciclo');
+
+          if (wantsFlow && hasProduct && cicloOk) { location.href = retTarget; return; }
+          if (wantsCiclo && hasProduct)           { location.href = retTarget; return; }
+          // se não puder ir para o desejado, continua a lógica padrão abaixo
+        }
+
+        if (!hasProduct) { location.href = 'home.html'; return; }
+        if (!cicloOk)    { location.href = 'ciclo.html'; return; }
+        location.href = 'flowcenter.html';
+      }catch(e){
+        console.error(e);
+        // fallback seguro
+        location.href = 'home.html';
+      }
+    }
   </script>
 </body>
 </html>
