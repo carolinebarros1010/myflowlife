@@ -9,109 +9,62 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/treino.css" />
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-<!-- Firebase (compat) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <!-- Firebase (compat) — precisa vir ANTES do femflow-core.js -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <style>
+    :root{ --teal:#335953; --terracota:#cc6a5a; } /* garante as vars aqui também */
+
     /* ===== 🌸 CARROSSEL DE BOXES ===== */
-    body {
-      background: #fffaf8;
-      margin: 0;
-      font-family: 'Lato', sans-serif;
-    }
+    body { background:#fffaf8; margin:0; font-family:'Lato',sans-serif; }
+    header { text-align:center; padding:12px 0 4px; }
+    header h1 { margin:0; color:var(--teal); font-family:'Playfair Display', serif; }
+    header .subtitle { margin:4px 0 0; color:#7a6c66; font-size:.95rem; }
 
     .carousel-container {
-      overflow: hidden;
-      width: 100%;
-      position: relative;
-      height: calc(100vh - 180px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      overflow:hidden; width:100%; position:relative;
+      height:calc(100vh - 180px); display:flex; justify-content:center; align-items:center;
     }
     .carousel-track {
-      display: flex;
-      flex-wrap: nowrap;
-      transition: transform 0.8s ease;
-      width: 100%;
-      cursor: grab;
+      display:flex; flex-wrap:nowrap; transition:transform .8s ease; width:100%; cursor:grab;
     }
-    .carousel-track:active {
-      cursor: grabbing;
-      transform: scale(0.995);
-      transition: transform 0.15s ease;
-    }
-    .carousel-item {
-      flex: 0 0 100%;
-      max-width: 100%;
-      padding: 1rem;
-      box-sizing: border-box;
-      scroll-snap-align: center;
-    }
+    .carousel-track:active { cursor:grabbing; transform:scale(.995); transition:transform .15s ease; }
+    .carousel-item { flex:0 0 100%; max-width:100%; padding:1rem; box-sizing:border-box; scroll-snap-align:center; }
 
     /* ===== BOTÕES DE NAVEGAÇÃO ===== */
     .carousel-nav {
-      position: fixed;
-      bottom: 25px;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      padding: 0 25px;
-      box-sizing: border-box;
+      position:fixed; bottom:25px; left:0; width:100%;
+      display:flex; justify-content:space-between; padding:0 25px; box-sizing:border-box;
     }
     .nav-btn {
-      background: var(--teal);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 55px;
-      height: 55px;
-      font-size: 1.4rem;
-      cursor: pointer;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-      transition: background 0.3s, transform 0.2s;
+      background:var(--teal); color:#fff; border:none; border-radius:50%;
+      width:55px; height:55px; font-size:1.4rem; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.25);
+      transition:background .3s, transform .2s;
     }
-    .nav-btn:hover { background: var(--terracota); transform: scale(1.08); }
+    .nav-btn:hover { background:var(--terracota); transform:scale(1.08); }
 
     /* ===== PROGRESSO ===== */
     .progress-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 5px;
-      background: var(--terracota);
-      width: 0%;
-      transition: width 0.4s ease;
-      border-radius: 0 3px 3px 0;
-      z-index: 999;
+      position:fixed; top:0; left:0; height:5px; background:var(--terracota);
+      width:0%; transition:width .4s ease; border-radius:0 3px 3px 0; z-index:999;
     }
 
     /* ===== RODAPÉ ===== */
     .fix-footer {
-      position: fixed;
-      bottom: 10px;
-      width: 100%;
-      text-align: center;
-      font-size: 0.9rem;
-      color: var(--teal);
-      opacity: 0.8;
+      position:fixed; bottom:10px; width:100%; text-align:center; font-size:.9rem; color:var(--teal); opacity:.85;
+      display:flex; gap:10px; justify-content:center;
     }
-    button.secundario {
-      background: var(--teal);
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.3s ease;
+    #salvarTreinoBtn, .secundario {
+      background:var(--teal); color:#fff; border:none; padding:10px 16px; border-radius:20px; font-size:1rem; cursor:pointer; transition:.3s ease;
     }
-    button.secundario:hover {
-      background: var(--terracota);
-      transform: scale(1.05);
-    }
+    .secundario { background:#fff; color:var(--teal); border:1px solid rgba(51,89,83,.25); }
+    #salvarTreinoBtn:hover, .secundario:hover { transform:scale(1.05); }
+    /* feedback visual dos timers */
+    .subtimer { user-select:none; padding:.35rem .6rem; border-radius:12px; background:#f3e7e3; display:inline-block; min-width:64px; text-align:center; }
+    .subtimer.running { background:#e9f3ef; }
+    .subtimer.done { background:#e9dedd; }
   </style>
 </head>
 
@@ -130,8 +83,8 @@
   </div>
 
   <div class="carousel-nav">
-    <button id="prevBtn" class="nav-btn">←</button>
-    <button id="nextBtn" class="nav-btn">→</button>
+    <button id="prevBtn" class="nav-btn" aria-label="Anterior">←</button>
+    <button id="nextBtn" class="nav-btn" aria-label="Próximo">→</button>
   </div>
 
   <div class="fix-footer">
@@ -139,106 +92,10 @@
     <button id="descansoBtn" class="secundario">🌿 Descanso</button>
   </div>
 
-<!-- Core no mesmo nível do arquivo -->
-<script src="./femflow-core.js"></script>
-<!-- Seu JS de treino (a versão nova acima) -->
-<script src="js/treino.js"></script>
-
-  <script>
-    const track = document.getElementById("carouselTrack");
-    const bar = document.getElementById("progressBar");
-    let current = 0;
-    let boxes = [];
-
-    // Navegação via botões
-    document.getElementById("nextBtn").addEventListener("click", () => moveTo("next"));
-    document.getElementById("prevBtn").addEventListener("click", () => moveTo("prev"));
-
-    function moveTo(direction) {
-      if (direction === "next" && current < boxes.length - 1) {
-        current++;
-        navigator.vibrate([40]);
-      } else if (direction === "prev" && current > 0) {
-        current--;
-        navigator.vibrate([20]);
-      }
-      updateCarousel();
-    }
-
-    function updateCarousel() {
-      track.style.transform = `translateX(-${current * 100}%)`;
-      bar.style.width = `${((current + 1) / boxes.length) * 100}%`;
-    }
-
-    // Swipe Gestures
-    let startX = 0;
-    let endX = 0;
-    const sensibilidade = 50;
-    track.addEventListener("touchstart", (e) => startX = e.touches[0].clientX);
-    track.addEventListener("touchmove", (e) => endX = e.touches[0].clientX);
-    track.addEventListener("touchend", () => {
-      const diff = startX - endX;
-      if (Math.abs(diff) > sensibilidade) {
-        if (diff > 0) moveTo("next");
-        else moveTo("prev");
-      }
-    });
-
-    // Renderização
-    function criarBoxHTML(box) {
-      if (box.tipo === "texto") {
-        return `<div class="box texto"><h3>${box.titulo}</h3><p>${box.mensagem}</p></div>`;
-      }
-      if (box.tipo === "exercicios") {
-        return `<div class="box treino">
-          <h3>${box.titulo}</h3>
-          ${box.itens.map(e => `
-            <div class="ex">
-              <div class="ex-head"><b>${e.exercicio}</b>${e.link ? `<a href="${e.link}" target="_blank">🎥</a>` : ''}</div>
-              <div class="ex-grid">
-                <label>Séries</label><input value="${e.series || ''}">
-                <label>Reps</label><input value="${e.reps || ''}">
-                <label>Timer</label>
-                <div class="subtimer" data-total="${e.tempo || 45}">
-                  00:${String(e.tempo || 45).padStart(2, "0")}
-                </div>
-              </div>
-            </div>`).join("")}
-        </div>`;
-      }
-      if (box.tipo === "hiit") {
-        return `<div class="hiit">
-          <b>${box.titulo}</b><br>${box.descricao}<br>
-          <small><i>🔥 Potência Feminina</i></small>
-        </div>`;
-      }
-      if (box.tipo === "resfriamento") {
-        return `<div class="box resfriamento">
-          <h3>${box.titulo}</h3>
-          <p>${box.mensagem}</p>
-        </div>`;
-      }
-      return "";
-    }
-
-     // Salvar treino e descanso
-    document.getElementById("salvarTreinoBtn").addEventListener("click", async () => {
-      const id = localStorage.getItem("femflow_id");
-      const fase = localStorage.getItem("fase_sugerida") || "desconhecida";
-      FEMFLOW.abrirPSE(async (pse) => {
-        await FEMFLOW.salvarTreino({ id, fase, treino: "dia", tipo_dia: "treino", pse });
-        FEMFLOW.toast("✅ Treino salvo!");
-      });
-    });
-
-    document.getElementById("descansoBtn").addEventListener("click", async () => {
-      const fase = localStorage.getItem("fase_sugerida") || "desconhecida";
-      await FEMFLOW.salvarDescanso(fase);
-      FEMFLOW.toast("🌿 Descanso registrado!");
-    });
-
-    carregarTreino();
-  </script>
+  <!-- Core no mesmo nível do arquivo -->
+  <script src="./femflow-core.js"></script>
+  <!-- Lógica híbrida (Apps Script + Firebase) com timers + links -->
+  <script src="js/treino.js"></script>
 </body>
 </html>
 
