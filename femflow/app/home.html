@@ -82,100 +82,124 @@
   <footer>FemFlow • escolha seu foco e comece hoje</footer>
 
  <script src="scripts/femflow-core.js"></script>
+ <script src="scripts/femflow-core.js"></script>
+
 <script>
-  // Saudação (pode manter do seu arquivo)
-  (function(){
-    const nome = (localStorage.getItem('femflow_nome') || '').split(' ')[0];
-    if (nome) document.getElementById('saudacao')?.textContent = `Olá, ${nome} 🌸`;
-  })();
+// ========= Entitlement helpers =========
+function hasEntitlement() {
+  const sku = localStorage.getItem('femflow_program');
+  const exp = localStorage.getItem('femflow_program_expiry');
+  if (!sku || !exp) return false;
+  return new Date() <= new Date(exp);
+}
 
-  // ===== Catálogo de 9 produtos (troque 'img' quando tiver as capas) =====
-  const PRODUTOS = [
-    { sku:'FF-30D-GLUTEOS',     titulo:'30 dias • Glúteos',             foco:'Glúteos',       img:null, color:'#d98f80', desc:'Ênfase em glúteo médio/máximo' },
-    { sku:'FF-30D-QUADRICEPS',  titulo:'30 dias • Ênfase Quadríceps',   foco:'Pernas',        img:null, color:'#9fb7ac', desc:'Foco em extensão de joelhos' },
-    { sku:'FF-30D-PEITORAL',    titulo:'30 dias • Ênfase Peitoral',     foco:'Peitoral',      img:null, color:'#c8a1a6', desc:'Empurrar, isometrias e controle' },
-    { sku:'FF-30D-COSTAS',      titulo:'30 dias • Ênfase Costas',       foco:'Costas',        img:null, color:'#a0a6c8', desc:'Remadas, escápulas e postura' },
-    { sku:'FF-30D-POSTERIORES', titulo:'30 dias • Posteriores',         foco:'Posteriores',   img:null, color:'#b08fb8', desc:'Hinge e cadeia posterior' },
-    { sku:'FF-30D-PANTURRILHA', titulo:'30 dias • Panturrilhas',        foco:'Panturrilhas',  img:null, color:'#bfa27d', desc:'Sóleo e gastrocnêmio' },
-    { sku:'FF-30D-CORE',        titulo:'30 dias • Core',                foco:'Core',          img:null, color:'#86a9b8', desc:'Antiextensão e antirotação' },
-    { sku:'FF-30D-MOBILIDADE',  titulo:'30 dias • Mobilidade',          foco:'Mobilidade',    img:null, color:'#a7b08f', desc:'Alongamento + liberação + flow' },
-    { sku:'FF-30D-HIIT-LOW',    titulo:'30 dias • HIIT Baixo Impacto',  foco:'Cardio',        img:null, color:'#e0a36b', desc:'Cardio gentil às articulações' }
-  ];
-  const CHECKOUTS = { /* 'FF-30D-GLUTEOS':'ABCD1234' */ };
+async function syncEntitlement() {
+  try {
+    const email = localStorage.getItem('femflow_email') || '';
+    if (!email || !window.FEMFLOW?.SCRIPT_URL) return;
+    const url = `${FEMFLOW.SCRIPT_URL}?action=status&email=${encodeURIComponent(email)}`;
+    const r = await fetch(url);
+    const j = await r.json();
 
-  const rail = document.getElementById('railProdutos');
+    if (j?.id) localStorage.setItem('femflow_id', j.id);
+    if (j?.program) localStorage.setItem('femflow_program', j.program);
+    else localStorage.removeItem('femflow_program');
 
-  function cardHTML(p){
-    const initials = p.titulo.replace('30 dias • ','').split(' ').map(s=>s[0]).join('').slice(0,3).toUpperCase();
-    return `
-      <article class="card" data-sku="${p.sku}"
-               style="flex:0 0 220px;scroll-snap-align:start;background:#fff;border-radius:16px;overflow:hidden;border:1px solid rgba(204,106,90,.14);box-shadow:0 6px 16px rgba(0,0,0,.08)">
-        <div class="thumb" style="position:relative;height:140px;display:flex;align-items:center;justify-content:center;background:${p.color}">
-          ${p.img ? `<img src="${p.img}" alt="${p.titulo}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>`
-                  : `<div class="ph" style="font-weight:900;font-size:28px;color:#fff;z-index:1">${initials}</div>`}
-          <span class="badge" style="position:absolute;right:10px;top:10px;background:rgba(51,89,83,.92);color:#fff;border-radius:999px;padding:4px 10px;font-size:.8rem;font-weight:800">${p.foco}</span>
-        </div>
-        <div class="info" style="padding:12px">
-          <h3 class="ttl" style="margin:0 0 6px;color:#335953;font-weight:900">${p.titulo}</h3>
-          <p class="desc" style="margin:0;color:#94786f;font-size:.92rem;min-height:38px">${p.desc||''}</p>
-        </div>
-      </article>`;
-  }
+    if (j?.expiryISO) localStorage.setItem('femflow_program_expiry', j.expiryISO);
+    else localStorage.removeItem('femflow_program_expiry');
 
-  function render(){
-    rail.innerHTML = PRODUTOS.map(cardHTML).join('');
-    rail.querySelectorAll('.card').forEach(el=>{
-      el.addEventListener('click', ()=>onChoose(el.dataset.sku));
-    });
-  }
+    if (j?.cycle?.startDate) localStorage.setItem('femflow_startDate', j.cycle.startDate);
+    if (j?.cycle?.length)    localStorage.setItem('femflow_cycleLength', j.cycle.length);
+  } catch(e) { console.warn('syncEntitlement failed', e); }
+}
+</script>
 
-  function onChoose(sku){
-    const id = localStorage.getItem('femflow_id');
-    const payCode = CHECKOUTS[sku];
-    if(payCode){ location.href = `https://pay.hotmart.com/${payCode}`; return; }
-    if(!id){ location.href = `login.html?sku=${encodeURIComponent(sku)}`; return; }
-    location.href = `flowcenter.html?sku=${encodeURIComponent(sku)}`;
-  }
+<script>
+// ========= Catálogo / UI =========
+const PRODUTOS = [
+  { sku:'FF-30D-GLUTEOS',     titulo:'30 dias • Glúteos',             foco:'Glúteos',       img:null, color:'#d98f80', desc:'Ênfase em glúteo médio/máximo' },
+  { sku:'FF-30D-QUADRICEPS',  titulo:'30 dias • Ênfase Quadríceps',   foco:'Pernas',        img:null, color:'#9fb7ac', desc:'Foco em extensão de joelhos' },
+  { sku:'FF-30D-PEITORAL',    titulo:'30 dias • Ênfase Peitoral',     foco:'Peitoral',      img:null, color:'#c8a1a6', desc:'Empurrar, isometrias e controle' },
+  { sku:'FF-30D-COSTAS',      titulo:'30 dias • Ênfase Costas',       foco:'Costas',        img:null, color:'#a0a6c8', desc:'Remadas, escápulas e postura' },
+  { sku:'FF-30D-POSTERIORES', titulo:'30 dias • Posteriores',         foco:'Posteriores',   img:null, color:'#b08fb8', desc:'Hinge e cadeia posterior' },
+  { sku:'FF-30D-PANTURRILHA', titulo:'30 dias • Panturrilhas',        foco:'Panturrilhas',  img:null, color:'#bfa27d', desc:'Sóleo e gastrocnêmio' },
+  { sku:'FF-30D-CORE',        titulo:'30 dias • Core',                foco:'Core',          img:null, color:'#86a9b8', desc:'Antiextensão e antirotação' },
+  { sku:'FF-30D-MOBILIDADE',  titulo:'30 dias • Mobilidade',          foco:'Mobilidade',    img:null, color:'#a7b08f', desc:'Alongamento + liberação + flow' },
+  { sku:'FF-30D-HIIT-LOW',    titulo:'30 dias • HIIT Baixo Impacto',  foco:'Cardio',        img:null, color:'#e0a36b', desc:'Cardio gentil às articulações' }
+];
+// (opcional) checkouts Hotmart por SKU
+const CHECKOUTS = { /* 'FF-30D-GLUTEOS':'ABCD1234' */ };
 
-  // Botões finais
-  document.getElementById('btnFlow').onclick = ()=> location.href='flowcenter.html';
-  document.getElementById('btnCad').onclick  = ()=> location.href='login.html';
+const rail = document.getElementById('railProdutos');
 
-  // Deep link ?id=FF-... (se vier do Hotmart)
-  (function(){
-    const p = new URLSearchParams(location.search);
-    const got = p.get('id');
-    if(got){ localStorage.setItem('femflow_id', got); }
-  })();
+function cardHTML(p){
+  const initials = p.titulo.replace('30 dias • ','').split(' ').map(s=>s[0]).join('').slice(0,3).toUpperCase();
+  return `
+    <article class="card" data-sku="${p.sku}">
+      <div class="thumb" style="background:${p.color}">
+        ${p.img ? `<img src="${p.img}" alt="${p.titulo}"/>`
+                : `<div class="ph">${initials}</div>`}
+        <span class="badge">${p.foco}</span>
+      </div>
+      <div class="info">
+        <h3 class="ttl">${p.titulo}</h3>
+        <p class="desc">${p.desc||''}</p>
+      </div>
+    </article>`;
+}
 
-  // SW (como já tinha)
-  if('serviceWorker' in navigator){
-    window.addEventListener('load', async ()=>{
-      try{ const reg = await navigator.serviceWorker.register('service-worker.js'); reg.postMessage('checkVersion'); }
-      catch(e){ console.warn('SW off', e); }
-    });
-  }
+function render(){
+  rail.innerHTML = PRODUTOS.map(cardHTML).join('');
+  rail.querySelectorAll('.card').forEach(el=>{
+    el.addEventListener('click', ()=>onChoose(el.dataset.sku));
+  });
+}
 
+function onChoose(sku){
+  const id = localStorage.getItem('femflow_id');
+  const payCode = CHECKOUTS[sku];
+  if (payCode) { location.href = `https://pay.hotmart.com/${payCode}`; return; }
+  if (!id) { location.href = `login.html?sku=${encodeURIComponent(sku)}`; return; }
+  location.href = `flowcenter.html?sku=${encodeURIComponent(sku)}`;
+}
+
+// ========= Inicialização =========
+(async () => {
+  // 1) sincroniza direitos
+  await syncEntitlement();
+
+  // 2) renderiza a vitrine
   render();
-</script>
-  <script>
-  (async () => { await syncEntitlement(); })();
-</script>
-  <script>
-  document.getElementById('btnFlow').onclick = async () => {
+
+  // 3) CTAs finais (uma única vez)
+  const btnFlow = document.getElementById('btnFlow');
+  const btnCad  = document.getElementById('btnCad');
+
+  btnFlow.onclick = async () => {
     await syncEntitlement();
     if (hasEntitlement()) {
       location.href = 'flowcenter.html';
     } else {
-      // sem direito ativo → mantém na Home (para comprar) ou vai ao login
       const id = localStorage.getItem('femflow_id');
       if (!id) location.href = 'login.html';
       else alert('Seu acesso terminou. Escolha um programa abaixo para continuar.');
     }
   };
-  document.getElementById('btnCad').onclick = () => location.href = 'login.html';
+  btnCad.onclick  = () => location.href = 'login.html';
+
+  // 4) Deep link ?id=FF-...
+  const p = new URLSearchParams(location.search);
+  const got = p.get('id');
+  if (got) { localStorage.setItem('femflow_id', got); }
+})();
+
+// ========= PWA (igual ao seu) =========
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async ()=>{
+    try { const reg = await navigator.serviceWorker.register('service-worker.js'); reg.postMessage('checkVersion'); }
+    catch(e){ console.warn('SW off', e); }
+  });
+}
 </script>
-
-
 </body>
 </html>
