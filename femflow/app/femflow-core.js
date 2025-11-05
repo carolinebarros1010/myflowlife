@@ -38,7 +38,7 @@ const FEMFLOW = {
   /* =======================================================
      🔹 1. LOGIN / CADASTRO
   ======================================================= */
-  async loginOuCadastro(nome, email) {
+  async loginouCadastro(nome, email) {
     if (!nome || !email) {
       this.toast("⚠️ Informe nome e e-mail para continuar.", true);
       return;
@@ -149,12 +149,12 @@ const FEMFLOW = {
       box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:999; cursor:pointer;
     `;
 
-    const map = {
-      "flowcenter.html": "index.html",
-      "treino.html": "flowcenter.html",
-      "evolucao.html": "flowcenter.html",
-      "ciclo.html": "index.html",
-    };
+  const map = {
+ "flowcenter.html": "home.html",
+   "treino.html": "flowcenter.html",
+   "evolucao.html": "flowcenter.html",
+ "ciclo.html": "home.html",
+};
 
     const page = location.pathname.split("/").pop();
     voltar.onclick = () => this.router(map[page] || "index");
@@ -295,7 +295,7 @@ const FEMFLOW = {
      🔹 7. AUTO CICLO – Reseta automaticamente ao completar
   ======================================================= */
   autoCiclo() {
-    const ciclo = Number(localStorage.getItem("ciclo_duracao") || 28);
+    const ciclo = Number(localStorage.getItem("femflow_cycleLength") || 28);
     let dia = Number(localStorage.getItem("dia_ciclo") || 1);
     if (dia > ciclo) {
       this.toast("🌸 Novo ciclo iniciado automaticamente!");
@@ -313,13 +313,13 @@ const FEMFLOW = {
   ======================================================= */
   router(destino) {
     const map = {
-      home: "index.html",
+      home: "home.html",
       cadastro: "cadastro.html",
-      ciclo: "ciclo.html",
-      flowcenter: "flowcenter.html",
+       ciclo: "ciclo.html",
+       flowcenter: "flowcenter.html",
       treino: "treino.html",
-      evolucao: "evolucao.html",
-    };
+       evolucao: "evolucao.html",
+     };
     const url = map[destino] || "index.html";
     console.log(`➡️ Navegando para: ${url}`);
     window.location.href = url;
