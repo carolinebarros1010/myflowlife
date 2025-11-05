@@ -74,22 +74,20 @@
       margin:12px auto 6px;
     }
   </style>
-  <script>
-    // Guard: exige sessão válida, produto e ciclo
-    (function(){
-      const id   = localStorage.getItem('femflow_id');
-      const auth = localStorage.getItem('femflow_auth')==='yes';
-      if(!id || !auth){ location.href='login.html?ret=flowcenter.html'; return; }
+ <script>
+  (async function(){
+    const id = localStorage.getItem('femflow_id');
+    if(!id){ location.href='login.html?ret=flowcenter.html'; return; }
 
-      const hasProduct = localStorage.getItem('femflow_hasProduct')==='yes';
-      if(!hasProduct){ location.href='home.html'; return; }
+    const hasStart = !!localStorage.getItem('femflow_startDate');
+    const hasLen   = !!localStorage.getItem('femflow_cycleLength');
+    if(!(hasStart && hasLen)){ location.href='ciclo.html'; return; }
 
-      const cicloOk = localStorage.getItem('femflow_cycle_configured')==='yes' &&
-                      localStorage.getItem('femflow_startDate') &&
-                      localStorage.getItem('femflow_cycleLength');
-      if(!cicloOk){ location.href='ciclo.html'; return; }
-    })();
-  </script>
+    // Opcional: sincronizar direitos (quando tiver o endpoint pronto)
+    // await syncEntitlement();
+    // if(!hasEntitlement()){ location.href='home.html'; return; }
+  })();
+</script>
 </head>
 <body>
   <div class="topbar">
@@ -246,50 +244,17 @@
   </script>
 <script>
   (async function(){
-    const id = localStorage.getItem('femflow_id');
-    if(!id){ location.href='login.html?ret=flowcenter.html'; return; }
-
-    const hasStart = !!localStorage.getItem('femflow_startDate');
-    const hasLen   = !!localStorage.getItem('femflow_cycleLength');
-    if(!(hasStart && hasLen)){ location.href='ciclo.html'; return; }
-
-    // Opcional: sincronizar direitos (quando tiver o endpoint pronto)
-    // await syncEntitlement();
-    // if(!hasEntitlement()){ location.href='home.html'; return; }
-  })();
-</script>
-  <script>
-  // Checa se há direito ativo (programa não expirado)
-  function hasEntitlement() {
-    const sku = localStorage.getItem('femflow_program');
-    const exp = localStorage.getItem('femflow_program_expiry');
-    if (!sku || !exp) return false;
-    return new Date() <= new Date(exp);
-  }
-
-  // Sincroniza com o Apps Script (action=status) usando e-mail salvo no login
-  async function syncEntitlement() {
-    try {
-      const email = localStorage.getItem('femflow_email') || '';
-      if (!email || !window.FEMFLOW?.SCRIPT_URL) return;
-
-      const url = `${FEMFLOW.SCRIPT_URL}?action=status&email=${encodeURIComponent(email)}`;
-      const r = await fetch(url);
-      const j = await r.json();
-
-      if (j?.id) localStorage.setItem('femflow_id', j.id);
-      if (j?.program) localStorage.setItem('femflow_program', j.program);
-      else localStorage.removeItem('femflow_program');
-
-      if (j?.expiryISO) localStorage.setItem('femflow_program_expiry', j.expiryISO);
-      else localStorage.removeItem('femflow_program_expiry');
-
-      if (j?.cycle?.startDate) localStorage.setItem('femflow_startDate', j.cycle.startDate);
-      if (j?.cycle?.length)    localStorage.setItem('femflow_cycleLength', j.cycle.length);
-    } catch(e) {
-      console.warn('syncEntitlement failed', e);
+    // já passou login + ciclo no guard do <head>
+    await syncEntitlement();
+    if (!hasEntitlement()) {
+      // Sem direito ativo: manda de volta p/ Home para escolher novo programa
+      location.href = 'home.html';
+      return;
     }
-  }
+
+    // aqui segue normalmente (sua renderização do arco, textos e botões)
+    // ... (seu código atual permanece)
+  })();
 </script>
   <!-- Core no caminho solicitado -->
   <script src="./femflow-core.js"></script>
