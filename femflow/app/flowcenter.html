@@ -256,56 +256,48 @@
     // ... (seu código atual permanece)
   })();
 </script>
-  <!-- Core no caminho solicitado -->
-<!-- Carregue o core ANTES de usar FEMFLOW -->
-<script src="scripts/femflow-core.js"></script>
 
-<!-- Helpers de entitlement (definições primeiro) -->
+<script src="./femflow-core.js"></script>
+
 <script>
-  // Checa se há direito ativo (programa não expirado)
-  function hasEntitlement() {
-    const sku = localStorage.getItem('femflow_program');
-    const exp = localStorage.getItem('femflow_program_expiry');
-    if (!sku || !exp) return false;
-    return new Date() <= new Date(exp);
-  }
+// Helpers (iguais aos da Home)
+function hasEntitlement() {
+  const sku = localStorage.getItem('femflow_program');
+  const exp = localStorage.getItem('femflow_program_expiry');
+  if (!sku || !exp) return false;
+  return new Date() <= new Date(exp);
+}
+async function syncEntitlement() {
+  try {
+    const email = localStorage.getItem('femflow_email') || '';
+    if (!email || !window.FEMFLOW?.SCRIPT_URL) return;
+    const url = `${FEMFLOW.SCRIPT_URL}?action=status&email=${encodeURIComponent(email)}`;
+    const r = await fetch(url); const j = await r.json();
 
-  // Sincroniza com o Apps Script (action=status) usando e-mail salvo no login
-  async function syncEntitlement() {
-    try {
-      const email = localStorage.getItem('femflow_email') || '';
-      if (!email || !window.FEMFLOW?.SCRIPT_URL) return;
+    if (j?.id) localStorage.setItem('femflow_id', j.id);
+    if (j?.program) localStorage.setItem('femflow_program', j.program);
+    else localStorage.removeItem('femflow_program');
 
-      const url = `${FEMFLOW.SCRIPT_URL}?action=status&email=${encodeURIComponent(email)}`;
-      const r = await fetch(url);
-      const j = await r.json();
+    if (j?.expiryISO) localStorage.setItem('femflow_program_expiry', j.expiryISO);
+    else localStorage.removeItem('femflow_program_expiry');
 
-      if (j?.id) localStorage.setItem('femflow_id', j.id);
-      if (j?.program) localStorage.setItem('femflow_program', j.program);
-      else localStorage.removeItem('femflow_program');
-
-      if (j?.expiryISO) localStorage.setItem('femflow_program_expiry', j.expiryISO);
-      else localStorage.removeItem('femflow_program_expiry');
-
-      if (j?.cycle?.startDate) localStorage.setItem('femflow_startDate', j.cycle.startDate);
-      if (j?.cycle?.length)    localStorage.setItem('femflow_cycleLength', j.cycle.length);
-    } catch(e) {
-      console.warn('syncEntitlement failed', e);
-    }
-  }
+    if (j?.cycle?.startDate) localStorage.setItem('femflow_startDate', j.cycle.startDate);
+    if (j?.cycle?.length)    localStorage.setItem('femflow_cycleLength', j.cycle.length);
+  } catch(e){ console.warn('syncEntitlement failed', e); }
+}
 </script>
 
-<!-- Agora SIM, chame a sync e bloqueie se não houver acesso -->
 <script>
-  (async function(){
-    await syncEntitlement();
-    if (!hasEntitlement()) {
-      // Sem direito ativo: direcione para a Home para escolher um programa
-      location.href = 'home.html';
-      return;
-    }
-    // Se tiver direito ativo, nada a fazer — o Flow Center que você já renderizou segue normal
-  })();
+// Checa acesso antes de liberar o hub
+(async function(){
+  // seu guard do <head> já conferiu login + ciclo
+  await syncEntitlement();
+  if (!hasEntitlement()) {
+    location.href = 'home.html'; // volta para escolher novo programa
+    return;
+  }
+  // se tiver acesso, segue normal (seu JS de UI já rodou acima)
+})();
 </script>
 </body>
 </html>
