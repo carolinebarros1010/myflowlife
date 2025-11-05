@@ -158,5 +158,24 @@
 
   render();
 </script>
+  <script>
+  (async () => { await syncEntitlement(); })();
+</script>
+  <script>
+  document.getElementById('btnFlow').onclick = async () => {
+    await syncEntitlement();
+    if (hasEntitlement()) {
+      location.href = 'flowcenter.html';
+    } else {
+      // sem direito ativo → mantém na Home (para comprar) ou vai ao login
+      const id = localStorage.getItem('femflow_id');
+      if (!id) location.href = 'login.html';
+      else alert('Seu acesso terminou. Escolha um programa abaixo para continuar.');
+    }
+  };
+  document.getElementById('btnCad').onclick = () => location.href = 'login.html';
+</script>
+
+
 </body>
 </html>
