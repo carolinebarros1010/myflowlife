@@ -1,5 +1,5 @@
 /* ===========================================================
-   🌸 FEMFLOW CORE SCRIPT v2.2
+   🌸 FEMFLOW CORE SCRIPT v2.2 (patch)
    Autor: Ricardo Fernandes • 2025
    Integração direta com FemFlow Core (Hotmart + App)
    =========================================================== */
@@ -8,19 +8,31 @@ const FEMFLOW = {
   /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
   SCRIPT_URL:
     localStorage.getItem("femflow_script") ||
-    "https://script.google.com/macros/s/AKfycbzmHvGjUwLjOIgDAARCxPgvGbTxGsH5zo9U8wx6a8LScWfiCtyiuz6w_cKdc4e9_WOL/exec",
+    "https://script.google.com/macros/s/AKfycbzYT12FfgDePZjfXX9e8Qiaey7Bhxx8hLxlu1p7U5TyLP47SNsMy_lp5LkEm4aZ1Aih/exec",
 
-  /* ----------- 🎨 LOGO PADRÃO ------------ */
-  LOGO: "../../assets/logofemlowverde.png",
+  /* ----------- 🎨 LOGO PADRÃO (ATUALIZADO) ------------ */
+  LOGO: "./assets/logofemflowterracotasf.png",
+
+  /* ----------- 🔎 PÁGINAS PÚBLICAS (não injetar UI) --- */
+  _isPublicPage(){
+    const p = location.pathname.split('/').pop().toLowerCase();
+    return ['login.html','home.html','index.html'].includes(p);
+  },
 
   /* ----------- ⚙️ INICIALIZAÇÃO GERAL ------------ */
   initTreino() {
     console.log("💫 FemFlow Core v2.2 conectado com sucesso");
-    this.inserirLogo();
-    this.criarModalPSE();
-    this.inserirBotaoVoltar();
+
+    // seguro em qualquer tela
     this.carregarLogoContextual();
+    this.criarModalPSE();
     this.autoCiclo();
+
+    // NÃO injeta UI nas páginas públicas
+    if (!this._isPublicPage()) {
+      this.inserirLogo();
+      this.inserirBotaoVoltar();
+    }
   },
 
   /* =======================================================
@@ -50,6 +62,7 @@ const FEMFLOW = {
         localStorage.setItem("femflow_id", data.id);
         localStorage.setItem("femflow_nome", data.nome);
         localStorage.setItem("femflow_email", data.email);
+        localStorage.setItem("femflow_auth","yes");
         this.router("home");
         return data;
       } else {
@@ -62,9 +75,30 @@ const FEMFLOW = {
   },
 
   /* =======================================================
+     🔹 1.1 LOGOUT (limpa sessão e volta ao login)
+  ======================================================= */
+  logout() {
+    const KEYS = [
+      'femflow_auth',
+      'femflow_id',
+      'femflow_nome',
+      'femflow_email'
+      // Se quiser limpar mais, descomente:
+      // 'femflow_hasProduct',
+      // 'femflow_cycle_configured',
+      // 'femflow_startDate',
+      // 'femflow_cycleLength',
+      // 'femflow_produto_fim'
+    ];
+    KEYS.forEach(k => localStorage.removeItem(k));
+    window.location.href = 'login.html';
+  },
+
+  /* =======================================================
      🔹 2. INTERFACE VISUAL
   ======================================================= */
   inserirLogo() {
+    if (this._isPublicPage()) return; // não em login/home/index
     if (!document.body) return;
     const header = document.createElement("div");
     header.innerHTML = `
@@ -76,32 +110,35 @@ const FEMFLOW = {
 
   async carregarLogoContextual() {
     try {
-      const resp = await fetch("../../assets/logos.json");
-      const logos = await resp.json();
-      let logoEscolhido = logos.principal;
+      // opcional: se não tiver logos.json, apenas ignore
+      const res = await fetch("./assets/logos.json").catch(()=>null);
+      if(!res || !res.ok) return;
+      const logos = await res.json();
+      let logoEscolhido = logos?.principal || this.LOGO;
 
       const hora = new Date().getHours();
-      const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const darkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-      if (darkMode) logoEscolhido = logos.escuro;
-      else if (hora >= 18 || hora < 6) logoEscolhido = logos.escuro;
-      else logoEscolhido = logos.principal;
+      if (darkMode) logoEscolhido = logos.escuro || logoEscolhido;
+      else if (hora >= 18 || hora < 6) logoEscolhido = logos.escuro || logoEscolhido;
 
-      if (window.location.pathname.includes("treino"))
-        logoEscolhido = logos.secundario;
-      if (window.location.pathname.includes("boasvindas"))
-        logoEscolhido = logos.boasvindas;
+      const page = (location.pathname.split("/").pop() || "").toLowerCase();
+      if (page.includes("treino"))       logoEscolhido = logos.secundario || logoEscolhido;
+      if (page.includes("boasvindas"))   logoEscolhido = logos.boasvindas || logoEscolhido;
 
       const logoImg = document.querySelector(".logo-img");
-      if (logoImg) logoImg.src = "../../" + logoEscolhido;
+      if (logoImg) logoImg.src = logoEscolhido;
 
       console.log("🌸 Logo carregado:", logoEscolhido);
     } catch (err) {
-      console.error("Erro ao carregar logos:", err);
+      // silencioso para não quebrar UI
+      console.debug("logos.json não encontrado/ignorado");
     }
   },
 
   inserirBotaoVoltar() {
+    if (this._isPublicPage()) return; // não em login/home/index
+
     const voltar = document.createElement("button");
     voltar.textContent = "← Voltar";
     voltar.style.cssText = `
@@ -221,7 +258,8 @@ const FEMFLOW = {
 
   abrirPSE(callback) {
     this.onPSESelecionado = callback;
-    document.getElementById("pseModal").style.display = "flex";
+    const el = document.getElementById("pseModal");
+    if(el) el.style.display = "flex";
   },
 
   /* =======================================================
@@ -290,6 +328,9 @@ const FEMFLOW = {
 
 /* ----------- 🚀 AUTOEXECUÇÃO ------------ */
 document.addEventListener("DOMContentLoaded", () => FEMFLOW.initTreino());
+
+/* ----------- 🔗 Alias global de logout ------------ */
+window.femflowLogout = function(){ FEMFLOW.logout(); };
 
 /* ----------- ✨ ANIMAÇÕES ------------ */
 const style = document.createElement("style");
