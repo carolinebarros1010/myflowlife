@@ -1,226 +1,243 @@
-<!--
-  FemFlow login and registration page
-  ------------------------------------------------------------
-  This page provides an entry point for users to create an account
-  with their e‑mail and password or to sign in with existing
-  credentials. It uses the FemFlow palette (creme, pêssego,
-  terracota and teal) and displays the FemFlow logo at the top
-  of the card. When a user registers or logs in successfully,
-  their FemFlow ID will be stored in localStorage and they will
-  be redirected to ciclo.html. Replace YOUR_DEPLOY_ID with your
-  Apps Script deployment ID for production.
--->
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Entrar no FemFlow</title>
-    <!-- Load shared styles if present -->
-    <link rel="stylesheet" href="../style.css" />
-    <style>
-      /* Page background using FemFlow palette */
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: "Helvetica Rounded", "Arial Rounded MT Bold", sans-serif;
-        background: linear-gradient(180deg, #F4E1D7 0%, #EFBDA6 100%);
-        color: #335953;
-      }
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Entrar no FemFlow</title>
 
-      /* Card container */
-      .login-card {
-        width: 90%;
-        max-width: 400px;
-        padding: 2rem;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        text-align: center;
-      }
+  <link rel="stylesheet" href="css/style.css"/>
 
-      .login-card img.logo {
-        width: 130px;
-        margin-bottom: 1rem;
-      }
+  <style>
+    :root{--terracota:#cc6a5a;--teal:#335953;--pessego:#efbda6;--bege:#f4e1d7;}
+    body{
+      margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+      font-family:"Lato",sans-serif;background:linear-gradient(180deg,var(--bege) 0%,var(--pessego) 100%);color:var(--teal);
+      -webkit-font-smoothing:antialiased;
+    }
+    .login-card{
+      width:90%;max-width:400px;padding:2rem;border-radius:18px;
+      background:rgba(255,255,255,.9);backdrop-filter:blur(12px);
+      box-shadow:0 8px 20px rgba(0,0,0,.1);text-align:center;animation:fadeIn .4s ease;
+    }
+    .login-card img.logo{width:130px;margin-bottom:1rem}
+    h2{margin:0;font-size:1.6rem;color:var(--terracota);font-family:"Playfair Display",serif}
+    .subtitle{font-size:.95rem;color:var(--teal);margin:.35rem 0 1.2rem}
+    .form-group{margin-bottom:.9rem;text-align:left}
+    input{
+      width:100%;padding:.8rem .9rem;border:1px solid #ddd;border-radius:12px;
+      font-size:1rem;color:var(--teal);background:#fff;outline:none;
+      transition:border-color .2s,box-shadow .2s
+    }
+    input:focus{border-color:var(--terracota);box-shadow:0 0 0 3px rgba(204,106,90,.25)}
+    button{
+      width:100%;padding:.9rem;margin-top:.35rem;border:none;border-radius:14px;font-weight:700;font-size:1rem;
+      color:#fff;background:linear-gradient(135deg,var(--teal),var(--terracota));cursor:pointer;transition:transform .25s ease
+    }
+    button:hover{transform:scale(1.02)}
+    .toggle{font-size:.9rem;color:var(--terracota);margin-top:.8rem;cursor:pointer;text-decoration:underline}
+    .message{margin-top:1rem;min-height:1.4rem;font-size:.95rem}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <img src="assets/logofemflowterracota.png" alt="FemFlow" class="logo"/>
+    <h2>Bem-vinda ao FemFlow</h2>
+    <p class="subtitle">Acesse ou crie sua conta para iniciar seu ciclo 🌸</p>
 
-      .login-card h2 {
-        margin: 0;
-        font-size: 1.6rem;
-        color: #cc6a5a;
-        font-family: "Playfair Display", serif;
-      }
-
-      .login-card .subtitle {
-        font-size: 0.9rem;
-        color: #335953;
-        margin: 0.2rem 0 1.5rem;
-      }
-
-      .form-group {
-        margin-bottom: 0.9rem;
-      }
-
-      .form-group input {
-        width: 100%;
-        padding: 0.7rem 0.8rem;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        font-size: 1rem;
-        color: #335953;
-        background: #ffffff;
-        outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-      }
-      .form-group input:focus {
-        border-color: #cc6a5a;
-        box-shadow: 0 0 0 3px rgba(204, 106, 90, 0.25);
-      }
-
-      button {
-        width: 100%;
-        padding: 0.8rem;
-        margin-top: 0.4rem;
-        border: none;
-        border-radius: 12px;
-        font-weight: bold;
-        font-size: 1rem;
-        cursor: pointer;
-        color: #ffffff;
-        background: linear-gradient(135deg, #335953, #cc6a5a);
-        transition: transform 0.3s, background 0.3s;
-      }
-      button:hover {
-        transform: scale(1.03);
-      }
-
-      .toggle {
-        font-size: 0.85rem;
-        color: #cc6a5a;
-        margin-top: 0.8rem;
-        cursor: pointer;
-        text-decoration: underline;
-      }
-
-      .message {
-        margin-top: 1rem;
-        min-height: 1.4rem;
-        font-size: 0.9rem;
-        color: #335953;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="login-card">
-      <!-- FemFlow logo at the top of the card -->
-      <img src="./assets/logofemflowterracota.png" alt="FemFlow logo" class="logo" />
-      <h2>Bem‑vinda ao FemFlow</h2>
-      <p class="subtitle">Acesse ou crie sua conta para iniciar seu ciclo</p>
-
-      <!-- Login form -->
-      <div id="loginBox">
-        <div class="form-group">
-          <input type="email" id="loginEmail" placeholder="Seu e‑mail" />
-        </div>
-        <div class="form-group">
-          <input type="password" id="loginSenha" placeholder="Sua senha" />
-        </div>
-        <button onclick="entrar()">Entrar</button>
-        <p class="toggle" onclick="mostrarCadastro()">Ainda não tem conta? Cadastre‑se</p>
+    <!-- Login -->
+    <div id="loginBox">
+      <div class="form-group">
+        <input type="email" id="loginEmail" placeholder="Seu e-mail"/>
       </div>
-
-      <!-- Cadastro form -->
-      <div id="cadastroBox" style="display: none;">
-        <div class="form-group">
-          <input type="text" id="nome" placeholder="Nome completo" />
-        </div>
-        <div class="form-group">
-          <input type="email" id="email" placeholder="E‑mail" />
-        </div>
-        <div class="form-group">
-          <input type="password" id="senha" placeholder="Crie uma senha" />
-        </div>
-        <button onclick="registrar()">Criar conta</button>
-        <p class="toggle" onclick="mostrarLogin()">Já tem conta? Fazer login</p>
+      <div class="form-group">
+        <input type="password" id="loginSenha" placeholder="Sua senha"/>
       </div>
+      <button id="btnEntrar">Entrar</button>
 
-      <p id="mensagem" class="message"></p>
+      <!-- Cadastro em página separada -->
+      <a class="toggle" href="anamnese_deluxe.html">Ainda não tem conta? Cadastre-se</a>
+      <!-- Recuperar senha -->
+      <p class="toggle" id="goRecuperar">Esqueci minha senha</p>
     </div>
 
-    <script>
-      
-      function mostrarLogin() {
-        document.getElementById("cadastroBox").style.display = "none";
-        document.getElementById("loginBox").style.display = "block";
-        document.getElementById("mensagem").textContent = "";
-      }
+    <!-- Recuperar Senha -->
+    <div id="recuperarBox" style="display:none">
+      <div class="form-group">
+        <input type="email" id="recEmail" placeholder="Seu e-mail cadastrado"/>
+      </div>
+      <button id="btnRecuperar">Enviar instruções</button>
+      <p class="toggle" id="voltarLogin">Voltar ao login</p>
+    </div>
 
-      async function registrar() {
-        const nome = document.getElementById("nome").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const senha = document.getElementById("senha").value.trim();
-        const msgEl = document.getElementById("mensagem");
-        msgEl.textContent = "Criando sua conta...";
-        msgEl.style.color = "#335953";
-        try {
-          const res = await fetch(scriptURL, {
-            method: "POST",
-            body: JSON.stringify({ action: "register", nome, email, senha }),
-          });
-          const data = await res.json();
-          if (data.status === "ok") {
-            msgEl.textContent = `Conta criada! ID: ${data.id}`;
-            msgEl.style.color = "#28a745";
-            setTimeout(() => {
-              localStorage.setItem("femflow_id", data.id);
-              window.location.href = "./ciclo.html";
-            }, 1500);
-          } else {
-            msgEl.textContent = data.msg || "Erro ao cadastrar.";
-            msgEl.style.color = "#d35470";
-          }
-        } catch (error) {
-          console.error(error);
-          msgEl.textContent = "Erro de rede. Tente novamente.";
-          msgEl.style.color = "#d35470";
+    <!-- (Opcional) Cadastro local nesta página – mantenho oculto se você usa a anamnese -->
+    <div id="cadastroBox" style="display:none">
+      <div class="form-group">
+        <input type="text" id="nome" placeholder="Nome completo"/>
+      </div>
+      <div class="form-group">
+        <input type="email" id="email" placeholder="E-mail"/>
+      </div>
+      <div class="form-group">
+        <input type="password" id="senha" placeholder="Crie uma senha"/>
+      </div>
+      <button id="btnCriar">Criar conta</button>
+      <p class="toggle" id="goLogin">Já tem conta? Fazer login</p>
+    </div>
+
+    <p id="mensagem" class="message"></p>
+  </div>
+
+  <!-- Core primeiro: expõe FEMFLOW.SCRIPT_URL e FEMFLOW.logout() -->
+  <script src="./femflow-core.js"></script>
+
+  <script>
+    // Endpoint do Apps Script vindo do core (fallback só para dev)
+    const scriptURL = (window.FEMFLOW && FEMFLOW.SCRIPT_URL) ||
+      "https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec";
+
+    const $ = (s)=>document.querySelector(s);
+    const msg = $("#mensagem");
+
+    // ---- Navegação entre boxes ----
+    function mostrarLogin(){
+      $("#recuperarBox").style.display="none";
+      $("#cadastroBox").style.display="none";
+      $("#loginBox").style.display="block";
+      msg.textContent="";
+    }
+    function mostrarCadastro(){
+      $("#recuperarBox").style.display="none";
+      $("#loginBox").style.display="none";
+      $("#cadastroBox").style.display="block";
+      msg.textContent="";
+    }
+
+    // binds de troca
+    $("#goLogin")?.addEventListener("click", mostrarLogin);
+    $("#goRecuperar")?.addEventListener("click", ()=>{
+      $("#loginBox").style.display="none";
+      $("#cadastroBox").style.display="none";
+      $("#recuperarBox").style.display="block";
+      msg.textContent="";
+    });
+    $("#voltarLogin")?.addEventListener("click", mostrarLogin);
+
+    // ---- UX helpers ----
+    function setMsg(t, ok=false){ msg.textContent=t; msg.style.color = ok ? "#2e7d32" : "#335953"; }
+    function setErr(t){ msg.textContent=t; msg.style.color="#cc6a5a"; }
+
+    // ---- Auto-redirect apenas com sessão válida (evita redirecionar sem clique) ----
+    (async function autoRouteIfLogged(){
+      const id = localStorage.getItem('femflow_id');
+      const auth = localStorage.getItem('femflow_auth') === 'yes';
+      if(!id || !auth) return;
+      const ret = new URLSearchParams(location.search).get('ret');
+      if(ret){ location.href = ret; return; }
+      location.href = 'ciclo.html';
+    })();
+
+    // ---- Cadastro local (se quiser manter além da anamnese) ----
+    async function registrar(){
+      const nome = $("#nome")?.value.trim();
+      const email = $("#email")?.value.trim();
+      const senha = $("#senha")?.value.trim();
+      if(!nome || !email || !senha){ setErr("Preencha nome, e-mail e senha."); return; }
+
+      setMsg("Criando sua conta...");
+      try{
+        const r = await fetch(scriptURL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // evita preflight
+          body: JSON.stringify({ action:"register", nome, email, senha })
+        });
+        const ct = (r.headers.get("content-type")||"").toLowerCase();
+        const data = ct.includes("application/json") ? await r.json() : JSON.parse(await r.text());
+
+        if(data.status==="ok" || data.status==="created"){
+          setMsg(`Conta criada! Bem-vinda, ${data.nome||nome} ✨`, true);
+          localStorage.setItem('femflow_id', data.id);
+          localStorage.setItem('femflow_nome', data.nome||nome);
+          localStorage.setItem('femflow_email', data.email||email);
+          localStorage.setItem('femflow_auth','yes');
+          const ret = new URLSearchParams(location.search).get('ret');
+          setTimeout(()=>{ location.href = ret || 'ciclo.html'; }, 900);
+        }else{
+          setErr(data.msg || "Erro ao cadastrar.");
         }
+      }catch(e){
+        console.error(e); setErr("Erro de rede. Tente novamente.");
       }
+    }
 
-      async function entrar() {
-        const email = document.getElementById("loginEmail").value.trim();
-        const senha = document.getElementById("loginSenha").value.trim();
-        const msgEl = document.getElementById("mensagem");
-        msgEl.textContent = "Verificando...";
-        msgEl.style.color = "#335953";
-        try {
-          const res = await fetch(scriptURL, {
-            method: "POST",
-            body: JSON.stringify({ action: "login", email, senha }),
-          });
-          const data = await res.json();
-          if (data.status === "ok") {
-            msgEl.textContent = `Bem‑vinda, ${data.nome}!`;
-            msgEl.style.color = "#28a745";
-            setTimeout(() => {
-              localStorage.setItem("femflow_id", data.id);
-              window.location.href = "./ciclo.html";
-            }, 1000);
-          } else {
-            msgEl.textContent = data.msg || "E‑mail ou senha incorretos.";
-            msgEl.style.color = "#d35470";
-          }
-        } catch (error) {
-          console.error(error);
-          msgEl.textContent = "Erro de rede. Tente novamente.";
-          msgEl.style.color = "#d35470";
+    // ---- Login ----
+    async function entrar(){
+      const email = $("#loginEmail").value.trim();
+      const senha = $("#loginSenha").value.trim();
+      if(!email || !senha){ setErr("Digite e-mail e senha."); return; }
+
+      setMsg("Verificando...");
+      try{
+        const r = await fetch(scriptURL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action:"login", email, senha })
+        });
+        const ct = (r.headers.get("content-type")||"").toLowerCase();
+        const data = ct.includes("application/json") ? await r.json() : JSON.parse(await r.text());
+
+      if(data.status==="ok"){
+          setMsg(`Bem-vinda, ${data.nome||"aluna"}!`, true);
+          localStorage.setItem('femflow_id', data.id);
+          localStorage.setItem('femflow_nome', data.nome||"");
+          localStorage.setItem('femflow_email', data.email||email);
+          localStorage.setItem('femflow_auth','yes');
+          const ret = new URLSearchParams(location.search).get('ret');
+          setTimeout(()=>{ location.href = ret || 'ciclo.html'; }, 700);
+        }else{
+          setErr(data.msg || "E-mail ou senha incorretos.");
         }
+      }catch(e){
+        console.error(e); setErr("Erro de rede. Tente novamente.");
       }
-    </script>
-    <script src="scripts/femflow-core.js"></script>
+    }
 
-  </body>
+    // ---- Recuperar senha ----
+    async function recuperarSenha(){
+      const email = $("#recEmail").value.trim();
+      if(!email){ setErr("Digite seu e-mail."); return; }
+
+      setMsg("Verificando...");
+      try{
+        const r = await fetch(scriptURL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action:"recuperarSenha", email })
+        });
+        const ct = (r.headers.get("content-type")||"").toLowerCase();
+        const data = ct.includes("application/json") ? await r.json() : JSON.parse(await r.text());
+
+        if(data.status === "ok"){
+          setMsg("📩 Se o e-mail existir, você receberá as instruções em instantes.", true);
+          setTimeout(()=>{ mostrarLogin(); msg.textContent=""; }, 2000);
+        }else if(data.status === "notfound"){
+          setErr("⚠️ E-mail não encontrado.");
+        }else{
+          setErr("❌ Erro ao enviar e-mail.");
+        }
+      }catch(e){
+        console.error(e); setErr("❌ Falha de rede. Tente novamente.");
+      }
+    }
+
+    // Binds
+    $("#btnEntrar").addEventListener("click", entrar);
+    $("#btnCriar")?.addEventListener("click", registrar);
+    $("#btnRecuperar").addEventListener("click", recuperarSenha);
+    $("#loginSenha").addEventListener("keydown", e=>{ if(e.key==='Enter') entrar(); });
+    $("#senha")?.addEventListener("keydown", e=>{ if(e.key==='Enter') registrar(); });
+    $("#recEmail").addEventListener("keydown", e=>{ if(e.key==='Enter') recuperarSenha(); });
+  </script>
+</body>
 </html>
+
