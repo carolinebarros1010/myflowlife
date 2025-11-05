@@ -224,9 +224,11 @@
 
   
 <script>
+// Auto-redirect APENAS se já houver sessão validada anteriormente
 (async function autoRouteIfLogged(){
-  const id = localStorage.getItem('femflow_id');
-  if(!id) return;
+  const id   = localStorage.getItem('femflow_id');
+  const auth = localStorage.getItem('femflow_auth') === 'yes';
+  if (!id || !auth) return;  // ← bloqueia redirect "fantasma"
   await decidirDestinoPosLogin(id, new URLSearchParams(location.search).get('ret'));
 })();
 
@@ -235,9 +237,10 @@ async function decidirDestinoPosLogin(id, retTarget){
     const url = `${FEMFLOW.SCRIPT_URL}?action=validar&id=${encodeURIComponent(id)}`;
     const d = await fetch(url).then(r=>r.json());
     const hasProduct = !!(d?.produto_ativo || d?.possui_produto || (Array.isArray(d?.produtos) && d.produtos.length));
-    const cicloOk = localStorage.getItem('femflow_cycle_configured')==='yes' &&
-                    localStorage.getItem('femflow_startDate') &&
-                    localStorage.getItem('femflow_cycleLength');
+    const cicloOk = localStorage.setItem('femflow_id', data.id);
+                    localStorage.setItem('femflow_nome', data.nome || '');
+                    localStorage.setItem('femflow_auth', 'yes');        // ← NOVO: marca sessão válida
+                    decidirDestinoPosLogin(data.id, ret);    
     if (d?.produto_fim) localStorage.setItem('femflow_produto_fim', d.produto_fim);
     localStorage.setItem('femflow_hasProduct', hasProduct ? 'yes' : 'no');
     if (retTarget){
@@ -251,6 +254,16 @@ async function decidirDestinoPosLogin(id, retTarget){
   }catch(e){
     console.error(e); location.href = 'home.html';
   }
+}
+  function femflowLogout(){
+  localStorage.removeItem('femflow_auth');
+  localStorage.removeItem('femflow_id');
+  // (opcional) limpar mais chaves locais:
+  // localStorage.removeItem('femflow_hasProduct');
+  // localStorage.removeItem('femflow_cycle_configured');
+  // localStorage.removeItem('femflow_startDate');
+  // localStorage.removeItem('femflow_cycleLength');
+  location.href = 'login.html';
 }
 </script>
 </body>
