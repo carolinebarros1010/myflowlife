@@ -78,23 +78,33 @@
 <body>
 <script>
 (function(){
-  const id = localStorage.getItem('femflow_id');
-  if(!id){ location.href='login.html?ret=flowcenter.html'; return; }
-  const hasProduct = localStorage.getItem('femflow_hasProduct')==='yes'; if(!hasProduct){ location.href='home.html'; return; }
+  const id   = localStorage.getItem('femflow_id');
+  const auth = localStorage.getItem('femflow_auth')==='yes';
+  if(!id || !auth){ location.href='login.html?ret=flowcenter.html'; return; }
+
+  const hasProduct = localStorage.getItem('femflow_hasProduct')==='yes';
+  if(!hasProduct){ location.href='home.html'; return; }
+
   const ok = localStorage.getItem('femflow_cycle_configured')==='yes' &&
              localStorage.getItem('femflow_startDate') &&
              localStorage.getItem('femflow_cycleLength');
   if(!ok){ location.href='ciclo.html'; return; }
 })();
 </script>
-  <div class="topbar">
-    <div></div>
+
+<div class="topbar">
+  <div></div>
+  <div style="display:flex; align-items:center; gap:10px;">
     <div class="lang">
       <button id="btnPT" class="active">PT</button>
       <span>•</span>
       <button id="btnEN"><i>EN</i></button>
     </div>
+    <!-- Botão Sair -->
+    <button id="btnSair" class="ff-logout" aria-label="Sair da conta">🔒 Sair</button>
   </div>
+</div>
+
 
   <div class="brand">
     <img src="assets/logofemflowterracota.png" alt="FemFlow logo"/>
@@ -127,6 +137,8 @@
     <p class="current-hint" id="t_hint"><i>—</i></p>
 
     <select id="cycleSelect">
+      <option value="28">26 dias</option>
+      <option value="29">27 dias</option>
       <option value="28">28 dias</option>
       <option value="29">29 dias</option>
       <option value="30">30 dias</option>
@@ -239,5 +251,23 @@
     $("#toTrain").onclick=()=>location.href="treino.html";
     $("#startBtn").onclick=()=>location.href="respiracao.html";
   </script>
+  <script>
+// 🔐 Logout FemFlow — limpa sessão local e volta ao Login
+function femflowLogout(){
+  if(!confirm("Deseja sair da sua conta?")) return;
+
+  const KEYS = [
+    'femflow_auth','femflow_id','femflow_nome',
+    'femflow_hasProduct','femflow_cycle_configured',
+    'femflow_startDate','femflow_cycleLength','femflow_produto_fim'
+  ];
+  KEYS.forEach(k => localStorage.removeItem(k));
+  location.href = 'login.html';
+}
+
+// bind do botão Sair
+document.getElementById('btnSair')?.addEventListener('click', femflowLogout);
+</script>
+
 </body>
 </html>
