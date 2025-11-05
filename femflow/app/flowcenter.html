@@ -133,8 +133,35 @@
   </div>
 
   <button class="cta" id="startBtn">Iniciar ciclo de 5 minutos / <i>Start 5-min cycle</i></button>
+<script src="scripts/femflow-core.js"></script>
+<script>
+    // Guard
+    (function(){
+      const id = localStorage.getItem('femflow_id');
+      const ok = localStorage.getItem('femflow_cycle_configured')==='yes' &&
+                 localStorage.getItem('femflow_startDate') &&
+                 localStorage.getItem('femflow_cycleLength');
+      if(!id){ location.href='cadastro.html'; return; }
+      if(!ok){ location.href='ciclo.html'; return; }
+    })();
 
-  <script>
+    // Saudação
+    (async function(){
+      try{
+        const id = localStorage.getItem('femflow_id');
+        const r = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${encodeURIComponent(id)}`);
+        const d = await r.json();
+        const nome = (d?.nome||'').split(' ')[0];
+        if(nome){
+          const brand = document.querySelector('.brand');
+          const p = document.createElement('p');
+          p.style.cssText="margin:6px 0 0;font-weight:700;color:#335953";
+          p.textContent = `Olá, ${nome} 🌿`;
+          brand?.after(p);
+        }
+      }catch(e){}
+    })();
+
     /* -------- I18N texts -------- */
     const T = {
       pt:{phases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"},
