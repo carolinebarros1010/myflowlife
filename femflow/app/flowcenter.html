@@ -74,6 +74,22 @@
       margin:12px auto 6px;
     }
   </style>
+  <script>
+    // Guard: exige sessão válida, produto e ciclo
+    (function(){
+      const id   = localStorage.getItem('femflow_id');
+      const auth = localStorage.getItem('femflow_auth')==='yes';
+      if(!id || !auth){ location.href='login.html?ret=flowcenter.html'; return; }
+
+      const hasProduct = localStorage.getItem('femflow_hasProduct')==='yes';
+      if(!hasProduct){ location.href='home.html'; return; }
+
+      const cicloOk = localStorage.getItem('femflow_cycle_configured')==='yes' &&
+                      localStorage.getItem('femflow_startDate') &&
+                      localStorage.getItem('femflow_cycleLength');
+      if(!cicloOk){ location.href='ciclo.html'; return; }
+    })();
+  </script>
 </head>
 <body>
   <div class="topbar">
@@ -86,7 +102,7 @@
   </div>
 
   <div class="brand">
-    <img src="assets/logo-femflow-terra.png" alt="FemFlow logo"/>
+    <img src="./assets/logofemflowterracotasf.png" alt="FemFlow logo"/>
     <h1>FemFlow</h1>
   </div>
 
@@ -228,5 +244,9 @@
     $("#toTrain").onclick=()=>location.href="treino.html";
     $("#startBtn").onclick=()=>location.href="respiracao.html";
   </script>
+
+  <!-- Core no caminho solicitado -->
+  <script src="./femflow-core.js"></script>
 </body>
 </html>
+
