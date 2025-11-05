@@ -204,32 +204,49 @@
 
     // ---- Recuperar senha ----
     async function recuperarSenha(){
-      const email = $("#recEmail").value.trim();
-      if(!email){ setErr("Digite seu e-mail."); return; }
+  const email = document.getElementById('recEmail').value.trim();
+  const msgEl = document.getElementById('mensagem');
+  if(!email){ msgEl.textContent='Digite seu e-mail.'; msgEl.style.color='#cc6a5a'; return; }
 
-      setMsg("Verificando...");
-      try{
-        const r = await fetch(scriptURL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action:"recuperarSenha", email })
-        });
-        const ct = (r.headers.get("content-type")||"").toLowerCase();
-        const data = ct.includes("application/json") ? await r.json() : JSON.parse(await r.text());
+  msgEl.innerHTML = 'Verificando...';
+  msgEl.style.color = '#335953';
 
-        if(data.status === "ok"){
-          setMsg("📩 Se o e-mail existir, você receberá as instruções em instantes.", true);
-          setTimeout(()=>{ mostrarLogin(); msg.textContent=""; }, 2000);
-        }else if(data.status === "notfound"){
-          setErr("⚠️ E-mail não encontrado.");
-        }else{
-          setErr("❌ Erro ao enviar e-mail.");
-        }
-      }catch(e){
-        console.error(e); setErr("❌ Falha de rede. Tente novamente.");
-      }
+  try{
+    const r = await fetch(scriptURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight
+      body: JSON.stringify({
+        action: 'recuperarsenha',   // <<<<<<<<<<<<<<<<<<<<<< aqui em minúsculas
+        email
+      })
+    });
+
+    let data;
+    const ct = (r.headers.get('content-type')||'').toLowerCase();
+    if(ct.includes('application/json')) data = await r.json();
+    else data = JSON.parse(await r.text());
+
+    if(data.status === 'ok'){
+      msgEl.textContent = '📩 Se o e-mail existir, você receberá as instruções em instantes.';
+      msgEl.style.color = '#2e7d32';
+      setTimeout(()=>{
+        document.getElementById('recuperarBox').style.display='none';
+        document.getElementById('loginBox').style.display='block';
+        msgEl.textContent='';
+      }, 2000);
+    } else if (data.status === 'notfound'){
+      msgEl.textContent = '⚠️ E-mail não encontrado.';
+      msgEl.style.color = '#cc6a5a';
+    } else {
+      msgEl.textContent = '❌ Erro ao enviar e-mail.';
+      msgEl.style.color = '#cc6a5a';
     }
-
+  }catch(err){
+    console.error(err);
+    msgEl.textContent = '❌ Falha de rede. Tente novamente.';
+    msgEl.style.color = '#cc6a5a';
+  }
+}
     // Binds
     $("#btnEntrar").addEventListener("click", entrar);
     $("#btnCriar")?.addEventListener("click", registrar);
