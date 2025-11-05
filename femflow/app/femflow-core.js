@@ -349,14 +349,14 @@ document.head.appendChild(style);
   // Evita reinit se já estiver pronto
   if (window._femflowFirebaseReady) return;
 
-  // TODO: troque pelos valores do seu projeto (Console Firebase > Config Web)
   const firebaseConfig = {
-    apiKey:        "YOUR_API_KEY",
-    authDomain:    "femflow-ebec2.firebaseapp.com",
-    projectId:     "femflow-ebec2",
-    storageBucket: "femflow-ebec2.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId:         "YOUR_APP_ID"
+    apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
+    authDomain: "femflow-ebec2.firebaseapp.com",
+    projectId: "femflow-ebec2",
+    storageBucket: "femflow-ebec2.firebasestorage.app",
+    messagingSenderId: "1043953159611",
+    appId: "1:1043953159611:web:d12b82f744740f3124c89e",
+    measurementId: "G-6F644L5VTW"
   };
 
   try {
