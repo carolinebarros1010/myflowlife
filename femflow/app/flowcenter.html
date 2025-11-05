@@ -133,7 +133,7 @@
   </div>
 
   <button class="cta" id="startBtn">Iniciar ciclo de 5 minutos / <i>Start 5-min cycle</i></button>
-<script src="scripts/femflow-core.js"></script>
+<script src="femflow-core.js"></script>
 <script>
     // Guard
     (function(){
@@ -221,6 +221,27 @@
       $("#progressArc").setAttribute("stroke-dasharray",`${dash} ${circumference}`);
       $("#progressArc").style.transition="stroke-dasharray 2s linear";
     }
+function applyLang(){
+  document.getElementById("btnPT").classList.toggle("active",LANG==="pt");
+  document.getElementById("btnEN").classList.toggle("active",LANG==="en");
+  const l = LANG==="pt" ? T.pt : T.en;
+
+  // labels das fases
+  $("#lblMenstrual").innerHTML  = l.phases.menstrual;
+  $("#lblFollicular").innerHTML = l.phases.follicular;
+  $("#lblOvulatory").innerHTML  = l.phases.ovulatory;
+  $("#lblLuteal").innerHTML     = l.phases.luteal;
+
+  // título e subtítulo do card
+  document.getElementById("t_hormonalPhase").textContent =
+    LANG==="pt" ? "Fase hormonal" : "Hormonal phase";
+  document.getElementById("t_hormonalHint").innerHTML =
+    LANG==="pt"
+      ? "Seu corpo tem um ritmo. Vamos acompanhar juntas."
+      : "<i>Your body has a rhythm. Let’s follow it together.</i>";
+
+  renderPhaseUI();
+}
 
     function renderPhaseUI(){
       const l=LANG==="pt"?T.pt:T.en;
