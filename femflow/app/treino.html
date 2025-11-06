@@ -13,8 +13,18 @@
     :root{ --teal:#335953; --terracota:#cc6a5a; } /* garante as vars aqui também */
 
     /* ===== 🌸 CARROSSEL DE BOXES ===== */
-    body { background:#fffaf8; margin:0; font-family:'Lato',sans-serif; }
-    header { text-align:center; padding:12px 0 4px; }
+    body {
+  padding-top: calc(70px + env(safe-area-inset-top, 0px));
+  box-sizing: border-box;
+}
+   header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 15px;  /* afastamento do topo */
+  margin-bottom: 10px;
+}
     header h1 { margin:0; color:var(--teal); font-family:'Playfair Display', serif; }
     header .subtitle { margin:4px 0 0; color:#7a6c66; font-size:.95rem; }
 
