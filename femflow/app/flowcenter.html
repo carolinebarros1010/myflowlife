@@ -74,20 +74,6 @@
       margin:12px auto 6px;
     }
   </style>
- <script>
-  (async function(){
-    const id = localStorage.getItem('femflow_id');
-    if(!id){ location.href='login.html?ret=flowcenter.html'; return; }
-
-    const hasStart = !!localStorage.getItem('femflow_startDate');
-    const hasLen   = !!localStorage.getItem('femflow_cycleLength');
-    if(!(hasStart && hasLen)){ location.href='ciclo.html'; return; }
-
-    // Opcional: sincronizar direitos (quando tiver o endpoint pronto)
-    // await syncEntitlement();
-    // if(!hasEntitlement()){ location.href='home.html'; return; }
-  })();
-</script>
 </head>
 <body>
   <div class="topbar">
@@ -99,11 +85,7 @@
     </div>
   </div>
 
-  <div class="brand">
-    <img src="./assets/logofemflowterracotasf.png" alt="FemFlow logo"/>
-    <h1>FemFlow</h1>
-  </div>
-
+  
   <div class="card">
     <h3 id="t_hormonalPhase">Fase hormonal</h3>
     <p id="t_hormonalHint" class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
