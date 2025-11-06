@@ -126,96 +126,124 @@
   <script src="scripts/femflow-core.js"></script>
 
   <!-- SCRIPT PRINCIPAL -->
-  <script>
-    // ✅ Validação de ID via Apps Script
-    async function validarID(id) {
-      try {
-        const response = await fetch(`${FEMFLOW.SCRIPT_URL}?id=${encodeURIComponent(id)}`, { method: "GET" });
-        const data = await response.json();
-        console.log("🔍 Retorno do servidor:", data);
-        return data.valido === true || data.status === "ok";
-      } catch (err) {
-        console.error("Erro de validação:", err);
-        return false;
-      }
+ <script>
+  // ✅ Consulta status pelo Apps Script usando email OU id
+  async function fetchStatus({ email, id }) {
+    const q = email ? `email=${encodeURIComponent(email)}` : `id=${encodeURIComponent(id||'')}`;
+    const url = `${FEMFLOW.SCRIPT_URL}?action=status&${q}`;
+    const r = await fetch(url);
+    return r.json();
+  }
+
+  // ✅ Validação de ID via Apps Script (agora usa action=status)
+  async function validarID(id) {
+    try {
+      const data = await fetchStatus({ id });
+      console.log("🔍 Retorno do servidor:", data);
+      // Considera válido se encontrou perfil
+      return (data?.status === "ok") ? data : null;
+    } catch (err) {
+      console.error("Erro de validação:", err);
+      return null;
+    }
+  }
+
+  // 🩷 Valida ID e prepara ambiente para o Treino
+  document.getElementById("btnValidar").addEventListener("click", async () => {
+    const id = document.getElementById("inputID").value.trim();
+    const status = document.getElementById("statusID");
+
+    if (!id) {
+      status.innerText = "Por favor, insira seu ID FemFlow.";
+      status.style.color = "#CC6A5A";
+      return;
     }
 
-    // 🩷 Valida ID e redireciona
-    document.getElementById("btnValidar").addEventListener("click", async () => {
-      const id = document.getElementById("inputID").value.trim();
-      const status = document.getElementById("statusID");
+    status.innerText = "🔄 Verificando ID...";
+    status.style.color = "#335953";
 
-      if (!id) {
-        status.innerText = "Por favor, insira seu ID FemFlow.";
-        status.style.color = "#CC6A5A";
-        return;
-      }
+    const j = await validarID(id);
+    if (j) {
+      // 🔐 sessão básica
+      localStorage.setItem("femflow_id", j.id);
+      if (j.nome)  localStorage.setItem("femflow_nome", j.nome);
+      if (j.email) localStorage.setItem("femflow_email", j.email);
 
-      status.innerText = "🔄 Verificando ID...";
+      // 🎟️ entitlement (opcional, mas ajuda nas próximas telas)
+      if (j.program)      localStorage.setItem("femflow_program", j.program);
+      if (j.expiryISO)    localStorage.setItem("femflow_program_expiry", j.expiryISO);
+
+      // 🗓️ ciclo: se o Apps Script devolveu, usa; senão usa inputs desta página
+      const startFromAPI = j?.cycle?.startDate;
+      const lenFromAPI   = j?.cycle?.length;
+
+      const inputData = document.getElementById('dataUltima').value;
+      const inputLen  = Number(document.getElementById('duracao').value || 28);
+
+      const startISO = startFromAPI || (inputData ? new Date(inputData).toISOString() : new Date().toISOString());
+      const length   = lenFromAPI   || (inputLen >= 21 && inputLen <= 35 ? inputLen : 28);
+
+      localStorage.setItem("femflow_startDate", startISO);
+      localStorage.setItem("femflow_cycleLength", String(length));
+      localStorage.setItem("femflow_cycle_configured", "yes");
+
+      status.innerText = "✅ ID confirmado! Iniciando...";
       status.style.color = "#335953";
 
-      const valido = await validarID(id);
-      if (valido) {
-        localStorage.setItem("femflow_id", id);
-        status.innerText = "✅ ID confirmado! Iniciando...";
+      // ✨ feedback + segue para treino
+      const overlay = document.getElementById("welcomeOverlay");
+      overlay.classList.add("show");
+      setTimeout(() => { window.location.href = "treino.html"; }, 1200);
+    } else {
+      status.innerText = "⚠️ ID inválido/expirado ou não encontrado. Verifique e tente novamente.";
+      status.style.color = "#CC6A5A";
+    }
+  });
+
+  // 🔑 Recuperação de ID (mantive sua lógica; apenas usa loginOuCadastro)
+  function mostrarRecuperar() {
+    document.getElementById('recuperarBox').style.display = 'block';
+  }
+
+  async function recuperarID() {
+    const nome = document.getElementById('nomeRec').value.trim();
+    const email = document.getElementById('emailRec').value.trim();
+    const status = document.getElementById('statusRec');
+
+    if (!nome || !email) {
+      status.innerText = 'Por favor, preencha nome e e-mail.';
+      status.style.color = '#CC6A5A';
+      return;
+    }
+
+    status.innerText = '🔄 Verificando...';
+    status.style.color = '#335953';
+
+    try {
+      const response = await fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "loginOuCadastro", nome, email })
+      });
+      const data = await response.json();
+      if (data?.status === "ok" || data?.status === "created") {
+        status.innerText = `📩 Seu ID é ${data.id}. Também foi enviado ao seu e-mail.`;
         status.style.color = "#335953";
-
-        const overlay = document.getElementById("welcomeOverlay");
-        overlay.classList.add("show");
-        setTimeout(() => {
-          window.location.href = "treino.html";
-        }, 2200);
       } else {
-        status.innerText = "⚠️ ID inválido ou não encontrado. Verifique e tente novamente.";
-        status.style.color = "#CC6A5A";
-      }
-    });
-
-    // 🔑 Recuperação de ID
-    function mostrarRecuperar() {
-      document.getElementById('recuperarBox').style.display = 'block';
-    }
-
-    async function recuperarID() {
-      const nome = document.getElementById('nomeRec').value.trim();
-      const email = document.getElementById('emailRec').value.trim();
-      const status = document.getElementById('statusRec');
-
-      if (!nome || !email) {
-        status.innerText = 'Por favor, preencha nome e e-mail.';
-        status.style.color = '#CC6A5A';
-        return;
-      }
-
-      status.innerText = '🔄 Verificando...';
-      status.style.color = '#335953';
-
-      try {
-        const response = await fetch(FEMFLOW.SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "loginOuCadastro", nome, email })
-        });
-
-        const data = await response.json();
-        if (data?.status === "ok" || data?.status === "created") {
-          status.innerText = `📩 Seu ID é ${data.id}. Também foi enviado ao seu e-mail.`;
-          status.style.color = "#335953";
-        } else {
-          status.innerText = '⚠️ E-mail não encontrado. Tente novamente.';
-          status.style.color = '#CC6A5A';
-        }
-      } catch (err) {
-        console.error("Erro ao recuperar ID:", err);
-        status.innerText = '❌ Falha de conexão. Verifique sua internet.';
+        status.innerText = '⚠️ E-mail não encontrado. Tente novamente.';
         status.style.color = '#CC6A5A';
       }
+    } catch (err) {
+      console.error("Erro ao recuperar ID:", err);
+      status.innerText = '❌ Falha de conexão. Verifique sua internet.';
+      status.style.color = '#CC6A5A';
     }
+  }
 
-    function fecharQuiz() {
-      document.getElementById("quizModal").style.display = "none";
-    }
-  </script>
+  function fecharQuiz() {
+    document.getElementById("quizModal").style.display = "none";
+  }
+</script>
 </body>
 </html>
 
