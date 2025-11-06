@@ -5,134 +5,128 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FemFlow • Protocolos de Respiração</title>
 
-  <style>
-    :root {
-      --terracota: #CC6A5A;
-      --bege: #F6E9E1;
-      --verde: #335953;
-    }
-    
-body {
-  padding-top: calc(70px + env(safe-area-inset-top, 0px)); /* iPhones com notch */
-}
+<style>
+  :root {
+    --terracota: #CC6A5A;
+    --bege: #F6E9E1;
+    --verde: #335953;
+  }
 
-    .logo-container {
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .logo-img {
-      width: 120px;
-      height: auto;
-      opacity: 0.9;
-    }
+  body {
+    background-color: var(--bege);
+    color: #5A4032;
+    font-family: 'Lato', sans-serif;
+    text-align: center;
+    margin: 0;
+    padding-top: calc(80px + env(safe-area-inset-top, 0px)); /* ✅ compensa topbar do core */
+    box-sizing: border-box;
+  }
 
-    h1 {
-      font-family: 'Playfair Display', serif;
-      color: var(--terracota);
-      font-size: 1.7em;
-      margin: 15px 0 5px;
-    }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--terracota);
+    font-size: 1.8em;
+    margin: 10px 0 5px;
+  }
 
-    p.sub {
-      color: #7C6058;
-      font-size: 1em;
-      margin-bottom: 25px;
-    }
+  p.sub {
+    color: #7C6058;
+    font-size: 1em;
+    margin-bottom: 30px;
+  }
 
-    .btn-protocolo {
-      width: 90%;
-      max-width: 340px;
-      border: none;
-      border-radius: 25px;
-      padding: 14px 18px;
-      font-size: 1.05em;
-      font-weight: 600;
-      cursor: pointer;
-      margin: 8px auto;
-      display: block;
-      transition: all 0.3s ease;
-    }
+  .btn-protocolo {
+    width: 90%;
+    max-width: 340px;
+    border: none;
+    border-radius: 25px;
+    padding: 14px 18px;
+    font-size: 1.05em;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 8px auto;
+    display: block;
+    transition: all 0.3s ease;
+  }
 
-    .btn-protocolo:hover {
-      transform: scale(1.03);
-      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
-    }
+  .btn-protocolo:hover {
+    transform: scale(1.03);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+  }
 
-    /* Cores dos botões */
-    .box { background: #CC6A5A; color: #fff; }
-    .moon { background: #E2B5A5; color: #5A4032; }
-    .energy { background: #335953; color: #fff; }
-    .calm { background: #EAD5C8; color: #5A4032; }
-    .fire { background: #B44C3B; color: #fff; }
+  /* Cores dos botões */
+  .box { background: #CC6A5A; color: #fff; }
+  .moon { background: #E2B5A5; color: #5A4032; }
+  .energy { background: #335953; color: #fff; }
+  .calm { background: #EAD5C8; color: #5A4032; }
+  .fire { background: #B44C3B; color: #fff; }
 
-    /* MODAL */
-    #breathModal {
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 75vh;
-      background: var(--bege);
-      transition: background 0.6s ease;
-    }
+  /* MODAL */
+  #breathModal {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 100px); /* ✅ centraliza abaixo do header */
+    background: var(--bege);
+    transition: background 0.6s ease;
+  }
 
-    #breathCircle {
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      background: var(--terracota);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      font-size: 3em;
-      font-weight: 700;
-      box-shadow: 0 0 25px rgba(204, 106, 90, 0.25);
-    }
+  #breathCircle {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: var(--terracota);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 3em;
+    font-weight: 700;
+    box-shadow: 0 0 25px rgba(204, 106, 90, 0.25);
+    margin-bottom: 15px;
+  }
 
-    #faseLabel {
-      margin-top: 10px;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3em;
-      color: #5A4032;
-      font-style: italic;
-      transition: opacity 0.5s;
-    }
+  #faseLabel {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3em;
+    color: #5A4032;
+    font-style: italic;
+    transition: opacity 0.5s;
+  }
 
-    #countdown {
-      font-size: 1.3em;
-      margin-top: 10px;
-      color: var(--verde);
-      display: none;
-    }
+  #countdown {
+    font-size: 1.2em;
+    margin-top: 8px;
+    color: var(--verde);
+    display: none;
+  }
 
-    .btn {
-      width: 85%;
-      max-width: 320px;
-      border: none;
-      border-radius: 25px;
-      padding: 12px 18px;
-      font-size: 1.05em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin: 10px auto;
-    }
+  .btn {
+    width: 85%;
+    max-width: 320px;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 18px;
+    font-size: 1.05em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 10px auto;
+  }
 
-    #btnClose {
-      background: var(--verde);
-      color: #fff;
-      display: none;
-    }
+  #btnClose {
+    background: var(--verde);
+    color: #fff;
+    display: none;
+  }
 
-    footer {
-      margin-top: 35px;
-      color: #A87E72;
-      font-size: 0.9em;
-    }
-  </style>
+  footer {
+    margin-top: 35px;
+    color: #A87E72;
+    font-size: 0.9em;
+  }
+</style>
 </head>
 <body>
   <h1>Respiração FemFlow</h1>
