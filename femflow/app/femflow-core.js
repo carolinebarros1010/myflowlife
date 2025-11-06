@@ -24,8 +24,7 @@ const FEMFLOW = {
     initTreino() {
     console.log("💫 FemFlow Core v2.2 conectado com sucesso");
 
-    this.carregarLogoContextual();
-    this.criarModalPSE();
+ this.criarModalPSE();
     this.autoCiclo();
 
     // não injeta em páginas públicas
