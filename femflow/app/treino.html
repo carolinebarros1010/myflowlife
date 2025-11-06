@@ -9,11 +9,6 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/treino.css" />
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-
-  <!-- Firebase (compat) — precisa vir ANTES do femflow-core.js -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
   <style>
     :root{ --teal:#335953; --terracota:#cc6a5a; } /* garante as vars aqui também */
 
@@ -91,7 +86,9 @@
     <button id="salvarTreinoBtn">💾 Salvar treino</button>
     <button id="descansoBtn" class="secundario">🌿 Descanso</button>
   </div>
-
+<!-- Firebase compat (antes do femflow-core.js) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <!-- Core no mesmo nível do arquivo -->
   <script src="./femflow-core.js"></script>
   <!-- Lógica híbrida (Apps Script + Firebase) com timers + links -->
