@@ -90,51 +90,61 @@ inserirHeaderApp() {
   if (/home|login/i.test(page)) return;
 
   const header = document.createElement("div");
-  header.className = "ff-topbar";
-  header.innerHTML = `
-    <a href="https://www.femflow.com.br" target="_blank" rel="noopener">
-      <img src="${this.LOGO}" alt="FemFlow" class="ff-logo">
-    </a>
-    <button class="ff-menu-btn">⋮</button>
-  `;
-  document.body.prepend(header);
+header.className = "ff-topbar";
+header.innerHTML = `
+  <a href="https://www.femflow.com.br" target="_blank" rel="noopener">
+    <img src="${this.LOGO}" alt="FemFlow" class="ff-logo">
+  </a>
+  <button class="ff-menu-btn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+`;
+document.body.prepend(header);
 
-  const style = document.createElement("style");
-  style.textContent = `
-    .ff-topbar {
-      position:fixed;top:0;left:0;width:100%;
-      display:flex;justify-content:space-between;align-items:center;
-      padding:10px 16px;background:rgba(255,255,255,0.9);
-      backdrop-filter:blur(8px);box-shadow:0 1px 6px rgba(0,0,0,0.08);
-      z-index:999;
-    }
-    .ff-logo{width:42px;height:auto;cursor:pointer;}
-    .ff-menu-btn{
-      background:var(--terracota,#cc6a5a);color:#fff;font-size:22px;
-      border:none;border-radius:10px;padding:4px 10px;cursor:pointer;
-      box-shadow:0 2px 6px rgba(0,0,0,0.15);
-    }
-    .ff-menu-modal{
-      display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,0.45);align-items:center;justify-content:center;
-      z-index:1000;
-    }
-    .ff-menu-box{
-      background:#fff;border-radius:20px;padding:22px;text-align:center;
-      width:80%;max-width:320px;box-shadow:0 4px 12px rgba(0,0,0,0.25);
-    }
-    .ff-menu-box h3{
-      color:#335953;font-family:'Playfair Display',serif;margin-bottom:10px;
-    }
-    .ff-menu-box button{
-      display:block;width:100%;margin:8px 0;padding:10px;border:none;
-      border-radius:12px;font-family:"Lato",sans-serif;font-weight:600;
-      cursor:pointer;background:var(--bege,#f9f3ef);color:var(--terracota,#cc6a5a);
-      transition:all .3s;
-    }
-    .ff-menu-box button:hover{background:var(--terracota,#cc6a5a);color:#fff;}
-  `;
-  document.head.appendChild(style);
+const style = document.createElement("style");
+style.textContent = `
+  .ff-topbar {
+    position:fixed;top:0;left:0;width:100%;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 16px;background:rgba(255,255,255,0.9);
+    backdrop-filter:blur(8px);box-shadow:0 1px 6px rgba(0,0,0,0.08);
+    z-index:999;
+  }
+  .ff-logo{width:42px;height:auto;cursor:pointer;}
+  /* botão hamburguer */
+  .ff-menu-btn {
+    width:30px;height:22px;
+    display:flex;flex-direction:column;justify-content:space-between;
+    background:none;border:none;padding:0;cursor:pointer;
+  }
+  .ff-menu-btn span {
+    display:block;width:100%;height:3px;
+    background:var(--terracota,#cc6a5a);
+    border-radius:3px;transition:all .3s ease;
+  }
+  .ff-menu-btn:hover span { background:#a95647; }
+  /* modal */
+  .ff-menu-modal{
+    display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.45);align-items:center;justify-content:center;
+    z-index:1000;
+  }
+  .ff-menu-box{
+    background:#fff;border-radius:20px;padding:22px;text-align:center;
+    width:80%;max-width:320px;box-shadow:0 4px 12px rgba(0,0,0,0.25);
+  }
+  .ff-menu-box h3{
+    color:#335953;font-family:'Playfair Display',serif;margin-bottom:10px;
+  }
+  .ff-menu-box button{
+    display:block;width:100%;margin:8px 0;padding:10px;border:none;
+    border-radius:12px;font-family:"Lato",sans-serif;font-weight:600;
+    cursor:pointer;background:var(--bege,#f9f3ef);color:var(--terracota,#cc6a5a);
+    transition:all .3s;
+  }
+  .ff-menu-box button:hover{background:var(--terracota,#cc6a5a);color:#fff;}
+`;
+document.head.appendChild(style);
 
   FEMFLOW.criarMenuModal(page);
 },
