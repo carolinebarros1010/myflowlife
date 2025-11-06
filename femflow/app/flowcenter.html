@@ -143,21 +143,30 @@
 </defs>
 
 <!-- Rótulos: centralizados no arco com startOffset=50% -->
-<!-- ✅ textos curvados espelhados corretamente -->
-<g transform="translate(0,300) scale(1,-1)">
-  <text id="lbl-menstrual" font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a" text-anchor="middle">
-    <textPath href="#text-menstrual" startOffset="50%">Menstrual</textPath>
-  </text>
-  <text id="lbl-follicular" font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a" text-anchor="middle">
-    <textPath href="#text-follicular" startOffset="50%">Folicular</textPath>
-  </text>
-  <text id="lbl-ovulatory" font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a" text-anchor="middle">
-    <textPath href="#text-ovulatory" startOffset="50%">Ovulatória</textPath>
-  </text>
-  <text id="lbl-luteal" font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a" text-anchor="middle">
-    <textPath href="#text-luteal" startOffset="50%">Lútea</textPath>
-  </text>
-</g>
+<!-- textos curvados, mantendo posição e curvatura, mas girados para ficarem de pé -->
+<text id="lbl-menstrual" font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a" text-anchor="middle">
+  <textPath href="#text-menstrual" startOffset="50%">
+    <tspan transform="rotate(180,150,150)">Menstrual</tspan>
+  </textPath>
+</text>
+
+<text id="lbl-follicular" font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a" text-anchor="middle">
+  <textPath href="#text-follicular" startOffset="50%">
+    <tspan transform="rotate(180,150,150)">Folicular</tspan>
+  </textPath>
+</text>
+
+<text id="lbl-ovulatory" font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a" text-anchor="middle">
+  <textPath href="#text-ovulatory" startOffset="50%">
+    <tspan transform="rotate(180,150,150)">Ovulatória</tspan>
+  </textPath>
+</text>
+
+<text id="lbl-luteal" font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a" text-anchor="middle">
+  <textPath href="#text-luteal" startOffset="50%">
+    <tspan transform="rotate(180,150,150)">Lútea</tspan>
+  </textPath>
+</text>
 
     <!-- Texto central -->
     <text id="centerPhase" x="150" y="152" text-anchor="middle"
