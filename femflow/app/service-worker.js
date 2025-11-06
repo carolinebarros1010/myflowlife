@@ -61,8 +61,11 @@ self.addEventListener("fetch", (event) => {
 
       return fetch(event.request)
         .then((networkResponse) => {
-          const clone = networkResponse.clone();
-          caches.open("femflow-cache-v1").then((cache) => cache.put(event.request, clone));
+          // 👇 clone antes de qualquer leitura
+          const responseClone = networkResponse.clone();
+          caches.open("femflow-cache-v1").then((cache) => {
+            cache.put(event.request, responseClone);
+          });
           return networkResponse;
         })
         .catch(() => caches.match("/offline.html"));
