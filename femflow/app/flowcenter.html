@@ -159,16 +159,26 @@
   <textPath href="#text-luteal" startOffset="50%">Lútea</textPath>
 </text>
 
-<!-- 🔶 Círculo central com borda da cor do fundo, margeando perfeitamente -->
+<!-- 🔶 círculo central com borda bege margeando, sem empurrar textos -->
+<!-- Borda bege -->
+<circle
+  cx="150"
+  cy="150"
+  r="67"                <!-- ligeiramente maior que o centro -->
+  fill="none"
+  stroke="#fff5ef"      <!-- cor do fundo -->
+  stroke-width="4"
+/>
+
+<!-- Núcleo terracota -->
 <circle
   cx="150"
   cy="150"
   r="65"
   fill="#cc6a5a"
-  stroke="#fff5ef"   <!-- cor de fundo -->
-  stroke-width="4"
 />
 
+<!-- Texto central -->
 <text
   id="centerPhase"
   x="150"
