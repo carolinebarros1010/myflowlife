@@ -231,24 +231,19 @@ _bindMenuAcoes(page, modal) {
       window.open("https://www.myflowlife.com.br/#planos", "_blank")
     );
 
-    modal.querySelector("#btnCancelarPlano")?.addEventListener("click", () => {
-      const c = document.createElement("div");
-      c.className = "ff-menu-modal";
-      c.innerHTML = `
-        <div class="ff-menu-box">
-          <p>Tem certeza que deseja cancelar o plano?</p>
-          <button id="sim">Sim</button>
-          <button id="nao">Não</button>
-        </div>`;
-      document.body.appendChild(c);
-      c.style.display = "flex";
-      c.querySelector("#nao").onclick = () => c.remove();
-      c.querySelector("#sim").onclick = () => {
-        c.remove();
-        FEMFLOW.toast("❌ Plano cancelado");
-        setTimeout(() => FEMFLOW.router("home"), 800);
-      };
-    });
+   modal.querySelector("#btnLangToggle")?.addEventListener("click", () => {
+  const newLang = localStorage.getItem("femflow_lang") === "en" ? "pt" : "en";
+  localStorage.setItem("femflow_lang", newLang);
+
+  FEMFLOW.toast(
+    newLang === "pt" ? "🌸 Idioma: Português" : "🌸 Language: English"
+  );
+
+  modal.style.display = "none";
+
+  // 🔄 dispara evento global de troca de idioma
+  window.dispatchEvent(new Event("femflow:langchange"));
+});
 
     modal.querySelector("#btnVoltarInicio")?.addEventListener("click", () => FEMFLOW.router("home"));
   }
