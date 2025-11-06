@@ -123,23 +123,25 @@ svg {
     <h3 id="t_hormonalPhase">Fase hormonal</h3>
     <p id="t_hormonalHint" class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
 
-   <div class="circle-wrap">
+  <div class="circle-wrap">
   <svg viewBox="0 0 300 300">
+    <!-- Base -->
     <circle cx="150" cy="150" r="110" fill="none" stroke="#f3e0d9" stroke-width="26"/>
+    <!-- Progresso -->
     <circle id="progressArc" cx="150" cy="150" r="110"
       fill="none" stroke="#cc6a5a" stroke-width="26"
       stroke-linecap="round" stroke-dasharray="0 690"/>
+    <!-- Núcleo interno -->
     <circle cx="150" cy="150" r="70" fill="#f8ece7" stroke="#efd0c7" stroke-width="1"/>
-    <text id="centerPhase" x="150" y="145" text-anchor="middle"
-          font-family="Playfair Display,serif" font-size="18" font-weight="700" fill="#cc6a5a">—</text>
-    <text id="centerDay" x="150" y="170" text-anchor="middle"
-          font-family="Lato,sans-serif" font-size="13" fill="#7a6c66">—</text>
+    <!-- Fase atual (fixa) -->
+    <text id="centerPhase" x="150" y="155" text-anchor="middle"
+          font-family="Playfair Display,serif" font-size="20" font-weight="700" fill="#cc6a5a">—</text>
   </svg>
 
-  <div class="phase-label p-menstrual" id="lblMenstrual">Menstrual</div>
+  <div class="phase-label p-menstrual"  id="lblMenstrual">Menstrual</div>
   <div class="phase-label p-follicular" id="lblFollicular">Folicular</div>
-  <div class="phase-label p-ovulatory" id="lblOvulatory">Ovulatória</div>
-  <div class="phase-label p-luteal" id="lblLuteal">Lútea</div>
+  <div class="phase-label p-ovulatory"  id="lblOvulatory">Ovulatória</div>
+  <div class="phase-label p-luteal"     id="lblLuteal">Lútea</div>
 </div>
 
 <select id="cycleSelect">
