@@ -168,8 +168,25 @@
       const auth = localStorage.getItem('femflow_auth') === 'yes';
       if(!id || !auth) return;
       const ret = new URLSearchParams(location.search).get('ret');
-      if(ret){ location.href = ret; return; }
-      location.href = 'home.html';
+      if(ret){ location.href = ret; return; };
+   // Após login bem-sucedido:
+if (data.status === "ok" || data.status === "created") {
+  localStorage.setItem("femflow_id", data.id);
+  localStorage.setItem("femflow_email", data.email);
+  localStorage.setItem("femflow_auth", "yes");
+
+  // Verifica se já tem ciclo configurado
+  const cicloOK =
+    localStorage.getItem("femflow_cycle_configured") === "yes" &&
+    localStorage.getItem("femflow_startDate") &&
+    localStorage.getItem("femflow_cycleLength");
+
+  if (cicloOK) {
+    location.href = "home.html";
+  } else {
+    location.href = "ciclo.html";
+  }
+}
     })();
 
     function ensureEndpoint(){ 
