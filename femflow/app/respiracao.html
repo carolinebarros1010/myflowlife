@@ -185,73 +185,69 @@ function encerrar() {
 }
 </script>
 
-  <script>
-    let cicloAtivo = false;
-    let faseTimer, timerTotal;
+ <script>
+  let cicloAtivo = false;
+  let faseTimer, timerTotal;
 
-    const circle = document.getElementById('breathCircle');
-    const label = document.getElementById('faseLabel');
-    const modal = document.getElementById('breathModal');
-    const countdown = document.getElementById('countdown');
-    const btnClose = document.getElementById('btnClose');
+  const circle = document.getElementById('breathCircle');
+  const label = document.getElementById('faseLabel');
+  const modal = document.getElementById('breathModal');
+  const countdown = document.getElementById('countdown');
+  const btnClose = document.getElementById('btnClose');
 
-    const protocolos = {
-      box:    { nome: "Box Breathing", fases: [4,4,4,4], cor: "#CC6A5A", vibra: [100,400] },
-      moon:   { nome: "Moon Flow", fases: [5,7,8,0], cor: "#E2B5A5", vibra: [100,500] },
-      energy: { nome: "Energy Flow", fases: [3,2,3,2], cor: "#335953", vibra: [80,300] },
-      calm:   { nome: "Calm Focus", fases: [6,2,6,2], cor: "#D9BBAA", vibra: [100,300] },
-      fire:   { nome: "Fire Flow", fases: [2,1,4,1], cor: "#B44C3B", vibra: [120,500] },
+  const protocolos = {
+    box:    { nome: "Box Breathing", fases: [4,4,4,4], cor: "#CC6A5A", vibra: [100,400] },
+    moon:   { nome: "Moon Flow", fases: [5,7,8,0], cor: "#E2B5A5", vibra: [100,500] },
+    energy: { nome: "Energy Flow", fases: [3,2,3,2], cor: "#335953", vibra: [80,300] },
+    calm:   { nome: "Calm Focus", fases: [6,2,6,2], cor: "#D9BBAA", vibra: [100,300] },
+    fire:   { nome: "Fire Flow", fases: [2,1,4,1], cor: "#B44C3B", vibra: [120,500] },
+  };
+
+  // 🔹 só inicia após DOM carregado
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("🌸 FemFlow Respiração pronto");
+
+    window.iniciarProtocolo = async function(tipo) {
+      if (cicloAtivo) return;
+      const protocolo = protocolos[tipo];
+      if (!protocolo) return;
+
+      cicloAtivo = true;
+      document.querySelectorAll('.btn-protocolo').forEach(b => b.style.display = 'none');
+      modal.style.display = 'flex';
+      modal.style.background = protocolo.cor + "20";
+      btnClose.style.display = "inline-block";
+
+      if ("vibrate" in navigator) navigator.vibrate([200,100,200]);
+
+      await contagemInicial();
+      await new Promise(res => setTimeout(res, 200));
+
+      const inicio = Date.now();
+      iniciarContadorTotal(inicio);
+
+      const nomes = ["Inspire", "Segure", "Expire", "Segure"];
+      let faseIndex = 0;
+
+      async function ciclo() {
+        const duracao = protocolo.fases[faseIndex];
+        if (duracao === 0) { faseIndex = (faseIndex + 1) % 4; return ciclo(); }
+
+        const nome = nomes[faseIndex];
+        label.textContent = `${nome} / ${["Inhale","Hold","Exhale","Hold"][faseIndex]}`;
+        label.style.fontStyle = "italic";
+        circle.style.background = protocolo.cor;
+
+        if (faseIndex === 0 && "vibrate" in navigator) navigator.vibrate(protocolo.vibra[0]);
+        if (faseIndex === 2 && "vibrate" in navigator) navigator.vibrate(protocolo.vibra[1]);
+
+        await animarContagem(duracao, faseIndex);
+        faseIndex = (faseIndex + 1) % 4;
+        if (cicloAtivo) ciclo();
+      }
+
+      ciclo();
     };
-
-   document.addEventListener("DOMContentLoaded", () => {
-     async function iniciarProtocolo(tipo) {
-  if (cicloAtivo) return;
-  const protocolo = protocolos[tipo];
-  if (!protocolo) return;
-
-  cicloAtivo = true;
-  document.querySelectorAll('.btn-protocolo').forEach(b => b.style.display = 'none');
-  modal.style.display = 'flex';
-  modal.style.background = protocolo.cor + "20";
-  btnClose.style.display = "inline-block";
-
-  // vibração inicial
-  if ("vibrate" in navigator) navigator.vibrate([200,100,200]);
-
-  // contagem regressiva de 5 segundos
-  await contagemInicial();
-
-  // 🩷 pequena pausa para evitar conflito entre vibração e timer
-  await new Promise(res => setTimeout(res, 200));
-
-  // inicia o cronômetro total (5 minutos)
-  const inicio = Date.now();
-  iniciarContadorTotal(inicio);
-
-  const nomes = ["Inspire", "Segure", "Expire", "Segure"];
-  let faseIndex = 0;
-});
-  async function ciclo() {
-    const duracao = protocolo.fases[faseIndex];
-    if (duracao === 0) { faseIndex = (faseIndex + 1) % 4; return ciclo(); }
-
-    const nome = nomes[faseIndex];
-    label.textContent = `${nome} / *${["Inhale","Hold","Exhale","Hold"][faseIndex]}*`;
-    label.style.fontStyle = "italic";
-    circle.style.background = protocolo.cor;
-
-    // vibra no início e expiração, se disponível
-    if (faseIndex === 0 && "vibrate" in navigator) navigator.vibrate(protocolo.vibra[0]);
-    if (faseIndex === 2 && "vibrate" in navigator) navigator.vibrate(protocolo.vibra[1]);
-
-    await animarContagem(duracao, faseIndex);
-    faseIndex = (faseIndex + 1) % 4;
-    if (cicloAtivo) ciclo();
-  }
-
-  // inicia o ciclo respiratório
-  ciclo();
-}
 
     async function contagemInicial() {
       for (let i = 5; i >= 1; i--) {
@@ -302,6 +298,7 @@ function encerrar() {
     function esperar(ms) {
       return new Promise(res => setTimeout(res, ms));
     }
-  </script>
+  });
+</script>
 </body>
 </html>
