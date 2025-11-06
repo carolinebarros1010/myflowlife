@@ -120,23 +120,23 @@
       <path id="arc-luteal" d="M150,150 L30,150 A120,120 0 0,1 150,30 Z" fill="#f6d7cc"></path>
 
       <!-- Caminhos para textos -->
-      <path id="path-menstrual" d="M180,60 A100,100 0 0,1 240,120" fill="none" />
-      <path id="path-follicular" d="M240,180 A100,100 0 0,1 180,240" fill="none" />
-      <path id="path-ovulatory" d="M60,240 A100,100 0 0,1 120,180" fill="none" />
-      <path id="path-luteal" d="M60,120 A100,100 0 0,1 120,60" fill="none" />
+      <path id="path-menstrual" d="M185,60 A100,100 0 0,1 240,120" fill="none" />
+      <path id="path-follicular" d="M240,180 A100,100 0 0,1 185,240" fill="none" />
+      <path id="path-ovulatory" d="M115,240 A100,100 0 0,1 60,180" fill="none" />
+      <path id="path-luteal" d="M60,120 A100,100 0 0,1 115,60" fill="none" />
 
-      <!-- Textos curvados bilíngues -->
+      <!-- Textos curvados (PT apenas) -->
       <text font-family="Playfair Display" font-size="12" font-weight="700">
-        <textPath href="#path-menstrual" startOffset="0%" fill="#cc6a5a">Menstrual / Menstrual</textPath>
+        <textPath href="#path-menstrual" startOffset="0%" fill="#cc6a5a">Menstrual</textPath>
       </text>
       <text font-family="Playfair Display" font-size="12" font-weight="700">
-        <textPath href="#path-follicular" startOffset="0%" fill="#cc6a5a">Folicular / Follicular</textPath>
+        <textPath href="#path-follicular" startOffset="0%" fill="#cc6a5a">Folicular</textPath>
       </text>
       <text font-family="Playfair Display" font-size="12" font-weight="700">
-        <textPath href="#path-ovulatory" startOffset="0%" fill="#cc6a5a">Ovulatória / Ovulatory</textPath>
+        <textPath href="#path-ovulatory" startOffset="0%" fill="#cc6a5a">Ovulatória</textPath>
       </text>
       <text font-family="Playfair Display" font-size="12" font-weight="700">
-        <textPath href="#path-luteal" startOffset="0%" fill="#cc6a5a">Lútea / Luteal</textPath>
+        <textPath href="#path-luteal" startOffset="0%" fill="#cc6a5a">Lútea</textPath>
       </text>
 
       <!-- Centro -->
@@ -179,17 +179,18 @@
         luteal: ['Lútea', 'Luteal']
       };
 
-      // Zera e destaca fatia ativa
+      // Resetar fatias
       document.querySelectorAll('[id^="arc-"]').forEach(el => {
         el.setAttribute('fill', '#f6d7cc');
         el.classList.remove('active-glow');
       });
 
+      // Ativar a fase correta
       const ativa = document.getElementById('arc-' + fase);
       ativa.setAttribute('fill', '#cc6a5a');
       ativa.classList.add('active-glow');
 
-      // Atualiza textos
+      // Atualizar textos centrais
       document.getElementById('centerPhase').textContent = nomes[fase][0];
       document.getElementById('t_current').textContent = `Fase atual: ${nomes[fase][0]}`;
       document.getElementById('t_current_en').textContent = `Current phase: ${nomes[fase][1]}`;
@@ -201,3 +202,4 @@
   </script>
 </body>
 </html>
+
