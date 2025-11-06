@@ -11,7 +11,7 @@ const FEMFLOW = {
     "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec",
 
   /* ----------- 🎨 LOGO PADRÃO (ATUALIZADO) ------------ */
-  LOGO: "./assets/logofemflowterracotasf.png",
+  LOGO: "./assets/logofemflowterracota.png",
 
   /* ----------- 🔎 PÁGINAS PÚBLICAS (não injetar UI) --- */
   _isPublicPage(){
@@ -20,20 +20,21 @@ const FEMFLOW = {
   },
 
   /* ----------- ⚙️ INICIALIZAÇÃO GERAL ------------ */
-  initTreino() {
-    console.log("💫 FemFlow Core v2.2 conectado com sucesso");
+initTreino() {
+  console.log("💫 FemFlow Core v2.2 conectado com sucesso");
 
-    // seguro em qualquer tela
-    this.carregarLogoContextual();
-    this.criarModalPSE();
-    this.autoCiclo();
+  // seguro em qualquer tela
+  this.carregarLogoContextual();
+  this.criarModalPSE();
+  this.autoCiclo();
 
-    // NÃO injeta UI nas páginas públicas
-    if (!this._isPublicPage()) {
-      this.inserirLogo();
-      this.inserirBotaoVoltar();
-    }
-  },
+  // opção para cada pagina colar (window.FEMFLOW_DISABLE_UI = true; entre script) //
+ if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
+  this.inserirLogo();
+  this.inserirBotaoVoltar();
+}
+
+},
 
   /* =======================================================
      🔹 1. LOGIN / CADASTRO
