@@ -99,7 +99,9 @@
 
   <!-- Core primeiro -->
   <script src="./femflow-core.js"></script>
-
+<script>
+  window.FEMFLOW_DISABLE_UI = true;
+</script>
   <script>
     // Endpoint: Core -> localStorage -> (sem fallback; mostra aviso)
     const scriptURL = (FEMFLOW && FEMFLOW.SCRIPT_URL) || localStorage.getItem('femflow_script') || null;
