@@ -162,7 +162,70 @@
     <text id="centerPhase" x="150" y="152" text-anchor="middle"
           font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff">—</text>
   </svg>
-</div>
+</div><body>
+  <h1>FemFlow</h1>
+  <h3>Fase Hormonal</h3>
+  <p class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
+
+  <div class="phase-svg">
+    <svg viewBox="0 0 300 300" width="260" height="260">
+      <!-- Fundo bege -->
+      <circle cx="150" cy="150" r="120" fill="#fff5ef"></circle>
+
+      <!-- Fatias -->
+      <g stroke="#fff5ef" stroke-width="3">
+        <path id="seg-menstrual"  d="M150,150 L150,30 A120,120 0 0,1 270,150 Z" fill="#f9e0d8"></path>
+        <path id="seg-follicular" d="M150,150 L270,150 A120,120 0 0,1 150,270 Z" fill="#f9e0d8"></path>
+        <path id="seg-ovulatory"  d="M150,150 L150,270 A120,120 0 0,1 30,150 Z" fill="#f9e0d8"></path>
+        <path id="seg-luteal"     d="M150,150 L30,150 A120,120 0 0,1 150,30 Z" fill="#f9e0d8"></path>
+      </g>
+
+      <!-- 🔸 Anel separador e centro -->
+      <!-- Borda bege margeando o centro -->
+      <circle cx="150" cy="150" r="68" fill="none" stroke="#fff5ef" stroke-width="4"></circle>
+
+      <!-- Centro terracota -->
+      <circle cx="150" cy="150" r="64" fill="#cc6a5a"></circle>
+
+      <!-- 🔁 Caminhos de texto: curvatura e posição corrigidas -->
+      <defs>
+        <!-- Menstrual 45° -->
+        <path id="text-menstrual"
+              d="M190,60 A112,112 0 0,1 260,130" fill="none" />
+        <!-- Folicular 135° -->
+        <path id="text-follicular"
+              d="M130,40 A112,112 0 0,1 40,130" fill="none" />
+        <!-- Ovulatória 225° -->
+        <path id="text-ovulatory"
+              d="M110,260 A112,112 0 0,1 40,170" fill="none" />
+        <!-- Lútea 315° -->
+        <path id="text-luteal"
+              d="M260,170 A112,112 0 0,1 170,260" fill="none" />
+      </defs>
+
+      <!-- Textos curvados -->
+      <text id="lbl-menstrual" font-family="Playfair Display" font-size="13"
+            font-weight="700" fill="#cc6a5a" text-anchor="middle">
+        <textPath href="#text-menstrual" startOffset="50%">Menstrual</textPath>
+      </text>
+      <text id="lbl-follicular" font-family="Playfair Display" font-size="13"
+            font-weight="700" fill="#cc6a5a" text-anchor="middle">
+        <textPath href="#text-follicular" startOffset="50%">Folicular</textPath>
+      </text>
+      <text id="lbl-ovulatory" font-family="Playfair Display" font-size="13"
+            font-weight="700" fill="#cc6a5a" text-anchor="middle">
+        <textPath href="#text-ovulatory" startOffset="50%">Ovulatória</textPath>
+      </text>
+      <text id="lbl-luteal" font-family="Playfair Display" font-size="13"
+            font-weight="700" fill="#cc6a5a" text-anchor="middle">
+        <textPath href="#text-luteal" startOffset="50%">Lútea</textPath>
+      </text>
+
+      <!-- Texto central -->
+      <text id="centerPhase" x="150" y="155" text-anchor="middle"
+            font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff">—</text>
+    </svg>
+  </div>
   
   <div class="current-phase" id="t_current">Fase atual: —</div>
   <div class="dual-lang" id="t_current_en">Current phase: —</div>
