@@ -91,197 +91,153 @@
     <p id="t_hormonalHint" class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
 
     <div class="circle-wrap">
-      <svg viewBox="0 0 300 300">
-        <circle cx="150" cy="150" r="110" fill="none" stroke="#f3e0d9" stroke-width="22"/>
-        <circle id="progressArc" cx="150" cy="150" r="110"
-          fill="none" stroke="#cc6a5a" stroke-width="22"
-          stroke-linecap="round" stroke-dasharray="0 690"/>
-        <circle cx="150" cy="150" r="70" fill="#f8ece7" stroke="#efd0c7" stroke-width="1"/>
-        <text id="centerPhase" x="150" y="140" text-anchor="middle"
-              font-family="Playfair Display,serif" font-size="18" font-weight="700" fill="#cc6a5a">—</text>
-        <text id="centerDay" x="150" y="165" text-anchor="middle"
-              font-family="Lato,sans-serif" font-size="13" fill="#7a6c66">—</text>
-      </svg>
-      <div class="phase-label p-follicular" id="lblFollicular">Folicular</div>
-      <div class="phase-label p-ovulatory" id="lblOvulatory">Ovulatória</div>
-      <div class="phase-label p-luteal" id="lblLuteal">Lútea</div>
-      <div class="phase-label p-menstrual" id="lblMenstrual">Menstrual</div>
-    </div>
+  <svg viewBox="0 0 300 300">
+    <!-- Fundo -->
+    <circle cx="150" cy="150" r="110" fill="none" stroke="#f3e0d9" stroke-width="28"/>
+    <!-- Progresso -->
+    <circle id="progressArc" cx="150" cy="150" r="110"
+      fill="none" stroke="#cc6a5a" stroke-width="28"
+      stroke-linecap="round" stroke-dasharray="0 690"/>
+    <!-- Núcleo -->
+    <circle cx="150" cy="150" r="70" fill="#f8ece7" stroke="#efd0c7" stroke-width="2"/>
+    <!-- Texto central -->
+    <text id="centerPhase" x="150" y="140" text-anchor="middle"
+          font-family="Playfair Display,serif" font-size="18" font-weight="700" fill="#cc6a5a">—</text>
+    <text id="centerDay" x="150" y="165" text-anchor="middle"
+          font-family="Lato,sans-serif" font-size="13" fill="#7a6c66">—</text>
+  </svg>
 
-    <p class="current-phase" id="t_current">Fase atual: —</p>
-    <p class="current-hint" id="t_hint"><i>—</i></p>
+  <!-- Rótulos reposicionados -->
+  <div class="phase-label p-menstrual"  id="lblMenstrual"  style="top:5%; right:18%;">Menstrual</div>
+  <div class="phase-label p-follicular" id="lblFollicular" style="bottom:12%; right:18%;">Folicular</div>
+  <div class="phase-label p-ovulatory"  id="lblOvulatory"  style="bottom:12%; left:18%;">Ovulatória</div>
+  <div class="phase-label p-luteal"     id="lblLuteal"     style="top:5%; left:18%;">Lútea</div>
+</div>
 
-    <select id="cycleSelect">
-      <option value="28">28 dias</option>
-      <option value="29">29 dias</option>
-      <option value="30">30 dias</option>
-      <option value="31">31 dias</option>
-      <option value="32">32 dias</option>
-      <option value="33">33 dias</option>
-      <option value="34">34 dias</option>
-      <option value="35">35 dias</option>
-    </select>
-  </div>
+<select id="cycleSelect">
+  <option value="25">25 dias</option>
+  <option value="26">26 dias</option>
+  <option value="27">27 dias</option>
+  <option value="28" selected>28 dias</option>
+  <option value="29">29 dias</option>
+  <option value="30">30 dias</option>
+  <option value="31">31 dias</option>
+  <option value="32">32 dias</option>
+  <option value="33">33 dias</option>
+  <option value="34">34 dias</option>
+  <option value="35">35 dias</option>
+  <option value="irregular">Irregular</option>
+  <option value="diu">DIU</option>
+  <option value="menopausa">Menopausa</option>
+</select>
 
   <div class="toolbar">
     <button class="tool" id="toBreath">💨 Respiração / <i>Breath</i></button>
     <button class="tool" id="toTrain">🏃 Treino / <i>Training</i></button>
   </div>
-
-  <button class="cta" id="startBtn">Iniciar ciclo de 5 minutos / <i>Start 5-min cycle</i></button>
-
   <script>
-    /* -------- I18N texts -------- */
-    const T = {
-      pt:{phases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"},
-          hint:{menstrual:"Recuperação e introspecção",follicular:"Crescimento e energia crescente",
-                 ovulatory:"Pico de fertilidade e confiança",luteal:"Regulação emocional e aterramento"},
-          current:"Fase atual"},
-      en:{phases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"},
-          hint:{menstrual:"Recovery and introspection",follicular:"Growth and rising energy",
-                 ovulatory:"Peak fertility and confidence",luteal:"Emotional regulation and grounding"},
-          current:"Current phase"}
-    };
-    let LANG = localStorage.getItem("femflow_lang")||"pt";
-    const $=s=>document.querySelector(s);
+/* -------- I18N texts -------- */
+const T = {
+  pt:{phases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"},
+      hint:{menstrual:"Recuperação e introspecção",follicular:"Crescimento e energia crescente",
+             ovulatory:"Pico de fertilidade e confiança",luteal:"Regulação emocional e aterramento"},
+      current:"Fase atual"},
+  en:{phases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"},
+      hint:{menstrual:"Recovery and introspection",follicular:"Growth and rising energy",
+             ovulatory:"Peak fertility and confidence",luteal:"Emotional regulation and grounding"},
+      current:"Current phase"}
+};
+let LANG = localStorage.getItem("femflow_lang")||"pt";
+const $=s=>document.querySelector(s);
 
-    function applyLang(){
-      document.getElementById("btnPT").classList.toggle("active",LANG==="pt");
-      document.getElementById("btnEN").classList.toggle("active",LANG==="en");
-      const l=LANG==="pt"?T.pt:T.en;
-      $("#lblMenstrual").innerHTML=l.phases.menstrual;
-      $("#lblFollicular").innerHTML=l.phases.follicular;
-      $("#lblOvulatory").innerHTML=l.phases.ovulatory;
-      $("#lblLuteal").innerHTML=l.phases.luteal;
-      renderPhaseUI();
-    }
-    $("#btnPT").onclick=()=>{LANG="pt";localStorage.setItem("femflow_lang","pt");applyLang()};
-    $("#btnEN").onclick=()=>{LANG="en";localStorage.setItem("femflow_lang","en");applyLang()};
-
-    /* -------- Progress engine -------- */
-    let ciclo_duracao=parseInt(localStorage.getItem("femflow_cycleLength"))||28;
-    let startDate=new Date(localStorage.getItem("femflow_startDate")||new Date());
-    localStorage.setItem("femflow_startDate",startDate.toISOString());
-    const circumference=2*Math.PI*110;
-
-    function calcDia(){
-      const diff=Math.floor((new Date()-new Date(startDate))/(1000*60*60*24));
-      return (diff%ciclo_duracao)+1;
-    }
-
-    let diaCiclo=calcDia();
-    $("#cycleSelect").value=ciclo_duracao;
-    $("#cycleSelect").addEventListener("change",e=>{
-      ciclo_duracao=parseInt(e.target.value);
-      localStorage.setItem("femflow_cycleLength",ciclo_duracao);
-      renderAll();
-    });
-
-    function phaseFromDay(d){
-      if(d<=5) return"menstrual";
-      if(d<=13)return"follicular";
-      if(d<=17)return"ovulatory";
-      return"luteal";
-    }
-
-    function renderArc(){
-      const progress=(diaCiclo/ciclo_duracao);
-      const dash=(circumference*progress).toFixed(1);
-      $("#progressArc").setAttribute("stroke-dasharray",`${dash} ${circumference}`);
-      $("#progressArc").style.transition="stroke-dasharray 2s linear";
-    }
-
-    function renderPhaseUI(){
-      const l=LANG==="pt"?T.pt:T.en;
-      const fase=phaseFromDay(diaCiclo);
-      const nome=l.phases[fase];
-      const dica=l.hint[fase];
-      $("#centerPhase").textContent=nome;
-      $("#centerDay").textContent=`${diaCiclo}/${ciclo_duracao}`;
-      $("#t_current").innerHTML=`${LANG==="pt"?l.current:"<i>"+l.current+"</i>"}: ${nome}`;
-      $("#t_hint").innerHTML=LANG==="pt"?dica:"<i>"+dica+"</i>";
-      ["Menstrual","Follicular","Ovulatory","Luteal"].forEach(k=>{
-        const el=$("#lbl"+k);
-        el.style.color=k.toLowerCase().includes(fase.slice(0,4))?"#cc6a5a":"#7a6c66";
-        el.style.opacity=k.toLowerCase().includes(fase.slice(0,4))?"1":".6";
-      });
-    }
-
-    function renderAll(){diaCiclo=calcDia();renderArc();renderPhaseUI();}
-    applyLang();renderAll();
-
-    // animação automática (progressão diária)
-    setInterval(()=>{renderAll()},1000*60*60); // atualiza a cada hora
-
-    // auto-giro suave
-    let angle=0;
-    setInterval(()=>{
-      angle+=.02;document.querySelector("svg").style.transform=`rotate(${angle-90}deg)`
-    },100);
-
-    // botões
-    $("#toBreath").onclick=()=>location.href="respiracao.html";
-    $("#toTrain").onclick=()=>location.href="treino.html";
-    $("#startBtn").onclick=()=>location.href="respiracao.html";
-  </script>
-<script>
-  (async function(){
-    // já passou login + ciclo no guard do <head>
-    await syncEntitlement();
-    if (!hasEntitlement()) {
-      // Sem direito ativo: manda de volta p/ Home para escolher novo programa
-      location.href = 'home.html';
-      return;
-    }
-
-    // aqui segue normalmente (sua renderização do arco, textos e botões)
-    // ... (seu código atual permanece)
-  })();
-</script>
-<!-- Firebase compat (antes do femflow-core.js) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="./femflow-core.js"></script>
-
-<script>
-async function syncEntitlement() {
-  try {
-    const email = localStorage.getItem('femflow_email') || '';
-    const id    = localStorage.getItem('femflow_id') || '';
-    if (!email && !id) return;
-    if (!window.FEMFLOW?.SCRIPT_URL) return;
-
-    // usa email; se não tiver, cai pro id
-    const q = email ? `email=${encodeURIComponent(email)}` : `id=${encodeURIComponent(id)}`;
-    const url = `${FEMFLOW.SCRIPT_URL}?action=status&${q}`;
-
-    const r = await fetch(url);
-    const j = await r.json();
-
-    if (j?.id) localStorage.setItem('femflow_id', j.id);
-    if (j?.program) localStorage.setItem('femflow_program', j.program);
-    else localStorage.removeItem('femflow_program');
-
-    if (j?.expiryISO) localStorage.setItem('femflow_program_expiry', j.expiryISO);
-    else localStorage.removeItem('femflow_program_expiry');
-
-    if (j?.cycle?.startDate) localStorage.setItem('femflow_startDate', j.cycle.startDate);
-    if (j?.cycle?.length)    localStorage.setItem('femflow_cycleLength', j.cycle.length);
-  } catch(e) {
-    console.warn('syncEntitlement failed', e);
-  }
+function applyLang(){
+  document.getElementById("btnPT").classList.toggle("active",LANG==="pt");
+  document.getElementById("btnEN").classList.toggle("active",LANG==="en");
+  const l=LANG==="pt"?T.pt:T.en;
+  $("#lblMenstrual").innerHTML=l.phases.menstrual;
+  $("#lblFollicular").innerHTML=l.phases.follicular;
+  $("#lblOvulatory").innerHTML=l.phases.ovulatory;
+  $("#lblLuteal").innerHTML=l.phases.luteal;
+  renderPhaseUI();
 }
+$("#btnPT").onclick=()=>{LANG="pt";localStorage.setItem("femflow_lang","pt");applyLang()};
+$("#btnEN").onclick=()=>{LANG="en";localStorage.setItem("femflow_lang","en");applyLang()};
+
+/* -------- Progress engine -------- */
+let ciclo_duracao=parseInt(localStorage.getItem("femflow_cycleLength"))||28;
+let startDate=new Date(localStorage.getItem("femflow_startDate")||new Date());
+localStorage.setItem("femflow_startDate",startDate.toISOString());
+const circumference=2*Math.PI*110;
+
+function calcDia(){
+  const diff=Math.floor((new Date()-new Date(startDate))/(1000*60*60*24));
+  return (diff%ciclo_duracao)+1;
+}
+
+let diaCiclo=calcDia();
+$("#cycleSelect").value=ciclo_duracao;
+$("#cycleSelect").addEventListener("change",e=>{
+  let val = e.target.value;
+  if(["irregular","diu","menopausa"].includes(val)) val = 28;
+  ciclo_duracao=parseInt(val);
+  localStorage.setItem("femflow_cycleLength",ciclo_duracao);
+  renderAll();
+});
+
+function phaseFromDay(d){
+  if(d<=5) return"menstrual";
+  if(d<=13)return"follicular";
+  if(d<=17)return"ovulatory";
+  return"luteal";
+}
+
+function renderArc(){
+  const progress=(diaCiclo/ciclo_duracao);
+  const dash=(circumference*progress).toFixed(1);
+  const fase=phaseFromDay(diaCiclo);
+
+  // 💫 cor do arco conforme a fase
+  const cores={
+    menstrual:"#cc6a5a",
+    follicular:"#eabbaa",
+    ovulatory:"#335953",
+    luteal:"#b47b6b"
+  };
+  $("#progressArc").setAttribute("stroke", cores[fase]);
+  $("#progressArc").setAttribute("stroke-dasharray",`${dash} ${circumference}`);
+  $("#progressArc").style.transition="stroke-dasharray 2s linear, stroke 1s ease";
+}
+
+function renderPhaseUI(){
+  const l=LANG==="pt"?T.pt:T.en;
+  const fase=phaseFromDay(diaCiclo);
+  const nome=l.phases[fase];
+  const dica=l.hint[fase];
+  $("#centerPhase").textContent=nome;
+  $("#centerDay").textContent=`${diaCiclo}/${ciclo_duracao}`;
+  $("#t_current").innerHTML=`${LANG==="pt"?l.current:"<i>"+l.current+"</i>"}: ${nome}`;
+  $("#t_hint").innerHTML=LANG==="pt"?dica:"<i>"+dica+"</i>";
+  ["Menstrual","Follicular","Ovulatory","Luteal"].forEach(k=>{
+    const el=$("#lbl"+k);
+    el.style.color=k.toLowerCase().includes(fase.slice(0,4))?"#cc6a5a":"#7a6c66";
+    el.style.opacity=k.toLowerCase().includes(fase.slice(0,4))?"1":".6";
+  });
+}
+
+function renderAll(){diaCiclo=calcDia();renderArc();renderPhaseUI();}
+applyLang();renderAll();
+
+// 🔄 Atualiza a cada hora (sem girar o SVG)
+setInterval(()=>{renderAll()},1000*60*60);
+document.querySelector("svg").style.transform="rotate(0deg)";
+
+// 🔹 Botões
+$("#toBreath").onclick=()=>location.href="respiracao.html";
+$("#toTrain").onclick=()=>location.href="treino.html";
+$("#startBtn").onclick=()=>location.href="respiracao.html";
 </script>
 
-<script>
-(async function(){
-  await syncEntitlement();
-  if (hasEntitlement()) {
-    // já tem programa ativo → vai direto pro hub
-    location.href = 'flowcenter.html';
-  }
-})();
-</script>
+    
 </body>
 </html>
 
