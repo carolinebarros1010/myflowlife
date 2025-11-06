@@ -182,6 +182,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.warn('Firebase falhou, usando fallback vazio', e);
       raw = [];
     }
+if (!raw.length) {
+  console.warn("⚠️ Nenhum treino encontrado no Firebase — ativando fallback planilha");
+  (j.boxes||[]).forEach(b => {
+    if (b.tipo==='exercicios' || b.tipo==='hiit' || b.tipo==='cardio') {
+      if (Array.isArray(b.itens))
+        b.itens = b.itens.map(ex => ({ ...ex, link: normLink(ex.link||'') }));
+      lista.push(b);
+    }
+  });
+}
 
     // 2) Sugestões do backend (quando faltar dado)
     const sugSeries  = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoSeries ?? 3;
