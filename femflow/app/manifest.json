@@ -13,19 +13,19 @@
   "categories": ["health", "fitness", "education", "lifestyle"],
   "icons": [
     {
-      "src": "/femflow/app/assets/icons/icon-192.png",
+      "src": "./assets/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/webp",
       "purpose": "any maskable"
     },
     {
-      "src": "/femflow/app/assets/icons/icon-512.png",
+      "src": "./assets/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/webp",
       "purpose": "any maskable"
     },
     {
-      "src": "/femflow/app/assets/icons/icon-mono.png",
+      "src": "./assets/icons/icon-mono.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "monochrome"
@@ -33,13 +33,13 @@
   ],
   "screenshots": [
     {
-      "src": "/femflow/app/assets/screenshots/femflow-home.png",
+      "src": "./assets/screenshots/femflow-home.png",
       "sizes": "1080x1920",
       "type": "image/webp",
       "form_factor": "narrow"
     },
     {
-      "src": "/femflow/app/assets/screenshots/femflow-dashboard.png",
+      "src": "./assets/screenshots/femflow-dashboard.png",
       "sizes": "1920x1080",
       "type": "image/webp",
       "form_factor": "wide"
