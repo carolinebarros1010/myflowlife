@@ -123,16 +123,13 @@
      <circle cx="150" cy="150" r="65" fill="none" stroke="#fff5ef" stroke-width="2"></circle>
      <circle cx="150" cy="150" r="63" fill="#cc6a5a"></circle>
 
-<!-- ✅ adicione este bloco antes do texto menstrual -->
-<defs>
-  <path id="curve-menstrual" d="M185,90 A115,115 0 0,1 245,135" fill="none" />
-</defs>
 
-<!-- ✅ e substitua o texto reto por este -->
 <text id="lbl-menstrual"
+      x="215" y="95"
       font-family="Playfair Display" font-size="14" font-weight="700"
-      fill="#cc6a5a" text-anchor="middle">
-  <textPath href="#curve-menstrual" startOffset="50%">Menstrual</textPath>
+      fill="#cc6a5a" text-anchor="middle"
+      transform="rotate(45,215,95)">
+  Menstrual
 </text>
 
 <text id="lbl-follicular"
