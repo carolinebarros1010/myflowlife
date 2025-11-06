@@ -161,6 +161,7 @@ _getMenuHTML(page) {
     case "evolucao.html":
       items = `
         <h3>Menu</h3>
+        <button id="btnLangToggle">🌐 Idioma / Language</button>
         <button id="btnPersonalizar">🎯 Personalizar treino</button>
         <button id="btnCancelarPlano">❌ Cancelar plano</button>
         <button id="btnVoltarInicio">🏠 Voltar</button>
@@ -177,6 +178,7 @@ _getMenuHTML(page) {
     case "respiracao.html":
       items = `
         <h3>Menu</h3>
+        <button id="btnLangToggle">🌐 Idioma / Language</button>
         <button id="btnCancelar">🛑 Cancelar</button>
         <button id="btnVoltarFlow">🏠 Voltar ao Flow Center</button>
         <button id="btnPlano">💳 Adquirir plano</button>
@@ -214,6 +216,14 @@ _bindMenuAcoes(page, modal) {
       };
     };
     modal.querySelector("#btnVoltarInicio").onclick = () => FEMFLOW.router("home");
+    // 🔄 alterna idioma global
+modal.querySelector("#btnLangToggle")?.addEventListener("click", () => {
+  const lang = localStorage.getItem("femflow_lang") === "en" ? "pt" : "en";
+  localStorage.setItem("femflow_lang", lang);
+  FEMFLOW.toast(lang === "pt" ? "🌸 Idioma: Português" : "🌸 Language: English");
+  modal.style.display = "none";
+  location.reload();
+});
   }
 
   // Treino
@@ -231,6 +241,15 @@ _bindMenuAcoes(page, modal) {
     modal.querySelector("#btnCancelar").onclick = () => FEMFLOW.router("respiracao");
     modal.querySelector("#btnVoltarFlow").onclick = () => FEMFLOW.router("flowcenter");
     modal.querySelector("#btnPlano").onclick = () => FEMFLOW.router("home");
+     // 🔄 alterna idioma global
+modal.querySelector("#btnLangToggle")?.addEventListener("click", () => {
+  const lang = localStorage.getItem("femflow_lang") === "en" ? "pt" : "en";
+  localStorage.setItem("femflow_lang", lang);
+  FEMFLOW.toast(lang === "pt" ? "🌸 Idioma: Português" : "🌸 Language: English");
+  modal.style.display = "none";
+  location.reload();
+});
+
   }
 },
   /* =======================================================
