@@ -108,47 +108,49 @@
   <p class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
 
   <div class="phase-svg">
-    <!-- ✅ NOVO SVG: fatias reais com separação -->
-    <svg viewBox="0 0 300 300" width="260" height="260">
-      <!-- Base clara -->
-      <circle cx="150" cy="150" r="120" fill="#fbe9e4"></circle>
+  <svg viewBox="0 0 300 300" width="260" height="260">
+    <!-- Fundo geral -->
+    <circle cx="150" cy="150" r="120" fill="#fbe9e4"></circle>
 
-      <!-- Fatias com separações -->
-      <path id="path-menstrual"  d="M150,150 L150,30 A120,120 0 0,1 262,150 Z" fill="#fbe9e4" stroke="#fff" stroke-width="4"></path>
-      <path id="path-follicular" d="M150,150 L262,150 A120,120 0 0,1 150,270 Z" fill="#fbe9e4" stroke="#fff" stroke-width="4"></path>
-      <path id="path-ovulatory"  d="M150,150 L150,270 A120,120 0 0,1 38,150 Z" fill="#fbe9e4" stroke="#fff" stroke-width="4"></path>
-      <path id="path-luteal"     d="M150,150 L38,150 A120,120 0 0,1 150,30 Z" fill="#fbe9e4" stroke="#fff" stroke-width="4"></path>
+    <!-- Fatias suaves com leve separação -->
+    <g stroke="#fff" stroke-width="2">
+      <path id="path-menstrual"  d="M150,150 L150,35 A115,115 0 0,1 265,150 Z" fill="#fbe9e4" />
+      <path id="path-follicular" d="M150,150 L265,150 A115,115 0 0,1 150,265 Z" fill="#fbe9e4" />
+      <path id="path-ovulatory"  d="M150,150 L150,265 A115,115 0 0,1 35,150 Z" fill="#fbe9e4" />
+      <path id="path-luteal"     d="M150,150 L35,150 A115,115 0 0,1 150,35 Z" fill="#fbe9e4" />
+    </g>
 
-      <!-- Círculo central -->
-      <circle cx="150" cy="150" r="80" fill="#cc6a5a"></circle>
+    <!-- Círculo central -->
+    <circle cx="150" cy="150" r="78" fill="#cc6a5a"></circle>
 
-      <!-- Caminhos de texto curvado -->
-      <defs>
-        <path id="text-menstrual"  d="M150,30 A120,120 0 0,1 262,150"></path>
-        <path id="text-follicular" d="M262,150 A120,120 0 0,1 150,270"></path>
-        <path id="text-ovulatory"  d="M150,270 A120,120 0 0,1 38,150"></path>
-        <path id="text-luteal"     d="M38,150 A120,120 0 0,1 150,30"></path>
-      </defs>
+    <!-- Caminhos internos de texto (mais próximos do centro) -->
+    <defs>
+      <path id="text-menstrual"  d="M150,50 A100,100 0 0,1 250,150" />
+      <path id="text-follicular" d="M250,150 A100,100 0 0,1 150,250" />
+      <path id="text-ovulatory"  d="M150,250 A100,100 0 0,1 50,150" />
+      <path id="text-luteal"     d="M50,150 A100,100 0 0,1 150,50" />
+    </defs>
 
-      <!-- Nomes curvados -->
-      <text id="lbl-menstrual" font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-        <textPath href="#text-menstrual" startOffset="15%">Menstrual</textPath>
-      </text>
-      <text id="lbl-follicular" font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-        <textPath href="#text-follicular" startOffset="25%">Folicular</textPath>
-      </text>
-      <text id="lbl-ovulatory" font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-        <textPath href="#text-ovulatory" startOffset="25%">Ovulatória</textPath>
-      </text>
-      <text id="lbl-luteal" font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-        <textPath href="#text-luteal" startOffset="25%">Lútea</textPath>
-      </text>
+    <!-- Nomes curvados -->
+    <text id="lbl-menstrual"  font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a">
+      <textPath href="#text-menstrual" startOffset="18%">Menstrual</textPath>
+    </text>
+    <text id="lbl-follicular" font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a">
+      <textPath href="#text-follicular" startOffset="25%">Folicular</textPath>
+    </text>
+    <text id="lbl-ovulatory"  font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a">
+      <textPath href="#text-ovulatory" startOffset="25%">Ovulatória</textPath>
+    </text>
+    <text id="lbl-luteal"     font-family="Playfair Display" font-size="13" font-weight="700" fill="#cc6a5a">
+      <textPath href="#text-luteal" startOffset="20%">Lútea</textPath>
+    </text>
 
-      <!-- Centro -->
-      <text id="centerPhase" x="150" y="150" text-anchor="middle" font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff" dy=".3em">—</text>
-    </svg>
-  </div>
-
+    <!-- Centro -->
+    <text id="centerPhase" x="150" y="150" text-anchor="middle"
+          font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff" dy=".3em">—</text>
+  </svg>
+</div>
+  
   <div class="current-phase" id="t_current">Fase atual: —</div>
   <div class="dual-lang" id="t_current_en">Current phase: —</div>
 
