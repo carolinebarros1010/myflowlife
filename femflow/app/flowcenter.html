@@ -125,14 +125,21 @@
 
       <!-- 🔁 Caminhos de texto: mesma posição angular, raio reduzido (r=102) -->
 <defs>
-  <!-- Menstrual • centrado em 45° -->
-  <path id="text-menstrual"  d="M180,65 A102,102 0 0,1 255,130" fill="none" />
-  <!-- Folicular • centrado em 135° -->
-  <path id="text-follicular" d="M65,120 A102,102 0 0,1 120,65" fill="none" />
-  <!-- Ovulatória • centrado em 225° -->
-  <path id="text-ovulatory"  d="M120,255 A102,102 0 0,1 45,180" fill="none" />
-  <!-- Lútea • centrado em 315° -->
-  <path id="text-luteal"     d="M255,180 A102,102 0 0,1 180,255" fill="none" />
+  <!-- Menstrual (45°) – ligeiramente mais interna -->
+  <path id="text-menstrual"
+        d="M182,70 A100,100 0 0,1 255,135" fill="none" />
+
+  <!-- Folicular (135°) – já estava boa, mínima correção -->
+  <path id="text-follicular"
+        d="M65,120 A102,102 0 0,1 120,65" fill="none" />
+
+  <!-- Ovulatória (225°) – mais interna -->
+  <path id="text-ovulatory"
+        d="M120,250 A98,98 0 0,1 55,180" fill="none" />
+
+  <!-- Lútea (315°) – mais interna -->
+  <path id="text-luteal"
+        d="M245,180 A98,98 0 0,1 180,245" fill="none" />
 </defs>
 
 <!-- Textos curvados (idênticos, apenas reposicionados mais para dentro) -->
