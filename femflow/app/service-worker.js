@@ -54,21 +54,18 @@ self.addEventListener('activate', (event) => {
 });
 
 // ⚙️ Estratégia de fetch: cache first, update em background
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return; // evita cachear POST/PUT
-
+self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      const networkFetch = fetch(event.request)
+      if (cachedResponse) return cachedResponse;
+
+      return fetch(event.request)
         .then((networkResponse) => {
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-          });
+          const clone = networkResponse.clone();
+          caches.open("femflow-cache-v1").then((cache) => cache.put(event.request, clone));
           return networkResponse;
         })
-        .catch(() => cachedResponse);
-
-      return cachedResponse || networkFetch;
+        .catch(() => caches.match("/offline.html"));
     })
   );
 });
