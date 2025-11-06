@@ -11,15 +11,10 @@
       --bege: #F6E9E1;
       --verde: #335953;
     }
-
-    body {
-      background-color: var(--bege);
-      color: #5A4032;
-      font-family: 'Lato', sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
+    
+body {
+  padding-top: calc(70px + env(safe-area-inset-top, 0px)); /* iPhones com notch */
+}
 
     .logo-container {
       margin-top: 20px;
@@ -139,9 +134,7 @@
     }
   </style>
 </head>
-
 <body>
- 
   <h1>Respiração FemFlow</h1>
   <p class="sub">Escolha o protocolo conforme seu momento 🌿</p>
 
@@ -189,9 +182,6 @@ function encerrar() {
   }, 1200);
 }
 </script>
-  </div>
-
-  <footer>🌬️ Inspire equilíbrio. Expire leveza.</footer>
 
   <script>
     let cicloAtivo = false;
