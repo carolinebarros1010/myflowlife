@@ -146,11 +146,12 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-  FEMFLOW.criarMenuModal(page);
+FEMFLOW.criarMenuModal(page);
 },
 
 criarMenuModal(page) {
   if (document.querySelector(".ff-menu-modal")) return;
+
   const modal = document.createElement("div");
   modal.className = "ff-menu-modal";
   document.body.appendChild(modal);
@@ -159,8 +160,21 @@ criarMenuModal(page) {
     modal.innerHTML = FEMFLOW._getMenuHTML(page);
     modal.style.display = "flex";
     FEMFLOW._bindMenuAcoes(page, modal);
+
+    // 🌐 alterna idioma global (para qualquer página)
+    const langBtn = modal.querySelector("#btnLangToggle");
+    if (langBtn) {
+      langBtn.addEventListener("click", () => {
+        const lang = localStorage.getItem("femflow_lang") === "en" ? "pt" : "en";
+        localStorage.setItem("femflow_lang", lang);
+        FEMFLOW.toast(lang === "pt" ? "🌸 Idioma: Português" : "🌸 Language: English");
+        modal.style.display = "none";
+        location.reload();
+      });
+    }
   };
 
+  // abre menu
   document.querySelector(".ff-menu-btn").onclick = openMenu;
 },
 
@@ -177,14 +191,17 @@ _getMenuHTML(page) {
         <button id="btnVoltarInicio">🏠 Voltar</button>
         <button id="btnFecharMenu">Fechar</button>`;
       break;
+
     case "treino.html":
       items = `
         <h3>Menu</h3>
+        <button id="btnLangToggle">🌐 Idioma / Language</button>
         <button id="btnCancelarTreino">🛑 Cancelar treino</button>
         <button id="btnRespirar">🧘 Respiração</button>
         <button id="btnVoltarFlow">🏠 Voltar ao Flow Center</button>
         <button id="btnFecharMenu">Fechar</button>`;
       break;
+
     case "respiracao.html":
       items = `
         <h3>Menu</h3>
@@ -194,8 +211,11 @@ _getMenuHTML(page) {
         <button id="btnPlano">💳 Adquirir plano</button>
         <button id="btnFecharMenu">Fechar</button>`;
       break;
+
     default:
-      items = `<button id="btnFecharMenu">Fechar</button>`;
+      items = `<h3>Menu</h3>
+               <button id="btnLangToggle">🌐 Idioma / Language</button>
+               <button id="btnFecharMenu">Fechar</button>`;
   }
   return `<div class="ff-menu-box">${items}</div>`;
 },
@@ -206,15 +226,18 @@ _bindMenuAcoes(page, modal) {
 
   // Flowcenter e Evolução
   if (["flowcenter.html", "evolucao.html"].includes(page)) {
-    modal.querySelector("#btnPersonalizar").onclick = () =>
-      window.open("https://www.myflowlife.com.br/#planos", "_blank");
-    modal.querySelector("#btnCancelarPlano").onclick = () => {
+    modal.querySelector("#btnPersonalizar")?.addEventListener("click", () =>
+      window.open("https://www.myflowlife.com.br/#planos", "_blank")
+    );
+
+    modal.querySelector("#btnCancelarPlano")?.addEventListener("click", () => {
       const c = document.createElement("div");
       c.className = "ff-menu-modal";
       c.innerHTML = `
         <div class="ff-menu-box">
           <p>Tem certeza que deseja cancelar o plano?</p>
-          <button id="sim">Sim</button><button id="nao">Não</button>
+          <button id="sim">Sim</button>
+          <button id="nao">Não</button>
         </div>`;
       document.body.appendChild(c);
       c.style.display = "flex";
@@ -224,19 +247,12 @@ _bindMenuAcoes(page, modal) {
         FEMFLOW.toast("❌ Plano cancelado");
         setTimeout(() => FEMFLOW.router("home"), 800);
       };
-    };
-    modal.querySelector("#btnVoltarInicio").onclick = () => FEMFLOW.router("home");
-    // 🔄 alterna idioma global
-modal.querySelector("#btnLangToggle")?.addEventListener("click", () => {
-  const lang = localStorage.getItem("femflow_lang") === "en" ? "pt" : "en";
-  localStorage.setItem("femflow_lang", lang);
-  FEMFLOW.toast(lang === "pt" ? "🌸 Idioma: Português" : "🌸 Language: English");
-  modal.style.display = "none";
-  location.reload();
-});
+    });
+
+    modal.querySelector("#btnVoltarInicio")?.addEventListener("click", () => FEMFLOW.router("home"));
   }
 
-  // Treino
+ // Treino
   if (page === "treino.html") {
     modal.querySelector("#btnCancelarTreino").onclick = () => {
       FEMFLOW.toast("❌ Treino cancelado");
