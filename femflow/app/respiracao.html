@@ -151,7 +151,8 @@
     <div id="breathCircle">5</div>
     <div id="faseLabel">Preparar...</div>
     <div id="countdown"></div>
-  
+ <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script src="./femflow-core.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -202,7 +203,8 @@ function encerrar() {
       fire:   { nome: "Fire Flow", fases: [2,1,4,1], cor: "#B44C3B", vibra: [120,500] },
     };
 
-    async function iniciarProtocolo(tipo) {
+   document.addEventListener("DOMContentLoaded", () => {
+     async function iniciarProtocolo(tipo) {
   if (cicloAtivo) return;
   const protocolo = protocolos[tipo];
   if (!protocolo) return;
@@ -228,7 +230,7 @@ function encerrar() {
 
   const nomes = ["Inspire", "Segure", "Expire", "Segure"];
   let faseIndex = 0;
-
+});
   async function ciclo() {
     const duracao = protocolo.fases[faseIndex];
     if (duracao === 0) { faseIndex = (faseIndex + 1) % 4; return ciclo(); }
