@@ -524,6 +524,10 @@ FEMFLOW.buscarExerciciosFirebase = async function (nivel, fase, diaKey, enfase) 
     });
   });
 
+  localStorage.setItem(cacheKey, JSON.stringify({ ts: now, data: itens }));
+  return itens.sort((a,b)=>a.box.localeCompare(b.box));
+};
+
   itens.sort((a, b) => a.box.localeCompare(b.box) || a.titulo.localeCompare(b.titulo));
 
   try {
