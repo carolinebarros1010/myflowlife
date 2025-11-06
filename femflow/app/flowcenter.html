@@ -111,7 +111,7 @@
       <!-- Fundo bege -->
       <circle cx="150" cy="150" r="120" fill="#fff5ef"></circle>
 
-      <!-- Fatias -->
+      <!-- Fatias (com divisões perfeitas em 90°) -->
       <g stroke="#fff5ef" stroke-width="3">
         <path id="seg-menstrual"  d="M150,150 L150,30 A120,120 0 0,1 270,150 Z" fill="#f9e0d8"></path>
         <path id="seg-follicular" d="M150,150 L270,150 A120,120 0 0,1 150,270 Z" fill="#f9e0d8"></path>
@@ -120,43 +120,36 @@
       </g>
 
       <!-- 🔸 Anel separador e centro -->
-      <!-- Borda bege margeando o centro -->
       <circle cx="150" cy="150" r="68" fill="none" stroke="#fff5ef" stroke-width="4"></circle>
-
-      <!-- Centro terracota -->
       <circle cx="150" cy="150" r="64" fill="#cc6a5a"></circle>
 
-      <!-- 🔁 Caminhos de texto: curvatura e posição corrigidas -->
-     <defs>
-  <!-- Menstrual 45° -->
-  <path id="text-menstrual"
-        d="M190,60 A112,112 0 0,1 260,130" fill="none" />
-  <!-- Folicular 135° (ajustada curvatura e sentido) -->
-  <path id="text-follicular"
-        d="M40,130 A112,112 0 0,1 130,40" fill="none" />
-  <!-- Ovulatória 225° -->
-  <path id="text-ovulatory"
-        d="M110,260 A112,112 0 0,1 40,170" fill="none" />
-  <!-- Lútea 315° -->
-  <path id="text-luteal"
-        d="M260,170 A112,112 0 0,1 170,260" fill="none" />
-</defs>
+      <!-- 🔁 Caminhos de texto: agora perfeitamente alinhados com as fatias -->
+      <defs>
+        <!-- Menstrual • centrado em 45° -->
+        <path id="text-menstrual"  d="M185,55 A112,112 0 0,1 260,130" fill="none" />
+        <!-- Folicular • centrado em 135° -->
+        <path id="text-follicular" d="M55,115 A112,112 0 0,1 125,45" fill="none" />
+        <!-- Ovulatória • centrado em 225° -->
+        <path id="text-ovulatory"  d="M115,255 A112,112 0 0,1 45,185" fill="none" />
+        <!-- Lútea • centrado em 315° -->
+        <path id="text-luteal"     d="M255,185 A112,112 0 0,1 185,255" fill="none" />
+      </defs>
 
-      <!-- Textos curvados -->
-      <text id="lbl-menstrual" font-family="Playfair Display" font-size="13"
-            font-weight="700" fill="#cc6a5a" text-anchor="middle">
+      <!-- Textos curvados (mantidos iguais e centralizados) -->
+      <text id="lbl-menstrual" font-family="Playfair Display" font-size="13" font-weight="700"
+            fill="#cc6a5a" text-anchor="middle">
         <textPath href="#text-menstrual" startOffset="50%">Menstrual</textPath>
       </text>
-      <text id="lbl-follicular" font-family="Playfair Display" font-size="13"
-            font-weight="700" fill="#cc6a5a" text-anchor="middle">
+      <text id="lbl-follicular" font-family="Playfair Display" font-size="13" font-weight="700"
+            fill="#cc6a5a" text-anchor="middle">
         <textPath href="#text-follicular" startOffset="50%">Folicular</textPath>
       </text>
-      <text id="lbl-ovulatory" font-family="Playfair Display" font-size="13"
-            font-weight="700" fill="#cc6a5a" text-anchor="middle">
+      <text id="lbl-ovulatory" font-family="Playfair Display" font-size="13" font-weight="700"
+            fill="#cc6a5a" text-anchor="middle">
         <textPath href="#text-ovulatory" startOffset="50%">Ovulatória</textPath>
       </text>
-      <text id="lbl-luteal" font-family="Playfair Display" font-size="13"
-            font-weight="700" fill="#cc6a5a" text-anchor="middle">
+      <text id="lbl-luteal" font-family="Playfair Display" font-size="13" font-weight="700"
+            fill="#cc6a5a" text-anchor="middle">
         <textPath href="#text-luteal" startOffset="50%">Lútea</textPath>
       </text>
 
