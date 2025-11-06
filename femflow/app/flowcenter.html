@@ -12,95 +12,26 @@
     :root {
       --bege: #fff5ef;
       --terracota: #cc6a5a;
-      --terracota-light: #f0c5b6;
-      --terracota-lighter: #f6d7cc;
       --texto: #5b4f49;
     }
-
     body {
-      margin: 0;
-      background: var(--bege);
-      color: var(--texto);
-      font-family: "Lato", sans-serif;
-      text-align: center;
+      margin: 0; background: var(--bege); color: var(--texto);
+      font-family: "Lato", sans-serif; text-align: center;
       padding-top: 70px;
     }
-
-    h1 {
-      font-family: 'Playfair Display', serif;
-      color: var(--terracota);
-      font-size: 2rem;
-      margin: 0;
-    }
-
-    p {
-      margin: 8px 0 20px;
-      color: var(--texto);
-    }
-
-    .phase-svg {
-      width: 280px;
-      height: 280px;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    svg {
-      display: block;
-      margin: 0 auto;
-    }
-
-    .current-phase {
-      margin-top: 25px;
-      font-weight: 700;
-      color: var(--terracota);
-    }
-
-    .dual-lang {
-      font-size: 0.9rem;
-      color: #7a6c66;
-      margin-top: 4px;
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin: 25px 0;
-    }
-
+    h1 { font-family:'Playfair Display',serif; color:var(--terracota); margin:0; }
+    .phase-svg { width:280px; height:280px; margin:0 auto; position:relative; }
+    .toolbar { display:flex; gap:12px; justify-content:center; margin:25px 0; }
     .tool {
-      border: 1px solid rgba(204,106,90,0.25);
-      background: #fff;
-      color: var(--terracota);
-      padding: 8px 12px;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: "Lato", sans-serif;
-      font-size: 0.9rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border:1px solid rgba(204,106,90,0.25); background:#fff; color:var(--terracota);
+      padding:8px 12px; border-radius:12px; font-weight:700; cursor:pointer;
+      font-family:"Lato",sans-serif; font-size:0.9rem;
+      box-shadow:0 2px 5px rgba(0,0,0,0.1);
     }
-
-    .tool:hover {
-      background: var(--terracota);
-      color: #fff;
-      transform: scale(1.03);
-      transition: all .3s ease;
-    }
-
-    @keyframes pulseGlow {
-      0% { filter: drop-shadow(0 0 4px rgba(204,106,90,0.4)); }
-      50% { filter: drop-shadow(0 0 14px rgba(204,106,90,0.8)); }
-      100% { filter: drop-shadow(0 0 4px rgba(204,106,90,0.4)); }
-    }
-
-    .active-glow {
-      animation: pulseGlow 3s ease-in-out infinite;
-      transform-origin: center;
-    }
+    .tool:hover { background:var(--terracota); color:#fff; transform:scale(1.03); transition:all .3s ease; }
   </style>
 </head>
+
 <body>
   <h1>FemFlow</h1>
   <h3>Fase Hormonal</h3>
@@ -108,10 +39,7 @@
 
   <div class="phase-svg">
     <svg viewBox="0 0 300 300" width="260" height="260">
-      <!-- Fundo bege -->
       <circle cx="150" cy="150" r="120" fill="#fff5ef"></circle>
-
-      <!-- Fatias (com divisões perfeitas em 90°) -->
       <g stroke="#fff5ef" stroke-width="3">
         <path id="seg-menstrual"  d="M150,150 L150,30 A120,120 0 0,1 270,150 Z" fill="#f9e0d8"></path>
         <path id="seg-follicular" d="M150,150 L270,150 A120,120 0 0,1 150,270 Z" fill="#f9e0d8"></path>
@@ -119,116 +47,82 @@
         <path id="seg-luteal"     d="M150,150 L30,150 A120,120 0 0,1 150,30 Z" fill="#f9e0d8"></path>
       </g>
 
-      <!-- 🔸 Anel separador e centro -->
-     <circle cx="150" cy="150" r="65" fill="none" stroke="#fff5ef" stroke-width="2"></circle>
-     <circle cx="150" cy="150" r="63" fill="#cc6a5a"></circle>
+      <!-- anel e centro -->
+      <circle cx="150" cy="150" r="65" fill="none" stroke="#fff5ef" stroke-width="2"></circle>
+      <circle cx="150" cy="150" r="63" fill="#cc6a5a"></circle>
 
+      <!-- nomes retos -->
+      <text id="lbl-menstrual"  x="215" y="95"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(45,215,95)">Menstrual</text>
+      <text id="lbl-follicular" x="215" y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(135,215,215)">Folicular</text>
+      <text id="lbl-ovulatory"  x="85"  y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(225,85,215)">Ovulatória</text>
+      <text id="lbl-luteal"     x="85"  y="85"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(315,85,85)">Lútea</text>
 
-<text id="lbl-menstrual"
-      x="215" y="95"
-      font-family="Playfair Display" font-size="14" font-weight="700"
-      fill="#cc6a5a" text-anchor="middle"
-      transform="rotate(45,215,95)">
-  Menstrual
-</text>
-
-<text id="lbl-follicular"
-      x="215" y="215"
-      font-family="Playfair Display" font-size="14" font-weight="700"
-      fill="#cc6a5a" text-anchor="middle"
-      transform="rotate(135,215,215)">
-  Folicular
-</text>
-
-<text id="lbl-ovulatory"
-      x="85" y="215"
-      font-family="Playfair Display" font-size="14" font-weight="700"
-      fill="#cc6a5a" text-anchor="middle"
-      transform="rotate(225,85,215)">
-  Ovulatória
-</text>
-
-<text id="lbl-luteal"
-      x="85" y="85"
-      font-family="Playfair Display" font-size="14" font-weight="700"
-      fill="#cc6a5a" text-anchor="middle"
-      transform="rotate(315,85,85)">
-  Lútea
-</text>
-
-      <!-- Texto central -->
-      <text id="centerPhase" x="150" y="155" text-anchor="middle"
-            font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff">—</text>
+      <text id="centerPhase" x="150" y="155" text-anchor="middle" font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff">—</text>
     </svg>
   </div>
-  
+
   <div class="current-phase" id="t_current">Fase atual: —</div>
- 
+
   <div class="toolbar">
-    <button class="tool" id="toBreath">💨 Respiração / <i>Breath</i></button>
-    <button class="tool" id="toTrain">🏃 Treino / <i>Training</i></button>
+    <button class="tool" id="toBreath">💨 Respiração</button>
+    <button class="tool" id="toTrain">🏃 Treino</button>
   </div>
 
   <script src="./femflow-core.js"></script>
 
-  <!-- ✅ Tradução dinâmica e lógica de ciclo -->
+  <!-- 🌸 SCRIPT ÚNICO DE TRADUÇÃO E LÓGICA -->
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener("DOMContentLoaded", ()=>{
     FEMFLOW.inserirHeaderApp?.();
 
-    const lang = localStorage.getItem('femflow_lang') || 'pt';
+    const lang = localStorage.getItem("femflow_lang") || "pt";
     const T = {
-      pt: {
-        phases: { menstrual: "Menstrual", follicular: "Folicular", ovulatory: "Ovulatória", luteal: "Lútea" },
-        titulo: "Fase Hormonal",
-        frase: "Seu corpo tem um ritmo. Vamos acompanhar juntas.",
-        faseAtual: "Fase atual:",
-        botoes: { breath: "💨 Respiração", train: "🏃 Treino" }
+      pt:{
+        titulo:"Fase Hormonal",
+        frase:"Seu corpo tem um ritmo. Vamos acompanhar juntas.",
+        faseAtual:"Fase atual:",
+        botoes:{breath:"💨 Respiração",train:"🏃 Treino"},
+        fases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"}
       },
-      en: {
-        phases: { menstrual: "Menstrual", follicular: "Follicular", ovulatory: "Ovulatory", luteal: "Luteal" },
-        titulo: "Hormonal Phase",
-        frase: "Your body has a rhythm. Let's follow it together.",
-        faseAtual: "Current phase:",
-        botoes: { breath: "💨 Breath", train: "🏃 Training" }
+      en:{
+        titulo:"Hormonal Phase",
+        frase:"Your body has a rhythm. Let's follow it together.",
+        faseAtual:"Current phase:",
+        botoes:{breath:"💨 Breathing",train:"🏃 Training"},
+        fases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"}
       }
     };
-
     const L = T[lang];
 
-    // Atualiza textos e botões
+    // textos gerais
     document.querySelector("h3").textContent = L.titulo;
     document.querySelector(".subtitle").textContent = L.frase;
-    document.getElementById("t_current").textContent = `${L.faseAtual} —`;
     document.getElementById("toBreath").textContent = L.botoes.breath;
     document.getElementById("toTrain").textContent = L.botoes.train;
 
-    // Atualiza rótulos SVG
-    for (const f of ["menstrual","follicular","ovulatory","luteal"]) {
-      const el = document.querySelector(`#lbl-${f} textPath`);
-      if (el) el.textContent = L.phases[f];
-    }
-
-    // Cálculo de ciclo
-    const ciclo = parseInt(localStorage.getItem('femflow_cycleLength') || 28);
-    const inicio = new Date(localStorage.getItem('femflow_startDate') || new Date());
-    const diff = Math.floor((new Date() - inicio) / (1000*60*60*24));
+    // ciclo e fase
+    const ciclo = parseInt(localStorage.getItem("femflow_cycleLength") || 28);
+    const inicio = new Date(localStorage.getItem("femflow_startDate") || new Date());
+    const diff = Math.floor((new Date() - inicio)/(1000*60*60*24));
     const dia = (diff % ciclo) + 1;
-    const faseAtual = d => (d <= 5) ? "menstrual" : (d <= 13) ? "follicular" : (d <= 17) ? "ovulatory" : "luteal";
-    const fase = faseAtual(dia);
+    let fase = "menstrual";
+    if (dia>5 && dia<=13) fase="follicular";
+    else if (dia<=17) fase="ovulatory";
+    else fase="luteal";
 
-    // Cor ativa no círculo
-    document.querySelectorAll('path[id^="path-"]').forEach(p => p.setAttribute("fill", "#fbe9e4"));
-    document.getElementById(`path-${fase}`).setAttribute("fill", "#e8b3a3");
+    // atualiza SVG
+    document.getElementById("centerPhase").textContent = L.fases[fase];
+    document.getElementById("t_current").textContent = `${L.faseAtual} ${L.fases[fase]}`;
 
-    // Atualiza textos centrais
-    document.getElementById('centerPhase').textContent = L.phases[fase];
-    document.getElementById('t_current').textContent = `${L.faseAtual} ${L.phases[fase]}`;
-    document.getElementById('t_current_en').textContent = (lang === "en" ? "" : "Current phase: " + L.phases[fase]);
+    // rótulos
+    document.getElementById("lbl-menstrual").textContent = L.fases.menstrual;
+    document.getElementById("lbl-follicular").textContent = L.fases.follicular;
+    document.getElementById("lbl-ovulatory").textContent = L.fases.ovulatory;
+    document.getElementById("lbl-luteal").textContent = L.fases.luteal;
 
-    // Navegação
-    document.getElementById('toBreath').onclick = () => FEMFLOW.router('respiracao');
-    document.getElementById('toTrain').onclick = () => FEMFLOW.router('treino');
+    // botões
+    document.getElementById("toBreath").onclick = ()=> FEMFLOW.router("respiracao");
+    document.getElementById("toTrain").onclick  = ()=> FEMFLOW.router("treino");
   });
   </script>
 </body>
