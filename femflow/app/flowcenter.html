@@ -45,24 +45,57 @@
     p.subtitle{margin-top:.2rem;font-size:.9rem;opacity:.8}
 
     /* Circle container */
-    .circle-wrap{position:relative;width:260px;height:260px;margin:12px auto;}
-    svg{width:100%;height:100%;transform:rotate(-90deg)}
-    .phase-label{
-      position:absolute;font-family:"Playfair Display",serif;font-weight:700;
-      font-size:.85rem;color:#7a6c66;
-    }
-    .p-menstrual  { top:78%; left:14%;}
-    .p-follicular { top:10%; left:20%;}
-    .p-ovulatory  { top:10%; right:18%;}
-    .p-luteal     { top:76%; right:16%;}
-    .current-phase{margin:.4rem 0 0;font-weight:800;color:var(--terracota)}
-    .current-hint{margin:0;opacity:.75;font-size:.9rem;font-style:italic}
-    .cta{
-      display:block;width:90%;max-width:400px;margin:20px auto 28px;padding:14px 18px;
-      border:none;border-radius:14px;background:var(--terracota);color:#fff;
-      font-weight:800;letter-spacing:.2px;cursor:pointer;
-      box-shadow:0 10px 18px rgba(204,106,90,.2)
-    }
+  .circle-wrap {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 20px auto;
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* início do arco no topo */
+}
+
+#centerPhase, #centerDay {
+  transform: rotate(90deg); /* texto central na horizontal */
+}
+
+.phase-label {
+  position: absolute;
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #7a6c66;
+}
+
+/* 🩸 Menstrual: canto superior direito */
+.p-menstrual {
+  top: -10px;
+  right: 50%;
+  transform: translateX(50%);
+}
+
+/* 🌱 Folicular: canto inferior direito */
+.p-follicular {
+  bottom: 10px;
+  right: 25px;
+}
+
+/* ☀️ Ovulatória: canto inferior esquerdo */
+.p-ovulatory {
+  bottom: 10px;
+  left: 25px;
+}
+
+/* 🌙 Lútea: canto superior esquerdo */
+.p-luteal {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
     .toolbar{display:flex;gap:12px;justify-content:center;margin:6px 0 20px}
     .tool{
       border:1px solid rgba(204,106,90,0.25);background:#fff;color:var(--terracota);
@@ -90,28 +123,23 @@
     <h3 id="t_hormonalPhase">Fase hormonal</h3>
     <p id="t_hormonalHint" class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
 
-    <div class="circle-wrap">
+   <div class="circle-wrap">
   <svg viewBox="0 0 300 300">
-    <!-- Fundo -->
-    <circle cx="150" cy="150" r="110" fill="none" stroke="#f3e0d9" stroke-width="28"/>
-    <!-- Progresso -->
+    <circle cx="150" cy="150" r="110" fill="none" stroke="#f3e0d9" stroke-width="26"/>
     <circle id="progressArc" cx="150" cy="150" r="110"
-      fill="none" stroke="#cc6a5a" stroke-width="28"
+      fill="none" stroke="#cc6a5a" stroke-width="26"
       stroke-linecap="round" stroke-dasharray="0 690"/>
-    <!-- Núcleo -->
-    <circle cx="150" cy="150" r="70" fill="#f8ece7" stroke="#efd0c7" stroke-width="2"/>
-    <!-- Texto central -->
-    <text id="centerPhase" x="150" y="140" text-anchor="middle"
+    <circle cx="150" cy="150" r="70" fill="#f8ece7" stroke="#efd0c7" stroke-width="1"/>
+    <text id="centerPhase" x="150" y="145" text-anchor="middle"
           font-family="Playfair Display,serif" font-size="18" font-weight="700" fill="#cc6a5a">—</text>
-    <text id="centerDay" x="150" y="165" text-anchor="middle"
+    <text id="centerDay" x="150" y="170" text-anchor="middle"
           font-family="Lato,sans-serif" font-size="13" fill="#7a6c66">—</text>
   </svg>
 
-  <!-- Rótulos reposicionados -->
-  <div class="phase-label p-menstrual"  id="lblMenstrual"  style="top:5%; right:18%;">Menstrual</div>
-  <div class="phase-label p-follicular" id="lblFollicular" style="bottom:12%; right:18%;">Folicular</div>
-  <div class="phase-label p-ovulatory"  id="lblOvulatory"  style="bottom:12%; left:18%;">Ovulatória</div>
-  <div class="phase-label p-luteal"     id="lblLuteal"     style="top:5%; left:18%;">Lútea</div>
+  <div class="phase-label p-menstrual" id="lblMenstrual">Menstrual</div>
+  <div class="phase-label p-follicular" id="lblFollicular">Folicular</div>
+  <div class="phase-label p-ovulatory" id="lblOvulatory">Ovulatória</div>
+  <div class="phase-label p-luteal" id="lblLuteal">Lútea</div>
 </div>
 
 <select id="cycleSelect">
