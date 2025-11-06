@@ -21,7 +21,7 @@ const FEMFLOW = {
   /* =======================================================
      ⚙️ INICIALIZAÇÃO GERAL
   ======================================================= */
-  initTreino() {
+    initTreino() {
     console.log("💫 FemFlow Core v2.2 conectado com sucesso");
 
     this.carregarLogoContextual();
@@ -29,10 +29,9 @@ const FEMFLOW = {
     this.autoCiclo();
 
     // não injeta em páginas públicas
-   if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
-  this.inserirHeaderApp(); // novo cabeçalho/menu
-}
-     }
+    if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
+      this.inserirHeaderApp(); // novo cabeçalho/menu
+    }
   },
 
   /* =======================================================
