@@ -166,19 +166,19 @@
     <path id="path-ovulatory"  d="M110,240 A100,100 0 0,1 60,180" fill="none"/>
     <path id="path-luteal"     d="M60,120 A100,100 0 0,1 110,70" fill="none"/>
 
-    <!-- rótulos bilíngues -->
-    <text font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-      <textPath href="#path-menstrual" startOffset="0%">Menstrual / Menstrual</textPath>
-    </text>
-    <text font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-      <textPath href="#path-follicular" startOffset="0%">Folicular / Follicular</textPath>
-    </text>
-    <text font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-      <textPath href="#path-ovulatory" startOffset="0%">Ovulatória / Ovulatory</textPath>
-    </text>
-    <text font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-      <textPath href="#path-luteal" startOffset="0%">Lútea / Luteal</textPath>
-    </text>
+   <!-- nomes das fases (apenas 1 idioma por vez, controlado via script) -->
+<text id="lbl-menstrual"  font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
+  <textPath href="#path-menstrual" startOffset="0%">Menstrual</textPath>
+</text>
+<text id="lbl-follicular" font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
+  <textPath href="#path-follicular" startOffset="0%">Folicular</textPath>
+</text>
+<text id="lbl-ovulatory"  font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
+  <textPath href="#path-ovulatory" startOffset="0%">Ovulatória</textPath>
+</text>
+<text id="lbl-luteal"     font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
+  <textPath href="#path-luteal" startOffset="0%">Lútea</textPath>
+</text>
 
     <!-- círculo central com brilho -->
     <circle cx="150" cy="150" r="70" fill="url(#centerGrad)" />
@@ -242,6 +242,32 @@
       document.getElementById('toTrain').onclick = () => FEMFLOW.router('treino');
     });
   </script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // idioma atual salvo
+  const lang = localStorage.getItem('femflow_lang') || 'pt';
+  const fases = {
+    pt: { menstrual:"Menstrual", follicular:"Folicular", ovulatory:"Ovulatória", luteal:"Lútea" },
+    en: { menstrual:"Menstrual", follicular:"Follicular", ovulatory:"Ovulatory", luteal:"Luteal" }
+  };
+
+  // atualiza textos do SVG
+  for (const f of ["menstrual","follicular","ovulatory","luteal"]) {
+    const el = document.querySelector(`#lbl-${f} textPath`);
+    if (el) el.textContent = fases[lang][f];
+  }
+
+  // atualiza rótulos centrais e frases
+  const nomes = {
+    pt: {fase:"Fase atual:", corpo:"Seu corpo tem um ritmo. Vamos acompanhar juntas.", hormonal:"Fase Hormonal"},
+    en: {fase:"Current phase:", corpo:"Your body has a rhythm. Let's follow it together.", hormonal:"Hormonal Phase"}
+  };
+  document.getElementById('t_current')?.textContent = `${nomes[lang].fase} —`;
+  document.getElementById('t_current_en')?.textContent = (lang==="pt" ? "" : `${nomes[lang].fase} —`);
+  document.querySelector('h3')?.textContent = nomes[lang].hormonal;
+  document.querySelector('p')?.textContent = nomes[lang].corpo;
+});
+</script>
 </body>
 </html>
 
