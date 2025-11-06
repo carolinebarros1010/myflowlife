@@ -16,7 +16,7 @@ const FEMFLOW = {
   /* ----------- 🔎 PÁGINAS PÚBLICAS (não injetar UI) --- */
   _isPublicPage(){
     const p = location.pathname.split('/').pop().toLowerCase();
-    return ['login.html','home.html','index.html'].includes(p);
+    return ['login.html','home.html'].includes(p);
   },
 
   /* ----------- ⚙️ INICIALIZAÇÃO GERAL ------------ */
@@ -158,7 +158,7 @@ initTreino() {
 };
 
     const page = location.pathname.split("/").pop();
-    voltar.onclick = () => this.router(map[page] || "index");
+    voltar.onclick = () => this.router(map[page] || "flowcenter");
     document.body.appendChild(voltar);
   },
 
