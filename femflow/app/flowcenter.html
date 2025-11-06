@@ -111,70 +111,59 @@
 <div class="phase-svg">
   <svg id="svgCiclo" viewBox="0 0 300 300" width="260" height="260">
     <defs>
+      <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#fff5ef" />
+        <stop offset="100%" stop-color="#fcebe4" />
+      </radialGradient>
+      <radialGradient id="centerGrad" cx="40%" cy="35%" r="70%">
+        <stop offset="0%" stop-color="#d98775"/>
+        <stop offset="100%" stop-color="#cc6a5a"/>
+      </radialGradient>
       <style>
-        .seg { fill:none; stroke:#f6d7cc; stroke-width:60; stroke-linecap:round; }
-        .seg.active { stroke:#cc6a5a; filter: drop-shadow(0 0 4px rgba(204,106,90,.4)); }
+        .seg { fill:none; stroke:#f6d7cc; stroke-width:45; stroke-linecap:round; }
+        .seg.active { stroke:#cc6a5a; filter:drop-shadow(0 0 5px rgba(204,106,90,.5)); }
         @keyframes pulseGlow {
-          0% { filter: drop-shadow(0 0 4px rgba(204,106,90,.4)); }
-          50% { filter: drop-shadow(0 0 14px rgba(204,106,90,.8)); }
-          100% { filter: drop-shadow(0 0 4px rgba(204,106,90,.4)); }
+          0% { filter:drop-shadow(0 0 4px rgba(204,106,90,.4)); }
+          50% { filter:drop-shadow(0 0 14px rgba(204,106,90,.8)); }
+          100% { filter:drop-shadow(0 0 4px rgba(204,106,90,.4)); }
         }
         .seg.active.pulse { animation:pulseGlow 3s ease-in-out infinite; }
       </style>
     </defs>
 
-    <!-- anel base (apenas fundo do canvas) -->
-    <circle cx="150" cy="150" r="120" fill="#f8ece7"/>
+    <!-- fundo -->
+    <circle cx="150" cy="150" r="120" fill="url(#bgGrad)"/>
 
-    <!-- 4 segmentos como ARCO (stroke grosso) com pequenas folgas -->
-    <!-- Topo→Direita (quadrante superior direito) = Ovulatória -->
-    <path id="seg-ovulatory" class="seg"
-          d="M150,38 A112,112 0 0 1 262,150" />
+    <!-- segmentos finos com gaps -->
+    <path id="seg-menstrual"  class="seg" d="M154,45 A105,105 0 0,1 255,146" />
+    <path id="seg-follicular" class="seg" d="M255,154 A105,105 0 0,1 154,255" />
+    <path id="seg-ovulatory"  class="seg" d="M146,255 A105,105 0 0,1 45,154" />
+    <path id="seg-luteal"     class="seg" d="M45,146  A105,105 0 0,1 146,45" />
 
-    <!-- Direita→Baixo (quadrante inferior direito) = Menstrual -->
-    <path id="seg-menstrual" class="seg"
-          d="M262,150 A112,112 0 0 1 150,262" />
+    <!-- nomes curvados -->
+    <path id="path-menstrual"  d="M190,70 A100,100 0 0,1 240,120" fill="none"/>
+    <path id="path-follicular" d="M240,180 A100,100 0 0,1 190,240" fill="none"/>
+    <path id="path-ovulatory"  d="M110,240 A100,100 0 0,1 60,180" fill="none"/>
+    <path id="path-luteal"     d="M60,120 A100,100 0 0,1 110,70" fill="none"/>
 
-    <!-- Baixo→Esquerda (quadrante inferior esquerdo) = Folicular -->
-    <path id="seg-follicular" class="seg"
-          d="M150,262 A112,112 0 0 1 38,150" />
-
-    <!-- Esquerda→Topo (quadrante superior esquerdo) = Lútea -->
-    <path id="seg-luteal" class="seg"
-          d="M38,150 A112,112 0 0 1 150,38" />
-
-    <!-- linhas radiais finas para reforçar as divisões (clássico FemFlow) -->
-    <line x1="150" y1="45"  x2="150" y2="255" stroke="#fff" stroke-width="8" />
-    <line x1="45"  y1="150" x2="255" y2="150" stroke="#fff" stroke-width="8" />
-
-    <!-- fenda entre ANEL e CENTRO -->
-    <circle cx="150" cy="150" r="90" fill="none" stroke="#fff" stroke-width="10"/>
-
-    <!-- caminhos invisíveis para os textos curvos (raio ~105) -->
-    <!-- posicionei para casar com os quadrantes acima -->
-    <path id="path-ovulatory" d="M150,45 A105,105 0 0 1 255,150" fill="none"/>
-    <path id="path-menstrual" d="M255,150 A105,105 0 0 1 150,255" fill="none"/>
-    <path id="path-follicular" d="M150,255 A105,105 0 0 1 45,150"  fill="none"/>
-    <path id="path-luteal"    d="M45,150  A105,105 0 0 1 150,45"  fill="none"/>
-
-    <!-- rótulos curvos (PT apenas, limpo) -->
+    <!-- bilíngue -->
     <text font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-      <textPath href="#path-ovulatory" startOffset="8%">Ovulatória</textPath>
+      <textPath href="#path-menstrual" startOffset="0%">Menstrual / Menstrual</textPath>
     </text>
     <text font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-      <textPath href="#path-menstrual" startOffset="8%">Menstrual</textPath>
+      <textPath href="#path-follicular" startOffset="0%">Folicular / Follicular</textPath>
     </text>
     <text font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-      <textPath href="#path-follicular" startOffset="8%">Folicular</textPath>
+      <textPath href="#path-ovulatory" startOffset="0%">Ovulatória / Ovulatory</textPath>
     </text>
     <text font-family="Playfair Display" font-size="12" font-weight="700" fill="#cc6a5a">
-      <textPath href="#path-luteal" startOffset="8%">Lútea</textPath>
+      <textPath href="#path-luteal" startOffset="0%">Lútea / Luteal</textPath>
     </text>
 
-    <!-- círculo central com a fase atual -->
-    <circle cx="150" cy="150" r="75" fill="#cc6a5a"/>
+    <!-- centro -->
+    <circle cx="150" cy="150" r="75" fill="url(#centerGrad)"/>
     <text id="centerPhase" x="150" y="156" text-anchor="middle"
-          font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff">—</text>
+      font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff">—</text>
   </svg>
 </div>
 
