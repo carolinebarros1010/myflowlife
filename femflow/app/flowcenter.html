@@ -292,15 +292,12 @@ async function syncEntitlement() {
 </script>
 
 <script>
-// Checa acesso antes de liberar o hub
 (async function(){
-  // seu guard do <head> já conferiu login + ciclo
   await syncEntitlement();
-  if (!hasEntitlement()) {
-    location.href = 'home.html'; // volta para escolher novo programa
-    return;
+  if (hasEntitlement()) {
+    // já tem programa ativo → vai direto pro hub
+    location.href = 'flowcenter.html';
   }
-  // se tiver acesso, segue normal (seu JS de UI já rodou acima)
 })();
 </script>
 </body>
