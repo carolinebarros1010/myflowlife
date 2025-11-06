@@ -29,12 +29,10 @@ const FEMFLOW = {
     this.autoCiclo();
 
     // não injeta em páginas públicas
-    if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
-      this.inserirLogo();
-      this.inserirBotaoVoltar();
-      // quando header for adicionado, aqui entra também:
-      // this.inserirHeaderApp();
-    }
+   if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
+  this.inserirHeaderApp(); // novo cabeçalho/menu
+}
+     }
   },
 
   /* =======================================================
