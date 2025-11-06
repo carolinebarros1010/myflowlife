@@ -524,16 +524,14 @@ FEMFLOW.buscarExerciciosFirebase = async function (nivel, fase, diaKey, enfase) 
     });
   });
 
+itens.sort((a, b) => 
+  a.box.localeCompare(b.box) || a.titulo.localeCompare(b.titulo)
+);
+
+try {
   localStorage.setItem(cacheKey, JSON.stringify({ ts: now, data: itens }));
-  return itens.sort((a,b)=>a.box.localeCompare(b.box));
-};
+} catch (_) {}
 
-  itens.sort((a, b) => a.box.localeCompare(b.box) || a.titulo.localeCompare(b.titulo));
-
-  try {
-    localStorage.setItem(cacheKey, JSON.stringify({ ts: now, data: itens }));
-  } catch (_) {}
-
-  return itens;
+return itens;
 };
 
