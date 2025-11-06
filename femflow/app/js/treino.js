@@ -13,17 +13,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   let current = 0;
   let boxes   = [];
 
+  // -------- Navegação --------
   const moveTo = (dir) => {
     if (dir==='next' && current < boxes.length-1) { current++; navigator.vibrate?.([40]); }
     else if (dir==='prev' && current>0)           { current--; navigator.vibrate?.([20]); }
     track.style.transform = `translateX(-${current * 100}%)`;
     bar.style.width = `${((current + 1) / Math.max(1,boxes.length)) * 100}%`;
   };
+  document.getElementById("nextBtn")?.addEventListener("click", () => moveTo("next"));
+  document.getElementById("prevBtn")?.addEventListener("click", () => moveTo("prev"));
 
-  document.getElementById("nextBtn").addEventListener("click", () => moveTo("next"));
-  document.getElementById("prevBtn").addEventListener("click", () => moveTo("prev"));
-
-  // swipe
+  // Swipe
   let startX=0,endX=0; const sens=50;
   track.addEventListener("touchstart", e => startX = e.touches[0].clientX);
   track.addEventListener("touchmove",  e => endX   = e.touches[0].clientX);
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (Math.abs(diff)>sens) moveTo(diff>0?'next':'prev');
   });
 
-  // ---------- Timers util ----------
+  // -------- Timers --------
   const fmt = (s)=>`00:${String(Math.max(0,Math.floor(s))).padStart(2,'0')}`;
   const intervals = new WeakMap(); // div -> intervalId
   const startTimer = (el) => {
@@ -71,10 +71,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   const bindTimers = (root)=>{
     root.querySelectorAll('.subtimer').forEach(el=>{
-      // init
       if(!el.dataset.total) el.dataset.total = el.textContent.replace(/\D/g,'')||'45';
       el.textContent = fmt(Number(el.dataset.total));
-      // click = play/pause
       let pressT=null;
       el.addEventListener('touchstart', ()=>{ pressT = Date.now(); }, {passive:true});
       el.addEventListener('touchend', ()=>{
@@ -85,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       el.addEventListener('click', ()=>{
         if(el.classList.contains('running')) pauseTimer(el); else startTimer(el);
       });
-      // long-press no mouse também
+      // long-press mouse
       let mouseHold; 
       el.addEventListener('mousedown', ()=>{ mouseHold=setTimeout(()=>{ resetTimer(el); navigator.vibrate?.([15,40]); },600); });
       el.addEventListener('mouseup',   ()=> clearTimeout(mouseHold));
@@ -93,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   };
 
-  // --------- Links util (normaliza YouTube / URLs simples) ----------
+  // -------- Links util --------
   const normLink = (u)=>{
     if(!u) return '';
     let s=String(u).trim();
@@ -104,6 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return /^[-\w]+(\.[-\w]+)+/.test(s) ? 'https://' + s : s;
   };
 
+  // -------- Render helpers --------
   const criarBoxHTML = (box) => {
     if (box.tipo === "texto") {
       return `<div class="box texto"><h3>${box.titulo}</h3><p>${box.mensagem}</p></div>`;
@@ -149,10 +148,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     track.innerHTML = boxes.map(b => `<div class="carousel-item">${criarBoxHTML(b)}</div>`).join("");
     current = 0;
     moveTo('stay');
-    bindTimers(track); // <- ativa timers nos itens renderizados
+    bindTimers(track);
   };
 
-  // ---- Backend: Apps Script (fase/dia/regras e origem) ----
+  // -------- Backend: Apps Script --------
   const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${encodeURIComponent(id)}`;
   let j = null;
   try { j = await fetch(url).then(r=>r.json()); } catch(e){ FEMFLOW.toast('Falha ao carregar treino.'); console.warn(e); }
@@ -171,140 +170,98 @@ document.addEventListener('DOMContentLoaded', async () => {
     lista.push({ tipo:'texto', titulo:'Box 0 — Conexão Inicial 🌸', mensagem:`Respire e alinhe intenção: ${j?.regras?.foco||'força'}. Hidratação + técnica.` });
   }
 
-  // Origem dos exercícios
- if (j.exSource === 'firebase' && j.firebaseQuery) {
-  const { nivel, fase, diaKey, enfase } = j.firebaseQuery;
+  // -------- Exercícios (Firebase ou fallback planilha) --------
+  if (j.exSource === 'firebase' && j.firebaseQuery) {
+    const { nivel, fase, diaKey, enfase } = j.firebaseQuery;
 
-  // 1) Buscar no Firebase: pode vir "caixas prontas" OU "lista plana"
-  let raw = [];
-  try {
-    raw = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey, enfase);
-  } catch(e) {
-    console.warn('Firebase falhou, usando fallback vazio', e);
-    raw = [];
-  }
+    // 1) Buscar no Firebase
+    let raw = [];
+    try {
+      raw = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey, enfase);
+    } catch(e) {
+      console.warn('Firebase falhou, usando fallback vazio', e);
+      raw = [];
+    }
 
-  // 2) Sugestões do backend (fallback quando faltar dado)
-  const sugSeries  = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoSeries ?? 3;
-  const sugTempo   = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoIntervalo ?? 45;
-  const sugRepsMax = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoRepsMax ?? 15;
-
-  // 3) Normalizadores
-  const normLink = (u)=>{
-    if(!u) return '';
-    let s=String(u).trim();
-    if(/^youtu\.be\//i.test(s)) s = 'https://' + s;
-    if(/^www\.youtube\.com\/watch/i.test(s)) s = 'https://' + s;
-    if(/^http/i.test(s)) return s;
-    if(/^(youtu\.be|youtube\.com)\b/i.test(s)) return 'https://' + s;
-    return /^[-\w]+(\.[-\w]+)+/.test(s) ? 'https://' + s : s;
-  };
-  const toInt = (v)=> {
-    if (v==null) return null;
-    const s = String(v).trim();
-    const m = s.match(/^\d+/); // pega inicio numérico
-    return m ? Number(m[0]) : null;
-  };
-  const toReps = (v)=> {
-    if (v==null) return null;
-    const s = String(v).trim();
-    // aceita "8-12", "10", "10–12"
-    return s.replace(/[–—]/g,'-'); // traço longo → '-'
-  };
-
-  // 4) Detecta formato:
-  //    a) Caixas prontas: [{ titulo, itens:[...] }]
-  const isBoxes = Array.isArray(raw) && raw.length && Array.isArray(raw[0]?.itens);
-
-  //    b) Lista plana de exercícios: [{ box, titulo, series, reps, link, ... }]
-  if (isBoxes) {
-    // já vem pronto — só normaliza links/valores faltantes
-    raw.forEach((box, idx) => {
-      const itens = (box.itens||[]).map(ex => ({
-        exercicio: ex.exercicio || ex.titulo || ex.nome || 'Exercício',
-        link: normLink(ex.link || ex.url || ex.video || ''),
-        series: ex.series ?? sugSeries,
-        reps: ex.reps ?? sugRepsMax,
-        tempo: ex.tempo ?? sugTempo
-      }));
-      lista.push({ tipo:'exercicios', titulo: box.titulo || `Box ${idx+1}`, itens });
-
-      // HIIT/Cardio planejados
-      const fx = (j.faixasExtras||[]).filter(f=>f.kind==='hiit' || f.kind==='cardio');
-      if (fx.length && idx < fx.length) {
-        const f = fx[idx];
-        if (f.kind==='hiit')   lista.push({ tipo:'hiit',   titulo:f.titulo,  descricao:f.protocolo, tempo_total:f.tempo_total||360 });
-        if (f.kind==='cardio') lista.push({ tipo:'cardio', titulo:f.titulo,  descricao:f.descricao, tempo_total:f.tempo_total||600 });
-      }
-    });
-
-  } else {
-    // LISTA PLANA → agrupar por 'box'
-    const byBox = new Map();
-    raw.forEach(doc => {
-      const boxName = (doc.box || 'Box 1').toString();
-      if (!byBox.has(boxName)) byBox.set(boxName, []);
-      byBox.get(boxName).push(doc);
-    });
-
-    // Ordena boxes por número (Box 1, Box 2, ...)
-    const extractNum = (s)=> {
-      const m = String(s).match(/(\d+)/);
-      return m ? Number(m[1]) : 9999;
-    };
-    const ordered = [...byBox.entries()].sort((a,b)=> extractNum(a[0]) - extractNum(b[0]));
-
-    ordered.forEach(([boxName, arr], idx) => {
-      const itens = arr.map(ex => ({
-        exercicio: ex.titulo || ex.nome || 'Exercício',
-        link: normLink(ex.link || ex.url || ex.video || ''),
-        series: toInt(ex.series) ?? sugSeries,
-        reps: toReps(ex.reps) ?? sugRepsMax,   // mantém "8-12" se vier string
-        tempo: toInt(ex.tempo) ?? sugTempo
-      }));
-
-      lista.push({ tipo:'exercicios', titulo: boxName || `Box ${idx+1}`, itens });
-
-      // HIIT/Cardio planejados (alinha por índice do box)
-      const fx = (j.faixasExtras||[]).filter(f=>f.kind==='hiit' || f.kind==='cardio');
-      if (fx.length && idx < fx.length) {
-        const f = fx[idx];
-        if (f.kind==='hiit')   lista.push({ tipo:'hiit',   titulo:f.titulo,  descricao:f.protocolo, tempo_total:f.tempo_total||360 });
-        if (f.kind==='cardio') lista.push({ tipo:'cardio', titulo:f.titulo,  descricao:f.descricao, tempo_total:f.tempo_total||600 });
-      }
-    });
-  }
-}
-
-
+    // 2) Sugestões do backend (quando faltar dado)
     const sugSeries  = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoSeries ?? 3;
     const sugTempo   = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoIntervalo ?? 45;
     const sugRepsMax = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoRepsMax ?? 15;
 
-    caixas.forEach((box, idx) => {
-      lista.push({
-        tipo:'exercicios',
-        titulo: box.titulo || `Box ${idx+1} — ${j.regras?.foco ? j.regras.foco.toUpperCase() : 'FemFlow'}`,
-        itens: (box.itens||[]).map(ex => ({
-          exercicio: ex.exercicio || ex.nome || 'Exercício',
-          link: normLink(ex.link || ex.url || ''),
+    const toInt = (v)=> {
+      if (v==null) return null;
+      const s = String(v).trim();
+      const m = s.match(/^\d+/);
+      return m ? Number(m[0]) : null;
+    };
+    const toReps = (v)=> {
+      if (v==null) return null;
+      const s = String(v).trim();
+      return s.replace(/[–—]/g,'-'); // 8–12 → 8-12
+    };
+
+    // 3) Detectar formato vindo do Firebase
+    const isBoxes = Array.isArray(raw) && raw.length && Array.isArray(raw[0]?.itens);
+
+    if (isBoxes) {
+      // Caixas prontas
+      raw.forEach((box, idx) => {
+        const itens = (box.itens||[]).map(ex => ({
+          exercicio: ex.exercicio || ex.titulo || ex.nome || 'Exercício',
+          link: normLink(ex.link || ex.url || ex.video || ''),
           series: ex.series ?? sugSeries,
           reps: ex.reps ?? sugRepsMax,
           tempo: ex.tempo ?? sugTempo
-        }))
+        }));
+        lista.push({ tipo:'exercicios', titulo: box.titulo || `Box ${idx+1}`, itens });
+
+        const fx = (j.faixasExtras||[]).filter(f=>f.kind==='hiit' || f.kind==='cardio');
+        if (fx.length && idx < fx.length) {
+          const f = fx[idx];
+          if (f.kind==='hiit')   lista.push({ tipo:'hiit',   titulo:f.titulo,  descricao:f.protocolo, tempo_total:f.tempo_total||360 });
+          if (f.kind==='cardio') lista.push({ tipo:'cardio', titulo:f.titulo,  descricao:f.descricao, tempo_total:f.tempo_total||600 });
+        }
       });
-      const fx = (j.faixasExtras||[]).filter(f=>f.kind==='hiit' || f.kind==='cardio');
-      if (fx.length && idx < fx.length) {
-        const f = fx[idx];
-        if (f.kind==='hiit')   lista.push({ tipo:'hiit',   titulo:f.titulo,  descricao:f.protocolo, tempo_total:f.tempo_total||360 });
-        if (f.kind==='cardio') lista.push({ tipo:'cardio', titulo:f.titulo,  descricao:f.descricao, tempo_total:f.tempo_total||600 });
-      }
-    });
+
+    } else {
+      // Lista plana → agrupar por 'box'
+      const byBox = new Map();
+      raw.forEach(doc => {
+        const boxName = (doc.box || 'Box 1').toString();
+        if (!byBox.has(boxName)) byBox.set(boxName, []);
+        byBox.get(boxName).push(doc);
+      });
+
+      const extractNum = (s)=> {
+        const m = String(s).match(/(\d+)/);
+        return m ? Number(m[1]) : 9999;
+      };
+      const ordered = [...byBox.entries()].sort((a,b)=> extractNum(a[0]) - extractNum(b[0]));
+
+      ordered.forEach(([boxName, arr], idx) => {
+        const itens = arr.map(ex => ({
+          exercicio: ex.titulo || ex.nome || 'Exercício',
+          link: normLink(ex.link || ex.url || ex.video || ''),
+          series: toInt(ex.series) ?? sugSeries,
+          reps: toReps(ex.reps) ?? sugRepsMax,
+          tempo: toInt(ex.tempo) ?? sugTempo
+        }));
+
+        lista.push({ tipo:'exercicios', titulo: boxName || `Box ${idx+1}`, itens });
+
+        const fx = (j.faixasExtras||[]).filter(f=>f.kind==='hiit' || f.kind==='cardio');
+        if (fx.length && idx < fx.length) {
+          const f = fx[idx];
+          if (f.kind==='hiit')   lista.push({ tipo:'hiit',   titulo:f.titulo,  descricao:f.protocolo, tempo_total:f.tempo_total||360 });
+          if (f.kind==='cardio') lista.push({ tipo:'cardio', titulo:f.titulo,  descricao:f.descricao, tempo_total:f.tempo_total||600 });
+        }
+      });
+    }
 
   } else {
+    // Fallback planilha
     (j.boxes||[]).forEach(b => {
       if (b.tipo==='exercicios' || b.tipo==='hiit' || b.tipo==='cardio') {
-        // normaliza links do legado
         if (Array.isArray(b.itens)) b.itens = b.itens.map(ex => ({ ...ex, link: normLink(ex.link||'') }));
         lista.push(b);
       }
@@ -316,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   render(lista);
 
-  // ===== Ações: Salvar / Descanso (PSE) =====
+  // -------- Ações: Salvar / Descanso --------
   document.getElementById('salvarTreinoBtn')?.addEventListener('click', async () => {
     FEMFLOW.abrirPSE(async (pse) => {
       await FEMFLOW.salvarTreino({
