@@ -260,19 +260,19 @@
 <script src="./femflow-core.js"></script>
 
 <script>
-// Helpers (iguais aos da Home)
-function hasEntitlement() {
-  const sku = localStorage.getItem('femflow_program');
-  const exp = localStorage.getItem('femflow_program_expiry');
-  if (!sku || !exp) return false;
-  return new Date() <= new Date(exp);
-}
 async function syncEntitlement() {
   try {
     const email = localStorage.getItem('femflow_email') || '';
-    if (!email || !window.FEMFLOW?.SCRIPT_URL) return;
-    const url = `${FEMFLOW.SCRIPT_URL}?action=status&email=${encodeURIComponent(email)}`;
-    const r = await fetch(url); const j = await r.json();
+    const id    = localStorage.getItem('femflow_id') || '';
+    if (!email && !id) return;
+    if (!window.FEMFLOW?.SCRIPT_URL) return;
+
+    // usa email; se não tiver, cai pro id
+    const q = email ? `email=${encodeURIComponent(email)}` : `id=${encodeURIComponent(id)}`;
+    const url = `${FEMFLOW.SCRIPT_URL}?action=status&${q}`;
+
+    const r = await fetch(url);
+    const j = await r.json();
 
     if (j?.id) localStorage.setItem('femflow_id', j.id);
     if (j?.program) localStorage.setItem('femflow_program', j.program);
@@ -283,7 +283,9 @@ async function syncEntitlement() {
 
     if (j?.cycle?.startDate) localStorage.setItem('femflow_startDate', j.cycle.startDate);
     if (j?.cycle?.length)    localStorage.setItem('femflow_cycleLength', j.cycle.length);
-  } catch(e){ console.warn('syncEntitlement failed', e); }
+  } catch(e) {
+    console.warn('syncEntitlement failed', e);
+  }
 }
 </script>
 
