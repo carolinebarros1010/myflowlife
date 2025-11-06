@@ -123,35 +123,35 @@
      <circle cx="150" cy="150" r="65" fill="none" stroke="#fff5ef" stroke-width="2"></circle>
      <circle cx="150" cy="150" r="63" fill="#cc6a5a"></circle>
 
-      <!-- 🔁 Caminhos de texto: agora perfeitamente alinhados com as fatias -->
-      <defs>
-        <!-- Menstrual • centrado em 45° -->
-        <path id="text-menstrual"  d="M185,55 A112,112 0 0,1 260,130" fill="none" />
-        <!-- Folicular • centrado em 135° -->
-        <path id="text-follicular" d="M55,115 A112,112 0 0,1 125,45" fill="none" />
-        <!-- Ovulatória • centrado em 225° -->
-        <path id="text-ovulatory"  d="M115,255 A112,112 0 0,1 45,185" fill="none" />
-        <!-- Lútea • centrado em 315° -->
-        <path id="text-luteal"     d="M255,185 A112,112 0 0,1 185,255" fill="none" />
-      </defs>
+      <!-- 🔁 Caminhos de texto: mesma posição angular, raio reduzido (r=102) -->
+<defs>
+  <!-- Menstrual • centrado em 45° -->
+  <path id="text-menstrual"  d="M180,65 A102,102 0 0,1 255,130" fill="none" />
+  <!-- Folicular • centrado em 135° -->
+  <path id="text-follicular" d="M65,120 A102,102 0 0,1 120,65" fill="none" />
+  <!-- Ovulatória • centrado em 225° -->
+  <path id="text-ovulatory"  d="M120,255 A102,102 0 0,1 45,180" fill="none" />
+  <!-- Lútea • centrado em 315° -->
+  <path id="text-luteal"     d="M255,180 A102,102 0 0,1 180,255" fill="none" />
+</defs>
 
-      <!-- Textos curvados (mantidos iguais e centralizados) -->
-      <text id="lbl-menstrual" font-family="Playfair Display" font-size="13" font-weight="700"
-            fill="#cc6a5a" text-anchor="middle">
-        <textPath href="#text-menstrual" startOffset="50%">Menstrual</textPath>
-      </text>
-      <text id="lbl-follicular" font-family="Playfair Display" font-size="13" font-weight="700"
-            fill="#cc6a5a" text-anchor="middle">
-        <textPath href="#text-follicular" startOffset="50%">Folicular</textPath>
-      </text>
-      <text id="lbl-ovulatory" font-family="Playfair Display" font-size="13" font-weight="700"
-            fill="#cc6a5a" text-anchor="middle">
-        <textPath href="#text-ovulatory" startOffset="50%">Ovulatória</textPath>
-      </text>
-      <text id="lbl-luteal" font-family="Playfair Display" font-size="13" font-weight="700"
-            fill="#cc6a5a" text-anchor="middle">
-        <textPath href="#text-luteal" startOffset="50%">Lútea</textPath>
-      </text>
+<!-- Textos curvados (idênticos, apenas reposicionados mais para dentro) -->
+<text id="lbl-menstrual" font-family="Playfair Display" font-size="13" font-weight="700"
+      fill="#cc6a5a" text-anchor="middle">
+  <textPath href="#text-menstrual" startOffset="50%">Menstrual</textPath>
+</text>
+<text id="lbl-follicular" font-family="Playfair Display" font-size="13" font-weight="700"
+      fill="#cc6a5a" text-anchor="middle">
+  <textPath href="#text-follicular" startOffset="50%">Folicular</textPath>
+</text>
+<text id="lbl-ovulatory" font-family="Playfair Display" font-size="13" font-weight="700"
+      fill="#cc6a5a" text-anchor="middle">
+  <textPath href="#text-ovulatory" startOffset="50%">Ovulatória</textPath>
+</text>
+<text id="lbl-luteal" font-family="Playfair Display" font-size="13" font-weight="700"
+      fill="#cc6a5a" text-anchor="middle">
+  <textPath href="#text-luteal" startOffset="50%">Lútea</textPath>
+</text>
 
       <!-- Texto central -->
       <text id="centerPhase" x="150" y="155" text-anchor="middle"
