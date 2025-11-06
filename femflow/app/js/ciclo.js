@@ -15,29 +15,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 🌀 Iniciar novo programa
-  btnIniciar?.addEventListener('click', () => {
-    const dataUltima = document.getElementById('dataUltima').value;
-    const dur = document.getElementById('duracao').value;
-    if (!dataUltima || !dur) {
-      alert('Preencha a data da última menstruação e a duração do ciclo.');
-      return;
-    }
+// 🌀 Iniciar novo programa
+btnIniciar?.addEventListener('click', () => {
+  const dataUltima = document.getElementById('dataUltima').value;
+  const dur = document.getElementById('duracao').value;
+  if (!dataUltima || !dur) {
+    FEMFLOW?.toast?.('⚠️ Preencha a data e a duração do ciclo.') || alert('Preencha a data e a duração do ciclo.');
+    return;
+  }
 
-    // Gera ou resgata ID
-    let id = localStorage.getItem('femflow_id');
-    if (!id) id = `FF-${Date.now().toString(36).toUpperCase()}`;
+  // Gera ou resgata ID
+  let id = localStorage.getItem('femflow_id');
+  if (!id) id = `FF-${Date.now().toString(36).toUpperCase()}`;
+  localStorage.setItem('femflow_id', id);
 
-    // Valida função externa
-    if (typeof iniciarPrograma === "function") {
-      iniciarPrograma(id, dataUltima, dur);
-    } else {
-      console.warn("⚠️ Função iniciarPrograma não encontrada.");
-    }
+  // 🔹 Salva ciclo no localStorage
+  localStorage.setItem('femflow_startDate', dataUltima);
+  localStorage.setItem('femflow_cycleLength', dur);
+  localStorage.setItem('femflow_cycle_configured', 'yes');
 
-    localStorage.setItem('femflow_id', id);
-    window.location.href = 'treino.html';
-  });
+  // 🔹 Feedback ao usuário
+  FEMFLOW?.toast?.('🌸 Ciclo configurado com sucesso!') || alert('Ciclo configurado com sucesso!');
+
+  // 🔹 Redireciona para HOME (não treino)
+  setTimeout(() => {
+    window.location.href = 'home.html';
+  }, 1200);
+});
 
   // 🔑 Validação de ID existente
   btnValidar?.addEventListener('click', () => {
