@@ -101,68 +101,7 @@
     }
   </style>
 </head>
-
 <body>
-  <h1>FemFlow</h1>
-  <h3>Fase Hormonal</h3>
-  <p class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
-
- <div class="phase-svg">
-  <svg viewBox="0 0 300 300" width="260" height="260">
-    <!-- Fundo bege -->
-    <circle cx="150" cy="150" r="120" fill="#fff5ef"></circle>
-
-    <!-- Fatias -->
-    <g stroke="#fff5ef" stroke-width="3">
-      <path id="seg-ovulatory"  d="M150,150 L150,30 A120,120 0 0,1 270,150 Z" fill="#f9e0d8"></path>
-      <path id="seg-luteal" d="M150,150 L270,150 A120,120 0 0,1 150,270 Z" fill="#f9e0d8"></path>
-      <path id="seg-menstrual"  d="M150,150 L150,270 A120,120 0 0,1 30,150 Z" fill="#f9e0d8"></path>
-      <path id="seg-follicular"     d="M150,150 L30,150 A120,120 0 0,1 150,30 Z" fill="#f9e0d8"></path>
-    </g>
-
-    <!-- Centro -->
-    <circle cx="150" cy="150" r="78" fill="#cc6a5a"></circle>
-
-<!-- 🔁 Modelo base mantido, textos invertidos (girados 180° no próprio eixo) -->
-<!-- ✅ Versão final: mantém posições, curvas corretas e orienta textos de pé -->
-<defs>
-  <!-- 🌀 Caminhos de texto levemente mais externos (raio 112) -->
-  <path id="text-menstrual"
-        d="M185.9,43 A112,112 0 0,1 257,114.1" fill="none" />
-  <path id="text-follicular"
-        d="M43,114.1 A112,112 0 0,1 114.1,43" fill="none" />
-  <path id="text-ovulatory"
-        d="M114.1,257 A112,112 0 0,1 43,185.9" fill="none" />
-  <path id="text-luteal"
-        d="M257,185.9 A112,112 0 0,1 185.9,257" fill="none" />
-</defs>
-
-<!-- textos curvados agora mais centralizados na borda -->
-<text id="lbl-menstrual" font-family="Playfair Display" font-size="13" font-weight="700"
-      fill="#cc6a5a" text-anchor="middle">
-  <textPath href="#text-menstrual" startOffset="50%">Menstrual</textPath>
-</text>
-<text id="lbl-follicular" font-family="Playfair Display" font-size="13" font-weight="700"
-      fill="#cc6a5a" text-anchor="middle">
-  <textPath href="#text-follicular" startOffset="50%">Folicular</textPath>
-</text>
-<text id="lbl-ovulatory" font-family="Playfair Display" font-size="13" font-weight="700"
-      fill="#cc6a5a" text-anchor="middle">
-  <textPath href="#text-ovulatory" startOffset="50%">Ovulatória</textPath>
-</text>
-<text id="lbl-luteal" font-family="Playfair Display" font-size="13" font-weight="700"
-      fill="#cc6a5a" text-anchor="middle">
-  <textPath href="#text-luteal" startOffset="50%">Lútea</textPath>
-</text>
-<text id="lbl-luteal" font-family="Playfair Display" font-size="13"
-      font-weight="700" fill="#cc6a5a" text-anchor="middle">
-  <textPath href="#text-luteal" startOffset="50%">Lútea</textPath>
-</text>
- <!-- Texto central -->
-    <text id="centerPhase" x="150" y="152" text-anchor="middle"
-          font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff">—</text>
-  </svg>
-</div><body>
   <h1>FemFlow</h1>
   <h3>Fase Hormonal</h3>
   <p class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
