@@ -84,73 +84,158 @@ const FEMFLOW = {
     KEYS.forEach(k => localStorage.removeItem(k));
     window.location.href = 'login.html';
   },
+/* =======================================================
+   🔹 CABEÇALHO + MENU CONTEXTUAL FEMFLOW (2025)
+   ======================================================= */
+inserirHeaderApp() {
+  if (document.querySelector(".ff-topbar")) return;
+  const page = location.pathname.split("/").pop().toLowerCase();
+  if (/home|login/i.test(page)) return;
 
-  /* =======================================================
-     🔹 2. INTERFACE VISUAL
-  ======================================================= */
-  inserirLogo() {
-    if (this._isPublicPage()) return;
-    if (!document.body) return;
+  const header = document.createElement("div");
+  header.className = "ff-topbar";
+  header.innerHTML = `
+    <a href="https://www.femflow.com.br" target="_blank" rel="noopener">
+      <img src="${this.LOGO}" alt="FemFlow" class="ff-logo">
+    </a>
+    <button class="ff-menu-btn">⋮</button>
+  `;
+  document.body.prepend(header);
 
-    if (document.querySelector(".logo-img")) return; // evita duplicar
-    const header = document.createElement("div");
-    header.innerHTML = `
-      <div style="display:flex;justify-content:center;margin:15px 0;">
-        <img src="${this.LOGO}" alt="FemFlow" class="logo-img" style="width:130px;height:auto;">
-      </div>`;
-    document.body.prepend(header);
-  },
-
-  async carregarLogoContextual() {
-    try {
-      const res = await fetch("./assets/logos.json").catch(() => null);
-      if (!res || !res.ok) return;
-      const logos = await res.json();
-      let logoEscolhido = logos?.principal || this.LOGO;
-
-      const hora = new Date().getHours();
-      const darkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-      if (darkMode) logoEscolhido = logos.escuro || logoEscolhido;
-      else if (hora >= 18 || hora < 6) logoEscolhido = logos.escuro || logoEscolhido;
-
-      const page = (location.pathname.split("/").pop() || "").toLowerCase();
-      if (page.includes("treino")) logoEscolhido = logos.secundario || logoEscolhido;
-      if (page.includes("boasvindas")) logoEscolhido = logos.boasvindas || logoEscolhido;
-
-      const logoImg = document.querySelector(".logo-img");
-      if (logoImg) logoImg.src = logoEscolhido;
-    } catch {
-      console.debug("logos.json não encontrado/ignorado");
+  const style = document.createElement("style");
+  style.textContent = `
+    .ff-topbar {
+      position:fixed;top:0;left:0;width:100%;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 16px;background:rgba(255,255,255,0.9);
+      backdrop-filter:blur(8px);box-shadow:0 1px 6px rgba(0,0,0,0.08);
+      z-index:999;
     }
-  },
+    .ff-logo{width:42px;height:auto;cursor:pointer;}
+    .ff-menu-btn{
+      background:var(--terracota,#cc6a5a);color:#fff;font-size:22px;
+      border:none;border-radius:10px;padding:4px 10px;cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,0.15);
+    }
+    .ff-menu-modal{
+      display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.45);align-items:center;justify-content:center;
+      z-index:1000;
+    }
+    .ff-menu-box{
+      background:#fff;border-radius:20px;padding:22px;text-align:center;
+      width:80%;max-width:320px;box-shadow:0 4px 12px rgba(0,0,0,0.25);
+    }
+    .ff-menu-box h3{
+      color:#335953;font-family:'Playfair Display',serif;margin-bottom:10px;
+    }
+    .ff-menu-box button{
+      display:block;width:100%;margin:8px 0;padding:10px;border:none;
+      border-radius:12px;font-family:"Lato",sans-serif;font-weight:600;
+      cursor:pointer;background:var(--bege,#f9f3ef);color:var(--terracota,#cc6a5a);
+      transition:all .3s;
+    }
+    .ff-menu-box button:hover{background:var(--terracota,#cc6a5a);color:#fff;}
+  `;
+  document.head.appendChild(style);
 
-  inserirBotaoVoltar() {
-    if (this._isPublicPage()) return;
-    if (document.querySelector(".btn-voltar")) return;
+  FEMFLOW.criarMenuModal(page);
+},
 
-    const voltar = document.createElement("button");
-    voltar.className = "btn-voltar";
-    voltar.textContent = "← Voltar";
-    voltar.style.cssText = `
-      position:fixed; top:15px; left:15px;
-      background:#335953; color:#fff; border:none;
-      padding:8px 14px; border-radius:20px;
-      font-family:'Lato',sans-serif; font-size:14px;
-      box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:999; cursor:pointer;
-    `;
+criarMenuModal(page) {
+  if (document.querySelector(".ff-menu-modal")) return;
+  const modal = document.createElement("div");
+  modal.className = "ff-menu-modal";
+  document.body.appendChild(modal);
 
-    const map = {
-      "flowcenter.html": "home.html",
-      "treino.html": "flowcenter.html",
-      "evolucao.html": "flowcenter.html",
-      "ciclo.html": "home.html",
+  const openMenu = () => {
+    modal.innerHTML = FEMFLOW._getMenuHTML(page);
+    modal.style.display = "flex";
+    FEMFLOW._bindMenuAcoes(page, modal);
+  };
+
+  document.querySelector(".ff-menu-btn").onclick = openMenu;
+},
+
+_getMenuHTML(page) {
+  let items = "";
+  switch (page) {
+    case "flowcenter.html":
+    case "evolucao.html":
+      items = `
+        <h3>Menu</h3>
+        <button id="btnPersonalizar">🎯 Personalizar treino</button>
+        <button id="btnCancelarPlano">❌ Cancelar plano</button>
+        <button id="btnVoltarInicio">🏠 Voltar</button>
+        <button id="btnFecharMenu">Fechar</button>`;
+      break;
+    case "treino.html":
+      items = `
+        <h3>Menu</h3>
+        <button id="btnCancelarTreino">🛑 Cancelar treino</button>
+        <button id="btnRespirar">🧘 Respiração</button>
+        <button id="btnVoltarFlow">🏠 Voltar ao Flow Center</button>
+        <button id="btnFecharMenu">Fechar</button>`;
+      break;
+    case "respiracao.html":
+      items = `
+        <h3>Menu</h3>
+        <button id="btnCancelar">🛑 Cancelar</button>
+        <button id="btnVoltarFlow">🏠 Voltar ao Flow Center</button>
+        <button id="btnPlano">💳 Adquirir plano</button>
+        <button id="btnFecharMenu">Fechar</button>`;
+      break;
+    default:
+      items = `<button id="btnFecharMenu">Fechar</button>`;
+  }
+  return `<div class="ff-menu-box">${items}</div>`;
+},
+
+_bindMenuAcoes(page, modal) {
+  const fechar = () => (modal.style.display = "none");
+  modal.querySelector("#btnFecharMenu")?.addEventListener("click", fechar);
+
+  // Flowcenter e Evolução
+  if (["flowcenter.html", "evolucao.html"].includes(page)) {
+    modal.querySelector("#btnPersonalizar").onclick = () =>
+      window.open("https://www.myflowlife.com.br/#planos", "_blank");
+    modal.querySelector("#btnCancelarPlano").onclick = () => {
+      const c = document.createElement("div");
+      c.className = "ff-menu-modal";
+      c.innerHTML = `
+        <div class="ff-menu-box">
+          <p>Tem certeza que deseja cancelar o plano?</p>
+          <button id="sim">Sim</button><button id="nao">Não</button>
+        </div>`;
+      document.body.appendChild(c);
+      c.style.display = "flex";
+      c.querySelector("#nao").onclick = () => c.remove();
+      c.querySelector("#sim").onclick = () => {
+        c.remove();
+        FEMFLOW.toast("❌ Plano cancelado");
+        setTimeout(() => FEMFLOW.router("home"), 800);
+      };
     };
-    const page = location.pathname.split("/").pop();
-    voltar.onclick = () => this.router(map[page] || "flowcenter");
-    document.body.appendChild(voltar);
-  },
+    modal.querySelector("#btnVoltarInicio").onclick = () => FEMFLOW.router("home");
+  }
 
+  // Treino
+  if (page === "treino.html") {
+    modal.querySelector("#btnCancelarTreino").onclick = () => {
+      FEMFLOW.toast("❌ Treino cancelado");
+      FEMFLOW.router("flowcenter");
+    };
+    modal.querySelector("#btnRespirar").onclick = () => FEMFLOW.router("respiracao");
+    modal.querySelector("#btnVoltarFlow").onclick = () => FEMFLOW.router("flowcenter");
+  }
+
+  // Respiração
+  if (page === "respiracao.html") {
+    modal.querySelector("#btnCancelar").onclick = () => FEMFLOW.router("respiracao");
+    modal.querySelector("#btnVoltarFlow").onclick = () => FEMFLOW.router("flowcenter");
+    modal.querySelector("#btnPlano").onclick = () => FEMFLOW.router("home");
+  }
+},
   /* =======================================================
      🔹 3. SALVAR TREINO / DESCANSO / PSE
   ======================================================= */
