@@ -2,262 +2,234 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>FemFlow • Flow Center</title>
+
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
   <style>
-    :root{
-      --bege:#fff5ef;
-      --terracota:#cc6a5a;
-      --terracota-light:#eabbaa;
-      --texto:#5b4f49;
+    :root {
+      --bege: #fff5ef;
+      --terracota: #cc6a5a;
+      --terracota-light: #f0c5b6;
+      --terracota-lighter: #f6d7cc;
+      --texto: #5b4f49;
     }
-    body{
-      margin:0;background:var(--bege);color:var(--texto);
-      font-family:"Lato", sans-serif;text-align:center;
-      overflow-x:hidden;
+
+    body {
+      margin: 0;
+      background: var(--bege);
+      color: var(--texto);
+      font-family: "Lato", sans-serif;
+      text-align: center;
+      padding-top: 70px;
     }
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:12px 18px;
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--terracota);
+      margin: 10px 0;
     }
-    .lang{
-      display:flex;gap:8px;align-items:center;
-      background:#fff;border-radius:20px;padding:4px 10px;
-      border:1px solid rgba(204,106,90,0.25);
+
+    h3 {
+      color: var(--terracota);
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 6px;
     }
-    .lang button{
-      border:none;background:transparent;font-weight:700;cursor:pointer;
-      color:var(--texto);opacity:.6
+
+    .phase-circle {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      margin: 25px auto;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--terracota-light) 0deg 90deg,
+        var(--terracota-lighter) 90deg 180deg,
+        var(--terracota-lighter) 180deg 270deg,
+        var(--terracota-lighter) 270deg 360deg
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .lang button.active{opacity:1;color:var(--terracota)}
-    .brand{
-      display:flex;align-items:center;justify-content:center;margin:8px auto 0;gap:8px;
+
+    .phase-circle.active-menstrual {
+      background: conic-gradient(
+        var(--terracota) 0deg 90deg,
+        var(--terracota-lighter) 90deg 180deg,
+        var(--terracota-lighter) 180deg 270deg,
+        var(--terracota-lighter) 270deg 360deg
+      );
     }
-    .brand img{width:40px;height:40px;border-radius:12px}
-    .brand h1{font-family:"Playfair Display",serif;font-size:1.8rem;color:var(--terracota);margin:0}
-    .card{
-      background:#fff;border-radius:18px;box-shadow:0 6px 20px rgba(0,0,0,.06);
-      padding:20px;margin:16px auto;max-width:400px;
+
+    .phase-circle.active-follicular {
+      background: conic-gradient(
+        var(--terracota-lighter) 0deg 90deg,
+        var(--terracota) 90deg 180deg,
+        var(--terracota-lighter) 180deg 270deg,
+        var(--terracota-lighter) 270deg 360deg
+      );
     }
-    h3{font-family:"Playfair Display",serif;margin:.5rem 0;color:var(--terracota)}
-    p.subtitle{margin-top:.2rem;font-size:.9rem;opacity:.8}
 
-    /* Circle container */
-.circle-wrap {
-  position: relative;
-  width: 280px;
-  height: 280px;
-  margin: 20px auto;
-}
-
-svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg); /* começa no topo */
-}
-
-#centerPhase {
-  transform: rotate(90deg); /* texto na horizontal */
-  font-size: 1.2rem;
-  fill: var(--terracota);
-}
-
-/* Posicionamento fixo das fases ao redor */
-.phase-label {
-  position: absolute;
-  font-family: "Playfair Display", serif;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: #7a6c66;
-}
-
-/* 🩸 Menstrual: topo */
-.p-menstrual { top: -10px; left: 50%; transform: translateX(-50%); }
-
-/* 🌱 Folicular: canto inferior direito */
-.p-follicular { bottom: 5px; right: 25px; }
-
-/* ☀️ Ovulatória: canto inferior esquerdo */
-.p-ovulatory { bottom: 5px; left: 25px; }
-
-/* 🌙 Lútea: topo esquerdo */
-.p-luteal { top: -10px; left: 20px; }
-
-
-    .toolbar{display:flex;gap:12px;justify-content:center;margin:6px 0 20px}
-    .tool{
-      border:1px solid rgba(204,106,90,0.25);background:#fff;color:var(--terracota);
-      padding:8px 12px;border-radius:12px;font-weight:700;cursor:pointer;
+    .phase-circle.active-ovulatory {
+      background: conic-gradient(
+        var(--terracota-lighter) 0deg 180deg,
+        var(--terracota) 180deg 270deg,
+        var(--terracota-lighter) 270deg 360deg
+      );
     }
-    select{
-      background:#fff;border:1px solid rgba(204,106,90,0.25);
-      border-radius:10px;padding:6px 10px;font-weight:600;color:var(--texto);
-      margin:12px auto 6px;
+
+    .phase-circle.active-luteal {
+      background: conic-gradient(
+        var(--terracota-lighter) 0deg 270deg,
+        var(--terracota) 270deg 360deg
+      );
+    }
+
+    .inner-circle {
+      width: 130px;
+      height: 130px;
+      background: var(--terracota);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .phase-labels {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      color: var(--texto);
+    }
+
+    .phase-labels div {
+      position: absolute;
+      font-size: 0.85rem;
+      width: 100px;
+      text-align: center;
+      color: #9c8a84;
+    }
+
+    .lbl-menstrual { top: -12px; left: 50%; transform: translateX(-50%); }
+    .lbl-follicular { right: -40px; top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: left center; }
+    .lbl-ovulatory { bottom: -14px; left: 50%; transform: translateX(-50%); }
+    .lbl-luteal { left: -40px; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: right center; }
+
+    .current-phase {
+      margin-top: 25px;
+      font-weight: 700;
+      color: var(--terracota);
+    }
+
+    .dual-lang {
+      font-size: 0.9rem;
+      color: #7a6c66;
+      margin-top: 4px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 25px 0;
+    }
+
+    .tool {
+      border: 1px solid rgba(204,106,90,0.25);
+      background: #fff;
+      color: var(--terracota);
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: "Lato", sans-serif;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .tool:hover {
+      background: var(--terracota);
+      color: #fff;
+      transform: scale(1.03);
+      transition: all .3s ease;
     }
   </style>
 </head>
+
 <body>
-  <div class="topbar">
-    <div></div>
-    <div class="lang">
-      <button id="btnPT" class="active">PT</button>
-      <span>•</span>
-      <button id="btnEN"><i>EN</i></button>
+  <h1>FemFlow</h1>
+  <h3>Fase Hormonal</h3>
+  <p>Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
+
+  <div class="phase-circle" id="circle">
+    <div class="phase-labels">
+      <div class="lbl-menstrual">Menstrual</div>
+      <div class="lbl-follicular">Folicular</div>
+      <div class="lbl-ovulatory">Ovulatória</div>
+      <div class="lbl-luteal">Lútea</div>
     </div>
+    <div class="inner-circle" id="centerPhase">—</div>
   </div>
 
-  
-  <div class="card">
-    <h3 id="t_hormonalPhase">Fase hormonal</h3>
-    <p id="t_hormonalHint" class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
-
-  <div class="circle-wrap">
-  <svg viewBox="0 0 300 300">
-    <!-- Base -->
-    <circle cx="150" cy="150" r="110" fill="none" stroke="#f3e0d9" stroke-width="26"/>
-    <!-- Progresso -->
-    <circle id="progressArc" cx="150" cy="150" r="110"
-      fill="none" stroke="#cc6a5a" stroke-width="26"
-      stroke-linecap="round" stroke-dasharray="0 690"/>
-    <!-- Núcleo interno -->
-    <circle cx="150" cy="150" r="70" fill="#f8ece7" stroke="#efd0c7" stroke-width="1"/>
-    <!-- Fase atual (fixa) -->
-    <text id="centerPhase" x="150" y="155" text-anchor="middle"
-          font-family="Playfair Display,serif" font-size="20" font-weight="700" fill="#cc6a5a">—</text>
-  </svg>
-
-  <div class="phase-label p-menstrual"  id="lblMenstrual">Menstrual</div>
-  <div class="phase-label p-follicular" id="lblFollicular">Folicular</div>
-  <div class="phase-label p-ovulatory"  id="lblOvulatory">Ovulatória</div>
-  <div class="phase-label p-luteal"     id="lblLuteal">Lútea</div>
-</div>
-
-<select id="cycleSelect">
-  <option value="25">25 dias</option>
-  <option value="26">26 dias</option>
-  <option value="27">27 dias</option>
-  <option value="28" selected>28 dias</option>
-  <option value="29">29 dias</option>
-  <option value="30">30 dias</option>
-  <option value="31">31 dias</option>
-  <option value="32">32 dias</option>
-  <option value="33">33 dias</option>
-  <option value="34">34 dias</option>
-  <option value="35">35 dias</option>
-  <option value="irregular">Irregular</option>
-  <option value="diu">DIU</option>
-  <option value="menopausa">Menopausa</option>
-</select>
+  <div class="current-phase" id="t_current">Fase atual: —</div>
+  <div class="dual-lang" id="t_current_en">Current phase: —</div>
 
   <div class="toolbar">
     <button class="tool" id="toBreath">💨 Respiração / <i>Breath</i></button>
     <button class="tool" id="toTrain">🏃 Treino / <i>Training</i></button>
   </div>
+
+  <script src="./femflow-core.js"></script>
   <script>
-/* -------- I18N texts -------- */
-const T = {
-  pt:{phases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"},
-      hint:{menstrual:"Recuperação e introspecção",follicular:"Crescimento e energia crescente",
-             ovulatory:"Pico de fertilidade e confiança",luteal:"Regulação emocional e aterramento"},
-      current:"Fase atual"},
-  en:{phases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"},
-      hint:{menstrual:"Recovery and introspection",follicular:"Growth and rising energy",
-             ovulatory:"Peak fertility and confidence",luteal:"Emotional regulation and grounding"},
-      current:"Current phase"}
-};
-let LANG = localStorage.getItem("femflow_lang")||"pt";
-const $=s=>document.querySelector(s);
+    document.addEventListener('DOMContentLoaded', () => {
+      FEMFLOW.inserirHeaderApp();
 
-function applyLang(){
-  document.getElementById("btnPT").classList.toggle("active",LANG==="pt");
-  document.getElementById("btnEN").classList.toggle("active",LANG==="en");
-  const l=LANG==="pt"?T.pt:T.en;
-  $("#lblMenstrual").innerHTML=l.phases.menstrual;
-  $("#lblFollicular").innerHTML=l.phases.follicular;
-  $("#lblOvulatory").innerHTML=l.phases.ovulatory;
-  $("#lblLuteal").innerHTML=l.phases.luteal;
-  renderPhaseUI();
-}
-$("#btnPT").onclick=()=>{LANG="pt";localStorage.setItem("femflow_lang","pt");applyLang()};
-$("#btnEN").onclick=()=>{LANG="en";localStorage.setItem("femflow_lang","en");applyLang()};
+      const ciclo = parseInt(localStorage.getItem('femflow_cycleLength') || 28);
+      const inicio = new Date(localStorage.getItem('femflow_startDate') || new Date());
+      const diff = Math.floor((new Date() - inicio) / (1000*60*60*24));
+      const dia = (diff % ciclo) + 1;
 
-/* -------- Progress engine -------- */
-let ciclo_duracao=parseInt(localStorage.getItem("femflow_cycleLength"))||28;
-let startDate=new Date(localStorage.getItem("femflow_startDate")||new Date());
-localStorage.setItem("femflow_startDate",startDate.toISOString());
-const circumference=2*Math.PI*110;
+      function faseAtual(d){
+        if(d <= 5) return 'menstrual';
+        if(d <= 13) return 'follicular';
+        if(d <= 17) return 'ovulatory';
+        return 'luteal';
+      }
 
-function calcDia(){
-  const diff=Math.floor((new Date()-new Date(startDate))/(1000*60*60*24));
-  return (diff%ciclo_duracao)+1;
-}
+      const fase = faseAtual(dia);
+      const nomes = {
+        menstrual:['Menstrual','Menstrual'],
+        follicular:['Folicular','Follicular'],
+        ovulatory:['Ovulatória','Ovulatory'],
+        luteal:['Lútea','Luteal']
+      };
 
-let diaCiclo=calcDia();
-$("#cycleSelect").value=ciclo_duracao;
-$("#cycleSelect").addEventListener("change",e=>{
-  let val = e.target.value;
-  if(["irregular","diu","menopausa"].includes(val)) val = 28;
-  ciclo_duracao=parseInt(val);
-  localStorage.setItem("femflow_cycleLength",ciclo_duracao);
-  renderAll();
-});
+      const circle = document.getElementById('circle');
+      circle.classList.add('active-' + fase);
+      document.getElementById('centerPhase').textContent = nomes[fase][0];
+      document.getElementById('t_current').textContent = `Fase atual: ${nomes[fase][0]}`;
+      document.getElementById('t_current_en').textContent = `Current phase: ${nomes[fase][1]}`;
 
-function phaseFromDay(d){
-  if(d<=5) return"menstrual";
-  if(d<=13)return"follicular";
-  if(d<=17)return"ovulatory";
-  return"luteal";
-}
-
-function renderArc(){
-  const progress=(diaCiclo/ciclo_duracao);
-  const dash=(circumference*progress).toFixed(1);
-  const fase=phaseFromDay(diaCiclo);
-
-  // 💫 cor do arco conforme a fase
-  const cores={
-    menstrual:"#cc6a5a",
-    follicular:"#eabbaa",
-    ovulatory:"#335953",
-    luteal:"#b47b6b"
-  };
-  $("#progressArc").setAttribute("stroke", cores[fase]);
-  $("#progressArc").setAttribute("stroke-dasharray",`${dash} ${circumference}`);
-  $("#progressArc").style.transition="stroke-dasharray 2s linear, stroke 1s ease";
-}
-
-function renderPhaseUI(){
-  const l=LANG==="pt"?T.pt:T.en;
-  const fase=phaseFromDay(diaCiclo);
-  const nome=l.phases[fase];
-  const dica=l.hint[fase];
-  $("#centerPhase").textContent=nome;
-  $("#centerDay").textContent=`${diaCiclo}/${ciclo_duracao}`;
-  $("#t_current").innerHTML=`${LANG==="pt"?l.current:"<i>"+l.current+"</i>"}: ${nome}`;
-  $("#t_hint").innerHTML=LANG==="pt"?dica:"<i>"+dica+"</i>";
-  ["Menstrual","Follicular","Ovulatory","Luteal"].forEach(k=>{
-    const el=$("#lbl"+k);
-    el.style.color=k.toLowerCase().includes(fase.slice(0,4))?"#cc6a5a":"#7a6c66";
-    el.style.opacity=k.toLowerCase().includes(fase.slice(0,4))?"1":".6";
-  });
-}
-
-function renderAll(){diaCiclo=calcDia();renderArc();renderPhaseUI();}
-applyLang();renderAll();
-
-// 🔄 Atualiza a cada hora (sem girar o SVG)
-setInterval(()=>{renderAll()},1000*60*60);
-document.querySelector("svg").style.transform="rotate(0deg)";
-
-// 🔹 Botões
-$("#toBreath").onclick=()=>location.href="respiracao.html";
-$("#toTrain").onclick=()=>location.href="treino.html";
-$("#startBtn").onclick=()=>location.href="respiracao.html";
-</script>
-
-    
+      // Botões
+      document.getElementById('toBreath').onclick = () => FEMFLOW.router('respiracao');
+      document.getElementById('toTrain').onclick = () => FEMFLOW.router('treino');
+    });
+  </script>
 </body>
 </html>
-
