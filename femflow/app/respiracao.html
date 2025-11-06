@@ -5,300 +5,284 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Respiração FemFlow</title>
 
- <style>
-  :root {
-    --terracota: #CC6A5A;
-    --bege: #FFF5EF;
-    --verde: #335953;
-    --texto: #5B4F49;
-  }
+  <style>
+    :root {
+      --terracota: #CC6A5A;
+      --bege: #FFF5EF;
+      --verde: #335953;
+      --texto: #5B4F49;
+    }
 
-  body {
-    background-color: var(--bege);
-    color: var(--texto);
-    font-family: "Lato", sans-serif;
-    text-align: center;
-    margin: 0;
-    padding-top: calc(85px + env(safe-area-inset-top, 0px)); /* compensa topbar */
-    box-sizing: border-box;
-  }
+    body {
+      background-color: var(--bege);
+      color: var(--texto);
+      font-family: "Lato", sans-serif;
+      text-align: center;
+      margin: 0;
+      padding-top: calc(85px + env(safe-area-inset-top, 0px));
+      box-sizing: border-box;
+    }
 
-  /* === TITULOS IGUAIS AO FLOWCENTER === */
-  h1 {
-    font-family: 'Playfair Display', serif;
-    color: var(--terracota);
-    font-size: 2.2rem;
-    margin: 0;
-    line-height: 1.2;
-  }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      color: var(--terracota);
+      font-size: 2.2rem;
+      line-height: 1.2;
+      margin: 0;
+    }
 
-  h1 span:first-child {
-    display: block;
-    color: var(--texto);
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    font-size: 1.6rem;
-  }
+    h1 span:first-child {
+      display: block;
+      color: var(--texto);
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
 
-  h1 span:last-child {
-    display: block;
-    color: var(--terracota);
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    font-size: 2.2rem;
-  }
+    h1 span:last-child {
+      display: block;
+      color: var(--terracota);
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
 
-  p.sub {
-    margin-top: 10px;
-    margin-bottom: 35px;
-    font-size: 1rem;
-    color: var(--texto);
-  }
+    p.sub {
+      margin-top: 10px;
+      margin-bottom: 35px;
+      font-size: 1rem;
+      color: var(--texto);
+    }
 
-  /* === BOTÕES DE PROTOCOLOS === */
-  .btn-protocolo {
-    width: 90%;
-    max-width: 340px;
-    border: none;
-    border-radius: 25px;
-    padding: 14px 18px;
-    font-size: 1.05em;
-    font-weight: 600;
-    cursor: pointer;
-    margin: 8px auto;
-    display: block;
-    transition: all 0.3s ease;
-  }
+    .btn-protocolo {
+      width: 90%;
+      max-width: 340px;
+      border: none;
+      border-radius: 25px;
+      padding: 14px 18px;
+      font-size: 1.05em;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 8px auto;
+      display: block;
+      transition: all 0.3s ease;
+    }
 
-  .btn-protocolo:hover {
-    transform: scale(1.03);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
-  }
+    .btn-protocolo:hover {
+      transform: scale(1.03);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+    }
 
-  /* CORES DOS BOTÕES */
-  .box { background: #CC6A5A; color: #fff; }
-  .moon { background: #E2B5A5; color: #5A4032; }
-  .energy { background: #335953; color: #fff; }
-  .calm { background: #EAD5C8; color: #5A4032; }
-  .fire { background: #B44C3B; color: #fff; }
+    .box { background: #CC6A5A; color: #fff; }
+    .moon { background: #E2B5A5; color: #5A4032; }
+    .energy { background: #335953; color: #fff; }
+    .calm { background: #EAD5C8; color: #5A4032; }
+    .fire { background: #B44C3B; color: #fff; }
 
-  /* === MODAL DE RESPIRAÇÃO === */
-  #breathModal {
-    display: none;
-    flex-direction: column;
-    justify-content: flex-start; /* sobe o círculo */
-    align-items: center;
-    min-height: calc(100vh - 100px);
-    background: var(--bege);
-    transition: background 0.6s ease;
-    padding-top: 60px;
-  }
+    #breathModal {
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: calc(100vh - 100px);
+      background: var(--bege);
+      transition: background 0.6s ease;
+      padding-top: 60px;
+    }
 
-  #breathCircle {
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    background: var(--terracota);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    font-size: 3em;
-    font-weight: 700;
-    box-shadow: 0 0 25px rgba(204, 106, 90, 0.25);
-    margin-bottom: 20px;
-  }
+    #breathCircle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: var(--terracota);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 3em;
+      font-weight: 700;
+      box-shadow: 0 0 25px rgba(204, 106, 90, 0.25);
+      margin-bottom: 20px;
+    }
 
-  #faseLabel {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3em;
-    color: var(--texto);
-    font-style: italic;
-    transition: opacity 0.5s;
-  }
+    #faseLabel {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3em;
+      color: var(--texto);
+      font-style: italic;
+      transition: opacity 0.5s;
+    }
 
-  #countdown {
-    font-size: 1.2em;
-    margin-top: 8px;
-    color: var(--verde);
-    display: none;
-  }
+    #countdown {
+      font-size: 1.2em;
+      margin-top: 8px;
+      color: var(--verde);
+      display: none;
+    }
 
-  footer {
-    margin-top: 40px;
-    color: #A87E72;
-    font-size: 0.9em;
-  }
-</style>
+    #btnStart {
+      margin-top: 30px;
+      background: var(--verde);
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      padding: 12px 24px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
+    #btnStart:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    footer {
+      margin-top: 40px;
+      color: #A87E72;
+      font-size: 0.9em;
+    }
+  </style>
 </head>
+
 <body>
- <h1>
+  <h1>
     <span>Respiração</span>
     <span>FemFlow</span>
   </h1>
   <p class="sub">Escolha o protocolo conforme seu momento 🌿</p>
 
-  <!-- BOTÕES DE PROTOCOLOS -->
   <button class="btn-protocolo box" onclick="iniciarProtocolo('box')">🟤 Box Breathing – 4•4•4•4</button>
   <button class="btn-protocolo moon" onclick="iniciarProtocolo('moon')">🌙 Moon Flow – 5•7•8</button>
   <button class="btn-protocolo energy" onclick="iniciarProtocolo('energy')">⚡ Energy Flow – 3•2•3•2</button>
   <button class="btn-protocolo calm" onclick="iniciarProtocolo('calm')">🌸 Calm Focus – 6•2•6•2</button>
   <button class="btn-protocolo fire" onclick="iniciarProtocolo('fire')">🔥 Fire Flow – 2•1•4•1</button>
 
-  <!-- MODAL -->
   <div id="breathModal">
     <div id="breathCircle">5</div>
     <div id="faseLabel">Preparar...</div>
     <div id="countdown"></div>
- <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="./femflow-core.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    FEMFLOW.inserirHeaderApp?.();
-  });
-</script>
-<script>
-function encerrar() {
-  cicloAtivo = false;
-  clearInterval(timerTotal);
-  circle.textContent = "✓";
-  label.textContent = "Finalizado 🌸";
-  btnClose.style.display = "none";
-  countdown.style.display = "none";
+    <button id="btnStart">Iniciar Respiração</button>
+  </div>
 
-  // Vibração final
-  if ("vibrate" in navigator) navigator.vibrate([300,100,300]);
+  <footer>🌬️ Inspire equilíbrio. Expire leveza.</footer>
 
-  // Exibe botão de retorno com transição suave
-  setTimeout(() => {
-    label.innerHTML = "✨ Sessão concluída<br>Volte ao Flow Center para continuar.";
-    const voltarBtn = document.createElement('button');
-    voltarBtn.textContent = "← Voltar ao Flow Center";
-    voltarBtn.className = "btn";
-    voltarBtn.style.background = "var(--verde)";
-    voltarBtn.style.color = "#fff";
-    voltarBtn.onclick = () => window.location.href = "flowcenter.html";
-    modal.appendChild(voltarBtn);
-  }, 1200);
-}
-</script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="./femflow-core.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      FEMFLOW.inserirHeaderApp?.();
 
- <script>
-  let cicloAtivo = false;
-  let faseTimer, timerTotal;
+      let cicloAtivo = false;
+      let timerTotal;
 
-  const circle = document.getElementById('breathCircle');
-  const label = document.getElementById('faseLabel');
-  const modal = document.getElementById('breathModal');
-  const countdown = document.getElementById('countdown');
-  const btnClose = document.getElementById('btnClose');
+      const circle = document.getElementById('breathCircle');
+      const label = document.getElementById('faseLabel');
+      const modal = document.getElementById('breathModal');
+      const countdown = document.getElementById('countdown');
+      const btnStart = document.getElementById('btnStart');
 
-  const protocolos = {
-    box:    { nome: "Box Breathing", fases: [4,4,4,4], cor: "#CC6A5A", vibra: [100,400] },
-    moon:   { nome: "Moon Flow", fases: [5,7,8,0], cor: "#E2B5A5", vibra: [100,500] },
-    energy: { nome: "Energy Flow", fases: [3,2,3,2], cor: "#335953", vibra: [80,300] },
-    calm:   { nome: "Calm Focus", fases: [6,2,6,2], cor: "#D9BBAA", vibra: [100,300] },
-    fire:   { nome: "Fire Flow", fases: [2,1,4,1], cor: "#B44C3B", vibra: [120,500] },
-  };
+      const protocolos = {
+        box:    { nome: "Box Breathing", fases: [4,4,4,4], cor: "#CC6A5A", vibra: [100,400] },
+        moon:   { nome: "Moon Flow", fases: [5,7,8,0], cor: "#E2B5A5", vibra: [100,500] },
+        energy: { nome: "Energy Flow", fases: [3,2,3,2], cor: "#335953", vibra: [80,300] },
+        calm:   { nome: "Calm Focus", fases: [6,2,6,2], cor: "#D9BBAA", vibra: [100,300] },
+        fire:   { nome: "Fire Flow", fases: [2,1,4,1], cor: "#B44C3B", vibra: [120,500] },
+      };
 
-  // 🔹 só inicia após DOM carregado
-  document.addEventListener("DOMContentLoaded", () => {
-    console.log("🌸 FemFlow Respiração pronto");
-
-    window.iniciarProtocolo = async function(tipo) {
-      if (cicloAtivo) return;
-      const protocolo = protocolos[tipo];
-      if (!protocolo) return;
-
-      cicloAtivo = true;
-      document.querySelectorAll('.btn-protocolo').forEach(b => b.style.display = 'none');
-      modal.style.display = 'flex';
-      modal.style.background = protocolo.cor + "20";
-      btnClose.style.display = "inline-block";
-
-      if ("vibrate" in navigator) navigator.vibrate([200,100,200]);
-
-      await contagemInicial();
-      await new Promise(res => setTimeout(res, 200));
-
-      const inicio = Date.now();
-      iniciarContadorTotal(inicio);
-
-      const nomes = ["Inspire", "Segure", "Expire", "Segure"];
-      let faseIndex = 0;
-
-      async function ciclo() {
-        const duracao = protocolo.fases[faseIndex];
-        if (duracao === 0) { faseIndex = (faseIndex + 1) % 4; return ciclo(); }
-
-        const nome = nomes[faseIndex];
-        label.textContent = `${nome} / ${["Inhale","Hold","Exhale","Hold"][faseIndex]}`;
-        label.style.fontStyle = "italic";
+      window.iniciarProtocolo = function(tipo) {
+        const protocolo = protocolos[tipo];
+        if (!protocolo) return;
+        document.querySelectorAll('.btn-protocolo').forEach(b => b.style.display = 'none');
+        modal.style.display = 'flex';
+        modal.style.background = protocolo.cor + "20";
         circle.style.background = protocolo.cor;
+        btnStart.style.display = 'block';
+        btnStart.onclick = () => startProtocolo(protocolo);
+      };
 
-        if (faseIndex === 0 && "vibrate" in navigator) navigator.vibrate(protocolo.vibra[0]);
-        if (faseIndex === 2 && "vibrate" in navigator) navigator.vibrate(protocolo.vibra[1]);
+      async function startProtocolo(protocolo) {
+        btnStart.style.display = 'none';
+        cicloAtivo = true;
+        if ("vibrate" in navigator) navigator.vibrate([200,100,200]);
 
-        await animarContagem(duracao, faseIndex);
-        faseIndex = (faseIndex + 1) % 4;
-        if (cicloAtivo) ciclo();
+        await contagemInicial();
+        const inicio = Date.now();
+        iniciarContadorTotal(inicio);
+
+        const nomes = ["Inspire", "Segure", "Expire", "Segure"];
+        let faseIndex = 0;
+
+        async function ciclo() {
+          const duracao = protocolo.fases[faseIndex];
+          if (duracao === 0) { faseIndex = (faseIndex + 1) % 4; return ciclo(); }
+
+          const nome = nomes[faseIndex];
+          label.textContent = `${nome} / ${["Inhale","Hold","Exhale","Hold"][faseIndex]}`;
+          label.style.fontStyle = "italic";
+          circle.style.background = protocolo.cor;
+
+          if (faseIndex === 0 && "vibrate" in navigator) navigator.vibrate(protocolo.vibra[0]);
+          if (faseIndex === 2 && "vibrate" in navigator) navigator.vibrate(protocolo.vibra[1]);
+
+          await animarContagem(duracao, faseIndex);
+          faseIndex = (faseIndex + 1) % 4;
+          if (cicloAtivo) ciclo();
+        }
+
+        ciclo();
       }
 
-      ciclo();
-    };
-
-    async function contagemInicial() {
-      for (let i = 5; i >= 1; i--) {
-        circle.textContent = i;
-        circle.style.opacity = 1;
-        await esperar(1000);
-        circle.style.opacity = 0.5;
+      async function contagemInicial() {
+        for (let i = 5; i >= 1; i--) {
+          circle.textContent = i;
+          circle.style.opacity = 1;
+          await esperar(1000);
+          circle.style.opacity = 0.5;
+        }
       }
-    }
 
-    async function animarContagem(segundos, faseIndex) {
-      for (let s = segundos; s >= 1; s--) {
-        circle.textContent = s;
-        if (faseIndex === 0) circle.style.transform = "scale(1.2)";
-        else if (faseIndex === 2) circle.style.transform = "scale(0.85)";
-        else circle.style.transform = "scale(1.0)";
-        circle.style.opacity = 1;
-        await esperar(800);
-        circle.style.opacity = 0.6;
-        await esperar(200);
+      async function animarContagem(segundos, faseIndex) {
+        for (let s = segundos; s >= 1; s--) {
+          circle.textContent = s;
+          if (faseIndex === 0) circle.style.transform = "scale(1.2)";
+          else if (faseIndex === 2) circle.style.transform = "scale(0.85)";
+          else circle.style.transform = "scale(1.0)";
+          circle.style.opacity = 1;
+          await esperar(800);
+          circle.style.opacity = 0.6;
+          await esperar(200);
+        }
       }
-    }
 
-    function iniciarContadorTotal(inicio) {
-      countdown.style.display = "block";
-      timerTotal = setInterval(() => {
-        const decorrido = Date.now() - inicio;
-        const restante = 300000 - decorrido;
-        if (restante <= 0) return encerrar();
+      function iniciarContadorTotal(inicio) {
+        countdown.style.display = "block";
+        timerTotal = setInterval(() => {
+          const decorrido = Date.now() - inicio;
+          const restante = 300000 - decorrido;
+          if (restante <= 0) return encerrar();
 
-        const min = Math.floor(restante / 60000);
-        const seg = Math.floor((restante % 60000) / 1000);
-        countdown.textContent = `⏱ ${min}:${seg.toString().padStart(2,'0')}`;
-      }, 1000);
-    }
+          const min = Math.floor(restante / 60000);
+          const seg = Math.floor((restante % 60000) / 1000);
+          countdown.textContent = `⏱ ${min}:${seg.toString().padStart(2,'0')}`;
+        }, 1000);
+      }
 
-    function encerrar() {
-      cicloAtivo = false;
-      clearInterval(timerTotal);
-      circle.textContent = "✓";
-      label.textContent = "Finalizado 🌸";
-      btnClose.style.display = "none";
-      countdown.style.display = "none";
-      if ("vibrate" in navigator) navigator.vibrate([300,100,300]);
-      setTimeout(() => window.location.reload(), 2500);
-    }
+      function encerrar() {
+        cicloAtivo = false;
+        clearInterval(timerTotal);
+        circle.textContent = "✓";
+        label.textContent = "Finalizado 🌸";
+        countdown.style.display = "none";
+        if ("vibrate" in navigator) navigator.vibrate([300,100,300]);
+        setTimeout(() => window.location.reload(), 2500);
+      }
 
-    function esperar(ms) {
-      return new Promise(res => setTimeout(res, ms));
-    }
-  });
-</script>
+      function esperar(ms) {
+        return new Promise(res => setTimeout(res, ms));
+      }
+    });
+  </script>
 </body>
 </html>
+
