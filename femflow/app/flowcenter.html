@@ -123,6 +123,13 @@
     // botões
     document.getElementById("toBreath").onclick = ()=> FEMFLOW.router("respiracao");
     document.getElementById("toTrain").onclick  = ()=> FEMFLOW.router("treino");
+  // 🔁 troca de idioma ao vivo (sem reload)
+window.addEventListener("femflow:langchange", () => {
+  console.log("🌐 Idioma alterado dinamicamente");
+  // Reexecuta a tradução no Flow Center
+  const event = new Event("DOMContentLoaded");
+  document.dispatchEvent(event);
+});  
   });
   </script>
 </body>
