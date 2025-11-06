@@ -127,20 +127,20 @@
       <circle cx="150" cy="150" r="64" fill="#cc6a5a"></circle>
 
       <!-- 🔁 Caminhos de texto: curvatura e posição corrigidas -->
-      <defs>
-        <!-- Menstrual 45° -->
-        <path id="text-menstrual"
-              d="M190,60 A112,112 0 0,1 260,130" fill="none" />
-        <!-- Folicular 135° -->
-        <path id="text-follicular"
-              d="M130,40 A112,112 0 0,1 40,130" fill="none" />
-        <!-- Ovulatória 225° -->
-        <path id="text-ovulatory"
-              d="M110,260 A112,112 0 0,1 40,170" fill="none" />
-        <!-- Lútea 315° -->
-        <path id="text-luteal"
-              d="M260,170 A112,112 0 0,1 170,260" fill="none" />
-      </defs>
+     <defs>
+  <!-- Menstrual 45° -->
+  <path id="text-menstrual"
+        d="M190,60 A112,112 0 0,1 260,130" fill="none" />
+  <!-- Folicular 135° (ajustada curvatura e sentido) -->
+  <path id="text-follicular"
+        d="M40,130 A112,112 0 0,1 130,40" fill="none" />
+  <!-- Ovulatória 225° -->
+  <path id="text-ovulatory"
+        d="M110,260 A112,112 0 0,1 40,170" fill="none" />
+  <!-- Lútea 315° -->
+  <path id="text-luteal"
+        d="M260,170 A112,112 0 0,1 170,260" fill="none" />
+</defs>
 
       <!-- Textos curvados -->
       <text id="lbl-menstrual" font-family="Playfair Display" font-size="13"
