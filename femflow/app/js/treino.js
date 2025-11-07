@@ -1,7 +1,7 @@
 // scripts/treino.js — HÍBRIDO + Timers + Links
 document.addEventListener('DOMContentLoaded', async () => {
   const id = localStorage.getItem('femflow_id');
-  if (!id) { FEMFLOW.toast('⚠️ Faça login.'); location.href='login.html?ret=treino.html'; return; }
+  if (!id) { FEMFLOW.toast('⚠️ Faça login.'); location.href='index.html?ret=treino.html'; return; }
 
   const ok = localStorage.getItem('femflow_cycle_configured')==='yes' &&
              localStorage.getItem('femflow_startDate') &&
