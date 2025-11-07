@@ -141,9 +141,13 @@
 
     // ========== Comunicação com Apps Script ==========
     async function postGAS(payload){
-      const r = await fetch(scriptURL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-      return r.json();
-    }
+        const r = await fetch(scriptURL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }, // ✅ mantém JSON
+    body: JSON.stringify(payload)
+  });
+  return r.json();
+}
 
     // ========== Cadastro ==========
     async function registrar(){
