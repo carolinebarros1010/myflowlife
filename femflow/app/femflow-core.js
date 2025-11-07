@@ -3,21 +3,22 @@
    Autor: Ricardo Fernandes • 2025
    =========================================================== */
 
-const FEMFLOW = {
-  /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
-  SCRIPT_URL:
-    localStorage.getItem("femflow_script") ||
-    "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec",
+// 🔹 Cria o objeto global se ainda não existir
+window.FEMFLOW = window.FEMFLOW || {};
 
-  /* ----------- 🎨 LOGO PADRÃO ------------ */
-  LOGO: "./assets/logofemflowterracota.png",
+// 🔹 Define o endpoint principal (Worker ativo)
+FEMFLOW.SCRIPT_URL = 
+  localStorage.getItem("femflow_script") ||
+  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-  /* ----------- 🔎 PÁGINAS PÚBLICAS (não injetar UI) --- */
-  _isPublicPage() {
-    const p = location.pathname.split('/').pop().toLowerCase();
-    return ['index.html', 'home.html'].includes(p);
-  },
+// 🔹 Define logo padrão e outras constantes
+FEMFLOW.LOGO = "./assets/logofemflowterracota.png";
 
+// 🔹 Função de verificação de páginas públicas
+FEMFLOW._isPublicPage = function () {
+  const p = location.pathname.split('/').pop().toLowerCase();
+  return ['index.html', 'home.html'].includes(p);
+};
   /* =======================================================
      ⚙️ INICIALIZAÇÃO GERAL
   ======================================================= */
