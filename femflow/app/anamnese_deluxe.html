@@ -12,12 +12,11 @@
       --verde: #335953;
       --texto: #5b4f49;
     }
-
     body {
       margin: 0;
-      font-family: "Lato", sans-serif;
       background-color: var(--bege);
       color: var(--texto);
+      font-family: "Lato", sans-serif;
       text-align: center;
       min-height: 100vh;
       display: flex;
@@ -27,35 +26,32 @@
       padding: 20px;
       box-sizing: border-box;
     }
-
     h1 {
       font-family: 'Playfair Display', serif;
       color: var(--terracota);
       font-size: 2rem;
       margin-bottom: 10px;
     }
-
     .card {
-      background: white;
-      border-radius: 20px;
+      background: #fff;
+      border-radius: 22px;
       padding: 20px;
       width: 100%;
-      max-width: 420px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
+      max-width: 430px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      margin-top: 10px;
+      transition: all .3s ease;
     }
-
     .question {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       margin-bottom: 20px;
+      font-weight: 500;
     }
-
     .options {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-
     button.option {
       background: var(--terracota);
       border: none;
@@ -63,44 +59,39 @@
       padding: 12px;
       border-radius: 10px;
       font-size: 1rem;
-      transition: background 0.2s;
+      transition: background 0.25s;
       cursor: pointer;
     }
-
     button.option:hover {
       background: var(--verde);
     }
-
     .gif {
       width: 160px;
       height: 160px;
-      border-radius: 16px;
+      border-radius: 18px;
       margin: 10px auto;
       object-fit: cover;
       display: block;
     }
-
-    .hidden {
-      display: none;
-    }
-
+    .hidden { display: none; }
     #final-msg {
       font-size: 1.1rem;
       color: var(--verde);
       font-weight: bold;
+      margin-top: 20px;
     }
   </style>
 </head>
 
 <body>
   <script>window.FEMFLOW_DISABLE_UI = true;</script>
-  <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px; margin-top:20px; margin-bottom:10px;">
 
+  <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px; margin-top:15px; margin-bottom:5px;">
   <h1>Anamnese FemFlow</h1>
 
   <div id="card" class="card">
     <img id="gif" src="./assets/gifs/profile_form.webp" alt="gif" class="gif">
-    <div id="question" class="question">Como você descreveria sua rotina atual de treinos?</div>
+    <div id="question" class="question"></div>
     <div id="options" class="options"></div>
   </div>
 
@@ -113,104 +104,70 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKUdHajGESV8xvRpXPXaLLWlWbAgobohkb1bsOQhy9X7chmEKMWkdSOtYrVBfAxRpL/exec";
 
     const perguntas = [
-      {
-        gif: "profile_form.webp",
-        texto: "Como você descreveria sua rotina atual de treinos?",
-        opcoes: [
-          { texto: "Não treino há meses 😅", valor: 1 },
-          { texto: "Treino 1–2x por semana 🧘‍♀️", valor: 2 },
-          { texto: "Treino 3x ou mais 💪", valor: 3 }
-        ]
-      },
-      {
-        gif: "breath_cycle.webp",
-        texto: "Como avalia seu condicionamento físico?",
-        opcoes: [
-          { texto: "Canso fácil 💤", valor: 1 },
-          { texto: "Regular, consigo manter 💫", valor: 2 },
-          { texto: "Excelente, sou ativa 🔥", valor: 3 }
-        ]
-      },
-      {
-        gif: "strength_training.webp",
-        texto: "Você já treinou com acompanhamento profissional?",
-        opcoes: [
-          { texto: "Nunca 🫣", valor: 1 },
-          { texto: "Sim, às vezes 🧩", valor: 2 },
-          { texto: "Sim, sempre com treino estruturado 📋", valor: 3 }
-        ]
-      },
-      {
-        gif: "hormonal_balance.webp",
-        texto: "Durante o ciclo, você percebe variações no rendimento?",
-        opcoes: [
-          { texto: "Nunca notei 🤔", valor: 1 },
-          { texto: "Sim, um pouco 🔄", valor: 2 },
-          { texto: "Sim, e ajusto o treino conforme 🌙", valor: 3 }
-        ]
-      },
-      {
-        gif: "success_flow.webp",
-        texto: "Qual é seu principal objetivo com o FemFlow?",
-        opcoes: [
-          { texto: "Recomeçar e ter constância 🌱", valor: 1 },
-          { texto: "Evoluir força e foco 💥", valor: 2 },
-          { texto: "Performance e equilíbrio total 🏆", valor: 3 }
-        ]
-      }
+      { gif: "profile_form.webp", texto: "Como você descreveria sua rotina atual de treinos?",
+        opcoes: [{texto:"Não treino há meses 😅",v:1},{texto:"Treino 1–2x por semana 🧘‍♀️",v:2},{texto:"Treino 3x ou mais 💪",v:3}] },
+      { gif: "breath_cycle.webp", texto: "Como avalia seu condicionamento físico?",
+        opcoes: [{texto:"Canso fácil 💤",v:1},{texto:"Regular, consigo manter 💫",v:2},{texto:"Excelente, sou ativa 🔥",v:3}] },
+      { gif: "strength_training.webp", texto: "Você já treinou com acompanhamento profissional?",
+        opcoes: [{texto:"Nunca 🫣",v:1},{texto:"Às vezes 🧩",v:2},{texto:"Sempre com treino estruturado 📋",v:3}] },
+      { gif: "hormonal_balance.webp", texto: "Durante o ciclo, você percebe variações no rendimento?",
+        opcoes: [{texto:"Nunca notei 🤔",v:1},{texto:"Um pouco 🔄",v:2},{texto:"Sim, e ajusto conforme 🌙",v:3}] },
+      { gif: "mind_focus.webp", texto: "Como está seu foco e disposição mental atualmente?",
+        opcoes: [{texto:"Baixo, sinto-me cansada 💤",v:1},{texto:"Regular, mas com altos e baixos ⚖️",v:2},{texto:"Constante e focada ✨",v:3}] },
+      { gif: "sleep_quality.webp", texto: "Como está a qualidade do seu sono?",
+        opcoes: [{texto:"Durmo mal 😴",v:1},{texto:"Durmo o suficiente 💤",v:2},{texto:"Durmo e acordo disposta ☀️",v:3}] },
+      { gif: "nutrition_balance.webp", texto: "Sua alimentação é equilibrada?",
+        opcoes: [{texto:"Desorganizada 🍕",v:1},{texto:"Moderadamente saudável 🥗",v:2},{texto:"Planejada e nutritiva 🥑",v:3}] },
+      { gif: "goal_motivation.webp", texto: "Qual seu principal objetivo com o FemFlow?",
+        opcoes: [{texto:"Recomeçar com leveza 🌱",v:1},{texto:"Ganhar força e foco 💥",v:2},{texto:"Performance e equilíbrio total 🏆",v:3}] }
     ];
 
-    let indice = 0;
-    let soma = 0;
-    const card = document.getElementById("card");
-    const question = document.getElementById("question");
-    const options = document.getElementById("options");
-    const gif = document.getElementById("gif");
-    const finalDiv = document.getElementById("final");
-    const finalMsg = document.getElementById("final-msg");
+    let i = 0, score = 0;
+    const gif = document.getElementById("gif"),
+          q = document.getElementById("question"),
+          opts = document.getElementById("options"),
+          card = document.getElementById("card"),
+          final = document.getElementById("final"),
+          msg = document.getElementById("final-msg");
 
     function mostrarPergunta() {
-      const p = perguntas[indice];
+      const p = perguntas[i];
       gif.src = "./assets/gifs/" + p.gif;
-      question.textContent = p.texto;
-      options.innerHTML = "";
+      q.textContent = p.texto;
+      opts.innerHTML = "";
       p.opcoes.forEach(o => {
-        const btn = document.createElement("button");
-        btn.className = "option";
-        btn.textContent = o.texto;
-        btn.onclick = () => {
-          soma += o.valor;
-          indice++;
-          if (indice < perguntas.length) {
-            mostrarPergunta();
-          } else {
-            finalizarAnamnese();
-          }
+        const b = document.createElement("button");
+        b.className = "option";
+        b.textContent = o.texto;
+        b.onclick = () => {
+          score += o.v; i++;
+          if (i < perguntas.length) mostrarPergunta();
+          else finalizar();
         };
-        options.appendChild(btn);
+        opts.appendChild(b);
       });
     }
 
-    async function finalizarAnamnese() {
+    async function finalizar() {
       card.classList.add("hidden");
-      finalDiv.classList.remove("hidden");
+      final.classList.remove("hidden");
 
       let nivel = "iniciante";
-      if (soma >= 11) nivel = "avançada";
-      else if (soma >= 7) nivel = "intermediária";
+      if (score >= 17) nivel = "avançada";
+      else if (score >= 12) nivel = "intermediária";
 
       const nome = localStorage.getItem("femflow_nome") || "";
       const email = localStorage.getItem("femflow_email") || "";
       const telefone = localStorage.getItem("femflow_tel") || "";
 
+      const respostas = perguntas.map((p, idx) => `Q${idx+1}: ${p.texto} → ${p.opcoes.find(o => true).texto}`);
+
       const dados = {
         action: "loginOuCadastro",
-        nome,
-        email,
-        telefone,
+        nome, email, telefone,
         perfil: nivel,
-        pontuacao: soma,
-        anamnese: JSON.stringify(perguntas.map((p, i) => `${p.texto}: ${p.opcoes.find(o => soma >= o.valor).texto}`))
+        pontuacao: score,
+        anamnese: JSON.stringify(respostas)
       };
 
       try {
@@ -223,9 +180,9 @@
         console.error("Erro:", err);
       }
 
-      finalMsg.textContent = `✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
+      msg.textContent = `✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
       setTimeout(() => {
-        location.href = "login.html";
+        location.href = "login.html?bemvinda=1";
       }, 4500);
     }
 
