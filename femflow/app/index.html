@@ -140,15 +140,16 @@
     })();
 
     // ========== Comunicação com Apps Script ==========
-    async function postGAS(payload) {
-  const scriptURL =
-    (typeof FEMFLOW !== "undefined" && FEMFLOW?.SCRIPT_URL)
-      ? FEMFLOW.SCRIPT_URL
-      : localStorage.getItem("femflow_script");
-
-  if (!scriptURL) {
-    throw new Error("⚠️ Endpoint FemFlow não configurado (SCRIPT_URL ausente).");
-  }
+   async function postGAS(payload) {
+  const scriptURL = localStorage.getItem("femflow_script");
+  const proxy = "https://api.allorigins.win/raw?url=" + encodeURIComponent(scriptURL);
+  const r = await fetch(proxy, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  return r.json();
+}
 
   const r = await fetch(scriptURL, {
     method: "POST",
