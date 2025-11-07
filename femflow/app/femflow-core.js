@@ -15,7 +15,7 @@ const FEMFLOW = {
   /* ----------- 🔎 PÁGINAS PÚBLICAS (não injetar UI) --- */
   _isPublicPage() {
     const p = location.pathname.split('/').pop().toLowerCase();
-    return ['login.html', 'home.html'].includes(p);
+    return ['index.html', 'home.html'].includes(p);
   },
 
   /* =======================================================
@@ -34,9 +34,9 @@ const FEMFLOW = {
   },
 
   /* =======================================================
-     🔹 1. LOGIN / CADASTRO
+     🔹 1. index / CADASTRO
   ======================================================= */
-  async loginOuCadastro(nome, email) {
+  async indexOuCadastro(nome, email) {
     if (!nome || !email) {
       this.toast("⚠️ Informe nome e e-mail para continuar.", true);
       return;
@@ -46,7 +46,7 @@ const FEMFLOW = {
       const resp = await fetch(this.SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "loginOuCadastro", nome, email }),
+        body: JSON.stringify({ action: "indexOuCadastro", nome, email }),
       });
       const data = await resp.json();
 
@@ -59,10 +59,10 @@ const FEMFLOW = {
         this.router("home");
         return data;
       } else {
-        this.toast("⚠️ Erro no cadastro/login.", true);
+        this.toast("⚠️ Erro no cadastro/index.", true);
       }
     } catch (err) {
-      console.error("Erro em loginOuCadastro:", err);
+      console.error("Erro em indexOuCadastro:", err);
       this.toast("❌ Falha de conexão com o servidor.", true);
     }
   },
@@ -78,7 +78,7 @@ const FEMFLOW = {
       'femflow_email',
     ];
     KEYS.forEach(k => localStorage.removeItem(k));
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
   },
 /* =======================================================
    🔹 CABEÇALHO + MENU CONTEXTUAL FEMFLOW (2025)
@@ -86,7 +86,7 @@ const FEMFLOW = {
 inserirHeaderApp() {
   if (document.querySelector(".ff-topbar")) return;
   const page = location.pathname.split("/").pop().toLowerCase();
-  if (/home|login/i.test(page)) return;
+  if (/home|index/i.test(page)) return;
 
   const header = document.createElement("div");
   header.className = "ff-topbar";
