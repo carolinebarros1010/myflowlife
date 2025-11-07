@@ -10,8 +10,7 @@ const ASSETS = [
   './evolucao.html',
   './cadastro.html',
   './home.html',
-  './login.html',
-
+ 
   // Styles & manifest
   './style.css',
   './manifest.json',
