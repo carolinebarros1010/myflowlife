@@ -2,7 +2,7 @@
    🌸 FEMFLOW CORE SCRIPT v2.2 (patch clean)
    =========================================================== */
 
-window.FEMFLOW = window.FEMFLOW || {
+window.FEMFLOW = window.FEMFLOW || {};
 
    /* =======================================================
    🌸 Cadastro / Anamnese → Apps Script
