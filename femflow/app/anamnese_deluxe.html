@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anamnese Deluxe • FemFlow</title>
+
+  <style>
+    :root {
+      --terracota: #cc6a5a;
+      --bege: #fff5ef;
+      --verde: #335953;
+      --texto: #5b4f49;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      background-color: var(--bege);
+      color: var(--texto);
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      color: var(--terracota);
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .question {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button.option {
+      background: var(--terracota);
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    button.option:hover {
+      background: var(--verde);
+    }
+
+    .gif {
+      width: 160px;
+      height: 160px;
+      border-radius: 16px;
+      margin: 10px auto;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #final-msg {
+      font-size: 1.1rem;
+      color: var(--verde);
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <script>window.FEMFLOW_DISABLE_UI = true;</script>
+  <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px; margin-top:20px; margin-bottom:10px;">
+
+  <h1>Anamnese FemFlow</h1>
+
+  <div id="card" class="card">
+    <img id="gif" src="./assets/gifs/profile_form.webp" alt="gif" class="gif">
+    <div id="question" class="question">Como você descreveria sua rotina atual de treinos?</div>
+    <div id="options" class="options"></div>
+  </div>
+
+  <div id="final" class="hidden">
+    <img src="./assets/gifs/success_flow.webp" alt="Sucesso" class="gif">
+    <p id="final-msg">Análise concluída! 🌸 Calculando seu perfil...</p>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKUdHajGESV8xvRpXPXaLLWlWbAgobohkb1bsOQhy9X7chmEKMWkdSOtYrVBfAxRpL/exec";
+
+    const perguntas = [
+      {
+        gif: "profile_form.webp",
+        texto: "Como você descreveria sua rotina atual de treinos?",
+        opcoes: [
+          { texto: "Não treino há meses 😅", valor: 1 },
+          { texto: "Treino 1–2x por semana 🧘‍♀️", valor: 2 },
+          { texto: "Treino 3x ou mais 💪", valor: 3 }
+        ]
+      },
+      {
+        gif: "breath_cycle.webp",
+        texto: "Como avalia seu condicionamento físico?",
+        opcoes: [
+          { texto: "Canso fácil 💤", valor: 1 },
+          { texto: "Regular, consigo manter 💫", valor: 2 },
+          { texto: "Excelente, sou ativa 🔥", valor: 3 }
+        ]
+      },
+      {
+        gif: "strength_training.webp",
+        texto: "Você já treinou com acompanhamento profissional?",
+        opcoes: [
+          { texto: "Nunca 🫣", valor: 1 },
+          { texto: "Sim, às vezes 🧩", valor: 2 },
+          { texto: "Sim, sempre com treino estruturado 📋", valor: 3 }
+        ]
+      },
+      {
+        gif: "hormonal_balance.webp",
+        texto: "Durante o ciclo, você percebe variações no rendimento?",
+        opcoes: [
+          { texto: "Nunca notei 🤔", valor: 1 },
+          { texto: "Sim, um pouco 🔄", valor: 2 },
+          { texto: "Sim, e ajusto o treino conforme 🌙", valor: 3 }
+        ]
+      },
+      {
+        gif: "success_flow.webp",
+        texto: "Qual é seu principal objetivo com o FemFlow?",
+        opcoes: [
+          { texto: "Recomeçar e ter constância 🌱", valor: 1 },
+          { texto: "Evoluir força e foco 💥", valor: 2 },
+          { texto: "Performance e equilíbrio total 🏆", valor: 3 }
+        ]
+      }
+    ];
+
+    let indice = 0;
+    let soma = 0;
+    const card = document.getElementById("card");
+    const question = document.getElementById("question");
+    const options = document.getElementById("options");
+    const gif = document.getElementById("gif");
+    const finalDiv = document.getElementById("final");
+    const finalMsg = document.getElementById("final-msg");
+
+    function mostrarPergunta() {
+      const p = perguntas[indice];
+      gif.src = "./assets/gifs/" + p.gif;
+      question.textContent = p.texto;
+      options.innerHTML = "";
+      p.opcoes.forEach(o => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.textContent = o.texto;
+        btn.onclick = () => {
+          soma += o.valor;
+          indice++;
+          if (indice < perguntas.length) {
+            mostrarPergunta();
+          } else {
+            finalizarAnamnese();
+          }
+        };
+        options.appendChild(btn);
+      });
+    }
+
+    async function finalizarAnamnese() {
+      card.classList.add("hidden");
+      finalDiv.classList.remove("hidden");
+
+      let nivel = "iniciante";
+      if (soma >= 11) nivel = "avançada";
+      else if (soma >= 7) nivel = "intermediária";
+
+      const nome = localStorage.getItem("femflow_nome") || "";
+      const email = localStorage.getItem("femflow_email") || "";
+      const telefone = localStorage.getItem("femflow_tel") || "";
+
+      const dados = {
+        action: "loginOuCadastro",
+        nome,
+        email,
+        telefone,
+        perfil: nivel,
+        pontuacao: soma,
+        anamnese: JSON.stringify(perguntas.map((p, i) => `${p.texto}: ${p.opcoes.find(o => soma >= o.valor).texto}`))
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(dados)
+        });
+      } catch (err) {
+        console.error("Erro:", err);
+      }
+
+      finalMsg.textContent = `✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
+      setTimeout(() => {
+        location.href = "login.html";
+      }, 4500);
+    }
+
+    mostrarPergunta();
+  </script>
+</body>
+</html>
