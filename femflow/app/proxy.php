@@ -1,17 +1,35 @@
 <?php
-  header("Access-Control-Allow-Origin: *");
-  header("Content-Type: application/json");
+// Permite acesso de qualquer origem (CORS)
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 
-  $input = file_get_contents("php://input");
-  $script = "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
+// Lida com o preflight (OPTIONS)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+  http_response_code(200);
+  exit;
+}
 
-  $ch = curl_init($script);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_POST, true);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, $input);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
-  $response = curl_exec($ch);
-  curl_close($ch);
+// Define tipo de resposta
+header("Content-Type: application/json");
 
-  echo $response;
+// Lê o corpo da requisição
+$input = file_get_contents("php://input");
+
+// URL do seu Apps Script
+$script = "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
+
+// Envia o POST ao Apps Script
+$ch = curl_init($script);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $input);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
+$response = curl_exec($ch);
+
+// Fecha conexão
+curl_close($ch);
+
+// Retorna resposta do Apps Script
+echo $response;
 ?>
