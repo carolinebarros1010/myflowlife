@@ -44,6 +44,34 @@
   </style>
 </head>
 <body>
+  <!-- 🌸 Banner de boas-vindas FemFlow -->
+<div id="bemvindaBanner" style="
+  display:none;
+  position:fixed;
+  top:0; left:0; width:100%;
+  background:linear-gradient(90deg, #cc6a5a, #eabbaa);
+  color:white;
+  font-family:'Lato',sans-serif;
+  text-align:center;
+  padding:12px 16px;
+  font-size:1rem;
+  z-index:9999;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+">
+  🌸 <b>Cadastro concluído!</b> Digite sua nova senha para continuar seu ciclo.
+</div>
+
+<script>
+  // Exibir o banner apenas se a URL tiver ?bemvinda=1
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("bemvinda") === "1") {
+    const banner = document.getElementById("bemvindaBanner");
+    banner.style.display = "block";
+    // some automaticamente após 8 segundos
+    setTimeout(() => banner.style.display = "none", 8000);
+  }
+</script>
+
   <div class="env-warn" id="envWarn">
     ⚠️ Endpoint não configurado. Defina <code>localStorage.femflow_script</code> com o seu Deployment ID do Apps Script.
   </div>
