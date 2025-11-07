@@ -1,31 +1,29 @@
 /* ===========================================================
    🌸 FEMFLOW CORE SCRIPT v2.2 (patch clean)
-   Autor: Ricardo Fernandes • 2025
    =========================================================== */
 
-// 🔹 Cria o objeto global se ainda não existir
-window.FEMFLOW = window.FEMFLOW || {};
+const FEMFLOW = {
+  /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
+  SCRIPT_URL:
+    localStorage.getItem("femflow_script") ||
+    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev",
 
-// 🔹 Define o endpoint principal (Worker ativo)
-FEMFLOW.SCRIPT_URL = 
-  localStorage.getItem("femflow_script") ||
-  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+  /* ----------- 🎨 LOGO PADRÃO ------------ */
+  LOGO: "./assets/logofemflowterracota.png",
 
-// 🔹 Define logo padrão e outras constantes
-FEMFLOW.LOGO = "./assets/logofemflowterracota.png";
+  /* ----------- 🔎 PÁGINAS PÚBLICAS ------------ */
+  _isPublicPage() {
+    const p = location.pathname.split("/").pop().toLowerCase();
+    return ["index.html", "home.html"].includes(p);
+  },
 
-// 🔹 Função de verificação de páginas públicas
-FEMFLOW._isPublicPage = function () {
-  const p = location.pathname.split('/').pop().toLowerCase();
-  return ['index.html', 'home.html'].includes(p);
-};
   /* =======================================================
      ⚙️ INICIALIZAÇÃO GERAL
   ======================================================= */
-    initTreino() {
+  initTreino() {
     console.log("💫 FemFlow Core v2.2 conectado com sucesso");
 
- this.criarModalPSE();
+    this.criarModalPSE();
     this.autoCiclo();
 
     // não injeta em páginas públicas
@@ -67,6 +65,7 @@ FEMFLOW._isPublicPage = function () {
       this.toast("❌ Falha de conexão com o servidor.", true);
     }
   },
+};
 
   /* =======================================================
      🔹 1.1 LOGOUT
