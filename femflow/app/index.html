@@ -4,8 +4,6 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Entrar no FemFlow</title>
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/icons/icon-192.png"/>
 
   <style>
@@ -71,7 +69,7 @@
       <p class="toggle" id="voltarLogin">Voltar ao login</p>
     </div>
 
-    <!-- Cadastro (opcional) -->
+    <!-- Cadastro -->
     <div id="cadastroBox" style="display:none">
       <div class="form-group"><input type="text" id="nome" placeholder="Nome completo"/></div>
       <div class="form-group"><input type="email" id="email" placeholder="E-mail"/></div>
@@ -83,11 +81,9 @@
     <p id="mensagem" class="message"></p>
   </div>
 
-  <!-- Firebase compat -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-  <!-- 🔥 Inicialização segura do Firebase -->
   <script>
   (function initFirebase(){
     if(window._femflowFirebaseReady) return;
@@ -112,192 +108,142 @@
   })();
   </script>
 
-  <!-- Core -->
   <script src="./femflow-core.js"></script>
 
 <script>
-  // ========= CONFIGURAÇÃO =========
-  const scriptURL =
-    (typeof FEMFLOW !== "undefined" && FEMFLOW.SCRIPT_URL) ||
-    localStorage.getItem("femflow_script") ||
-    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+window.FEMFLOW = window.FEMFLOW || {};
 
-  const $ = (s) => document.querySelector(s);
-  const msg = $("#mensagem"),
-    warn = $("#envWarn");
+const scriptURL =
+  FEMFLOW.SCRIPT_URL ||
+  localStorage.getItem("femflow_script") ||
+  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-  if (!scriptURL) warn.style.display = "block";
+const $ = (s) => document.querySelector(s);
+const msg = $("#mensagem"), warn = $("#envWarn");
+if (!scriptURL) warn.style.display = "block";
 
-  // ========= FUNÇÕES DE UI =========
-  function mostrarLogin() {
-    $("#recuperarBox").style.display = "none";
-    $("#cadastroBox").style.display = "none";
-    $("#loginBox").style.display = "block";
-    msg.textContent = "";
-  }
-  function mostrarCadastro() {
-    $("#loginBox").style.display = "none";
-    $("#recuperarBox").style.display = "none";
-    $("#cadastroBox").style.display = "block";
-    msg.textContent = "";
-  }
+// ========= UI =========
+function mostrarLogin(){ $("#recuperarBox").style.display="none"; $("#cadastroBox").style.display="none"; $("#loginBox").style.display="block"; msg.textContent=""; }
+function mostrarCadastro(){ $("#loginBox").style.display="none"; $("#recuperarBox").style.display="none"; $("#cadastroBox").style.display="block"; msg.textContent=""; }
+$("#goLogin")?.addEventListener("click", mostrarLogin);
+$("#goRecuperar")?.addEventListener("click", ()=>{ $("#loginBox").style.display="none"; $("#recuperarBox").style.display="block"; msg.textContent=""; });
+$("#voltarLogin")?.addEventListener("click", mostrarLogin);
 
-  $("#goLogin")?.addEventListener("click", mostrarLogin);
-  $("#goRecuperar")?.addEventListener("click", () => {
-    $("#loginBox").style.display = "none";
-    $("#recuperarBox").style.display = "block";
-    msg.textContent = "";
+function setMsg(t,ok=false){ msg.textContent=t; msg.style.color=ok?"#2e7d32":"#335953"; }
+function setErr(t){ msg.textContent=t; msg.style.color="#cc6a5a"; }
+
+// ========= Sessão existente =========
+(function autoRouteIfLogged(){
+  const id=localStorage.getItem("femflow_id");
+  const auth=localStorage.getItem("femflow_auth")==="yes";
+  if(id && auth) location.href="home.html";
+})();
+
+// ========= API Helper =========
+async function postGAS(payload){
+  const r=await fetch(scriptURL,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify(payload)
   });
-  $("#voltarLogin")?.addEventListener("click", mostrarLogin);
+  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
 
-  function setMsg(t, ok = false) {
-    msg.textContent = t;
-    msg.style.color = ok ? "#2e7d32" : "#335953";
-  }
-  function setErr(t) {
-    msg.textContent = t;
-    msg.style.color = "#cc6a5a";
-  }
+// ========= Link Hotmart Dinâmico =========
+let linkHotmart="https://pay.hotmart.com/SEU-LINK-MENSAL";
+(async function buscarLinkHotmart(){
+  try{
+    const ctrl=new AbortController();
+    const timeout=setTimeout(()=>ctrl.abort(),6000);
+    const r=await fetch(`${scriptURL}?action=products`,{signal:ctrl.signal});
+    clearTimeout(timeout);
+    const data=await r.json();
 
-  // ========= REVALIDAÇÃO AUTOMÁTICA =========
-  (function autoRouteIfLogged() {
-    const id = localStorage.getItem("femflow_id");
-    const auth = localStorage.getItem("femflow_auth") === "yes";
-    if (id && auth) location.href = "home.html";
-  })();
-
-  // ========= COMUNICAÇÃO COM APP SCRIPT (via Cloudflare Worker) =========
-  async function postGAS(payload) {
-    const r = await fetch(scriptURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json();
-  }
-
-  // ========= CADASTRO =========
-  async function registrar() {
-    if (!scriptURL) {
-      setErr("Endpoint não configurado.");
-      return;
+    if(data.products?.length>0){
+      const produtoFemFlow=data.products.find(p=>p.titulo.toLowerCase().includes("femflow"));
+      linkHotmart=produtoFemFlow?.hotmart || data.products[0].hotmart || linkHotmart;
+      console.log("🔗 Link Hotmart carregado:",linkHotmart);
     }
-    const nome = $("#nome").value.trim(),
-      email = $("#email").value.trim(),
-      senha = $("#senha").value.trim();
-    if (!nome || !email || !senha) {
-      setErr("Preencha todos os campos.");
-      return;
-    }
-    setMsg("Criando conta...");
-    try {
-      const data = await postGAS({ action: "register", nome, email, senha });
-      if (data.status === "ok" || data.status === "created") {
-        setMsg(`Conta criada! Bem-vinda, ${data.nome || nome} ✨`, true);
-        localStorage.setItem("femflow_id", data.id);
-        localStorage.setItem("femflow_email", data.email || email);
-        localStorage.setItem("femflow_auth", "yes");
-        setTimeout(() => (location.href = "ciclo.html"), 1000);
-      } else setErr(data.msg || "Erro ao cadastrar.");
-    } catch (e) {
-      console.error(e);
-      setErr("Erro de rede. Tente novamente.");
-    }
+  }catch(err){
+    console.warn("⚠️ Falha ao buscar link Hotmart:",err);
   }
+})();
 
-  // ========= LOGIN COM VERIFICAÇÃO DE ASSINATURA =========
-  async function entrar() {
-    if (!scriptURL) {
-      setErr("Endpoint não configurado.");
-      return;
-    }
+// ========= Cadastro =========
+async function registrar(){
+  const nome=$("#nome").value.trim(),email=$("#email").value.trim(),senha=$("#senha").value.trim();
+  if(!nome||!email||!senha){setErr("Preencha todos os campos.");return;}
+  setMsg("Criando conta...");
+  try{
+    const data=await postGAS({action:"register",nome,email,senha});
+    if(data.status==="ok"||data.status==="created"){
+      setMsg(`Conta criada! Bem-vinda, ${data.nome||nome} ✨`,true);
+      localStorage.setItem("femflow_id",data.id);
+      localStorage.setItem("femflow_email",data.email||email);
+      localStorage.setItem("femflow_auth","yes");
+      setTimeout(()=>location.href="ciclo.html",1000);
+    }else setErr(data.msg||"Erro ao cadastrar.");
+  }catch(e){console.error(e);setErr("Erro de rede. Tente novamente.");}
+}
 
-    const email = $("#loginEmail").value.trim();
-    const senha = $("#loginSenha").value.trim();
+// ========= Login =========
+async function entrar(){
+  const email=$("#loginEmail").value.trim(),senha=$("#loginSenha").value.trim();
+  if(!email||!senha){setErr("Digite e-mail e senha.");return;}
+  setMsg("Verificando...");
+  try{
+    const data=await postGAS({action:"login",email,senha});
+    console.log("Login retorno:",data);
 
-    if (!email || !senha) {
-      setErr("Digite e-mail e senha.");
+    if(data.status==="expired"||data.status==="inactive"){
+      setErr(
+        data.status==="expired"
+        ?"💳 Sua assinatura expirou. Clique abaixo para renovar."
+        :"🔒 Sua assinatura está inativa. Clique abaixo para reativar."
+      );
+      const btn=document.createElement("button");
+      btn.textContent="🔁 Renovar assinatura";
+      btn.style.marginTop="12px";
+      btn.onclick=()=>window.open(linkHotmart,"_blank");
+      msg.insertAdjacentElement("afterend",btn);
       return;
     }
 
-    setMsg("Verificando...");
-
-    try {
-      const data = await postGAS({ action: "login", email, senha });
-      console.log("Login retorno:", data);
-
-      // === STATUS DE LICENÇA ===
-      if (data.status === "expired") {
-        setErr("💳 Sua assinatura expirou. Redirecionando para renovação...");
-        setTimeout(() => {
-          window.open("https://pay.hotmart.com/SEU-LINK-MENSAL", "_blank");
-        }, 1500);
-        return;
-      }
-
-      if (data.status === "inactive") {
-        setErr("🔒 Sua assinatura está inativa. Redirecionando para reativar...");
-        setTimeout(() => {
-          window.open("https://pay.hotmart.com/SEU-LINK-MENSAL", "_blank");
-        }, 1500);
-        return;
-      }
-
-      if (data.status === "error") {
-        setErr(data.msg || "E-mail ou senha incorretos.");
-        return;
-      }
-
-      if (data.status === "ok") {
-        setMsg(`Bem-vinda, ${data.nome || "aluna"}!`, true);
-        localStorage.setItem("femflow_id", data.id);
-        localStorage.setItem("femflow_nome", data.nome || "");
-        localStorage.setItem("femflow_email", data.email || email);
-        localStorage.setItem("femflow_auth", "yes");
-        setTimeout(() => (location.href = "home.html"), 800);
-        return;
-      }
-
-      setErr("⚠️ Resposta inesperada. Tente novamente.");
-    } catch (e) {
-      console.error("Erro ao fazer login:", e);
-      setErr("Erro de rede. Tente novamente.");
-    }
-  }
-
-  // ========= RECUPERAR SENHA =========
-  async function recuperarSenha() {
-    const email = $("#recEmail").value.trim();
-    if (!email) {
-      setErr("Digite seu e-mail.");
+    if(data.status==="error"){setErr(data.msg||"E-mail ou senha incorretos.");return;}
+    if(data.status==="ok"){
+      setMsg(`Bem-vinda, ${data.nome||"aluna"}!`,true);
+      localStorage.setItem("femflow_id",data.id);
+      localStorage.setItem("femflow_nome",data.nome||"");
+      localStorage.setItem("femflow_email",data.email||email);
+      localStorage.setItem("femflow_auth","yes");
+      setTimeout(()=>location.href="home.html",800);
       return;
     }
-    setMsg("Verificando...");
-    try {
-      const data = await postGAS({ action: "recuperarsenha", email });
-      if (data.status === "ok")
-        setMsg("📩 Se o e-mail existir, você receberá instruções em instantes.", true);
-      else setErr("⚠️ E-mail não encontrado.");
-    } catch (e) {
-      setErr("Erro de rede. Tente novamente.");
-    }
-  }
+    setErr("⚠️ Resposta inesperada. Tente novamente.");
+  }catch(e){console.error(e);setErr("Erro de rede. Tente novamente.");}
+}
 
-  // ========= EVENTOS =========
-  $("#btnEntrar").addEventListener("click", entrar);
-  $("#btnCriar")?.addEventListener("click", registrar);
-  $("#btnRecuperar").addEventListener("click", recuperarSenha);
-  $("#loginSenha").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") entrar();
-  });
-  $("#senha")?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") registrar();
-  });
-  $("#recEmail").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") recuperarSenha();
-  });
+// ========= Recuperar Senha =========
+async function recuperarSenha(){
+  const email=$("#recEmail").value.trim();
+  if(!email){setErr("Digite seu e-mail.");return;}
+  setMsg("Verificando...");
+  try{
+    const data=await postGAS({action:"recuperarsenha",email});
+    if(data.status==="ok")setMsg("📩 Se o e-mail existir, você receberá instruções em instantes.",true);
+    else setErr("⚠️ E-mail não encontrado.");
+  }catch(e){setErr("Erro de rede. Tente novamente.");}
+}
+
+// ========= Eventos =========
+$("#btnEntrar").addEventListener("click",entrar);
+$("#btnCriar")?.addEventListener("click",registrar);
+$("#btnRecuperar").addEventListener("click",recuperarSenha);
+$("#loginSenha").addEventListener("keydown",e=>{if(e.key==="Enter")entrar();});
+$("#senha")?.addEventListener("keydown",e=>{if(e.key==="Enter")registrar();});
+$("#recEmail").addEventListener("keydown",e=>{if(e.key==="Enter")recuperarSenha();});
 </script>
-
 </body>
 </html>
+
