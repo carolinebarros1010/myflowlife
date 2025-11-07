@@ -450,26 +450,39 @@ style.innerHTML = `
 }`;
 document.head.appendChild(style);
 
-/* =======================================================================
-   🔥 Firebase init (compat)
-   ======================================================================= */
-(function () {
+// 🌸 Inicialização segura do Firebase FemFlow
+(function initFirebase() {
   if (window._femflowFirebaseReady) return;
+
   const firebaseConfig = {
     apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
     authDomain: "femflow-ebec2.firebaseapp.com",
     projectId: "femflow-ebec2",
-    storageBucket: "femflow-ebec2.firebasestorage.app",
+    storageBucket: "femflow-ebec2.appspot.com",  // ✅ corrigido
     messagingSenderId: "1043953159611",
     appId: "1:1043953159611:web:d12b82f744740f3124c89e",
     measurementId: "G-6F644L5VTW",
   };
 
   try {
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    // Garante que o SDK está carregado
+    if (typeof firebase === "undefined") {
+      console.error("❌ Firebase SDK não encontrado. Inclua firebase-app-compat.js antes deste script.");
+      return;
+    }
+
+    // Evita múltiplas inicializações
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+      console.log("🔥 Firebase inicializado com sucesso (FemFlow)");
+    } else {
+      console.log("⚙️ Firebase já estava inicializado.");
+    }
+
     window._femflowFirebaseReady = true;
   } catch (e) {
-    console.warn("⚠️ Firebase init falhou", e);
+    console.warn("⚠️ Falha ao inicializar Firebase:", e);
+    window._femflowFirebaseReady = false;
   }
 })();
 
