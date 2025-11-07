@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Anamnese Deluxe • FemFlow</title>
+  <title>FemFlow • Anamnese Deluxe</title>
+
+  <!-- PWA essentials -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#cc6a5a">
+
+  <!-- Estilos -->
   <style>
     :root {
       --terracota:#cc6a5a;
@@ -12,46 +18,50 @@
       --texto:#5b4f49;
     }
     body {
-      margin:0; background:var(--bege); color:var(--texto);
-      font-family:"Lato",sans-serif; text-align:center;
-      display:flex; flex-direction:column; align-items:center;
-      min-height:100vh; padding:24px;
+      margin:0;background:var(--bege);color:var(--texto);
+      font-family:"Lato",sans-serif;text-align:center;
+      display:flex;flex-direction:column;align-items:center;
+      min-height:100vh;padding:22px;
     }
     h1 {
       font-family:'Playfair Display',serif;
-      color:var(--terracota); font-size:2rem; margin-bottom:8px;
+      color:var(--terracota);font-size:2rem;margin:8px 0;
     }
     .card {
-      background:#fff; border-radius:22px; padding:22px;
-      max-width:420px; width:100%; box-shadow:0 6px 12px rgba(0,0,0,0.1);
-      margin-top:12px;
+      background:#fff;border-radius:22px;padding:22px;
+      box-shadow:0 6px 12px rgba(0,0,0,.1);
+      max-width:420px;width:100%;margin-top:12px;
     }
     input {
-      width:100%; padding:10px; margin:6px 0;
-      border:1px solid #ddd; border-radius:10px; font-size:1rem;
+      width:100%;padding:10px;margin:6px 0;
+      border:1px solid #ddd;border-radius:10px;font-size:1rem;
     }
     button {
-      background:var(--terracota); color:white; border:none;
-      border-radius:12px; padding:12px 18px; font-size:1rem;
-      margin-top:10px; cursor:pointer; transition:background .3s;
+      background:var(--terracota);color:#fff;border:none;
+      border-radius:12px;padding:12px 18px;font-size:1rem;
+      margin-top:10px;cursor:pointer;transition:.3s;
     }
     button:hover { background:var(--verde); }
-    .gif { width:160px; height:160px; border-radius:18px; margin:10px auto; object-fit:cover; display:block; }
-    .question { font-size:1.15rem; margin-bottom:20px; font-weight:500; }
-    .options { display:flex; flex-direction:column; gap:10px; }
+    .gif {
+      width:160px;height:160px;object-fit:cover;
+      border-radius:18px;margin:10px auto;display:block;
+    }
+    .question { font-size:1.1rem;margin-bottom:18px;font-weight:500; }
+    .options { display:flex;flex-direction:column;gap:10px; }
     .hidden { display:none; }
   </style>
 </head>
 <body>
+  <!-- Desativa cabeçalho do core -->
   <script>window.FEMFLOW_DISABLE_UI = true;</script>
 
-  <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px;margin-top:15px;">
+  <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px;margin-top:10px;">
   <h1>Cadastro + Anamnese</h1>
 
-  <!-- Etapa 1: Cadastro -->
+  <!-- Etapa 1 -->
   <div id="cadastro" class="card">
-    <p style="font-size:1rem;margin-bottom:10px;">🌸 Preencha seus dados para começar:</p>
-    <input id="nome" type="text" placeholder="Nome completo" required>
+    <p>🌸 Preencha seus dados para começar:</p>
+    <input id="nome" placeholder="Nome completo" required>
     <input id="email" type="email" placeholder="E-mail" required>
     <input id="telefone" type="tel" placeholder="Telefone (opcional)">
     <input id="senha" type="password" placeholder="Crie uma senha" required>
@@ -59,24 +69,25 @@
     <button id="btnIniciar">Iniciar Anamnese</button>
   </div>
 
-  <!-- Etapa 2: Perguntas -->
+  <!-- Etapa 2 -->
   <div id="quiz" class="card hidden">
-    <img id="gif" src="./assets/gifs/profile_form.webp" alt="gif" class="gif">
+    <img id="gif" src="./assets/gifs/profile_form.webp" class="gif" alt="gif">
     <div id="question" class="question"></div>
     <div id="options" class="options"></div>
   </div>
 
-  <!-- Etapa 3: Final -->
+  <!-- Etapa 3 -->
   <div id="final" class="hidden">
-    <img src="./assets/gifs/success_flow.webp" alt="Sucesso" class="gif">
+    <img src="./assets/gifs/success_flow.webp" class="gif" alt="Sucesso">
     <p id="final-msg" style="font-size:1.1rem;color:var(--verde);font-weight:bold;">
       Análise concluída! Calculando seu perfil...
     </p>
   </div>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKUdHajGESV8xvRpXPXaLLWlWbAgobohkb1bsOQhy9X7chmEKMWkdSOtYrVBfAxRpL/exec";
+  <!-- Core principal -->
+  <script src="./scripts/femflow-core.js"></script>
 
+  <script>
     const perguntas = [
       { gif:"profile_form.webp", texto:"Como está sua rotina de treinos?",
         opcoes:[{texto:"Não treino há meses 😅",v:1},{texto:"Treino 1–2x por semana 🧘‍♀️",v:2},{texto:"Treino 3x ou mais 💪",v:3}]},
@@ -90,7 +101,7 @@
         opcoes:[{texto:"Tenho sintomas fortes 😖",v:1},{texto:"Algumas variações 💫",v:2},{texto:"Bem controlado 🌿",v:3}]},
       { gif:"menstrual_flow.webp", texto:"Como costuma ser seu fluxo menstrual?",
         opcoes:[{texto:"Intenso e incômodo 💢",v:1},{texto:"Moderado 💧",v:2},{texto:"Leve e regular 🌺",v:3}]},
-      { gif:"breath_cycle.webp", texto:"Como está seu padrão respiratório e energia diária?",
+      { gif:"breath_cycle.webp", texto:"Como está sua respiração e energia diária?",
         opcoes:[{texto:"Canso fácil 😮‍💨",v:1},{texto:"Regular ⚖️",v:2},{texto:"Energia alta ☀️",v:3}]},
     ];
 
@@ -111,14 +122,9 @@
       senha=document.getElementById("senha").value.trim();
       const confirma=document.getElementById("confirma").value.trim();
 
-      if(!nome||!email||!senha){alert("Preencha todos os campos obrigatórios.");return;}
-      if(senha.length<6){alert("A senha deve ter pelo menos 6 caracteres.");return;}
-      if(senha!==confirma){alert("As senhas não coincidem.");return;}
-
-      localStorage.setItem("femflow_nome",nome);
-      localStorage.setItem("femflow_email",email);
-      localStorage.setItem("femflow_tel",telefone);
-      localStorage.setItem("femflow_senha",senha);
+      if(!nome||!email||!senha){FEMFLOW.toast("⚠️ Preencha todos os campos obrigatórios.",true);return;}
+      if(senha.length<6){FEMFLOW.toast("🔐 A senha deve ter pelo menos 6 caracteres.",true);return;}
+      if(senha!==confirma){FEMFLOW.toast("❌ As senhas não coincidem.",true);return;}
 
       cadastro.classList.add("hidden");
       quiz.classList.remove("hidden");
@@ -147,24 +153,31 @@
       else if(score>=11) nivel="intermediária";
 
       const respostas=perguntas.map((p,idx)=>`Q${idx+1}: ${p.texto}`);
-      const dados={
-        action:"loginOuCadastro",
-        nome,email,telefone,senha,
-        perfil:nivel,
-        pontuacao:score,
-        anamnese:JSON.stringify(respostas)
-      };
+
+      FEMFLOW.toast("⏳ Enviando suas respostas...",false);
 
       try{
-        await fetch(SCRIPT_URL,{
-          method:"POST",
-          headers:{"Content-Type":"text/plain;charset=utf-8"},
-          body:JSON.stringify(dados)
+        const r = await FEMFLOW.enviarCadastro({
+          nome,email,telefone,senha,
+          perfil:nivel,
+          pontuacao:score,
+          anamnese:JSON.stringify(respostas)
         });
-      }catch(err){console.error("Erro:",err);}
-
-      msg.textContent=`✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
-      setTimeout(()=>location.href="index.html?bemvinda=1",4000);
+        console.log("Cadastro:",r);
+        if(r && r.status){
+          localStorage.setItem("femflow_id",r.id);
+          localStorage.setItem("femflow_email",r.email);
+          localStorage.setItem("femflow_cycle_configured","yes");
+          FEMFLOW.toast("🌸 Bem-vinda ao FemFlow!");
+          msg.textContent=`✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
+          setTimeout(()=>location.href="index.html?bemvinda=1",4000);
+        } else {
+          FEMFLOW.toast("❌ Falha ao enviar cadastro.",true);
+        }
+      }catch(err){
+        FEMFLOW.toast("⚠️ Erro de conexão. Tente novamente.",true);
+        console.error(err);
+      }
     }
   </script>
 </body>
