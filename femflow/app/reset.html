@@ -114,7 +114,7 @@
         const data = await postGAS({ action:"resetsenha", email, novaSenha:s1 });
         if(data.status === "ok"){
           setMsg("✔️ Senha atualizada! Voltando ao login…", true);
-          setTimeout(()=> location.href="login.html", 1200);
+          setTimeout(()=> location.href="index.html", 1200);
         }else if(data.status === "notfound"){
           setErr("E-mail não encontrado.");
           $("#btnSalvar").disabled = false;
