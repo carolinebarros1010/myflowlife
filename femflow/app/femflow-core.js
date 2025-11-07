@@ -32,54 +32,54 @@ const FEMFLOW = {
     }
   },
 
-  /* =======================================================
-     🔹 1. index / CADASTRO
-  ======================================================= */
-  async indexOuCadastro(nome, email) {
-    if (!nome || !email) {
-      this.toast("⚠️ Informe nome e e-mail para continuar.", true);
-      return;
+ /* =======================================================
+   🔹 1. index / CADASTRO
+======================================================= */
+async indexOuCadastro(nome, email) {
+  if (!nome || !email) {
+    this.toast("⚠️ Informe nome e e-mail para continuar.", true);
+    return;
+  }
+
+  try {
+    const resp = await fetch(this.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "indexOuCadastro", nome, email }),
+    });
+    const data = await resp.json();
+
+    if (data.status === "ok" || data.status === "created") {
+      this.toast(`🌸 Bem-vinda, ${data.nome}!`);
+      localStorage.setItem("femflow_id", data.id);
+      localStorage.setItem("femflow_nome", data.nome);
+      localStorage.setItem("femflow_email", data.email);
+      localStorage.setItem("femflow_auth", "yes");
+      this.router("home");
+      return data;
+    } else {
+      this.toast("⚠️ Erro no cadastro/index.", true);
     }
+  } catch (err) {
+    console.error("Erro em indexOuCadastro:", err);
+    this.toast("❌ Falha de conexão com o servidor.", true);
+  }
+},  // 👈✅ vírgula obrigatória aqui
 
-    try {
-      const resp = await fetch(this.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "indexOuCadastro", nome, email }),
-      });
-      const data = await resp.json();
+/* =======================================================
+   🔹 1.1 LOGOUT
+======================================================= */
+logout() {
+  const KEYS = [
+    'femflow_auth',
+    'femflow_id',
+    'femflow_nome',
+    'femflow_email',
+  ];
+  KEYS.forEach(k => localStorage.removeItem(k));
+  window.location.href = 'index.html';
+},
 
-      if (data.status === "ok" || data.status === "created") {
-        this.toast(`🌸 Bem-vinda, ${data.nome}!`);
-        localStorage.setItem("femflow_id", data.id);
-        localStorage.setItem("femflow_nome", data.nome);
-        localStorage.setItem("femflow_email", data.email);
-        localStorage.setItem("femflow_auth", "yes");
-        this.router("home");
-        return data;
-      } else {
-        this.toast("⚠️ Erro no cadastro/index.", true);
-      }
-    } catch (err) {
-      console.error("Erro em indexOuCadastro:", err);
-      this.toast("❌ Falha de conexão com o servidor.", true);
-    }
-  },
-};
-
-  /* =======================================================
-     🔹 1.1 LOGOUT
-  ======================================================= */
-  logout() {
-    const KEYS = [
-      'femflow_auth',
-      'femflow_id',
-      'femflow_nome',
-      'femflow_email',
-    ];
-    KEYS.forEach(k => localStorage.removeItem(k));
-    window.location.href = 'index.html';
-  },
 /* =======================================================
    🔹 CABEÇALHO + MENU CONTEXTUAL FEMFLOW (2025)
    ======================================================= */
