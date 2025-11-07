@@ -83,7 +83,33 @@
       Análise concluída! Calculando seu perfil...
     </p>
   </div>
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
+  <script>
+  (function initFirebase(){
+    if(window._femflowFirebaseReady) return;
+    const firebaseConfig = {
+      apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
+      authDomain: "femflow-ebec2.firebaseapp.com",
+      projectId: "femflow-ebec2",
+      storageBucket: "femflow-ebec2.appspot.com",
+      messagingSenderId: "1043953159611",
+      appId: "1:1043953159611:web:d12b82f744740f3124c89e",
+      measurementId: "G-6F644L5VTW"
+    };
+    try{
+      if(typeof firebase==="undefined"){console.error("Firebase SDK não encontrado");return;}
+      if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      window._femflowFirebaseReady=true;
+      console.log("🔥 Firebase inicializado com sucesso (FemFlow)");
+    }catch(e){
+      console.warn("⚠️ Falha ao inicializar Firebase:",e);
+      window._femflowFirebaseReady=false;
+    }
+  })();
+  </script>
   <!-- Core principal -->
   <script src="./femflow-core.js"></script>
 
