@@ -4,7 +4,7 @@
   "short_name": "FemFlow",
   "description": "Treine em harmonia com o seu ciclo. Programa de 30 dias sincronizado ao seu corpo, energia e fases hormonais.",
   "lang": "pt-BR",
-  "start_url": "/femflow/app/home.html",
+  "start_url": "/femflow/app/index.html",
   "scope": "/femflow/app/",
   "display": "standalone",
   "orientation": "portrait",
@@ -13,19 +13,19 @@
   "categories": ["health", "fitness", "education", "lifestyle"],
   "icons": [
     {
-      "src": "./assets/icons/icon-192.png",
+      "src": "assets/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/webp",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./assets/icons/icon-512.png",
+      "src": "assets/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/webp",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./assets/icons/icon-mono.png",
+      "src": "assets/icons/icon-mono.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "monochrome"
@@ -33,13 +33,13 @@
   ],
   "screenshots": [
     {
-      "src": "./assets/screenshots/femflow-home.png",
+      "src": "assets/screenshots/femflow-home.png",
       "sizes": "1080x1920",
       "type": "image/webp",
       "form_factor": "narrow"
     },
     {
-      "src": "./assets/screenshots/femflow-dashboard.png",
+      "src": "assets/screenshots/femflow-dashboard.png",
       "sizes": "1920x1080",
       "type": "image/webp",
       "form_factor": "wide"
