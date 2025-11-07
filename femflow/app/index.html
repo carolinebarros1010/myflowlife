@@ -141,7 +141,7 @@
 
     // ========== Comunicação com Apps Script ==========
    async function postGAS(payload) {
-  const scriptURL = localStorage.getItem("femflow_script");
+  const scriptURL = "proxy.php"; // 👈 envia para o proxy local
   const proxy = "https://api.allorigins.win/raw?url=" + encodeURIComponent(scriptURL);
   const r = await fetch(proxy, {
     method: "POST",
