@@ -220,5 +220,98 @@ if ('serviceWorker' in navigator) {
   addEventListener('load', ()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
 }
 </script>
+  <!-- 🔔 Banner de status da assinatura -->
+<script>
+(async function verificarAssinatura(){
+  const id = localStorage.getItem("femflow_id");
+  if(!id) return;
+
+  const scriptURL =
+    (typeof FEMFLOW !== "undefined" && FEMFLOW.SCRIPT_URL) ||
+    localStorage.getItem("femflow_script") ||
+    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+
+  let linkHotmart = "https://pay.hotmart.com/SEU-LINK-MENSAL";
+
+  try {
+    // Busca link dinâmico dos produtos
+    const resp = await fetch(`${scriptURL}?action=products`);
+    const dataProd = await resp.json();
+    if(dataProd.products?.length > 0){
+      const produtoFemFlow = dataProd.products.find(p =>
+        p.titulo.toLowerCase().includes("femflow")
+      );
+      linkHotmart = produtoFemFlow?.hotmart || dataProd.products[0].hotmart || linkHotmart;
+    }
+
+    // Consulta status da assinatura
+    const r = await fetch(`${scriptURL}?action=status&id=${id}`);
+    const data = await r.json();
+    console.log("🩷 Status assinatura:", data);
+
+    if(data.status !== "ok" || !data.expiryISO) return;
+
+    const exp = new Date(data.expiryISO);
+    const hoje = new Date();
+    const diff = Math.ceil((exp - hoje) / (1000 * 60 * 60 * 24)); // dias restantes
+
+    if(diff <= 0){
+      mostrarBanner("💳 Sua assinatura expirou.", "🔁 Renovar agora", linkHotmart);
+    } else if(diff <= 5){
+      mostrarBanner(`⏳ Sua assinatura expira em ${diff} dia${diff>1?"s":""}.`, "Renovar agora", linkHotmart);
+    }
+
+  } catch(err){
+    console.warn("⚠️ Falha ao verificar assinatura:", err);
+  }
+
+  // ======== UI do Banner ========
+  function mostrarBanner(msg, btnText, link){
+    const bar = document.createElement("div");
+    bar.style.position = "fixed";
+    bar.style.bottom = "0";
+    bar.style.left = "0";
+    bar.style.width = "100%";
+    bar.style.background = "#cc6a5a";
+    bar.style.color = "white";
+    bar.style.padding = "10px 16px";
+    bar.style.fontFamily = "Lato, sans-serif";
+    bar.style.display = "flex";
+    bar.style.justifyContent = "space-between";
+    bar.style.alignItems = "center";
+    bar.style.zIndex = "9999";
+    bar.style.boxShadow = "0 -3px 10px rgba(0,0,0,0.2)";
+    bar.style.transition = "transform .3s ease";
+
+    const span = document.createElement("span");
+    span.textContent = msg;
+    span.style.fontSize = "0.95rem";
+    span.style.flex = "1";
+
+    const btn = document.createElement("button");
+    btn.textContent = btnText;
+    btn.style.background = "white";
+    btn.style.color = "#cc6a5a";
+    btn.style.border = "none";
+    btn.style.borderRadius = "20px";
+    btn.style.padding = "6px 14px";
+    btn.style.fontWeight = "600";
+    btn.style.cursor = "pointer";
+    btn.onclick = () => window.open(link, "_blank");
+
+    const close = document.createElement("span");
+    close.textContent = "×";
+    close.style.cursor = "pointer";
+    close.style.marginLeft = "10px";
+    close.style.fontSize = "1.2rem";
+    close.onclick = () => bar.remove();
+
+    bar.appendChild(span);
+    bar.appendChild(btn);
+    bar.appendChild(close);
+    document.body.appendChild(bar);
+  }
+})();
+</script>
 </body>
 </html>
