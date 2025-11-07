@@ -1,192 +1,171 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Anamnese Deluxe • FemFlow</title>
-
   <style>
     :root {
-      --terracota: #cc6a5a;
-      --bege: #fff5ef;
-      --verde: #335953;
-      --texto: #5b4f49;
+      --terracota:#cc6a5a;
+      --bege:#fff5ef;
+      --verde:#335953;
+      --texto:#5b4f49;
     }
     body {
-      margin: 0;
-      background-color: var(--bege);
-      color: var(--texto);
-      font-family: "Lato", sans-serif;
-      text-align: center;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: center;
-      padding: 20px;
-      box-sizing: border-box;
+      margin:0; background:var(--bege); color:var(--texto);
+      font-family:"Lato",sans-serif; text-align:center;
+      display:flex; flex-direction:column; align-items:center;
+      min-height:100vh; padding:24px;
     }
     h1 {
-      font-family: 'Playfair Display', serif;
-      color: var(--terracota);
-      font-size: 2rem;
-      margin-bottom: 10px;
+      font-family:'Playfair Display',serif;
+      color:var(--terracota); font-size:2rem; margin-bottom:8px;
     }
     .card {
-      background: #fff;
-      border-radius: 22px;
-      padding: 20px;
-      width: 100%;
-      max-width: 430px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      margin-top: 10px;
-      transition: all .3s ease;
+      background:#fff; border-radius:22px; padding:22px;
+      max-width:420px; width:100%; box-shadow:0 6px 12px rgba(0,0,0,0.1);
+      margin-top:12px;
     }
-    .question {
-      font-size: 1.15rem;
-      margin-bottom: 20px;
-      font-weight: 500;
+    input {
+      width:100%; padding:10px; margin:6px 0;
+      border:1px solid #ddd; border-radius:10px; font-size:1rem;
     }
-    .options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    button {
+      background:var(--terracota); color:white; border:none;
+      border-radius:12px; padding:12px 18px; font-size:1rem;
+      margin-top:10px; cursor:pointer; transition:background .3s;
     }
-    button.option {
-      background: var(--terracota);
-      border: none;
-      color: white;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 1rem;
-      transition: background 0.25s;
-      cursor: pointer;
-    }
-    button.option:hover {
-      background: var(--verde);
-    }
-    .gif {
-      width: 160px;
-      height: 160px;
-      border-radius: 18px;
-      margin: 10px auto;
-      object-fit: cover;
-      display: block;
-    }
-    .hidden { display: none; }
-    #final-msg {
-      font-size: 1.1rem;
-      color: var(--verde);
-      font-weight: bold;
-      margin-top: 20px;
-    }
+    button:hover { background:var(--verde); }
+    .gif { width:160px; height:160px; border-radius:18px; margin:10px auto; object-fit:cover; display:block; }
+    .question { font-size:1.15rem; margin-bottom:20px; font-weight:500; }
+    .options { display:flex; flex-direction:column; gap:10px; }
+    .hidden { display:none; }
   </style>
 </head>
-
 <body>
   <script>window.FEMFLOW_DISABLE_UI = true;</script>
 
-  <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px; margin-top:15px; margin-bottom:5px;">
-  <h1>Anamnese FemFlow</h1>
+  <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px;margin-top:15px;">
+  <h1>Cadastro + Anamnese</h1>
 
-  <div id="card" class="card">
+  <!-- Etapa 1: Cadastro -->
+  <div id="cadastro" class="card">
+    <p style="font-size:1rem;margin-bottom:10px;">🌸 Preencha seus dados para começar:</p>
+    <input id="nome" type="text" placeholder="Nome completo" required>
+    <input id="email" type="email" placeholder="E-mail" required>
+    <input id="telefone" type="tel" placeholder="Telefone (opcional)">
+    <input id="senha" type="password" placeholder="Crie uma senha" required>
+    <input id="confirma" type="password" placeholder="Confirme a senha" required>
+    <button id="btnIniciar">Iniciar Anamnese</button>
+  </div>
+
+  <!-- Etapa 2: Perguntas -->
+  <div id="quiz" class="card hidden">
     <img id="gif" src="./assets/gifs/profile_form.webp" alt="gif" class="gif">
     <div id="question" class="question"></div>
     <div id="options" class="options"></div>
   </div>
 
+  <!-- Etapa 3: Final -->
   <div id="final" class="hidden">
     <img src="./assets/gifs/success_flow.webp" alt="Sucesso" class="gif">
-    <p id="final-msg">Análise concluída! 🌸 Calculando seu perfil...</p>
+    <p id="final-msg" style="font-size:1.1rem;color:var(--verde);font-weight:bold;">
+      Análise concluída! Calculando seu perfil...
+    </p>
   </div>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKUdHajGESV8xvRpXPXaLLWlWbAgobohkb1bsOQhy9X7chmEKMWkdSOtYrVBfAxRpL/exec";
 
     const perguntas = [
-      { gif: "profile_form.webp", texto: "Como você descreveria sua rotina atual de treinos?",
-        opcoes: [{texto:"Não treino há meses 😅",v:1},{texto:"Treino 1–2x por semana 🧘‍♀️",v:2},{texto:"Treino 3x ou mais 💪",v:3}] },
-      { gif: "breath_cycle.webp", texto: "Como avalia seu condicionamento físico?",
-        opcoes: [{texto:"Canso fácil 💤",v:1},{texto:"Regular, consigo manter 💫",v:2},{texto:"Excelente, sou ativa 🔥",v:3}] },
-      { gif: "strength_training.webp", texto: "Você já treinou com acompanhamento profissional?",
-        opcoes: [{texto:"Nunca 🫣",v:1},{texto:"Às vezes 🧩",v:2},{texto:"Sempre com treino estruturado 📋",v:3}] },
-      { gif: "hormonal_balance.webp", texto: "Durante o ciclo, você percebe variações no rendimento?",
-        opcoes: [{texto:"Nunca notei 🤔",v:1},{texto:"Um pouco 🔄",v:2},{texto:"Sim, e ajusto conforme 🌙",v:3}] },
-      { gif: "mind_focus.webp", texto: "Como está seu foco e disposição mental atualmente?",
-        opcoes: [{texto:"Baixo, sinto-me cansada 💤",v:1},{texto:"Regular, mas com altos e baixos ⚖️",v:2},{texto:"Constante e focada ✨",v:3}] },
-      { gif: "sleep_quality.webp", texto: "Como está a qualidade do seu sono?",
-        opcoes: [{texto:"Durmo mal 😴",v:1},{texto:"Durmo o suficiente 💤",v:2},{texto:"Durmo e acordo disposta ☀️",v:3}] },
-      { gif: "nutrition_balance.webp", texto: "Sua alimentação é equilibrada?",
-        opcoes: [{texto:"Desorganizada 🍕",v:1},{texto:"Moderadamente saudável 🥗",v:2},{texto:"Planejada e nutritiva 🥑",v:3}] },
-      { gif: "goal_motivation.webp", texto: "Qual seu principal objetivo com o FemFlow?",
-        opcoes: [{texto:"Recomeçar com leveza 🌱",v:1},{texto:"Ganhar força e foco 💥",v:2},{texto:"Performance e equilíbrio total 🏆",v:3}] }
+      { gif:"profile_form.webp", texto:"Como está sua rotina de treinos?",
+        opcoes:[{texto:"Não treino há meses 😅",v:1},{texto:"Treino 1–2x por semana 🧘‍♀️",v:2},{texto:"Treino 3x ou mais 💪",v:3}]},
+      { gif:"routine_cycle.webp", texto:"Você sente variações de energia ao longo do ciclo?",
+        opcoes:[{texto:"Nunca percebi 🤔",v:1},{texto:"Às vezes 🔄",v:2},{texto:"Sim, percebo fases distintas 🌙",v:3}]},
+      { gif:"strength_training.webp", texto:"Você já treinou com acompanhamento profissional?",
+        opcoes:[{texto:"Nunca 🫣",v:1},{texto:"Às vezes 🧩",v:2},{texto:"Sempre com treino estruturado 📋",v:3}]},
+      { gif:"mobility_flow.webp", texto:"Como está sua mobilidade e alongamento?",
+        opcoes:[{texto:"Preciso melhorar 😬",v:1},{texto:"Razoável 🧘‍♀️",v:2},{texto:"Boa flexibilidade 🌸",v:3}]},
+      { gif:"hormonal_balance.webp", texto:"Como avalia seu equilíbrio hormonal?",
+        opcoes:[{texto:"Tenho sintomas fortes 😖",v:1},{texto:"Algumas variações 💫",v:2},{texto:"Bem controlado 🌿",v:3}]},
+      { gif:"menstrual_flow.webp", texto:"Como costuma ser seu fluxo menstrual?",
+        opcoes:[{texto:"Intenso e incômodo 💢",v:1},{texto:"Moderado 💧",v:2},{texto:"Leve e regular 🌺",v:3}]},
+      { gif:"breath_cycle.webp", texto:"Como está seu padrão respiratório e energia diária?",
+        opcoes:[{texto:"Canso fácil 😮‍💨",v:1},{texto:"Regular ⚖️",v:2},{texto:"Energia alta ☀️",v:3}]},
     ];
 
-    let i = 0, score = 0;
-    const gif = document.getElementById("gif"),
-          q = document.getElementById("question"),
-          opts = document.getElementById("options"),
-          card = document.getElementById("card"),
-          final = document.getElementById("final"),
-          msg = document.getElementById("final-msg");
+    const cadastro=document.getElementById("cadastro"),
+          quiz=document.getElementById("quiz"),
+          final=document.getElementById("final"),
+          gif=document.getElementById("gif"),
+          q=document.getElementById("question"),
+          opts=document.getElementById("options"),
+          msg=document.getElementById("final-msg");
 
-    function mostrarPergunta() {
-      const p = perguntas[i];
-      gif.src = "./assets/gifs/" + p.gif;
-      q.textContent = p.texto;
-      opts.innerHTML = "";
-      p.opcoes.forEach(o => {
-        const b = document.createElement("button");
-        b.className = "option";
-        b.textContent = o.texto;
-        b.onclick = () => {
-          score += o.v; i++;
-          if (i < perguntas.length) mostrarPergunta();
-          else finalizar();
-        };
+    let i=0, score=0, nome="", email="", telefone="", senha="";
+
+    document.getElementById("btnIniciar").onclick=()=>{
+      nome=document.getElementById("nome").value.trim();
+      email=document.getElementById("email").value.trim();
+      telefone=document.getElementById("telefone").value.trim();
+      senha=document.getElementById("senha").value.trim();
+      const confirma=document.getElementById("confirma").value.trim();
+
+      if(!nome||!email||!senha){alert("Preencha todos os campos obrigatórios.");return;}
+      if(senha.length<6){alert("A senha deve ter pelo menos 6 caracteres.");return;}
+      if(senha!==confirma){alert("As senhas não coincidem.");return;}
+
+      localStorage.setItem("femflow_nome",nome);
+      localStorage.setItem("femflow_email",email);
+      localStorage.setItem("femflow_tel",telefone);
+      localStorage.setItem("femflow_senha",senha);
+
+      cadastro.classList.add("hidden");
+      quiz.classList.remove("hidden");
+      mostrarPergunta();
+    };
+
+    function mostrarPergunta(){
+      const p=perguntas[i];
+      gif.src="./assets/gifs/"+p.gif;
+      q.textContent=p.texto;
+      opts.innerHTML="";
+      p.opcoes.forEach(o=>{
+        const b=document.createElement("button");
+        b.textContent=o.texto;
+        b.onclick=()=>{score+=o.v;i++;(i<perguntas.length)?mostrarPergunta():finalizar();};
         opts.appendChild(b);
       });
     }
 
-    async function finalizar() {
-      card.classList.add("hidden");
+    async function finalizar(){
+      quiz.classList.add("hidden");
       final.classList.remove("hidden");
 
-      let nivel = "iniciante";
-      if (score >= 17) nivel = "avançada";
-      else if (score >= 12) nivel = "intermediária";
+      let nivel="iniciante";
+      if(score>=16) nivel="avançada";
+      else if(score>=11) nivel="intermediária";
 
-      const nome = localStorage.getItem("femflow_nome") || "";
-      const email = localStorage.getItem("femflow_email") || "";
-      const telefone = localStorage.getItem("femflow_tel") || "";
-
-      const respostas = perguntas.map((p, idx) => `Q${idx+1}: ${p.texto} → ${p.opcoes.find(o => true).texto}`);
-
-      const dados = {
-        action: "loginOuCadastro",
-        nome, email, telefone,
-        perfil: nivel,
-        pontuacao: score,
-        anamnese: JSON.stringify(respostas)
+      const respostas=perguntas.map((p,idx)=>`Q${idx+1}: ${p.texto}`);
+      const dados={
+        action:"loginOuCadastro",
+        nome,email,telefone,senha,
+        perfil:nivel,
+        pontuacao:score,
+        anamnese:JSON.stringify(respostas)
       };
 
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(dados)
+      try{
+        await fetch(SCRIPT_URL,{
+          method:"POST",
+          headers:{"Content-Type":"text/plain;charset=utf-8"},
+          body:JSON.stringify(dados)
         });
-      } catch (err) {
-        console.error("Erro:", err);
-      }
+      }catch(err){console.error("Erro:",err);}
 
-      msg.textContent = `✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
-      setTimeout(() => {
-        location.href = "index.html?bemvinda=1";
-      }, 4500);
+      msg.textContent=`✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
+      setTimeout(()=>location.href="index.html?bemvinda=1",4000);
     }
-
-    mostrarPergunta();
   </script>
 </body>
 </html>
