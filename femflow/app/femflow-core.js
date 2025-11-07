@@ -548,3 +548,44 @@ try {
 return itens;
 };
 
+/* =======================================================
+   🌸 Cadastro / Anamnese → Apps Script
+======================================================= */
+FEMFLOW.enviarCadastro = async function(dados) {
+  if (!dados || !dados.email) {
+    FEMFLOW.toast("⚠️ E-mail é obrigatório.", true);
+    return;
+  }
+
+  try {
+    const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "loginOuCadastro",
+        nome: dados.nome || "",
+        email: dados.email || "",
+        telefone: dados.telefone || "",
+        senha: dados.senha || "",
+        perfil: dados.perfil || "iniciante",
+        pontuacao: dados.pontuacao || 0,
+        anamnese: dados.anamnese || ""
+      }),
+    });
+
+    const r = await resp.json();
+    if (r.status === "ok" || r.status === "created") {
+      FEMFLOW.toast("✨ Cadastro enviado com sucesso!");
+      return r;
+    } else {
+      FEMFLOW.toast("❌ Erro ao cadastrar: " + (r.msg || r.status), true);
+      return null;
+    }
+  } catch (err) {
+    FEMFLOW.toast("⚠️ Falha de rede.", true);
+    console.error("Erro enviarCadastro:", err);
+    return null;
+  }
+};
+
+
