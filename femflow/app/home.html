@@ -130,24 +130,24 @@
   }
   </script>
 
- <script>
+<script>
   // === PROGRAMA DE ACESSO LIVRE (assinatura mensal única) ===
   const PRODUTOS = [
-    { sku:'GLUTEO',      titulo:'Glúteos',        enfase:'gluteo',      color:'#d98f80', desc:'Ênfase em glúteo médio/máximo' },
-    { sku:'QUADRICEPS',  titulo:'Quadríceps',     enfase:'quadriceps',  color:'#9fb7ac', desc:'Foco em extensão de joelhos' },
-    { sku:'PEITO',       titulo:'Peitoral',       enfase:'peito',       color:'#c8a1a6', desc:'Empurrar, isometrias e controle' },
-    { sku:'COSTAS',      titulo:'Costas',         enfase:'costas',      color:'#a0a6c8', desc:'Remadas, escápulas e postura' },
-    { sku:'POSTERIOR',   titulo:'Posteriores',    enfase:'posteriores', color:'#b08fb8', desc:'Cadeia posterior e hinge' },
-    { sku:'PANTURRILHA', titulo:'Panturrilhas',   enfase:'panturrilha', color:'#bfa27d', desc:'Sóleo e gastrocnêmio' },
-    { sku:'CORE',        titulo:'Core',           enfase:'core',        color:'#86a9b8', desc:'Antiextensão e antirotação' },
-    { sku:'GERAL',       titulo:'Geral',          enfase:'geral',       color:'#cc6a5a', desc:'Corpo todo e equilíbrio' },
-    { sku:'MOBILIDADE',  titulo:'Mobilidade',     enfase:'mobilidade',  color:'#a7b08f', desc:'Alongamento e liberação' },
-    { sku:'CARDIO',      titulo:'HIIT / Cardio',  enfase:'cardio',      color:'#e0a36b', desc:'Cardio e baixa intensidade' }
+    { titulo:'Glúteos',        enfase:'gluteo',      color:'#d98f80', desc:'Ênfase em glúteo médio/máximo' },
+    { titulo:'Quadríceps',     enfase:'quadriceps',  color:'#9fb7ac', desc:'Foco em extensão de joelhos' },
+    { titulo:'Peitoral',       enfase:'peito',       color:'#c8a1a6', desc:'Empurrar, isometrias e controle' },
+    { titulo:'Costas',         enfase:'costas',      color:'#a0a6c8', desc:'Remadas, escápulas e postura' },
+    { titulo:'Posteriores',    enfase:'posteriores', color:'#b08fb8', desc:'Cadeia posterior e hinge' },
+    { titulo:'Panturrilhas',   enfase:'panturrilha', color:'#bfa27d', desc:'Sóleo e gastrocnêmio' },
+    { titulo:'Core',           enfase:'core',        color:'#86a9b8', desc:'Antiextensão e antirotação' },
+    { titulo:'Geral',          enfase:'geral',       color:'#cc6a5a', desc:'Corpo todo e equilíbrio' },
+    { titulo:'Mobilidade',     enfase:'mobilidade',  color:'#a7b08f', desc:'Alongamento e liberação' },
+    { titulo:'HIIT / Cardio',  enfase:'cardio',      color:'#e0a36b', desc:'Cardio e baixa intensidade' }
   ];
 
   const rail = document.getElementById('railProdutos');
 
-  // === Monta os cards ===
+  // === Monta o HTML dos cards ===
   function cardHTML(p){
     return `
       <article class="card" data-enfase="${p.enfase}">
@@ -157,11 +157,12 @@
         </div>
         <div class="info">
           <h3 class="ttl">${p.titulo}</h3>
-          <p class="desc">${p.desc||''}</p>
+          <p class="desc">${p.desc || ''}</p>
         </div>
       </article>`;
   }
 
+  // === Renderiza os cards na vitrine ===
   function render(){
     rail.innerHTML = PRODUTOS.map(cardHTML).join('');
     rail.querySelectorAll('.card').forEach(el=>{
@@ -169,70 +170,44 @@
     });
   }
 
-  // === Clique no card → define ênfase e vai pro FlowCenter ===
+  // === Clique no card → define a ênfase e vai pro Flow Center ===
   function onChoose(enfase){
+    // salva no localStorage para o treino.js puxar do Firebase
     localStorage.setItem('femflow_enfase', enfase);
     location.href = 'flowcenter.html';
   }
 
-  // === Inicialização ===
+  // === Inicialização (async) ===
   (async () => {
-    await syncEntitlement();
-    render();
-    document.getElementById('btnFlow').onclick = () => location.href='flowcenter.html';
-    document.getElementById('btnCad').onclick  = () => location.href='index.html';
-  })();
+    await syncEntitlement();   // Atualiza status de assinatura
+    render();                  // Renderiza cards
 
-
-function onChoose(sku){
-  // 🔹 Mapeia o SKU (Hotmart) para a ênfase real usada no Firebase
-  const map = {
-    'FF-30D-GLUTEOS':     'gluteo',
-    'FF-30D-QUADRICEPS':  'quadriceps',
-    'FF-30D-PEITORAL':    'peito',
-    'FF-30D-COSTAS':      'costas',
-    'FF-30D-POSTERIORES': 'posteriores',
-    'FF-30D-PANTURRILHA': 'panturrilha',
-    'FF-30D-CORE':        'core',
-    'FF-30D-MOBILIDADE':  'mobilidade',
-    'FF-30D-HIIT-LOW':    'cardio',
-    'FF-30D-GERAL':       'geral'
-  };
-  const enfase = map[sku] || 'geral';
-
-  // 🔹 Salva a ênfase escolhida
-  localStorage.setItem('femflow_enfase', enfase);
-
-  // 🔹 Pula direto pro Flow Center (não há mais pagamento por produto)
-  location.href = 'flowcenter.html';
-}
-  (async () => {
-    await syncEntitlement();   // 1) atualiza status
-    render();                  // 2) renderiza vitrine
-
-    // 3) CTAs
+    // Botões principais
     document.getElementById('btnFlow').onclick = async () => {
       await syncEntitlement();
-      if (hasEntitlement()) location.href = 'flowcenter.html';
-      else {
+      if (hasEntitlement()) {
+        location.href = 'flowcenter.html';
+      } else {
         const id = localStorage.getItem('femflow_id');
         if (!id) location.href = 'index.html';
-        else alert('Seu acesso terminou. Escolha um programa abaixo para continuar.');
+        else alert('⚠️ Sua assinatura terminou. Renove para continuar.');
       }
     };
-    document.getElementById('btnCad').onclick  = () => location.href = 'index.html';
+    document.getElementById('btnCad').onclick = () => location.href = 'index.html';
 
-    // 4) Deep link ?id=...
+    // Deep link (?id=...)
     const p = new URLSearchParams(location.search);
-    const got = p.get('id'); if (got) localStorage.setItem('femflow_id', got);
+    const got = p.get('id');
+    if (got) localStorage.setItem('femflow_id', got);
   })();
 
-  // PWA (se usar)
+  // === Registro do PWA (service worker) ===
   if ('serviceWorker' in navigator) {
-    addEventListener('load', ()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
+    addEventListener('load', () =>
+      navigator.serviceWorker.register('service-worker.js').catch(() => {})
+    );
   }
-  </script>
-
+</script>
   <!-- 🔔 Banner de status da assinatura -->
   <script>
   (async function verificarAssinatura(){
