@@ -130,29 +130,30 @@
   }
   </script>
 
-  <!-- Catálogo e UI -->
-  <script>
+ <script>
+  // === PROGRAMA DE ACESSO LIVRE (assinatura mensal única) ===
   const PRODUTOS = [
-    { sku:'FF-30D-GLUTEOS',     titulo:'30 dias • Glúteos',            foco:'Glúteos',      img:null, color:'#d98f80', desc:'Ênfase em glúteo médio/máximo' },
-    { sku:'FF-30D-QUADRICEPS',  titulo:'30 dias • Ênfase Quadríceps',  foco:'Pernas',       img:null, color:'#9fb7ac', desc:'Foco em extensão de joelhos' },
-    { sku:'FF-30D-PEITORAL',    titulo:'30 dias • Ênfase Peitoral',    foco:'Peitoral',     img:null, color:'#c8a1a6', desc:'Empurrar, isometrias e controle' },
-    { sku:'FF-30D-COSTAS',      titulo:'30 dias • Ênfase Costas',      foco:'Costas',       img:null, color:'#a0a6c8', desc:'Remadas, escápulas e postura' },
-    { sku:'FF-30D-POSTERIORES', titulo:'30 dias • Posteriores',        foco:'Posteriores',  img:null, color:'#b08fb8', desc:'Hinge e cadeia posterior' },
-    { sku:'FF-30D-PANTURRILHA', titulo:'30 dias • Panturrilhas',       foco:'Panturrilhas', img:null, color:'#bfa27d', desc:'Sóleo e gastrocnêmio' },
-    { sku:'FF-30D-CORE',        titulo:'30 dias • Core',               foco:'Core',         img:null, color:'#86a9b8', desc:'Antiextensão e antirotação' },
-    { sku:'FF-30D-MOBILIDADE',  titulo:'30 dias • Mobilidade',         foco:'Mobilidade',   img:null, color:'#a7b08f', desc:'Alongamento + liberação + flow' },
-    { sku:'FF-30D-HIIT-LOW',    titulo:'30 dias • HIIT Baixo Impacto', foco:'Cardio',       img:null, color:'#e0a36b', desc:'Cardio gentil às articulações' }
+    { sku:'GLUTEO',      titulo:'Glúteos',        enfase:'gluteo',      color:'#d98f80', desc:'Ênfase em glúteo médio/máximo' },
+    { sku:'QUADRICEPS',  titulo:'Quadríceps',     enfase:'quadriceps',  color:'#9fb7ac', desc:'Foco em extensão de joelhos' },
+    { sku:'PEITO',       titulo:'Peitoral',       enfase:'peito',       color:'#c8a1a6', desc:'Empurrar, isometrias e controle' },
+    { sku:'COSTAS',      titulo:'Costas',         enfase:'costas',      color:'#a0a6c8', desc:'Remadas, escápulas e postura' },
+    { sku:'POSTERIOR',   titulo:'Posteriores',    enfase:'posteriores', color:'#b08fb8', desc:'Cadeia posterior e hinge' },
+    { sku:'PANTURRILHA', titulo:'Panturrilhas',   enfase:'panturrilha', color:'#bfa27d', desc:'Sóleo e gastrocnêmio' },
+    { sku:'CORE',        titulo:'Core',           enfase:'core',        color:'#86a9b8', desc:'Antiextensão e antirotação' },
+    { sku:'GERAL',       titulo:'Geral',          enfase:'geral',       color:'#cc6a5a', desc:'Corpo todo e equilíbrio' },
+    { sku:'MOBILIDADE',  titulo:'Mobilidade',     enfase:'mobilidade',  color:'#a7b08f', desc:'Alongamento e liberação' },
+    { sku:'CARDIO',      titulo:'HIIT / Cardio',  enfase:'cardio',      color:'#e0a36b', desc:'Cardio e baixa intensidade' }
   ];
-  const CHECKOUTS = {};
+
   const rail = document.getElementById('railProdutos');
 
+  // === Monta os cards ===
   function cardHTML(p){
-    const initials = p.titulo.replace('30 dias • ','').split(' ').map(s=>s[0]).join('').slice(0,3).toUpperCase();
     return `
-      <article class="card" data-sku="${p.sku}">
+      <article class="card" data-enfase="${p.enfase}">
         <div class="thumb" style="background:${p.color}">
-          ${p.img ? `<img src="${p.img}" alt="${p.titulo}"/>` : `<div class="ph">${initials}</div>`}
-          <span class="badge">${p.foco}</span>
+          <div class="ph">${p.titulo.charAt(0)}</div>
+          <span class="badge">${p.titulo}</span>
         </div>
         <div class="info">
           <h3 class="ttl">${p.titulo}</h3>
@@ -164,9 +165,24 @@
   function render(){
     rail.innerHTML = PRODUTOS.map(cardHTML).join('');
     rail.querySelectorAll('.card').forEach(el=>{
-      el.addEventListener('click', ()=>onChoose(el.dataset.sku));
+      el.addEventListener('click', ()=>onChoose(el.dataset.enfase));
     });
   }
+
+  // === Clique no card → define ênfase e vai pro FlowCenter ===
+  function onChoose(enfase){
+    localStorage.setItem('femflow_enfase', enfase);
+    location.href = 'flowcenter.html';
+  }
+
+  // === Inicialização ===
+  (async () => {
+    await syncEntitlement();
+    render();
+    document.getElementById('btnFlow').onclick = () => location.href='flowcenter.html';
+    document.getElementById('btnCad').onclick  = () => location.href='index.html';
+  })();
+
 
 function onChoose(sku){
   // 🔹 Mapeia o SKU (Hotmart) para a ênfase real usada no Firebase
