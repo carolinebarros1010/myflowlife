@@ -55,8 +55,8 @@
   </style>
 </head>
 <body>
-  <header><img class="logo" src="assets/logofemflowverde.png" alt="FemFlow"/></header>
-
+  <!-- 🌸 TOPO AUTO do CORE (injetado via femflow-core.js) -->
+  
   <main class="wrap">
     <!-- Vídeo -->
     <section class="video">
@@ -80,238 +80,225 @@
   </main>
 
   <footer>FemFlow • escolha seu foco e comece hoje</footer>
-<!-- Firebase compat (antes do femflow-core.js) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="./femflow-core.js"></script>
 
-<script>
-async function syncEntitlement() {
-  try {
-    const email = localStorage.getItem('femflow_email') || '';
-    const id    = localStorage.getItem('femflow_id') || '';
-    if (!email && !id) return;
-    if (!window.FEMFLOW?.SCRIPT_URL) return;
+  <!-- Firebase compat (antes do femflow-core.js) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-    // usa email; se não tiver, cai pro id
-    const q = email ? `email=${encodeURIComponent(email)}` : `id=${encodeURIComponent(id)}`;
-    const url = `${FEMFLOW.SCRIPT_URL}?action=status&${q}`;
+  <!-- Core e UI -->
+  <script>
+    window.FEMFLOW_DISABLE_UI = false; // garante que o topo apareça
+  </script>
+  <script src="./femflow-core.js"></script>
 
-    const r = await fetch(url);
-    const j = await r.json();
+  <!-- Sincronização e controle -->
+  <script>
+  async function syncEntitlement() {
+    try {
+      const email = localStorage.getItem('femflow_email') || '';
+      const id    = localStorage.getItem('femflow_id') || '';
+      if (!email && !id) return;
+      if (!window.FEMFLOW?.SCRIPT_URL) return;
 
-    if (j?.id) localStorage.setItem('femflow_id', j.id);
-    if (j?.program) localStorage.setItem('femflow_program', j.program);
-    else localStorage.removeItem('femflow_program');
+      // usa email; se não tiver, cai pro id
+      const q = email ? `email=${encodeURIComponent(email)}` : `id=${encodeURIComponent(id)}`;
+      const url = `${FEMFLOW.SCRIPT_URL}?action=status&${q}`;
 
-    if (j?.expiryISO) localStorage.setItem('femflow_program_expiry', j.expiryISO);
-    else localStorage.removeItem('femflow_program_expiry');
+      const r = await fetch(url);
+      const j = await r.json();
 
-    if (j?.cycle?.startDate) localStorage.setItem('femflow_startDate', j.cycle.startDate);
-    if (j?.cycle?.length)    localStorage.setItem('femflow_cycleLength', j.cycle.length);
-  } catch(e) {
-    console.warn('syncEntitlement failed', e);
+      if (j?.id) localStorage.setItem('femflow_id', j.id);
+      if (j?.program) localStorage.setItem('femflow_program', j.program);
+      else localStorage.removeItem('femflow_program');
+
+      if (j?.expiryISO) localStorage.setItem('femflow_program_expiry', j.expiryISO);
+      else localStorage.removeItem('femflow_program_expiry');
+
+      if (j?.cycle?.startDate) localStorage.setItem('femflow_startDate', j.cycle.startDate);
+      if (j?.cycle?.length)    localStorage.setItem('femflow_cycleLength', j.cycle.length);
+    } catch(e) {
+      console.warn('syncEntitlement failed', e);
+    }
   }
-}
-</script>
-<script>
-// --- Checa direito ativo (programa válido) ---
-function hasEntitlement() {
-  const sku = localStorage.getItem('femflow_program');
-  const exp = localStorage.getItem('femflow_program_expiry');
-  if (!sku || !exp) return false;
-  return new Date() <= new Date(exp);
-}
 
-// --- Sincroniza status com Apps Script (GET action=status) ---
-async function syncEntitlement() {
-  try {
-    const email = localStorage.getItem('femflow_email') || '';
-    if (!email || !window.FEMFLOW?.SCRIPT_URL) return;
-
-    const url = `${FEMFLOW.SCRIPT_URL}?action=status&email=${encodeURIComponent(email)}`;
-    const r = await fetch(url);
-    const j = await r.json();
-
-    // Atualiza localStorage com dados retornados
-    if (j?.id) localStorage.setItem('femflow_id', j.id);
-    if (j?.program) localStorage.setItem('femflow_program', j.program);
-    else localStorage.removeItem('femflow_program');
-
-    if (j?.expiryISO) localStorage.setItem('femflow_program_expiry', j.expiryISO);
-    else localStorage.removeItem('femflow_program_expiry');
-
-    if (j?.cycle?.startDate) localStorage.setItem('femflow_startDate', j.cycle.startDate);
-    if (j?.cycle?.length)    localStorage.setItem('femflow_cycleLength', j.cycle.length);
-  } catch (e) {
-    console.warn('syncEntitlement failed', e);
+  // --- Checa direito ativo (programa válido) ---
+  function hasEntitlement() {
+    const sku = localStorage.getItem('femflow_program');
+    const exp = localStorage.getItem('femflow_program_expiry');
+    if (!sku || !exp) return false;
+    return new Date() <= new Date(exp);
   }
-}
-</script>
-<script>
-// ========= Catálogo / UI =========
-const PRODUTOS = [
-  { sku:'FF-30D-GLUTEOS',     titulo:'30 dias • Glúteos',            foco:'Glúteos',      img:null, color:'#d98f80', desc:'Ênfase em glúteo médio/máximo' },
-  { sku:'FF-30D-QUADRICEPS',  titulo:'30 dias • Ênfase Quadríceps',  foco:'Pernas',       img:null, color:'#9fb7ac', desc:'Foco em extensão de joelhos' },
-  { sku:'FF-30D-PEITORAL',    titulo:'30 dias • Ênfase Peitoral',    foco:'Peitoral',     img:null, color:'#c8a1a6', desc:'Empurrar, isometrias e controle' },
-  { sku:'FF-30D-COSTAS',      titulo:'30 dias • Ênfase Costas',      foco:'Costas',       img:null, color:'#a0a6c8', desc:'Remadas, escápulas e postura' },
-  { sku:'FF-30D-POSTERIORES', titulo:'30 dias • Posteriores',        foco:'Posteriores',  img:null, color:'#b08fb8', desc:'Hinge e cadeia posterior' },
-  { sku:'FF-30D-PANTURRILHA', titulo:'30 dias • Panturrilhas',       foco:'Panturrilhas', img:null, color:'#bfa27d', desc:'Sóleo e gastrocnêmio' },
-  { sku:'FF-30D-CORE',        titulo:'30 dias • Core',               foco:'Core',         img:null, color:'#86a9b8', desc:'Antiextensão e antirotação' },
-  { sku:'FF-30D-MOBILIDADE',  titulo:'30 dias • Mobilidade',         foco:'Mobilidade',   img:null, color:'#a7b08f', desc:'Alongamento + liberação + flow' },
-  { sku:'FF-30D-HIIT-LOW',    titulo:'30 dias • HIIT Baixo Impacto', foco:'Cardio',       img:null, color:'#e0a36b', desc:'Cardio gentil às articulações' }
-];
-const CHECKOUTS = { /* 'FF-30D-GLUTEOS':'ABCD1234' */ };
-const rail = document.getElementById('railProdutos');
+  </script>
 
-function cardHTML(p){
-  const initials = p.titulo.replace('30 dias • ','').split(' ').map(s=>s[0]).join('').slice(0,3).toUpperCase();
-  return `
-    <article class="card" data-sku="${p.sku}">
-      <div class="thumb" style="background:${p.color}">
-        ${p.img ? `<img src="${p.img}" alt="${p.titulo}"/>` : `<div class="ph">${initials}</div>`}
-        <span class="badge">${p.foco}</span>
-      </div>
-      <div class="info">
-        <h3 class="ttl">${p.titulo}</h3>
-        <p class="desc">${p.desc||''}</p>
-      </div>
-    </article>`;
-}
+  <!-- Catálogo e UI -->
+  <script>
+  const PRODUTOS = [
+    { sku:'FF-30D-GLUTEOS',     titulo:'30 dias • Glúteos',            foco:'Glúteos',      img:null, color:'#d98f80', desc:'Ênfase em glúteo médio/máximo' },
+    { sku:'FF-30D-QUADRICEPS',  titulo:'30 dias • Ênfase Quadríceps',  foco:'Pernas',       img:null, color:'#9fb7ac', desc:'Foco em extensão de joelhos' },
+    { sku:'FF-30D-PEITORAL',    titulo:'30 dias • Ênfase Peitoral',    foco:'Peitoral',     img:null, color:'#c8a1a6', desc:'Empurrar, isometrias e controle' },
+    { sku:'FF-30D-COSTAS',      titulo:'30 dias • Ênfase Costas',      foco:'Costas',       img:null, color:'#a0a6c8', desc:'Remadas, escápulas e postura' },
+    { sku:'FF-30D-POSTERIORES', titulo:'30 dias • Posteriores',        foco:'Posteriores',  img:null, color:'#b08fb8', desc:'Hinge e cadeia posterior' },
+    { sku:'FF-30D-PANTURRILHA', titulo:'30 dias • Panturrilhas',       foco:'Panturrilhas', img:null, color:'#bfa27d', desc:'Sóleo e gastrocnêmio' },
+    { sku:'FF-30D-CORE',        titulo:'30 dias • Core',               foco:'Core',         img:null, color:'#86a9b8', desc:'Antiextensão e antirotação' },
+    { sku:'FF-30D-MOBILIDADE',  titulo:'30 dias • Mobilidade',         foco:'Mobilidade',   img:null, color:'#a7b08f', desc:'Alongamento + liberação + flow' },
+    { sku:'FF-30D-HIIT-LOW',    titulo:'30 dias • HIIT Baixo Impacto', foco:'Cardio',       img:null, color:'#e0a36b', desc:'Cardio gentil às articulações' }
+  ];
+  const CHECKOUTS = {};
+  const rail = document.getElementById('railProdutos');
 
-function render(){
-  rail.innerHTML = PRODUTOS.map(cardHTML).join('');
-  rail.querySelectorAll('.card').forEach(el=>{
-    el.addEventListener('click', ()=>onChoose(el.dataset.sku));
-  });
-}
+  function cardHTML(p){
+    const initials = p.titulo.replace('30 dias • ','').split(' ').map(s=>s[0]).join('').slice(0,3).toUpperCase();
+    return `
+      <article class="card" data-sku="${p.sku}">
+        <div class="thumb" style="background:${p.color}">
+          ${p.img ? `<img src="${p.img}" alt="${p.titulo}"/>` : `<div class="ph">${initials}</div>`}
+          <span class="badge">${p.foco}</span>
+        </div>
+        <div class="info">
+          <h3 class="ttl">${p.titulo}</h3>
+          <p class="desc">${p.desc||''}</p>
+        </div>
+      </article>`;
+  }
 
-function onChoose(sku){
+  function render(){
+    rail.innerHTML = PRODUTOS.map(cardHTML).join('');
+    rail.querySelectorAll('.card').forEach(el=>{
+      el.addEventListener('click', ()=>onChoose(el.dataset.sku));
+    });
+  }
+
+ function onChoose(sku){
   const id = localStorage.getItem('femflow_id');
   const payCode = CHECKOUTS[sku];
+
+  // 🔹 salva a ênfase atual (para o Firebase puxar depois)
+  localStorage.setItem('femflow_enfase', sku);
+
   if (payCode) { location.href = `https://pay.hotmart.com/${payCode}`; return; }
   if (!id) { location.href = `index.html?sku=${encodeURIComponent(sku)}`; return; }
   location.href = `flowcenter.html?sku=${encodeURIComponent(sku)}`;
 }
+  (async () => {
+    await syncEntitlement();   // 1) atualiza status
+    render();                  // 2) renderiza vitrine
 
-(async () => {
-  await syncEntitlement();   // 1) atualiza status
-  render();                  // 2) renderiza vitrine
+    // 3) CTAs
+    document.getElementById('btnFlow').onclick = async () => {
+      await syncEntitlement();
+      if (hasEntitlement()) location.href = 'flowcenter.html';
+      else {
+        const id = localStorage.getItem('femflow_id');
+        if (!id) location.href = 'index.html';
+        else alert('Seu acesso terminou. Escolha um programa abaixo para continuar.');
+      }
+    };
+    document.getElementById('btnCad').onclick  = () => location.href = 'index.html';
 
-  // 3) CTAs
-  document.getElementById('btnFlow').onclick = async () => {
-    await syncEntitlement();
-    if (hasEntitlement()) location.href = 'flowcenter.html';
-    else {
-      const id = localStorage.getItem('femflow_id');
-      if (!id) location.href = 'index.html';
-      else alert('Seu acesso terminou. Escolha um programa abaixo para continuar.');
-    }
-  };
-  document.getElementById('btnCad').onclick  = () => location.href = 'index.html';
+    // 4) Deep link ?id=...
+    const p = new URLSearchParams(location.search);
+    const got = p.get('id'); if (got) localStorage.setItem('femflow_id', got);
+  })();
 
-  // 4) Deep link ?id=...
-  const p = new URLSearchParams(location.search);
-  const got = p.get('id'); if (got) localStorage.setItem('femflow_id', got);
-})();
+  // PWA (se usar)
+  if ('serviceWorker' in navigator) {
+    addEventListener('load', ()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
+  }
+  </script>
 
-// PWA (se usar)
-if ('serviceWorker' in navigator) {
-  addEventListener('load', ()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
-}
-</script>
   <!-- 🔔 Banner de status da assinatura -->
-<script>
-(async function verificarAssinatura(){
-  const id = localStorage.getItem("femflow_id");
-  if(!id) return;
+  <script>
+  (async function verificarAssinatura(){
+    const id = localStorage.getItem("femflow_id");
+    if(!id) return;
 
-  const scriptURL =
-    (typeof FEMFLOW !== "undefined" && FEMFLOW.SCRIPT_URL) ||
-    localStorage.getItem("femflow_script") ||
-    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+    const scriptURL =
+      (typeof FEMFLOW !== "undefined" && FEMFLOW.SCRIPT_URL) ||
+      localStorage.getItem("femflow_script") ||
+      "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-  let linkHotmart = "https://pay.hotmart.com/SEU-LINK-MENSAL";
+    let linkHotmart = "https://pay.hotmart.com/SEU-LINK-MENSAL";
 
-  try {
-    // Busca link dinâmico dos produtos
-    const resp = await fetch(`${scriptURL}?action=products`);
-    const dataProd = await resp.json();
-    if(dataProd.products?.length > 0){
-      const produtoFemFlow = dataProd.products.find(p =>
-        p.titulo.toLowerCase().includes("femflow")
-      );
-      linkHotmart = produtoFemFlow?.hotmart || dataProd.products[0].hotmart || linkHotmart;
+    try {
+      const resp = await fetch(`${scriptURL}?action=products`);
+      const dataProd = await resp.json();
+      if(dataProd.products?.length > 0){
+        const produtoFemFlow = dataProd.products.find(p =>
+          p.titulo.toLowerCase().includes("femflow")
+        );
+        linkHotmart = produtoFemFlow?.hotmart || dataProd.products[0].hotmart || linkHotmart;
+      }
+
+      const r = await fetch(`${scriptURL}?action=status&id=${id}`);
+      const data = await r.json();
+      console.log("🩷 Status assinatura:", data);
+
+      if(data.status !== "ok" || !data.expiryISO) return;
+
+      const exp = new Date(data.expiryISO);
+      const hoje = new Date();
+      const diff = Math.ceil((exp - hoje) / (1000 * 60 * 60 * 24));
+
+      if(diff <= 0){
+        mostrarBanner("💳 Sua assinatura expirou.", "🔁 Renovar agora", linkHotmart);
+      } else if(diff <= 5){
+        mostrarBanner(`⏳ Sua assinatura expira em ${diff} dia${diff>1?"s":""}.`, "Renovar agora", linkHotmart);
+      }
+
+    } catch(err){
+      console.warn("⚠️ Falha ao verificar assinatura:", err);
     }
 
-    // Consulta status da assinatura
-    const r = await fetch(`${scriptURL}?action=status&id=${id}`);
-    const data = await r.json();
-    console.log("🩷 Status assinatura:", data);
+    function mostrarBanner(msg, btnText, link){
+      const bar = document.createElement("div");
+      bar.style.position = "fixed";
+      bar.style.bottom = "0";
+      bar.style.left = "0";
+      bar.style.width = "100%";
+      bar.style.background = "#cc6a5a";
+      bar.style.color = "white";
+      bar.style.padding = "10px 16px";
+      bar.style.fontFamily = "Lato, sans-serif";
+      bar.style.display = "flex";
+      bar.style.justifyContent = "space-between";
+      bar.style.alignItems = "center";
+      bar.style.zIndex = "9999";
+      bar.style.boxShadow = "0 -3px 10px rgba(0,0,0,0.2)";
 
-    if(data.status !== "ok" || !data.expiryISO) return;
+      const span = document.createElement("span");
+      span.textContent = msg;
+      span.style.fontSize = "0.95rem";
+      span.style.flex = "1";
 
-    const exp = new Date(data.expiryISO);
-    const hoje = new Date();
-    const diff = Math.ceil((exp - hoje) / (1000 * 60 * 60 * 24)); // dias restantes
+      const btn = document.createElement("button");
+      btn.textContent = btnText;
+      btn.style.background = "white";
+      btn.style.color = "#cc6a5a";
+      btn.style.border = "none";
+      btn.style.borderRadius = "20px";
+      btn.style.padding = "6px 14px";
+      btn.style.fontWeight = "600";
+      btn.style.cursor = "pointer";
+      btn.onclick = () => window.open(link, "_blank");
 
-    if(diff <= 0){
-      mostrarBanner("💳 Sua assinatura expirou.", "🔁 Renovar agora", linkHotmart);
-    } else if(diff <= 5){
-      mostrarBanner(`⏳ Sua assinatura expira em ${diff} dia${diff>1?"s":""}.`, "Renovar agora", linkHotmart);
+      const close = document.createElement("span");
+      close.textContent = "×";
+      close.style.cursor = "pointer";
+      close.style.marginLeft = "10px";
+      close.style.fontSize = "1.2rem";
+      close.onclick = () => bar.remove();
+
+      bar.appendChild(span);
+      bar.appendChild(btn);
+      bar.appendChild(close);
+      document.body.appendChild(bar);
     }
+  })();
+  </script>
 
-  } catch(err){
-    console.warn("⚠️ Falha ao verificar assinatura:", err);
-  }
-
-  // ======== UI do Banner ========
-  function mostrarBanner(msg, btnText, link){
-    const bar = document.createElement("div");
-    bar.style.position = "fixed";
-    bar.style.bottom = "0";
-    bar.style.left = "0";
-    bar.style.width = "100%";
-    bar.style.background = "#cc6a5a";
-    bar.style.color = "white";
-    bar.style.padding = "10px 16px";
-    bar.style.fontFamily = "Lato, sans-serif";
-    bar.style.display = "flex";
-    bar.style.justifyContent = "space-between";
-    bar.style.alignItems = "center";
-    bar.style.zIndex = "9999";
-    bar.style.boxShadow = "0 -3px 10px rgba(0,0,0,0.2)";
-    bar.style.transition = "transform .3s ease";
-
-    const span = document.createElement("span");
-    span.textContent = msg;
-    span.style.fontSize = "0.95rem";
-    span.style.flex = "1";
-
-    const btn = document.createElement("button");
-    btn.textContent = btnText;
-    btn.style.background = "white";
-    btn.style.color = "#cc6a5a";
-    btn.style.border = "none";
-    btn.style.borderRadius = "20px";
-    btn.style.padding = "6px 14px";
-    btn.style.fontWeight = "600";
-    btn.style.cursor = "pointer";
-    btn.onclick = () => window.open(link, "_blank");
-
-    const close = document.createElement("span");
-    close.textContent = "×";
-    close.style.cursor = "pointer";
-    close.style.marginLeft = "10px";
-    close.style.fontSize = "1.2rem";
-    close.onclick = () => bar.remove();
-
-    bar.appendChild(span);
-    bar.appendChild(btn);
-    bar.appendChild(close);
-    document.body.appendChild(bar);
-  }
-})();
-</script>
+  <!-- Ativa o topo do CORE -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => FEMFLOW.initTreino());
+  </script>
 </body>
 </html>
