@@ -72,66 +72,80 @@
 
   <!-- 🌸 SCRIPT ÚNICO DE TRADUÇÃO E LÓGICA -->
   <script>
-  document.addEventListener("DOMContentLoaded", ()=>{
-    FEMFLOW.inserirHeaderApp?.();
+document.addEventListener("DOMContentLoaded", () => {
+  FEMFLOW.inserirHeaderApp?.();
 
-    const lang = localStorage.getItem("femflow_lang") || "pt";
-    const T = {
-      pt:{
-        titulo:"Fase Hormonal",
-        frase:"Seu corpo tem um ritmo. Vamos acompanhar juntas.",
-        faseAtual:"Fase atual:",
-        botoes:{breath:"💨 Respiração",train:"🏃 Treino"},
-        fases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"}
-      },
-      en:{
-        titulo:"Hormonal Phase",
-        frase:"Your body has a rhythm. Let's follow it together.",
-        faseAtual:"Current phase:",
-        botoes:{breath:"💨 Breathing",train:"🏃 Training"},
-        fases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"}
-      }
-    };
-    const L = T[lang];
+  const lang = localStorage.getItem("femflow_lang") || "pt";
+  const T = {
+    pt:{
+      titulo:"Fase Hormonal",
+      frase:"Seu corpo tem um ritmo. Vamos acompanhar juntas.",
+      faseAtual:"Fase atual:",
+      botoes:{breath:"💨 Respiração",train:"🏃 Treino"},
+      fases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"}
+    },
+    en:{
+      titulo:"Hormonal Phase",
+      frase:"Your body has a rhythm. Let's follow it together.",
+      faseAtual:"Current phase:",
+      botoes:{breath:"💨 Breathing",train:"🏃 Training"},
+      fases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"}
+    }
+  };
+  const L = T[lang];
 
-    // textos gerais
-    document.querySelector("h3").textContent = L.titulo;
-    document.querySelector(".subtitle").textContent = L.frase;
-    document.getElementById("toBreath").textContent = L.botoes.breath;
-    document.getElementById("toTrain").textContent = L.botoes.train;
+  // --- Textos gerais ---
+  document.querySelector("h3").textContent = L.titulo;
+  document.querySelector(".subtitle").textContent = L.frase;
+  document.getElementById("toBreath").textContent = L.botoes.breath;
+  document.getElementById("toTrain").textContent  = L.botoes.train;
 
-    // ciclo e fase
-    const ciclo = parseInt(localStorage.getItem("femflow_cycleLength") || 28);
-    const inicio = new Date(localStorage.getItem("femflow_startDate") || new Date());
+  // --- Cálculo da fase hormonal ---
+  const perfil = localStorage.getItem("femflow_perfilHormonal") || "regular";
+  const ciclo  = parseInt(localStorage.getItem("femflow_cycleLength") || 28);
+  const inicio = new Date(localStorage.getItem("femflow_startDate") || new Date());
+  const faseSugerida = localStorage.getItem("fase_sugerida"); // para DIU/menopausa/irregular
+
+  let fase = "menstrual";
+  if (perfil === "regular") {
     const diff = Math.floor((new Date() - inicio)/(1000*60*60*24));
     const dia = (diff % ciclo) + 1;
-    let fase = "menstrual";
     if (dia>5 && dia<=13) fase="follicular";
     else if (dia<=17) fase="ovulatory";
     else fase="luteal";
+  } else if (faseSugerida) {
+    fase = faseSugerida.toLowerCase();
+  }
 
-    // atualiza SVG
-    document.getElementById("centerPhase").textContent = L.fases[fase];
-    document.getElementById("t_current").textContent = `${L.faseAtual} ${L.fases[fase]}`;
+  // --- Atualiza SVG ---
+  document.getElementById("centerPhase").textContent = L.fases[fase];
+  document.getElementById("t_current").textContent   = `${L.faseAtual} ${L.fases[fase]}`;
 
-    // rótulos
-    document.getElementById("lbl-menstrual").textContent = L.fases.menstrual;
-    document.getElementById("lbl-follicular").textContent = L.fases.follicular;
-    document.getElementById("lbl-ovulatory").textContent = L.fases.ovulatory;
-    document.getElementById("lbl-luteal").textContent = L.fases.luteal;
+  document.getElementById("lbl-menstrual").textContent  = L.fases.menstrual;
+  document.getElementById("lbl-follicular").textContent = L.fases.follicular;
+  document.getElementById("lbl-ovulatory").textContent  = L.fases.ovulatory;
+  document.getElementById("lbl-luteal").textContent     = L.fases.luteal;
 
-    // botões
-    document.getElementById("toBreath").onclick = ()=> FEMFLOW.router("respiracao");
-    document.getElementById("toTrain").onclick  = ()=> FEMFLOW.router("treino");
-  // 🔁 troca de idioma ao vivo (sem reload)
-window.addEventListener("femflow:langchange", () => {
-  console.log("🌐 Idioma alterado dinamicamente");
-  // Reexecuta a tradução no Flow Center
-  const event = new Event("DOMContentLoaded");
-  document.dispatchEvent(event);
-});  
+  // --- Destaca o segmento ativo ---
+  const segs = ["menstrual","follicular","ovulatory","luteal"];
+  segs.forEach(s => {
+    const el = document.getElementById(`seg-${s}`);
+    el.style.fill = (s===fase) ? "#cc6a5a" : "#f9e0d8";
   });
-  </script>
+
+  // --- Botões de ação ---
+  document.getElementById("toBreath").onclick = () => FEMFLOW.router("respiracao");
+  document.getElementById("toTrain").onclick  = () => FEMFLOW.router("treino");
+
+  // --- Mudança dinâmica de idioma ---
+  window.addEventListener("femflow:langchange", () => {
+    console.log("🌐 Idioma alterado dinamicamente");
+    const event = new Event("DOMContentLoaded");
+    document.dispatchEvent(event);
+  });
+});
+</script>
+
 </body>
 </html>
 
