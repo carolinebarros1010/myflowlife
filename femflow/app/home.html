@@ -168,16 +168,27 @@
     });
   }
 
- function onChoose(sku){
-  const id = localStorage.getItem('femflow_id');
-  const payCode = CHECKOUTS[sku];
+function onChoose(sku){
+  // 🔹 Mapeia o SKU (Hotmart) para a ênfase real usada no Firebase
+  const map = {
+    'FF-30D-GLUTEOS':     'gluteo',
+    'FF-30D-QUADRICEPS':  'quadriceps',
+    'FF-30D-PEITORAL':    'peito',
+    'FF-30D-COSTAS':      'costas',
+    'FF-30D-POSTERIORES': 'posteriores',
+    'FF-30D-PANTURRILHA': 'panturrilha',
+    'FF-30D-CORE':        'core',
+    'FF-30D-MOBILIDADE':  'mobilidade',
+    'FF-30D-HIIT-LOW':    'cardio',
+    'FF-30D-GERAL':       'geral'
+  };
+  const enfase = map[sku] || 'geral';
 
-  // 🔹 salva a ênfase atual (para o Firebase puxar depois)
-  localStorage.setItem('femflow_enfase', sku);
+  // 🔹 Salva a ênfase escolhida
+  localStorage.setItem('femflow_enfase', enfase);
 
-  if (payCode) { location.href = `https://pay.hotmart.com/${payCode}`; return; }
-  if (!id) { location.href = `index.html?sku=${encodeURIComponent(sku)}`; return; }
-  location.href = `flowcenter.html?sku=${encodeURIComponent(sku)}`;
+  // 🔹 Pula direto pro Flow Center (não há mais pagamento por produto)
+  location.href = 'flowcenter.html';
 }
   (async () => {
     await syncEntitlement();   // 1) atualiza status
