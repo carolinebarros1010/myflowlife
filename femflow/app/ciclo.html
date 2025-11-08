@@ -3,247 +3,234 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Identifique seu Ciclo - FemFlow</title>
+  <title>Seu Momento • FemFlow</title>
 
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    .welcome-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at center, var(--pessego), var(--terracota));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
+    :root {
+      --terracota: #cc6a5a;
+      --bege: #fff5ef;
+      --verde: #335953;
+      --texto: #5b4f49;
+    }
+    body {
+      background: var(--bege);
+      color: var(--texto);
+      font-family: "Lato", sans-serif;
+      margin: 0;
       text-align: center;
-      z-index: 999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 1s ease-in-out;
+      padding: 20px;
     }
-    .welcome-overlay.show {
-      opacity: 1;
-      pointer-events: all;
+    h1 {
+      font-family: "Playfair Display", serif;
+      color: var(--terracota);
+      margin-bottom: 8px;
     }
-    @keyframes pulseGlow {
-      0%,100% { text-shadow: 0 0 5px rgba(255,255,255,0.4); }
-      50% { text-shadow: 0 0 20px rgba(255,255,255,0.8); }
+    p.sub {
+      color: #7b6e68;
+      margin-bottom: 28px;
     }
-    .welcome-overlay p {
-      animation: pulseGlow 2.2s infinite;
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      max-width: 440px;
+      margin: 0 auto 20px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 700;
+      color: var(--verde);
+    }
+    input, button, select {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 6px;
+      border: 1px solid #e6d8d2;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: "Lato", sans-serif;
+      box-sizing: border-box;
+    }
+    button {
+      background: var(--verde);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .3s ease;
+      margin-top: 16px;
+    }
+    button:hover { background: var(--terracota); }
+    .perfil-btns {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .perfil-btn {
+      flex: 1 1 45%;
+      background: #fff;
+      border: 2px solid var(--verde);
+      border-radius: 12px;
+      padding: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--verde);
+      transition: all .3s;
+    }
+    .perfil-btn.active {
+      background: var(--verde);
+      color: #fff;
+    }
+    .quiz-box {
+      display: none;
+      margin-top: 20px;
+    }
+    .quiz-btns {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .quiz-btns button {
+      width: 40%;
     }
   </style>
 </head>
 
 <body>
-  <header class="header-ciclo">
-    <h1 class="titulo-ciclo">Identifique seu ciclo</h1>
-    <p class="subtitulo-ciclo">Ajuste seu treino ao seu ritmo</p>
-  </header>
+  <h1>Identifique seu momento</h1>
+  <p class="sub">Vamos ajustar seus treinos ao seu ciclo atual 🌸</p>
 
-  <div class="container">
-    <!-- 🌿 NOVO CICLO -->
-    <div class="section" id="cicloSection">
-      <h3>Configurar novo ciclo</h3>
+  <div class="card">
+    <h3>Seu perfil hormonal</h3>
+    <div class="perfil-btns">
+      <button class="perfil-btn" data-perfil="regular">Regular</button>
+      <button class="perfil-btn" data-perfil="irregular">Irregular</button>
+      <button class="perfil-btn" data-perfil="diu">Uso DIU</button>
+      <button class="perfil-btn" data-perfil="menopausa">Menopausa</button>
+    </div>
+
+    <!-- REGULAR -->
+    <div id="regularBox" style="display:none;">
       <label for="dataUltima">Data da última menstruação</label>
-      <input type="date" id="dataUltima" placeholder="Selecione a data" />
-
-      <label for="duracao">Duração média do ciclo (dias)</label>
-      <input type="number" id="duracao" min="21" max="35" value="28" />
-
-      <button id="btnIniciar">Iniciar Programa</button>
+      <input type="date" id="dataUltima">
+      <label for="duracao">Duração média (dias)</label>
+      <input type="number" id="duracao" min="21" max="35" value="28">
+      <button id="btnConfirmarRegular">Confirmar</button>
     </div>
 
-    <!-- 🔹 OPÇÕES DE CICLO -->
-    <div class="opcoes-ciclo">
-      <button class="btn-pequeno" onclick="abrirQuiz('irregular')">Sou irregular</button>
-      <button class="btn-pequeno" onclick="abrirQuiz('diu')">Uso DIU</button>
-      <button class="btn-pequeno" onclick="abrirQuiz('menopausa')">Estou na menopausa</button>
-    </div>
-
-    <!-- 🌸 MODAL QUIZ -->
-    <div id="quizModal" class="quiz-modal">
-      <div class="quiz-content">
-        <h3 id="quizPergunta">Pergunta aqui...</h3>
-        <div id="quizRespostas" class="quiz-respostas"></div>
-        <button class="btn" style="margin-top:1rem;" onclick="fecharQuiz()">Fechar</button>
+    <!-- QUIZ -->
+    <div id="quizBox" class="quiz-box">
+      <p id="quizPergunta">Pronta?</p>
+      <div class="quiz-btns">
+        <button id="btnQuizSim">Sim</button>
+        <button id="btnQuizNao">Não</button>
       </div>
-    </div>
-
-    <!-- 🩷 LOGIN COM ID -->
-    <div class="section" id="idSection">
-      <h3>Já tem um ID?</h3>
-      <input type="text" id="inputID" placeholder="FF-AAAA-XXXX" />
-      <button id="btnValidar">Continuar</button>
-      <p id="statusID" style="margin-top:0.5rem; font-size:0.9rem;"></p>
-    </div>
-
-    <!-- 🔑 RECUPERAÇÃO DE ID -->
-    <p style="text-align:center; margin-top:1rem;">
-      <button class="btn-recuperar" onclick="mostrarRecuperar()">🔑 Esqueceu seu ID?</button>
-    </p>
-
-    <div id="recuperarBox" class="recuperar-box" style="display:none;">
-      <input type="text" id="nomeRec" placeholder="Seu nome completo" required />
-      <input type="email" id="emailRec" placeholder="Seu e-mail cadastrado" required />
-      <button class="btn" style="background:var(--terracota);" onclick="recuperarID()">Recuperar ID</button>
-      <p id="statusRec" style="margin-top:0.5rem; font-size:0.9rem;"></p>
-    </div>
-
-    <!-- ⚙️ NAVEGAÇÃO -->
-    <div style="text-align:center;margin-top:2rem;">
-      <button class="btn-pequeno" onclick="location.href='cadastro.html'">🪷 Fazer Cadastro</button>
-      <button class="btn-pequeno" onclick="location.href='flowcenter.html'">🚀 Ir ao Flow Center</button>
+      <p id="quizStep" style="margin-top:8px;color:#94786f;font-size:.9rem"></p>
     </div>
   </div>
 
-  <!-- 🌸 BOAS-VINDAS -->
-  <div id="welcomeOverlay" class="welcome-overlay">
-    <p>✨ Bem-vinda ao seu ciclo FemFlow!</p>
-  </div>
+  <p style="font-size:.9rem;color:#9a8077;margin-top:12px;">
+    As informações servem apenas para adaptar os treinos ao seu corpo. 💫
+  </p>
 
-  <!-- 📲 INSTALAR -->
-  <div class="instalar-app">
-    <h3>📲 Instale o FemFlow</h3>
-    <p>Tenha acesso rápido aos seus treinos direto da tela inicial.</p>
-    <button id="btnInstall" class="btn-install">Adicionar à tela inicial</button>
-  </div>
+  <script src="./femflow-core.js"></script>
+  <script>
+  // === VARIÁVEIS ===
+  let perfil = null;
+  let quizIdx = 0, quizScore = 0;
+  const perguntas = [
+    "Você sentiu variações fortes de energia nos últimos dias?",
+    "Percebeu sensibilidade nos seios ou inchaço?",
+    "Teve oscilações de humor sem motivo aparente?",
+    "Está dormindo pior ou suando mais que o normal?",
+    "Sente cólica, dor pélvica ou leve sangramento?"
+  ];
 
-  <!-- SCRIPTS BASE -->
-  <script src="js/memoria.js"></script>
-  <script src="js/validacao.js"></script>
-  <script src="js/ciclo.js"></script>
-  <script src="scripts/femflow-core.js"></script>
+  const quizPerg = document.getElementById('quizPergunta');
+  const quizStep = document.getElementById('quizStep');
+  const regularBox = document.getElementById('regularBox');
+  const quizBox = document.getElementById('quizBox');
 
-  <!-- SCRIPT PRINCIPAL -->
- <script>
-  // ✅ Consulta status pelo Apps Script usando email OU id
-  async function fetchStatus({ email, id }) {
-    const q = email ? `email=${encodeURIComponent(email)}` : `id=${encodeURIComponent(id||'')}`;
-    const url = `${FEMFLOW.SCRIPT_URL}?action=status&${q}`;
-    const r = await fetch(url);
-    return r.json();
-  }
-
-  // ✅ Validação de ID via Apps Script (agora usa action=status)
-  async function validarID(id) {
-    try {
-      const data = await fetchStatus({ id });
-      console.log("🔍 Retorno do servidor:", data);
-      // Considera válido se encontrou perfil
-      return (data?.status === "ok") ? data : null;
-    } catch (err) {
-      console.error("Erro de validação:", err);
-      return null;
-    }
-  }
-
-  // 🩷 Valida ID e prepara ambiente para o Treino
-  document.getElementById("btnValidar").addEventListener("click", async () => {
-    const id = document.getElementById("inputID").value.trim();
-    const status = document.getElementById("statusID");
-
-    if (!id) {
-      status.innerText = "Por favor, insira seu ID FemFlow.";
-      status.style.color = "#CC6A5A";
-      return;
-    }
-
-    status.innerText = "🔄 Verificando ID...";
-    status.style.color = "#335953";
-
-    const j = await validarID(id);
-    if (j) {
-      // 🔐 sessão básica
-      localStorage.setItem("femflow_id", j.id);
-      if (j.nome)  localStorage.setItem("femflow_nome", j.nome);
-      if (j.email) localStorage.setItem("femflow_email", j.email);
-
-      // 🎟️ entitlement (opcional, mas ajuda nas próximas telas)
-      if (j.program)      localStorage.setItem("femflow_program", j.program);
-      if (j.expiryISO)    localStorage.setItem("femflow_program_expiry", j.expiryISO);
-
-      // 🗓️ ciclo: se o Apps Script devolveu, usa; senão usa inputs desta página
-      const startFromAPI = j?.cycle?.startDate;
-      const lenFromAPI   = j?.cycle?.length;
-
-      const inputData = document.getElementById('dataUltima').value;
-      const inputLen  = Number(document.getElementById('duracao').value || 28);
-
-      const startISO = startFromAPI || (inputData ? new Date(inputData).toISOString() : new Date().toISOString());
-      const length   = lenFromAPI   || (inputLen >= 21 && inputLen <= 35 ? inputLen : 28);
-
-      localStorage.setItem("femflow_startDate", startISO);
-      localStorage.setItem("femflow_cycleLength", String(length));
-      localStorage.setItem("femflow_cycle_configured", "yes");
-
-      status.innerText = "✅ ID confirmado! Iniciando...";
-      status.style.color = "#335953";
-
-      // ✨ feedback + segue para treino
-      const overlay = document.getElementById("welcomeOverlay");
-      overlay.classList.add("show");
-      setTimeout(() => { window.location.href = "treino.html"; }, 1200);
-    } else {
-      status.innerText = "⚠️ ID inválido/expirado ou não encontrado. Verifique e tente novamente.";
-      status.style.color = "#CC6A5A";
-    }
+  // === SELEÇÃO DE PERFIL ===
+  document.querySelectorAll('.perfil-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.perfil-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      perfil = btn.dataset.perfil;
+      regularBox.style.display = perfil==='regular' ? 'block' : 'none';
+      quizBox.style.display    = perfil==='regular' ? 'none'  : 'block';
+      if (perfil!=='regular') iniciarQuiz();
+    });
   });
 
-  // 🔑 Recuperação de ID (mantive sua lógica; apenas usa loginOuCadastro)
-  function mostrarRecuperar() {
-    document.getElementById('recuperarBox').style.display = 'block';
+  // === QUIZ ===
+  function iniciarQuiz(){
+    quizIdx = 0; quizScore = 0;
+    quizPerg.textContent = perguntas[quizIdx];
+    quizStep.textContent = `Pergunta ${quizIdx+1} de ${perguntas.length}`;
+    quizBox.style.display = 'block';
+  }
+  function responderQuiz(v){
+    quizScore += v ? 1 : 0;
+    quizIdx++;
+    if (quizIdx < perguntas.length){
+      quizPerg.textContent = perguntas[quizIdx];
+      quizStep.textContent = `Pergunta ${quizIdx+1} de ${perguntas.length}`;
+    } else {
+      concluirQuiz();
+    }
+  }
+  function concluirQuiz(){
+    const fase = quizScore <=2 ? 'folicular' :
+                 quizScore <=3 ? 'ovulatoria' :
+                 quizScore <=4 ? 'lutea' : 'menstrual';
+    salvarCiclo({perfil, fase});
   }
 
-  async function recuperarID() {
-    const nome = document.getElementById('nomeRec').value.trim();
-    const email = document.getElementById('emailRec').value.trim();
-    const status = document.getElementById('statusRec');
+  document.getElementById('btnQuizSim').onclick = ()=>responderQuiz(true);
+  document.getElementById('btnQuizNao').onclick = ()=>responderQuiz(false);
 
-    if (!nome || !email) {
-      status.innerText = 'Por favor, preencha nome e e-mail.';
-      status.style.color = '#CC6A5A';
+  // === CONFIRMAR REGULAR ===
+  document.getElementById('btnConfirmarRegular').onclick = ()=>{
+    const data = document.getElementById('dataUltima').value;
+    const dur  = parseInt(document.getElementById('duracao').value||28);
+    if(!data || dur<21 || dur>35){
+      alert('Preencha corretamente data e duração do ciclo.');
       return;
     }
+    salvarCiclo({perfil:'regular', start:new Date(data).toISOString(), length:dur});
+  };
 
-    status.innerText = '🔄 Verificando...';
-    status.style.color = '#335953';
+  // === SALVAR E REDIRECIONAR ===
+  function salvarCiclo({perfil,start,length,fase}){
+    localStorage.setItem('femflow_perfilHormonal', perfil);
+    localStorage.setItem('femflow_cycle_configured','yes');
+    localStorage.setItem('femflow_program_active','yes');
+    localStorage.setItem('femflow_program_startISO', new Date().toISOString());
 
-    try {
-      const response = await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "loginOuCadastro", nome, email })
-      });
-      const data = await response.json();
-      if (data?.status === "ok" || data?.status === "created") {
-        status.innerText = `📩 Seu ID é ${data.id}. Também foi enviado ao seu e-mail.`;
-        status.style.color = "#335953";
-      } else {
-        status.innerText = '⚠️ E-mail não encontrado. Tente novamente.';
-        status.style.color = '#CC6A5A';
-      }
-    } catch (err) {
-      console.error("Erro ao recuperar ID:", err);
-      status.innerText = '❌ Falha de conexão. Verifique sua internet.';
-      status.style.color = '#CC6A5A';
+    if (perfil==='regular'){
+      localStorage.setItem('femflow_startDate', start);
+      localStorage.setItem('femflow_cycleLength', length);
+    } else {
+      localStorage.setItem('femflow_startDate', new Date().toISOString());
+      localStorage.setItem('femflow_cycleLength', '28');
+      localStorage.setItem('fase_sugerida', fase);
     }
-  }
 
-  function fecharQuiz() {
-    document.getElementById("quizModal").style.display = "none";
+    localStorage.setItem('femflow_perfilHormonal_locked','yes');
+    (window.FEMFLOW?.toast||alert)('✨ Ciclo configurado com sucesso!');
+    setTimeout(()=>location.href='flowcenter.html',1000);
   }
-</script>
+  </script>
 </body>
 </html>
-
