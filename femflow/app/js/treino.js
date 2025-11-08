@@ -152,7 +152,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // -------- Backend: Apps Script --------
-  const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${encodeURIComponent(id)}`;
+  const enfase = localStorage.getItem('femflow_enfase') || 'geral';
+const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${encodeURIComponent(id)}&enfase=${encodeURIComponent(enfase)}`;
   let j = null;
   try { j = await fetch(url).then(r=>r.json()); } catch(e){ FEMFLOW.toast('Falha ao carregar treino.'); console.warn(e); }
 
