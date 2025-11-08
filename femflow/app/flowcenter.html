@@ -29,6 +29,25 @@
       box-shadow:0 2px 5px rgba(0,0,0,0.1);
     }
     .tool:hover { background:var(--terracota); color:#fff; transform:scale(1.03); transition:all .3s ease; }
+
+    /* 🔍 Painel de Diagnóstico */
+    #debugPanel {
+      position: fixed;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(255,255,255,0.92);
+      color: #333;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.3;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      padding: 8px 10px;
+      z-index: 9999;
+      max-width: 240px;
+      text-align: left;
+    }
+    #debugPanel b { color: var(--terracota); }
   </style>
 </head>
 
@@ -47,11 +66,9 @@
         <path id="seg-luteal"     d="M150,150 L30,150 A120,120 0 0,1 150,30 Z" fill="#f9e0d8"></path>
       </g>
 
-      <!-- anel e centro -->
       <circle cx="150" cy="150" r="65" fill="none" stroke="#fff5ef" stroke-width="2"></circle>
       <circle cx="150" cy="150" r="63" fill="#cc6a5a"></circle>
 
-      <!-- nomes retos -->
       <text id="lbl-menstrual"  x="215" y="95"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(45,215,95)">Menstrual</text>
       <text id="lbl-follicular" x="215" y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(135,215,215)">Folicular</text>
       <text id="lbl-ovulatory"  x="85"  y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(225,85,215)">Ovulatória</text>
@@ -68,84 +85,97 @@
     <button class="tool" id="toTrain">🏃 Treino</button>
   </div>
 
+  <div id="debugPanel" hidden></div>
+
   <script src="./femflow-core.js"></script>
 
-  <!-- 🌸 SCRIPT ÚNICO DE TRADUÇÃO E LÓGICA -->
   <script>
-document.addEventListener("DOMContentLoaded", () => {
-  FEMFLOW.inserirHeaderApp?.();
+  document.addEventListener("DOMContentLoaded", () => {
+    FEMFLOW.inserirHeaderApp?.();
 
-  const lang = localStorage.getItem("femflow_lang") || "pt";
-  const T = {
-    pt:{
-      titulo:"Fase Hormonal",
-      frase:"Seu corpo tem um ritmo. Vamos acompanhar juntas.",
-      faseAtual:"Fase atual:",
-      botoes:{breath:"💨 Respiração",train:"🏃 Treino"},
-      fases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"}
-    },
-    en:{
-      titulo:"Hormonal Phase",
-      frase:"Your body has a rhythm. Let's follow it together.",
-      faseAtual:"Current phase:",
-      botoes:{breath:"💨 Breathing",train:"🏃 Training"},
-      fases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"}
+    const lang = localStorage.getItem("femflow_lang") || "pt";
+    const T = {
+      pt:{
+        titulo:"Fase Hormonal",
+        frase:"Seu corpo tem um ritmo. Vamos acompanhar juntas.",
+        faseAtual:"Fase atual:",
+        botoes:{breath:"💨 Respiração",train:"🏃 Treino"},
+        fases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"}
+      },
+      en:{
+        titulo:"Hormonal Phase",
+        frase:"Your body has a rhythm. Let's follow it together.",
+        faseAtual:"Current phase:",
+        botoes:{breath:"💨 Breathing",train:"🏃 Training"},
+        fases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"}
+      }
+    };
+    const L = T[lang];
+
+    document.querySelector("h3").textContent = L.titulo;
+    document.querySelector(".subtitle").textContent = L.frase;
+    document.getElementById("toBreath").textContent = L.botoes.breath;
+    document.getElementById("toTrain").textContent  = L.botoes.train;
+
+    // === CÁLCULO DE FASE ===
+    const perfil = localStorage.getItem("femflow_perfilHormonal") || "regular";
+    const ciclo  = parseInt(localStorage.getItem("femflow_cycleLength") || 28);
+    const inicio = new Date(localStorage.getItem("femflow_startDate") || new Date());
+    const faseSugerida = localStorage.getItem("fase_sugerida");
+
+    let fase = "menstrual";
+    if (perfil === "regular") {
+      const diff = Math.floor((new Date() - inicio)/(1000*60*60*24));
+      const dia = (diff % ciclo) + 1;
+      if (dia>5 && dia<=13) fase="follicular";
+      else if (dia<=17) fase="ovulatory";
+      else fase="luteal";
+    } else if (faseSugerida) {
+      fase = faseSugerida.toLowerCase();
     }
-  };
-  const L = T[lang];
 
-  // --- Textos gerais ---
-  document.querySelector("h3").textContent = L.titulo;
-  document.querySelector(".subtitle").textContent = L.frase;
-  document.getElementById("toBreath").textContent = L.botoes.breath;
-  document.getElementById("toTrain").textContent  = L.botoes.train;
+    // === Atualiza UI ===
+    document.getElementById("centerPhase").textContent = L.fases[fase];
+    document.getElementById("t_current").textContent   = `${L.faseAtual} ${L.fases[fase]}`;
 
-  // --- Cálculo da fase hormonal ---
-  const perfil = localStorage.getItem("femflow_perfilHormonal") || "regular";
-  const ciclo  = parseInt(localStorage.getItem("femflow_cycleLength") || 28);
-  const inicio = new Date(localStorage.getItem("femflow_startDate") || new Date());
-  const faseSugerida = localStorage.getItem("fase_sugerida"); // para DIU/menopausa/irregular
+    document.getElementById("lbl-menstrual").textContent  = L.fases.menstrual;
+    document.getElementById("lbl-follicular").textContent = L.fases.follicular;
+    document.getElementById("lbl-ovulatory").textContent  = L.fases.ovulatory;
+    document.getElementById("lbl-luteal").textContent     = L.fases.luteal;
 
-  let fase = "menstrual";
-  if (perfil === "regular") {
-    const diff = Math.floor((new Date() - inicio)/(1000*60*60*24));
-    const dia = (diff % ciclo) + 1;
-    if (dia>5 && dia<=13) fase="follicular";
-    else if (dia<=17) fase="ovulatory";
-    else fase="luteal";
-  } else if (faseSugerida) {
-    fase = faseSugerida.toLowerCase();
-  }
+    // destaca fase atual no gráfico
+    ["menstrual","follicular","ovulatory","luteal"].forEach(s=>{
+      const el=document.getElementById(`seg-${s}`);
+      el.style.fill=(s===fase)?"#cc6a5a":"#f9e0d8";
+    });
 
-  // --- Atualiza SVG ---
-  document.getElementById("centerPhase").textContent = L.fases[fase];
-  document.getElementById("t_current").textContent   = `${L.faseAtual} ${L.fases[fase]}`;
+    // === Botões ===
+    document.getElementById("toBreath").onclick = ()=> FEMFLOW.router("respiracao");
+    document.getElementById("toTrain").onclick  = ()=> FEMFLOW.router("treino");
 
-  document.getElementById("lbl-menstrual").textContent  = L.fases.menstrual;
-  document.getElementById("lbl-follicular").textContent = L.fases.follicular;
-  document.getElementById("lbl-ovulatory").textContent  = L.fases.ovulatory;
-  document.getElementById("lbl-luteal").textContent     = L.fases.luteal;
+    // === Diagnóstico visível (só em debug) ===
+    const dbg = document.getElementById("debugPanel");
+    const debugData = {
+      perfil,
+      fase,
+      fase_sugerida: faseSugerida,
+      ciclo,
+      startDate: localStorage.getItem("femflow_startDate"),
+      enfase: localStorage.getItem("femflow_enfase"),
+      program: localStorage.getItem("femflow_program_active")
+    };
+    dbg.innerHTML = Object.entries(debugData)
+      .map(([k,v])=>`<b>${k}</b>: ${v||'—'}`).join("<br>");
+    dbg.hidden = false; // coloque true se quiser ocultar em produção
 
-  // --- Destaca o segmento ativo ---
-  const segs = ["menstrual","follicular","ovulatory","luteal"];
-  segs.forEach(s => {
-    const el = document.getElementById(`seg-${s}`);
-    el.style.fill = (s===fase) ? "#cc6a5a" : "#f9e0d8";
+    // === Mudança dinâmica de idioma ===
+    window.addEventListener("femflow:langchange", () => {
+      console.log("🌐 Idioma alterado dinamicamente");
+      const event = new Event("DOMContentLoaded");
+      document.dispatchEvent(event);
+    });
   });
-
-  // --- Botões de ação ---
-  document.getElementById("toBreath").onclick = () => FEMFLOW.router("respiracao");
-  document.getElementById("toTrain").onclick  = () => FEMFLOW.router("treino");
-
-  // --- Mudança dinâmica de idioma ---
-  window.addEventListener("femflow:langchange", () => {
-    console.log("🌐 Idioma alterado dinamicamente");
-    const event = new Event("DOMContentLoaded");
-    document.dispatchEvent(event);
-  });
-});
-</script>
-
+  </script>
 </body>
 </html>
 
