@@ -518,19 +518,38 @@ modal.querySelector("#btnLangToggle")?.addEventListener("click", () => {
   /* =======================================================
      🔹 7. AUTO CICLO
   ======================================================= */
-  autoCiclo() {
-    const ciclo = Number(localStorage.getItem("femflow_cycleLength") || 28);
-    let dia = Number(localStorage.getItem("dia_ciclo") || 1);
-    if (dia > ciclo) {
-      this.toast("🌸 Novo ciclo iniciado automaticamente!");
-      dia = 1;
-      localStorage.setItem("dia_ciclo", 1);
-      localStorage.setItem(
-        `femflow_reiniciado_${localStorage.getItem("femflow_id")}`,
-        new Date().toISOString()
-      );
-    }
-  },
+autoCiclo() {
+  const ciclo = Number(localStorage.getItem("femflow_cycleLength") || 28);
+  let dia = Number(localStorage.getItem("dia_ciclo") || 1);
+
+  // 🔄 Avança automaticamente 1 dia a cada inicialização do app
+  dia = (dia % ciclo) + 1;
+  localStorage.setItem("dia_ciclo", dia);
+
+  // 🌸 Calcula fase atual conforme o dia do ciclo
+  const fase = (() => {
+    if (dia <= 5) return "menstrual";
+    if (dia <= 13) return "folicular";
+    if (dia <= 17) return "ovulatoria";
+    return "lutea";
+  })();
+
+  // 💾 Atualiza localStorage
+  localStorage.setItem("fase_atual", fase);
+  localStorage.setItem("fase_sugerida", fase);
+
+  // 🔔 Notifica início simbólico
+  if (dia === 1) {
+    this.toast("🌸 Novo ciclo simbólico iniciado!");
+    localStorage.setItem(
+      `femflow_reiniciado_${localStorage.getItem("femflow_id")}`,
+      new Date().toISOString()
+    );
+  }
+
+  // 🧠 Log útil para depuração
+  console.log(`🩸 Ciclo simbólico: Dia ${dia}/${ciclo} → Fase ${fase}`);
+},
 
   /* =======================================================
      🔹 8. ROTEADOR
