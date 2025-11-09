@@ -153,6 +153,28 @@ async indexOuCadastro(nome, email) {
   }
 }, // ✅ vírgula necessária para encerrar o método
 /* =======================================================
+   🔹 1.1 LOGOUT
+   ======================================================= */
+logout() {
+  // Remove credenciais e dados sensíveis
+  const KEYS = [
+    "femflow_auth",
+    "femflow_id",
+    "femflow_nome",
+    "femflow_email",
+    "fase_sugerida",
+    "dia_ciclo",
+    "femflow_enfase",
+    "nivel_atual",
+    "femflow_cycle_configured",
+  ];
+  KEYS.forEach((k) => localStorage.removeItem(k));
+
+  this.toast("👋 Sessão encerrada com sucesso!");
+  window.location.href = "index.html";
+},
+   
+/* =======================================================
    🔹 CABEÇALHO + MENU CONTEXTUAL FEMFLOW (2025)
    ======================================================= */
 inserirHeaderApp() {
