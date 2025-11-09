@@ -147,7 +147,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   let j = null;
   try { j = await fetch(url).then(r=>r.json()); } 
   catch(e){ FEMFLOW.toast('Falha ao carregar treino.'); console.warn(e); }
-
+try {
+  const resp = await fetch(url);
+  const txt = await resp.text();
+  console.log("📡 Resposta bruta Apps Script:", txt.slice(0,200));
+  j = JSON.parse(txt);
+} catch(e){
+  FEMFLOW.toast("❌ Erro ao processar resposta do servidor");
+  console.error("Erro detalhado:", e);
+}
+  
   if (!j || j.status==='id_not_found') {
     render([{ tipo:'texto', titulo:'Sem treino', mensagem:'Não localizei seu perfil. Faça login novamente.' }]);
     return;
