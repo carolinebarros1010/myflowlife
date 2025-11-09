@@ -1,8 +1,7 @@
-// 🌸 FemFlow Service Worker v4 (final)
+// 🌸 FemFlow Service Worker v4.1 (hotfix final)
 const CACHE_NAME = 'femflow-cache-v4';
 
 const ASSETS = [
-  // Core pages
   './',
   './index.html',
   './ciclo.html',
@@ -10,24 +9,19 @@ const ASSETS = [
   './evolucao.html',
   './cadastro.html',
   './home.html',
- 
-  // Styles & manifest
   './style.css',
   './manifest.json',
-
-  // Scripts
   './js/memoria.js',
   './js/ciclo.js',
   './js/treino.js',
   './js/validacao.js',
   './js/cadastro.js',
-
-  // Icons (necessários para PWA)
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './offline.html'  // ✅ fallback adicionado
 ];
 
-// 🪴 Instalação inicial: cria cache com os arquivos base
+// 🪴 Instalação inicial
 self.addEventListener('install', (event) => {
   console.log('📦 Instalando FemFlow PWA...');
   event.waitUntil(
@@ -38,36 +32,36 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 🔁 Ativa nova versão e remove caches antigos
+// 🔁 Ativa nova versão
 self.addEventListener('activate', (event) => {
-  console.log('✨ FemFlow Service Worker ativo.');
+  console.log(`✨ FemFlow Service Worker ativo (${CACHE_NAME}).`);
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       )
     ).then(() => self.clients.claim())
   );
 });
 
-// ⚙️ Estratégia de fetch: cache first + atualização silenciosa
+// ⚙️ Estratégia: cache first + update silencioso
 self.addEventListener("fetch", (event) => {
+  // ⚠️ Ignora chamadas externas (Firebase, APIs, Hotmart)
+  if (!event.request.url.startsWith(self.location.origin)) return;
+
   event.respondWith(
     (async () => {
       try {
-        // 🔹 1. tenta cache
+        // 1️⃣ tenta cache
         const cachedResponse = await caches.match(event.request);
         if (cachedResponse) {
-          // atualiza em background sem bloquear a resposta
+          // atualiza em background
           fetch(event.request)
             .then(async (netResp) => {
               if (netResp && netResp.ok) {
-                const cache = await caches.open("femflow-cache-v1");
+                const cache = await caches.open(CACHE_NAME);
                 try {
-                  const clone = netResp.clone();
-                  await cache.put(event.request, clone);
+                  await cache.put(event.request, netResp.clone());
                 } catch (err) {
                   console.warn("[SW] Falha ao clonar resposta:", err.message);
                 }
@@ -77,13 +71,12 @@ self.addEventListener("fetch", (event) => {
           return cachedResponse;
         }
 
-        // 🔹 2. sem cache → busca rede normalmente
+        // 2️⃣ sem cache → busca rede
         const networkResponse = await fetch(event.request);
         if (networkResponse && networkResponse.ok) {
-          const cache = await caches.open("femflow-cache-v1");
+          const cache = await caches.open(CACHE_NAME);
           try {
-            const clone = networkResponse.clone();
-            await cache.put(event.request, clone);
+            await cache.put(event.request, networkResponse.clone());
           } catch (err) {
             console.warn("[SW] Falha ao clonar resposta:", err.message);
           }
@@ -92,13 +85,15 @@ self.addEventListener("fetch", (event) => {
 
       } catch (err) {
         console.warn("[SW] Erro no fetch handler:", err.message);
-        return caches.match("/offline.html");
+        // 3️⃣ fallback
+        return caches.match("./offline.html") ||
+               new Response("🌸 FemFlow está offline.", { headers: { "Content-Type": "text/html" } });
       }
     })()
   );
 });
 
-// 🔄 Atualização manual (usada via postMessage)
+// 🔄 Atualização manual (postMessage)
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') {
     console.log('🔁 Forçando atualização do Service Worker.');
