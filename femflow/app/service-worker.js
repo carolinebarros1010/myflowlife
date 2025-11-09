@@ -44,54 +44,41 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ⚙️ Estratégia: cache first + update silencioso
+// ⚙️ Estratégia de fetch: cache first + atualização silenciosa
 self.addEventListener("fetch", (event) => {
-  // ⚠️ Ignora chamadas externas (Firebase, APIs, Hotmart)
-  if (!event.request.url.startsWith(self.location.origin)) return;
-
   event.respondWith(
     (async () => {
-      try {
-        // 1️⃣ tenta cache
-        const cachedResponse = await caches.match(event.request);
-        if (cachedResponse) {
-          // atualiza em background
-          fetch(event.request)
-            .then(async (netResp) => {
-              if (netResp && netResp.ok) {
-                const cache = await caches.open(CACHE_NAME);
-                try {
-                  await cache.put(event.request, netResp.clone());
-                } catch (err) {
-                  console.warn("[SW] Falha ao clonar resposta:", err.message);
-                }
-              }
-            })
-            .catch(() => {});
-          return cachedResponse;
-        }
+      const cache = await caches.open("femflow-cache-v1");
 
-        // 2️⃣ sem cache → busca rede
+      // 🔹 tenta resposta do cache primeiro
+      const cachedResponse = await cache.match(event.request);
+      if (cachedResponse) {
+        // Atualiza em background
+        fetch(event.request)
+          .then((netResp) => {
+            if (netResp && netResp.ok) {
+              cache.put(event.request, netResp.clone());
+            }
+          })
+          .catch(() => {});
+        return cachedResponse;
+      }
+
+      // 🔹 senão, busca da rede
+      try {
         const networkResponse = await fetch(event.request);
         if (networkResponse && networkResponse.ok) {
-          const cache = await caches.open(CACHE_NAME);
-          try {
-            await cache.put(event.request, networkResponse.clone());
-          } catch (err) {
-            console.warn("[SW] Falha ao clonar resposta:", err.message);
-          }
+          cache.put(event.request, networkResponse.clone());
         }
         return networkResponse;
-
       } catch (err) {
-        console.warn("[SW] Erro no fetch handler:", err.message);
-        // 3️⃣ fallback
-        return caches.match("./offline.html") ||
-               new Response("🌸 FemFlow está offline.", { headers: { "Content-Type": "text/html" } });
+        console.warn("[SW] Erro de rede:", err);
+        return caches.match("/offline.html");
       }
     })()
   );
 });
+
 
 // 🔄 Atualização manual (postMessage)
 self.addEventListener('message', (event) => {
