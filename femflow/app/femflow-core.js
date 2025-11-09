@@ -519,14 +519,38 @@ modal.querySelector("#btnLangToggle")?.addEventListener("click", () => {
      🔹 7. AUTO CICLO
   ======================================================= */
 autoCiclo() {
+  const perfil = localStorage.getItem("femflow_perfilHormonal") || "regular";
   const ciclo = Number(localStorage.getItem("femflow_cycleLength") || 28);
   let dia = Number(localStorage.getItem("dia_ciclo") || 1);
 
-  // 🔄 Avança automaticamente 1 dia a cada inicialização do app
+  // 🌿 Caso REGULAR → calcula fase real baseada na data de início
+  if (perfil === "regular") {
+    const startDate = new Date(localStorage.getItem("femflow_startDate") || new Date());
+    const hoje = new Date();
+    const diffDias = Math.floor((hoje - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+    // Se o ciclo passou do limite, reinicia
+    const diaCiclo = ((diffDias - 1) % ciclo) + 1;
+    localStorage.setItem("dia_ciclo", diaCiclo);
+
+    // Define fase com base no ciclo fisiológico
+    const fase = (() => {
+      if (diaCiclo <= 5) return "menstrual";
+      if (diaCiclo <= 13) return "folicular";
+      if (diaCiclo <= 17) return "ovulatoria";
+      return "lutea";
+    })();
+
+    localStorage.setItem("fase_atual", fase);
+    localStorage.setItem("fase_sugerida", fase);
+    console.log(`🩸 Regular: Dia ${diaCiclo}/${ciclo} → ${fase}`);
+    return;
+  }
+
+  // 🌸 Caso IRREGULAR / DIU / MENOPAUSA → ciclo simbólico contínuo
   dia = (dia % ciclo) + 1;
   localStorage.setItem("dia_ciclo", dia);
 
-  // 🌸 Calcula fase atual conforme o dia do ciclo
   const fase = (() => {
     if (dia <= 5) return "menstrual";
     if (dia <= 13) return "folicular";
@@ -534,11 +558,9 @@ autoCiclo() {
     return "lutea";
   })();
 
-  // 💾 Atualiza localStorage
   localStorage.setItem("fase_atual", fase);
   localStorage.setItem("fase_sugerida", fase);
 
-  // 🔔 Notifica início simbólico
   if (dia === 1) {
     this.toast("🌸 Novo ciclo simbólico iniciado!");
     localStorage.setItem(
@@ -547,9 +569,9 @@ autoCiclo() {
     );
   }
 
-  // 🧠 Log útil para depuração
-  console.log(`🩸 Ciclo simbólico: Dia ${dia}/${ciclo} → Fase ${fase}`);
+  console.log(`🩸 Simbólico: Dia ${dia}/${ciclo} → ${fase}`);
 },
+
 
   /* =======================================================
      🔹 8. ROTEADOR
