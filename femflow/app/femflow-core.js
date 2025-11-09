@@ -310,19 +310,7 @@ _bindMenuAcoes(page, modal) {
       window.open("https://www.myflowlife.com.br/#planos", "_blank")
     );
 
-   modal.querySelector("#btnLangToggle")?.addEventListener("click", () => {
-  const newLang = localStorage.getItem("femflow_lang") === "en" ? "pt" : "en";
-  localStorage.setItem("femflow_lang", newLang);
-
-  FEMFLOW.toast(
-    newLang === "pt" ? "🌸 Idioma: Português" : "🌸 Language: English"
-  );
-
-  modal.style.display = "none";
-
-  // 🔄 dispara evento global de troca de idioma
-  window.dispatchEvent(new Event("femflow:langchange"));
-});
+  modal.querySelector("#btnLangToggle")?.addEventListener("click", () => FEMFLOW.toggleLang());
 
     modal.querySelector("#btnVoltarInicio")?.addEventListener("click", () => FEMFLOW.router("home"));
   }
@@ -353,6 +341,22 @@ modal.querySelector("#btnLangToggle")?.addEventListener("click", () => {
 
   }
 },
+         /* =======================================================
+     🌐 2.9 SISTEMA DE IDIOMA GLOBAL (PT ↔ EN)
+  ======================================================= */
+  setLang(lang) {
+    const langNorm = (lang === "en" ? "en" : "pt");
+    localStorage.setItem("femflow_lang", langNorm);
+    window.dispatchEvent(new Event("femflow:langchange"));
+    this.toast(langNorm === "pt" ? "🌸 Idioma: Português" : "🌸 Language: English");
+  },
+
+  toggleLang() {
+    const current = localStorage.getItem("femflow_lang") || "pt";
+    const newLang = current === "pt" ? "en" : "pt";
+    this.setLang(newLang);
+  },
+
   /* =======================================================
      🔹 3. SALVAR TREINO / DESCANSO / PSE
   ======================================================= */
