@@ -1204,6 +1204,23 @@ video {
 .perfil-btn:active {
   transform: scale(0.97);
 }
+/* 👉 Garantir toque em botões do ciclo no mobile */
+.perfil-btns,
+.perfil-btn,
+#btnConfirmarRegular,
+.quiz-btns button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  pointer-events: auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* Se existir algum overlay “vidro” ativo por engano, ele não bloqueia cliques */
+.welcome-overlay,
+.quiz-modal {
+  pointer-events: none; /* só recoloque para auto quando realmente abrir */
+}
 
 
 
