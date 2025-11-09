@@ -142,7 +142,28 @@ path {
     document.querySelector(".subtitle").textContent = L.frase;
     document.getElementById("toBreath").textContent = L.botoes.breath;
     document.getElementById("toTrain").textContent  = L.botoes.train;
+    
+// 🚨 Sincronização entre contextos FemFlow (PWA / Web)
+if (window.localStorage && navigator.serviceWorker) {
+  try {
+    const sharedKeys = ["femflow_startDate", "femflow_cycleLength", "fase_sugerida", "femflow_enfase", "femflow_perfilHormonal"];
+    const backup = JSON.parse(localStorage.getItem("femflow_backup") || "{}");
 
+    // Se backup existir e dados principais estiverem faltando, restaura
+    sharedKeys.forEach(k => {
+      if (!localStorage.getItem(k) && backup[k]) {
+        localStorage.setItem(k, backup[k]);
+      }
+    });
+
+    // Atualiza backup global
+    const snapshot = {};
+    sharedKeys.forEach(k => snapshot[k] = localStorage.getItem(k));
+    localStorage.setItem("femflow_backup", JSON.stringify(snapshot));
+  } catch (err) {
+    console.warn("⚠️ Falha ao sincronizar dados locais:", err);
+  }
+}
     // === CÁLCULO DE FASE ===
     const perfil = localStorage.getItem("femflow_perfilHormonal") || "regular";
     const ciclo  = parseInt(localStorage.getItem("femflow_cycleLength") || 28);
