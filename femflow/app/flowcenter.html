@@ -29,7 +29,10 @@
       box-shadow:0 2px 5px rgba(0,0,0,0.1);
     }
     .tool:hover { background:var(--terracota); color:#fff; transform:scale(1.03); transition:all .3s ease; }
-
+/* Suaviza transição de cor dos setores */
+path { 
+  transition: fill 0.6s ease; 
+}
     /* 🔍 Painel de Diagnóstico */
     #debugPanel {
       position: fixed;
@@ -54,14 +57,12 @@
   animation: phasePulse 3s ease-in-out infinite;
 }
 @keyframes phasePulse {
-  0%, 100% { opacity: 1; text-shadow: 0 0 3px rgba(255,255,255,.4); }
-  50% { opacity: 0.9; text-shadow: 0 0 10px rgba(255,255,255,.8); }
+  0%, 100% { opacity: 0.95; text-shadow: 0 0 3px rgba(255,255,255,.3); }
+  50% { opacity: 1; text-shadow: 0 0 8px rgba(255,255,255,.6); }
 }
 
 /* === DESTACAR FASE ATIVA === */
-.path-active {
-  filter: drop-shadow(0 0 8px rgba(204,106,90,.3));
-}
+.path-active { filter: drop-shadow(0 0 6px rgba(204,106,90,.25)); }
 .label-active {
   fill: var(--terracota);
   filter: drop-shadow(0 0 4px rgba(204,106,90,.25));
@@ -104,8 +105,6 @@
   </div>
 
   <div id="debugPanel" hidden></div>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="./femflow-core.js"></script>
 
   <script>
@@ -123,9 +122,9 @@
       },
       en:{
         titulo:"Hormonal Phase",
-        frase:"Your body has a rhythm. Let's follow it together.",
+       frase: "Your body moves in cycles. Let’s follow its rhythm together.",
         faseAtual:"Current phase:",
-        botoes:{breath:"💨 Breathing",train:"🏃 Training"},
+       botoes:{breath:"💨 Breathing", train:"🏃 Workout"},
         fases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"}
       }
     };
@@ -199,12 +198,6 @@ document.getElementById("lbl-luteal").classList.toggle("label-active",     fase=
       .map(([k,v])=>`<b>${k}</b>: ${v||'—'}`).join("<br>");
     dbg.hidden = false; // coloque true se quiser ocultar em produção
 
-    // === Mudança dinâmica de idioma ===
-    window.addEventListener("femflow:langchange", () => {
-      console.log("🌐 Idioma alterado dinamicamente");
-      const event = new Event("DOMContentLoaded");
-      document.dispatchEvent(event);
-    });
   });
     // === Mudança dinâmica de idioma (fix real-time) ===
 window.addEventListener("femflow:langchange", () => {
@@ -236,7 +229,7 @@ window.addEventListener("femflow:langchange", () => {
   document.getElementById("toTrain").textContent  = L.botoes.train;
 
   // Reaplica nomes de fases e status atual
-  const fase = localStorage.getItem("fase_atual")?.toLowerCase() || "menstrual";
+ const fase = (localStorage.getItem("fase_sugerida") || "menstrual").toLowerCase();
   document.getElementById("centerPhase").textContent = L.fases[fase];
   document.getElementById("t_current").textContent   = `${L.faseAtual} ${L.fases[fase]}`;
   document.getElementById("lbl-menstrual").textContent  = L.fases.menstrual;
