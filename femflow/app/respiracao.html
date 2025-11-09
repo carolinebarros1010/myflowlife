@@ -283,6 +283,30 @@
       }
     });
   </script>
+  <script>
+window.addEventListener("femflow:langchange", () => {
+  const lang = localStorage.getItem("femflow_lang") || "pt";
+  const T = {
+    pt: {
+      titulo: "Respiração Consciente",
+      subtitulo: "Regule o corpo, acalme a mente 🌸",
+      voltar: "🏠 Voltar ao Flow Center"
+    },
+    en: {
+      titulo: "Conscious Breathing",
+      subtitulo: "Balance your body, calm your mind 🌸",
+      voltar: "🏠 Back to Flow Center"
+    }
+  };
+  const L = T[lang];
+
+  document.querySelector("h1").textContent = L.titulo;
+  const sub = document.querySelector(".subtitle");
+  if (sub) sub.textContent = L.subtitulo;
+  const voltarBtn = document.getElementById("voltarBtn");
+  if (voltarBtn) voltarBtn.textContent = L.voltar;
+});
+</script>
 </body>
 </html>
 
