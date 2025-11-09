@@ -52,23 +52,49 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ⚙️ Estratégia de fetch: cache first, update em background
+// ⚙️ Estratégia de fetch: cache first + atualização silenciosa
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
+    (async () => {
+      try {
+        // 🔹 1. tenta cache
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) {
+          // atualiza em background sem bloquear a resposta
+          fetch(event.request)
+            .then(async (netResp) => {
+              if (netResp && netResp.ok) {
+                const cache = await caches.open("femflow-cache-v1");
+                try {
+                  const clone = netResp.clone();
+                  await cache.put(event.request, clone);
+                } catch (err) {
+                  console.warn("[SW] Falha ao clonar resposta:", err.message);
+                }
+              }
+            })
+            .catch(() => {});
+          return cachedResponse;
+        }
 
-      return fetch(event.request)
-        .then((networkResponse) => {
-          // 👇 clone antes de qualquer leitura
-          const responseClone = networkResponse.clone();
-          caches.open("femflow-cache-v1").then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-          return networkResponse;
-        })
-        .catch(() => caches.match("/offline.html"));
-    })
+        // 🔹 2. sem cache → busca rede normalmente
+        const networkResponse = await fetch(event.request);
+        if (networkResponse && networkResponse.ok) {
+          const cache = await caches.open("femflow-cache-v1");
+          try {
+            const clone = networkResponse.clone();
+            await cache.put(event.request, clone);
+          } catch (err) {
+            console.warn("[SW] Falha ao clonar resposta:", err.message);
+          }
+        }
+        return networkResponse;
+
+      } catch (err) {
+        console.warn("[SW] Erro no fetch handler:", err.message);
+        return caches.match("/offline.html");
+      }
+    })()
   );
 });
 
