@@ -144,7 +144,13 @@
   </p>
 
   <script src="./femflow-core.js"></script>
+  
   <script>
+    
+    function parseDateLocalYYYYMMDD(s){
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m-1, d, 12, 0, 0); // 12h local = sem shift de fuso
+}
   // === VARIÁVEIS ===
   let perfil = null;
   let quizIdx = 0, quizScore = 0;
@@ -201,36 +207,78 @@
   document.getElementById('btnQuizNao').onclick = ()=>responderQuiz(false);
 
   // === CONFIRMAR REGULAR ===
-  document.getElementById('btnConfirmarRegular').onclick = ()=>{
-    const data = document.getElementById('dataUltima').value;
-    const dur  = parseInt(document.getElementById('duracao').value||28);
-    if(!data || dur<21 || dur>35){
-      alert('Preencha corretamente data e duração do ciclo.');
-      return;
-    }
-    salvarCiclo({perfil:'regular', start:new Date(data).toISOString(), length:dur});
-  };
+ document.getElementById('btnConfirmarRegular').onclick = ()=>{
+  const s = document.getElementById('dataUltima').value;
+  const len  = parseInt(document.getElementById('duracao').value||28,10);
+  if(!s || len<21 || len>35){ alert('Preencha corretamente data e duração do ciclo.'); return; }
+
+  const start = parseDateLocalYYYYMMDD(s);
+  const today = new Date();
+  const diff  = Math.floor((today - start)/(1000*60*60*24));
+  const dia   = ((diff % len)+len)%len + 1; // 1..len
+
+  const fase = (()=>{
+    if (dia<=5) return 'menstrual';
+    if (dia<=13) return 'folicular';
+    if (dia<=17) return 'ovulatoria';
+    return 'lutea';
+  })();
+
+  salvarCiclo({ perfil:'regular', start, length:len, faseCalc:fase, dia });
+};
 
   // === SALVAR E REDIRECIONAR ===
-  function salvarCiclo({perfil,start,length,fase}){
-    localStorage.setItem('femflow_perfilHormonal', perfil);
-    localStorage.setItem('femflow_cycle_configured','yes');
-    localStorage.setItem('femflow_program_active','yes');
-    localStorage.setItem('femflow_program_startISO', new Date().toISOString());
+ function salvarCiclo({perfil,start,length,fase,faseCalc,dia}){
+  localStorage.setItem('femflow_perfilHormonal', perfil);
+  localStorage.setItem('femflow_cycle_configured','yes');
+  localStorage.setItem('femflow_program_active','yes');
+  localStorage.setItem('femflow_program_startISO', new Date().toISOString());
 
-    if (perfil==='regular'){
-      localStorage.setItem('femflow_startDate', start);
-      localStorage.setItem('femflow_cycleLength', length);
-    } else {
-      localStorage.setItem('femflow_startDate', new Date().toISOString());
-      localStorage.setItem('femflow_cycleLength', '28');
-      localStorage.setItem('fase_sugerida', fase);
-    }
+  if (perfil==='regular'){
+    localStorage.setItem('femflow_startDate', (start instanceof Date? start : new Date(start)).toISOString());
+    localStorage.setItem('femflow_cycleLength', String(length||28));
 
-    localStorage.setItem('femflow_perfilHormonal_locked','yes');
-    (window.FEMFLOW?.toast||alert)('✨ Ciclo configurado com sucesso!');
-    setTimeout(()=>location.href='flowcenter.html',1000);
+    // 🔒 remove qualquer sugestão antiga que possa conflitar
+    localStorage.removeItem('fase_sugerida');
+
+    // ✅ sincroniza estado consumido pelo app
+    localStorage.setItem('dia_ciclo', String(dia||1));
+    localStorage.setItem('fase_atual', (faseCalc||'menstrual').toLowerCase());
+  } else {
+    // Irregular / DIU / Menopausa via quiz
+    localStorage.setItem('femflow_startDate', new Date().toISOString());
+    localStorage.setItem('femflow_cycleLength', '28');
+    localStorage.setItem('fase_sugerida', (fase||'folicular').toLowerCase());
+
+    // ✅ ainda assim salva chaves usadas por outras telas
+    localStorage.setItem('dia_ciclo', '1');
+    localStorage.setItem('fase_atual', (fase||'folicular').toLowerCase());
   }
+
+  localStorage.setItem('femflow_perfilHormonal_locked','yes');
+
+  // 🔄 opcional: persistir no backend (se quiser gravar na planilha)
+  try {
+    fetch((window.FEMFLOW?.SCRIPT_URL)||'',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action:'sincronizarCiclo',
+        id: localStorage.getItem('femflow_id'),
+        perfil: localStorage.getItem('femflow_perfilHormonal'),
+        startDate: localStorage.getItem('femflow_startDate'),
+        cycleLength: localStorage.getItem('femflow_cycleLength'),
+        fase: localStorage.getItem('fase_atual'),
+        diaCiclo: localStorage.getItem('dia_ciclo')
+      })
+    }).catch(()=>{});
+  } catch(_) {}
+
+  (window.FEMFLOW?.toast||alert)('✨ Ciclo configurado com sucesso!');
+
+  // Se já escolheu programa (enfase), ir direto ao FlowCenter; senão, volta pra Home
+  const prox = localStorage.getItem('femflow_enfase') ? 'flowcenter.html' : 'home.html';
+  setTimeout(()=>location.href = prox, 900);
+}
   </script>
 </body>
 </html>
