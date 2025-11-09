@@ -104,7 +104,8 @@
   </div>
 
   <div id="debugPanel" hidden></div>
-
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="./femflow-core.js"></script>
 
   <script>
@@ -166,6 +167,18 @@
       const el=document.getElementById(`seg-${s}`);
       el.style.fill=(s===fase)?"#cc6a5a":"#f9e0d8";
     });
+    // destaca fase atual no gráfico
+["menstrual","follicular","ovulatory","luteal"].forEach(s=>{
+  const el=document.getElementById(`seg-${s}`);
+  el.style.fill=(s===fase)?"#cc6a5a":"#f9e0d8";
+  el.classList.toggle("path-active", s===fase);
+});
+
+// destaca rótulo da fase ativa
+document.getElementById("lbl-menstrual").classList.toggle("label-active",  fase==="menstrual");
+document.getElementById("lbl-follicular").classList.toggle("label-active", fase==="follicular");
+document.getElementById("lbl-ovulatory").classList.toggle("label-active",  fase==="ovulatory");
+document.getElementById("lbl-luteal").classList.toggle("label-active",     fase==="luteal");
 
     // === Botões ===
     document.getElementById("toBreath").onclick = ()=> FEMFLOW.router("respiracao");
