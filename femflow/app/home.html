@@ -133,21 +133,23 @@
 <script>
   // === PROGRAMA DE ACESSO LIVRE (assinatura mensal única) ===
   const PRODUTOS = [
-    { titulo:'Glúteos',        enfase:'gluteo',      color:'#d98f80', desc:'Ênfase em glúteo médio/máximo' },
-    { titulo:'Quadríceps',     enfase:'quadriceps',  color:'#9fb7ac', desc:'Foco em extensão de joelhos' },
-    { titulo:'Peitoral',       enfase:'peito',       color:'#c8a1a6', desc:'Empurrar, isometrias e controle' },
-    { titulo:'Costas',         enfase:'costas',      color:'#a0a6c8', desc:'Remadas, escápulas e postura' },
-    { titulo:'Posteriores',    enfase:'posteriores', color:'#b08fb8', desc:'Cadeia posterior e hinge' },
-    { titulo:'Panturrilhas',   enfase:'panturrilha', color:'#bfa27d', desc:'Sóleo e gastrocnêmio' },
-    { titulo:'Core',           enfase:'core',        color:'#86a9b8', desc:'Antiextensão e antirotação' },
-    { titulo:'Geral',          enfase:'geral',       color:'#cc6a5a', desc:'Corpo todo e equilíbrio' },
-    { titulo:'Mobilidade',     enfase:'mobilidade',  color:'#a7b08f', desc:'Alongamento e liberação' },
-    { titulo:'HIIT / Cardio',  enfase:'cardio',      color:'#e0a36b', desc:'Cardio e baixa intensidade' }
+    { sku:'INICIANTE_ADAPTACAO', titulo:'Adaptação', enfase:'iniciante_adaptacao', color:'#e6b299', desc:'Transição suave e fortalecimento geral' },
+    { sku:'INICIANTE_BEACH',     titulo:'Beach',      enfase:'iniciante_beach',     color:'#e3a689', desc:'Desempenho para beach tennis e areia' },
+    { sku:'INICIANTE_BRACO',     titulo:'Braço',      enfase:'iniciante_braco',     color:'#d9876b', desc:'Foco em força e definição dos braços' },
+    { sku:'INICIANTE_CASA',      titulo:'Em Casa',    enfase:'iniciante_casa',      color:'#d1a697', desc:'Treinos leves e sem equipamentos' },
+    { sku:'INICIANTE_CORRIDA',   titulo:'Corrida',    enfase:'iniciante_corrida',   color:'#b8a59c', desc:'Base aeróbica e resistência progressiva' },
+    { sku:'INICIANTE_COSTAS',    titulo:'Costas',     enfase:'iniciante_costas',    color:'#a6b8c8', desc:'Remadas, postura e estabilidade' },
+    { sku:'INICIANTE_GERAL',     titulo:'Geral',      enfase:'iniciante_geral',     color:'#cc6a5a', desc:'Corpo completo e equilíbrio muscular' },
+    { sku:'INICIANTE_GLUTEO',    titulo:'Glúteos',    enfase:'iniciante_gluteo',    color:'#d98f80', desc:'Ênfase em glúteo médio e máximo' },
+    { sku:'INICIANTE_NATACAO',   titulo:'Natação',    enfase:'iniciante_natacao',   color:'#80a8b3', desc:'Estabilidade de tronco e propulsão aquática' },
+    { sku:'INICIANTE_POSTERIOR', titulo:'Posteriores', enfase:'iniciante_posteriores', color:'#b58fb5', desc:'Cadeia posterior e estabilidade pélvica' },
+    { sku:'INICIANTE_QUADRICEPS',titulo:'Quadríceps', enfase:'iniciante_quadriceps', color:'#9fb7ac', desc:'Ênfase em extensão de joelhos e pernas' },
+    { sku:'INICIANTE_REMO',      titulo:'Remo / Canoa', enfase:'iniciante_remo',    color:'#7f9d94', desc:'Força de tração e core para remadores' }
   ];
 
   const rail = document.getElementById('railProdutos');
 
-  // === Monta o HTML dos cards ===
+  // === Monta os cards ===
   function cardHTML(p){
     return `
       <article class="card" data-enfase="${p.enfase}">
@@ -157,12 +159,11 @@
         </div>
         <div class="info">
           <h3 class="ttl">${p.titulo}</h3>
-          <p class="desc">${p.desc || ''}</p>
+          <p class="desc">${p.desc||''}</p>
         </div>
       </article>`;
   }
 
-  // === Renderiza os cards na vitrine ===
   function render(){
     rail.innerHTML = PRODUTOS.map(cardHTML).join('');
     rail.querySelectorAll('.card').forEach(el=>{
@@ -170,42 +171,23 @@
     });
   }
 
-  // === Clique no card → define a ênfase e vai pro Flow Center ===
+  // === Clique no card → define ênfase e vai pro FlowCenter ===
   function onChoose(enfase){
-    // salva no localStorage para o treino.js puxar do Firebase
     localStorage.setItem('femflow_enfase', enfase);
     location.href = 'flowcenter.html';
   }
 
-  // === Inicialização (async) ===
+  // === Inicialização ===
   (async () => {
-    await syncEntitlement();   // Atualiza status de assinatura
-    render();                  // Renderiza cards
-
-    // Botões principais
-    document.getElementById('btnFlow').onclick = async () => {
-      await syncEntitlement();
-      if (hasEntitlement()) {
-        location.href = 'flowcenter.html';
-      } else {
-        const id = localStorage.getItem('femflow_id');
-        if (!id) location.href = 'index.html';
-        else alert('⚠️ Sua assinatura terminou. Renove para continuar.');
-      }
-    };
-    document.getElementById('btnCad').onclick = () => location.href = 'index.html';
-
-    // Deep link (?id=...)
-    const p = new URLSearchParams(location.search);
-    const got = p.get('id');
-    if (got) localStorage.setItem('femflow_id', got);
+    await syncEntitlement();
+    render();
+    document.getElementById('btnFlow').onclick = () => location.href='flowcenter.html';
+    document.getElementById('btnCad').onclick  = () => location.href='index.html';
   })();
 
-  // === Registro do PWA (service worker) ===
+  // PWA (instalação opcional)
   if ('serviceWorker' in navigator) {
-    addEventListener('load', () =>
-      navigator.serviceWorker.register('service-worker.js').catch(() => {})
-    );
+    addEventListener('load', ()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
   }
 </script>
   <!-- 🔔 Banner de status da assinatura -->
