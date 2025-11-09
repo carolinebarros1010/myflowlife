@@ -141,7 +141,7 @@ if (!cicloOk) {
   this.router("ciclo");  // leva para ciclo.html
 } else {
   this.router("home");   // se já configurado, vai direto para home.html
-}
+},
 
 return data;
 
