@@ -62,10 +62,16 @@ path {
 }
 
 /* === DESTACAR FASE ATIVA === */
-.path-active { filter: drop-shadow(0 0 6px rgba(204,106,90,.25)); }
+.path-active {
+  fill: #cc6a5a !important;
+  stroke: rgba(204,106,90,0.3);
+  stroke-width: 3px;
+  transition: all 0.6s ease;
+}
 .label-active {
   fill: var(--terracota);
-  filter: drop-shadow(0 0 4px rgba(204,106,90,.25));
+  stroke: rgba(204,106,90,0.25);
+  stroke-width: 0.5px;
 }
   </style>
 </head>
