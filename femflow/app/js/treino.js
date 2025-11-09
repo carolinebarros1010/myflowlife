@@ -12,6 +12,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const bar   = document.getElementById("progressBar");
   let current = 0;
   let boxes   = [];
+  
+  const diaTreino = Number(localStorage.getItem("femflow_dia_treino") || 1);
+document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Programa`;
+
 
   // -------- Navegação --------
   const moveTo = (dir) => {
