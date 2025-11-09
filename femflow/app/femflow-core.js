@@ -523,6 +523,21 @@ autoCiclo() {
   const ciclo = Number(localStorage.getItem("femflow_cycleLength") || 28);
   let dia = Number(localStorage.getItem("dia_ciclo") || 1);
 
+  // 🎨 Função auxiliar de log bonito
+  const logCiclo = (fase, diaCiclo, tipo) => {
+    const emoji = fase === "menstrual" ? "🩸" :
+                  fase === "folicular" ? "🌱" :
+                  fase === "ovulatoria" ? "🔥" : "🌙";
+    const cor = fase === "menstrual" ? "color:#d64242" :
+                fase === "folicular" ? "color:#2a8f5a" :
+                fase === "ovulatoria" ? "color:#c98625" :
+                "color:#6b4c9a";
+    console.log(
+      `%c${emoji} ${tipo} | Dia ${diaCiclo}/${ciclo} → ${fase.toUpperCase()}`,
+      `${cor}; font-weight:700;`
+    );
+  };
+
   // 🌿 Caso REGULAR → calcula fase real baseada na data de início
   if (perfil === "regular") {
     const startDate = new Date(localStorage.getItem("femflow_startDate") || new Date());
@@ -543,7 +558,8 @@ autoCiclo() {
 
     localStorage.setItem("fase_atual", fase);
     localStorage.setItem("fase_sugerida", fase);
-    console.log(`🩸 Regular: Dia ${diaCiclo}/${ciclo} → ${fase}`);
+
+    logCiclo(fase, diaCiclo, "🔹 Regular");
     return;
   }
 
@@ -569,9 +585,8 @@ autoCiclo() {
     );
   }
 
-  console.log(`🩸 Simbólico: Dia ${dia}/${ciclo} → ${fase}`);
+  logCiclo(fase, dia, "🔸 Simbólico");
 },
-
 
   /* =======================================================
      🔹 8. ROTEADOR
