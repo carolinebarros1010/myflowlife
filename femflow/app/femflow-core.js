@@ -51,6 +51,13 @@ window.FEMFLOW = {
       return null;
     }
   },
+/* =======================================================
+   🔍 DETECTOR DE PÁGINAS PÚBLICAS
+======================================================= */
+  _isPublicPage() {
+    const p = (location.pathname.split("/").pop() || "").toLowerCase();
+    return ["index.html", "home.html", "ciclo.html"].includes(p);
+  },
 
   /* =======================================================
      ⚙️ INICIALIZAÇÃO GERAL
