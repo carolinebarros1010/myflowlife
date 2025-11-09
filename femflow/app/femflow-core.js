@@ -2,77 +2,71 @@
    🌸 FEMFLOW CORE SCRIPT v2.2 (patch clean)
    =========================================================== */
 
-window.FEMFLOW = window.FEMFLOW || {};
+window.FEMFLOW = {
 
-   /* =======================================================
-   🌸 Cadastro / Anamnese → Apps Script
-======================================================= */
-FEMFLOW.enviarCadastro = async function(dados) {
-  if (!dados || !dados.email) {
-    FEMFLOW.toast("⚠️ E-mail é obrigatório.", true);
-    return;
-  }
+  /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
+  SCRIPT_URL:
+    localStorage.getItem("femflow_script") ||
+    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev",
 
-  try {
-    const resp = await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "loginOuCadastro",
-        nome: dados.nome || "",
-        email: dados.email || "",
-        telefone: dados.telefone || "",
-        senha: dados.senha || "",
-        perfil: dados.perfil || "iniciante",
-        pontuacao: dados.pontuacao || 0,
-        anamnese: dados.anamnese || ""
-      }),
-    });
+  /* ----------- 🎨 LOGO PADRÃO ------------ */
+  LOGO: "./assets/logofemflowterracota.png",
 
-    const r = await resp.json();
-    if (r.status === "ok" || r.status === "created") {
-      FEMFLOW.toast("✨ Cadastro enviado com sucesso!");
-      return r;
-    } else {
-      FEMFLOW.toast("❌ Erro ao cadastrar: " + (r.msg || r.status), true);
+  /* =======================================================
+     🌸 Cadastro / Anamnese → Apps Script
+  ======================================================= */
+  async enviarCadastro(dados) {
+    if (!dados || !dados.email) {
+      this.toast("⚠️ E-mail é obrigatório.", true);
+      return;
+    }
+
+    try {
+      const resp = await fetch(this.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "loginOuCadastro",
+          nome: dados.nome || "",
+          email: dados.email || "",
+          telefone: dados.telefone || "",
+          senha: dados.senha || "",
+          perfil: dados.perfil || "iniciante",
+          pontuacao: dados.pontuacao || 0,
+          anamnese: dados.anamnese || ""
+        }),
+      });
+
+      const r = await resp.json();
+      if (r.status === "ok" || r.status === "created") {
+        this.toast("✨ Cadastro enviado com sucesso!");
+        return r;
+      } else {
+        this.toast("❌ Erro ao cadastrar: " + (r.msg || r.status), true);
+        return null;
+      }
+    } catch (err) {
+      this.toast("⚠️ Falha de rede.", true);
+      console.error("Erro enviarCadastro:", err);
       return null;
     }
-  } catch (err) {
-    FEMFLOW.toast("⚠️ Falha de rede.", true);
-    console.error("Erro enviarCadastro:", err);
-    return null;
-  }
-};
-  /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
-FEMFLOW.SCRIPT_URL =
-  localStorage.getItem("femflow_script") ||
-  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+  },
 
-/* ----------- 🎨 LOGO PADRÃO ------------ */
-FEMFLOW.LOGO = "./assets/logofemflowterracota.png";
+  /* =======================================================
+     ⚙️ INICIALIZAÇÃO GERAL
+  ======================================================= */
+  initTreino() {
+    console.log("💫 FemFlow Core v2.2 conectado com sucesso");
+    this.criarModalPSE();
+    this.autoCiclo();
 
-/* ----------- 🔎 PÁGINAS PÚBLICAS ------------ */
-FEMFLOW._isPublicPage = function () {
-  const p = location.pathname.split("/").pop().toLowerCase();
-  return ["index.html", "home.html"].includes(p);
-};
+    if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
+      this.inserirHeaderApp();
+    }
+  },
 
-/* =======================================================
-   ⚙️ INICIALIZAÇÃO GERAL
-======================================================= */
-FEMFLOW.initTreino = function () {
-  console.log("💫 FemFlow Core v2.2 conectado com sucesso");
 
-  this.criarModalPSE();
-  this.autoCiclo();
-
-  // não injeta em páginas públicas
-  if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
-    this.inserirHeaderApp(); // novo cabeçalho/menu
-  }
-};
-
- /* =======================================================
+  /* =======================================================
    🔹 1. index / CADASTRO
 ======================================================= */
 async indexOuCadastro(nome, email) {
