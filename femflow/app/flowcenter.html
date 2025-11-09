@@ -196,5 +196,21 @@
     });
   });
   </script>
+  <script>
+  // 🚀 Espera o Core carregar totalmente antes de vincular os botões
+  window.addEventListener("load", () => {
+    const esperarCore = setInterval(() => {
+      if (window.FEMFLOW?.router) {
+        clearInterval(esperarCore);
+
+        document.getElementById("toBreath").onclick = () => FEMFLOW.router("respiracao");
+        document.getElementById("toTrain").onclick  = () => FEMFLOW.router("treino");
+
+        console.log("✅ Botões FemFlow conectados ao Core.");
+      }
+    }, 300);
+  });
+</script>
+
 </body>
 </html>
