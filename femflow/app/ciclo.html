@@ -66,8 +66,11 @@
       cursor: pointer;
       transition: all .3s ease;
       margin-top: 16px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     button:hover { background: var(--terracota); }
+
     .perfil-btns {
       display: flex;
       flex-wrap: wrap;
@@ -85,24 +88,22 @@
       font-weight: 700;
       color: var(--verde);
       transition: all .3s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     .perfil-btn.active {
       background: var(--verde);
       color: #fff;
     }
-    .quiz-box {
-      display: none;
-      margin-top: 20px;
-    }
+
+    .quiz-box { display: none; margin-top: 20px; }
     .quiz-btns {
       display: flex;
       justify-content: center;
       gap: 16px;
       margin-top: 10px;
     }
-    .quiz-btns button {
-      width: 40%;
-    }
+    .quiz-btns button { width: 40%; }
   </style>
 </head>
 
@@ -113,12 +114,11 @@
   <div class="card">
     <h3>Seu perfil hormonal</h3>
     <div class="perfil-btns">
-  <button type="button" class="perfil-btn" data-perfil="regular">Regular</button>
-  <button type="button" class="perfil-btn" data-perfil="irregular">Irregular</button>
-  <button type="button" class="perfil-btn" data-perfil="diu">Uso DIU</button>
-  <button type="button" class="perfil-btn" data-perfil="menopausa">Menopausa</button>
-</div>
-
+      <button type="button" class="perfil-btn" data-perfil="regular">Regular</button>
+      <button type="button" class="perfil-btn" data-perfil="irregular">Irregular</button>
+      <button type="button" class="perfil-btn" data-perfil="diu">Uso DIU</button>
+      <button type="button" class="perfil-btn" data-perfil="menopausa">Menopausa</button>
+    </div>
 
     <!-- REGULAR -->
     <div id="regularBox" style="display:none;">
@@ -133,8 +133,8 @@
     <div id="quizBox" class="quiz-box">
       <p id="quizPergunta">Pronta?</p>
       <div class="quiz-btns">
-       <button type="button" id="btnQuizSim">Sim</button>
-       <button type="button" id="btnQuizNao">Não</button>
+        <button type="button" id="btnQuizSim">Sim</button>
+        <button type="button" id="btnQuizNao">Não</button>
       </div>
       <p id="quizStep" style="margin-top:8px;color:#94786f;font-size:.9rem"></p>
     </div>
@@ -143,213 +143,121 @@
   <p style="font-size:.9rem;color:#9a8077;margin-top:12px;">
     As informações servem apenas para adaptar os treinos ao seu corpo. 💫
   </p>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="./femflow-core.js"></script>
+
   <script>
-  // Helper: bind “click” e “touchstart” sem duplo acionamento
-  function bindTap(el, handler) {
-    let fired = false;
-    el.addEventListener('touchstart', (e) => { fired = true; handler(e); }, { passive: true });
-    el.addEventListener('click', (e) => { if (!fired) handler(e); fired = false; });
-  }
-
-  // ===== SELEÇÃO DE PERFIL =====
-  function onPerfilClick(btn){
-    document.querySelectorAll('.perfil-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    perfil = btn.dataset.perfil;
-
-    // alterna blocos
-    regularBox.style.display = (perfil === 'regular') ? 'block' : 'none';
-    quizBox.style.display    = (perfil === 'regular') ? 'none'  : 'block';
-
-    if (perfil !== 'regular') iniciarQuiz();
-  }
-
-  document.querySelectorAll('.perfil-btn').forEach(btn => {
-    btn.setAttribute('type','button'); // redundante mas seguro
-    bindTap(btn, () => onPerfilClick(btn));
-  });
-
-  // ===== QUIZ =====
-  bindTap(document.getElementById('btnQuizSim'), () => responderQuiz(true));
-  bindTap(document.getElementById('btnQuizNao'), () => responderQuiz(false));
-
-  // ===== CONFIRMAR REGULAR =====
-  bindTap(document.getElementById('btnConfirmarRegular'), () => {
-    const data = document.getElementById('dataUltima').value;
-    const dur  = parseInt(document.getElementById('duracao').value||28);
-    if(!data || dur<21 || dur>35){
-      alert('Preencha corretamente data e duração do ciclo.');
-      return;
-    }
-    // usa a função parseDateLocalYYYYMMDD se você já adicionou
-    const start = (typeof parseDateLocalYYYYMMDD === 'function')
-      ? parseDateLocalYYYYMMDD(data)
-      : new Date(data);
-
-    // fase/dia calculados (se você já implementou a lógica)
-    const { faseCalc, dia } = (typeof FEMFLOW_CALC === 'object' && FEMFLOW_CALC.calcFaseDia)
-      ? FEMFLOW_CALC.calcFaseDia(start, dur)
-      : { faseCalc: 'menstrual', dia: 1 };
-
-    salvarCiclo({perfil:'regular', start, length:dur, faseCalc, dia});
-  });
-</script>
-
-  
-  <script>
-    
+    // ========= HELPERS =========
     function parseDateLocalYYYYMMDD(s){
-  const [y,m,d] = s.split('-').map(Number);
-  return new Date(y, m-1, d, 12, 0, 0); // 12h local = sem shift de fuso
-}
-  // === VARIÁVEIS ===
-  let perfil = null;
-  let quizIdx = 0, quizScore = 0;
-  const perguntas = [
-    "Você sentiu variações fortes de energia nos últimos dias?",
-    "Percebeu sensibilidade nos seios ou inchaço?",
-    "Teve oscilações de humor sem motivo aparente?",
-    "Está dormindo pior ou suando mais que o normal?",
-    "Sente cólica, dor pélvica ou leve sangramento?"
-  ];
-
-  const quizPerg = document.getElementById('quizPergunta');
-  const quizStep = document.getElementById('quizStep');
-  const regularBox = document.getElementById('regularBox');
-  const quizBox = document.getElementById('quizBox');
-
-  // === SELEÇÃO DE PERFIL ===
-  document.querySelectorAll('.perfil-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      document.querySelectorAll('.perfil-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      perfil = btn.dataset.perfil;
-      regularBox.style.display = perfil==='regular' ? 'block' : 'none';
-      quizBox.style.display    = perfil==='regular' ? 'none'  : 'block';
-      if (perfil!=='regular') iniciarQuiz();
-    });
-  });
-
-  // === QUIZ ===
-  function iniciarQuiz(){
-    quizIdx = 0; quizScore = 0;
-    quizPerg.textContent = perguntas[quizIdx];
-    quizStep.textContent = `Pergunta ${quizIdx+1} de ${perguntas.length}`;
-    quizBox.style.display = 'block';
-  }
-  function responderQuiz(v){
-    quizScore += v ? 1 : 0;
-    quizIdx++;
-    if (quizIdx < perguntas.length){
-      quizPerg.textContent = perguntas[quizIdx];
-      quizStep.textContent = `Pergunta ${quizIdx+1} de ${perguntas.length}`;
-    } else {
-      concluirQuiz();
+      const [y,m,d] = s.split('-').map(Number);
+      return new Date(y, m-1, d, 12, 0, 0);
     }
-  }
-  function concluirQuiz(){
-    const fase = quizScore <=2 ? 'folicular' :
-                 quizScore <=3 ? 'ovulatoria' :
-                 quizScore <=4 ? 'lutea' : 'menstrual';
-    salvarCiclo({ perfil, fase: fase.toLowerCase() });
-  }
 
-  document.getElementById('btnQuizSim').onclick = ()=>responderQuiz(true);
-  document.getElementById('btnQuizNao').onclick = ()=>responderQuiz(false);
+    function bindTap(el, handler){
+      if(!el) return;
+      let fired=false;
+      el.addEventListener('touchstart', ()=>{fired=true;handler();}, {passive:true});
+      el.addEventListener('click', (e)=>{if(!fired)handler();fired=false;});
+    }
 
-  // === CONFIRMAR REGULAR ===
- document.getElementById('btnConfirmarRegular').onclick = ()=>{
-  const s = document.getElementById('dataUltima').value;
-  const len  = parseInt(document.getElementById('duracao').value||28,10);
-  if(!s || len<21 || len>35){ alert('Preencha corretamente data e duração do ciclo.'); return; }
+    // ========= VARIÁVEIS =========
+    let perfil=null, quizIdx=0, quizScore=0;
+    const perguntas=[
+      "Você sentiu variações fortes de energia nos últimos dias?",
+      "Percebeu sensibilidade nos seios ou inchaço?",
+      "Teve oscilações de humor sem motivo aparente?",
+      "Está dormindo pior ou suando mais que o normal?",
+      "Sente cólica, dor pélvica ou leve sangramento?"
+    ];
+    const quizPerg=document.getElementById('quizPergunta');
+    const quizStep=document.getElementById('quizStep');
+    const regularBox=document.getElementById('regularBox');
+    const quizBox=document.getElementById('quizBox');
 
-  const start = parseDateLocalYYYYMMDD(s);
-  const today = new Date();
-  const diff  = Math.floor((today - start)/(1000*60*60*24));
-  const dia   = ((diff % len)+len)%len + 1; // 1..len
+    // ========= PERFIL =========
+    document.querySelectorAll('.perfil-btn').forEach(btn=>{
+      bindTap(btn, ()=>{
+        document.querySelectorAll('.perfil-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        perfil=btn.dataset.perfil;
+        regularBox.style.display=(perfil==='regular')?'block':'none';
+        quizBox.style.display=(perfil==='regular')?'none':'block';
+        if(perfil!=='regular') iniciarQuiz();
+      });
+    });
 
-  const fase = (()=>{
-    if (dia<=5) return 'menstrual';
-    if (dia<=13) return 'folicular';
-    if (dia<=17) return 'ovulatoria';
-    return 'lutea';
-  })();
+    // ========= QUIZ =========
+    function iniciarQuiz(){
+      quizIdx=0; quizScore=0;
+      quizPerg.textContent=perguntas[quizIdx];
+      quizStep.textContent=`Pergunta ${quizIdx+1} de ${perguntas.length}`;
+      quizBox.style.display='block';
+    }
+    function responderQuiz(v){
+      quizScore+=v?1:0;
+      quizIdx++;
+      if(quizIdx<perguntas.length){
+        quizPerg.textContent=perguntas[quizIdx];
+        quizStep.textContent=`Pergunta ${quizIdx+1} de ${perguntas.length}`;
+      } else {
+        concluirQuiz();
+      }
+    }
+    function concluirQuiz(){
+      const fase = quizScore<=2?'folicular':quizScore<=3?'ovulatoria':quizScore<=4?'lutea':'menstrual';
+      salvarCiclo({perfil, fase:fase.toLowerCase()});
+    }
 
-  salvarCiclo({ perfil:'regular', start, length:len, faseCalc:fase, dia });
-};
+    bindTap(document.getElementById('btnQuizSim'), ()=>responderQuiz(true));
+    bindTap(document.getElementById('btnQuizNao'), ()=>responderQuiz(false));
 
-  // === SALVAR E REDIRECIONAR ===
- function salvarCiclo({perfil,start,length,fase,faseCalc,dia}){
-  localStorage.setItem('femflow_perfilHormonal', perfil);
-  localStorage.setItem('femflow_cycle_configured','yes');
-  localStorage.setItem('femflow_program_active','yes');
-  localStorage.setItem('femflow_program_startISO', new Date().toISOString());
+    // ========= CONFIRMAR REGULAR =========
+    bindTap(document.getElementById('btnConfirmarRegular'), ()=>{
+      const s=document.getElementById('dataUltima').value;
+      const len=parseInt(document.getElementById('duracao').value||28,10);
+      if(!s||len<21||len>35){alert('Preencha corretamente data e duração do ciclo.');return;}
 
-  if (perfil==='regular'){
-    localStorage.setItem('femflow_startDate', (start instanceof Date? start : new Date(start)).toISOString());
-    localStorage.setItem('femflow_cycleLength', String(length||28));
+      const start=parseDateLocalYYYYMMDD(s);
+      const today=new Date();
+      const diff=Math.floor((today-start)/(1000*60*60*24));
+      const dia=((diff%len)+len)%len+1;
+      const fase=(()=>{if(dia<=5)return'menstrual';if(dia<=13)return'folicular';if(dia<=17)return'ovulatoria';return'lutea';})();
+      salvarCiclo({perfil:'regular',start,length:len,faseCalc:fase,dia});
+    });
 
-    // 🔒 remove qualquer sugestão antiga que possa conflitar
-    localStorage.removeItem('fase_sugerida');
+    // ========= SALVAR =========
+    function salvarCiclo({perfil,start,length,fase,faseCalc,dia}){
+      localStorage.setItem('femflow_perfilHormonal', perfil);
+      localStorage.setItem('femflow_cycle_configured','yes');
+      localStorage.setItem('femflow_program_active','yes');
+      localStorage.setItem('femflow_program_startISO', new Date().toISOString());
 
-    // ✅ sincroniza estado consumido pelo app
-    localStorage.setItem('dia_ciclo', String(dia||1));
-    localStorage.setItem('fase_atual', (faseCalc||'menstrual').toLowerCase());
-  }   } else {
-    // 🔹 Perfis: Irregular / DIU / Menopausa (definidos via quiz)
-    localStorage.setItem('femflow_startDate', new Date().toISOString());
-    localStorage.setItem('femflow_cycleLength', '28');
+      if(perfil==='regular'){
+        localStorage.setItem('femflow_startDate',(start instanceof Date?start:new Date(start)).toISOString());
+        localStorage.setItem('femflow_cycleLength',String(length||28));
+        localStorage.removeItem('fase_sugerida');
+        localStorage.setItem('dia_ciclo',String(dia||1));
+        localStorage.setItem('fase_atual',(faseCalc||'menstrual').toLowerCase());
+      } else {
+        localStorage.setItem('femflow_startDate',new Date().toISOString());
+        localStorage.setItem('femflow_cycleLength','28');
+        const faseMap={follicular:'folicular',ovulatory:'ovulatoria',luteal:'lutea',menstrual:'menstrual'};
+        fase=(faseMap[fase]||fase||'folicular').toLowerCase();
+        let diaSim=1;
+        if(fase==='folicular')diaSim=6; else if(fase==='ovulatoria')diaSim=14; else if(fase==='lutea')diaSim=18;
+        localStorage.setItem('fase_sugerida',fase);
+        localStorage.setItem('fase_atual',fase);
+        localStorage.setItem('dia_ciclo',String(diaSim));
+      }
 
-    // 🔧 Mapeia nomes de fases vindas do quiz (padroniza nomenclaturas)
-    const faseMap = {
-      follicular: 'folicular',
-      ovulatory: 'ovulatoria',
-      luteal: 'lutea',
-      menstrual: 'menstrual'
-    };
-    fase = (faseMap[fase] || fase || 'folicular').toLowerCase();
+      localStorage.setItem('femflow_perfilHormonal_locked','yes');
+      (window.FEMFLOW?.toast||alert)('✨ Ciclo configurado com sucesso!');
 
-    // 🔢 Define o "dia simbólico" da fase — referência para o Firebase
-    let diaSimbolico = 1;
-    if (fase === 'folicular') diaSimbolico = 6;
-    else if (fase === 'ovulatoria') diaSimbolico = 14;
-    else if (fase === 'lutea') diaSimbolico = 18;
-    else diaSimbolico = 1; // menstrual (default)
-
-    // 💾 Grava o estado coerente para o app
-    localStorage.setItem('fase_sugerida', fase);
-    localStorage.setItem('fase_atual', fase);
-    localStorage.setItem('dia_ciclo', String(diaSimbolico));
-  }
-
-
-  localStorage.setItem('femflow_perfilHormonal_locked','yes');
-
-  // 🔄 opcional: persistir no backend (se quiser gravar na planilha)
-  try {
-    fetch((window.FEMFLOW?.SCRIPT_URL)||'',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        action:'sincronizarCiclo',
-        id: localStorage.getItem('femflow_id'),
-        perfil: localStorage.getItem('femflow_perfilHormonal'),
-        startDate: localStorage.getItem('femflow_startDate'),
-        cycleLength: localStorage.getItem('femflow_cycleLength'),
-        fase: localStorage.getItem('fase_atual'),
-        diaCiclo: localStorage.getItem('dia_ciclo')
-      })
-    }).catch(()=>{});
-  } catch(_) {}
-
-  (window.FEMFLOW?.toast||alert)('✨ Ciclo configurado com sucesso!');
-
-  // Se já escolheu programa (enfase), ir direto ao FlowCenter; senão, volta pra Home
-  const prox = localStorage.getItem('femflow_enfase') ? 'flowcenter.html' : 'home.html';
-  setTimeout(()=>location.href = prox, 900);
-}
+      const prox=localStorage.getItem('femflow_enfase')?'flowcenter.html':'home.html';
+      setTimeout(()=>location.href=prox,900);
+    }
   </script>
 </body>
 </html>
