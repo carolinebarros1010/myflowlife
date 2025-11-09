@@ -146,6 +146,58 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="./femflow-core.js"></script>
+  <script>
+  // Helper: bind “click” e “touchstart” sem duplo acionamento
+  function bindTap(el, handler) {
+    let fired = false;
+    el.addEventListener('touchstart', (e) => { fired = true; handler(e); }, { passive: true });
+    el.addEventListener('click', (e) => { if (!fired) handler(e); fired = false; });
+  }
+
+  // ===== SELEÇÃO DE PERFIL =====
+  function onPerfilClick(btn){
+    document.querySelectorAll('.perfil-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    perfil = btn.dataset.perfil;
+
+    // alterna blocos
+    regularBox.style.display = (perfil === 'regular') ? 'block' : 'none';
+    quizBox.style.display    = (perfil === 'regular') ? 'none'  : 'block';
+
+    if (perfil !== 'regular') iniciarQuiz();
+  }
+
+  document.querySelectorAll('.perfil-btn').forEach(btn => {
+    btn.setAttribute('type','button'); // redundante mas seguro
+    bindTap(btn, () => onPerfilClick(btn));
+  });
+
+  // ===== QUIZ =====
+  bindTap(document.getElementById('btnQuizSim'), () => responderQuiz(true));
+  bindTap(document.getElementById('btnQuizNao'), () => responderQuiz(false));
+
+  // ===== CONFIRMAR REGULAR =====
+  bindTap(document.getElementById('btnConfirmarRegular'), () => {
+    const data = document.getElementById('dataUltima').value;
+    const dur  = parseInt(document.getElementById('duracao').value||28);
+    if(!data || dur<21 || dur>35){
+      alert('Preencha corretamente data e duração do ciclo.');
+      return;
+    }
+    // usa a função parseDateLocalYYYYMMDD se você já adicionou
+    const start = (typeof parseDateLocalYYYYMMDD === 'function')
+      ? parseDateLocalYYYYMMDD(data)
+      : new Date(data);
+
+    // fase/dia calculados (se você já implementou a lógica)
+    const { faseCalc, dia } = (typeof FEMFLOW_CALC === 'object' && FEMFLOW_CALC.calcFaseDia)
+      ? FEMFLOW_CALC.calcFaseDia(start, dur)
+      : { faseCalc: 'menstrual', dia: 1 };
+
+    salvarCiclo({perfil:'regular', start, length:dur, faseCalc, dia});
+  });
+</script>
+
   
   <script>
     
