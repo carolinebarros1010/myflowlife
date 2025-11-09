@@ -871,6 +871,7 @@ header h1 {
   background: #335953;
   color: white;
 }
+
 /* === FEMFLOW — EVOLUÇÃO (Imagem 25) === */
 body {
   background: linear-gradient(180deg,#FCE3D5 0%,#EFBDA6 100%);
@@ -1153,6 +1154,57 @@ video {
   transform:translateY(-2px);
   background:linear-gradient(135deg,#2b4b45,#b65a48);
 }
+/* === FIX — BOTÕES DE CICLO (touch mobile iOS/Android) === */
+.perfil-btn,
+#btnConfirmarRegular,
+#btnQuizSim,
+#btnQuizNao {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  pointer-events: auto;
+  position: relative;
+  z-index: 10; /* garante prioridade sobre camadas decorativas */
+}
+
+/* Evita que camadas visuais bloqueiem o toque */
+.quiz-modal,
+.welcome-overlay {
+  pointer-events: none;
+}
+
+/* Caso exista overlay visível (ativa manualmente via JS), reabilita pointer */
+.quiz-modal.active {
+  pointer-events: auto;
+}
+
+/* Feedback visual dos botões de perfil */
+.perfil-btn {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid var(--teal);
+  border-radius: 12px;
+  color: var(--teal);
+  font-weight: 600;
+  padding: 0.8rem 1.2rem;
+  margin: 0.4rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.perfil-btn:hover,
+.perfil-btn.active {
+  background: var(--teal);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(51, 89, 83, 0.25);
+}
+
+/* Suaviza animação no toque (mobile safe) */
+.perfil-btn:active {
+  transform: scale(0.97);
+}
+
 
 
 
