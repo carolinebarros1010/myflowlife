@@ -113,11 +113,12 @@
   <div class="card">
     <h3>Seu perfil hormonal</h3>
     <div class="perfil-btns">
-      <button class="perfil-btn" data-perfil="regular">Regular</button>
-      <button class="perfil-btn" data-perfil="irregular">Irregular</button>
-      <button class="perfil-btn" data-perfil="diu">Uso DIU</button>
-      <button class="perfil-btn" data-perfil="menopausa">Menopausa</button>
-    </div>
+  <button type="button" class="perfil-btn" data-perfil="regular">Regular</button>
+  <button type="button" class="perfil-btn" data-perfil="irregular">Irregular</button>
+  <button type="button" class="perfil-btn" data-perfil="diu">Uso DIU</button>
+  <button type="button" class="perfil-btn" data-perfil="menopausa">Menopausa</button>
+</div>
+
 
     <!-- REGULAR -->
     <div id="regularBox" style="display:none;">
@@ -125,15 +126,15 @@
       <input type="date" id="dataUltima">
       <label for="duracao">Duração média (dias)</label>
       <input type="number" id="duracao" min="21" max="35" value="28">
-      <button id="btnConfirmarRegular">Confirmar</button>
+      <button type="button" id="btnConfirmarRegular">Confirmar</button>
     </div>
 
     <!-- QUIZ -->
     <div id="quizBox" class="quiz-box">
       <p id="quizPergunta">Pronta?</p>
       <div class="quiz-btns">
-        <button id="btnQuizSim">Sim</button>
-        <button id="btnQuizNao">Não</button>
+       <button type="button" id="btnQuizSim">Sim</button>
+       <button type="button" id="btnQuizNao">Não</button>
       </div>
       <p id="quizStep" style="margin-top:8px;color:#94786f;font-size:.9rem"></p>
     </div>
