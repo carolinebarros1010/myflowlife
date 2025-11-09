@@ -99,6 +99,31 @@
   <script src="./femflow-core.js"></script>
   <!-- Lógica híbrida (Apps Script + Firebase) com timers + links -->
   <script src="js/treino.js"></script>
+ <script>
+window.addEventListener("femflow:langchange", () => {
+  const lang = localStorage.getItem("femflow_lang") || "pt";
+  const T = {
+    pt: {
+      titulo: "Treino Diário",
+      subtitulo: "Fluxo de movimento e consciência",
+      salvar: "💾 Salvar treino",
+      descanso: "🌿 Descanso"
+    },
+    en: {
+      titulo: "Daily Workout",
+      subtitulo: "Flow of movement and awareness",
+      salvar: "💾 Save workout",
+      descanso: "🌿 Rest day"
+    }
+  };
+  const L = T[lang];
+
+  document.querySelector("header h1").textContent = L.titulo;
+  document.querySelector(".subtitle").textContent = L.subtitulo;
+  document.getElementById("salvarTreinoBtn").textContent = L.salvar;
+  document.getElementById("descansoBtn").textContent = L.descanso;
+});
+</script>
 </body>
 </html>
 
