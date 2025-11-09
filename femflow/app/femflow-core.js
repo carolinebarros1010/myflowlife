@@ -490,6 +490,9 @@ style.innerHTML = `
 }`;
 document.head.appendChild(style);
 
+console.log("✅ femflow-core.js carregado e executando");
+
+
 // 🌸 Inicialização segura do Firebase FemFlow
 (function initFirebase() {
   if (window._femflowFirebaseReady) return;
