@@ -68,9 +68,9 @@
 </head>
 
 <body>
-  <h1>FemFlow</h1>
-  <h3>Fase Hormonal</h3>
-  <p class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
+<h1 id="flowTitle">FemFlow</h1>
+<h3 id="flowSubtitle">Fase Hormonal</h3>
+<p id="flowDesc">Seu corpo tem um ritmo. Vamos segui-lo juntas.</p>
 
   <div class="phase-svg">
     <svg viewBox="0 0 300 300" width="260" height="260">
@@ -94,12 +94,12 @@
     </svg>
   </div>
 
-  <div class="status-fase" id="statusFase">🌸 —</div>
+ <div id="flowStatus">🌸 Você está na fase Ovulatória</div>
   <p class="fase-descricao" id="faseDescricao">—</p>
 
   <div class="toolbar">
-    <button class="tool" id="toBreath">💨 Respiração</button>
-    <button class="tool" id="toTrain">🏃 Treino</button>
+    <button id="btnBreathing" class="btn">Respiração</button>
+  <button id="btnTraining" class="btn">Treinar</button>
   </div>
   
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -109,6 +109,68 @@
 </script>
 
   <script src="./femflow-core.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("🌐 FemFlow Language Handler ativo");
+
+  const lang = localStorage.getItem("femflow_lang") || "pt";
+  atualizarIdioma(lang);
+
+  // 🔄 Atualiza ao trocar idioma no menu
+  window.addEventListener("femflow:langchange", () => {
+    const newLang = localStorage.getItem("femflow_lang") || "pt";
+    atualizarIdioma(newLang);
+  });
+
+  function atualizarIdioma(lang) {
+    const textos = {
+      pt: {
+        title: "FemFlow",
+        subtitle: "Fase Hormonal",
+        description: "Seu corpo tem um ritmo. Vamos segui-lo juntas.",
+        status: "🌸 Você está na fase",
+        breathing: "Respiração",
+        training: "Treinar",
+        phases: {
+          menstrual: "Menstrual",
+          follicular: "Folicular",
+          ovulatory: "Ovulatória",
+          luteal: "Lútea"
+        }
+      },
+      en: {
+        title: "FemFlow",
+        subtitle: "Hormonal Phase",
+        description: "Your body has a rhythm. Let's follow it together.",
+        status: "🌸 You are in the",
+        breathing: "Breathing",
+        training: "Training",
+        phases: {
+          menstrual: "Menstrual",
+          follicular: "Follicular",
+          ovulatory: "Ovulatory",
+          luteal: "Luteal"
+        }
+      }
+    };
+
+    const t = textos[lang];
+
+    // Atualiza textos fixos
+    document.querySelector("#flowTitle")?.textContent = t.title;
+    document.querySelector("#flowSubtitle")?.textContent = t.subtitle;
+    document.querySelector("#flowDesc")?.textContent = t.description;
+    document.querySelector("#btnBreathing")?.textContent = t.breathing;
+    document.querySelector("#btnTraining")?.textContent = t.training;
+
+    // Atualiza status com nome da fase dinâmica
+    const faseAtual = (localStorage.getItem("fase_atual") || "ovulatory").toLowerCase();
+    const faseTraduzida = t.phases[faseAtual] || faseAtual;
+    document.querySelector("#flowStatus")?.textContent = `${t.status} ${faseTraduzida}`;
+  }
+});
+</script>
+
 
   <script>
   document.addEventListener("DOMContentLoaded", () => {
