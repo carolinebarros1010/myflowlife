@@ -164,6 +164,63 @@ if (window.localStorage && navigator.serviceWorker) {
     console.warn("⚠️ Falha ao sincronizar dados locais:", err);
   }
 }
+   // ===================================================
+// 🔄 Sincronização de Dados FemFlow (Web ↔ PWA ↔ Mobile)
+// ===================================================
+try {
+  const sharedKeys = [
+    "femflow_startDate",
+    "femflow_cycleLength",
+    "fase_sugerida",
+    "femflow_enfase",
+    "femflow_perfilHormonal"
+  ];
+
+  // 🔹 1. Lê backup global (criado no login)
+  const backup = JSON.parse(localStorage.getItem("femflow_backup") || "{}");
+  let restored = false;
+
+  // 🔹 2. Se houver dados faltando, restaura
+  sharedKeys.forEach(k => {
+    if (!localStorage.getItem(k) && backup[k]) {
+      localStorage.setItem(k, backup[k]);
+      restored = true;
+    }
+  });
+
+  // 🔹 3. Se restaurou, exibe aviso rápido
+  if (restored) {
+    const note = document.createElement("div");
+    note.textContent = "🌸 Sincronizando seus dados hormonais...";
+    note.style = `
+      position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+      background: rgba(204,106,90,0.9); color: #fff; font-size: 13px;
+      font-family: 'Lato', sans-serif; padding: 8px 14px;
+      border-radius: 20px; z-index: 9999; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      animation: fadeOut 3s forwards ease-in-out;
+    `;
+    document.body.appendChild(note);
+    setTimeout(() => note.remove(), 3000);
+  }
+
+  // 🔹 4. Atualiza backup (mantém coerência)
+  const snapshot = {};
+  sharedKeys.forEach(k => (snapshot[k] = localStorage.getItem(k)));
+  localStorage.setItem("femflow_backup", JSON.stringify(snapshot));
+} catch (err) {
+  console.warn("⚠️ Falha ao sincronizar backup FemFlow:", err);
+}
+
+// 🔹 Animação fade-out do aviso (opcional)
+const styleSync = document.createElement("style");
+styleSync.textContent = `
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(10px); }
+}`;
+document.head.appendChild(styleSync);
+ 
     // === CÁLCULO DE FASE ===
     const perfil = localStorage.getItem("femflow_perfilHormonal") || "regular";
     const ciclo  = parseInt(localStorage.getItem("femflow_cycleLength") || 28);
