@@ -572,6 +572,28 @@ console.log("✅ femflow-core.js carregado e executando");
     window._femflowFirebaseReady = false;
   }
 })();
+     
+FEMFLOW.calcularCiclos = function () {
+  const start = new Date(localStorage.getItem("femflow_startDate"));
+  const cicloLen = Number(localStorage.getItem("femflow_cycleLength") || 28);
+  const hoje = new Date();
+  const diff = Math.floor((hoje - start) / 86400000) + 1; // dias desde início do ciclo
+
+  // 🔹 Dia biológico (1–28)
+  const diaCiclo = ((diff - 1) % cicloLen) + 1;
+
+  // 🔹 Determina fase hormonal atual
+  let fase = "folicular";
+  if (diaCiclo <= 5) fase = "menstrual";
+  else if (diaCiclo <= 13) fase = "folicular";
+  else if (diaCiclo <= 16) fase = "ovulatoria";
+  else fase = "lutea";
+
+  // 🔹 Dia do programa (progresso de treino sequencial)
+  let diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
+
+  return { diaCiclo, fase, diaPrograma };
+};
 
 /* ===========================================================
    🔹 Busca de Exercícios no Firebase
