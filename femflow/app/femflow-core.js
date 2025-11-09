@@ -129,37 +129,29 @@ async indexOuCadastro(nome, email) {
       };
       localStorage.setItem("femflow_backup", JSON.stringify(backup));
 
-     // 🔹 Redireciona após login ou cadastro
-const cicloOk =
-  localStorage.getItem("femflow_startDate") &&
-  localStorage.getItem("femflow_cycleLength") &&
-  localStorage.getItem("femflow_perfilHormonal") &&
-  localStorage.getItem("femflow_cycle_configured") === "yes";
+      // 🔹 Redireciona após login ou cadastro
+      const cicloOk =
+        localStorage.getItem("femflow_startDate") &&
+        localStorage.getItem("femflow_cycleLength") &&
+        localStorage.getItem("femflow_perfilHormonal") &&
+        localStorage.getItem("femflow_cycle_configured") === "yes";
 
-if (!cicloOk) {
-  this.toast("🌿 Configure seu ciclo antes de começar");
-  this.router("ciclo");  // leva para ciclo.html
-} else {
-  this.router("home");   // se já configurado, vai direto para home.html
-},
+      if (!cicloOk) {
+        this.toast("🌿 Configure seu ciclo antes de começar");
+        this.router("ciclo");  // leva para ciclo.html
+      } else {
+        this.router("home");   // se já configurado, vai direto para home.html
+      }
 
-return data;
-
-
-/* =======================================================
-   🔹 1.1 LOGOUT
-======================================================= */
-logout() {
-  const KEYS = [
-    'femflow_auth',
-    'femflow_id',
-    'femflow_nome',
-    'femflow_email',
-  ];
-  KEYS.forEach(k => localStorage.removeItem(k));
-  window.location.href = 'index.html';
-},
-
+      return data; // ✅ retorno DENTRO do try
+    } else {
+      this.toast("⚠️ Erro no cadastro/index.", true);
+    }
+  } catch (err) {
+    console.error("Erro em indexOuCadastro", err);
+    this.toast("❌ Falha de conexão com o servidor.", true);
+  }
+}, // ✅ vírgula necessária para encerrar o método
 /* =======================================================
    🔹 CABEÇALHO + MENU CONTEXTUAL FEMFLOW (2025)
    ======================================================= */
