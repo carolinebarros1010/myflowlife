@@ -206,6 +206,44 @@ document.getElementById("lbl-luteal").classList.toggle("label-active",     fase=
       document.dispatchEvent(event);
     });
   });
+    // === Mudança dinâmica de idioma (fix real-time) ===
+window.addEventListener("femflow:langchange", () => {
+  console.log("🌐 Idioma alterado via menu FemFlow");
+
+  const newLang = localStorage.getItem("femflow_lang") || "pt";
+  const T = {
+    pt:{
+      titulo:"Fase Hormonal",
+      frase:"Seu corpo tem um ritmo. Vamos acompanhar juntas.",
+      faseAtual:"Fase atual:",
+      botoes:{breath:"💨 Respiração",train:"🏃 Treino"},
+      fases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"}
+    },
+    en:{
+      titulo:"Hormonal Phase",
+      frase:"Your body has a rhythm. Let's follow it together.",
+      faseAtual:"Current phase:",
+      botoes:{breath:"💨 Breathing",train:"🏃 Training"},
+      fases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"}
+    }
+  };
+  const L = T[newLang];
+
+  // Reaplica todos os textos
+  document.querySelector("h3").textContent = L.titulo;
+  document.querySelector(".subtitle").textContent = L.frase;
+  document.getElementById("toBreath").textContent = L.botoes.breath;
+  document.getElementById("toTrain").textContent  = L.botoes.train;
+
+  // Reaplica nomes de fases e status atual
+  const fase = localStorage.getItem("fase_atual")?.toLowerCase() || "menstrual";
+  document.getElementById("centerPhase").textContent = L.fases[fase];
+  document.getElementById("t_current").textContent   = `${L.faseAtual} ${L.fases[fase]}`;
+  document.getElementById("lbl-menstrual").textContent  = L.fases.menstrual;
+  document.getElementById("lbl-follicular").textContent = L.fases.follicular;
+  document.getElementById("lbl-ovulatory").textContent  = L.fases.ovulatory;
+  document.getElementById("lbl-luteal").textContent     = L.fases.luteal;
+});
   </script>
 </body>
 </html>
