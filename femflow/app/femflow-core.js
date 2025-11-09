@@ -580,6 +580,15 @@ FEMFLOW.buscarExerciciosFirebase = async function (nivel, fase, diaKey, enfase) 
   const norm = (s) => (s || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
   nivel = norm(nivel || localStorage.getItem("nivel_atual") || "iniciante");
   fase = norm(fase || localStorage.getItem("fase_atual") || "folicular");
+  // 🔧 Corrige variações estrangeiras ou acentuadas
+const faseMap = {
+  follicular: "folicular",
+  ovulatory: "ovulatoria",
+  luteal: "lutea",
+  menstrual: "menstrual"
+};
+if (faseMap[fase]) fase = faseMap[fase];
+ 
   diaKey = (diaKey || `dia_${localStorage.getItem("dia_ciclo") || 1}`).toLowerCase();
   enfase = norm(enfase || localStorage.getItem("enfase_atual") || "geral");
 
