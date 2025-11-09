@@ -15,14 +15,31 @@ window.FEMFLOW = {
      ⚙️ INICIALIZAÇÃO GERAL
   ======================================================= */
   initTreino() {
-    console.log("💫 FemFlow Core v2.2 conectado com sucesso");
-    this.criarModalPSE();
-    this.autoCiclo();
+   console.log("💫 FemFlow Core v2.2 conectado com sucesso");
+  this.criarModalPSE();
+  this.autoCiclo();
 
-    if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
-      this.inserirHeaderApp();
+  // 🚧 Verificação global de ciclo antes de carregar o app
+  const p = (location.pathname.split("/").pop() || "").toLowerCase();
+  const paginasProtegidas = ["flowcenter.html", "treino.html", "evolucao.html"];
+
+  if (paginasProtegidas.includes(p)) {
+    const cicloOk =
+      localStorage.getItem("femflow_cycle_configured") === "yes" &&
+      localStorage.getItem("femflow_startDate") &&
+      localStorage.getItem("femflow_cycleLength");
+
+    if (!cicloOk) {
+      this.toast("🌿 Configure seu ciclo antes de acessar esta página.");
+      location.href = "ciclo.html";
+      return;
     }
-  },
+  }
+
+  if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
+    this.inserirHeaderApp();
+  }
+},
   /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
   SCRIPT_URL:
     localStorage.getItem("femflow_script") ||
