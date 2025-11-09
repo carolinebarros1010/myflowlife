@@ -173,10 +173,20 @@ const PRODUTOS = [
 
   // === Clique no card → define ênfase e vai pro FlowCenter ===
   function onChoose(enfase){
-    localStorage.setItem('femflow_enfase', enfase);
+  localStorage.setItem('femflow_enfase', enfase);
+
+  const cicloOk =
+    localStorage.getItem('femflow_cycle_configured') === 'yes' &&
+    localStorage.getItem('femflow_startDate') &&
+    localStorage.getItem('femflow_cycleLength');
+
+  if (!cicloOk) {
+    FEMFLOW.toast("🌿 Configure seu ciclo primeiro");
+    location.href = 'ciclo.html';
+  } else {
     location.href = 'flowcenter.html';
   }
-
+}
   // === Inicialização ===
   (async () => {
     await syncEntitlement();
