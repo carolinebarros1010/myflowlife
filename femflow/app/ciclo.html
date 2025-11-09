@@ -244,18 +244,33 @@
     // ✅ sincroniza estado consumido pelo app
     localStorage.setItem('dia_ciclo', String(dia||1));
     localStorage.setItem('fase_atual', (faseCalc||'menstrual').toLowerCase());
-  } else {
-    // Irregular / DIU / Menopausa via quiz
+  }   } else {
+    // 🔹 Perfis: Irregular / DIU / Menopausa (definidos via quiz)
     localStorage.setItem('femflow_startDate', new Date().toISOString());
     localStorage.setItem('femflow_cycleLength', '28');
-    const faseMap = { follicular:"folicular", ovulatory:"ovulatoria", luteal:"lutea", menstrual:"menstrual" };
-fase = faseMap[fase] || fase;
-    localStorage.setItem('fase_sugerida', (fase||'folicular').toLowerCase());
 
-    // ✅ ainda assim salva chaves usadas por outras telas
-    localStorage.setItem('dia_ciclo', '1');
-    localStorage.setItem('fase_atual', (fase||'folicular').toLowerCase());
+    // 🔧 Mapeia nomes de fases vindas do quiz (padroniza nomenclaturas)
+    const faseMap = {
+      follicular: 'folicular',
+      ovulatory: 'ovulatoria',
+      luteal: 'lutea',
+      menstrual: 'menstrual'
+    };
+    fase = (faseMap[fase] || fase || 'folicular').toLowerCase();
+
+    // 🔢 Define o "dia simbólico" da fase — referência para o Firebase
+    let diaSimbolico = 1;
+    if (fase === 'folicular') diaSimbolico = 6;
+    else if (fase === 'ovulatoria') diaSimbolico = 14;
+    else if (fase === 'lutea') diaSimbolico = 18;
+    else diaSimbolico = 1; // menstrual (default)
+
+    // 💾 Grava o estado coerente para o app
+    localStorage.setItem('fase_sugerida', fase);
+    localStorage.setItem('fase_atual', fase);
+    localStorage.setItem('dia_ciclo', String(diaSimbolico));
   }
+
 
   localStorage.setItem('femflow_perfilHormonal_locked','yes');
 
