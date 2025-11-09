@@ -96,18 +96,25 @@ async indexOuCadastro(nome, email) {
       localStorage.setItem("femflow_email", data.email);
       localStorage.setItem("femflow_auth", "yes");
 
-      // 🔹 Inicialização padrão do ciclo — garante coerência em PWA e web
-      if (!localStorage.getItem("femflow_cycleLength")) {
-        localStorage.setItem("femflow_cycleLength", "28");
-      }
-      if (!localStorage.getItem("femflow_startDate")) {
-        localStorage.setItem("femflow_startDate", new Date().toISOString());
-      }
-      if (!localStorage.getItem("femflow_perfilHormonal")) {
-        localStorage.setItem("femflow_perfilHormonal", "regular");
-      }
+      // 🔹 Ciclo — sincroniza com o backend (ou mantém padrão)
+      if (data.ciclo_duracao) localStorage.setItem("femflow_cycleLength", String(data.ciclo_duracao));
+      else if (!localStorage.getItem("femflow_cycleLength")) localStorage.setItem("femflow_cycleLength", "28");
 
-      // 🔹 Cria backup global de segurança para PWA / Mobile
+      if (data.data_inicio) localStorage.setItem("femflow_startDate", new Date(data.data_inicio).toISOString());
+      else if (!localStorage.getItem("femflow_startDate")) localStorage.setItem("femflow_startDate", new Date().toISOString());
+
+      // 🔹 Fase e Dia do Ciclo — sincronização direta com backend
+      if (data.fase) localStorage.setItem("fase_sugerida", data.fase.toLowerCase());
+      if (data.diaCiclo) localStorage.setItem("dia_ciclo", data.diaCiclo);
+
+      // 🔹 Ênfase e Nível
+      if (data.enfase) localStorage.setItem("femflow_enfase", data.enfase.toLowerCase());
+      if (data.nivel) localStorage.setItem("nivel_atual", data.nivel.toLowerCase());
+
+      // 🔹 Perfil hormonal
+      localStorage.setItem("femflow_perfilHormonal", "regular");
+
+      // 🔹 Backup global de segurança (para PWA / mobile)
       const backup = {
         femflow_id: data.id,
         femflow_nome: data.nome,
@@ -115,10 +122,14 @@ async indexOuCadastro(nome, email) {
         femflow_cycleLength: localStorage.getItem("femflow_cycleLength"),
         femflow_startDate: localStorage.getItem("femflow_startDate"),
         femflow_perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
+        fase_sugerida: localStorage.getItem("fase_sugerida"),
+        dia_ciclo: localStorage.getItem("dia_ciclo"),
+        enfase: localStorage.getItem("femflow_enfase"),
+        nivel: localStorage.getItem("nivel_atual")
       };
       localStorage.setItem("femflow_backup", JSON.stringify(backup));
 
-      // Redireciona ao app
+      // 🔹 Redireciona para home
       this.router("home");
       return data;
     } else {
