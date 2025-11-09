@@ -1,5 +1,8 @@
-// scripts/treino.js — HÍBRIDO + Timers + Links
+// scripts/treino.js — HÍBRIDO + Timers + Firebase + Contador de Programa
+
 document.addEventListener('DOMContentLoaded', async () => {
+
+  // -------- Verificações de login e ciclo --------
   const id = localStorage.getItem('femflow_id');
   if (!id) { FEMFLOW.toast('⚠️ Faça login.'); location.href='index.html?ret=treino.html'; return; }
 
@@ -8,16 +11,21 @@ document.addEventListener('DOMContentLoaded', async () => {
              localStorage.getItem('femflow_cycleLength');
   if (!ok) { FEMFLOW.toast('⚠️ Configure seu ciclo.'); location.href='ciclo.html'; return; }
 
+  // -------- Inicializações --------
   const track = document.getElementById("carouselTrack");
   const bar   = document.getElementById("progressBar");
   let current = 0;
   let boxes   = [];
-  
+
+  // -------- Dia do Programa --------
   const diaTreino = Number(localStorage.getItem("femflow_dia_treino") || 1);
-document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Programa`;
+  if (document.getElementById("tituloDiaTreino")) {
+    document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Programa`;
+  } else {
+    console.warn("⚠️ Elemento #tituloDiaTreino não encontrado no HTML");
+  }
 
-
-  // -------- Navegação --------
+  // -------- Navegação entre boxes --------
   const moveTo = (dir) => {
     if (dir==='next' && current < boxes.length-1) { current++; navigator.vibrate?.([40]); }
     else if (dir==='prev' && current>0)           { current--; navigator.vibrate?.([20]); }
@@ -27,7 +35,7 @@ document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Pr
   document.getElementById("nextBtn")?.addEventListener("click", () => moveTo("next"));
   document.getElementById("prevBtn")?.addEventListener("click", () => moveTo("prev"));
 
-  // Swipe
+  // -------- Swipe para mobile --------
   let startX=0,endX=0; const sens=50;
   track.addEventListener("touchstart", e => startX = e.touches[0].clientX);
   track.addEventListener("touchmove",  e => endX   = e.touches[0].clientX);
@@ -38,7 +46,7 @@ document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Pr
 
   // -------- Timers --------
   const fmt = (s)=>`00:${String(Math.max(0,Math.floor(s))).padStart(2,'0')}`;
-  const intervals = new WeakMap(); // div -> intervalId
+  const intervals = new WeakMap();
   const startTimer = (el) => {
     clearTimer(el);
     let remain = Number(el.dataset.remain ?? el.dataset.total ?? 45);
@@ -58,21 +66,9 @@ document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Pr
     },1000);
     intervals.set(el,id);
   };
-  const pauseTimer = (el)=>{
-    const id = intervals.get(el);
-    if(id){ clearInterval(id); intervals.delete(el); }
-    el.classList.remove('running');
-  };
-  const clearTimer = (el)=>{
-    const id = intervals.get(el);
-    if(id){ clearInterval(id); intervals.delete(el); }
-  };
-  const resetTimer = (el)=>{
-    clearTimer(el);
-    el.dataset.remain = el.dataset.total;
-    el.classList.remove('running','done');
-    el.textContent = fmt(Number(el.dataset.total||45));
-  };
+  const pauseTimer = (el)=>{ const id = intervals.get(el); if(id){ clearInterval(id); intervals.delete(el); } el.classList.remove('running'); };
+  const clearTimer = (el)=>{ const id = intervals.get(el); if(id){ clearInterval(id); intervals.delete(el); } };
+  const resetTimer = (el)=>{ clearTimer(el); el.dataset.remain = el.dataset.total; el.classList.remove('running','done'); el.textContent = fmt(Number(el.dataset.total||45)); };
   const bindTimers = (root)=>{
     root.querySelectorAll('.subtimer').forEach(el=>{
       if(!el.dataset.total) el.dataset.total = el.textContent.replace(/\D/g,'')||'45';
@@ -87,7 +83,6 @@ document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Pr
       el.addEventListener('click', ()=>{
         if(el.classList.contains('running')) pauseTimer(el); else startTimer(el);
       });
-      // long-press mouse
       let mouseHold; 
       el.addEventListener('mousedown', ()=>{ mouseHold=setTimeout(()=>{ resetTimer(el); navigator.vibrate?.([15,40]); },600); });
       el.addEventListener('mouseup',   ()=> clearTimeout(mouseHold));
@@ -95,7 +90,7 @@ document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Pr
     });
   };
 
-  // -------- Links util --------
+  // -------- Normalização de links --------
   const normLink = (u)=>{
     if(!u) return '';
     let s=String(u).trim();
@@ -106,7 +101,7 @@ document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Pr
     return /^[-\w]+(\.[-\w]+)+/.test(s) ? 'https://' + s : s;
   };
 
-  // -------- Render helpers --------
+  // -------- Renderização dos boxes --------
   const criarBoxHTML = (box) => {
     if (box.tipo === "texto") {
       return `<div class="box texto"><h3>${box.titulo}</h3><p>${box.mensagem}</p></div>`;
@@ -132,18 +127,9 @@ document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Pr
         }).join("")}
       </div>`;
     }
-    if (box.tipo === "hiit") {
-      return `<div class="hiit">
-        <b>${box.titulo}</b><br>${box.descricao||box.protocolo||''}<br>
-        <small><i>🔥 Potência Feminina</i></small>
-      </div>`;
-    }
-    if (box.tipo === "cardio") {
-      return `<div class="cardio"><b>${box.titulo}</b><br>${box.descricao||''}</div>`;
-    }
-    if (box.tipo === "resfriamento") {
-      return `<div class="box resfriamento"><h3>${box.titulo}</h3><p>${box.mensagem}</p></div>`;
-    }
+    if (box.tipo === "hiit") return `<div class="hiit"><b>${box.titulo}</b><br>${box.descricao||box.protocolo||''}<br><small><i>🔥 Potência Feminina</i></small></div>`;
+    if (box.tipo === "cardio") return `<div class="cardio"><b>${box.titulo}</b><br>${box.descricao||''}</div>`;
+    if (box.tipo === "resfriamento") return `<div class="box resfriamento"><h3>${box.titulo}</h3><p>${box.mensagem}</p></div>`;
     return "";
   };
 
@@ -157,105 +143,46 @@ document.getElementById("tituloDiaTreino").textContent = `Dia ${diaTreino} do Pr
 
   // -------- Backend: Apps Script --------
   const enfase = localStorage.getItem('femflow_enfase') || 'geral';
-const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${encodeURIComponent(id)}&enfase=${encodeURIComponent(enfase)}`;
+  const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${encodeURIComponent(id)}&enfase=${encodeURIComponent(enfase)}`;
   let j = null;
-  try { j = await fetch(url).then(r=>r.json()); } catch(e){ FEMFLOW.toast('Falha ao carregar treino.'); console.warn(e); }
+  try { j = await fetch(url).then(r=>r.json()); } 
+  catch(e){ FEMFLOW.toast('Falha ao carregar treino.'); console.warn(e); }
 
   if (!j || j.status==='id_not_found') {
     render([{ tipo:'texto', titulo:'Sem treino', mensagem:'Não localizei seu perfil. Faça login novamente.' }]);
     return;
   }
 
-  // Base (Box 0)
+  // -------- Fallback local se Firebase não vier configurado --------
+  if (!j.exSource && localStorage.getItem('femflow_id')) {
+    const faseLocal = localStorage.getItem("fase_sugerida") || "folicular";
+    const nivelLocal = localStorage.getItem("nivel_atual") || "iniciante";
+    const enfaseLocal = localStorage.getItem("femflow_enfase") || "geral";
+    const diaCiclo = localStorage.getItem("dia_ciclo") || "1";
+
+    j.exSource = "firebase";
+    j.firebaseQuery = { nivel: nivelLocal, fase: faseLocal.toLowerCase(), diaKey: `dia_${diaCiclo}`, enfase: enfaseLocal.toLowerCase() };
+    console.log("⚙️ Forçando leitura direta do Firebase:", j.firebaseQuery);
+  }
+
+  // -------- Carrega exercícios (Firebase) --------
   const lista = [];
   if (Array.isArray(j.boxes)) {
     const box0 = j.boxes.find(b=>b.tipo==='texto');
     if (box0) lista.push(box0);
-  } else {
-    lista.push({ tipo:'texto', titulo:'Box 0 — Conexão Inicial 🌸', mensagem:`Respire e alinhe intenção: ${j?.regras?.foco||'força'}. Hidratação + técnica.` });
   }
-// 🔹 FORÇA USO DO FIREBASE SE DADOS FOREM VÁLIDOS LOCALMENTE
-if (!j.exSource && localStorage.getItem('femflow_id')) {
-  const faseLocal = localStorage.getItem("fase_sugerida") || "folicular";
-  const nivelLocal = localStorage.getItem("nivel_atual") || "iniciante";
-  const enfaseLocal = localStorage.getItem("femflow_enfase") || "geral";
-  const diaCiclo = localStorage.getItem("dia_ciclo") || "1";
 
-  j.exSource = "firebase";
-  j.firebaseQuery = {
-    nivel: nivelLocal,
-    fase: faseLocal.toLowerCase(),
-    diaKey: `dia_${diaCiclo}`,
-    enfase: enfaseLocal.toLowerCase()
-  };
-  console.log("⚙️ Forçando leitura direta do Firebase:", j.firebaseQuery);
-}
-
-  // -------- Exercícios (Firebase ou fallback planilha) --------
   if (j.exSource === 'firebase' && j.firebaseQuery) {
     const { nivel, fase, diaKey, enfase } = j.firebaseQuery;
-
-    // 1) Buscar no Firebase
     let raw = [];
-    try {
-      raw = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey, enfase);
-    } catch(e) {
-      console.warn('Firebase falhou, usando fallback vazio', e);
-      raw = [];
-    }
-if (!raw.length) {
-  console.warn("⚠️ Nenhum treino encontrado no Firebase — ativando fallback planilha");
-  (j.boxes||[]).forEach(b => {
-    if (b.tipo==='exercicios' || b.tipo==='hiit' || b.tipo==='cardio') {
-      if (Array.isArray(b.itens))
-        b.itens = b.itens.map(ex => ({ ...ex, link: normLink(ex.link||'') }));
-      lista.push(b);
-    }
-  });
-}
+    try { raw = await FEMFLOW.buscarExerciciosFirebase(nivel, fase, diaKey, enfase); } 
+    catch(e) { console.warn('Firebase falhou, fallback', e); }
 
-    // 2) Sugestões do backend (quando faltar dado)
-    const sugSeries  = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoSeries ?? 3;
-    const sugTempo   = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoIntervalo ?? 45;
-    const sugRepsMax = j?.faixasExtras?.find(f=>f.kind==='boxHeader')?.sugestaoRepsMax ?? 15;
+    const sugSeries = j?.faixasExtras?.[0]?.sugestaoSeries ?? 3;
+    const sugTempo = j?.faixasExtras?.[0]?.sugestaoIntervalo ?? 45;
+    const sugRepsMax = j?.faixasExtras?.[0]?.sugestaoRepsMax ?? 15;
 
-    const toInt = (v)=> {
-      if (v==null) return null;
-      const s = String(v).trim();
-      const m = s.match(/^\d+/);
-      return m ? Number(m[0]) : null;
-    };
-    const toReps = (v)=> {
-      if (v==null) return null;
-      const s = String(v).trim();
-      return s.replace(/[–—]/g,'-'); // 8–12 → 8-12
-    };
-
-    // 3) Detectar formato vindo do Firebase
-    const isBoxes = Array.isArray(raw) && raw.length && Array.isArray(raw[0]?.itens);
-
-    if (isBoxes) {
-      // Caixas prontas
-      raw.forEach((box, idx) => {
-        const itens = (box.itens||[]).map(ex => ({
-          exercicio: ex.exercicio || ex.titulo || ex.nome || 'Exercício',
-          link: normLink(ex.link || ex.url || ex.video || ''),
-          series: ex.series ?? sugSeries,
-          reps: ex.reps ?? sugRepsMax,
-          tempo: ex.tempo ?? sugTempo
-        }));
-        lista.push({ tipo:'exercicios', titulo: box.titulo || `Box ${idx+1}`, itens });
-
-        const fx = (j.faixasExtras||[]).filter(f=>f.kind==='hiit' || f.kind==='cardio');
-        if (fx.length && idx < fx.length) {
-          const f = fx[idx];
-          if (f.kind==='hiit')   lista.push({ tipo:'hiit',   titulo:f.titulo,  descricao:f.protocolo, tempo_total:f.tempo_total||360 });
-          if (f.kind==='cardio') lista.push({ tipo:'cardio', titulo:f.titulo,  descricao:f.descricao, tempo_total:f.tempo_total||600 });
-        }
-      });
-
-    } else {
-      // Lista plana → agrupar por 'box'
+    if (raw.length) {
       const byBox = new Map();
       raw.forEach(doc => {
         const boxName = (doc.box || 'Box 1').toString();
@@ -263,48 +190,33 @@ if (!raw.length) {
         byBox.get(boxName).push(doc);
       });
 
-      const extractNum = (s)=> {
-        const m = String(s).match(/(\d+)/);
-        return m ? Number(m[1]) : 9999;
-      };
+      const extractNum = (s)=> Number((String(s).match(/(\d+)/)||[0,999])[1]);
       const ordered = [...byBox.entries()].sort((a,b)=> extractNum(a[0]) - extractNum(b[0]));
 
-      ordered.forEach(([boxName, arr], idx) => {
-        const itens = arr.map(ex => ({
+      ordered.forEach(([boxName, arr])=>{
+        const itens = arr.map(ex=>({
           exercicio: ex.titulo || ex.nome || 'Exercício',
           link: normLink(ex.link || ex.url || ex.video || ''),
-          series: toInt(ex.series) ?? sugSeries,
-          reps: toReps(ex.reps) ?? sugRepsMax,
-          tempo: toInt(ex.tempo) ?? sugTempo
+          series: ex.series ?? sugSeries,
+          reps: ex.reps ?? sugRepsMax,
+          tempo: ex.tempo ?? sugTempo
         }));
-
-        lista.push({ tipo:'exercicios', titulo: boxName || `Box ${idx+1}`, itens });
-
-        const fx = (j.faixasExtras||[]).filter(f=>f.kind==='hiit' || f.kind==='cardio');
-        if (fx.length && idx < fx.length) {
-          const f = fx[idx];
-          if (f.kind==='hiit')   lista.push({ tipo:'hiit',   titulo:f.titulo,  descricao:f.protocolo, tempo_total:f.tempo_total||360 });
-          if (f.kind==='cardio') lista.push({ tipo:'cardio', titulo:f.titulo,  descricao:f.descricao, tempo_total:f.tempo_total||600 });
-        }
+        lista.push({ tipo:'exercicios', titulo: boxName, itens });
       });
     }
-
-  } else {
-    // Fallback planilha
-    (j.boxes||[]).forEach(b => {
-      if (b.tipo==='exercicios' || b.tipo==='hiit' || b.tipo==='cardio') {
-        if (Array.isArray(b.itens)) b.itens = b.itens.map(ex => ({ ...ex, link: normLink(ex.link||'') }));
-        lista.push(b);
-      }
-    });
   }
 
-  // Box final
   lista.push({ tipo:'resfriamento', titulo:'🌿 Box Final — Respiração e Alongamento', mensagem:'Respire 4–4 e alongamento leve dos quadris/ombros.' });
-
   render(lista);
-
-  // -------- Ações: Salvar / Descanso --------
+// 🧩 Incrementa o dia do programa
+let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
+if (prog < 30) {
+  localStorage.setItem("femflow_dia_treino", String(prog + 1));
+  FEMFLOW.toast(`✅ Treino salvo! Próximo: Dia ${prog + 1}`);
+} else {
+  FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
+}
+  // -------- SALVAR TREINO --------
   document.getElementById('salvarTreinoBtn')?.addEventListener('click', async () => {
     FEMFLOW.abrirPSE(async (pse) => {
       await FEMFLOW.salvarTreino({
@@ -314,13 +226,28 @@ if (!raw.length) {
         tipo_dia: 'treino',
         pse
       });
+      // avança dia do programa
+      let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
+      if (prog < 30) localStorage.setItem("femflow_dia_treino", String(prog + 1));
       FEMFLOW.toast('✅ Treino salvo!');
     });
   });
 
+  // -------- SALVAR DESCANSO --------
   document.getElementById('descansoBtn')?.addEventListener('click', async () => {
     const fase = j.fase || localStorage.getItem('fase_sugerida') || 'desconhecida';
     await FEMFLOW.salvarDescanso(fase);
-    FEMFLOW.toast('🌿 Descanso registrado!');
+    let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
+    if (prog < 30) localStorage.setItem("femflow_dia_treino", String(prog + 1));
+  // 🧩 Incrementa o dia do programa mesmo em descanso
+let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
+if (prog < 30) {
+  localStorage.setItem("femflow_dia_treino", String(prog + 1));
+  FEMFLOW.toast(`🌿 Descanso registrado. Próximo: Dia ${prog + 1}`);
+} else {
+  FEMFLOW.toast("🎉 Programa concluído!");
+}
   });
+
 });
+
