@@ -48,6 +48,24 @@
       text-align: left;
     }
     #debugPanel b { color: var(--terracota); }
+
+    /* === PULSAR NO NOME DA FASE CENTRAL === */
+#centerPhase {
+  animation: phasePulse 3s ease-in-out infinite;
+}
+@keyframes phasePulse {
+  0%, 100% { opacity: 1; text-shadow: 0 0 3px rgba(255,255,255,.4); }
+  50% { opacity: 0.9; text-shadow: 0 0 10px rgba(255,255,255,.8); }
+}
+
+/* === DESTACAR FASE ATIVA === */
+.path-active {
+  filter: drop-shadow(0 0 8px rgba(204,106,90,.3));
+}
+.label-active {
+  fill: var(--terracota);
+  filter: drop-shadow(0 0 4px rgba(204,106,90,.25));
+}
   </style>
 </head>
 
