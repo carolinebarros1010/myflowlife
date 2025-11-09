@@ -89,10 +89,36 @@ async indexOuCadastro(nome, email) {
 
     if (data.status === "ok" || data.status === "created") {
       this.toast(`🌸 Bem-vinda, ${data.nome}!`);
+
+      // 🔹 Identificação e autenticação
       localStorage.setItem("femflow_id", data.id);
       localStorage.setItem("femflow_nome", data.nome);
       localStorage.setItem("femflow_email", data.email);
       localStorage.setItem("femflow_auth", "yes");
+
+      // 🔹 Inicialização padrão do ciclo — garante coerência em PWA e web
+      if (!localStorage.getItem("femflow_cycleLength")) {
+        localStorage.setItem("femflow_cycleLength", "28");
+      }
+      if (!localStorage.getItem("femflow_startDate")) {
+        localStorage.setItem("femflow_startDate", new Date().toISOString());
+      }
+      if (!localStorage.getItem("femflow_perfilHormonal")) {
+        localStorage.setItem("femflow_perfilHormonal", "regular");
+      }
+
+      // 🔹 Cria backup global de segurança para PWA / Mobile
+      const backup = {
+        femflow_id: data.id,
+        femflow_nome: data.nome,
+        femflow_email: data.email,
+        femflow_cycleLength: localStorage.getItem("femflow_cycleLength"),
+        femflow_startDate: localStorage.getItem("femflow_startDate"),
+        femflow_perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
+      };
+      localStorage.setItem("femflow_backup", JSON.stringify(backup));
+
+      // Redireciona ao app
       this.router("home");
       return data;
     } else {
@@ -102,7 +128,7 @@ async indexOuCadastro(nome, email) {
     console.error("Erro em indexOuCadastro", err);
     this.toast("❌ Falha de conexão com o servidor.", true);
   }
-},  // 👈✅ vírgula obrigatória aqui
+},
 
 /* =======================================================
    🔹 1.1 LOGOUT
