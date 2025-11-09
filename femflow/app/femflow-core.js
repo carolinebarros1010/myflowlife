@@ -432,16 +432,25 @@ modal.querySelector("#btnLangToggle")?.addEventListener("click", () => {
     }
   },
 
-  async salvarDescanso(fase = "menstrual") {
-    await this.salvarTreino({
-      tipo_dia: "descanso",
-      fase,
-      treino: "Descanso",
-      pse: "N/A",
-      observacao: "Descanso ativo",
-    });
-    setTimeout(() => this.router("flowcenter"), 1800);
-  },
+async salvarDescanso(fase = "menstrual") {
+  await this.salvarTreino({
+    tipo_dia: "descanso",
+    fase,
+    treino: "Descanso",
+    pse: "N/A",
+    observacao: "Descanso ativo",
+  });
+
+  // 💤 Avança também o dia do programa
+  let diaTreino = Number(localStorage.getItem("femflow_dia_treino") || 1);
+  if (diaTreino < 30) {
+    localStorage.setItem("femflow_dia_treino", String(diaTreino + 1));
+    console.log(`💤 Descanso registrado → Avançando para Dia ${diaTreino + 1}`);
+  }
+
+  setTimeout(() => this.router("flowcenter"), 1800);
+},
+
 
   /* =======================================================
      🔹 4. MODAL PSE
@@ -704,8 +713,9 @@ if (faseMap[fase]) fase = faseMap[fase];
  
   diaKey = (diaKey || `dia_${localStorage.getItem("dia_ciclo") || 1}`).toLowerCase();
   enfase = norm(enfase || localStorage.getItem("enfase_atual") || "geral");
+const diaPrograma = Number(localStorage.getItem("femflow_dia_treino") || 1);
 
-  const grupoId = `${nivel}_${enfase}`;
+ const grupoId = `${nivel}_${enfase}`;
   const cacheKey = `ff_fb_${grupoId}_${fase}_${diaKey}`;
   const now = Date.now();
 
