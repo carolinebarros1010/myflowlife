@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>FemFlow • Offline</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --terracota: #cc6a5a;
+      --bege: #fff5ef;
+      --texto: #5b4f49;
+      --verde: #335953;
+    }
+
+    body {
+      background: var(--bege);
+      color: var(--texto);
+      font-family: "Lato", sans-serif;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-family: "Playfair Display", serif;
+      color: var(--terracota);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      max-width: 320px;
+      margin: 0 auto 1.4rem;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    button {
+      background: var(--terracota);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 22px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+
+    button:hover {
+      background: var(--verde);
+      transform: scale(1.03);
+    }
+
+    img {
+      width: 70px;
+      margin-bottom: 1rem;
+      opacity: 0.9;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+    }
+
+    footer {
+      font-size: 0.8rem;
+      margin-top: 2rem;
+      color: #9a8e89;
+    }
+  </style>
+</head>
+
+<body>
+  <img src="./assets/logofemflowterracota.png" alt="FemFlow" />
+  <h1>Você está offline 🌸</h1>
+  <p>Sem conexão com a internet.<br>
+     Respire, mantenha a calma e volte quando a rede estiver disponível.</p>
+  <button onclick="location.reload()">Tentar novamente</button>
+  <footer>FemFlow • Ciclo Inteligente</footer>
+</body>
+</html>
