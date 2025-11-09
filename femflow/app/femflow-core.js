@@ -18,6 +18,10 @@ window.FEMFLOW = {
    console.log("💫 FemFlow Core v2.2 conectado com sucesso");
   this.criarModalPSE();
   this.autoCiclo();
+     // Inicializa contador do programa (se ainda não existir)
+if (!localStorage.getItem("femflow_dia_treino")) {
+  localStorage.setItem("femflow_dia_treino", "1");
+}
 
   // 🚧 Verificação global de ciclo antes de carregar o app
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
