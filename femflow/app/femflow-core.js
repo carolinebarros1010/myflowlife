@@ -129,17 +129,22 @@ async indexOuCadastro(nome, email) {
       };
       localStorage.setItem("femflow_backup", JSON.stringify(backup));
 
-      // 🔹 Redireciona para home
-      this.router("home");
-      return data;
-    } else {
-      this.toast("⚠️ Erro no cadastro/index.", true);
-    }
-  } catch (err) {
-    console.error("Erro em indexOuCadastro", err);
-    this.toast("❌ Falha de conexão com o servidor.", true);
-  }
-},
+     // 🔹 Redireciona após login ou cadastro
+const cicloOk =
+  localStorage.getItem("femflow_startDate") &&
+  localStorage.getItem("femflow_cycleLength") &&
+  localStorage.getItem("femflow_perfilHormonal") &&
+  localStorage.getItem("femflow_cycle_configured") === "yes";
+
+if (!cicloOk) {
+  this.toast("🌿 Configure seu ciclo antes de começar");
+  this.router("ciclo");  // leva para ciclo.html
+} else {
+  this.router("home");   // se já configurado, vai direto para home.html
+}
+
+return data;
+
 
 /* =======================================================
    🔹 1.1 LOGOUT
