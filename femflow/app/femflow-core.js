@@ -44,33 +44,33 @@ FEMFLOW.enviarCadastro = async function(dados) {
   }
 };
   /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
-  SCRIPT_URL:
-    localStorage.getItem("femflow_script") ||
-    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev",
+FEMFLOW.SCRIPT_URL =
+  localStorage.getItem("femflow_script") ||
+  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-  /* ----------- 🎨 LOGO PADRÃO ------------ */
-  LOGO: "./assets/logofemflowterracota.png",
+/* ----------- 🎨 LOGO PADRÃO ------------ */
+FEMFLOW.LOGO = "./assets/logofemflowterracota.png";
 
-  /* ----------- 🔎 PÁGINAS PÚBLICAS ------------ */
-  _isPublicPage() {
-    const p = location.pathname.split("/").pop().toLowerCase();
-    return ["index.html", "home.html"].includes(p);
-  },
+/* ----------- 🔎 PÁGINAS PÚBLICAS ------------ */
+FEMFLOW._isPublicPage = function () {
+  const p = location.pathname.split("/").pop().toLowerCase();
+  return ["index.html", "home.html"].includes(p);
+};
 
-  /* =======================================================
-     ⚙️ INICIALIZAÇÃO GERAL
-  ======================================================= */
-  initTreino() {
-    console.log("💫 FemFlow Core v2.2 conectado com sucesso");
+/* =======================================================
+   ⚙️ INICIALIZAÇÃO GERAL
+======================================================= */
+FEMFLOW.initTreino = function () {
+  console.log("💫 FemFlow Core v2.2 conectado com sucesso");
 
-    this.criarModalPSE();
-    this.autoCiclo();
+  this.criarModalPSE();
+  this.autoCiclo();
 
-    // não injeta em páginas públicas
-    if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
-      this.inserirHeaderApp(); // novo cabeçalho/menu
-    }
-  },
+  // não injeta em páginas públicas
+  if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
+    this.inserirHeaderApp(); // novo cabeçalho/menu
+  }
+};
 
  /* =======================================================
    🔹 1. index / CADASTRO
