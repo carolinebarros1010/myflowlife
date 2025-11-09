@@ -3,7 +3,26 @@
    =========================================================== */
 
 window.FEMFLOW = {
+   /* =======================================================
+   🔍 DETECTOR DE PÁGINAS PÚBLICAS
+======================================================= */
+  _isPublicPage() {
+    const p = (location.pathname.split("/").pop() || "").toLowerCase();
+    return ["index.html", "home.html", "ciclo.html"].includes(p);
+  },
 
+  /* =======================================================
+     ⚙️ INICIALIZAÇÃO GERAL
+  ======================================================= */
+  initTreino() {
+    console.log("💫 FemFlow Core v2.2 conectado com sucesso");
+    this.criarModalPSE();
+    this.autoCiclo();
+
+    if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
+      this.inserirHeaderApp();
+    }
+  },
   /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
   SCRIPT_URL:
     localStorage.getItem("femflow_script") ||
@@ -51,28 +70,6 @@ window.FEMFLOW = {
       return null;
     }
   },
-/* =======================================================
-   🔍 DETECTOR DE PÁGINAS PÚBLICAS
-======================================================= */
-  _isPublicPage() {
-    const p = (location.pathname.split("/").pop() || "").toLowerCase();
-    return ["index.html", "home.html", "ciclo.html"].includes(p);
-  },
-
-  /* =======================================================
-     ⚙️ INICIALIZAÇÃO GERAL
-  ======================================================= */
-  initTreino() {
-    console.log("💫 FemFlow Core v2.2 conectado com sucesso");
-    this.criarModalPSE();
-    this.autoCiclo();
-
-    if (!this._isPublicPage() && !window.FEMFLOW_DISABLE_UI) {
-      this.inserirHeaderApp();
-    }
-  },
-
-
   /* =======================================================
    🔹 1. index / CADASTRO
 ======================================================= */
