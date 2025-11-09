@@ -101,7 +101,7 @@ async indexOuCadastro(nome, email) {
       this.toast("⚠️ Erro no cadastro/index.", true);
     }
   } catch (err) {
-    console.error("Erro em indexOuCadastro:", err);
+    console.error("Erro em indexOuCadastro", err);
     this.toast("❌ Falha de conexão com o servidor.", true);
   }
 },  // 👈✅ vírgula obrigatória aqui
