@@ -170,6 +170,22 @@ const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${encodeURIComponent(id)}&en
   } else {
     lista.push({ tipo:'texto', titulo:'Box 0 — Conexão Inicial 🌸', mensagem:`Respire e alinhe intenção: ${j?.regras?.foco||'força'}. Hidratação + técnica.` });
   }
+// 🔹 FORÇA USO DO FIREBASE SE DADOS FOREM VÁLIDOS LOCALMENTE
+if (!j.exSource && localStorage.getItem('femflow_id')) {
+  const faseLocal = localStorage.getItem("fase_sugerida") || "folicular";
+  const nivelLocal = localStorage.getItem("nivel_atual") || "iniciante";
+  const enfaseLocal = localStorage.getItem("femflow_enfase") || "geral";
+  const diaCiclo = localStorage.getItem("dia_ciclo") || "1";
+
+  j.exSource = "firebase";
+  j.firebaseQuery = {
+    nivel: nivelLocal,
+    fase: faseLocal.toLowerCase(),
+    diaKey: `dia_${diaCiclo}`,
+    enfase: enfaseLocal.toLowerCase()
+  };
+  console.log("⚙️ Forçando leitura direta do Firebase:", j.firebaseQuery);
+}
 
   // -------- Exercícios (Firebase ou fallback planilha) --------
   if (j.exSource === 'firebase' && j.firebaseQuery) {
