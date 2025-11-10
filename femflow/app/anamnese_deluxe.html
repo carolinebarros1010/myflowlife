@@ -136,10 +136,20 @@
   <script defer src="./femflow-core.js"></script>
 </head>
 <body>
-  <script>window.FEMFLOW_DISABLE_UI = true;</script>
-
-  <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px;margin-top:10px;">
+    <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px;margin-top:10px;">
   <h1>Anamnese Deluxe</h1>
+  
+<!-- Desativa header automático -->
+<script>window.FEMFLOW_DISABLE_UI = true;</script>
+
+<!-- Corrige comportamento dos botões em mobile -->
+<script>
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (b && !b.getAttribute("type")) b.setAttribute("type", "button");
+  }, { capture: true, passive: true });
+</script>
+
 
   <!-- Etapa 1 -->
   <div id="cadastro" class="card">
@@ -166,7 +176,14 @@
       ✨ Análise concluída! Calculando seu perfil...
     </p>
   </div>
-
+<!-- 🔹 Mova o script pra cá -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btnIniciar");
+  if (!btn) return console.warn("⚠️ Botão não encontrado");
+  btn.addEventListener("click", () => FEMFLOW.toast("🌸 Funcionando!"));
+});
+</script>
   <!-- Script da Anamnese -->
   <script src="js/anamnese.js" defer></script>
 </body>
