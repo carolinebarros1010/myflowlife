@@ -4,7 +4,10 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Entrar no FemFlow</title>
-  <link rel="icon" type="image/png" href="assets/icons/icon-192.png"/>
+  <link rel="preload" href="./assets/logofemflowterracota.png" as="image" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="./femflow-core.js"></script>
 
   <style>
     :root{--terracota:#cc6a5a;--teal:#335953;--pessego:#efbda6;--bege:#f4e1d7;}
@@ -109,9 +112,6 @@
     <p id="mensagem" class="message"></p>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
   <script>
   (function initFirebase(){
     if(window._femflowFirebaseReady) return;
@@ -135,8 +135,6 @@
     }
   })();
   </script>
-
-  <script src="./femflow-core.js"></script>
 
 <script>
 window.FEMFLOW = window.FEMFLOW || {};
