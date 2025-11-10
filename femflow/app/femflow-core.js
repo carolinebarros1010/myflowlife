@@ -306,16 +306,18 @@ _getMenuHTML(page) {
   `;
   break;
 
-    case "treino.html":
-      items = `
-        <h3>Menu</h3>
-      <button type="button" id="btnLangToggle">🌐 Idioma / Language</button>
-      <button type="button" id="btnCancelarTreino">🛑 Cancelar treino</button>
-      <button type="button" id="btnRespirar">🧘 Respiração</button>
-      <button type="button" id="btnVoltarFlow">🏠 Voltar ao Flow Center</button>
-      <button type="button" id="btnFecharMenu">FecharMenu</button>`;
-      break;
-
+    case "treino.html": {
+  const lines = [
+    '<h3>Menu</h3>',
+    '<button type="button" id="btnLangToggle">🌐 Idioma / Language</button>',
+    '<button type="button" id="btnCancelarTreino">🛑 Cancelar treino</button>',
+    '<button type="button" id="btnRespirar">🧘 Respiração</button>',
+    '<button type="button" id="btnVoltarFlow">🏠 Voltar ao Flow Center</button>',
+    '<button type="button" id="btnFecharMenu">Fechar</button>'
+  ];
+  items = lines.join('');
+  break;
+}
     case "respiracao.html":
       items = `
         <h3>Menu</h3>
@@ -325,7 +327,16 @@ _getMenuHTML(page) {
         <button type="button" id="btnPlano">💳 Adquirir plano</button>
         <button type="button" id="btnFecharMenu">FecharMenu</button>`;
       break;
+        
+case "home.html":
+      items = `
+        <h3>Menu</h3>
+         <button type="button" id="btnLangToggle">🌐 Idioma / Language</button>
+         <button type="button" id="btnPlano">💳 Adquirir plano</button>
+        <button type="button" id="btnFecharMenu">FecharMenu</button>`;
+      break;
 
+        
     default:
       items = `<h3>Menu</h3>
                <button type="button" id="btnLangToggle">🌐 Idioma / Language</button>
