@@ -495,43 +495,57 @@ FEMFLOW.buscarHistorico = async function (id, n = 30) {
   /* =======================================================
      🔹 4. MODAL PSE
   ======================================================= */
-  criarModalPSE() {
-    if (document.getElementById("pseModal")) return;
+criarModalPSE() {
+  if (document.getElementById("pseModal")) return;
 
-    const modal = document.createElement("div");
-    modal.id = "pseModal";
-    modal.style.cssText = `
-      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.7); justify-content:center; align-items:center;
-      z-index:1000; font-family:'Lato',sans-serif;`;
+  const modal = document.createElement("div");
+  modal.id = "pseModal";
+  modal.style.cssText = `
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.7); justify-content:center; align-items:center;
+    z-index:1000; font-family:'Lato',sans-serif;`;
 
-    modal.innerHTML = `
-      <div style="background:#fff; padding:25px; border-radius:20px; text-align:center;
-                  width:85%; max-width:340px; box-shadow:0 3px 12px rgba(0,0,0,0.2); animation:fadeIn 0.4s ease;">
-        <h3 style="color:#335953;font-family:'Playfair Display';margin-bottom:10px;">Escala PSE 🌿</h3>
-        <p style="margin-bottom:15px;">Como foi a intensidade do treino?</p>
-        <div id="pseBtns" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;"></div>
-        <button id="cancelarPSE" style="margin-top:15px;background:#aaa;color:#fff;border:none;
-                padding:8px 16px;border-radius:15px;cursor:pointer;">Cancelar</button>
-      </div>`;
-    document.body.appendChild(modal);
+  modal.innerHTML = `
+    <div style="background:#fff; padding:25px; border-radius:20px; text-align:center;
+                width:85%; max-width:340px; box-shadow:0 3px 12px rgba(0,0,0,0.2); animation:fadeIn 0.4s ease;">
+      <h3 style="color:#335953;font-family:'Playfair Display';margin-bottom:10px;">Escala PSE 🌿</h3>
+      <p style="margin-bottom:15px;">Como foi a intensidade do treino?</p>
+      <div id="pseBtns" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;"></div>
+      <button type="button" id="cancelarPSE" style="margin-top:15px;background:#aaa;color:#fff;border:none;
+              padding:8px 16px;border-radius:15px;cursor:pointer;">Cancelar</button>
+    </div>`;
+  document.body.appendChild(modal);
 
-    const pseBtns = modal.querySelector("#pseBtns");
-    for (let i = 0; i <= 10; i++) {
-      const btn = document.createElement("button");
-      btn.textContent = i;
-      btn.style.cssText = `
-        background:#335953; color:#fff; border:none; border-radius:50%;
-        width:40px; height:40px; font-size:16px; cursor:pointer;`;
-      btn.onclick = () => {
-        modal.style.display = "none";
-        FEMFLOW.onPSESelecionado && FEMFLOW.onPSESelecionado(i);
-      };
-      pseBtns.appendChild(btn);
-    }
+  const pseBtns = modal.querySelector("#pseBtns");
 
-    modal.querySelector("#cancelarPSE").onclick = () => (modal.style.display = "none");
-  },
+  // 🔹 Criação segura dos botões 0–10
+  for (let i = 0; i <= 10; i++) {
+    const btn = document.createElement("button");
+    btn.type = "button"; // ✅ evita submit no mobile
+    btn.textContent = i;
+    btn.style.cssText = `
+      background:#335953; color:#fff; border:none; border-radius:50%;
+      width:40px; height:40px; font-size:16px; cursor:pointer;
+      -webkit-tap-highlight-color: transparent;`; // ✅ evita flash azul no toque
+
+    btn.addEventListener("click", () => {
+      modal.style.display = "none";
+      FEMFLOW.onPSESelecionado && FEMFLOW.onPSESelecionado(i);
+      // 🔸 feedback tátil leve
+      if (navigator.vibrate) navigator.vibrate(30);
+    });
+
+    pseBtns.appendChild(btn);
+  }
+
+  // 🔹 Fecha o modal com Cancelar
+  const cancelar = modal.querySelector("#cancelarPSE");
+  cancelar.type = "button"; // ✅ garante que não dispare submit
+  cancelar.addEventListener("click", () => {
+    modal.style.display = "none";
+    navigator.vibrate?.(20);
+  });
+},
 
   abrirPSE(callback) {
     this.onPSESelecionado = callback;
@@ -661,6 +675,14 @@ autoCiclo() {
 
 /* ----------- 🚀 AUTOEXECUÇÃO ------------ */
 document.addEventListener("DOMContentLoaded", () => FEMFLOW.initTreino());
+
+// iOS/Android: garante que clique dispare sem comportamento de submit
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("button");
+  if (!el) return;
+  if (!el.getAttribute("type")) el.setAttribute("type", "button");
+}, { capture: true, passive: true });
+
 
 /* ----------- 🔗 Alias global de logout ------------ */
 window.femflowLogout = () => FEMFLOW.logout();
