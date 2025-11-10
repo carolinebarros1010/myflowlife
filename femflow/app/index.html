@@ -4,9 +4,13 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Entrar no FemFlow</title>
-  <link rel="preload" href="./assets/logofemflowterracota.png" as="image" />
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script>
+    window.FEMFLOW_DISABLE_UI = true; /* 🚫 desativa toolbar automática */
+  </script>
   <script defer src="./femflow-core.js"></script>
 
   <style>
@@ -38,51 +42,35 @@
     button:hover{transform:scale(1.02)}
     .toggle{font-size:.9rem;color:var(--terracota);margin-top:.8rem;cursor:pointer;text-decoration:underline}
     .message{margin-top:1rem;min-height:1.4rem;font-size:.95rem}
-    .env-warn{
-      position:fixed;top:0;left:0;right:0;padding:.7rem 1rem;text-align:center;
-      background:#fff3cd;color:#856404;border-bottom:1px solid #ffeeba;font-size:.9rem;
-      z-index:1000;display:none
-    }
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
-  <!-- 🌸 Banner de boas-vindas FemFlow -->
-<div id="bemvindaBanner" style="
-  display:none;
-  position:fixed;
-  top:0; left:0; width:100%;
-  background:linear-gradient(90deg, #cc6a5a, #eabbaa);
-  color:white;
-  font-family:'Lato',sans-serif;
-  text-align:center;
-  padding:12px 16px;
-  font-size:1rem;
-  z-index:9999;
-  box-shadow:0 2px 6px rgba(0,0,0,0.2);
-">
-  🌸 <b>Cadastro concluído!</b> Digite sua nova senha para continuar seu ciclo.
-</div>
-
-<script>
-  // Exibir o banner apenas se a URL tiver ?bemvinda=1
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("bemvinda") === "1") {
-    const banner = document.getElementById("bemvindaBanner");
-    banner.style.display = "block";
-    // some automaticamente após 8 segundos
-    setTimeout(() => banner.style.display = "none", 8000);
-  }
-</script>
-
-  <div class="env-warn" id="envWarn">
-    ⚠️ Endpoint não configurado. Defina <code>localStorage.femflow_script</code> com o seu Deployment ID do Apps Script.
-  </div>
 
   <div class="login-card">
     <img src="assets/logofemflowterracotasf.png" alt="FemFlow" class="logo"/>
     <h2>Bem-vinda ao FemFlow</h2>
     <p class="subtitle">Acesse ou crie sua conta para iniciar seu ciclo 🌸</p>
+
+    <!-- 🔹 Login com Google -->
+    <div style="margin-bottom: 1rem;">
+      <div id="g_id_onload"
+           data-client_id="457716839153-mot8gjc4j50cfug9em1t1niahhferll6.apps.googleusercontent.com"
+           data-context="signin"
+           data-ux_mode="popup"
+           data-callback="preencherComGoogle"
+           data-auto_prompt="false">
+      </div>
+
+      <div class="g_id_signin"
+           data-type="standard"
+           data-shape="rectangular"
+           data-theme="outline"
+           data-text="signin_with"
+           data-size="large"
+           data-logo_alignment="center">
+      </div>
+    </div>
 
     <!-- Login -->
     <div id="loginBox">
@@ -100,176 +88,73 @@
       <p class="toggle" id="voltarLogin">Voltar ao login</p>
     </div>
 
-    <!-- Cadastro -->
-    <div id="cadastroBox" style="display:none">
-      <div class="form-group"><input type="text" id="nome" placeholder="Nome completo"/></div>
-      <div class="form-group"><input type="email" id="email" placeholder="E-mail"/></div>
-      <div class="form-group"><input type="password" id="senha" placeholder="Crie uma senha"/></div>
-      <button id="btnCriar">Criar conta</button>
-      <p class="toggle" id="goLogin">Já tem conta? Fazer login</p>
-    </div>
-
     <p id="mensagem" class="message"></p>
   </div>
 
+  <!-- Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+
   <script>
-  (function initFirebase(){
-    if(window._femflowFirebaseReady) return;
-    const firebaseConfig = {
-      apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
-      authDomain: "femflow-ebec2.firebaseapp.com",
-      projectId: "femflow-ebec2",
-      storageBucket: "femflow-ebec2.appspot.com",
-      messagingSenderId: "1043953159611",
-      appId: "1:1043953159611:web:d12b82f744740f3124c89e",
-      measurementId: "G-6F644L5VTW"
-    };
-    try{
-      if(typeof firebase==="undefined"){console.error("Firebase SDK não encontrado");return;}
-      if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      window._femflowFirebaseReady=true;
-      console.log("🔥 Firebase inicializado com sucesso (FemFlow)");
-    }catch(e){
-      console.warn("⚠️ Falha ao inicializar Firebase:",e);
-      window._femflowFirebaseReady=false;
-    }
-  })();
-  </script>
+  window.FEMFLOW = window.FEMFLOW || {};
+  const scriptURL = FEMFLOW.SCRIPT_URL || localStorage.getItem("femflow_script") ||
+    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-<script>
-window.FEMFLOW = window.FEMFLOW || {};
+  const $ = (s) => document.querySelector(s);
+  const msg = $("#mensagem");
+  function setErr(t){ msg.textContent=t; msg.style.color="#cc6a5a"; }
+  function setMsg(t,ok=false){ msg.textContent=t; msg.style.color=ok?"#2e7d32":"#335953"; }
 
-const scriptURL =
-  FEMFLOW.SCRIPT_URL ||
-  localStorage.getItem("femflow_script") ||
-  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
-
-const $ = (s) => document.querySelector(s);
-const msg = $("#mensagem"), warn = $("#envWarn");
-if (!scriptURL) warn.style.display = "block";
-
-// ========= UI =========
-function mostrarLogin(){ $("#recuperarBox").style.display="none"; $("#cadastroBox").style.display="none"; $("#loginBox").style.display="block"; msg.textContent=""; }
-function mostrarCadastro(){ $("#loginBox").style.display="none"; $("#recuperarBox").style.display="none"; $("#cadastroBox").style.display="block"; msg.textContent=""; }
-$("#goLogin")?.addEventListener("click", mostrarLogin);
-$("#goRecuperar")?.addEventListener("click", ()=>{ $("#loginBox").style.display="none"; $("#recuperarBox").style.display="block"; msg.textContent=""; });
-$("#voltarLogin")?.addEventListener("click", mostrarLogin);
-
-function setMsg(t,ok=false){ msg.textContent=t; msg.style.color=ok?"#2e7d32":"#335953"; }
-function setErr(t){ msg.textContent=t; msg.style.color="#cc6a5a"; }
-
-// ========= Sessão existente =========
-(function autoRouteIfLogged(){
-  const id=localStorage.getItem("femflow_id");
-  const auth=localStorage.getItem("femflow_auth")==="yes";
-  if(id && auth) location.href="home.html";
-})();
-
-// ========= API Helper =========
-async function postGAS(payload){
-  const r=await fetch(scriptURL,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify(payload)
-  });
-  if(!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
-}
-
-// ========= Link Hotmart Dinâmico =========
-let linkHotmart="https://pay.hotmart.com/SEU-LINK-MENSAL";
-(async function buscarLinkHotmart(){
-  try{
-    const ctrl=new AbortController();
-    const timeout=setTimeout(()=>ctrl.abort(),6000);
-    const r=await fetch(`${scriptURL}?action=products`,{signal:ctrl.signal});
-    clearTimeout(timeout);
-    const data=await r.json();
-
-    if(data.products?.length>0){
-      const produtoFemFlow=data.products.find(p=>p.titulo.toLowerCase().includes("femflow"));
-      linkHotmart=produtoFemFlow?.hotmart || data.products[0].hotmart || linkHotmart;
-      console.log("🔗 Link Hotmart carregado:",linkHotmart);
-    }
-  }catch(err){
-    console.warn("⚠️ Falha ao buscar link Hotmart:",err);
+  async function postGAS(payload){
+    const r=await fetch(scriptURL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
   }
-})();
 
-// ========= Cadastro =========
-async function registrar(){
-  const nome=$("#nome").value.trim(),email=$("#email").value.trim(),senha=$("#senha").value.trim();
-  if(!nome||!email||!senha){setErr("Preencha todos os campos.");return;}
-  setMsg("Criando conta...");
-  try{
-    const data=await postGAS({action:"register",nome,email,senha});
-    if(data.status==="ok"||data.status==="created"){
-      setMsg(`Conta criada! Bem-vinda, ${data.nome||nome} ✨`,true);
-      localStorage.setItem("femflow_id",data.id);
-      localStorage.setItem("femflow_email",data.email||email);
-      localStorage.setItem("femflow_auth","yes");
-      setTimeout(()=>location.href="ciclo.html",1000);
-    }else setErr(data.msg||"Erro ao cadastrar.");
-  }catch(e){console.error(e);setErr("Erro de rede. Tente novamente.");}
-}
+  // === 🔹 Login padrão ===
+  async function entrar(){
+    const email=$("#loginEmail").value.trim(),senha=$("#loginSenha").value.trim();
+    if(!email||!senha){setErr("Digite e-mail e senha.");return;}
+    setMsg("Verificando...");
+    try{
+      const data=await postGAS({action:"login",email,senha});
+      if(data.status==="ok"){
+        setMsg(`Bem-vinda, ${data.nome||"aluna"}!`,true);
+        localStorage.setItem("femflow_id",data.id);
+        localStorage.setItem("femflow_email",data.email||email);
+        localStorage.setItem("femflow_auth","yes");
+        setTimeout(()=>location.href="home.html",800);
+      }else setErr(data.msg||"E-mail ou senha incorretos.");
+    }catch(e){console.error(e);setErr("Erro de rede. Tente novamente.");}
+  }
 
-// ========= Login =========
-async function entrar(){
-  const email=$("#loginEmail").value.trim(),senha=$("#loginSenha").value.trim();
-  if(!email||!senha){setErr("Digite e-mail e senha.");return;}
-  setMsg("Verificando...");
-  try{
-    const data=await postGAS({action:"login",email,senha});
-    console.log("Login retorno:",data);
+  // === 🔹 Login automático via Google ===
+  async function preencherComGoogle(response) {
+    try {
+      const data = jwt_decode(response.credential);
+      if (!data || !data.email) return;
 
-    if(data.status==="expired"||data.status==="inactive"){
-      setErr(
-        data.status==="expired"
-        ?"💳 Sua assinatura expirou. Clique abaixo para renovar."
-        :"🔒 Sua assinatura está inativa. Clique abaixo para reativar."
-      );
-      const btn=document.createElement("button");
-      btn.textContent="🔁 Renovar assinatura";
-      btn.style.marginTop="12px";
-      btn.onclick=()=>window.open(linkHotmart,"_blank");
-      msg.insertAdjacentElement("afterend",btn);
-      return;
+      $("#loginEmail").value = data.email;
+      FEMFLOW.toast("🌸 Verificando seu acesso FemFlow...");
+
+      // 🔎 Tenta login automático (sem senha)
+      const res = await postGAS({ action: "login", email: data.email, senha: "" });
+
+      if (res.status === "ok") {
+        localStorage.setItem("femflow_id", res.id);
+        localStorage.setItem("femflow_email", res.email);
+        localStorage.setItem("femflow_auth", "yes");
+        FEMFLOW.toast("✨ Login automático realizado!");
+        setTimeout(() => location.href = "home.html", 1200);
+      } else {
+        FEMFLOW.toast("💡 Complete seu cadastro para continuar.");
+      }
+    } catch (err) {
+      console.warn("⚠️ Erro ao processar login Google:", err);
     }
+  }
 
-    if(data.status==="error"){setErr(data.msg||"E-mail ou senha incorretos.");return;}
-    if(data.status==="ok"){
-      setMsg(`Bem-vinda, ${data.nome||"aluna"}!`,true);
-      localStorage.setItem("femflow_id",data.id);
-      localStorage.setItem("femflow_nome",data.nome||"");
-      localStorage.setItem("femflow_email",data.email||email);
-      localStorage.setItem("femflow_auth","yes");
-      setTimeout(()=>location.href="home.html",800);
-      return;
-    }
-    setErr("⚠️ Resposta inesperada. Tente novamente.");
-  }catch(e){console.error(e);setErr("Erro de rede. Tente novamente.");}
-}
-
-// ========= Recuperar Senha =========
-async function recuperarSenha(){
-  const email=$("#recEmail").value.trim();
-  if(!email){setErr("Digite seu e-mail.");return;}
-  setMsg("Verificando...");
-  try{
-    const data=await postGAS({action:"recuperarsenha",email});
-    if(data.status==="ok")setMsg("📩 Se o e-mail existir, você receberá instruções em instantes.",true);
-    else setErr("⚠️ E-mail não encontrado.");
-  }catch(e){setErr("Erro de rede. Tente novamente.");}
-}
-
-// ========= Eventos =========
-$("#btnEntrar").addEventListener("click",entrar);
-$("#btnCriar")?.addEventListener("click",registrar);
-$("#btnRecuperar").addEventListener("click",recuperarSenha);
-$("#loginSenha").addEventListener("keydown",e=>{if(e.key==="Enter")entrar();});
-$("#senha")?.addEventListener("keydown",e=>{if(e.key==="Enter")registrar();});
-$("#recEmail").addEventListener("keydown",e=>{if(e.key==="Enter")recuperarSenha();});
-</script>
+  $("#btnEntrar").addEventListener("click", entrar);
+  </script>
 </body>
 </html>
-
