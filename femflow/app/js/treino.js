@@ -140,22 +140,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     moveTo('stay');
     bindTimers(track);
   };
-
+   const enfase = localStorage.getItem('femflow_enfase') || 'geral';
+// ===== Fallback de segurança =====
+if(!localStorage.getItem("fase_sugerida")) localStorage.setItem("fase_sugerida","folicular");
+if(!localStorage.getItem("nivel_atual")) localStorage.setItem("nivel_atual","iniciante");
+if(!localStorage.getItem("femflow_enfase")) localStorage.setItem("femflow_enfase","geral");
+if(!localStorage.getItem("dia_ciclo")) localStorage.setItem("dia_ciclo","1");
   // -------- Backend: Apps Script --------
-  const enfase = localStorage.getItem('femflow_enfase') || 'geral';
+ 
   const url = `${FEMFLOW.SCRIPT_URL}?action=treino&id=${encodeURIComponent(id)}&enfase=${encodeURIComponent(enfase)}`;
-  let j = null;
-  try { j = await fetch(url).then(r=>r.json()); } 
-  catch(e){ FEMFLOW.toast('Falha ao carregar treino.'); console.warn(e); }
+let j = null;
 try {
   const resp = await fetch(url);
   const txt = await resp.text();
   console.log("📡 Resposta bruta Apps Script:", txt.slice(0,200));
-  j = JSON.parse(txt);
-} catch(e){
-  FEMFLOW.toast("❌ Erro ao processar resposta do servidor");
+
+  try {
+    j = JSON.parse(txt);
+  } catch {
+    FEMFLOW.toast("❌ Resposta inválida do servidor.");
+    console.warn("Resposta não era JSON:", txt.slice(0,150));
+  }
+} catch(e) {
+  FEMFLOW.toast("⚠️ Falha de rede ao carregar treino.");
   console.error("Erro detalhado:", e);
 }
+
   
   if (!j || j.status==='id_not_found') {
     render([{ tipo:'texto', titulo:'Sem treino', mensagem:'Não localizei seu perfil. Faça login novamente.' }]);
