@@ -297,13 +297,14 @@ _getMenuHTML(page) {
     case "flowcenter.html":
     case "evolucao.html":
       items = `
-        <h3>Menu</h3>
-       <button type="button" id="btnLangToggle">🌐 Idioma / Language</button>
-       <button type="button" id="btnPersonalizar">🎯 Personalizar treino</button>
-       <button type="button" id="btnCancelarPlano">❌ Cancelar plano</button>
-       <button type="button" id="btnVoltarInicio">🏠 Voltar</button>
-       <button type="button" id="btnFecharMenu">FecharMenu</button>
-      break;
+    <h3>Menu</h3>
+    <button type="button" id="btnLangToggle">🌐 Idioma</button>
+    <button type="button" id="btnCancelarTreino">❌ Cancelar</button>
+    <button type="button" id="btnRespirar">🌬️ Respirar</button>
+    <button type="button" id="btnVoltarFlow">🏠 Flow Center</button>
+    <button type="button" id="btnFecharMenu">Fechar</button>
+  `;
+  break;
 
     case "treino.html":
       items = `
