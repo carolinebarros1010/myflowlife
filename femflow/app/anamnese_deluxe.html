@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>FemFlow • Anamnese Deluxe</title>
 
-  <!-- PWA essentials -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#cc6a5a">
 
-  <!-- Estilos -->
   <style>
     :root {
       --terracota:#cc6a5a;
@@ -52,7 +50,6 @@
   </style>
 </head>
 <body>
-  <!-- Desativa cabeçalho do core -->
   <script>window.FEMFLOW_DISABLE_UI = true;</script>
 
   <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px;margin-top:10px;">
@@ -66,7 +63,7 @@
     <input id="telefone" type="tel" placeholder="Telefone (opcional)">
     <input id="senha" type="password" placeholder="Crie uma senha" required>
     <input id="confirma" type="password" placeholder="Confirme a senha" required>
-    <button id="btnIniciar">Iniciar Anamnese</button>
+    <button type="button" id="btnIniciar">Iniciar Anamnese</button>
   </div>
 
   <!-- Etapa 2 -->
@@ -110,101 +107,186 @@
     }
   })();
   </script>
-  <!-- Core principal -->
+
   <script src="./femflow-core.js"></script>
 
   <script>
-    const perguntas = [
-      { gif:"profile_form.webp", texto:"Como está sua rotina de treinos?",
-        opcoes:[{texto:"Não treino há meses 😅",v:1},{texto:"Treino 1–2x por semana 🧘‍♀️",v:2},{texto:"Treino 3x ou mais 💪",v:3}]},
-      { gif:"routine_cycle.webp", texto:"Você sente variações de energia ao longo do ciclo?",
-        opcoes:[{texto:"Nunca percebi 🤔",v:1},{texto:"Às vezes 🔄",v:2},{texto:"Sim, percebo fases distintas 🌙",v:3}]},
-      { gif:"strength_training.webp", texto:"Você já treinou com acompanhamento profissional?",
-        opcoes:[{texto:"Nunca 🫣",v:1},{texto:"Às vezes 🧩",v:2},{texto:"Sempre com treino estruturado 📋",v:3}]},
-      { gif:"mobility_flow.webp", texto:"Como está sua mobilidade e alongamento?",
-        opcoes:[{texto:"Preciso melhorar 😬",v:1},{texto:"Razoável 🧘‍♀️",v:2},{texto:"Boa flexibilidade 🌸",v:3}]},
-      { gif:"hormonal_balance.webp", texto:"Como avalia seu equilíbrio hormonal?",
-        opcoes:[{texto:"Tenho sintomas fortes 😖",v:1},{texto:"Algumas variações 💫",v:2},{texto:"Bem controlado 🌿",v:3}]},
-      { gif:"menstrual_flow.webp", texto:"Como costuma ser seu fluxo menstrual?",
-        opcoes:[{texto:"Intenso e incômodo 💢",v:1},{texto:"Moderado 💧",v:2},{texto:"Leve e regular 🌺",v:3}]},
-      { gif:"breath_cycle.webp", texto:"Como está sua respiração e energia diária?",
-        opcoes:[{texto:"Canso fácil 😮‍💨",v:1},{texto:"Regular ⚖️",v:2},{texto:"Energia alta ☀️",v:3}]},
-    ];
+  document.addEventListener("click", (e) => {
+    const el = e.target.closest("button");
+    if (!el) return;
+    if (!el.getAttribute("type")) el.setAttribute("type", "button");
+  }, { capture: true, passive: true });
+  </script>
 
-    const cadastro=document.getElementById("cadastro"),
-          quiz=document.getElementById("quiz"),
-          final=document.getElementById("final"),
-          gif=document.getElementById("gif"),
-          q=document.getElementById("question"),
-          opts=document.getElementById("options"),
-          msg=document.getElementById("final-msg");
+  <script>
+  const perguntas = [
+    { gif:"training_time.webp",
+      texto:"Há quanto tempo você treina com regularidade?",
+      opcoes:[
+        {texto:"Nunca ou menos de 3 meses 😅",v:1},
+        {texto:"Entre 3 meses e 1 ano 🧘‍♀️",v:2},
+        {texto:"Mais de 1 ano 💪",v:3}
+      ]
+    },
+    { gif:"training_days.webp",
+      texto:"Quantos dias por semana você costuma treinar?",
+      opcoes:[
+        {texto:"1 a 2 dias 💤",v:1},
+        {texto:"3 a 4 dias 🍑",v:2},
+        {texto:"5 dias ou mais 🔥",v:3}
+      ]
+    },
+    { gif:"discipline.webp",
+      texto:"Com que frequência você cumpre o treino planejado?",
+      opcoes:[
+        {texto:"Quando dá tempo 😬",v:1},
+        {texto:"Na maioria das vezes ✅",v:2},
+        {texto:"Sou muito disciplinada 🧠",v:3}
+      ]
+    },
+    { gif:"body_awareness.webp",
+      texto:"Como avalia sua consciência corporal durante o treino?",
+      opcoes:[
+        {texto:"Ainda me perco nos movimentos 😅",v:1},
+        {texto:"Consigo corrigir às vezes 👀",v:2},
+        {texto:"Domino bem os exercícios ✨",v:3}
+      ]
+    },
+    { gif:"strength_endurance.webp",
+      texto:"Como descreveria sua força e resistência hoje?",
+      opcoes:[
+        {texto:"Canso fácil ou fico dolorida 🥴",v:1},
+        {texto:"Aguento treinos moderados 🌿",v:2},
+        {texto:"Treinos longos e intensos são tranquilos 💪",v:3}
+      ]
+    },
+    { gif:"recovery_sleep.webp",
+      texto:"Como é sua recuperação e qualidade de sono?",
+      opcoes:[
+        {texto:"Durmo mal e demoro pra recuperar 😴",v:1},
+        {texto:"Oscila conforme a semana ⚖️",v:2},
+        {texto:"Durmo bem e me recupero rápido 🌙",v:3}
+      ]
+    },
+    { gif:"cycle_energy.webp",
+      texto:"Você percebe variações de energia ao longo do ciclo?",
+      opcoes:[
+        {texto:"Nunca percebi 🤔",v:1},
+        {texto:"Algumas fases me afetam 🔄",v:2},
+        {texto:"Ajusto meu treino conforme o ciclo 🌸",v:3}
+      ]
+    },
+    { gif:"stress_balance.webp",
+      texto:"Como está seu nível de estresse no dia a dia?",
+      opcoes:[
+        {texto:"Ando sobrecarregada 😩",v:1},
+        {texto:"Oscila conforme o período 🌤️",v:2},
+        {texto:"Equilibrado e sob controle 🧘‍♀️",v:3}
+      ]
+    },
+    { gif:"pushup_test.webp",
+      texto:"Quantas flexões você consegue fazer sem parar?",
+      opcoes:[
+        {texto:"Menos de 5",v:1},
+        {texto:"6–10",v:2},
+        {texto:"Mais de 10",v:3}
+      ]
+    },
+    { gif:"squat_test.webp",
+      texto:"Quantos agachamentos completos você faz em 40 segundos?",
+      opcoes:[
+        {texto:"Menos de 15",v:1},
+        {texto:"15–25",v:2},
+        {texto:"Mais de 25",v:3}
+      ]
+    }
+  ];
 
-    let i=0, score=0, nome="", email="", telefone="", senha="";
+  const cadastro=document.getElementById("cadastro"),
+        quiz=document.getElementById("quiz"),
+        final=document.getElementById("final"),
+        gif=document.getElementById("gif"),
+        q=document.getElementById("question"),
+        opts=document.getElementById("options"),
+        msg=document.getElementById("final-msg");
 
-    document.getElementById("btnIniciar").onclick=()=>{
-      nome=document.getElementById("nome").value.trim();
-      email=document.getElementById("email").value.trim();
-      telefone=document.getElementById("telefone").value.trim();
-      senha=document.getElementById("senha").value.trim();
-      const confirma=document.getElementById("confirma").value.trim();
+  let i=0, score=0, nome="", email="", telefone="", senha="";
 
-      if(!nome||!email||!senha){FEMFLOW.toast("⚠️ Preencha todos os campos obrigatórios.",true);return;}
-      if(senha.length<6){FEMFLOW.toast("🔐 A senha deve ter pelo menos 6 caracteres.",true);return;}
-      if(senha!==confirma){FEMFLOW.toast("❌ As senhas não coincidem.",true);return;}
+  document.getElementById("btnIniciar").onclick=()=>{
+    nome=document.getElementById("nome").value.trim();
+    email=document.getElementById("email").value.trim();
+    telefone=document.getElementById("telefone").value.trim();
+    senha=document.getElementById("senha").value.trim();
+    const confirma=document.getElementById("confirma").value.trim();
 
-      cadastro.classList.add("hidden");
-      quiz.classList.remove("hidden");
-      mostrarPergunta();
-    };
+    if(!nome||!email||!senha){FEMFLOW.toast("⚠️ Preencha todos os campos obrigatórios.",true);return;}
+    if(senha.length<6){FEMFLOW.toast("🔐 A senha deve ter pelo menos 6 caracteres.",true);return;}
+    if(senha!==confirma){FEMFLOW.toast("❌ As senhas não coincidem.",true);return;}
 
-    function mostrarPergunta(){
-      const p=perguntas[i];
-      gif.src="./assets/gifs/"+p.gif;
-      q.textContent=p.texto;
-      opts.innerHTML="";
-      p.opcoes.forEach(o=>{
-        const b=document.createElement("button");
-        b.textContent=o.texto;
-        b.onclick=()=>{score+=o.v;i++;(i<perguntas.length)?mostrarPergunta():finalizar();};
-        opts.appendChild(b);
+    cadastro.classList.add("hidden");
+    quiz.classList.remove("hidden");
+    mostrarPergunta();
+  };
+
+  function mostrarPergunta(){
+    const p=perguntas[i];
+    gif.src="./assets/gifs/"+p.gif;
+    q.textContent=p.texto;
+    opts.innerHTML="";
+    p.opcoes.forEach(o=>{
+      const b=document.createElement("button");
+      b.type="button";
+      b.textContent=o.texto;
+      b.style.cssText=`
+        background:var(--terracota);
+        color:#fff;border:none;border-radius:12px;
+        padding:10px 14px;font-size:1rem;
+        cursor:pointer;transition:0.3s;
+        -webkit-tap-highlight-color:transparent;`;
+      b.addEventListener("click",()=>{
+        score+=o.v;i++;
+        if(i<perguntas.length)mostrarPergunta();
+        else finalizar();
+        navigator.vibrate?.(25);
       });
+      opts.appendChild(b);
+    });
+  }
+
+  async function finalizar(){
+    quiz.classList.add("hidden");
+    final.classList.remove("hidden");
+
+    let nivel="iniciante";
+    if(score>=20) nivel="avançada";
+    else if(score>=14) nivel="intermediária";
+
+    const respostas=perguntas.map((p,idx)=>`Q${idx+1}: ${p.texto}`);
+
+    FEMFLOW.toast("⏳ Enviando suas respostas...",false);
+
+    try{
+      const r=await FEMFLOW.enviarCadastro({
+        nome,email,telefone,senha,
+        perfil:nivel,
+        pontuacao:score,
+        anamnese:JSON.stringify(respostas)
+      });
+      console.log("Cadastro:",r);
+      if(r&&r.status){
+        localStorage.setItem("femflow_id",r.id);
+        localStorage.setItem("femflow_email",r.email);
+        localStorage.setItem("femflow_cycle_configured","yes");
+        FEMFLOW.toast("🌸 Bem-vinda ao FemFlow!");
+        msg.textContent=`✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
+        setTimeout(()=>location.href="index.html?bemvinda=1",4000);
+      }else FEMFLOW.toast("❌ Falha ao enviar cadastro.",true);
+    }catch(err){
+      FEMFLOW.toast("⚠️ Erro de conexão. Tente novamente.",true);
+      console.error(err);
     }
-
-    async function finalizar(){
-      quiz.classList.add("hidden");
-      final.classList.remove("hidden");
-
-      let nivel="iniciante";
-      if(score>=16) nivel="avançada";
-      else if(score>=11) nivel="intermediária";
-
-      const respostas=perguntas.map((p,idx)=>`Q${idx+1}: ${p.texto}`);
-
-      FEMFLOW.toast("⏳ Enviando suas respostas...",false);
-
-      try{
-        const r = await FEMFLOW.enviarCadastro({
-          nome,email,telefone,senha,
-          perfil:nivel,
-          pontuacao:score,
-          anamnese:JSON.stringify(respostas)
-        });
-        console.log("Cadastro:",r);
-        if(r && r.status){
-          localStorage.setItem("femflow_id",r.id);
-          localStorage.setItem("femflow_email",r.email);
-          localStorage.setItem("femflow_cycle_configured","yes");
-          FEMFLOW.toast("🌸 Bem-vinda ao FemFlow!");
-          msg.textContent=`✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
-          setTimeout(()=>location.href="index.html?bemvinda=1",4000);
-        } else {
-          FEMFLOW.toast("❌ Falha ao enviar cadastro.",true);
-        }
-      }catch(err){
-        FEMFLOW.toast("⚠️ Erro de conexão. Tente novamente.",true);
-        console.error(err);
-      }
-    }
+  }
   </script>
 </body>
 </html>
+
