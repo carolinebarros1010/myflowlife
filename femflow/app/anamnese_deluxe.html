@@ -4,50 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>FemFlow • Anamnese Deluxe</title>
-
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#cc6a5a">
-
-  <style>
-    :root {
-      --terracota:#cc6a5a;
-      --bege:#fff5ef;
-      --verde:#335953;
-      --texto:#5b4f49;
-    }
-    body {
-      margin:0;background:var(--bege);color:var(--texto);
-      font-family:"Lato",sans-serif;text-align:center;
-      display:flex;flex-direction:column;align-items:center;
-      min-height:100vh;padding:22px;
-    }
-    h1 {
-      font-family:'Playfair Display',serif;
-      color:var(--terracota);font-size:2rem;margin:8px 0;
-    }
-    .card {
-      background:#fff;border-radius:22px;padding:22px;
-      box-shadow:0 6px 12px rgba(0,0,0,.1);
-      max-width:420px;width:100%;margin-top:12px;
-    }
-    input {
-      width:100%;padding:10px;margin:6px 0;
-      border:1px solid #ddd;border-radius:10px;font-size:1rem;
-    }
-    button {
-      background:var(--terracota);color:#fff;border:none;
-      border-radius:12px;padding:12px 18px;font-size:1rem;
-      margin-top:10px;cursor:pointer;transition:.3s;
-    }
-    button:hover { background:var(--verde); }
-    .gif {
-      width:160px;height:160px;object-fit:cover;
-      border-radius:18px;margin:10px auto;display:block;
-    }
-    .question { font-size:1.1rem;margin-bottom:18px;font-weight:500; }
-    .options { display:flex;flex-direction:column;gap:10px; }
-    .hidden { display:none; }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <script>window.FEMFLOW_DISABLE_UI = true;</script>
@@ -55,7 +14,6 @@
   <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px;margin-top:10px;">
   <h1>Cadastro</h1>
 
-  <!-- Etapa 1 -->
   <div id="cadastro" class="card">
     <p>🌸 Preencha seus dados para começar:</p>
     <input id="nome" placeholder="Nome completo" required>
@@ -66,282 +24,27 @@
     <button type="button" id="btnIniciar">Iniciar Anamnese</button>
   </div>
 
-  <!-- Etapa 2 -->
   <div id="quiz" class="card hidden">
     <img id="gif" src="./assets/gifs/profile_form.webp" class="gif" alt="gif">
     <div id="question" class="question"></div>
     <div id="options" class="options"></div>
   </div>
 
-  <!-- Etapa 3 -->
   <div id="final" class="hidden">
     <img src="./assets/gifs/success_flow.webp" class="gif" alt="Sucesso">
     <p id="final-msg" style="font-size:1.1rem;color:var(--verde);font-weight:bold;">
       Análise concluída! Calculando seu perfil...
     </p>
   </div>
-  
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-  <script>
-  (function initFirebase(){
-    if(window._femflowFirebaseReady) return;
-    const firebaseConfig = {
-      apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
-      authDomain: "femflow-ebec2.firebaseapp.com",
-      projectId: "femflow-ebec2",
-      storageBucket: "femflow-ebec2.appspot.com",
-      messagingSenderId: "1043953159611",
-      appId: "1:1043953159611:web:d12b82f744740f3124c89e",
-      measurementId: "G-6F644L5VTW"
-    };
-    try{
-      if(typeof firebase==="undefined"){console.error("Firebase SDK não encontrado");return;}
-      if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      window._femflowFirebaseReady=true;
-      console.log("🔥 Firebase inicializado com sucesso (FemFlow)");
-    }catch(e){
-      console.warn("⚠️ Falha ao inicializar Firebase:",e);
-      window._femflowFirebaseReady=false;
-    }
-  })();
-  </script>
-
+  <!-- Core -->
   <script src="./femflow-core.js" defer></script>
 
-  <script>
-  document.addEventListener("click", (e) => {
-    const el = e.target.closest("button");
-    if (!el) return;
-    if (!el.getAttribute("type")) el.setAttribute("type", "button");
-  }, { capture: true, passive: true });
-  </script>
-
-  <script>
-    // ✅ Espera o core FemFlow estar pronto antes de continuar
-async function esperarFEMFLOW() {
-  let tentativas = 0;
-  while (!window.FEMFLOW && tentativas < 50) {
-    await new Promise(r => setTimeout(r, 100));
-    tentativas++;
-  }
-  if (!window.FEMFLOW) {
-    alert("⚠️ O sistema FemFlow não foi carregado corretamente. Recarregue a página.");
-    throw new Error("FEMFLOW não carregado");
-  }
-}
-await esperarFEMFLOW();
-    
-  const perguntas = [
-  { gif:"profile_form.webp", texto:"Há quanto tempo você treina com regularidade?",
-    opcoes:[
-      {texto:"Nunca ou menos de 3 meses 😅",v:1},
-      {texto:"Entre 3 meses e 1 ano 🧘‍♀️",v:2},
-      {texto:"Mais de 1 ano 💪",v:3}
-    ]},
-  { gif:"routine_cycle.webp", texto:"Quantos dias por semana você costuma treinar?",
-    opcoes:[
-      {texto:"1 a 2 dias 💤",v:1},
-      {texto:"3 a 4 dias 🍑",v:2},
-      {texto:"5 dias ou mais 🔥",v:3}
-    ]},
-  { gif:"strength_training.webp", texto:"Com que frequência você cumpre o treino planejado?",
-    opcoes:[
-      {texto:"Quando dá tempo 😬",v:1},
-      {texto:"Na maioria das vezes ✅",v:2},
-      {texto:"Sou muito disciplinada 🧠",v:3}
-    ]},
-  { gif:"mobility_flow.webp", texto:"Como avalia sua consciência corporal durante o treino?",
-    opcoes:[
-      {texto:"Ainda me perco nos movimentos 😅",v:1},
-      {texto:"Consigo corrigir às vezes 👀",v:2},
-      {texto:"Domino bem os exercícios ✨",v:3}
-    ]},
-  { gif:"strength_training.webp", texto:"Como descreveria sua força e resistência hoje?",
-    opcoes:[
-      {texto:"Canso fácil ou fico dolorida 🥴",v:1},
-      {texto:"Aguento treinos moderados 🌿",v:2},
-      {texto:"Treinos longos e intensos são tranquilos 💪",v:3}
-    ]},
-  { gif:"hormonal_balance.webp", texto:"Como é sua recuperação e qualidade de sono?",
-    opcoes:[
-      {texto:"Durmo mal e demoro pra recuperar 😴",v:1},
-      {texto:"Oscila conforme a semana ⚖️",v:2},
-      {texto:"Durmo bem e me recupero rápido 🌙",v:3}
-    ]},
-  { gif:"menstrual_flow.webp", texto:"Você percebe variações de energia ao longo do ciclo?",
-    opcoes:[
-      {texto:"Nunca percebi 🤔",v:1},
-      {texto:"Algumas fases me afetam 🔄",v:2},
-      {texto:"Ajusto meu treino conforme o ciclo 🌸",v:3}
-    ]},
-  { gif:"breath_cycle.webp", texto:"Como está seu nível de estresse no dia a dia?",
-    opcoes:[
-      {texto:"Ando sobrecarregada 😩",v:1},
-      {texto:"Oscila conforme o período 🌤️",v:2},
-      {texto:"Equilibrado e sob controle 🧘‍♀️",v:3}
-    ]},
-  { gif:"strength_training.webp", texto:"Quantas flexões você consegue fazer sem parar?",
-    opcoes:[
-      {texto:"Menos de 5",v:1},
-      {texto:"6–10",v:2},
-      {texto:"Mais de 10",v:3}
-    ]},
-  { gif:"mobility_flow.webp", texto:"Quantos agachamentos completos você faz em 40 segundos?",
-    opcoes:[
-      {texto:"Menos de 15",v:1},
-      {texto:"15–25",v:2},
-      {texto:"Mais de 25",v:3}
-    ]}
-];
-  const cadastro=document.getElementById("cadastro"),
-        quiz=document.getElementById("quiz"),
-        final=document.getElementById("final"),
-        gif=document.getElementById("gif"),
-        q=document.getElementById("question"),
-        opts=document.getElementById("options"),
-        msg=document.getElementById("final-msg");
-
-  let i=0, score=0, nome="", email="", telefone="", senha="";
-
- document.getElementById("btnIniciar").onclick = async () => {
-  const nome = document.getElementById("nome").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const telefone = document.getElementById("telefone").value.trim();
-  const senha = document.getElementById("senha").value.trim();
-  const confirma = document.getElementById("confirma").value.trim();
-
-  // 🧩 validações
-  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  if (!nome || !email || !senha) {
-    FEMFLOW.toast("⚠️ Preencha todos os campos obrigatórios.", true);
-    return;
-  }
-  if (!emailValido) {
-    FEMFLOW.toast("📧 Digite um e-mail válido.", true);
-    return;
-  }
-  if (senha.length < 6) {
-    FEMFLOW.toast("🔐 A senha deve ter pelo menos 6 caracteres.", true);
-    return;
-  }
-  if (senha !== confirma) {
-    FEMFLOW.toast("❌ As senhas não coincidem.", true);
-    return;
-  }
-
-  // 🌸 salva localmente para retomada ou desistência
-  localStorage.setItem("lead_nome", nome);
-  localStorage.setItem("lead_email", email);
-  localStorage.setItem("lead_telefone", telefone);
-
-  // 📨 envia lead parcial para o backend
-  try {
-    const params = new URLSearchParams(location.search);
-    const utm_source = params.get("utm") || params.get("utm_source") || "orgânico";
-
-    await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "leadParcial",
-        nome,
-        email,
-        telefone,
-        utm_source,
-        origem: "Anamnese FemFlow"
-      }),
-    });
-    console.log("📩 Lead salvo com sucesso");
-  } catch (err) {
-    console.warn("⚠️ Falha ao enviar lead parcial:", err);
-  }
-
-  // 🧠 inicia anamnese
-  cadastro.classList.add("hidden");
-  quiz.classList.remove("hidden");
-  mostrarPergunta();
-};
-
-function mostrarPergunta() {
-  if (i >= perguntas.length) return finalizar(); // ✅ impede travamento
-
-  const p = perguntas[i];
-  gif.src = "./assets/gifs/" + p.gif;
-  q.textContent = p.texto;
-  opts.innerHTML = "";
-
-  p.opcoes.forEach(o => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = o.texto;
-    b.style.cssText = `
-      background: var(--terracota);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.3s;
-      -webkit-tap-highlight-color: transparent;`;
-    b.addEventListener("click", () => {
-      score += o.v;
-      i++;
-      mostrarPergunta();
-      navigator.vibrate?.(25);
-    });
-    opts.appendChild(b);
-  });
-}
-
-
-async function finalizar() {
-  quiz.classList.add("hidden");
-  final.classList.remove("hidden");
-
-  let nivel = "iniciante";
-  if (score >= 20) nivel = "avançada";
-  else if (score >= 14) nivel = "intermediária";
-
-  const respostas = perguntas.map((p, idx) => `Q${idx + 1}: ${p.texto}`);
-
-  FEMFLOW.toast("⏳ Enviando suas respostas...", false);
-
-  try {
-    const r = await FEMFLOW.enviarCadastro({
-      nome,
-      email,
-      telefone,
-      senha,
-      perfil: nivel,
-      pontuacao: score,
-      anamnese: JSON.stringify(respostas),
-    });
-    console.log("Cadastro:", r);
-    if (r && r.status) {
-      localStorage.setItem("femflow_id", r.id);
-      localStorage.setItem("femflow_email", r.email);
-      localStorage.setItem("femflow_cycle_configured", "yes");
-
-      // 🧹 Limpa leads parciais (já virou aluna)
-      localStorage.removeItem("lead_nome");
-      localStorage.removeItem("lead_email");
-      localStorage.removeItem("lead_telefone");
-
-      FEMFLOW.toast("🌸 Bem-vinda ao FemFlow!");
-      msg.textContent = `✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
-      setTimeout(() => (location.href = "index.html?bemvinda=1"), 4000);
-    } else {
-      FEMFLOW.toast("❌ Falha ao enviar cadastro.", true);
-    }
-  } catch (err) {
-    FEMFLOW.toast("⚠️ Erro de conexão. Tente novamente.", true);
-    console.error(err);
-  }
-}
-  </script>
+  <!-- Script dedicado da Anamnese -->
+  <script src="js/anamnese.js" defer></script>
 </body>
 </html>
-
