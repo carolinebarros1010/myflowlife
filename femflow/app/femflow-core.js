@@ -450,7 +450,49 @@ async salvarDescanso(fase = "menstrual") {
 
   setTimeout(() => this.router("flowcenter"), 1800);
 },
+   
+/* =======================================================
+   🔹 3.1 VALIDAÇÃO DE ASSINATURA E HISTÓRICO
+   ======================================================= */
+FEMFLOW.validarAssinatura = async function (id) {
+  const script = this.SCRIPT_URL || "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
+  id = id || localStorage.getItem("femflow_id");
+  if (!id) return { status: "noid" };
 
+  try {
+    const resp = await fetch(script, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "status", id })
+    });
+    const data = await resp.json();
+    console.log("🩷 FEMFLOW.validarAssinatura →", data);
+    return data;
+  } catch (err) {
+    console.error("Erro validarAssinatura:", err);
+    return { status: "error", msg: err.message };
+  }
+};
+
+FEMFLOW.buscarHistorico = async function (id, n = 30) {
+  const script = this.SCRIPT_URL || "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
+  id = id || localStorage.getItem("femflow_id");
+  if (!id) return [];
+
+  try {
+    const resp = await fetch(script, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "historico", id, n })
+    });
+    const data = await resp.json();
+    console.log("📜 FEMFLOW.buscarHistorico →", data);
+    return data.registros || [];
+  } catch (err) {
+    console.error("Erro buscarHistorico:", err);
+    return [];
+  }
+};
 
   /* =======================================================
      🔹 4. MODAL PSE
