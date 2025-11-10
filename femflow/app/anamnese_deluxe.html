@@ -212,21 +212,85 @@
 
   let i=0, score=0, nome="", email="", telefone="", senha="";
 
-  document.getElementById("btnIniciar").onclick=()=>{
-    nome=document.getElementById("nome").value.trim();
-    email=document.getElementById("email").value.trim();
-    telefone=document.getElementById("telefone").value.trim();
-    senha=document.getElementById("senha").value.trim();
-    const confirma=document.getElementById("confirma").value.trim();
+  document.getElementById("btnIniciar").onclick = async () => {
+  nome = document.getElementById("nome").value.trim();
+  email = document.getElementById("email").value.trim();
+  telefone = document.getElementById("telefone").value.trim();
+  senha = document.getElementById("senha").value.trim();
+  const confirma = document.getElementById("confirma").value.trim();
 
-    if(!nome||!email||!senha){FEMFLOW.toast("⚠️ Preencha todos os campos obrigatórios.",true);return;}
-    if(senha.length<6){FEMFLOW.toast("🔐 A senha deve ter pelo menos 6 caracteres.",true);return;}
-    if(senha!==confirma){FEMFLOW.toast("❌ As senhas não coincidem.",true);return;}
+  // 🧩 validações
+  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!nome || !email || !senha) {
+    FEMFLOW.toast("⚠️ Preencha todos os campos obrigatórios.", true);
+    return;
+  }
+  if (!emailValido) {
+    FEMFLOW.toast("📧 Digite um e-mail válido.", true);
+    return;
+  }
+  if (senha.length < 6) {
+    FEMFLOW.toast("🔐 A senha deve ter pelo menos 6 caracteres.", true);
+    return;
+  }
+  if (senha !== confirma) {
+    FEMFLOW.toast("❌ As senhas não coincidem.", true);
+    return;
+  }
+     try {
+    const params = new URLSearchParams(location.search);
+    const utm_source = params.get("utm") || params.get("utm_source") || "orgânico";
 
-    cadastro.classList.add("hidden");
-    quiz.classList.remove("hidden");
-    mostrarPergunta();
-  };
+         // 🌸 salva localmente para retomada ou desistência
+  localStorage.setItem("lead_nome", nome);
+  localStorage.setItem("lead_email", email);
+  localStorage.setItem("lead_telefone", telefone);
+       
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "leadParcial",
+        nome,
+        email,
+        telefone,
+        utm_source, // 🔹 enviado ao backend
+        origem: "Anamnese FemFlow"
+      }),
+    });
+  } catch (err) {
+    console.warn("⚠️ Falha ao enviar lead parcial:", err);
+  }
+
+  cadastro.classList.add("hidden");
+  quiz.classList.remove("hidden");
+  mostrarPergunta();
+};
+  // 🌐 envia lead parcial para o backend (mesmo sem concluir anamnese)
+  try {
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "leadParcial",
+        nome,
+        email,
+        telefone,
+        origem: "anamnese_iniciada",
+        data: new Date().toISOString(),
+      }),
+    });
+    console.log("📩 Lead salvo com sucesso");
+  } catch (err) {
+    console.warn("⚠️ Falha ao registrar lead:", err);
+  }
+
+  // 🧠 inicia anamnese
+  cadastro.classList.add("hidden");
+  quiz.classList.remove("hidden");
+  mostrarPergunta();
+};
+
 
   function mostrarPergunta(){
     const p=perguntas[i];
@@ -273,15 +337,23 @@
         anamnese:JSON.stringify(respostas)
       });
       console.log("Cadastro:",r);
-      if(r&&r.status){
-        localStorage.setItem("femflow_id",r.id);
-        localStorage.setItem("femflow_email",r.email);
-        localStorage.setItem("femflow_cycle_configured","yes");
-        FEMFLOW.toast("🌸 Bem-vinda ao FemFlow!");
-        msg.textContent=`✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
-        setTimeout(()=>location.href="index.html?bemvinda=1",4000);
-      }else FEMFLOW.toast("❌ Falha ao enviar cadastro.",true);
-    }catch(err){
+      if(r && r.status){
+  localStorage.setItem("femflow_id",r.id);
+  localStorage.setItem("femflow_email",r.email);
+  localStorage.setItem("femflow_cycle_configured","yes");
+
+  // 🧹 Limpa leads parciais (já virou aluna)
+  localStorage.removeItem("lead_nome");
+  localStorage.removeItem("lead_email");
+  localStorage.removeItem("lead_telefone");
+
+  FEMFLOW.toast("🌸 Bem-vinda ao FemFlow!");
+  msg.textContent=`✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
+  setTimeout(()=>location.href="index.html?bemvinda=1",4000);
+} else {
+  FEMFLOW.toast("❌ Falha ao enviar cadastro.",true);
+}
+    catch(err){
       FEMFLOW.toast("⚠️ Erro de conexão. Tente novamente.",true);
       console.error(err);
     }
