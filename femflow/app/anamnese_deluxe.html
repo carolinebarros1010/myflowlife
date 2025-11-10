@@ -49,7 +49,6 @@
       transition: all .3s ease-in-out;
       animation: fadeIn 0.5s ease;
     }
-
     input {
       width: 100%;
       padding: 10px;
@@ -58,7 +57,6 @@
       border-radius: 10px;
       font-size: 1rem;
     }
-
     button {
       background: var(--terracota);
       color: #fff;
@@ -70,98 +68,76 @@
       cursor: pointer;
       transition: 0.3s;
     }
-
-    button:hover {
-      background: var(--verde);
-    }
-
+    button:hover { background: var(--verde); }
     .gif {
-      width: 180px;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 20px;
-      margin: 1rem auto;
-      display: block;
+      width: 180px; height: 180px; object-fit: cover;
+      border-radius: 20px; margin: 1rem auto; display: block;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
-
-    .question {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin: 1rem 0;
-      line-height: 1.4;
-    }
-
+    .question { font-size: 1.1rem; font-weight: 600; margin: 1rem 0; line-height: 1.4; }
     .options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: center;
+      display: flex; flex-direction: column; gap: 10px; align-items: center;
     }
-
     .options button {
-      width: 100%;
-      max-width: 320px;
-      border-radius: 14px;
-      font-size: 1rem;
-      padding: 10px;
+      width: 100%; max-width: 320px; border-radius: 14px;
+      font-size: 1rem; padding: 10px;
     }
-
-    .hidden {
-      display: none !important;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .final-msg {
-      font-size: 1.1rem;
-      color: var(--verde);
-      font-weight: bold;
-      text-align: center;
-      margin-top: 1rem;
-      line-height: 1.5;
-    }
-
-    .success {
-      color: var(--terracota);
-      font-weight: bold;
-    }
+    .hidden { display: none !important; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .final-msg { font-size: 1.1rem; color: var(--verde); font-weight: bold; text-align: center; margin-top: 1rem; line-height: 1.5; }
   </style>
+
   <link rel="preload" href="./assets/logofemflowterracota.png" as="image" />
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <!-- Desativa header automático do core -->
+  <script>window.FEMFLOW_DISABLE_UI = true;</script>
+
+  <!-- Core FemFlow -->
   <script defer src="./femflow-core.js"></script>
+
+  <!-- Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
 </head>
+
 <body>
-    <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px;margin-top:10px;">
+  <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px;margin-top:10px;">
   <h1>Anamnese Deluxe</h1>
-  
-<!-- Desativa header automático -->
-<script>window.FEMFLOW_DISABLE_UI = true;</script>
-
-<!-- Corrige comportamento dos botões em mobile -->
-<script>
-  document.addEventListener("click", (e) => {
-    const b = e.target.closest("button");
-    if (b && !b.getAttribute("type")) b.setAttribute("type", "button");
-  }, { capture: true, passive: true });
-</script>
-
 
   <!-- Etapa 1 -->
   <div id="cadastro" class="card">
     <p>🌸 Preencha seus dados para começar:</p>
+
+    <!-- Login com Google -->
+    <div style="margin-bottom: 1rem;">
+      <div id="g_id_onload"
+           data-client_id="457716839153-mot8gjc4j50cfug9em1t1niahhferll6.apps.googleusercontent.com"
+           data-context="signin"
+           data-ux_mode="popup"
+           data-callback="preencherComGoogleAnamnese"
+           data-auto_prompt="false"></div>
+
+      <div class="g_id_signin"
+           data-type="standard"
+           data-shape="rectangular"
+           data-theme="outline"
+           data-text="signin_with"
+           data-size="large"
+           data-logo_alignment="center"></div>
+    </div>
+
     <form id="formCadastro" onsubmit="return false;">
-    <input id="nome" placeholder="Nome completo" required>
-    <input id="email" type="email" placeholder="E-mail" required>
-    <input id="telefone" type="tel" placeholder="Telefone (opcional)">
-    <input id="senha" type="password" placeholder="Crie uma senha" required>
-    <input id="confirma" type="password" placeholder="Confirme a senha" required>
-    <button type="button" id="btnIniciar">Iniciar Anamnese</button>
-      </form>
+      <input id="nome" placeholder="Nome completo" required>
+      <input id="email" type="email" placeholder="E-mail" required>
+      <input id="telefone" type="tel" placeholder="Telefone (opcional)">
+      <input id="senha" type="password" placeholder="Crie uma senha" required>
+      <input id="confirma" type="password" placeholder="Confirme a senha" required>
+      <button type="button" id="btnIniciar">Iniciar Anamnese</button>
+    </form>
   </div>
 
   <!-- Etapa 2 -->
@@ -174,19 +150,54 @@
   <!-- Etapa 3 -->
   <div id="final" class="card hidden">
     <img src="./assets/gifs/success_flow.webp" class="gif" alt="Sucesso">
-    <p id="final-msg" class="final-msg">
-      ✨ Análise concluída! Calculando seu perfil...
-    </p>
+    <p id="final-msg" class="final-msg">✨ Análise concluída! Calculando seu perfil...</p>
   </div>
-<!-- 🔹 Mova o script pra cá -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("btnIniciar");
-  if (!btn) return console.warn("⚠️ Botão não encontrado");
-  btn.addEventListener("click", () => FEMFLOW.toast("🌸 Funcionando!"));
-});
-</script>
-  <!-- Script da Anamnese -->
+
+  <!-- Corrige botões mobile -->
+  <script>
+    document.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (b && !b.getAttribute("type")) b.setAttribute("type", "button");
+    }, { capture: true, passive: true });
+  </script>
+
+  <!-- Google Login para Anamnese -->
+  <script>
+  async function preencherComGoogleAnamnese(response) {
+    try {
+      const data = jwt_decode(response.credential);
+      if (!data || !data.email) return;
+
+      document.getElementById("email").value = data.email;
+      document.getElementById("nome").value = data.name || "";
+
+      FEMFLOW.toast("🌸 Bem-vinda! Carregando seu perfil...");
+
+      // Verifica se já existe cadastro
+      const scriptURL = FEMFLOW.SCRIPT_URL || localStorage.getItem("femflow_script") ||
+        "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+
+      const resp = await fetch(scriptURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "login", email: data.email, senha: "" })
+      });
+      const result = await resp.json();
+
+      // Independentemente do resultado, vai para o quiz
+      document.getElementById("cadastro").classList.add("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+
+      // Guarda dados básicos localmente
+      localStorage.setItem("lead_nome", data.name || "");
+      localStorage.setItem("lead_email", data.email);
+    } catch (err) {
+      console.warn("⚠️ Erro no Google Login:", err);
+    }
+  }
+  </script>
+
+  <!-- Script principal da Anamnese -->
   <script src="js/anamnese.js" defer></script>
 </body>
 </html>
