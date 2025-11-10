@@ -209,9 +209,7 @@ inserirHeaderApp() {
     <a href="https://www.femflow.com.br" target="_blank" rel="noopener">
       <img src="${this.LOGO}" alt="FemFlow" class="ff-logo">
     </a>
-    <button class="ff-menu-btn" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    <button type="button" class="ff-menu-btn" aria-label="Menu">…</button>
   `;
   document.body.prepend(header);
 
@@ -300,37 +298,37 @@ _getMenuHTML(page) {
     case "evolucao.html":
       items = `
         <h3>Menu</h3>
-        <button id="btnLangToggle">🌐 Idioma / Language</button>
-        <button id="btnPersonalizar">🎯 Personalizar treino</button>
-        <button id="btnCancelarPlano">❌ Cancelar plano</button>
-        <button id="btnVoltarInicio">🏠 Voltar</button>
-        <button id="btnFecharMenu">Fechar</button>`;
+       <button type="button" id="btnLangToggle">🌐 Idioma / Language</button>
+       <button type="button" id="btnPersonalizar">🎯 Personalizar treino</button>
+       <button type="button" id="btnCancelarPlano">❌ Cancelar plano</button>
+       <button type="button" id="btnVoltarInicio">🏠 Voltar</button>
+       <button type="button" id="btnFecharMenu">FecharMenu</button>
       break;
 
     case "treino.html":
       items = `
         <h3>Menu</h3>
-        <button id="btnLangToggle">🌐 Idioma / Language</button>
-        <button id="btnCancelarTreino">🛑 Cancelar treino</button>
-        <button id="btnRespirar">🧘 Respiração</button>
-        <button id="btnVoltarFlow">🏠 Voltar ao Flow Center</button>
-        <button id="btnFecharMenu">Fechar</button>`;
+      <button type="button" id="btnLangToggle">🌐 Idioma / Language</button>
+      <button type="button" id="btnCancelarTreino">🛑 Cancelar treino</button>
+      <button type="button" id="btnRespirar">🧘 Respiração</button>
+      <button type="button" id="btnVoltarFlow">🏠 Voltar ao Flow Center</button>
+      <button type="button" id="btnFecharMenu">FecharMenu</button>`;
       break;
 
     case "respiracao.html":
       items = `
         <h3>Menu</h3>
-        <button id="btnLangToggle">🌐 Idioma / Language</button>
-        <button id="btnCancelar">🛑 Cancelar</button>
-        <button id="btnVoltarFlow">🏠 Voltar ao Flow Center</button>
-        <button id="btnPlano">💳 Adquirir plano</button>
-        <button id="btnFecharMenu">Fechar</button>`;
+         <button type="button" id="btnLangToggle">🌐 Idioma / Language</button>
+         <button type="button" id="btnCancelarTreino">🛑 Cancelar treino</button>
+        <button type="button" id="btnVoltarFlow">🏠 Voltar ao Flow Center</button>
+        <button type="button" id="btnPlano">💳 Adquirir plano</button>
+        <button type="button" id="btnFecharMenu">FecharMenu</button>`;
       break;
 
     default:
       items = `<h3>Menu</h3>
-               <button id="btnLangToggle">🌐 Idioma / Language</button>
-               <button id="btnFecharMenu">Fechar</button>`;
+               <button type="button" id="btnLangToggle">🌐 Idioma / Language</button>
+               <button type="button" id="btnFecharMenu">FecharMenu</button>`;
   }
   return `<div class="ff-menu-box">${items}</div>`;
 },
