@@ -154,12 +154,14 @@
   <!-- Etapa 1 -->
   <div id="cadastro" class="card">
     <p>🌸 Preencha seus dados para começar:</p>
+    <form id="formCadastro" onsubmit="return false;">
     <input id="nome" placeholder="Nome completo" required>
     <input id="email" type="email" placeholder="E-mail" required>
     <input id="telefone" type="tel" placeholder="Telefone (opcional)">
     <input id="senha" type="password" placeholder="Crie uma senha" required>
     <input id="confirma" type="password" placeholder="Confirme a senha" required>
     <button type="button" id="btnIniciar">Iniciar Anamnese</button>
+      </form>
   </div>
 
   <!-- Etapa 2 -->
