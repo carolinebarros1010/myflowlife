@@ -60,10 +60,13 @@
   <main class="wrap">
     <!-- Vídeo -->
     <section class="video">
-      <iframe src="https://youtu.be/DyX8F1ChSDw?si=j8yep0vNMuUgkonf"
-              title="Boas-vindas FemFlow" frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen></iframe>
+    <iframe
+  src="https://www.youtube-nocookie.com/embed/DyX8F1ChSDw"
+  title="Boas-vindas FemFlow"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowfullscreen>
+</iframe>
     </section>
 
     <!-- Vitrine (scroll lateral) -->
@@ -87,9 +90,10 @@
 
   <!-- Core e UI -->
   <script>
-    window.FEMFLOW_DISABLE_UI = false; // garante que o topo apareça
+    window.FEMFLOW_DISABLE_UI = true; // garante que o topo apareça
   </script>
-  <script src="./femflow-core.js"></script>
+
+     <script src="./femflow-core.js"></script>
 
   <!-- Sincronização e controle -->
   <script>
@@ -200,8 +204,7 @@ function onChoose(enfase){
     addEventListener('load', ()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
   }
 </script>
-  <!-- 🔔 Banner de status da assinatura -->
- <!-- 🔔 Banner de status da assinatura -->
+
 <script>
 (async function verificarAssinatura() {
   const id = localStorage.getItem("femflow_id");
