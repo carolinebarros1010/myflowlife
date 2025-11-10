@@ -119,6 +119,20 @@
   </script>
 
   <script>
+    // ✅ Espera o core FemFlow estar pronto antes de continuar
+async function esperarFEMFLOW() {
+  let tentativas = 0;
+  while (!window.FEMFLOW && tentativas < 50) {
+    await new Promise(r => setTimeout(r, 100));
+    tentativas++;
+  }
+  if (!window.FEMFLOW) {
+    alert("⚠️ O sistema FemFlow não foi carregado corretamente. Recarregue a página.");
+    throw new Error("FEMFLOW não carregado");
+  }
+}
+await esperarFEMFLOW();
+    
   const perguntas = [
   { gif:"profile_form.webp", texto:"Há quanto tempo você treina com regularidade?",
     opcoes:[
