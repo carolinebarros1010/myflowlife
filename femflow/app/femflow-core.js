@@ -442,7 +442,7 @@ modal.querySelector("#btnLangToggle")?.addEventListener("click", () => {
     }
   },
 
-async salvarDescanso(fase = "menstrual") {
+salvarDescanso: async function (fase = "menstrual") {
   await this.salvarTreino({
     tipo_dia: "descanso",
     fase,
@@ -451,7 +451,6 @@ async salvarDescanso(fase = "menstrual") {
     observacao: "Descanso ativo",
   });
 
-  // 💤 Avança também o dia do programa
   let diaTreino = Number(localStorage.getItem("femflow_dia_treino") || 1);
   if (diaTreino < 30) {
     localStorage.setItem("femflow_dia_treino", String(diaTreino + 1));
@@ -460,12 +459,10 @@ async salvarDescanso(fase = "menstrual") {
 
   setTimeout(() => this.router("flowcenter"), 1800);
 },
-   
-/* =======================================================
-   🔹 3.1 VALIDAÇÃO DE ASSINATURA E HISTÓRICO
-   ======================================================= */
-FEMFLOW.validarAssinatura = async function (id) {
-  const script = this.SCRIPT_URL || "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
+
+validarAssinatura: async function (id) {
+  const script = this.SCRIPT_URL ||
+    "https://script.google.com/macros/s/AKfycby1OydWK-Akw0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
   id = id || localStorage.getItem("femflow_id");
   if (!id) return { status: "noid" };
 
@@ -473,7 +470,7 @@ FEMFLOW.validarAssinatura = async function (id) {
     const resp = await fetch(script, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "status", id })
+      body: JSON.stringify({ action: "status", id }),
     });
     const data = await resp.json();
     console.log("🩷 FEMFLOW.validarAssinatura →", data);
@@ -482,10 +479,11 @@ FEMFLOW.validarAssinatura = async function (id) {
     console.error("Erro validarAssinatura:", err);
     return { status: "error", msg: err.message };
   }
-};
+},
 
-FEMFLOW.buscarHistorico = async function (id, n = 30) {
-  const script = this.SCRIPT_URL || "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
+buscarHistorico: async function (id, n = 30) {
+  const script = this.SCRIPT_URL ||
+    "https://script.google.com/macros/s/AKfycby1OydWK-Akw0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
   id = id || localStorage.getItem("femflow_id");
   if (!id) return [];
 
@@ -493,7 +491,7 @@ FEMFLOW.buscarHistorico = async function (id, n = 30) {
     const resp = await fetch(script, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "historico", id, n })
+      body: JSON.stringify({ action: "historico", id, n }),
     });
     const data = await resp.json();
     console.log("📜 FEMFLOW.buscarHistorico →", data);
@@ -502,10 +500,10 @@ FEMFLOW.buscarHistorico = async function (id, n = 30) {
     console.error("Erro buscarHistorico:", err);
     return [];
   }
-};
+},
 
-  /* =======================================================
-     🔹 4. MODAL PSE
+/* =======================================================
+   🔹 4. MODAL PSE
   ======================================================= */
 criarModalPSE() {
   if (document.getElementById("pseModal")) return;
@@ -530,40 +528,33 @@ criarModalPSE() {
 
   const pseBtns = modal.querySelector("#pseBtns");
 
-  // 🔹 Criação segura dos botões 0–10
   for (let i = 0; i <= 10; i++) {
     const btn = document.createElement("button");
-    btn.type = "button"; // ✅ evita submit no mobile
+    btn.type = "button";
     btn.textContent = i;
     btn.style.cssText = `
       background:#335953; color:#fff; border:none; border-radius:50%;
       width:40px; height:40px; font-size:16px; cursor:pointer;
-      -webkit-tap-highlight-color: transparent;`; // ✅ evita flash azul no toque
-
+      -webkit-tap-highlight-color: transparent;`;
     btn.addEventListener("click", () => {
       modal.style.display = "none";
       FEMFLOW.onPSESelecionado && FEMFLOW.onPSESelecionado(i);
-      // 🔸 feedback tátil leve
       if (navigator.vibrate) navigator.vibrate(30);
     });
-
     pseBtns.appendChild(btn);
   }
 
-  // 🔹 Fecha o modal com Cancelar
-  const cancelar = modal.querySelector("#cancelarPSE");
-  cancelar.type = "button"; // ✅ garante que não dispare submit
-  cancelar.addEventListener("click", () => {
+  modal.querySelector("#cancelarPSE").addEventListener("click", () => {
     modal.style.display = "none";
     navigator.vibrate?.(20);
   });
 },
 
-  abrirPSE(callback) {
-    this.onPSESelecionado = callback;
-    const el = document.getElementById("pseModal");
-    if (el) el.style.display = "flex";
-  },
+abrirPSE(callback) {
+  this.onPSESelecionado = callback;
+  const el = document.getElementById("pseModal");
+  if (el) el.style.display = "flex";
+},
 
   /* =======================================================
      🔹 5. HIIT SIMPLES
