@@ -31,6 +31,12 @@ self.addEventListener('install', (event) => {
       .catch((err) => console.warn('⚠️ Falha ao criar cache inicial:', err))
   );
 });
+// LOGO CACHE
+const CACHE_ASSETS = [
+  '/femflow/app/assets/logofemflowterracota.png',
+  '/femflow/app/assets/icons/icon-192.png',
+  '/femflow/app/assets/icons/icon-512.png',
+];
 
 // 🔁 Ativa nova versão
 self.addEventListener('activate', (event) => {
