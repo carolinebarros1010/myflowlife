@@ -109,7 +109,7 @@ document.getElementById("btnIniciar").onclick = async () => {
       body: JSON.stringify({
         action: "leadParcial",
         nome, email, telefone, utm_source,
-        origem: "Anamnese FemFlow"
+        origem: "Anamnese Deluxe FemFlow"
       }),
     });
   } catch (err) { console.warn("⚠️ Falha ao enviar lead parcial:", err); }
