@@ -60,7 +60,7 @@
   <main class="wrap">
     <!-- Vídeo -->
     <section class="video">
-      <iframe src="https://www.youtube.com/embed/VIDEO_ID?rel=0"
+      <iframe src="https://www.youtube.com/watch?v=qGIa3VUwDlE"
               title="Boas-vindas FemFlow" frameborder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowfullscreen></iframe>
@@ -223,9 +223,14 @@ function onChoose(enfase){
         linkHotmart = produtoFemFlow?.hotmart || dataProd.products[0].hotmart || linkHotmart;
       }
 
-      const r = await fetch(`${scriptURL}?action=status&id=${id}`);
-      const data = await r.json();
-      console.log("🩷 Status assinatura:", data);
+    const resp = await fetch("https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ action: "status", id })
+});
+const data = await resp.json();
+console.log("🩷 Status assinatura:", data);
+
 
       if(data.status !== "ok" || !data.expiryISO) return;
 
