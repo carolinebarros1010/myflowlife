@@ -50,7 +50,7 @@ if (!localStorage.getItem("femflow_dia_treino")) {
     "https://api-myflowlife.falling-wildflower-a8c0.workers.dev",
 
   /* ----------- 🎨 LOGO PADRÃO ------------ */
-  LOGO: "./assets/logofemflowterracota.png",
+  LOGO: "https://carolinebarros1010.github.io/myflowlife/femflow/app/assets/logofemflowterracota.png",
 
   /* =======================================================
      🌸 Cadastro / Anamnese → Apps Script
