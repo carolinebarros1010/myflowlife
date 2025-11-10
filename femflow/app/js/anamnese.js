@@ -12,6 +12,11 @@ async function esperarFEMFLOW() {
 }
 await esperarFEMFLOW();
 
+document.getElementById("formCadastro").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  FEMFLOW.toast("✨ Anamnese iniciada!");
+});
+
 // 🔹 Protege botões no mobile
 document.addEventListener("click", (e) => {
   const el = e.target.closest("button");
