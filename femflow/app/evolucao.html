@@ -159,9 +159,7 @@
     const id = localStorage.getItem("femflow_id");
     if (!id) { window.location.href = "ciclo.html"; return; }
 
-    const scriptURL = FEMFLOW.SCRIPT_URL;
-
-    // 🌿 Progresso
+    // 🌿 Progresso visual
     const progresso = calcularProgresso(id, 30);
     document.getElementById("progressoBarra").style.width = progresso + "%";
     document.getElementById("progressoTexto").innerText = FEMFLOW_LANG === "en"
@@ -176,14 +174,17 @@
       });
     }
 
-    // Restante do código (fetch e gráficos)
-    const url = `${scriptURL}?action=historico&id=${encodeURIComponent(id)}&n=30`;
-    const response = await fetch(url);
-    const historico = await response.json();
+    // ✅ Busca histórico via Core (POST)
+    const historico = await FEMFLOW.buscarHistorico(id, 30);
+    if (!historico.length) {
+      FEMFLOW.toast("Nenhum treino registrado ainda 🌿");
+      return;
+    }
 
+    // 🔹 Gráfico de PSE
     const ctx = document.getElementById("graficoPSE").getContext("2d");
-    const pseValues = historico.treinos.map(t => Number(t.pse) || 0);
-    const labels = historico.treinos.map((t, i) => `Day ${i + 1}`);
+    const pseValues = historico.map(t => Number(t.pse) || 0);
+    const labels = historico.map((t, i) => `Dia ${i + 1}`);
 
     new Chart(ctx, {
       type: "line",
@@ -199,7 +200,11 @@
       },
       options: { plugins: { legend: { display: false } } }
     });
+
+    // Botão voltar
+    document.getElementById("voltarFlow").onclick = () => FEMFLOW.router("flowcenter");
   });
   </script>
 </body>
 </html>
+
