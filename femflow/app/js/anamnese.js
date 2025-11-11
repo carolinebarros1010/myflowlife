@@ -162,8 +162,8 @@
         localStorage.removeItem("lead_email");
         localStorage.removeItem("lead_telefone");
         FEMFLOW.toast("🌸 Bem-vinda ao FemFlow!");
-        msg.textContent = `✨ Seu perfil é ${nivel.toUpperCase()}! Redirecionando...`;
-        setTimeout(() => (location.href = "index.html?bemvinda=1"), 4000);
+        msg.textContent = `✨ Seu perfil é ${nivel.toUpperCase()}! Bem-vinda ao seu ciclo 🌸`;
+setTimeout(() => (location.href = "home.html"), 3500);
       } else {
         FEMFLOW.toast("❌ Falha ao enviar cadastro.", true);
       }
