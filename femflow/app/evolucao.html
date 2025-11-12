@@ -103,10 +103,12 @@
     <button type="button" id="voltarFlow">← Voltar ao Flow Center</button>
   </div>
 
-  <script src="scripts/femflow-core.js"></script>
+ 
   <script src="js/memoria.js"></script>
 
   <script>
+    window.FEMFLOW_DISABLE_UI = false;
+document.addEventListener("DOMContentLoaded", () => FEMFLOW.inserirHeaderApp());
   const FEMFLOW_LANG = (navigator.language || navigator.userLanguage).startsWith("en") ? "en" : "pt";
 
   const I18N = {
@@ -205,6 +207,8 @@
     document.getElementById("voltarFlow").onclick = () => FEMFLOW.router("flowcenter");
   });
   </script>
+  <script src="scripts/femflow-core.js"></script>
+<script src="js/memoria.js"></script>
 </body>
 </html>
 
