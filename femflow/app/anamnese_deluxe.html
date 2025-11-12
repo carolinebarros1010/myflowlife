@@ -13,83 +13,51 @@
 
   <style>
     :root {
-      --terracota: #cc6a5a;
-      --bege: #fff5ef;
-      --verde: #335953;
-      --texto: #5b4f49;
+      --terracota:#cc6a5a; --bege:#fff5ef; --verde:#335953; --texto:#5b4f49;
     }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(180deg, var(--bege) 0%, #fae6dc 100%);
-      color: var(--texto);
-      font-family: "Lato", sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      overflow-x: hidden;
+    body{
+      margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+      background:linear-gradient(180deg,var(--bege) 0%,#fae6dc 100%); color:var(--texto);
+      font-family:"Lato",sans-serif; -webkit-font-smoothing:antialiased; overflow-x:hidden;
     }
-    h1 {
-      font-family: 'Playfair Display', serif;
-      color: var(--terracota);
-      font-size: 2rem;
-      margin: 1rem 0 0.5rem;
-      text-align: center;
+    h1{
+      font-family:'Playfair Display',serif; color:var(--terracota); font-size:2rem; margin:1rem 0 .5rem; text-align:center;
     }
-    .card {
-      background: #fff;
-      border-radius: 22px;
-      box-shadow: 0 8px 20px rgba(0,0,0,.1);
-      max-width: 420px;
-      width: 90%;
-      padding: 24px 20px;
-      margin-top: 1rem;
-      text-align: center;
-      transition: all .3s ease-in-out;
-      animation: fadeIn 0.5s ease;
+    .card{
+      background:#fff; border-radius:24px; box-shadow:0 8px 20px rgba(0,0,0,.08);
+      max-width:420px; width:90%; padding:26px 22px; margin-top:1.2rem; text-align:center; animation:fadeIn .5s ease;
     }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      font-size: 1rem;
+    .hint{ margin:.2rem 0 1rem; font-size:.95rem; color:#6a5f59 }
+    input{
+      width:78%; max-width:300px; padding:.85rem 1rem; margin:.4rem 0 1rem;
+      border:1px solid #e6ddd8; border-radius:14px; font-size:.95rem; color:var(--texto); background:#fff; outline:none;
+      transition:border-color .2s, box-shadow .2s;
     }
-    button {
-      background: var(--terracota);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 12px 18px;
-      font-size: 1rem;
-      margin-top: 10px;
-      cursor: pointer;
-      transition: 0.3s;
+    input:focus{ border-color:var(--terracota); box-shadow:0 0 0 3px rgba(204,106,90,.18) }
+    input[aria-invalid="true"]{ border-color:#d9534f }
+    .err{
+      font-size:.9rem; color:#d9534f; min-height:1.1rem; margin:-.6rem 0 .6rem;
     }
-    button:hover { background: var(--verde); }
-    .gif {
-      width: 180px; height: 180px; object-fit: cover;
-      border-radius: 20px; margin: 1rem auto; display: block;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    button{
+      background:linear-gradient(135deg,var(--verde),var(--terracota)); color:#fff; border:none; border-radius:14px;
+      padding:12px 18px; font-size:1rem; font-weight:600; width:78%; max-width:300px; margin-top:.2rem; cursor:pointer;
+      transition:all .25s ease;
     }
-    .question { font-size: 1.1rem; font-weight: 600; margin: 1rem 0; line-height: 1.4; }
-    .options {
-      display: flex; flex-direction: column; gap: 10px; align-items: center;
+    button[disabled]{ opacity:.6; cursor:not-allowed; }
+    button:hover:not([disabled]){ transform:translateY(-2px) }
+    .gif{
+      width:180px; height:180px; object-fit:cover; border-radius:20px; margin:1rem auto; display:block; box-shadow:0 5px 15px rgba(0,0,0,.1);
     }
-    .options button {
-      width: 100%; max-width: 320px; border-radius: 14px;
-      font-size: 1rem; padding: 10px;
-    }
-    .hidden { display: none !important; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .final-msg { font-size: 1.1rem; color: var(--verde); font-weight: bold; text-align: center; margin-top: 1rem; line-height: 1.5; }
+    .question{ font-size:1.1rem; font-weight:600; margin:1.2rem 0; line-height:1.4 }
+    .options{ display:flex; flex-direction:column; gap:10px; align-items:center }
+    .options button{ width:100%; max-width:320px; border-radius:14px; font-size:1rem; padding:10px }
+    .hidden{ display:none !important }
+    @keyframes fadeIn{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
   </style>
 
   <link rel="preload" href="./assets/logofemflowterracota.png" as="image" />
 
-  <!-- Firebase -->
+  <!-- Firebase (mantido para compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
@@ -98,10 +66,6 @@
 
   <!-- Core FemFlow -->
   <script defer src="./femflow-core.js"></script>
-
-  <!-- Google Sign-In SDK -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
 </head>
 
 <body>
@@ -110,39 +74,31 @@
 
   <!-- Etapa 1 -->
   <div id="cadastro" class="card">
-    <p>🌸 Preencha seus dados para começar:</p>
+    <p class="hint">🌸 Preencha seus dados para começar:</p>
 
-    <!-- Login com Google -->
-    <div style="margin-bottom: 1rem;">
-      <div id="g_id_onload"
-           data-client_id="457716839153-mot8gjc4j50cfug9em1t1niahhferll6.apps.googleusercontent.com"
-           data-context="signin"
-           data-ux_mode="popup"
-           data-callback="preencherComGoogleAnamnese"
-           data-auto_prompt="false"></div>
-
-      <div class="g_id_signin"
-           data-type="standard"
-           data-shape="rectangular"
-           data-theme="outline"
-           data-text="signin_with"
-           data-size="large"
-           data-logo_alignment="center"></div>
-    </div>
-
-    <form id="formCadastro" onsubmit="return false;">
+    <form id="formCadastro" onsubmit="return false" novalidate>
       <input id="nome" placeholder="Nome completo" required>
+      <div id="eNome" class="err"></div>
+
       <input id="email" type="email" placeholder="E-mail" required>
+      <div id="eEmail" class="err"></div>
+
       <input id="telefone" type="tel" placeholder="Telefone (opcional)">
-      <input id="senha" type="password" placeholder="Crie uma senha" required>
+      <div id="eTel" class="err"></div>
+
+      <input id="senha" type="password" placeholder="Crie uma senha (mín. 6)" required>
+      <div id="eSenha" class="err"></div>
+
       <input id="confirma" type="password" placeholder="Confirme a senha" required>
-      <button type="button" id="btnIniciar">Iniciar Anamnese</button>
+      <div id="eConf" class="err"></div>
+
+      <button type="button" id="btnIniciar" disabled>Iniciar Anamnese</button>
     </form>
   </div>
 
   <!-- Etapa 2 -->
   <div id="quiz" class="card hidden">
-    <img id="gif" src="./assets/gifs/profile_form.webp" class="gif" alt="gif">
+    <img id="gif" src="./assets/gifs/profile_form.webp" class="gif" alt="gif ilustrativo">
     <div id="question" class="question"></div>
     <div id="options" class="options"></div>
   </div>
@@ -161,43 +117,98 @@
     }, { capture: true, passive: true });
   </script>
 
-  <!-- Google Login para Anamnese -->
+  <!-- Validação + início do fluxo (sem depender do anamnese.js para a etapa 1) -->
   <script>
-  async function preencherComGoogleAnamnese(response) {
-    try {
-      const data = jwt_decode(response.credential);
-      if (!data || !data.email) return;
+    (function(){
+      const $ = (s)=>document.querySelector(s);
 
-      document.getElementById("email").value = data.email;
-      document.getElementById("nome").value = data.name || "";
+      const nome = $("#nome");
+      const email = $("#email");
+      const tel = $("#telefone");
+      const senha = $("#senha");
+      const conf = $("#confirma");
+      const eNome = $("#eNome");
+      const eEmail = $("#eEmail");
+      const eSenha = $("#eSenha");
+      const eConf = $("#eConf");
+      const btn = $("#btnIniciar");
 
-      FEMFLOW.toast("🌸 Bem-vinda! Carregando seu perfil...");
+      // script do GAS
+      const SCRIPT_URL = (window.FEMFLOW && FEMFLOW.SCRIPT_URL) || localStorage.getItem("femflow_script") ||
+                         "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-      // Verifica se já existe cadastro
-      const scriptURL = FEMFLOW.SCRIPT_URL || localStorage.getItem("femflow_script") ||
-        "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+      const reEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      const resp = await fetch(scriptURL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", email: data.email, senha: "" })
+      function mark(input, elErr, ok, msg=""){
+        input.setAttribute("aria-invalid", ok ? "false" : "true");
+        elErr.textContent = ok ? "" : msg;
+      }
+
+      function validate(){
+        const vNome  = (nome.value||"").trim().length >= 2;
+        const vEmail = reEmail.test((email.value||"").trim());
+        const vSenha = (senha.value||"").trim().length >= 6;
+        const vConf  = (conf.value||"").trim() === (senha.value||"").trim() && vSenha;
+
+        mark(nome,  eNome,  vNome,  "Informe seu nome.");
+        mark(email, eEmail, vEmail, "Digite um e-mail válido.");
+        mark(senha, eSenha, vSenha, "Mínimo de 6 caracteres.");
+        mark(conf,  eConf,  vConf,  "As senhas não coincidem.");
+
+        btn.disabled = !(vNome && vEmail && vSenha && vConf);
+        return !btn.disabled;
+      }
+
+      ["input","blur"].forEach(evt=>{
+        [nome,email,tel,senha,conf].forEach(el=> el.addEventListener(evt, validate));
       });
-      const result = await resp.json();
 
-      // Independentemente do resultado, vai para o quiz
-      document.getElementById("cadastro").classList.add("hidden");
-      document.getElementById("quiz").classList.remove("hidden");
+      async function leadParcial(nome, email, telefone){
+        try{
+          await fetch(SCRIPT_URL, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify({
+              action:"leadParcial",
+              nome, email, telefone,
+              origem:"Anamnese Deluxe FemFlow"
+            })
+          });
+        }catch(_){}
+      }
 
-      // Guarda dados básicos localmente
-      localStorage.setItem("lead_nome", data.name || "");
-      localStorage.setItem("lead_email", data.email);
-    } catch (err) {
-      console.warn("⚠️ Erro no Google Login:", err);
-    }
-  }
+      btn.addEventListener("click", async ()=>{
+        if(!validate()) return;
+
+        const nomeV = nome.value.trim();
+        const emailV = email.value.trim();
+        const telV = (tel.value||"").trim();
+
+        // guarda lead local
+        localStorage.setItem("lead_nome", nomeV);
+        localStorage.setItem("lead_email", emailV);
+        if(telV) localStorage.setItem("lead_telefone", telV);
+
+        // dispara lead parcial (silencioso)
+        leadParcial(nomeV, emailV, telV);
+
+        // feedback
+        if(window.FEMFLOW && FEMFLOW.toast){
+          FEMFLOW.toast("✨ Anamnese iniciada!");
+        }
+
+        // avança para o quiz (anamnese.js assume a partir daqui)
+        document.getElementById("cadastro").classList.add("hidden");
+        document.getElementById("quiz").classList.remove("hidden");
+
+        // opcional: expõe dados básicos para o anamnese.js (se quiser usar)
+        window.FEMFLOW = window.FEMFLOW || {};
+        FEMFLOW._leadCadastro = { nome:nomeV, email:emailV, telefone:telV || "" };
+      });
+    })();
   </script>
 
-  <!-- Script principal da Anamnese -->
+  <!-- Script principal do quiz/perfil -->
   <script src="js/anamnese.js" defer></script>
 </body>
 </html>
