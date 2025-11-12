@@ -9,68 +9,204 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/treino.css" />
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-  <style>
-    :root{ --teal:#335953; --terracota:#cc6a5a; } /* garante as vars aqui também */
+<style>
+  :root {
+    --teal: #335953;
+    --terracota: #cc6a5a;
+    --bege: #fff8f4;
+    --areia: #f2e6dd;
+    --sombra: rgba(0, 0, 0, 0.08);
+  }
 
-    /* ===== 🌸 CARROSSEL DE BOXES ===== */
-    body {
-  padding-top: calc(70px + env(safe-area-inset-top, 0px));
-  box-sizing: border-box;
-}
-   header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding-top: 15px;  /* afastamento do topo */
-  margin-bottom: 10px;
-}
-    header h1 { margin:0; color:var(--teal); font-family:'Playfair Display', serif; }
-    header .subtitle { margin:4px 0 0; color:#7a6c66; font-size:.95rem; }
+  /* 🌿 BASE */
+  * {
+    box-sizing: border-box;
+  }
 
-    .carousel-container {
-      overflow:hidden; width:100%; position:relative;
-      height:calc(100vh - 180px); display:flex; justify-content:center; align-items:center;
-    }
-    .carousel-track {
-      display:flex; flex-wrap:nowrap; transition:transform .8s ease; width:100%; cursor:grab;
-    }
-    .carousel-track:active { cursor:grabbing; transform:scale(.995); transition:transform .15s ease; }
-    .carousel-item { flex:0 0 100%; max-width:100%; padding:1rem; box-sizing:border-box; scroll-snap-align:center; }
+  body {
+    margin: 0;
+    padding-top: calc(85px + env(safe-area-inset-top, 0px));
+    font-family: "Lato", sans-serif;
+    background: linear-gradient(180deg, var(--bege) 0%, var(--areia) 100%);
+    color: var(--teal);
+    -webkit-font-smoothing: antialiased;
+  }
 
-    /* ===== BOTÕES DE NAVEGAÇÃO ===== */
-    .carousel-nav {
-      position:fixed; bottom:25px; left:0; width:100%;
-      display:flex; justify-content:space-between; padding:0 25px; box-sizing:border-box;
-    }
-    .nav-btn {
-      background:var(--teal); color:#fff; border:none; border-radius:50%;
-      width:55px; height:55px; font-size:1.4rem; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.25);
-      transition:background .3s, transform .2s;
-    }
-    .nav-btn:hover { background:var(--terracota); transform:scale(1.08); }
+  /* 🌸 CABEÇALHO */
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+  }
 
-    /* ===== PROGRESSO ===== */
-    .progress-bar {
-      position:fixed; top:0; left:0; height:5px; background:var(--terracota);
-      width:0%; transition:width .4s ease; border-radius:0 3px 3px 0; z-index:999;
-    }
+  header h1 {
+    margin: 0;
+    font-family: "Playfair Display", serif;
+    font-size: 1.8rem;
+    color: var(--teal);
+    letter-spacing: 0.5px;
+  }
 
-    /* ===== RODAPÉ ===== */
-    .fix-footer {
-      position:fixed; bottom:10px; width:100%; text-align:center; font-size:.9rem; color:var(--teal); opacity:.85;
-      display:flex; gap:10px; justify-content:center;
+  header .subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #7a6c66;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+
+  #tituloDiaTreino {
+    margin-top: 8px;
+    color: var(--terracota);
+    font-size: 1.1rem;
+    font-family: "Playfair Display", serif;
+  }
+
+  /* 🌀 CARROSSEL */
+  .carousel-container {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+    height: calc(100vh - 220px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .carousel-track {
+    display: flex;
+    flex-wrap: nowrap;
+    transition: transform 0.7s ease;
+    width: 100%;
+    cursor: grab;
+  }
+
+  .carousel-track:active {
+    cursor: grabbing;
+    transform: scale(0.995);
+  }
+
+  .carousel-item {
+    flex: 0 0 100%;
+    padding: 1.2rem;
+    scroll-snap-align: center;
+    text-align: center;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 6px 14px var(--sombra);
+    max-width: 90%;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+  }
+
+  .carousel-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 🔸 TIMERS VISUAIS */
+  .subtimer {
+    display: inline-block;
+    user-select: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: #f6edea;
+    min-width: 70px;
+    color: var(--teal);
+    margin-top: 5px;
+  }
+
+  .subtimer.running {
+    background: #eaf5f1;
+  }
+
+  .subtimer.done {
+    background: #f4e1dd;
+  }
+
+  /* ⏳ PROGRESSO */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 5px;
+    background: var(--terracota);
+    width: 0%;
+    border-radius: 0 3px 3px 0;
+    transition: width 0.4s ease;
+    z-index: 999;
+  }
+
+  /* 🪶 BOTÕES FIXOS */
+  .fix-footer {
+    position: fixed;
+    bottom: 15px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+
+  #salvarTreinoBtn,
+  .secundario {
+    border: none;
+    border-radius: 24px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-weight: 600;
+    font-family: "Lato", sans-serif;
+  }
+
+  #salvarTreinoBtn {
+    background: linear-gradient(135deg, var(--teal), var(--terracota));
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  #salvarTreinoBtn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+  }
+
+  .secundario {
+    background: #fff;
+    color: var(--teal);
+    border: 1px solid rgba(51, 89, 83, 0.25);
+  }
+
+  .secundario:hover {
+    background: var(--bege);
+    transform: scale(1.05);
+  }
+
+  /* 💫 ANIMAÇÃO */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
     }
-    #salvarTreinoBtn, .secundario {
-      background:var(--teal); color:#fff; border:none; padding:10px 16px; border-radius:20px; font-size:1rem; cursor:pointer; transition:.3s ease;
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
-    .secundario { background:#fff; color:var(--teal); border:1px solid rgba(51,89,83,.25); }
-    #salvarTreinoBtn:hover, .secundario:hover { transform:scale(1.05); }
-    /* feedback visual dos timers */
-    .subtimer { user-select:none; padding:.35rem .6rem; border-radius:12px; background:#f3e7e3; display:inline-block; min-width:64px; text-align:center; }
-    .subtimer.running { background:#e9f3ef; }
-    .subtimer.done { background:#e9dedd; }
-  </style>
+  }
+
+  .carousel-item {
+    animation: fadeIn 0.6s ease;
+  }
+</style>
 </head>
 
 <body>
@@ -106,6 +242,16 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <!-- Core no mesmo nível do arquivo -->
   <script src="./femflow-core.js"></script>
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Força criação do menu se o core estiver ativo
+  if (window.FEMFLOW && typeof FEMFLOW.inserirHeaderApp === "function") {
+    FEMFLOW.inserirHeaderApp();
+  } else {
+    console.warn("⚠️ FEMFLOW Core não encontrado ou ainda carregando.");
+  }
+});
+</script>
   <!-- Lógica híbrida (Apps Script + Firebase) com timers + links -->
   <script src="js/treino.js"></script>
  <script>
