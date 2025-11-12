@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Minha Evolução - FemFlow</title>
+  <title>FemFlow • Minha Evolução</title>
 
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -14,121 +13,123 @@
 
   <style>
     :root {
-      --terracota: #cc6a5a;
-      --pessego: #efbda6;
+      --terracota: #CC6A5A;
+      --pessego: #F4D4C8;
       --teal: #335953;
+      --bege: #FFF5EF;
     }
 
     body {
-      font-family: "Lato", sans-serif;
-      background: #fff5ef;
       margin: 0;
-      padding-top: 80px;
-      text-align: center;
+      font-family: "Lato", sans-serif;
+      background: var(--bege);
       color: var(--teal);
+      text-align: center;
+      padding-top: 90px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      color: var(--terracota);
+      margin: 0;
+      font-size: 1.8rem;
     }
 
     .evo-container {
       width: 100%;
       max-width: 480px;
-      padding: 0 16px;
       margin: 0 auto;
+      padding: 0 16px;
       box-sizing: border-box;
     }
 
-    .section { margin-top: 22px; }
+    .section {
+      margin-top: 26px;
+    }
 
-    /* PROGRESSO */
+    /* Barra de progresso */
     .barra-progresso {
       width: 100%;
-      max-width: 440px;
       height: 18px;
-      margin: 0 auto;
       background: rgba(240,236,233,0.8);
       border-radius: 20px;
       overflow: hidden;
+      margin-bottom: 10px;
     }
+
     .preenchimento-progresso {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg,var(--terracota),var(--pessego),var(--teal));
+      background: linear-gradient(90deg, var(--terracota), var(--pessego), var(--teal));
       transition: width 1.2s ease-in-out;
     }
 
     .texto-progresso {
-      font-weight: 700;
+      font-weight: bold;
       margin-bottom: 0.4rem;
     }
 
-    /* CANVAS RESPONSIVO */
-    canvas {
-      width: 100% !important;
-      height: auto !important;
-      max-height: 280px;
-      display: block;
+    /* Gráficos responsivos */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 260px;
       margin: 0 auto;
     }
 
-    /* PESOS */
-    .peso-item {
-      background: rgba(240,236,233,0.5);
-      padding: 0.7rem 1rem;
-      border-radius: 10px;
-      margin-bottom: 0.5rem;
-      display: flex;
-      justify-content: space-between;
-    }
-    .peso-item strong { color: var(--teal); }
-    .peso-item span { color: var(--terracota); font-weight: 700; }
-
-    /* BOTÃO VOLTAR */
-    #voltarFlow {
-      background: var(--terracota);
-      color: #fff;
-      border: none;
-      padding: 0.8rem 1.2rem;
-      border-radius: 20px;
-      font-weight: 600;
-      margin: 1.5rem auto;
-      display: block;
-      width: 90%;
-      max-width: 350px;
-      cursor: pointer;
-    }
-    #voltarFlow:hover {
-      background: var(--teal);
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
     }
 
-    /* MENSAGEM FINAL */
+    /* Mensagem final */
     .mensagem-final {
-      background: rgba(239,189,166,0.3);
+      background: rgba(239,189,166,0.4);
       border-left: 4px solid var(--terracota);
-      padding: 1rem;
-      margin-top: 1.4rem;
-      border-radius: 10px;
+      padding: 16px;
+      color: var(--teal);
       font-weight: 600;
+      border-radius: 12px;
+      margin-top: 18px;
       display: none;
     }
+
     .btn-novo-ciclo {
       background: var(--teal);
-      color: #fff;
-      margin-top: 1rem;
-      padding: 0.8rem 1.4rem;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 14px;
       border: none;
-      border-radius: 12px;
       cursor: pointer;
+      margin-top: 12px;
     }
     .btn-novo-ciclo:hover {
       background: var(--terracota);
+    }
+
+    #voltarFlow {
+      background: var(--terracota);
+      color: #fff;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 20px;
+      font-weight: bold;
+      margin-top: 34px;
+      margin-bottom: 40px;
+      cursor: pointer;
+      width: 90%;
+      max-width: 330px;
+    }
+    #voltarFlow:hover {
+      background: var(--teal);
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <h1 id="tituloPagina">Minha Evolução</h1>
-    <p id="subtituloPagina" class="subtitle">Acompanhe como seu corpo responde ao treino</p>
-  </header>
+
+  <h1 id="tituloPagina">Minha Evolução</h1>
+  <p id="subtituloPagina" class="subtitle">Acompanhe como seu corpo responde ao treino</p>
 
   <div class="evo-container">
 
@@ -142,15 +143,20 @@
     </div>
 
     <!-- GRÁFICO PSE -->
-    <div class="section grafico-box">
+    <div class="section">
       <h3 id="tituloPSE">📈 Evolução do Esforço Percebido (PSE)</h3>
-      <canvas id="graficoPSE"></canvas>
+
+      <div class="chart-container">
+        <canvas id="graficoPSE"></canvas>
+      </div>
+
       <p id="legendaPSE">🩵 Leve • 🍑 Moderado • ❤️ Intenso</p>
     </div>
 
+    <!-- MENSAGEM FINAL -->
     <div id="mensagemFinal" class="mensagem-final">
       <span id="textoMensagemFinal"></span>
-      <button class="btn-novo-ciclo" id="novoCicloBtn"></button>
+      <button id="novoCicloBtn" class="btn-novo-ciclo"></button>
     </div>
 
     <button id="voltarFlow">← Voltar ao Flow Center</button>
@@ -159,82 +165,89 @@
 
   <!-- CORE -->
   <script src="scripts/femflow-core.js"></script>
-  <script src="js/memoria.js"></script>
 
+  <!-- === FUNÇÕES NECESSÁRIAS DO ANTIGO memoria.js === -->
   <script>
-  /* ============================================================
-     TRADUÇÃO PT ↔ EN FEMFLOW
-  ============================================================ */
+    function calcularProgresso(id, total = 30) {
+      const dia = Number(localStorage.getItem("femflow_dia_treino") || 1);
+      return Math.min(100, Math.round(((dia - 1) / total) * 100));
+    }
 
-  window.addEventListener("femflow:langchange", aplicarTraducao);
-  document.addEventListener("DOMContentLoaded", aplicarTraducao);
+    function limparMemoria(id) {
+      const keys = [
+        "femflow_dia_treino",
+        "femflow_hist",
+        "femflow_lastSync",
+        `femflow_reiniciado_${id}`
+      ];
+      keys.forEach(k => localStorage.removeItem(k));
+      localStorage.setItem("femflow_dia_treino","1");
+    }
+  </script>
 
-  function aplicarTraducao() {
+  <!-- === LÓGICA PRINCIPAL === -->
+  <script>
+  // TRADUÇÃO
+  window.addEventListener("femflow:langchange", traduzir);
+  document.addEventListener("DOMContentLoaded", traduzir);
+
+  function traduzir() {
     const lang = localStorage.getItem("femflow_lang") || "pt";
 
     const T = {
       pt: {
-        tituloPagina: "Minha Evolução",
-        subtituloPagina: "Acompanhe como seu corpo responde ao treino",
+        titulo: "Minha Evolução",
+        subtitulo: "Acompanhe como seu corpo responde ao treino",
         progresso: "🌿 Progresso do seu programa",
         pse: "📈 Evolução do Esforço Percebido (PSE)",
-        mensagemFinal: "✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.<br>Respire, celebre e permita que o seu corpo descanse.",
-        novoCiclo: "🔄 Iniciar novo ciclo",
-        voltar: "← Voltar ao Flow Center",
-        progressoTexto: x => `Você completou ${x}% do programa`,
+        final: "✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.<br>Respire, celebre e permita-se descansar.",
+        novo: "🔄 Iniciar novo ciclo",
+        back: "← Voltar ao Flow Center",
+        progText: x => `Você completou ${x}% do programa`,
       },
       en: {
-        tituloPagina: "My Evolution",
-        subtituloPagina: "Track how your body responds to training",
+        titulo: "My Evolution",
+        subtitulo: "Track how your body responds to training",
         progresso: "🌿 Your Program Progress",
         pse: "📈 Perceived Effort Evolution (RPE)",
-        mensagemFinal: "✨ Congratulations! You completed your 30-day FemFlow cycle.<br>Breathe, celebrate and rest your body.",
-        novoCiclo: "🔄 Start a new cycle",
-        voltar: "← Back to Flow Center",
-        progressoTexto: x => `You've completed ${x}% of the program`,
+        final: "✨ Congratulations! You completed your 30-day FemFlow cycle.<br>Breathe, celebrate and rest.",
+        novo: "🔄 Start new cycle",
+        back: "← Back to Flow Center",
+        progText: x => `You've completed ${x}% of the program`,
       }
     };
 
     const L = T[lang];
 
-    document.getElementById("tituloPagina").innerHTML = L.tituloPagina;
-    document.getElementById("subtituloPagina").innerHTML = L.subtituloPagina;
+    document.getElementById("tituloPagina").innerHTML = L.titulo;
+    document.getElementById("subtituloPagina").innerHTML = L.subtitulo;
     document.getElementById("tituloProgresso").innerHTML = L.progresso;
     document.getElementById("tituloPSE").innerHTML = L.pse;
-    document.getElementById("textoMensagemFinal").innerHTML = L.mensagemFinal;
-    document.getElementById("novoCicloBtn").innerHTML = L.novoCiclo;
-    document.getElementById("voltarFlow").innerHTML = L.voltar;
+    document.getElementById("textoMensagemFinal").innerHTML = L.final;
+    document.getElementById("novoCicloBtn").innerHTML = L.novo;
+    document.getElementById("voltarFlow").innerHTML = L.back;
 
-    if (window.__ultimoProgresso !== undefined) {
-      document.getElementById("progressoTexto").innerText =
-        L.progressoTexto(window.__ultimoProgresso);
+    if (window.__prog !== undefined) {
+      document.getElementById("progressoTexto").innerText = L.progText(window.__prog);
     }
   }
 
-  /* ============================================================
-     LÓGICA PRINCIPAL
-  ============================================================ */
-
+  // LÓGICA
   document.addEventListener("DOMContentLoaded", async () => {
+
     FEMFLOW.inserirHeaderApp?.();
 
     const id = localStorage.getItem("femflow_id");
-    if (!id) {
-      window.location.href = "ciclo.html";
-      return;
-    }
+    if (!id) { FEMFLOW.router("ciclo"); return; }
 
-    // PROGRESSO
-    const progresso = calcularProgresso(id, 30);
-    window.__ultimoProgresso = progresso;
+    // Progresso
+    const prog = calcularProgresso(id, 30);
+    window.__prog = prog;
+    traduzir();
 
-    const lang = localStorage.getItem("femflow_lang") || "pt";
-    aplicarTraducao();
+    document.getElementById("progressoBarra").style.width = prog + "%";
 
-    document.getElementById("progressoBarra").style.width = progresso + "%";
-
-    // SE COMPLETO
-    if (progresso >= 100) {
+    if (prog >= 100) {
       document.getElementById("mensagemFinal").style.display = "block";
       document.getElementById("novoCicloBtn").onclick = () => {
         limparMemoria(id);
@@ -242,28 +255,25 @@
       };
     }
 
-    // HISTÓRICO
-    const historico = await FEMFLOW.buscarHistorico(id, 30);
+    // Histórico
+    const hist = await FEMFLOW.buscarHistorico(id, 40);
 
-    if (!historico || !historico.length) {
-      FEMFLOW.toast("🌿 Sem registros de treino ainda");
+    if (!hist || !hist.length) {
+      FEMFLOW.toast("🌿 Sem treinos registrados");
       return;
     }
 
-    // GRÁFICO PSE
-    const pseValues = historico.map(t => Number(t.pse) || 0);
-    const labels = historico.map((t, i) => "Dia " + (i + 1));
-
+    // Gráfico
     new Chart(document.getElementById("graficoPSE"), {
       type: "line",
       data: {
-        labels,
+        labels: hist.map((t, i) => i + 1),
         datasets: [{
-          data: pseValues,
+          data: hist.map(t => Number(t.pse) || 0),
           borderColor: "#CC6A5A",
-          backgroundColor: "rgba(239,189,166,0.3)",
-          tension: 0.3,
+          backgroundColor: "rgba(239,189,166,0.35)",
           borderWidth: 2,
+          tension: 0.3,
           fill: true
         }]
       },
@@ -274,11 +284,11 @@
       }
     });
 
-    document.getElementById("voltarFlow").onclick = () =>
-      FEMFLOW.router("flowcenter");
+    // Voltar
+    document.getElementById("voltarFlow").onclick = () => FEMFLOW.router("flowcenter");
   });
-
   </script>
 
 </body>
 </html>
+
