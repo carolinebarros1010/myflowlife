@@ -260,8 +260,10 @@ document.getElementById('descansoBtn')?.addEventListener('click', async () => {
     localStorage.setItem("femflow_dia_treino", String(prog + 1));
     FEMFLOW.toast(`🌿 Descanso registrado. Próximo: Dia ${prog + 1}`);
   } else {
+      } else {
     FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
   }
 });
 
-
+// ✅ fecha o bloco principal do DOMContentLoaded
+});
