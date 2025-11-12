@@ -106,9 +106,11 @@ path {
   <div class="current-phase" id="t_current">Fase atual: —</div>
 
   <div class="toolbar">
-    <button class="tool" id="toBreath">💨 Respiração</button>
-    <button class="tool" id="toTrain">🏃 Treino</button>
-  </div>
+  <button class="tool" id="toBreath">💨 Respiração</button>
+  <button class="tool" id="toTrain">🏃 Treino</button>
+  <button class="tool" id="toEvolution">📈 Evolução</button>
+</div>
+
 
   <div id="debugPanel" hidden></div>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -268,6 +270,8 @@ document.getElementById("lbl-luteal").classList.toggle("label-active",     fase=
     // === Botões ===
     document.getElementById("toBreath").onclick = ()=> FEMFLOW.router("respiracao");
     document.getElementById("toTrain").onclick  = ()=> FEMFLOW.router("treino");
+    document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao");
+
 
     // === Diagnóstico visível (só em debug) ===
     const dbg = document.getElementById("debugPanel");
@@ -313,6 +317,7 @@ window.addEventListener("femflow:langchange", () => {
   document.querySelector(".subtitle").textContent = L.frase;
   document.getElementById("toBreath").textContent = L.botoes.breath;
   document.getElementById("toTrain").textContent  = L.botoes.train;
+  
 
   // Reaplica nomes de fases e status atual
  const fase = (localStorage.getItem("fase_sugerida") || "menstrual").toLowerCase();
