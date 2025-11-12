@@ -7,9 +7,11 @@
 
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="css/style.css" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -32,11 +34,6 @@
     }
     .btn-novo-ciclo:hover { background: var(--terracota); }
 
-    .peso-item { display: flex; justify-content: space-between; align-items: center; background: rgba(240,236,233,0.5);
-      padding: 0.7rem 1rem; border-radius: 10px; margin-bottom: 0.5rem; font-size: 0.95rem; }
-    .peso-item strong { color: var(--teal); }
-    .peso-item span { color: var(--terracota); font-weight: 600; }
-
     #voltarFlow {
       background: var(--terracota);
       color: #fff;
@@ -56,12 +53,14 @@
 </head>
 
 <body>
-  <header>
+
+  <header style="margin-top:85px;">
     <h1 id="tituloPagina">Minha Evolução</h1>
     <p class="subtitle" id="subtituloPagina">Acompanhe como seu corpo responde ao treino</p>
   </header>
 
   <div class="container">
+
     <div class="section progresso-box">
       <h3 id="tituloProgresso">🌿 Progresso do seu programa</h3>
       <p id="progressoTexto" class="texto-progresso">Calculando...</p>
@@ -72,24 +71,6 @@
       <h3 id="tituloPSE">📈 Evolução do Esforço Percebido (PSE)</h3>
       <canvas id="graficoPSE"></canvas>
       <p id="legendaPSE">🩵 Leve • 🍑 Moderado • ❤️ Intenso</p>
-    </div>
-
-    <div class="section cargas-box">
-      <h3 id="tituloCargas">🏋️ Histórico de Cargas (Últimos Pesos)</h3>
-      <div id="listaCargas" class="peso-lista"></div>
-    </div>
-
-    <div class="section grafico-carga-box">
-      <h3 id="tituloGraficoCarga">📊 Evolução de Carga por Exercício</h3>
-      <select id="selectExercicio"></select>
-      <canvas id="graficoCarga"></canvas>
-    </div>
-
-    <div class="section historico-box">
-      <h3 id="tituloHistoricoTreinos">📋 Histórico de Treinos</h3>
-      <ul id="listaTreinos"></ul>
-      <h3 id="tituloHistoricoDiario">📘 Histórico Diário</h3>
-      <ul id="listaDiario"></ul>
     </div>
 
     <div id="mensagemFinal" class="mensagem-final" style="display:none;">
@@ -103,112 +84,99 @@
     <button type="button" id="voltarFlow">← Voltar ao Flow Center</button>
   </div>
 
- 
-  <script src="js/memoria.js"></script>
+  <!-- CORE SEMPRE DEVE VIR ANTES DO SCRIPT LOCAL -->
+  <script src="scripts/femflow-core.js"></script>
 
   <script>
     window.FEMFLOW_DISABLE_UI = false;
-document.addEventListener("DOMContentLoaded", () => FEMFLOW.inserirHeaderApp());
-  const FEMFLOW_LANG = (navigator.language || navigator.userLanguage).startsWith("en") ? "en" : "pt";
+    document.addEventListener("DOMContentLoaded", () => FEMFLOW.inserirHeaderApp());
 
-  const I18N = {
-    pt: {
-      tituloPagina: "Minha Evolução",
-      subtituloPagina: "Acompanhe como seu corpo responde ao treino",
-      progresso: "🌿 Progresso do seu programa",
-      pse: "📈 Evolução do Esforço Percebido (PSE)",
-      cargas: "🏋️ Histórico de Cargas (Últimos Pesos)",
-      cargaExercicio: "📊 Evolução de Carga por Exercício",
-      historicoTreinos: "📋 Histórico de Treinos",
-      historicoDiario: "📘 Histórico Diário",
-      mensagemFinal: "✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.<br>Respire, celebre e permita que o seu corpo descanse.",
-      novoCiclo: "🔄 Iniciar novo ciclo",
-      voltar: "← Voltar ao Flow Center"
-    },
-    en: {
-      tituloPagina: "My Evolution",
-      subtituloPagina: "Track how your body responds to training",
-      progresso: "🌿 Your Program Progress",
-      pse: "📈 Perceived Effort Evolution (RPE)",
-      cargas: "🏋️ Load History (Latest Weights)",
-      cargaExercicio: "📊 Load Progress by Exercise",
-      historicoTreinos: "📋 Training History",
-      historicoDiario: "📘 Daily Log",
-      mensagemFinal: "✨ Congratulations! You’ve completed your 30-day FemFlow cycle.<br>Breathe, celebrate, and let your body rest.",
-      novoCiclo: "🔄 Start a new cycle",
-      voltar: "← Back to Flow Center"
-    }
-  };
+    const FEMFLOW_LANG = localStorage.getItem("femflow_lang") || "pt";
 
-  function traduzir() {
-    const T = I18N[FEMFLOW_LANG];
-    document.getElementById("tituloPagina").innerHTML = T.tituloPagina;
-    document.getElementById("subtituloPagina").innerHTML = T.subtituloPagina;
-    document.getElementById("tituloProgresso").innerHTML = T.progresso;
-    document.getElementById("tituloPSE").innerHTML = T.pse;
-    document.getElementById("tituloCargas").innerHTML = T.cargas;
-    document.getElementById("tituloGraficoCarga").innerHTML = T.cargaExercicio;
-    document.getElementById("tituloHistoricoTreinos").innerHTML = T.historicoTreinos;
-    document.getElementById("tituloHistoricoDiario").innerHTML = T.historicoDiario;
-    document.getElementById("textoMensagemFinal").innerHTML = T.mensagemFinal;
-    document.getElementById("novoCicloBtn").innerHTML = T.novoCiclo;
-    document.getElementById("voltarFlow").innerHTML = T.voltar;
-  }
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    traduzir();
-
-    const id = localStorage.getItem("femflow_id");
-    if (!id) { window.location.href = "ciclo.html"; return; }
-
-    // 🌿 Progresso visual
-    const progresso = calcularProgresso(id, 30);
-    document.getElementById("progressoBarra").style.width = progresso + "%";
-    document.getElementById("progressoTexto").innerText = FEMFLOW_LANG === "en"
-      ? `You’ve completed ${progresso}% of the program`
-      : `Você completou ${progresso}% do programa`;
-
-    if (progresso === 100) {
-      document.getElementById("mensagemFinal").style.display = "block";
-      document.getElementById("novoCicloBtn").addEventListener("click", () => {
-        limparMemoria(id);
-        window.location.href = "ciclo.html";
-      });
-    }
-
-    // ✅ Busca histórico via Core (POST)
-    const historico = await FEMFLOW.buscarHistorico(id, 30);
-    if (!historico.length) {
-      FEMFLOW.toast("Nenhum treino registrado ainda 🌿");
-      return;
-    }
-
-    // 🔹 Gráfico de PSE
-    const ctx = document.getElementById("graficoPSE").getContext("2d");
-    const pseValues = historico.map(t => Number(t.pse) || 0);
-    const labels = historico.map((t, i) => `Dia ${i + 1}`);
-
-    new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [{
-          label: FEMFLOW_LANG === "en" ? "RPE" : "PSE",
-          data: pseValues,
-          borderColor: "#CC6A5A",
-          backgroundColor: "rgba(239,189,166,0.3)",
-          fill: true, tension: 0.3, borderWidth: 2
-        }]
+    const I18N = {
+      pt: {
+        tituloPagina: "Minha Evolução",
+        subtituloPagina: "Acompanhe como seu corpo responde ao treino",
+        progresso: "🌿 Progresso do seu programa",
+        pse: "📈 Evolução do Esforço Percebido (PSE)",
+        mensagemFinal: "✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.<br>Respire, celebre e permita que o seu corpo descanse.",
+        novoCiclo: "🔄 Iniciar novo ciclo",
+        voltar: "← Voltar ao Flow Center"
       },
-      options: { plugins: { legend: { display: false } } }
-    });
+      en: {
+        tituloPagina: "My Evolution",
+        subtituloPagina: "Track how your body responds to training",
+        progresso: "🌿 Your Program Progress",
+        pse: "📈 Perceived Effort Evolution (RPE)",
+        mensagemFinal: "✨ Congratulations! You’ve completed your 30-day FemFlow cycle.<br>Breathe, celebrate, and let your body rest.",
+        novoCiclo: "🔄 Start a new cycle",
+        voltar: "← Back to Flow Center"
+      }
+    };
 
-    // Botão voltar
-    document.getElementById("voltarFlow").onclick = () => FEMFLOW.router("flowcenter");
-  });
+    function traduzir() {
+      const T = I18N[FEMFLOW_LANG];
+
+      document.getElementById("tituloPagina").innerHTML = T.tituloPagina;
+      document.getElementById("subtituloPagina").innerHTML = T.subtituloPagina;
+      document.getElementById("tituloProgresso").innerHTML = T.progresso;
+      document.getElementById("tituloPSE").innerHTML = T.pse;
+      document.getElementById("textoMensagemFinal").innerHTML = T.mensagemFinal;
+      document.getElementById("novoCicloBtn").innerHTML = T.novoCiclo;
+      document.getElementById("voltarFlow").innerHTML = T.voltar;
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+      traduzir();
+
+      const id = localStorage.getItem("femflow_id");
+      if (!id) { return FEMFLOW.router("ciclo"); }
+
+      // progresso do programa
+      const prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
+      const pct = Math.min(100, Math.floor((prog / 30) * 100));
+
+      document.getElementById("progressoBarra").style.width = pct + "%";
+      document.getElementById("progressoTexto").textContent =
+        FEMFLOW_LANG === "en" ? `You’ve completed ${pct}%` : `Você completou ${pct}%`;
+
+      if (pct >= 100) {
+        document.getElementById("mensagemFinal").style.display = "block";
+        document.getElementById("novoCicloBtn").addEventListener("click", () => {
+          localStorage.removeItem("femflow_dia_treino");
+          FEMFLOW.router("ciclo");
+        });
+      }
+
+      // Histórico PSE
+      const hist = await FEMFLOW.buscarHistorico(id, 30);
+      if (!hist.length) {
+        FEMFLOW.toast("Nenhum treino ainda.");
+        return;
+      }
+
+      const pseValues = hist.map(h => Number(h.pse) || 0);
+      const labels = hist.map((_, i) => `Dia ${i+1}`);
+
+      new Chart(document.getElementById("graficoPSE"), {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            data: pseValues,
+            borderColor: "#CC6A5A",
+            backgroundColor: "rgba(239,189,166,0.25)",
+            fill: true, tension: 0.35
+          }]
+        },
+        options: { plugins: { legend: { display:false } } }
+      });
+
+      // voltar
+      document.getElementById("voltarFlow").onclick = () => FEMFLOW.router("flowcenter");
+    });
   </script>
-  <script src="scripts/femflow-core.js"></script>
-<script src="js/memoria.js"></script>
+
 </body>
 </html>
-
