@@ -227,46 +227,41 @@ try {
 
   lista.push({ tipo:'resfriamento', titulo:'🌿 Box Final — Respiração e Alongamento', mensagem:'Respire 4–4 e alongamento leve dos quadris/ombros.' });
   render(lista);
-// 🧩 Incrementa o dia do programa
-let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
-if (prog < 30) {
-  localStorage.setItem("femflow_dia_treino", String(prog + 1));
-  FEMFLOW.toast(`✅ Treino salvo! Próximo: Dia ${prog + 1}`);
-} else {
-  FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
-}
-  // -------- SALVAR TREINO --------
-  document.getElementById('salvarTreinoBtn')?.addEventListener('click', async () => {
-    FEMFLOW.abrirPSE(async (pse) => {
-      await FEMFLOW.salvarTreino({
-        id,
-        fase: j.fase || localStorage.getItem('fase_sugerida') || 'desconhecida',
-        treino: 'dia',
-        tipo_dia: 'treino',
-        pse
-      });
-      // avança dia do programa
-      let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
-      if (prog < 30) localStorage.setItem("femflow_dia_treino", String(prog + 1));
-      FEMFLOW.toast('✅ Treino salvo!');
+// -------- SALVAR TREINO --------
+document.getElementById('salvarTreinoBtn')?.addEventListener('click', async () => {
+  FEMFLOW.abrirPSE(async (pse) => {
+    await FEMFLOW.salvarTreino({
+      id,
+      fase: j.fase || localStorage.getItem('fase_sugerida') || 'desconhecida',
+      treino: 'dia',
+      tipo_dia: 'treino',
+      pse
     });
-  });
 
-  // -------- SALVAR DESCANSO --------
-  document.getElementById('descansoBtn')?.addEventListener('click', async () => {
-    const fase = j.fase || localStorage.getItem('fase_sugerida') || 'desconhecida';
-    await FEMFLOW.salvarDescanso(fase);
+    // 🌿 Avança o dia do programa
     let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
-    if (prog < 30) localStorage.setItem("femflow_dia_treino", String(prog + 1));
-  // 🧩 Incrementa o dia do programa mesmo em descanso
-let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
-if (prog < 30) {
-  localStorage.setItem("femflow_dia_treino", String(prog + 1));
-  FEMFLOW.toast(`🌿 Descanso registrado. Próximo: Dia ${prog + 1}`);
-} else {
-  FEMFLOW.toast("🎉 Programa concluído!");
-}
+    if (prog < 30) {
+      localStorage.setItem("femflow_dia_treino", String(prog + 1));
+      FEMFLOW.toast(`✅ Treino salvo! Próximo: Dia ${prog + 1}`);
+    } else {
+      FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
+    }
   });
-
 });
+
+// -------- SALVAR DESCANSO --------
+document.getElementById('descansoBtn')?.addEventListener('click', async () => {
+  const fase = j.fase || localStorage.getItem('fase_sugerida') || 'desconhecida';
+  await FEMFLOW.salvarDescanso(fase);
+
+  // 🧩 Incrementa o dia do programa mesmo em descanso
+  let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
+  if (prog < 30) {
+    localStorage.setItem("femflow_dia_treino", String(prog + 1));
+    FEMFLOW.toast(`🌿 Descanso registrado. Próximo: Dia ${prog + 1}`);
+  } else {
+    FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
+  }
+});
+
 
