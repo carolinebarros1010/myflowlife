@@ -59,18 +59,15 @@
       display:flex; justify-content:center; align-items:center; gap:1.6rem;
       margin-top:1.6rem;
     }
-    .social-icon{
-      width:50px; height:50px; border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      box-shadow:0 4px 12px rgba(0,0,0,0.1);
-      background:#fff; cursor:pointer;
-      transition:.25s transform,.25s box-shadow;
+    
+    .social-row {  display: flex;  justify-content: center;  gap: 14px;  margin-bottom: 1.4rem;}
+    .social-icon {  width: 46px;  height: 46px;  border-radius: 12px;  background: white;  display: flex;  align-items: center;  justify-content: center;
+     box-shadow: 0 2px 8px rgba(0,0,0,0.12);  cursor: pointer;  transition: transform .25s ease, box-shadow .25s ease;}
+    .social-icon img {  width: 24px;  height: 24px;}
+    .social-icon:hover {  transform: scale(1.07);  box-shadow: 0 4px 12px rgba(0,0,0,0.18);}
+    .apple img {  filter: invert(0); /* preto elegante */
     }
-    .social-icon img{ width:22px; height:22px; }
-    .social-icon.apple{ background:#000; }
-    .social-icon.apple img{ filter:invert(1); width:20px; }
-    .social-icon.bio{ background:var(--verde); color:#fff; font-size:1.2rem; display:none; }
-    .social-icon:hover{ transform:translateY(-2px) scale(1.07); box-shadow:0 6px 16px rgba(0,0,0,0.12); }
+    .bio {  font-size: 22px;  color: #335953;}
     @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
   </style>
 </head>
@@ -90,17 +87,14 @@
 
     <!-- Ícones sociais -->
     <div class="social-row">
-      <div class="social-icon google" id="googleSignIn">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Google__G__Logo.svg" alt="Google">
-      </div>
-      <div class="social-icon apple" id="appleSignIn">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple">
-      </div>
-      <div class="social-icon bio" id="bioSignIn">🔒</div>
-    </div>
-
-    <p id="mensagem" class="message"></p>
+  <div class="social-icon google" id="googleSignIn">
+    <img src="assets/icons/google-g.svg" alt="Google">
   </div>
+  <div class="social-icon apple" id="appleSignIn">
+    <img src="assets/icons/apple.svg" alt="Apple">
+  </div>
+  <div class="social-icon bio" id="bioSignIn">🔒</div>
+</div>
 
   <script>
   // === Helpers ===
