@@ -68,6 +68,24 @@
     .apple img {  filter: invert(0); /* preto elegante */
     }
     .bio {  font-size: 22px;  color: #335953;}
+
+    /* ======== BOHO SOCIAL ROW ========= */
+.social-row.boho { display: flex;  justify-content: center;  gap: 18px;  margin: 1.6rem 0 1.2rem;}
+/* ======== BOTÃO SOCIAL (estilo boho) ========= */
+.social-icon.boho {   width: 56px;  height: 56px;  border-radius: 18px;  background: linear-gradient(    145deg,    #f7e9e3 0%,    #f3d7cb 50%,    #f6ece5 100%  );
+  border: 1px solid rgba(204, 106, 90, 0.25);  display: flex;  align-items: center;  justify-content: center;
+  box-shadow:    0 4px 10px rgba(0,0,0,0.12),    inset 0 1px 2px rgba(255,255,255,0.4);  cursor: pointer;  transition: all .35s ease;}
+.social-icon.boho img {  width: 26px;  height: 26px;}
+/* Apple em preto elegante */
+.social-icon.boho.apple img {  filter: invert(0);}
+/* Ícone biometria */
+.social-icon.boho.bio {  font-size: 26px;  color: #335953;}
+/* ======== HOVER AFETIVO / ORGÂNICO ========= */
+.social-icon.boho:hover {  transform: translateY(-3px) scale(1.05);  box-shadow:    0 6px 14px rgba(0,0,0,0.18),    inset 0 1px 3px rgba(255,255,255,0.5);
+  background: linear-gradient(    145deg,    #f6e4dc 0%,    #efd1c3 40%,    #f3ded6 100%  );}
+/* ======== TOQUE (MOBILE) ========= */
+.social-icon.boho:active {  transform: scale(.96);  box-shadow:    0 3px 8px rgba(0,0,0,0.18),    inset 0 2px 6px rgba(0,0,0,0.12);}
+
     @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
   </style>
 </head>
@@ -86,14 +104,16 @@
     <p class="toggle" id="goRecuperar">Esqueci minha senha</p>
 
     <!-- Ícones sociais -->
-    <div class="social-row">
-  <div class="social-icon google" id="googleSignIn">
+    <div class="social-row boho">
+  <div class="social-icon boho google" id="googleSignIn">
     <img src="assets/icons/google-g.svg" alt="Google">
   </div>
-  <div class="social-icon apple" id="appleSignIn">
+
+  <div class="social-icon boho apple" id="appleSignIn">
     <img src="assets/icons/apple.svg" alt="Apple">
   </div>
-  <div class="social-icon bio" id="bioSignIn">🔒</div>
+
+  <div class="social-icon boho bio" id="bioSignIn">🔒</div>
 </div>
 
   <script>
