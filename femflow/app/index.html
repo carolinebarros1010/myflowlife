@@ -55,36 +55,30 @@
       margin-top:.8rem; cursor:pointer; display:block;
     }
     .message{ margin-top:1.2rem; min-height:1.4rem; font-size:.95rem; }
-    .social-row{
-      display:flex; justify-content:center; align-items:center; gap:1.6rem;
-      margin-top:1.6rem;
-    }
-    
-    .social-row {  display: flex;  justify-content: center;  gap: 14px;  margin-bottom: 1.4rem;}
-    .social-icon {  width: 46px;  height: 46px;  border-radius: 12px;  background: white;  display: flex;  align-items: center;  justify-content: center;
-     box-shadow: 0 2px 8px rgba(0,0,0,0.12);  cursor: pointer;  transition: transform .25s ease, box-shadow .25s ease;}
-    .social-icon img {  width: 24px;  height: 24px;}
-    .social-icon:hover {  transform: scale(1.07);  box-shadow: 0 4px 12px rgba(0,0,0,0.18);}
-    .apple img {  filter: invert(0); /* preto elegante */
-    }
-    .bio {  font-size: 22px;  color: #335953;}
 
-    /* ======== BOHO SOCIAL ROW ========= */
-.social-row.boho { display: flex;  justify-content: center;  gap: 18px;  margin: 1.6rem 0 1.2rem;}
-/* ======== BOTÃO SOCIAL (estilo boho) ========= */
-.social-icon.boho {   width: 56px;  height: 56px;  border-radius: 18px;  background: linear-gradient(    145deg,    #f7e9e3 0%,    #f3d7cb 50%,    #f6ece5 100%  );
-  border: 1px solid rgba(204, 106, 90, 0.25);  display: flex;  align-items: center;  justify-content: center;
-  box-shadow:    0 4px 10px rgba(0,0,0,0.12),    inset 0 1px 2px rgba(255,255,255,0.4);  cursor: pointer;  transition: all .35s ease;}
-.social-icon.boho img {  width: 26px;  height: 26px;}
-/* Apple em preto elegante */
-.social-icon.boho.apple img {  filter: invert(0);}
-/* Ícone biometria */
-.social-icon.boho.bio {  font-size: 26px;  color: #335953;}
-/* ======== HOVER AFETIVO / ORGÂNICO ========= */
-.social-icon.boho:hover {  transform: translateY(-3px) scale(1.05);  box-shadow:    0 6px 14px rgba(0,0,0,0.18),    inset 0 1px 3px rgba(255,255,255,0.5);
-  background: linear-gradient(    145deg,    #f6e4dc 0%,    #efd1c3 40%,    #f3ded6 100%  );}
-/* ======== TOQUE (MOBILE) ========= */
-.social-icon.boho:active {  transform: scale(.96);  box-shadow:    0 3px 8px rgba(0,0,0,0.18),    inset 0 2px 6px rgba(0,0,0,0.12);}
+    /* Ícones sociais BOHO */
+    .social-row.boho { display:flex; justify-content:center; gap:18px; margin:1.6rem 0 1.2rem; }
+    .social-icon.boho {
+      width:56px; height:56px; border-radius:18px;
+      background:linear-gradient(145deg,#f7e9e3 0%,#f3d7cb 50%,#f6ece5 100%);
+      border:1px solid rgba(204,106,90,0.25);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 10px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.4);
+      cursor:pointer; transition:.35s ease;
+    }
+    .social-icon.boho img { width:26px; height:26px; }
+    .social-icon.boho.apple img { filter:invert(0); }
+    .social-icon.boho.bio { font-size:26px; color:#335953; }
+
+    .social-icon.boho:hover {
+      transform:translateY(-3px) scale(1.05);
+      box-shadow:0 6px 14px rgba(0,0,0,0.18), inset 0 1px 3px rgba(255,255,255,0.5);
+      background:linear-gradient(145deg,#f6e4dc,#efd1c3,#f3ded6);
+    }
+    .social-icon.boho:active{
+      transform:scale(.96);
+      box-shadow:0 3px 8px rgba(0,0,0,0.18), inset 0 2px 6px rgba(0,0,0,0.12);
+    }
 
     @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
   </style>
@@ -98,100 +92,167 @@
 
     <input id="loginEmail" type="email" placeholder="Seu e-mail"/><br/>
     <input id="loginSenha" type="password" placeholder="Sua senha"/><br/>
-    <button id="btnEntrar">Entrar</button>
+
+    <!-- 🔥 Botão com type="button" (evita recarregar em TWA) -->
+    <button id="btnEntrar" type="button">Entrar</button>
+
+    <!-- 🔥 Mensagem robusta -->
+    <p id="mensagem" class="message"></p>
 
     <a class="toggle" href="anamnese_deluxe.html">Ainda não tem conta? Cadastre-se</a>
     <p class="toggle" id="goRecuperar">Esqueci minha senha</p>
 
     <!-- Ícones sociais -->
     <div class="social-row boho">
-  <div class="social-icon boho google" id="googleSignIn">
-    <img src="assets/icons/google-g.svg" alt="Google">
-  </div>
+      <div class="social-icon boho google" id="googleSignIn">
+        <img src="assets/icons/google-g.svg" alt="Google">
+      </div>
 
-  <div class="social-icon boho apple" id="appleSignIn">
-    <img src="assets/icons/apple.svg" alt="Apple">
-  </div>
+      <div class="social-icon boho apple" id="appleSignIn">
+        <img src="assets/icons/apple.svg" alt="Apple">
+      </div>
 
-  <div class="social-icon boho bio" id="bioSignIn">🔒</div>
-</div>
+      <div class="social-icon boho bio" id="bioSignIn">🔒</div>
+    </div>
 
   <script>
   // === Helpers ===
   window.FEMFLOW = window.FEMFLOW || {};
-  const scriptURL = FEMFLOW.SCRIPT_URL || localStorage.getItem("femflow_script") ||
+
+  const scriptURL =
+    FEMFLOW.SCRIPT_URL ||
+    localStorage.getItem("femflow_script") ||
     "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
-  const $ = s=>document.querySelector(s);
-  const msg=$("#mensagem");
-  function setErr(t){msg.textContent=t;msg.style.color="#cc6a5a";}
-  function setMsg(t,ok=false){msg.textContent=t;msg.style.color=ok?"#2e7d32":"#335953";}
-  async function postGAS(p){const r=await fetch(scriptURL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});if(!r.ok)throw new Error();return r.json();}
+
+  const $ = s => document.querySelector(s);
+  const msg = $("#mensagem");
+
+  /* === MENSAGENS SEGURAS (à prova de erro) === */
+  function setErr(t){
+    if(msg){ msg.textContent = t; msg.style.color = "#cc6a5a"; }
+  }
+  function setMsg(t, ok=false){
+    if(msg){ msg.textContent = t; msg.style.color = ok ? "#2e7d32" : "#335953"; }
+  }
+
+  async function postGAS(p){
+    const r = await fetch(scriptURL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(p)
+    });
+    if(!r.ok) throw new Error();
+    return r.json();
+  }
 
   // === Login padrão ===
   async function entrar(){
-    const email=$("#loginEmail").value.trim(),senha=$("#loginSenha").value.trim();
-    if(!email||!senha){setErr("Digite e-mail e senha.");return;}
+    const email = $("#loginEmail").value.trim(),
+          senha = $("#loginSenha").value.trim();
+
+    if(!email || !senha){
+      setErr("Digite e-mail e senha.");
+      return;
+    }
+
     setMsg("Verificando...");
+
     try{
-      const d=await postGAS({action:"login",email,senha});
-      if(d.status==="ok"){setMsg(`Bem-vinda, ${d.nome||"aluna"}!`,true);
-        localStorage.setItem("femflow_id",d.id);
-        localStorage.setItem("femflow_email",d.email||email);
-        localStorage.setItem("femflow_auth","yes");
-        setTimeout(()=>location.href="home.html",800);
-      }else setErr(d.msg||"E-mail ou senha incorretos.");
-    }catch{setErr("Erro de rede.");}
+      const d = await postGAS({action:"login", email, senha});
+
+      if(d.status === "ok"){
+        setMsg(`Bem-vinda, ${d.nome||"aluna"}!`, true);
+
+        localStorage.setItem("femflow_id", d.id);
+        localStorage.setItem("femflow_email", d.email || email);
+        localStorage.setItem("femflow_auth", "yes");
+
+        setTimeout(()=>location.href="home.html", 700);
+
+      } else {
+        setErr(d.msg || "E-mail ou senha incorretos.");
+      }
+
+    } catch(e){
+      setErr("Erro de rede.");
+    }
   }
-  $("#btnEntrar").onclick=entrar;
-  $("#loginSenha").addEventListener("keydown",e=>{if(e.key==="Enter")entrar();});
+
+  $("#btnEntrar").onclick = entrar;
+  $("#loginSenha").addEventListener("keydown", e => {
+    if(e.key === "Enter") entrar();
+  });
 
   // === Google Sign-In ===
-  $("#googleSignIn").onclick=()=>google.accounts.id.prompt();
+  $("#googleSignIn").onclick = ()=> google.accounts.id.prompt();
+
   async function preencherComGoogle(r){
     try{
-      const d=jwt_decode(r.credential);
-      if(!d||!d.email)return;
-      $("#loginEmail").value=d.email;
-      const res=await postGAS({action:"login",email:d.email,senha:""});
-      if(res.status==="ok"){
-        localStorage.setItem("femflow_id",res.id);
-        localStorage.setItem("femflow_email",res.email);
-        localStorage.setItem("femflow_auth","yes");
+      const d = jwt_decode(r.credential);
+      if(!d || !d.email) return;
+
+      $("#loginEmail").value = d.email;
+
+      const res = await postGAS({action:"login", email:d.email, senha:""});
+      if(res.status === "ok"){
+        localStorage.setItem("femflow_id", res.id);
+        localStorage.setItem("femflow_email", res.email);
+        localStorage.setItem("femflow_auth", "yes");
         FEMFLOW.toast?.("✨ Login automático realizado!");
         setTimeout(()=>location.href="home.html",800);
-      } else FEMFLOW.toast?.("💡 Complete seu cadastro para continuar.");
-    }catch(e){console.warn("Google erro:",e);}
+      } else {
+        FEMFLOW.toast?.("💡 Complete seu cadastro para continuar.");
+      }
+
+    }catch(err){
+      console.warn("Google erro:", err);
+    }
   }
-  window.preencherComGoogle=preencherComGoogle;
+  window.preencherComGoogle = preencherComGoogle;
 
   // === Biometria Local ===
-  const bio=$("#bioSignIn");
-  (async()=>{if(window.PublicKeyCredential&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()){bio.style.display="flex";}})();
-  bio.onclick=async()=>{
+  const bio = $("#bioSignIn");
+  (async()=>{
+    if(window.PublicKeyCredential &&
+       await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()){
+      bio.style.display = "flex";
+    }
+  })();
+
+  bio.onclick = async()=>{
     try{
-      const email=$("#loginEmail").value.trim();
-      if(!email){setErr("Digite seu e-mail.");return;}
-      const chal=crypto.getRandomValues(new Uint8Array(32));
-      await navigator.credentials.create({publicKey:{
-        challenge:chal,
-        rp:{name:"FemFlow"},
-        user:{id:new TextEncoder().encode(email),name:email,displayName:email},
-        pubKeyCredParams:[{type:"public-key",alg:-7}],
-        authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required"}
-      }});
-      const res=await postGAS({action:"login",email,senha:""});
-      if(res.status==="ok"){
-        localStorage.setItem("femflow_id",res.id);
-        localStorage.setItem("femflow_email",res.email||email);
-        localStorage.setItem("femflow_auth","yes");
-        setMsg("Acesso liberado ✨",true);
-        setTimeout(()=>location.href="home.html",700);
+      const email = $("#loginEmail").value.trim();
+      if(!email){ setErr("Digite seu e-mail."); return; }
+
+      const chal = crypto.getRandomValues(new Uint8Array(32));
+
+      await navigator.credentials.create({
+        publicKey:{
+          challenge:chal,
+          rp:{ name:"FemFlow" },
+          user:{ id:new TextEncoder().encode(email), name:email, displayName:email },
+          pubKeyCredParams:[{type:"public-key", alg:-7}],
+          authenticatorSelection:{ authenticatorAttachment:"platform", userVerification:"required" }
+        }
+      });
+
+      const res = await postGAS({action:"login", email, senha:""});
+      if(res.status === "ok"){
+        localStorage.setItem("femflow_id", res.id);
+        localStorage.setItem("femflow_email", res.email||email);
+        localStorage.setItem("femflow_auth", "yes");
+        setMsg("Acesso liberado ✨", true);
+        setTimeout(()=>location.href="home.html", 700);
       }
-    }catch(e){setErr("Falha ao usar biometria.");}
+
+    }catch(e){
+      setErr("Falha ao usar biometria.");
+    }
   };
 
-  // === Apple placeholder ===
-  $("#appleSignIn").onclick=()=>FEMFLOW.toast?.("🍎 Entrar com Apple em breve.");
+  // === Apple ===
+  $("#appleSignIn").onclick = ()=> FEMFLOW.toast?.("🍎 Entrar com Apple em breve.");
   </script>
 </body>
 </html>
+
