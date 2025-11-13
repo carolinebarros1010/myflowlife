@@ -37,12 +37,72 @@
       font-size:1.65rem; margin:0;
     }
     .subtitle{ font-size:.95rem; color:var(--verde); margin:.5rem 0 1.8rem }
+
+    /* WRAPPER DO INPUT DE SENHA */
+    .password-wrapper {
+      position: relative;
+      width: 78%;
+      max-width: 290px;
+      margin: 0 auto .8rem auto;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding-right: 40px !important;
+      padding-left: 1rem;
+    }
+
+    /* Botão olho iOS */
+    .toggle-eye {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      background-image: url("assets/icons/eye-off.svg");
+      background-size: 24px;
+      background-repeat: no-repeat;
+      opacity: .55;
+      cursor: pointer;
+      transition: .25s ease;
+    }
+    .toggle-eye.active {
+      background-image: url("assets/icons/eye.svg");
+      opacity: .95;
+      transform: translateY(-50%) scale(1.05);
+    }
+
     input{
       width:78%; max-width:290px; padding:.8rem 1rem; margin-bottom:1rem;
       border:1px solid #e6ddd8; border-radius:14px; font-size:.95rem;
       color:var(--texto); outline:none; background:#fff; transition:.2s;
     }
     input:focus{ border-color:var(--terracota); box-shadow:0 0 0 3px rgba(204,106,90,0.15); }
+
+    /* METER FORÇA DA SENHA */
+    .strength-meter {
+      width: 78%;
+      max-width: 290px;
+      display: flex;
+      gap: 5px;
+      margin: -6px auto 12px auto;
+    }
+    .strength-bar {
+      flex: 1;
+      height: 6px;
+      background: #e6ddd8;
+      border-radius: 8px;
+      transition: .35s ease;
+      opacity: .5;
+    }
+    .strength-1 #bar1 { background:#cc6a5a; opacity:1; }
+    .strength-2 #bar1,
+    .strength-2 #bar2 { background:#efbda6; opacity:1; }
+    .strength-3 #bar1,
+    .strength-3 #bar2,
+    .strength-3 #bar3 { background:#335953; opacity:1; }
+
     button{
       width:78%; max-width:290px; padding:.95rem; margin-top:.4rem;
       background:linear-gradient(135deg,var(--verde),var(--terracota));
@@ -50,17 +110,18 @@
       font-size:1rem; transition:.25s;
     }
     button:hover{ transform:translateY(-2px); }
+
     .toggle{
       font-size:.9rem; color:var(--terracota); text-decoration:underline;
       margin-top:.8rem; cursor:pointer; display:block;
     }
     .message{ margin-top:1.2rem; min-height:1.4rem; font-size:.95rem; }
 
-    /* Ícones sociais BOHO */
+    /* ÍCONES SOCIAIS */
     .social-row.boho { display:flex; justify-content:center; gap:18px; margin:1.6rem 0 1.2rem; }
     .social-icon.boho {
       width:56px; height:56px; border-radius:18px;
-      background:linear-gradient(145deg,#f7e9e3 0%,#f3d7cb 50%,#f6ece5 100%);
+      background:linear-gradient(145deg,#f7e9e3,#f3d7cb,#f6ece5);
       border:1px solid rgba(204,106,90,0.25);
       display:flex; align-items:center; justify-content:center;
       box-shadow:0 4px 10px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.4);
@@ -70,189 +131,209 @@
     .social-icon.boho.apple img { filter:invert(0); }
     .social-icon.boho.bio { font-size:26px; color:#335953; }
 
-    .social-icon.boho:hover {
+    .social-icon.boho:hover{
       transform:translateY(-3px) scale(1.05);
       box-shadow:0 6px 14px rgba(0,0,0,0.18), inset 0 1px 3px rgba(255,255,255,0.5);
       background:linear-gradient(145deg,#f6e4dc,#efd1c3,#f3ded6);
     }
-    .social-icon.boho:active{
-      transform:scale(.96);
-      box-shadow:0 3px 8px rgba(0,0,0,0.18), inset 0 2px 6px rgba(0,0,0,0.12);
-    }
 
-    @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+    @keyframes fadeIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
   </style>
 </head>
 <body>
 
-  <div class="login-card">
-    <img src="assets/logofemflowterracotasf.png" alt="FemFlow" class="logo"/>
-    <h2>Bem-vinda ao FemFlow</h2>
-    <p class="subtitle">Acesse ou crie sua conta para iniciar seu ciclo 🌸</p>
+<div class="login-card">
+  <img src="assets/logofemflowterracotasf.png" class="logo"/>
 
-    <input id="loginEmail" type="email" placeholder="Seu e-mail"/><br/>
-    <input id="loginSenha" type="password" placeholder="Sua senha"/><br/>
+  <h2>Bem-vinda ao FemFlow</h2>
+  <p class="subtitle">Acesse ou crie sua conta para iniciar seu ciclo 🌸</p>
 
-    <!-- 🔥 Botão com type="button" (evita recarregar em TWA) -->
-    <button id="btnEntrar" type="button">Entrar</button>
+  <input id="loginEmail" type="email" placeholder="Seu e-mail"/>
 
-    <!-- 🔥 Mensagem robusta -->
-    <p id="mensagem" class="message"></p>
+  <!-- CAMPO DE SENHA + OLHO -->
+  <div class="password-wrapper">
+    <input id="loginSenha" type="password" placeholder="Sua senha">
+    <span id="toggleSenha" class="toggle-eye"></span>
+  </div>
 
-    <a class="toggle" href="anamnese_deluxe.html">Ainda não tem conta? Cadastre-se</a>
-    <p class="toggle" id="goRecuperar">Esqueci minha senha</p>
+  <!-- METER -->
+  <div class="strength-meter">
+    <div class="strength-bar" id="bar1"></div>
+    <div class="strength-bar" id="bar2"></div>
+    <div class="strength-bar" id="bar3"></div>
+  </div>
 
-    <!-- Ícones sociais -->
-    <div class="social-row boho">
-      <div class="social-icon boho google" id="googleSignIn">
-        <img src="assets/icons/google-g.svg" alt="Google">
-      </div>
+  <button id="btnEntrar" type="button">Entrar</button>
+  <p id="mensagem" class="message"></p>
 
-      <div class="social-icon boho apple" id="appleSignIn">
-        <img src="assets/icons/apple.svg" alt="Apple">
-      </div>
+  <a class="toggle" href="anamnese_deluxe.html">Ainda não tem conta? Cadastre-se</a>
+  <p class="toggle" id="goRecuperar">Esqueci minha senha</p>
 
-      <div class="social-icon boho bio" id="bioSignIn">🔒</div>
+  <div class="social-row boho">
+    <div class="social-icon boho google" id="googleSignIn">
+      <img src="assets/icons/google-g.svg">
     </div>
 
-  <script>
-  // === Helpers ===
-  window.FEMFLOW = window.FEMFLOW || {};
+    <div class="social-icon boho apple" id="appleSignIn">
+      <img src="assets/icons/apple.svg">
+    </div>
 
-  const scriptURL =
-    FEMFLOW.SCRIPT_URL ||
-    localStorage.getItem("femflow_script") ||
-    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+    <div class="social-icon boho bio" id="bioSignIn">🔒</div>
+  </div>
+</div>
 
-  const $ = s => document.querySelector(s);
-  const msg = $("#mensagem");
+<script>
+/* ========== HELPERS ========== */
+window.FEMFLOW = window.FEMFLOW || {};
+const scriptURL = FEMFLOW.SCRIPT_URL ||
+  localStorage.getItem("femflow_script") ||
+  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-  /* === MENSAGENS SEGURAS (à prova de erro) === */
-  function setErr(t){
-    if(msg){ msg.textContent = t; msg.style.color = "#cc6a5a"; }
-  }
-  function setMsg(t, ok=false){
-    if(msg){ msg.textContent = t; msg.style.color = ok ? "#2e7d32" : "#335953"; }
-  }
+const $ = s => document.querySelector(s);
+const msg = $("#mensagem");
 
-  async function postGAS(p){
-    const r = await fetch(scriptURL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(p)
-    });
-    if(!r.ok) throw new Error();
-    return r.json();
-  }
+function setErr(t){ msg.textContent=t; msg.style.color="#cc6a5a"; }
+function setMsg(t,ok=false){ msg.textContent=t; msg.style.color=ok?"#2e7d32":"#335953"; }
 
-  // === Login padrão ===
-  async function entrar(){
-    const email = $("#loginEmail").value.trim(),
-          senha = $("#loginSenha").value.trim();
-
-    if(!email || !senha){
-      setErr("Digite e-mail e senha.");
-      return;
-    }
-
-    setMsg("Verificando...");
-
-    try{
-      const d = await postGAS({action:"login", email, senha});
-
-      if(d.status === "ok"){
-        setMsg(`Bem-vinda, ${d.nome||"aluna"}!`, true);
-
-        localStorage.setItem("femflow_id", d.id);
-        localStorage.setItem("femflow_email", d.email || email);
-        localStorage.setItem("femflow_auth", "yes");
-
-        setTimeout(()=>location.href="home.html", 700);
-
-      } else {
-        setErr(d.msg || "E-mail ou senha incorretos.");
-      }
-
-    } catch(e){
-      setErr("Erro de rede.");
-    }
-  }
-
-  $("#btnEntrar").onclick = entrar;
-  $("#loginSenha").addEventListener("keydown", e => {
-    if(e.key === "Enter") entrar();
+async function postGAS(p){
+  const r = await fetch(scriptURL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(p)
   });
+  if(!r.ok) throw new Error();
+  return r.json();
+}
 
-  // === Google Sign-In ===
-  $("#googleSignIn").onclick = ()=> google.accounts.id.prompt();
+/* ========== LOGIN ========= */
+async function entrar(){
+  const email=$("#loginEmail").value.trim();
+  const senha=$("#loginSenha").value.trim();
 
-  async function preencherComGoogle(r){
-    try{
-      const d = jwt_decode(r.credential);
-      if(!d || !d.email) return;
+  if(!email || !senha){ setErr("Digite e-mail e senha."); return; }
 
-      $("#loginEmail").value = d.email;
+  setMsg("Verificando...");
 
-      const res = await postGAS({action:"login", email:d.email, senha:""});
-      if(res.status === "ok"){
-        localStorage.setItem("femflow_id", res.id);
-        localStorage.setItem("femflow_email", res.email);
-        localStorage.setItem("femflow_auth", "yes");
-        FEMFLOW.toast?.("✨ Login automático realizado!");
-        setTimeout(()=>location.href="home.html",800);
-      } else {
-        FEMFLOW.toast?.("💡 Complete seu cadastro para continuar.");
-      }
+  try{
+    const d = await postGAS({action:"login", email, senha});
 
-    }catch(err){
-      console.warn("Google erro:", err);
-    }
+    if(d.status==="ok"){
+      setMsg(`Bem-vinda, ${d.nome||"aluna"}!`,true);
+      localStorage.setItem("femflow_id",d.id);
+      localStorage.setItem("femflow_email",d.email||email);
+      localStorage.setItem("femflow_auth","yes");
+      setTimeout(()=>location.href="home.html",700);
+    } else setErr(d.msg||"E-mail ou senha incorretos.");
+
+  } catch(e){
+    setErr("Erro de rede.");
   }
-  window.preencherComGoogle = preencherComGoogle;
+}
 
-  // === Biometria Local ===
-  const bio = $("#bioSignIn");
-  (async()=>{
-    if(window.PublicKeyCredential &&
-       await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()){
-      bio.style.display = "flex";
+$("#btnEntrar").onclick = entrar;
+
+/* Enter no teclado */
+$("#loginSenha").addEventListener("keydown",e=>{
+  if(e.key==="Enter") entrar();
+});
+
+/* ========== VER SENHA (iOS) ========== */
+const senhaInput = $("#loginSenha");
+const toggle = $("#toggleSenha");
+
+toggle.onclick = ()=>{
+  const isPass = senhaInput.type==="password";
+  senhaInput.type = isPass ? "text" : "password";
+  toggle.classList.toggle("active",isPass);
+};
+
+/* ========== FORÇA DA SENHA ========== */
+const meter = $(".strength-meter");
+
+senhaInput.addEventListener("input", ()=>{
+  const v = senhaInput.value;
+  let score = 0;
+
+  if(v.length >= 6) score++;
+  if(/[A-Z]/.test(v) || /[0-9]/.test(v)) score++;
+  if(/[^A-Za-z0-9]/.test(v) || v.length >= 10) score++;
+
+  meter.classList.remove("strength-1","strength-2","strength-3");
+
+  if(score===1) meter.classList.add("strength-1");
+  if(score===2) meter.classList.add("strength-2");
+  if(score>=3) meter.classList.add("strength-3");
+});
+
+/* ========== GOOGLE LOGIN ========== */
+$("#googleSignIn").onclick = ()=> google.accounts.id.prompt();
+
+async function preencherComGoogle(r){
+  try{
+    const d = jwt_decode(r.credential);
+    if(!d || !d.email) return;
+
+    $("#loginEmail").value = d.email;
+
+    const res = await postGAS({action:"login",email:d.email,senha:""});
+
+    if(res.status==="ok"){
+      localStorage.setItem("femflow_id",res.id);
+      localStorage.setItem("femflow_email",res.email);
+      localStorage.setItem("femflow_auth","yes");
+      FEMFLOW.toast?.("✨ Login automático realizado!");
+      setTimeout(()=>location.href="home.html",800);
+    } else {
+      FEMFLOW.toast?.("💡 Complete seu cadastro para continuar.");
     }
-  })();
 
-  bio.onclick = async()=>{
-    try{
-      const email = $("#loginEmail").value.trim();
-      if(!email){ setErr("Digite seu e-mail."); return; }
+  } catch(e){ console.warn(e); }
+}
+window.preencherComGoogle = preencherComGoogle;
 
-      const chal = crypto.getRandomValues(new Uint8Array(32));
+/* ========== BIOMETRIA LOCAL ========== */
+const bio = $("#bioSignIn");
 
-      await navigator.credentials.create({
-        publicKey:{
-          challenge:chal,
-          rp:{ name:"FemFlow" },
-          user:{ id:new TextEncoder().encode(email), name:email, displayName:email },
-          pubKeyCredParams:[{type:"public-key", alg:-7}],
-          authenticatorSelection:{ authenticatorAttachment:"platform", userVerification:"required" }
-        }
-      });
+(async()=>{
+  if(window.PublicKeyCredential &&
+     await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()){
+    bio.style.display="flex";
+  }
+})();
 
-      const res = await postGAS({action:"login", email, senha:""});
-      if(res.status === "ok"){
-        localStorage.setItem("femflow_id", res.id);
-        localStorage.setItem("femflow_email", res.email||email);
-        localStorage.setItem("femflow_auth", "yes");
-        setMsg("Acesso liberado ✨", true);
-        setTimeout(()=>location.href="home.html", 700);
+bio.onclick = async ()=>{
+  try{
+    const email=$("#loginEmail").value.trim();
+    if(!email){ setErr("Digite seu e-mail."); return; }
+
+    const chal = crypto.getRandomValues(new Uint8Array(32));
+
+    await navigator.credentials.create({
+      publicKey:{
+        challenge:chal,
+        rp:{name:"FemFlow"},
+        user:{id:new TextEncoder().encode(email),name:email,displayName:email},
+        pubKeyCredParams:[{type:"public-key",alg:-7}],
+        authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required"}
       }
+    });
 
-    }catch(e){
-      setErr("Falha ao usar biometria.");
+    const res = await postGAS({action:"login",email,senha:""});
+    if(res.status==="ok"){
+      localStorage.setItem("femflow_id",res.id);
+      localStorage.setItem("femflow_email",res.email||email);
+      localStorage.setItem("femflow_auth","yes");
+      setMsg("Acesso liberado ✨",true);
+      setTimeout(()=>location.href="home.html",700);
     }
-  };
 
-  // === Apple ===
-  $("#appleSignIn").onclick = ()=> FEMFLOW.toast?.("🍎 Entrar com Apple em breve.");
-  </script>
+  } catch(e){ setErr("Falha ao usar biometria."); }
+};
+
+/* ========== APPLE LOGIN FUTURO ========== */
+$("#appleSignIn").onclick = ()=> FEMFLOW.toast?.("🍎 Entrar com Apple em breve.");
+
+</script>
 </body>
 </html>
 
