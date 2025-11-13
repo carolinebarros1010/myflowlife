@@ -17,132 +17,194 @@
 
   <style>
     :root{
-      --terracota:#cc6a5a; --verde:#335953; --pessego:#fceae3; --bege:#fffaf7; --texto:#5b4f49;
+      --terracota:#cc6a5a;
+      --verde:#335953;
+      --pessego:#fceae3;
+      --bege:#fffaf7;
+      --texto:#5b4f49;
     }
+
     body{
-      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       font-family:"Lato",sans-serif;
       background:linear-gradient(180deg,var(--bege) 0%,var(--pessego) 100%);
-      color:var(--texto); -webkit-font-smoothing:antialiased;
+      color:var(--texto);
     }
+
     .login-card{
-      width:92%; max-width:400px; padding:2.2rem 1.7rem; border-radius:26px;
-      background:rgba(255,255,255,0.94); backdrop-filter:blur(14px);
-      box-shadow:0 10px 28px rgba(0,0,0,0.08); text-align:center; animation:fadeIn .5s ease;
+      width:92%;
+      max-width:400px;
+      padding:2.2rem 1.7rem;
+      border-radius:26px;
+      background:rgba(255,255,255,0.94);
+      backdrop-filter:blur(14px);
+      box-shadow:0 10px 28px rgba(0,0,0,0.08);
+      text-align:center;
+      animation:fadeIn .5s ease;
       border:1px solid rgba(255,255,255,0.6);
     }
+
     .logo{ width:120px; margin-bottom:1rem }
+
     h2{
-      font-family:"Playfair Display",serif; color:var(--terracota);
-      font-size:1.65rem; margin:0;
-    }
-    .subtitle{ font-size:.95rem; color:var(--verde); margin:.5rem 0 1.8rem }
-
-    /* WRAPPER DO INPUT DE SENHA */
-    .password-wrapper {
-      position: relative;
-      width: 78%;
-      max-width: 290px;
-      margin: 0 auto .8rem auto;
+      font-family:"Playfair Display",serif;
+      color:var(--terracota);
+      font-size:1.65rem;
+      margin:0;
     }
 
-    .password-wrapper input {
-      width: 100%;
-      padding-right: 40px !important;
-      padding-left: 1rem;
-    }
-
-    /* Botão olho iOS */
-    .toggle-eye {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 24px;
-      height: 24px;
-      background-image: url("assets/icons/eye-off.svg");
-      background-size: 24px;
-      background-repeat: no-repeat;
-      opacity: .55;
-      cursor: pointer;
-      transition: .25s ease;
-    }
-    .toggle-eye.active {
-      background-image: url("assets/icons/eye.svg");
-      opacity: .95;
-      transform: translateY(-50%) scale(1.05);
+    .subtitle{
+      font-size:.95rem;
+      color:var(--verde);
+      margin:.5rem 0 1.8rem;
     }
 
     input{
-      width:78%; max-width:290px; padding:.8rem 1rem; margin-bottom:1rem;
-      border:1px solid #e6ddd8; border-radius:14px; font-size:.95rem;
-      color:var(--texto); outline:none; background:#fff; transition:.2s;
+      width:78%;
+      max-width:290px;
+      padding:.8rem 1rem;
+      margin:0 auto 1rem auto;
+      border:1px solid #e6ddd8;
+      border-radius:14px;
+      font-size:.95rem;
+      display:block;
+      color:var(--texto);
+      background:#fff;
+      transition:.2s;
     }
-    input:focus{ border-color:var(--terracota); box-shadow:0 0 0 3px rgba(204,106,90,0.15); }
 
-    /* METER FORÇA DA SENHA */
-    .strength-meter {
-      width: 78%;
-      max-width: 290px;
-      display: flex;
-      gap: 5px;
-      margin: -6px auto 12px auto;
+    input:focus{
+      border-color:var(--terracota);
+      box-shadow:0 0 0 3px rgba(204,106,90,0.15);
     }
-    .strength-bar {
-      flex: 1;
-      height: 6px;
-      background: #e6ddd8;
-      border-radius: 8px;
-      transition: .35s ease;
-      opacity: .5;
+
+    /* WRAPPER SENHA */
+    .password-wrapper{
+      position:relative;
+      width:78%;
+      max-width:290px;
+      margin:0 auto 1rem auto;
     }
-    .strength-1 #bar1 { background:#cc6a5a; opacity:1; }
+
+    .password-wrapper input{
+      padding-right:45px !important;
+    }
+
+    /* OLHO iOS */
+    .toggle-eye{
+      position:absolute;
+      right:14px;
+      top:50%;
+      transform:translateY(-50%);
+      width:22px;
+      height:22px;
+      background-image:url("assets/icons/eye-off.svg");
+      background-size:22px;
+      background-repeat:no-repeat;
+      opacity:.55;
+      cursor:pointer;
+      transition:.25s ease;
+    }
+
+    .toggle-eye.active{
+      background-image:url("assets/icons/eye.svg");
+      opacity:.95;
+      transform:translateY(-50%) scale(1.05);
+    }
+
+    /* BARRA DE FORÇA */
+    .strength-meter{
+      width:78%;
+      max-width:290px;
+      margin: -4px auto 14px auto;
+      display:flex;
+      gap:6px;
+      justify-content:center;
+    }
+
+    .strength-bar{
+      flex:1;
+      height:6px;
+      background:#e6ddd8;
+      border-radius:6px;
+      opacity:.5;
+      transition:.35s ease;
+    }
+
+    .strength-1 #bar1{ background:#cc6a5a; opacity:1; }
     .strength-2 #bar1,
-    .strength-2 #bar2 { background:#efbda6; opacity:1; }
+    .strength-2 #bar2{ background:#efbda6; opacity:1; }
     .strength-3 #bar1,
     .strength-3 #bar2,
-    .strength-3 #bar3 { background:#335953; opacity:1; }
+    .strength-3 #bar3{ background:#335953; opacity:1; }
 
     button{
-      width:78%; max-width:290px; padding:.95rem; margin-top:.4rem;
+      width:78%;
+      max-width:290px;
+      padding:.95rem;
       background:linear-gradient(135deg,var(--verde),var(--terracota));
-      border:none; border-radius:14px; color:#fff; font-weight:600; cursor:pointer;
-      font-size:1rem; transition:.25s;
+      border:none;
+      border-radius:14px;
+      color:#fff;
+      font-weight:600;
+      cursor:pointer;
+      font-size:1rem;
+      margin:0 auto .6rem auto;
+      display:block;
+      transition:.25s;
     }
-    button:hover{ transform:translateY(-2px); }
 
-    .toggle{
-      font-size:.9rem; color:var(--terracota); text-decoration:underline;
-      margin-top:.8rem; cursor:pointer; display:block;
+    .toggle{ color:var(--terracota); text-decoration:underline; cursor:pointer; margin:.8rem 0; display:block; }
+
+    .message{
+      min-height:1.4rem;
+      margin:.8rem 0;
+      font-size:.95rem;
     }
-    .message{ margin-top:1.2rem; min-height:1.4rem; font-size:.95rem; }
 
-    /* ÍCONES SOCIAIS */
-    .social-row.boho { display:flex; justify-content:center; gap:18px; margin:1.6rem 0 1.2rem; }
-    .social-icon.boho {
-      width:56px; height:56px; border-radius:18px;
+    /* SOCIAL BOHO */
+    .social-row.boho{
+      display:flex;
+      justify-content:center;
+      gap:18px;
+      margin:1.6rem 0;
+    }
+
+    .social-icon.boho{
+      width:56px;
+      height:56px;
+      border-radius:18px;
       background:linear-gradient(145deg,#f7e9e3,#f3d7cb,#f6ece5);
       border:1px solid rgba(204,106,90,0.25);
-      display:flex; align-items:center; justify-content:center;
-      box-shadow:0 4px 10px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.4);
-      cursor:pointer; transition:.35s ease;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 4px 10px rgba(0,0,0,0.12),
+                 inset 0 1px 2px rgba(255,255,255,0.4);
+      transition:.35s;
+      cursor:pointer;
     }
-    .social-icon.boho img { width:26px; height:26px; }
-    .social-icon.boho.apple img { filter:invert(0); }
-    .social-icon.boho.bio { font-size:26px; color:#335953; }
 
     .social-icon.boho:hover{
       transform:translateY(-3px) scale(1.05);
-      box-shadow:0 6px 14px rgba(0,0,0,0.18), inset 0 1px 3px rgba(255,255,255,0.5);
-      background:linear-gradient(145deg,#f6e4dc,#efd1c3,#f3ded6);
+      box-shadow:0 6px 14px rgba(0,0,0,0.18),
+                 inset 0 1px 3px rgba(255,255,255,0.5);
     }
 
-    @keyframes fadeIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+    @keyframes fadeIn{
+      from{ opacity:0; transform:translateY(10px);}
+      to{ opacity:1; transform:translateY(0);}
+    }
   </style>
 </head>
-<body>
 
+<body>
 <div class="login-card">
+
   <img src="assets/logofemflowterracotasf.png" class="logo"/>
 
   <h2>Bem-vinda ao FemFlow</h2>
@@ -150,14 +212,14 @@
 
   <input id="loginEmail" type="email" placeholder="Seu e-mail"/>
 
-  <!-- CAMPO DE SENHA + OLHO -->
+  <!-- SENHA -->
   <div class="password-wrapper">
     <input id="loginSenha" type="password" placeholder="Sua senha">
     <span id="toggleSenha" class="toggle-eye"></span>
   </div>
 
   <!-- METER -->
-  <div class="strength-meter">
+  <div class="strength-meter" id="strengthMeter">
     <div class="strength-bar" id="bar1"></div>
     <div class="strength-bar" id="bar2"></div>
     <div class="strength-bar" id="bar3"></div>
@@ -180,11 +242,13 @@
 
     <div class="social-icon boho bio" id="bioSignIn">🔒</div>
   </div>
+
 </div>
 
 <script>
-/* ========== HELPERS ========== */
+/* HELPERS */
 window.FEMFLOW = window.FEMFLOW || {};
+
 const scriptURL = FEMFLOW.SCRIPT_URL ||
   localStorage.getItem("femflow_script") ||
   "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
@@ -205,7 +269,7 @@ async function postGAS(p){
   return r.json();
 }
 
-/* ========== LOGIN ========= */
+/* LOGIN */
 async function entrar(){
   const email=$("#loginEmail").value.trim();
   const senha=$("#loginSenha").value.trim();
@@ -215,7 +279,7 @@ async function entrar(){
   setMsg("Verificando...");
 
   try{
-    const d = await postGAS({action:"login", email, senha});
+    const d=await postGAS({action:"login",email,senha});
 
     if(d.status==="ok"){
       setMsg(`Bem-vinda, ${d.nome||"aluna"}!`,true);
@@ -225,19 +289,15 @@ async function entrar(){
       setTimeout(()=>location.href="home.html",700);
     } else setErr(d.msg||"E-mail ou senha incorretos.");
 
-  } catch(e){
-    setErr("Erro de rede.");
-  }
+  } catch(e){ setErr("Erro de rede."); }
 }
 
 $("#btnEntrar").onclick = entrar;
-
-/* Enter no teclado */
 $("#loginSenha").addEventListener("keydown",e=>{
   if(e.key==="Enter") entrar();
 });
 
-/* ========== VER SENHA (iOS) ========== */
+/* OLHO iOS */
 const senhaInput = $("#loginSenha");
 const toggle = $("#toggleSenha");
 
@@ -247,8 +307,8 @@ toggle.onclick = ()=>{
   toggle.classList.toggle("active",isPass);
 };
 
-/* ========== FORÇA DA SENHA ========== */
-const meter = $(".strength-meter");
+/* FORÇA DA SENHA */
+const meter = $("#strengthMeter");
 
 senhaInput.addEventListener("input", ()=>{
   const v = senhaInput.value;
@@ -265,7 +325,7 @@ senhaInput.addEventListener("input", ()=>{
   if(score>=3) meter.classList.add("strength-3");
 });
 
-/* ========== GOOGLE LOGIN ========== */
+/* GOOGLE */
 $("#googleSignIn").onclick = ()=> google.accounts.id.prompt();
 
 async function preencherComGoogle(r){
@@ -291,8 +351,8 @@ async function preencherComGoogle(r){
 }
 window.preencherComGoogle = preencherComGoogle;
 
-/* ========== BIOMETRIA LOCAL ========== */
-const bio = $("#bioSignIn");
+/* BIOMETRIA */
+const bio=$("#bioSignIn");
 
 (async()=>{
   if(window.PublicKeyCredential &&
@@ -306,7 +366,7 @@ bio.onclick = async ()=>{
     const email=$("#loginEmail").value.trim();
     if(!email){ setErr("Digite seu e-mail."); return; }
 
-    const chal = crypto.getRandomValues(new Uint8Array(32));
+    const chal=crypto.getRandomValues(new Uint8Array(32));
 
     await navigator.credentials.create({
       publicKey:{
@@ -330,10 +390,10 @@ bio.onclick = async ()=>{
   } catch(e){ setErr("Falha ao usar biometria."); }
 };
 
-/* ========== APPLE LOGIN FUTURO ========== */
+/* APPLE FUTURO */
 $("#appleSignIn").onclick = ()=> FEMFLOW.toast?.("🍎 Entrar com Apple em breve.");
-
 </script>
 </body>
 </html>
+
 
