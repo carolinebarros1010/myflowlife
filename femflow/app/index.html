@@ -11,8 +11,17 @@
   <script>window.FEMFLOW_DISABLE_UI = true;</script>
   <script defer src="./femflow-core.js"></script>
 
-  <!-- Google Sign-In -->
+  <!-- GOOGLE SIGN-IN (PRONTO E CONFIGURADO) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Google Callback -->
+  <div id="g_id_onload"
+       data-client_id="457716839153-mot8gjc4j50cfug9em1t1niahhferll6.apps.googleusercontent.com"
+       data-callback="preencherComGoogle"
+       data-auto_select="false"
+       data-login_uri="https://myflowlife.com.br/femflow/app/index.html">
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
 
   <style>
@@ -77,22 +86,14 @@
       transition:.2s;
     }
 
-    input:focus{
-      border-color:var(--terracota);
-      box-shadow:0 0 0 3px rgba(204,106,90,0.15);
-    }
-
-    /* WRAPPER SENHA */
+    /* WRAPPER SENHA (FINAL) */
     .password-wrapper{
       position:relative;
       width:78%;
       max-width:290px;
       margin:0 auto 1rem auto;
     }
-
-    .password-wrapper input{
-      padding-right:45px !important;
-    }
+    .password-wrapper input{ width:100%; }
 
     /* OLHO iOS */
     .toggle-eye{
@@ -109,7 +110,6 @@
       cursor:pointer;
       transition:.25s ease;
     }
-
     .toggle-eye.active{
       background-image:url("assets/icons/eye.svg");
       opacity:.95;
@@ -120,12 +120,11 @@
     .strength-meter{
       width:78%;
       max-width:290px;
-      margin: -4px auto 14px auto;
+      margin:-4px auto 14px auto;
       display:flex;
       gap:6px;
       justify-content:center;
     }
-
     .strength-bar{
       flex:1;
       height:6px;
@@ -134,7 +133,6 @@
       opacity:.5;
       transition:.35s ease;
     }
-
     .strength-1 #bar1{ background:#cc6a5a; opacity:1; }
     .strength-2 #bar1,
     .strength-2 #bar2{ background:#efbda6; opacity:1; }
@@ -142,18 +140,19 @@
     .strength-3 #bar2,
     .strength-3 #bar3{ background:#335953; opacity:1; }
 
+    /* BOTÃO ENTRAR — VERSÃO MENOR E ELEGANTE */
     button{
-      width:78%;
-      max-width:290px;
-      padding:.95rem;
+      width:64%;
+      max-width:240px;
+      padding:.85rem;
       background:linear-gradient(135deg,var(--verde),var(--terracota));
       border:none;
       border-radius:14px;
       color:#fff;
       font-weight:600;
       cursor:pointer;
-      font-size:1rem;
-      margin:0 auto .6rem auto;
+      font-size:.95rem;
+      margin:0 auto .8rem auto;
       display:block;
       transition:.25s;
     }
@@ -164,6 +163,7 @@
       min-height:1.4rem;
       margin:.8rem 0;
       font-size:.95rem;
+      text-align:center;
     }
 
     /* SOCIAL BOHO */
@@ -189,16 +189,6 @@
       cursor:pointer;
     }
 
-    .social-icon.boho:hover{
-      transform:translateY(-3px) scale(1.05);
-      box-shadow:0 6px 14px rgba(0,0,0,0.18),
-                 inset 0 1px 3px rgba(255,255,255,0.5);
-    }
-
-    @keyframes fadeIn{
-      from{ opacity:0; transform:translateY(10px);}
-      to{ opacity:1; transform:translateY(0);}
-    }
   </style>
 </head>
 
@@ -246,10 +236,11 @@
 </div>
 
 <script>
-/* HELPERS */
+/* === HELPERS === */
 window.FEMFLOW = window.FEMFLOW || {};
 
-const scriptURL = FEMFLOW.SCRIPT_URL ||
+const scriptURL =
+  FEMFLOW.SCRIPT_URL ||
   localStorage.getItem("femflow_script") ||
   "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
@@ -269,7 +260,7 @@ async function postGAS(p){
   return r.json();
 }
 
-/* LOGIN */
+/* === LOGIN PADRÃO === */
 async function entrar(){
   const email=$("#loginEmail").value.trim();
   const senha=$("#loginSenha").value.trim();
@@ -280,7 +271,6 @@ async function entrar(){
 
   try{
     const d=await postGAS({action:"login",email,senha});
-
     if(d.status==="ok"){
       setMsg(`Bem-vinda, ${d.nome||"aluna"}!`,true);
       localStorage.setItem("femflow_id",d.id);
@@ -288,16 +278,13 @@ async function entrar(){
       localStorage.setItem("femflow_auth","yes");
       setTimeout(()=>location.href="home.html",700);
     } else setErr(d.msg||"E-mail ou senha incorretos.");
-
   } catch(e){ setErr("Erro de rede."); }
 }
 
 $("#btnEntrar").onclick = entrar;
-$("#loginSenha").addEventListener("keydown",e=>{
-  if(e.key==="Enter") entrar();
-});
+$("#loginSenha").addEventListener("keydown",e=>{ if(e.key==="Enter") entrar(); });
 
-/* OLHO iOS */
+/* === OLHO iOS === */
 const senhaInput = $("#loginSenha");
 const toggle = $("#toggleSenha");
 
@@ -307,35 +294,35 @@ toggle.onclick = ()=>{
   toggle.classList.toggle("active",isPass);
 };
 
-/* FORÇA DA SENHA */
+/* === FORÇA DA SENHA === */
 const meter = $("#strengthMeter");
 
 senhaInput.addEventListener("input", ()=>{
   const v = senhaInput.value;
   let score = 0;
-
   if(v.length >= 6) score++;
   if(/[A-Z]/.test(v) || /[0-9]/.test(v)) score++;
   if(/[^A-Za-z0-9]/.test(v) || v.length >= 10) score++;
 
   meter.classList.remove("strength-1","strength-2","strength-3");
-
   if(score===1) meter.classList.add("strength-1");
   if(score===2) meter.classList.add("strength-2");
   if(score>=3) meter.classList.add("strength-3");
 });
 
-/* GOOGLE */
+/* ==================================================
+   GOOGLE LOGIN — VERSÃO FINAL COM CALLBACK
+   ================================================== */
 $("#googleSignIn").onclick = ()=> google.accounts.id.prompt();
 
-async function preencherComGoogle(r){
+async function preencherComGoogle(response){
   try{
-    const d = jwt_decode(r.credential);
-    if(!d || !d.email) return;
+    const data = jwt_decode(response.credential);
+    if(!data || !data.email) return;
 
-    $("#loginEmail").value = d.email;
+    $("#loginEmail").value = data.email;
 
-    const res = await postGAS({action:"login",email:d.email,senha:""});
+    const res = await postGAS({action:"login",email:data.email,senha:""});
 
     if(res.status==="ok"){
       localStorage.setItem("femflow_id",res.id);
@@ -347,11 +334,16 @@ async function preencherComGoogle(r){
       FEMFLOW.toast?.("💡 Complete seu cadastro para continuar.");
     }
 
-  } catch(e){ console.warn(e); }
+  } catch(e){
+    console.warn("Erro Google:",e);
+  }
 }
+
 window.preencherComGoogle = preencherComGoogle;
 
-/* BIOMETRIA */
+/* ==================================================
+   BIOMETRIA — AGORA FUNCIONANDO (ES256 + RS256)
+   ================================================== */
 const bio=$("#bioSignIn");
 
 (async()=>{
@@ -366,15 +358,25 @@ bio.onclick = async ()=>{
     const email=$("#loginEmail").value.trim();
     if(!email){ setErr("Digite seu e-mail."); return; }
 
-    const chal=crypto.getRandomValues(new Uint8Array(32));
+    const chal = crypto.getRandomValues(new Uint8Array(32));
 
     await navigator.credentials.create({
       publicKey:{
-        challenge:chal,
-        rp:{name:"FemFlow"},
-        user:{id:new TextEncoder().encode(email),name:email,displayName:email},
-        pubKeyCredParams:[{type:"public-key",alg:-7}],
-        authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required"}
+        challenge: chal,
+        rp:{ name:"FemFlow" },
+        user:{
+          id:new TextEncoder().encode(email),
+          name: email,
+          displayName: email
+        },
+        pubKeyCredParams:[
+          { type:"public-key", alg:-7 },
+          { type:"public-key", alg:-257 }
+        ],
+        authenticatorSelection:{
+          authenticatorAttachment:"platform",
+          userVerification:"required"
+        }
       }
     });
 
@@ -386,14 +388,18 @@ bio.onclick = async ()=>{
       setMsg("Acesso liberado ✨",true);
       setTimeout(()=>location.href="home.html",700);
     }
-
-  } catch(e){ setErr("Falha ao usar biometria."); }
+  } catch(e){
+    console.warn(e);
+    setErr("Falha ao usar biometria.");
+  }
 };
 
-/* APPLE FUTURO */
+/* APPLE LOGIN FUTURO */
 $("#appleSignIn").onclick = ()=> FEMFLOW.toast?.("🍎 Entrar com Apple em breve.");
+
 </script>
 </body>
 </html>
+
 
 
