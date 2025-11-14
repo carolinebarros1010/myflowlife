@@ -164,18 +164,16 @@
       });
 
       async function leadParcial(nome, email, telefone){
-        try{
-          await fetch(SCRIPT_URL, {
-            method:"POST",
-            headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify({
-              action:"leadParcial",
-              nome, email, telefone,
-              origem:"Anamnese Deluxe FemFlow"
-            })
-          });
-        }catch(_){}
-      }
+  try{
+    const qs = new URLSearchParams({
+      action:"leadparcial",
+      nome, email, telefone,
+      origem:"Anamnese Deluxe FemFlow"
+    }).toString();
+
+    await fetch(SCRIPT_URL + "?" + qs);
+  }catch(_){}
+}
 
       btn.addEventListener("click", async ()=>{
         if(!validate()) return;
