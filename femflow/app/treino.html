@@ -310,47 +310,107 @@
       line-height: 1.4;
     }
 
-    /* 🌕 PERFORMANCE MODE — ovulação */
-    body.ff-performance-ovulation {
-      background: linear-gradient(180deg, #fff4ef 0%, #fce0d8 100%);
-    }
+      /* ================================
+   * 🎯 PERFORMANCE VIEW HORMONAL
+   * ================================ */
 
-    .perf-banner {
-      background: #ffe8e1;
-      border-left: 5px solid var(--terracota);
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 14px;
-      color: var(--teal);
-      text-align: left;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
-      animation: fadeIn 0.5s ease-in-out;
-    }
+  body.ff-performance-ovulation {
+    background: radial-gradient(circle at top,
+      #ffe6e0 0%,
+      #fff8f4 45%,
+      #fce3d5 100%);
+  }
 
-    .perf-banner p {
-      margin: 4px 0 0;
-      font-size: 0.9rem;
-      opacity: 0.85;
-    }
+  body.ff-flow-menstrual {
+    background: linear-gradient(180deg,
+      #f8eef0 0%,
+      #fff8f4 55%,
+      #f4dde5 100%);
+  }
 
-    body.ff-performance-ovulation .subtimer.running {
-      animation: pulse 1s infinite;
-    }
+  body.ff-flow-folicular {
+    background: linear-gradient(180deg,
+      #e9f5f0 0%,
+      #fff8f4 70%,
+      #e8fbf5 100%);
+  }
 
-    @keyframes pulse {
-      0% { transform: scale(1); background:#ffe6e0; }
-      50% { transform: scale(1.05); background:#ffd9d0; }
-      100% { transform: scale(1); background:#ffe6e0; }
-    }
+  body.ff-flow-lutea {
+    background: linear-gradient(180deg,
+      #fff8f4 0%,
+      #f9eddc 50%,
+      #f4e2c7 100%);
+  }
 
-    body.ff-performance-ovulation .carousel-item {
-      box-shadow: 0px 8px 18px rgba(204,106,90,0.25);
-    }
+  /* ================================
+   * 🌕 BANNER PERFORMANCE (ovulatória)
+   * ================================ */
+  .perf-banner {
+    background: rgba(255,255,255,0.9);
+    border-radius: 16px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    border: 1px dashed rgba(204,106,90,0.55);
+    font-size: 0.85rem;
+    text-align: left;
+  }
 
-    /* Outros modos (já preparados, podem ganhar cores depois) */
-    body.ff-flow-menstrual {}
-    body.ff-flow-folicular {}
-    body.ff-flow-lutea {}
+  .perf-banner b {
+    color: var(--terracota);
+  }
+
+  .perf-banner p {
+    margin: 4px 0 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  /* ================================
+   * 💗🔥 BOX EXTRA (HIIT / CARDIO DO BOX)
+   * ================================ */
+  .box-extra-wrapper {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .box-extra {
+    border-radius: 16px;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.85rem;
+    background: #fff7f3;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+  }
+
+  .box-extra h4 {
+    margin: 4px 0 6px;
+    font-size: 0.95rem;
+    color: var(--teal);
+  }
+
+  .box-extra p {
+    margin: 3px 0;
+    line-height: 1.35;
+  }
+
+  .box-extra-tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+
+  .box-extra.hiit {
+    border-left: 3px solid var(--terracota);
+  }
+
+  .box-extra.cardio {
+    border-left: 3px solid var(--teal);
+    background: #f4faf8;
+  }
   </style>
 </head>
 
