@@ -1,9 +1,16 @@
 // =======================================================================
-// FemFlow — Treino Diário 2025 (Versão HÍBRIDA + Performance View)
-// Box0 + Box1(+HIIT/Cardio) + Box2(+HIIT/Cardio) + Finalização
+// FemFlow — Treino Diário 2025 (Versão HÍBRIDA PREMIUM + Performance View)
+// Box0 + Box1(+HIIT/Cardio) + Box2(+HIIT/Cardio) + Box3 (se existir) + Finalização
+// - Híbrido: Apps Script (treino-dia) + Firebase exercícios
+// - Pronto para PWA/TWA e modo offline (snapshot do último treino)
 // =======================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
+
+  // -----------------------------------------------------------
+  // 🔐 0. Constantes de armazenamento offline
+  // -----------------------------------------------------------
+  const OFFLINE_KEY_TREINO = "femflow_offline_treino_v1";
 
   // ============================================================
   // 1. VERIFICAÇÕES DE LOGIN E CICLO
@@ -29,13 +36,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ============================================================
   // 2. ELEMENTOS BÁSICOS DO TREINO
   // ============================================================
-  const track = document.querySelector("#carouselTrack");
-  const bar   = document.querySelector("#progressBar");
+  const track     = document.querySelector("#carouselTrack");
+  const bar       = document.querySelector("#progressBar");
   const tituloDia = document.querySelector("#tituloDiaTreino");
 
   if (!track || !bar) {
     FEMFLOW.toast("❌ Erro interno: Estrutura do treino ausente.");
-    console.error("Elementos essenciais não encontrados.");
+    console.error("Elementos essenciais não encontrados (track/progressBar).");
     return;
   }
 
@@ -47,6 +54,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (tituloDia) {
     tituloDia.textContent = `Dia ${diaPrograma} do Programa`;
   }
+
+  // meta do treino (para salvar/descanso, inclusive offline)
+  let metaTreino = {
+    fase: null,
+    diaCiclo: null,
+    diaPrograma
+  };
 
   // ============================================================
   // 3. NAVEGAÇÃO DO CARROSSEL + SWIPE
@@ -174,99 +188,39 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // ============================================================
-  // 6. FALLBACKS LOCAIS BÁSICOS
-  // ============================================================
-  const enfase = localStorage.getItem("femflow_enfase") || "geral";
-
-  if (!localStorage.getItem("fase_sugerida"))
-    localStorage.setItem("fase_sugerida", "folicular");
-  if (!localStorage.getItem("nivel_atual"))
-    localStorage.setItem("nivel_atual", "iniciante");
-  if (!localStorage.getItem("dia_ciclo"))
-    localStorage.setItem("dia_ciclo", "1");
-
-  // ============================================================
-  // 7. CHAMADA AO BACKEND (Apps Script via Worker)
-  // ============================================================
-  const SCRIPT_URL =
-    FEMFLOW.SCRIPT_URL ||
-    localStorage.getItem("femflow_script") ||
-    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
-
-  const url = `${SCRIPT_URL}?action=treino&id=${id}&enfase=${enfase}`;
-
-  let j = null;
-
-  try {
-    const resp = await fetch(url);
-    const txt  = await resp.text();
-    console.log("📡 Resposta bruta:", txt.slice(0, 300));
-
-    try { j = JSON.parse(txt); }
-    catch {
-      FEMFLOW.toast("❌ Resposta inválida do servidor.");
-      console.error("Resposta não-JSON:", txt);
-      return;
-    }
-
-  } catch (e) {
-    FEMFLOW.toast("⚠️ Falha de rede.");
-    console.error(e);
-    return;
-  }
-
-  // ============================================================
-  // 8. VALIDAÇÃO DO RETORNO
-  // ============================================================
-  if (!j || j.status === "id_not_found") {
-    render([{ tipo: "texto", titulo: "Sem treino", mensagem: "Faça login novamente." }]);
-    return;
-  }
-
-  // fallback de metadata Firebase se não vier exSource
-  if (!j.exSource) {
-    j.exSource = "firebase";
-    j.firebaseQuery = j.firebaseQuery || {
-      nivel: localStorage.getItem("nivel_atual"),
-      fase:  localStorage.getItem("fase_sugerida"),
-      enfase,
-      diaKey: `dia_${localStorage.getItem("dia_ciclo")}`
-    };
-  }
-
-  // ============================================================
-  // 9. PERFORMANCE VIEW (fases hormonais)
+  // 6. PERFORMANCE VIEW + HTML DOS BOXES + RENDER
   // ============================================================
   let perfMode = "none";
-  const faseLower = (j.fase || "").toLowerCase();
 
-  if (faseLower.includes("ovulat")) {
-    perfMode = "ovulation";
-    document.body.classList.add("ff-performance-ovulation");
-  } else if (faseLower.includes("menstr")) {
-    perfMode = "softflow";
-    document.body.classList.add("ff-flow-menstrual");
-  } else if (faseLower.includes("folicular")) {
-    perfMode = "growthflow";
-    document.body.classList.add("ff-flow-folicular");
-  } else if (faseLower.includes("lutea") || faseLower.includes("lútea")) {
-    perfMode = "focusedflow";
-    document.body.classList.add("ff-flow-lutea");
-  }
+  const aplicarPerformanceView = (faseStr = "") => {
+    const f = (faseStr || "").toLowerCase();
 
-  // ============================================================
-  // 10. ORGANIZAÇÃO DAS FAIXAS HIIT/CARDIO POR BOX
-  // ============================================================
-  const extrasByBox = new Map();
-  (j.hiitCardio || []).forEach(entry => {
-    const b = Number(entry.box || 0);
-    if (!b || !Array.isArray(entry.extras)) return;
-    extrasByBox.set(b, entry.extras);
-  });
+    // limpa classes antigas
+    document.body.classList.remove(
+      "ff-performance-ovulation",
+      "ff-flow-menstrual",
+      "ff-flow-folicular",
+      "ff-flow-lutea",
+      "ff-flow-lútea"
+    );
 
-  // ============================================================
-  // 11. CRIAÇÃO DO HTML DOS BOXES
-  // ============================================================
+    if (f.includes("ovulat")) {
+      perfMode = "ovulation";
+      document.body.classList.add("ff-performance-ovulation");
+    } else if (f.includes("menstr")) {
+      perfMode = "softflow";
+      document.body.classList.add("ff-flow-menstrual");
+    } else if (f.includes("folicular")) {
+      perfMode = "growthflow";
+      document.body.classList.add("ff-flow-folicular");
+    } else if (f.includes("lutea") || f.includes("lútea")) {
+      perfMode = "focusedflow";
+      document.body.classList.add("ff-flow-lutea");
+    } else {
+      perfMode = "none";
+    }
+  };
+
   const criarBoxHTML = (box) => {
 
     // Banner de Performance (apenas em box de treino, modo ovulatório)
@@ -337,7 +291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return "";
   };
 
-  const render = lista => {
+  const render = (lista) => {
     boxes = lista;
     track.innerHTML = lista
       .map(b => `<div class="carousel-item">${criarBoxHTML(b)}</div>`)
@@ -348,11 +302,150 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // ============================================================
-  // 12. MONTAGEM DA LISTA DE BOXES (Box0 + Box1/2 + BoxFinal)
+  // 7. HELPERS OFFLINE (snapshot do último treino)
+  // ============================================================
+  const carregarSnapshotOffline = () => {
+    try {
+      const raw = localStorage.getItem(OFFLINE_KEY_TREINO);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn("⚠️ Falha ao carregar snapshot offline:", e);
+      return null;
+    }
+  };
+
+  const salvarSnapshotOffline = (meta, lista) => {
+    try {
+      const snap = {
+        meta: {
+          fase: meta.fase || null,
+          diaCiclo: meta.diaCiclo || null,
+          diaPrograma: meta.diaPrograma || null
+        },
+        lista
+      };
+      localStorage.setItem(OFFLINE_KEY_TREINO, JSON.stringify(snap));
+    } catch (e) {
+      console.warn("⚠️ Falha ao salvar snapshot offline:", e);
+    }
+  };
+
+  // ============================================================
+  // 8. FALLBACKS LOCAIS BÁSICOS
+  // ============================================================
+  const enfase = localStorage.getItem("femflow_enfase") || "geral";
+
+  if (!localStorage.getItem("fase_sugerida"))
+    localStorage.setItem("fase_sugerida", "folicular");
+  if (!localStorage.getItem("nivel_atual"))
+    localStorage.setItem("nivel_atual", "iniciante");
+  if (!localStorage.getItem("dia_ciclo"))
+    localStorage.setItem("dia_ciclo", "1");
+
+  // ============================================================
+  // 9. CHAMADA AO BACKEND (Apps Script via Worker) + OFFLINE
+  // ============================================================
+  const SCRIPT_URL =
+    FEMFLOW.SCRIPT_URL ||
+    localStorage.getItem("femflow_script") ||
+    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+
+  const url = `${SCRIPT_URL}?action=treino&id=${id}&enfase=${enfase}`;
+
+  let j = null;
+  let offlineSnap = null;
+
+  try {
+    const resp = await fetch(url);
+    const txt  = await resp.text();
+    console.log("📡 Resposta bruta treino:", txt.slice(0, 300));
+
+    try {
+      j = JSON.parse(txt);
+    } catch (e) {
+      console.error("❌ Resposta não-JSON:", txt);
+      // tenta offline
+      offlineSnap = carregarSnapshotOffline();
+    }
+
+  } catch (e) {
+    console.warn("⚠️ Falha de rede no treino:", e);
+    offlineSnap = carregarSnapshotOffline();
+  }
+
+  // ------------------------------------------------------------
+  // 9.1. MODO OFFLINE: usa último snapshot salvo
+  // ------------------------------------------------------------
+  if (!j) {
+    if (offlineSnap && Array.isArray(offlineSnap.lista)) {
+      FEMFLOW.toast("📴 Modo offline — exibindo último treino salvo.");
+      document.body.classList.add("ff-offline-mode");
+
+      metaTreino = {
+        fase: offlineSnap.meta?.fase || localStorage.getItem("fase_sugerida") || "folicular",
+        diaCiclo: offlineSnap.meta?.diaCiclo || Number(localStorage.getItem("dia_ciclo") || 1),
+        diaPrograma: offlineSnap.meta?.diaPrograma || diaPrograma
+      };
+
+      aplicarPerformanceView(metaTreino.fase);
+      render(offlineSnap.lista);
+      return;
+    }
+
+    FEMFLOW.toast("⚠️ Sem conexão e nenhum treino salvo. Conecte-se à internet.");
+    render([{
+      tipo: "texto",
+      titulo: "Sem treino disponível",
+      mensagem: "Não foi possível carregar o treino de hoje. Verifique sua conexão e tente novamente."
+    }]);
+    return;
+  }
+
+  // ============================================================
+  // 10. VALIDAÇÃO DO RETORNO ONLINE
+  // ============================================================
+  if (!j || j.status === "id_not_found") {
+    render([{ tipo: "texto", titulo: "Sem treino", mensagem: "Faça login novamente." }]);
+    return;
+  }
+
+  // fallback de metadata Firebase se não vier exSource
+  if (!j.exSource) {
+    j.exSource = "firebase";
+    j.firebaseQuery = j.firebaseQuery || {
+      nivel: localStorage.getItem("nivel_atual"),
+      fase:  localStorage.getItem("fase_sugerida"),
+      enfase,
+      diaKey: `dia_${localStorage.getItem("dia_ciclo")}`
+    };
+  }
+
+  // Atualiza metaTreino com dados reais do backend
+  metaTreino = {
+    fase: j.fase || localStorage.getItem("fase_sugerida"),
+    diaCiclo: j.diaCiclo || Number(localStorage.getItem("dia_ciclo") || 1),
+    diaPrograma: j.diaPrograma || diaPrograma
+  };
+
+  aplicarPerformanceView(metaTreino.fase);
+
+  // ============================================================
+  // 11. ORGANIZAÇÃO DAS FAIXAS HIIT/CARDIO POR BOX
+  // ============================================================
+  const extrasByBox = new Map();
+  (j.hiitCardio || []).forEach(entry => {
+    const b = Number(entry.box || 0);
+    if (!b || !Array.isArray(entry.extras)) return;
+    extrasByBox.set(b, entry.extras);
+  });
+
+  // ============================================================
+  // 12. MONTAGEM DA LISTA DE BOXES (Box0 + Box1/2/3 + BoxFinal)
   // ============================================================
   const lista = [];
 
-  // Box 0 (conexão) e Box Final vem do backend (Apps Script)
+  // Box 0 (conexão) e Box Final vêm do backend (Apps Script)
   let boxIntro = null;
   let boxFinal = null;
 
@@ -375,7 +468,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         j.firebaseQuery.enfase
       );
     } catch (e) {
-      console.warn("Firebase falhou", e);
+      console.warn("Firebase falhou ao carregar exercícios:", e);
     }
 
     if (raw.length) {
@@ -394,7 +487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           return na - nb;
         })
         .forEach(([boxName, arr]) => {
-          const idx = Number((boxName.match(/\d+/) || [0])[0]);
+          const idx = Number((boxName.match(/\d+/) || [0])[0]); // 1,2,3...
           const extras = extrasByBox.get(idx) || [];
 
           lista.push({
@@ -415,43 +508,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (boxFinal) lista.push(boxFinal);
 
+  // ============================================================
+  // 13. RENDERIZA E SALVA SNAPSHOT OFFLINE
+  // ============================================================
   render(lista);
+  salvarSnapshotOffline(metaTreino, lista);
 
   // ============================================================
-  // 13. SALVAR TREINO
+  // 14. SALVAR TREINO
   // ============================================================
   document.querySelector("#salvarTreinoBtn")?.addEventListener("click", async () => {
     FEMFLOW.abrirPSE(async (pse) => {
-      await FEMFLOW.salvarTreino({
-        id,
-        fase: j.fase || localStorage.getItem("fase_sugerida"),
-        treino: "dia",
-        tipo_dia: "treino",
-        pse
-      });
+      try {
+        await FEMFLOW.salvarTreino({
+          id,
+          fase: metaTreino.fase || localStorage.getItem("fase_sugerida"),
+          treino: "dia",
+          tipo_dia: "treino",
+          pse
+        });
 
-      let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
-      if (prog < 30) {
-        localStorage.setItem("femflow_dia_treino", prog + 1);
-        FEMFLOW.toast(`Treino salvo! Próximo: Dia ${prog + 1}`);
-      } else {
-        FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
+        let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
+        if (prog < 30) {
+          localStorage.setItem("femflow_dia_treino", prog + 1);
+          FEMFLOW.toast(`Treino salvo! Próximo: Dia ${prog + 1}`);
+        } else {
+          FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
+        }
+      } catch (e) {
+        console.warn("Falha ao salvar treino (provável offline):", e);
+        FEMFLOW.toast("📴 Sem conexão para salvar agora. Treino realizado ficará registrado localmente.");
       }
     });
   });
 
   // ============================================================
-  // 14. SALVAR DESCANSO
+  // 15. SALVAR DESCANSO
   // ============================================================
   document.querySelector("#descansoBtn")?.addEventListener("click", async () => {
-    await FEMFLOW.salvarDescanso(j.fase || localStorage.getItem("fase_sugerida"));
+    try {
+      await FEMFLOW.salvarDescanso(metaTreino.fase || localStorage.getItem("fase_sugerida"));
 
-    let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
-    if (prog < 30) {
-      localStorage.setItem("femflow_dia_treino", prog + 1);
-      FEMFLOW.toast(`🌿 Descanso registrado. Próximo: Dia ${prog + 1}`);
-    } else {
-      FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
+      let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
+      if (prog < 30) {
+        localStorage.setItem("femflow_dia_treino", prog + 1);
+        FEMFLOW.toast(`🌿 Descanso registrado. Próximo: Dia ${prog + 1}`);
+      } else {
+        FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
+      }
+    } catch (e) {
+      console.warn("Falha ao registrar descanso (provável offline):", e);
+      FEMFLOW.toast("📴 Sem conexão para registrar descanso agora. Você pode repetir esse dia depois.");
     }
   });
 
