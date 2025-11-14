@@ -11,17 +11,19 @@ window.FEMFLOW = {
     return ["index.html", "home.html", "ciclo.html"].includes(p);
   },
 
-  /* =======================================================
-     ⚙️ INICIALIZAÇÃO GERAL
-  ======================================================= */
-  initTreino() {
-   console.log("💫 FemFlow Core v2.2 conectado com sucesso");
+/* =======================================================
+   ⚙️ INICIALIZAÇÃO GERAL
+======================================================= */
+initTreino() {
+  console.log("💫 FemFlow Core v2.2 conectado com sucesso");
+
   this.criarModalPSE();
   this.autoCiclo();
-     // Inicializa contador do programa (se ainda não existir)
-if (!localStorage.getItem("femflow_dia_treino")) {
-  localStorage.setItem("femflow_dia_treino", "1");
-}
+
+  // Inicializa contador do programa (se ainda não existir)
+  if (!localStorage.getItem("femflow_dia_treino")) {
+    localStorage.setItem("femflow_dia_treino", "1");
+  }
 
   // 🚧 Verificação global de ciclo antes de carregar o app
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
@@ -44,13 +46,47 @@ if (!localStorage.getItem("femflow_dia_treino")) {
     this.inserirHeaderApp();
   }
 },
-  /* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
-  SCRIPT_URL:
-    localStorage.getItem("femflow_script") ||
-    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev",
 
-  /* ----------- 🎨 LOGO PADRÃO ------------ */
-  LOGO: "https://carolinebarros1010.github.io/myflowlife/femflow/app/assets/logofemflowterracota.png",
+
+/* ============================================================
+   FEMFLOW — Resolver Estado Atual para Treino
+============================================================ */
+getEstadoTreino() {
+  const enfase = localStorage.getItem("femflow_enfase") || "geral";
+
+  const fase =
+    localStorage.getItem("fase_atual") ||
+    localStorage.getItem("fase_sugerida") ||
+    "folicular";
+
+  const faseSugerida =
+    localStorage.getItem("fase_sugerida") ||
+    localStorage.getItem("fase_atual") ||
+    fase;
+
+  const diaCiclo =
+    Number(localStorage.getItem("dia_ciclo")) || 1;
+
+  const nivel =
+    localStorage.getItem("nivel_atual") || "iniciante";
+
+  const cicloOK =
+    localStorage.getItem("femflow_cycle_configured") === "yes" &&
+    localStorage.getItem("femflow_startDate") &&
+    localStorage.getItem("femflow_cycleLength");
+
+  return { enfase, nivel, fase, faseSugerida, diaCiclo, cicloOK };
+},
+
+
+/* ----------- 🔗 ENDPOINT PRINCIPAL ------------ */
+SCRIPT_URL:
+  localStorage.getItem("femflow_script") ||
+  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev",
+
+/* ----------- 🎨 LOGO PADRÃO ------------ */
+LOGO: "https://carolinebarros1010.github.io/myflowlife/femflow/app/assets/logofemflowterracota.png",
+
 
   /* =======================================================
      🌸 Cadastro / Anamnese → Apps Script
