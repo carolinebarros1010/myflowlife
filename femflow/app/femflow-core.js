@@ -599,6 +599,85 @@ abrirPSE(callback) {
     this.toast(`🔥 HIIT iniciado: ${on}s ON / ${off}s OFF ×${ciclos}`);
   },
 
+/* =======================================================
+   🔐  RESET DE SENHA — FemFlow (Compatível com Backend)
+======================================================= */
+
+/* Solicitar link de redefinição — action=solicitarResetSenha */
+FEMFLOW.solicitarResetSenha = async function(email) {
+  if (!email) {
+    this.toast("Digite seu e-mail antes.", true);
+    return;
+  }
+
+  try {
+    const resp = await fetch(this.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "solicitarResetSenha",
+        email
+      })
+    });
+
+    const r = await resp.json();
+    console.log("RESET STEP 1:", r);
+
+    if (r.status === "ok") {
+      this.toast("📩 Enviamos um link de redefinição para seu e-mail.");
+      localStorage.setItem("femflow_reset_email", email);
+      this.router("reset");
+    } else {
+      this.toast("E-mail não encontrado.", true);
+    }
+
+  } catch(e) {
+    console.error("resetErro", e);
+    this.toast("Falha na conexão.", true);
+  }
+};
+
+
+/* Aplicar nova senha — action=resetSenha */
+FEMFLOW.enviarNovaSenha = async function(id, token, novaSenha) {
+  if (!id || !token || !novaSenha) {
+    this.toast("Preencha todos os campos.", true);
+    return;
+  }
+
+  try {
+    const resp = await fetch(this.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "resetSenha",
+        id,
+        token,
+        novaSenha
+      })
+    });
+
+    const r = await resp.json();
+    console.log("RESET STEP 2:", r);
+
+    if (r.status === "ok") {
+      this.toast("✨ Senha redefinida!");
+      this.router("index");
+    } else if (r.status === "expired") {
+      this.toast("Link expirado. Solicite novamente.", true);
+    } else if (r.status === "invalid") {
+      this.toast("Token inválido.", true);
+    } else {
+      this.toast("Não foi possível redefinir.", true);
+    }
+
+  } catch (e) {
+    console.error(e);
+    this.toast("Erro ao redefinir senha.", true);
+  }
+};
+
+   
   /* =======================================================
      🔹 6. TOAST UNIVERSAL
   ======================================================= */
