@@ -143,52 +143,47 @@
   </script>
   <script src="./femflow-core.js"></script>
   <script>
-    const $ = s => document.querySelector(s);
-    const msg = $("#mensagem");
+const $ = s => document.querySelector(s);
+const msg = $("#mensagem");
 
-    // Pré-preenche e-mail vindo do link
-   (function init(){
+(function init() {
   const p = new URLSearchParams(location.search);
 
   window._resetID    = p.get("id") || "";
   window._resetToken = p.get("token") || "";
 
   const e = p.get("email");
-  if(e) $("#email").value = decodeURIComponent(e);
+  if (e) $("#email").value = decodeURIComponent(e);
 })();
-    
-    function setMsg(t, ok=false){ msg.textContent=t; msg.style.color= ok? "#2e7d32" : "#335953"; }
-    function setErr(t){ msg.textContent=t; msg.style.color="#cc6a5a"; }
 
-    async function postGAS(payload, {retries=2, initialDelay=1200} = {}){
-      const doFetch = () => fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-      let attempt=0, delay=initialDelay;
-      while(true){
-        const r = await doFetch().catch(()=>null);
-        if(r && r.ok){
-          const ct=(r.headers.get("content-type")||"").toLowerCase();
-          return ct.includes("application/json")? r.json(): JSON.parse(await r.text());
-        }
-        const st = r? r.status:0;
-        if((st===429||st===503) && attempt<retries){ await new Promise(res=>setTimeout(res,delay)); attempt++; delay*=2; continue; }
-        throw new Error(st?`HTTP ${st}`:'Falha de rede');
-      }
-    }
+function setMsg(t, ok=false){
+  msg.textContent = t;
+  msg.style.color = ok ? "#2e7d32" : "#335953";
+}
+function setErr(t){
+  msg.textContent = t;
+  msg.style.color = "#cc6a5a";
+}
 
-   async function salvar(){
+async function salvar() {
   const email = $("#email").value.trim().toLowerCase();
   const s1 = $("#senha1").value.trim();
   const s2 = $("#senha2").value.trim();
 
-  if(!email || !s1 || !s2){ setErr("Preencha todos os campos."); return; }
-  if(s1.length < 6){ setErr("A senha deve ter ao menos 6 caracteres."); return; }
-  if(s1 !== s2){ setErr("As senhas não coincidem."); return; }
+  if (!email || !s1 || !s2) {
+    setErr("Preencha todos os campos.");
+    return;
+  }
+  if (s1.length < 6) {
+    setErr("A senha deve ter ao menos 6 caracteres.");
+    return;
+  }
+  if (s1 !== s2) {
+    setErr("As senhas não coincidem.");
+    return;
+  }
 
-  if(!window._resetID || !window._resetToken){
+  if (!window._resetID || !window._resetToken) {
     setErr("Link inválido ou expirado.");
     return;
   }
@@ -196,32 +191,45 @@
   setMsg("Atualizando senha…");
   $("#btnSalvar").disabled = true;
 
-  try{
-    const data = await postGAS({
-      action:"resetsenha",
-      id: window._resetID,
-      token: window._resetToken,
-      novaSenha: s1
+  try {
+    const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "resetSenha",  // ✔ CORRIGIDO
+        id: window._resetID,
+        token: window._resetToken,
+        novaSenha: s1
+      })
     });
 
-    if(data.status === "ok"){
+    const data = await resp.json();
+    console.log("BACK RESET:", data);
+
+    if (data.status === "ok") {
       setMsg("✔️ Senha atualizada! Voltando ao login…", true);
-      setTimeout(()=> location.href="index.html", 1200);
+      setTimeout(() => location.href = "index.html", 1200);
     }
-    else if(data.status === "expired"){
+    else if (data.status === "expired") {
       setErr("Link expirado. Solicite nova recuperação.");
       $("#btnSalvar").disabled = false;
     }
-    else{
+    else if (data.status === "invalid") {
+      setErr("Token inválido. Solicite nova recuperação.");
+      $("#btnSalvar").disabled = false;
+    }
+    else {
       setErr(data.msg || "Erro ao redefinir senha.");
       $("#btnSalvar").disabled = false;
     }
   }
-  catch(e){
-    setErr("❌ Falha de rede.");
+  catch (e) {
+    console.error(e);
+    setErr("❌ Falha na conexão.");
     $("#btnSalvar").disabled = false;
   }
 }
-  </script>
+</script>
+
 </body>
 </html>
