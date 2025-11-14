@@ -9,240 +9,349 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/treino.css" />
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --teal: #335953;
+      --terracota: #cc6a5a;
+      --bege: #fff8f4;
+      --areia: #f2e6dd;
+      --sombra: rgba(0, 0, 0, 0.08);
+    }
 
-<style>
-/* ============================================================
-   🌸 VARIÁVEIS FEMFLOW
-============================================================ */
-:root {
-  --teal: #335953;
-  --terracota: #cc6a5a;
-  --bege: #fff8f4;
-  --areia: #f2e6dd;
-  --sombra: rgba(0, 0, 0, 0.08);
-}
+    /* 🌿 BASE */
+    * {
+      box-sizing: border-box;
+    }
 
-/* ============================================================
-   🌿 BASE
-============================================================ */
-* {
-  box-sizing: border-box;
-}
+    body {
+      margin: 0;
+      padding-top: calc(85px + env(safe-area-inset-top, 0px));
+      font-family: "Lato", sans-serif;
+      background: linear-gradient(180deg, var(--bege) 0%, var(--areia) 100%);
+      color: var(--teal);
+      -webkit-font-smoothing: antialiased;
+    }
 
-body {
-  margin: 0;
-  padding-top: calc(85px + env(safe-area-inset-top, 0px));
-  font-family: "Lato", sans-serif;
-  background: linear-gradient(180deg, var(--bege) 0%, var(--areia) 100%);
-  color: var(--teal);
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-}
+    /* 🌸 CABEÇALHO */
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding-top: 20px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
 
-/* ============================================================
-   🌸 CABEÇALHO
-============================================================ */
-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding-top: 20px;
-  margin-bottom: 10px;
-  text-align: center;
-}
+    header h1 {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      font-size: 1.8rem;
+      color: var(--teal);
+      letter-spacing: 0.5px;
+    }
 
-header h1 {
-  margin: 0;
-  font-family: "Playfair Display", serif;
-  font-size: 1.8rem;
-  color: var(--teal);
-}
+    header .subtitle {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #7a6c66;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+    }
 
-header .subtitle {
-  margin: 0;
-  font-size: 0.95rem;
-  color: #7a6c66;
-  font-weight: 500;
-}
+    #tituloDiaTreino {
+      margin-top: 8px;
+      color: var(--terracota);
+      font-size: 1.1rem;
+      font-family: "Playfair Display", serif;
+    }
 
-#tituloDiaTreino {
-  margin-top: 8px;
-  color: var(--terracota);
-  font-size: 1.1rem;
-  font-family: "Playfair Display", serif;
-}
+    /* 🌀 CARROSSEL */
+    .carousel-container {
+      overflow: hidden;
+      width: 100%;
+      height: calc(100vh - 220px);
+      position: relative;
+      touch-action: pan-x;
+    }
 
-/* ============================================================
-   🌀 CARROSSEL FEMFLOW
-============================================================ */
-.carousel-container {
-  overflow: hidden;
-  width: 100%;
-  height: calc(100vh - 220px);
-  position: relative;
-  touch-action: pan-x;
-}
+    .carousel-track {
+      display: flex;
+      flex-wrap: nowrap;
+      width: 100%;
+      transition: transform 0.7s ease;
+      cursor: grab;
+      padding-bottom: 160px; /* evita que botões cubram o box final */
+      touch-action: pan-y;
+    }
 
-.carousel-track {
-  display: flex;
-  flex-wrap: nowrap;
-  width: 100%;
-  transition: transform 0.7s ease;
-  cursor: grab;
-  padding-bottom: 160px;
-  touch-action: pan-y;
-}
+    .carousel-track:active {
+      cursor: grabbing;
+    }
 
-.carousel-track:active {
-  cursor: grabbing;
-}
+    .carousel-item {
+      flex: 0 0 100%;
+      padding: 1.2rem;
+      scroll-snap-align: center;
+      text-align: center;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 14px var(--sombra);
+      max-width: 90%;
+      margin: 0 auto;
+      transition: all 0.3s ease;
+    }
 
-.carousel-item {
-  flex: 0 0 100%;
-  padding: 1.5rem;
-  scroll-snap-align: center;
-  text-align: center;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 6px 14px var(--sombra);
-  max-width: 92%;
-  margin: 0 auto;
-  transition: all 0.3s ease;
-  animation: fadeIn 0.6s ease;
-}
+    .carousel-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+    }
 
-.carousel-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
-}
+    /* 🔸 TIMERS VISUAIS */
+    .subtimer {
+      display: inline-block;
+      user-select: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: #f6edea;
+      min-width: 70px;
+      color: var(--teal);
+      margin-top: 5px;
+    }
 
-/* ============================================================
-   🔸 TIMERS
-============================================================ */
-.subtimer {
-  display: inline-block;
-  padding: 0.45rem 0.9rem;
-  border-radius: 14px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  background: #f6edea;
-  min-width: 68px;
-  margin-top: 5px;
-  cursor: pointer;
-}
+    .subtimer.running {
+      background: #eaf5f1;
+    }
 
-.subtimer.running {
-  background: #eaf5f1;
-}
+    .subtimer.done {
+      background: #f4e1dd;
+    }
 
-.subtimer.done {
-  background: #f4e1dd;
-}
+    /* ⏳ PROGRESSO */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 5px;
+      background: var(--terracota);
+      width: 0%;
+      border-radius: 0 3px 3px 0;
+      transition: width 0.4s ease;
+      z-index: 999;
+    }
 
-/* ============================================================
-   🎨 BLOCO EXTRA (HIIT/CARDIO EMBUTIDO)
-============================================================ */
-.box-extra {
-  background: #fff7f3;
-  border-left: 6px solid var(--terracota);
-  padding: 16px;
-  margin: 18px 0;
-  border-radius: 14px;
-  text-align: left;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-}
+    /* 🪶 BOTÕES FIXOS */
+    .fix-footer {
+      position: fixed;
+      bottom: 15px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
 
-.box-extra.hiit {
-  border-color: var(--terracota);
-}
+    #salvarTreinoBtn,
+    .secundario {
+      border: none;
+      border-radius: 24px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-weight: 600;
+      font-family: "Lato", sans-serif;
+    }
 
-.box-extra.cardio {
-  border-color: var(--teal);
-}
+    #salvarTreinoBtn {
+      background: linear-gradient(135deg, var(--teal), var(--terracota));
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
 
-.box-extra h4 {
-  margin: 0 0 6px;
-  font-size: 1.15rem;
-  color: var(--teal);
-  font-family: "Playfair Display", serif;
-}
+    #salvarTreinoBtn:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
 
-.box-extra p {
-  margin: 6px 0;
-  font-size: 0.95rem;
-  color: #6a5f5a;
-  line-height: 1.45;
-}
+    .secundario {
+      background: #fff;
+      color: var(--teal);
+      border: 1px solid rgba(51, 89, 83, 0.25);
+    }
 
-/* ============================================================
-   ⏳ BARRA DE PROGRESSO
-============================================================ */
-.progress-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 5px;
-  background: var(--terracota);
-  width: 0%;
-  border-radius: 0 3px 3px 0;
-  transition: width 0.4s ease;
-  z-index: 999;
-}
+    .secundario:hover {
+      background: var(--bege);
+      transform: scale(1.05);
+    }
 
-/* ============================================================
-   🪶 BOTÕES FIXOS
-============================================================ */
-.fix-footer {
-  position: fixed;
-  bottom: 15px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-}
+    /* 💫 ANIMAÇÃO */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-#salvarTreinoBtn,
-.secundario {
-  border: none;
-  border-radius: 24px;
-  padding: 12px 22px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  font-weight: 600;
-}
+    .carousel-item {
+      animation: fadeIn 0.6s ease;
+    }
 
-#salvarTreinoBtn {
-  background: linear-gradient(135deg, var(--teal), var(--terracota));
-  color: #fff;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-}
+    /* 🎯 BOXES INTERIORES */
+    .box h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-family: "Playfair Display", serif;
+    }
 
-#salvarTreinoBtn:hover {
-  transform: scale(1.05);
-}
+    .box.texto p,
+    .box.resfriamento p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
 
-.secundario {
-  background: #fff;
-  color: var(--teal);
-  border: 1px solid rgba(51,89,83,0.25);
-}
+    .ex {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #fff7f3;
+    }
 
-.secundario:hover {
-  background: var(--bege);
-  transform: scale(1.05);
-}
+    .ex-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
 
-/* ============================================================
-   💫 ANIMAÇÃO
-============================================================ */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-</style>
+    .ex-head b {
+      font-size: 0.95rem;
+      text-align: left;
+    }
+
+    .ex-head .vid {
+      font-size: 1.1rem;
+      text-decoration: none;
+    }
+
+    .ex-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .ex-grid label {
+      display: block;
+      text-align: left;
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+
+    .ex-grid input {
+      width: 100%;
+      padding: 4px 6px;
+      border-radius: 8px;
+      border: 1px solid #e2d3c9;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    /* 💥 BOX EXTRA: HIIT / CARDIO DENTRO DO BOX */
+    .box-extra-wrapper {
+      margin-top: 14px;
+      text-align: left;
+    }
+
+    .box-extra {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      font-size: 0.88rem;
+    }
+
+    .box-extra-tag {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+      opacity: 0.8;
+    }
+
+    .box-extra.hiit {
+      border-left: 4px solid var(--terracota);
+      background: #fff1ed;
+    }
+
+    .box-extra.cardio {
+      border-left: 4px solid var(--teal);
+      background: #eaf5f1;
+    }
+
+    .box-extra h4 {
+      margin: 4px 0 4px;
+      font-size: 0.93rem;
+    }
+
+    .box-extra p {
+      margin: 2px 0;
+      line-height: 1.4;
+    }
+
+    /* 🌕 PERFORMANCE MODE — ovulação */
+    body.ff-performance-ovulation {
+      background: linear-gradient(180deg, #fff4ef 0%, #fce0d8 100%);
+    }
+
+    .perf-banner {
+      background: #ffe8e1;
+      border-left: 5px solid var(--terracota);
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 14px;
+      color: var(--teal);
+      text-align: left;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .perf-banner p {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    body.ff-performance-ovulation .subtimer.running {
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); background:#ffe6e0; }
+      50% { transform: scale(1.05); background:#ffd9d0; }
+      100% { transform: scale(1); background:#ffe6e0; }
+    }
+
+    body.ff-performance-ovulation .carousel-item {
+      box-shadow: 0px 8px 18px rgba(204,106,90,0.25);
+    }
+
+    /* Outros modos (já preparados, podem ganhar cores depois) */
+    body.ff-flow-menstrual {}
+    body.ff-flow-folicular {}
+    body.ff-flow-lutea {}
+  </style>
 </head>
 
 <body>
@@ -252,8 +361,13 @@ header .subtitle {
     <h1>Treino Diário</h1>
     <p class="subtitle">Fluxo de movimento e consciência</p>
 
+    <!-- ✅ Contador do dia do programa -->
     <h2 id="tituloDiaTreino"
-        style="text-align:center;color:#335953;margin:12px 0;font-family:'Playfair Display',serif;font-weight:700;">
+        style="text-align:center;
+               color:#335953;
+               margin:12px 0;
+               font-family:'Playfair Display',serif;
+               font-weight:700;">
       Dia do Programa
     </h2>
   </header>
@@ -269,38 +383,50 @@ header .subtitle {
     <button id="descansoBtn" class="secundario">🌿 Descanso</button>
   </div>
 
-<!-- Firebase compat -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <!-- Firebase compat (antes do femflow-core.js) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-<script src="./femflow-core.js"></script>
+  <!-- Core no mesmo nível do arquivo -->
+  <script src="./femflow-core.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.FEMFLOW && typeof FEMFLOW.inserirHeaderApp === "function") {
+        FEMFLOW.inserirHeaderApp();
+      } else {
+        console.warn("⚠️ FEMFLOW Core não encontrado ou ainda carregando.");
+      }
+    });
+  </script>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  if (window.FEMFLOW && typeof FEMFLOW.inserirHeaderApp === "function") {
-    FEMFLOW.inserirHeaderApp();
-  }
-});
-</script>
+  <!-- Lógica híbrida (Apps Script + Firebase) com timers + HIIT/Cardio por box -->
+  <script src="js/treino.js"></script>
 
-<script src="js/treino.js"></script>
+  <script>
+  window.addEventListener("femflow:langchange", () => {
+    const lang = localStorage.getItem("femflow_lang") || "pt";
+    const T = {
+      pt: {
+        titulo: "Treino Diário",
+        subtitulo: "Fluxo de movimento e consciência",
+        salvar: "💾 Salvar treino",
+        descanso: "🌿 Descanso"
+      },
+      en: {
+        titulo: "Daily Workout",
+        subtitulo: "Flow of movement and awareness",
+        salvar: "💾 Save workout",
+        descanso: "🌿 Rest day"
+      }
+    };
+    const L = T[lang];
 
-<script>
-window.addEventListener("femflow:langchange", () => {
-  const lang = localStorage.getItem("femflow_lang") || "pt";
-  const T = {
-    pt: { titulo: "Treino Diário", subtitulo: "Fluxo de movimento e consciência", salvar: "💾 Salvar treino", descanso: "🌿 Descanso" },
-    en: { titulo: "Daily Workout", subtitulo: "Flow of movement and awareness", salvar: "💾 Save workout", descanso: "🌿 Rest day" }
-  };
-  const L = T[lang];
-
-  document.querySelector("header h1").textContent = L.titulo;
-  document.querySelector(".subtitle").textContent = L.subtitulo;
-  document.getElementById("salvarTreinoBtn").textContent = L.salvar;
-  document.getElementById("descansoBtn").textContent = L.descanso;
-});
-</script>
-
+    document.querySelector("header h1").textContent = L.titulo;
+    document.querySelector(".subtitle").textContent = L.subtitulo;
+    document.getElementById("salvarTreinoBtn").textContent = L.salvar;
+    document.getElementById("descansoBtn").textContent = L.descanso;
+  });
+  </script>
 </body>
 </html>
 
