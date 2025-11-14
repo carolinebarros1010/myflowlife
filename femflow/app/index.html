@@ -88,58 +88,41 @@
 
   /* NOVO PADRÃO FEMFLOW – inputs totalmente alinhados */
 input,
-.password-wrapper {
+/* WRAPPER DA SENHA — CORREÇÃO FINAL */
+.password-wrapper{
+  position: relative;
   width: 78%;
   max-width: 290px;
   margin: 0 auto 1rem auto;
-  display: block;
-  box-sizing: border-box;
 }
 
-.password-wrapper input {
+.password-wrapper input{
   width: 100%;
+  padding-right: 46px; /* espaço para o olho */
 }
 
-    /* 🔧 Wrapper opcional para telas futuras */
-.login-box {
-  width: 92%;
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 0; /* evita conflito com padding do login-card */
-  box-sizing: border-box;
+/* OLHO — ALINHADO DENTRO DO INPUT */
+.toggle-eye{
+  position: absolute;
+  right: 14px;       /* distância da borda direita do input */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background-image: url("assets/icons/eye-off.svg");
+  background-size: 24px;
+  background-repeat: no-repeat;
+  opacity: .55;
+  cursor: pointer;
+  transition: .25s ease;
+  pointer-events: auto;
 }
 
-/* Label alinhado caso use campos com label */
-.login-label {
-  text-align: left;
-  font-size: 0.95rem;
-  margin: 6px auto 4px;
-  width: 78%;
-  max-width: 290px;
-  color: var(--texto);
-  display: block;
+.toggle-eye.active{
+  background-image: url("assets/icons/eye.svg");
+  opacity: .95;
+  transform: translateY(-50%) scale(1.05);
 }
-    /* OLHO iOS */
-    .toggle-eye{
-      position:absolute;
-      right:14px;
-      top:50%;
-      transform:translateY(-50%);
-      width:22px;
-      height:22px;
-      background-image:url("assets/icons/eye-off.svg");
-      background-size:22px;
-      background-repeat:no-repeat;
-      opacity:.55;
-      cursor:pointer;
-      transition:.25s ease;
-    }
-    .toggle-eye.active{
-      background-image:url("assets/icons/eye.svg");
-      opacity:.95;
-      transform:translateY(-50%) scale(1.05);
-    }
-
     /* BARRA DE FORÇA */
     .strength-meter{
       width:78%;
@@ -313,14 +296,22 @@ $("#btnEntrar").onclick = entrar;
 $("#loginSenha").addEventListener("keydown",e=>{ if(e.key==="Enter") entrar(); });
 
 /* === OLHO iOS === */
-const senhaInput = $("#loginSenha");
-const toggle = $("#toggleSenha");
+const senhaInput = document.querySelector("#loginSenha");
+const toggle = document.querySelector("#toggleSenha");
 
-toggle.onclick = ()=>{
-  const isPass = senhaInput.type==="password";
+toggle.addEventListener("click", () => {
+  const isPass = senhaInput.type === "password";
+
+  // troca tipo
   senhaInput.type = isPass ? "text" : "password";
-  toggle.classList.toggle("active",isPass);
-};
+
+  // ativa o olho
+  if (isPass) {
+    toggle.classList.add("active");
+  } else {
+    toggle.classList.remove("active");
+  }
+});
 
 /* === FORÇA DA SENHA === */
 const meter = $("#strengthMeter");
