@@ -420,7 +420,7 @@ $("#appleSignIn").onclick = ()=> FEMFLOW.toast?.("🍎 Entrar com Apple em breve
    🔐 RECUPERAÇÃO DE SENHA (FLUXO SIMPLIFICADO)
 ================================================== */
 $("#goRecuperar").onclick = async () => {
-  const email = $("#loginEmail").value.trim();
+  const email = $("#loginEmail").value.trim().toLowerCase();
 
   if (!email) {
     setErr("Digite seu e-mail para recuperar a senha.");
@@ -430,12 +430,25 @@ $("#goRecuperar").onclick = async () => {
   setMsg("Enviando instruções...", false);
 
   try {
-    const res = await FEMFLOW.resetSenha(email);
+    const r = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "solicitarreset",
+        email
+      })
+    });
 
-    if (res.ok) {
+    const data = await r.json();
+
+    if (data.status === "ok") {
       setMsg("📬 Verifique seu e-mail!", true);
-    } else {
+    }
+    else if (data.status === "notfound") {
       setErr("E-mail não encontrado.");
+    }
+    else {
+      setErr("Erro ao solicitar redefinição.");
     }
 
   } catch (e) {
@@ -443,6 +456,7 @@ $("#goRecuperar").onclick = async () => {
     setErr("Erro ao enviar solicitação.");
   }
 };
+
 
 </script>
 </body>
