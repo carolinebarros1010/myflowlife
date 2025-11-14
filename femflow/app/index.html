@@ -234,7 +234,12 @@
   </div>
 
 </div>
-
+<script>
+document.getElementById("btnEsqueci")?.addEventListener("click", () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  FEMFLOW.solicitarResetSenha(email);
+});
+</script>
 <script>
 /* === HELPERS === */
 window.FEMFLOW = window.FEMFLOW || {};
