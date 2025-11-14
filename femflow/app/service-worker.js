@@ -1,98 +1,151 @@
-// 🌸 FemFlow Service Worker v4.1 (hotfix final)
-const CACHE_NAME = 'femflow-cache-v4';
+// 🌸 FemFlow Service Worker v5.0 (PWA + CORS safe)
+const CACHE_NAME = "femflow-cache-v5";
 
+// Arquivos principais do app (tela, JS e manifest)
 const ASSETS = [
-  './',
-  './index.html',
-  './ciclo.html',
-  './treino.html',
-  './evolucao.html',
-  './cadastro.html',
-  './home.html',
-  './style.css',
-  './manifest.json',
-  './js/memoria.js',
-  './js/ciclo.js',
-  './js/treino.js',
-  './js/validacao.js',
-  './js/cadastro.js',
-  './icon-192.png',
-  './icon-512.png',
-  './offline.html'  // ✅ fallback adicionado
+  "./",
+  "./index.html",
+  "./home.html",
+  "./ciclo.html",
+  "./treino.html",
+  "./evolucao.html",
+  "./anamnese_deluxe.html",
+  "./respiracao.html",
+  "./reset.html",
+  "./offline.html",
+  "./manifest.json",
+
+  "./css/style.css",
+
+  "./femflow-core.js",
+  "./js/ciclo.js",
+  "./js/treino.js",
+  "./js/anamnese.js",
+  "./js/memoria.js",
+
+  // Logos / ícones
+  "./assets/logofemflowterracota.png",
+  "./assets/icons/icon-192.png",
+  "./assets/icons/icon-512.png"
 ];
 
-// 🪴 Instalação inicial
-self.addEventListener('install', (event) => {
-  console.log('📦 Instalando FemFlow PWA...');
+// --------------------------------------------------
+// 🔹 2. LOGOS & ÍCONES (carregados depois, em background)
+// Faz o app abrir rápido, SEM delay no logo
+// --------------------------------------------------
+const CACHE_ASSETS = [
+  "./assets/logofemflowterracota.png",
+  "./assets/icons/icon-192.png",
+  "./assets/icons/icon-512.png"
+];
+
+// --------------------------------------------------
+// 🪴 3. INSTALAÇÃO — cache inicial rápido
+// --------------------------------------------------
+self.addEventListener("install", (event) => {
+  console.log("📦 Instalando FemFlow PWA…");
+
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(ASSETS))
-      .then(() => self.skipWaiting())
-      .catch((err) => console.warn('⚠️ Falha ao criar cache inicial:', err))
-  );
-});
-// LOGO CACHE
-const CACHE_ASSETS = [
-  '/femflow/app/assets/logofemflowterracota.png',
-  '/femflow/app/assets/icons/icon-192.png',
-  '/femflow/app/assets/icons/icon-512.png',
-];
-
-// 🔁 Ativa nova versão
-self.addEventListener('activate', (event) => {
-  console.log(`✨ FemFlow Service Worker ativo (${CACHE_NAME}).`);
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      .then((cache) =>
+        Promise.all(
+          ASSETS.map((url) =>
+            cache.add(url).catch((err) => {
+              console.warn("[SW] Falha ao cachear:", url, err);
+            })
+          )
+        )
       )
-    ).then(() => self.clients.claim())
+      .then(() => self.skipWaiting())
   );
 });
 
-// ⚙️ Estratégia de fetch: cache first + atualização silenciosa
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    (async () => {
-      const cache = await caches.open("femflow-cache-v1");
+// --------------------------------------------------
+// 🔁 4. ATIVAÇÃO — limpa caches antigos e prefetch das logos
+// --------------------------------------------------
+self.addEventListener("activate", (event) => {
+  console.log(`✨ FemFlow SW ativo (${CACHE_NAME})`);
 
-      // 🔹 tenta resposta do cache primeiro
-      const cachedResponse = await cache.match(event.request);
-      if (cachedResponse) {
-        // Atualiza em background
-        fetch(event.request)
-          .then((netResp) => {
-            if (netResp && netResp.ok) {
-              cache.put(event.request, netResp.clone());
-            }
+  event.waitUntil(
+    (async () => {
+      // Remove versões antigas
+      const keys = await caches.keys();
+      await Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      );
+
+      // Carrega logos silenciosamente (background)
+      const cache = await caches.open(CACHE_NAME);
+      CACHE_ASSETS.forEach((url) => {
+        fetch(url)
+          .then((resp) => {
+            if (resp && resp.ok) cache.put(url, resp.clone());
           })
           .catch(() => {});
-        return cachedResponse;
+      });
+
+      await self.clients.claim();
+    })()
+  );
+});
+
+// --------------------------------------------------
+// ⚙️ 5. FETCH — cache-first somente para arquivos locais
+// NUNCA intercepta POST ou requisições externas (Apps Script)
+// --------------------------------------------------
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+
+  // Não intercepta POST (Hotmart, login, treino, descanso, etc.)
+  if (req.method !== "GET") return;
+
+  const url = new URL(req.url);
+
+  // Não intercepta chamadas externas (Google Script, Firebase, Hotmart)
+  if (url.origin !== self.location.origin) return;
+
+  // Estratégia cache-first
+  event.respondWith(
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(req);
+
+      if (cached) {
+        // atualiza silenciosamente
+        fetch(req)
+          .then((resp) => {
+            if (resp && resp.ok) cache.put(req, resp.clone());
+          })
+          .catch(() => {});
+
+        return cached;
       }
 
-      // 🔹 senão, busca da rede
+      // busca na rede
       try {
-        const networkResponse = await fetch(event.request);
-        if (networkResponse && networkResponse.ok) {
-          cache.put(event.request, networkResponse.clone());
-        }
-        return networkResponse;
+        const resp = await fetch(req);
+        if (resp && resp.ok) cache.put(req, resp.clone());
+        return resp;
       } catch (err) {
         console.warn("[SW] Erro de rede:", err);
-        return caches.match("/offline.html");
+        return caches.match("./offline.html");
       }
     })()
   );
 });
 
-
-// 🔄 Atualização manual (postMessage)
-self.addEventListener('message', (event) => {
-  if (event.data?.type === 'SKIP_WAITING') {
-    console.log('🔁 Forçando atualização do Service Worker.');
+// --------------------------------------------------
+// 🔄 6. Mensagens manuais (para update imediato no TWA)
+// --------------------------------------------------
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    console.log("🔁 Atualizando SW imediatamente.");
     self.skipWaiting();
   }
-  if (event.data === 'checkVersion') {
+
+  if (event.data === "checkVersion") {
     console.log(`[FemFlow] Cache ativo: ${CACHE_NAME}`);
   }
 });
