@@ -147,12 +147,16 @@
     const msg = $("#mensagem");
 
     // Pré-preenche e-mail vindo do link
-    (function init(){
-      const p = new URLSearchParams(location.search);
-      const e = p.get('email');
-      if(e) $("#email").value = decodeURIComponent(e);
-    })();
+   (function init(){
+  const p = new URLSearchParams(location.search);
 
+  window._resetID    = p.get("id") || "";
+  window._resetToken = p.get("token") || "";
+
+  const e = p.get("email");
+  if(e) $("#email").value = decodeURIComponent(e);
+})();
+    
     function setMsg(t, ok=false){ msg.textContent=t; msg.style.color= ok? "#2e7d32" : "#335953"; }
     function setErr(t){ msg.textContent=t; msg.style.color="#cc6a5a"; }
 
@@ -175,37 +179,49 @@
       }
     }
 
-    async function salvar(){
-      const email = $("#email").value.trim().toLowerCase();
-      const s1 = $("#senha1").value.trim();
-      const s2 = $("#senha2").value.trim();
-      if(!email || !s1 || !s2){ setErr("Preencha todos os campos."); return; }
-      if(s1.length < 6){ setErr("A senha deve ter ao menos 6 caracteres."); return; }
-      if(s1 !== s2){ setErr("As senhas não coincidem."); return; }
+   async function salvar(){
+  const email = $("#email").value.trim().toLowerCase();
+  const s1 = $("#senha1").value.trim();
+  const s2 = $("#senha2").value.trim();
 
-      setMsg("Atualizando senha…");
-      $("#btnSalvar").disabled = true;
+  if(!email || !s1 || !s2){ setErr("Preencha todos os campos."); return; }
+  if(s1.length < 6){ setErr("A senha deve ter ao menos 6 caracteres."); return; }
+  if(s1 !== s2){ setErr("As senhas não coincidem."); return; }
 
-      try{
-        const data = await postGAS({ action:"resetsenha", email, novaSenha:s1 });
-        if(data.status === "ok"){
-          setMsg("✔️ Senha atualizada! Voltando ao login…", true);
-          setTimeout(()=> location.href="index.html", 1200);
-        }else if(data.status === "notfound"){
-          setErr("E-mail não encontrado.");
-          $("#btnSalvar").disabled = false;
-        }else{
-          setErr(data.msg || "Não foi possível atualizar a senha.");
-          $("#btnSalvar").disabled = false;
-        }
-      }catch(e){
-        setErr(String(e.message).includes("429") ? "⏳ Tente novamente em instantes." : "❌ Falha de rede.");
-        $("#btnSalvar").disabled = false;
-      }
+  if(!window._resetID || !window._resetToken){
+    setErr("Link inválido ou expirado.");
+    return;
+  }
+
+  setMsg("Atualizando senha…");
+  $("#btnSalvar").disabled = true;
+
+  try{
+    const data = await postGAS({
+      action:"resetsenha",
+      id: window._resetID,
+      token: window._resetToken,
+      novaSenha: s1
+    });
+
+    if(data.status === "ok"){
+      setMsg("✔️ Senha atualizada! Voltando ao login…", true);
+      setTimeout(()=> location.href="index.html", 1200);
     }
-
-    $("#btnSalvar").addEventListener("click", salvar);
-    $("#senha2").addEventListener("keydown", e=>{ if(e.key==="Enter") salvar(); });
+    else if(data.status === "expired"){
+      setErr("Link expirado. Solicite nova recuperação.");
+      $("#btnSalvar").disabled = false;
+    }
+    else{
+      setErr(data.msg || "Erro ao redefinir senha.");
+      $("#btnSalvar").disabled = false;
+    }
+  }
+  catch(e){
+    setErr("❌ Falha de rede.");
+    $("#btnSalvar").disabled = false;
+  }
+}
   </script>
 </body>
 </html>
