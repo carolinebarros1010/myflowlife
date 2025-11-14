@@ -89,40 +89,45 @@
   /* NOVO PADRÃO FEMFLOW – inputs totalmente alinhados */
 input,
 /* WRAPPER DA SENHA — CORREÇÃO FINAL */
+/* WRAPPER DA SENHA — versão corrigida */
 .password-wrapper{
   position: relative;
   width: 78%;
   max-width: 290px;
   margin: 0 auto 1rem auto;
+  display: flex;
+  align-items: center;
 }
 
+/* INPUT ocupa 100% sem ser empurrado */
 .password-wrapper input{
   width: 100%;
-  padding-right: 46px; /* espaço para o olho */
+  padding-right: 48px !important; /* espaço para o olho */
+  box-sizing: border-box;
 }
 
-/* OLHO — ALINHADO DENTRO DO INPUT */
+/* OLHO corrigido — não empurra nada */
 .toggle-eye{
   position: absolute;
-  right: 14px;       /* distância da borda direita do input */
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   background-image: url("assets/icons/eye-off.svg");
-  background-size: 24px;
+  background-size: 22px;
   background-repeat: no-repeat;
-  opacity: .55;
   cursor: pointer;
+  opacity: .55;
   transition: .25s ease;
-  pointer-events: auto;
+  pointer-events: auto;      /* impede empurrar o campo */
 }
 
 .toggle-eye.active{
   background-image: url("assets/icons/eye.svg");
-  opacity: .95;
-  transform: translateY(-50%) scale(1.05);
+  opacity: .9;
 }
+
     /* BARRA DE FORÇA */
     .strength-meter{
       width:78%;
