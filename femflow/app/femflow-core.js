@@ -608,7 +608,7 @@ solicitarResetSenha: async function(email) {
   if (!email) {
     this.toast("Digite seu e-mail antes.", true);
     return;
-  },
+  }
 
   try {
     const resp = await fetch(this.SCRIPT_URL, {
@@ -635,7 +635,7 @@ solicitarResetSenha: async function(email) {
     console.error("resetErro", e);
     this.toast("Falha na conexão.", true);
   }
-};
+},
 
 
 /* Aplicar nova senha — action=resetSenha */
@@ -643,7 +643,7 @@ enviarNovaSenha: async function(id, token, novaSenha) {
   if (!id || !token || !novaSenha) {
     this.toast("Preencha todos os campos.", true);
     return;
-  },
+  }
 
   try {
     const resp = await fetch(this.SCRIPT_URL, {
@@ -675,7 +675,7 @@ enviarNovaSenha: async function(id, token, novaSenha) {
     console.error(e);
     this.toast("Erro ao redefinir senha.", true);
   }
-};
+},
 
    
   /* =======================================================
