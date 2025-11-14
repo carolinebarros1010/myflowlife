@@ -396,6 +396,34 @@ bio.onclick = async ()=>{
 
 /* APPLE LOGIN FUTURO */
 $("#appleSignIn").onclick = ()=> FEMFLOW.toast?.("🍎 Entrar com Apple em breve.");
+  
+/* ==================================================
+   🔐 RECUPERAÇÃO DE SENHA (FLUXO SIMPLIFICADO)
+================================================== */
+$("#goRecuperar").onclick = async () => {
+  const email = $("#loginEmail").value.trim();
+
+  if (!email) {
+    setErr("Digite seu e-mail para recuperar a senha.");
+    return;
+  }
+
+  setMsg("Enviando instruções...", false);
+
+  try {
+    const res = await FEMFLOW.resetSenha(email);
+
+    if (res.ok) {
+      setMsg("📬 Verifique seu e-mail!", true);
+    } else {
+      setErr("E-mail não encontrado.");
+    }
+
+  } catch (e) {
+    console.error(e);
+    setErr("Erro ao enviar solicitação.");
+  }
+};
 
 </script>
 </body>
