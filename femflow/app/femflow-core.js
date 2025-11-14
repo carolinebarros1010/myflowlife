@@ -604,11 +604,11 @@ abrirPSE(callback) {
 ======================================================= */
 
 /* Solicitar link de redefinição — action=solicitarResetSenha */
-FEMFLOW.solicitarResetSenha = async function(email) {
+solicitarResetSenha: async function(email) {
   if (!email) {
     this.toast("Digite seu e-mail antes.", true);
     return;
-  }
+  },
 
   try {
     const resp = await fetch(this.SCRIPT_URL, {
@@ -639,11 +639,11 @@ FEMFLOW.solicitarResetSenha = async function(email) {
 
 
 /* Aplicar nova senha — action=resetSenha */
-FEMFLOW.enviarNovaSenha = async function(id, token, novaSenha) {
+enviarNovaSenha: async function(id, token, novaSenha) {
   if (!id || !token || !novaSenha) {
     this.toast("Preencha todos os campos.", true);
     return;
-  }
+  },
 
   try {
     const resp = await fetch(this.SCRIPT_URL, {
