@@ -498,7 +498,7 @@ salvarDescanso: async function (fase = "menstrual") {
 
 validarAssinatura: async function (id) {
   const script = this.SCRIPT_URL ||
-    "https://script.google.com/macros/s/AKfycby1OydWK-Akw0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
+    "https://script.google.com/macros/s/AKfycbwMdVo_TgYGg5mj5W4wcP1yD2PXRcLkA4tZRcc9TdSe363qIvm29odXkAGyPMIJR0xf/exec";
   id = id || localStorage.getItem("femflow_id");
   if (!id) return { status: "noid" };
 
@@ -519,7 +519,7 @@ validarAssinatura: async function (id) {
 
 buscarHistorico: async function (id, n = 30) {
   const script = this.SCRIPT_URL ||
-    "https://script.google.com/macros/s/AKfycby1OydWK-Akw0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
+    "https://script.google.com/macros/s/AKfycbwMdVo_TgYGg5mj5W4wcP1yD2PXRcLkA4tZRcc9TdSe363qIvm29odXkAGyPMIJR0xf/exec";
   id = id || localStorage.getItem("femflow_id");
   if (!id) return [];
 
