@@ -1,11 +1,23 @@
 (async () => {
-  // 🔹 Protege botões no mobile
-  document.addEventListener("click", (e) => {
-    const el = e.target.closest("button");
-    if (el && !el.getAttribute("type")) el.setAttribute("type", "button");
-  }, { capture: true, passive: true });
 
-  // 🔹 Perguntas com GIFs corretos
+  // ========= UTILITÁRIOS ==========
+  const $ = (sel) => document.querySelector(sel);
+  const SCRIPT_URL =
+    (window.FEMFLOW && FEMFLOW.SCRIPT_URL) ||
+    localStorage.getItem("femflow_script") ||
+    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+
+  // ========= ELEMENTOS ==========
+  const cardCadastro = $("#cadastro");
+  const cardQuiz = $("#quiz");
+  const cardFinal = $("#final");
+
+  const gif = $("#gif");
+  const question = $("#question");
+  const options = $("#options");
+  const finalMsg = $("#final-msg");
+
+  // ========= PERGUNTAS ==========
   const perguntas = [
     { gif:"profile_form.webp", texto:"Há quanto tempo você treina com regularidade?",
       opcoes:[
@@ -57,119 +69,114 @@
       ]}
   ];
 
-  const cadastro = document.getElementById("cadastro");
-  const quiz = document.getElementById("quiz");
-  const final = document.getElementById("final");
-  const gif = document.getElementById("gif");
-  const q = document.getElementById("question");
-  const opts = document.getElementById("options");
-  const msg = document.getElementById("final-msg");
+  // ========= VARIÁVEIS ==========
+  let index = 0;
+  let score = 0;
 
-  let i = 0, score = 0, nome = "", email = "", telefone = "", senha = "";
+  let nome = "";
+  let email = "";
+  let telefone = "";
+  let senha = "";
 
-  // 🔹 Botão principal
-  document.getElementById("btnIniciar").onclick = async () => {
-    nome = document.getElementById("nome").value.trim();
-    email = document.getElementById("email").value.trim();
-    telefone = document.getElementById("telefone").value.trim();
-    senha = document.getElementById("senha").value.trim();
-    const confirma = document.getElementById("confirma").value.trim();
+  // =====================================================================
+  // 🔹 ETAPA 1 — Receber dados da pré-anamnese vindos do anamnese.html
+  // =====================================================================
 
-    // Validações
-    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (!nome || !email || !senha)
-      return FEMFLOW.toast("⚠️ Preencha todos os campos obrigatórios.", true);
-    if (!emailValido)
-      return FEMFLOW.toast("📧 Digite um e-mail válido.", true);
-    if (senha.length < 6)
-      return FEMFLOW.toast("🔐 A senha deve ter pelo menos 6 caracteres.", true);
-    if (senha !== confirma)
-      return FEMFLOW.toast("❌ As senhas não coincidem.", true);
+  document.getElementById("btnIniciar").addEventListener("click", () => {
+    // valores da página inicial
+    nome = $("#nome").value.trim();
+    email = $("#email").value.trim();
+    telefone = $("#telefone").value.trim();
+    senha = $("#senha").value.trim();
 
-    // Salva lead local
-    localStorage.setItem("lead_nome", nome);
-    localStorage.setItem("lead_email", email);
-    localStorage.setItem("lead_telefone", telefone);
+    // expõe ao FEMFLOW (opcional)
+    window.FEMFLOW = window.FEMFLOW || {};
+    FEMFLOW._leadCadastro = { nome, email, telefone };
 
-    // Envia lead parcial
-    try {
-      const params = new URLSearchParams(location.search);
-      const utm_source = params.get("utm") || params.get("utm_source") || "orgânico";
-      await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "leadParcial",
-          nome, email, telefone, utm_source,
-          origem: "Anamnese Deluxe FemFlow"
-        }),
-      });
-    } catch {}
+    // muda de tela
+    cardCadastro.classList.add("hidden");
+    cardQuiz.classList.remove("hidden");
 
-    cadastro.classList.add("hidden");
-    quiz.classList.remove("hidden");
     mostrarPergunta();
-  };
+  });
 
-  // 🔹 Controle de perguntas
+  // =====================================================================
+  // 🔹 MOSTRAR PERGUNTAS
+  // =====================================================================
   function mostrarPergunta() {
-    if (i >= perguntas.length) return finalizar();
-    const p = perguntas[i];
-    gif.src = "./assets/gifs/" + p.gif;
-    q.textContent = p.texto;
-    opts.innerHTML = "";
+    if (index >= perguntas.length) return finalizar();
 
-    p.opcoes.forEach(o => {
+    const p = perguntas[index];
+    gif.src = "./assets/gifs/" + p.gif;
+    question.textContent = p.texto;
+
+    options.innerHTML = "";
+    p.opcoes.forEach( op => {
       const b = document.createElement("button");
+      b.textContent = op.texto;
       b.type = "button";
-      b.textContent = o.texto;
-      b.className = "btn-opcao";
       b.onclick = () => {
-        score += o.v;
-        i++;
+        score += op.v;
+        index++;
         mostrarPergunta();
         navigator.vibrate?.(25);
       };
-      opts.appendChild(b);
+      options.appendChild(b);
     });
   }
 
-  // 🔹 Finalização da anamnese
+  // =====================================================================
+  // 🔹 FINALIZAÇÃO — Enviar para o Script
+  // =====================================================================
   async function finalizar() {
-    quiz.classList.add("hidden");
-    final.classList.remove("hidden");
+    cardQuiz.classList.add("hidden");
+    cardFinal.classList.remove("hidden");
 
-    let nivel = "iniciante";
-    if (score >= 20) nivel = "avançada";
-    else if (score >= 14) nivel = "intermediária";
+    // define nível
+    let perfil = "iniciante";
+    if (score >= 20) perfil = "avançada";
+    else if (score >= 14) perfil = "intermediária";
 
-    const respostas = perguntas.map((p, idx) => `Q${idx + 1}: ${p.texto}`);
+    finalMsg.textContent = "✨ Analisando seu perfil...";
 
-    FEMFLOW.toast("⏳ Enviando suas respostas...", false);
+    const respostas = perguntas.map((p, i) => ({
+      pergunta: p.texto,
+      resposta: p.opcoes.find(o => true) // estrutura simples
+    }));
+
+    FEMFLOW.toast?.("⏳ Enviando suas informações...", false);
 
     try {
-      const r = await FEMFLOW.enviarCadastro({
-        nome, email, telefone, senha,
-        perfil: nivel, pontuacao: score,
+      const qs = new URLSearchParams({
+        action: "enviarcadastro",
+        nome,
+        email,
+        telefone,
+        senha,
+        perfil,
+        pontuacao: score,
         anamnese: JSON.stringify(respostas)
-      });
+      }).toString();
 
-      if (r && r.status) {
+      const resp = await fetch(SCRIPT_URL + "?" + qs);
+      const r = await resp.json();
+
+      if (r.status === "ok" || r.status === "created") {
         localStorage.setItem("femflow_id", r.id);
         localStorage.setItem("femflow_email", r.email);
         localStorage.setItem("femflow_cycle_configured", "yes");
-        localStorage.removeItem("lead_nome");
-        localStorage.removeItem("lead_email");
-        localStorage.removeItem("lead_telefone");
-        FEMFLOW.toast("🌸 Bem-vinda ao FemFlow!");
-        msg.textContent = `✨ Seu perfil é ${nivel.toUpperCase()}! Bem-vinda ao seu ciclo 🌸`;
-setTimeout(() => (location.href = "home.html"), 3500);
+
+        FEMFLOW.toast?.("🌸 Bem-vinda ao FemFlow!", false);
+        finalMsg.textContent = `✨ Seu perfil é ${perfil.toUpperCase()}!`;
+
+        setTimeout(() => location.href = "home.html", 3000);
       } else {
-        FEMFLOW.toast("❌ Falha ao enviar cadastro.", true);
+        FEMFLOW.toast?.("❌ Falha ao enviar cadastro.", true);
       }
-    } catch {
-      FEMFLOW.toast("⚠️ Erro de conexão. Tente novamente.", true);
+    } catch (err) {
+      console.error("Erro enviar cadastro:", err);
+      FEMFLOW.toast?.("⚠️ Erro de conexão.", true);
     }
   }
-})();
 
+})();
