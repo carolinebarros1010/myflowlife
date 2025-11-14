@@ -33,6 +33,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+    // ============================================================
+  // 2. ESTADO GLOBAL DO TREINO (vindo do Core)
+  // ============================================================
+  const estado = (window.FEMFLOW && typeof FEMFLOW.getEstadoTreino === "function")
+    ? FEMFLOW.getEstadoTreino()
+    : {
+        enfase: "geral",
+        nivel: "iniciante",
+        fase: "folicular",
+        faseSugerida: "folicular",
+        diaCiclo: 1,
+        cicloOK: false
+      };
+
+  console.log("🔎 EstadoTreino:", estado);
+
   // ============================================================
   // 2. ELEMENTOS BÁSICOS DO TREINO
   // ============================================================
@@ -331,27 +347,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  // ============================================================
-  // 8. FALLBACKS LOCAIS BÁSICOS
-  // ============================================================
-  const enfase = localStorage.getItem("femflow_enfase") || "geral";
+// ============================================================
+// 8. FALLBACKS LOCAIS BÁSICOS (apenas para garantir persistência)
+// ============================================================
 
-  if (!localStorage.getItem("fase_sugerida"))
-    localStorage.setItem("fase_sugerida", "folicular");
-  if (!localStorage.getItem("nivel_atual"))
-    localStorage.setItem("nivel_atual", "iniciante");
-  if (!localStorage.getItem("dia_ciclo"))
-    localStorage.setItem("dia_ciclo", "1");
+// Garante que o que veio do Core também esteja salvo em localStorage
+if (estado.faseSugerida && !localStorage.getItem("fase_sugerida")) {
+  localStorage.setItem("fase_sugerida", estado.faseSugerida);
+}
+if (estado.nivel && !localStorage.getItem("nivel_atual")) {
+  localStorage.setItem("nivel_atual", estado.nivel);
+}
+if (estado.diaCiclo && !localStorage.getItem("dia_ciclo")) {
+  localStorage.setItem("dia_ciclo", String(estado.diaCiclo));
+}
+
+// Enfase agora vem SEMPRE do Core
+const enfase = estado.enfase || "geral";
+
 
   // ============================================================
   // 9. CHAMADA AO BACKEND (Apps Script via Worker) + OFFLINE
   // ============================================================
-  const SCRIPT_URL =
-    FEMFLOW.SCRIPT_URL ||
-    localStorage.getItem("femflow_script") ||
-    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+ const SCRIPT_URL =
+  FEMFLOW.SCRIPT_URL ||
+  localStorage.getItem("femflow_script") ||
+  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-  const url = `${SCRIPT_URL}?action=treino&id=${id}&enfase=${enfase}`;
+// usamos o estado completo aqui
+const url = `${SCRIPT_URL
+  }?action=treino` +
+  `&id=${encodeURIComponent(id)}` +
+  `&enfase=${encodeURIComponent(estado.enfase || "geral")}` +
+  `&fase=${encodeURIComponent(estado.faseSugerida || estado.fase || "folicular")}` +
+  `&diaCiclo=${encodeURIComponent(estado.diaCiclo || 1)}`;
+
 
   let j = null;
   let offlineSnap = null;
