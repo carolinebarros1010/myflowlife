@@ -17,7 +17,7 @@ header("Content-Type: application/json");
 $input = file_get_contents("php://input");
 
 // URL do seu Apps Script
-$script = "https://script.google.com/macros/s/AKfycby1OydWK-Akw0zx0QqKJfZS7tc28ziSfpIN8lF4thtEEifWaLUTKKtBBAy1q_nhy3ot/exec";
+$script = "https://script.google.com/macros/s/AKfycbwMdVo_TgYGg5mj5W4wcP1yD2PXRcLkA4tZRcc9TdSe363qIvm29odXkAGyPMIJR0xf/exec";
 
 // Envia o POST ao Apps Script
 $ch = curl_init($script);
