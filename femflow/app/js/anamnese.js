@@ -1,4 +1,12 @@
 // js/anamnese.js — FemFlow Anamnese Deluxe (versão estável)
+// Pré-carrega todos os GIFs
+["profile_form.webp", "routine_cycle.webp", "strength_training.webp",
+ "mobility_flow.webp", "hormonal_balance.webp", 
+ "menstrual_flow.webp", "breath_cycle.webp", "success_flow.webp"
+].forEach(g => {
+  const img = new Image();
+  img.src = "./assets/gifs/" + g;
+});
 
 (function () {
   // Protege botões no mobile (evita submit acidental)
@@ -260,5 +268,11 @@
 
     // Se preferir já deixar carregado, pode iniciar mesmo oculto:
     // mostrarPergunta();
+    window.iniciarQuizFemFlow = function () {
+  idx = 0;
+  score = 0;
+  mostrarPergunta();
+};
+
   });
 })();
