@@ -42,3 +42,6 @@ export function detectarUsuario(callback) {
     else callback(null);
   });
 }
+
+// ✅ Exporte também db e auth para uso externo
+export { db, auth };
