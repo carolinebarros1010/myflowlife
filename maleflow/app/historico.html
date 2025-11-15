@@ -5,23 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Histórico de Treinos · MaleFlow</title>
   <link rel="stylesheet" href="assets/style-maleflow.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
     th { background: #f3f7f6; }
     .page { max-width: 960px; margin: auto; }
+    canvas { margin-top: 40px; }
   </style>
 </head>
 <body>
   <main class="page">
     <h1>📊 Histórico de Treinos</h1>
     <div id="historico"></div>
+    <canvas id="graficoCargas" height="180"></canvas>
   </main>
 
   <script type="module">
     import { db } from './js/firebase.js';
     import { detectarUsuario } from './js/firebase.js';
     import { collection, getDocs, doc } from 'https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js';
+
+    const pesosPorExercicio = {};
 
     async function carregarHistorico(uid) {
       const ciclosRef = collection(db, `usuarios/${uid}/ciclos`);
@@ -41,7 +46,7 @@
         if (!diasSnap.empty) {
           const tabela = document.createElement('table');
           const cabecalho = document.createElement('thead');
-          cabecalho.innerHTML = `<tr><th colspan="4">Ciclo: ${cicloId}</th></tr><tr><th>Dia</th><th>Exercício</th><th>Peso (kg)</th><th>Data</th></tr>`;
+          cabecalho.innerHTML = `<tr><th colspan="5">Ciclo: ${cicloId}</th></tr><tr><th>Dia</th><th>Exercício</th><th>Peso (kg)</th><th>Data</th><th>PSE</th></tr>`;
           tabela.appendChild(cabecalho);
 
           const corpo = document.createElement('tbody');
@@ -49,8 +54,19 @@
           for (const diaDoc of diasSnap.docs) {
             const diaId = diaDoc.id;
             const data = diaDoc.data();
+            const pse = data?.pse?.valor || '-';
+
             Object.entries(data).forEach(([key, val]) => {
-              corpo.innerHTML += `<tr><td>${diaId}</td><td>${val.nome || key}</td><td>${val.peso || '-'}</td><td>${val?.registradoEm?.toDate?.().toLocaleDateString?.() || '-'}</td></tr>`;
+              if (key === "pse") return;
+              const nome = val.nome || key;
+              const peso = parseFloat(val.peso || 0);
+              const dataStr = val?.registradoEm?.toDate?.().toLocaleDateString?.() || '-';
+              const pseTexto = typeof pse === 'number' ? `${pse} (${interpretaPSE(pse)})` : pse;
+
+              corpo.innerHTML += `<tr><td>${diaId}</td><td>${nome}</td><td>${peso}</td><td>${dataStr}</td><td>${pseTexto}</td></tr>`;
+
+              if (!pesosPorExercicio[nome]) pesosPorExercicio[nome] = [];
+              pesosPorExercicio[nome].push(peso);
             });
           }
 
@@ -58,6 +74,37 @@
           container.appendChild(tabela);
         }
       }
+      desenharGrafico();
+    }
+
+    function interpretaPSE(valor) {
+      if (valor <= 4) return "leve";
+      if (valor <= 7) return "moderado";
+      return "intenso";
+    }
+
+    function desenharGrafico() {
+      const ctx = document.getElementById('graficoCargas').getContext('2d');
+      const datasets = Object.entries(pesosPorExercicio).map(([nome, pesos], i) => ({
+        label: nome,
+        data: pesos,
+        fill: false,
+        tension: 0.3,
+        borderWidth: 2
+      }));
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: Array.from({length: Math.max(...Object.values(pesosPorExercicio).map(arr => arr.length))}, (_, i) => `#${i+1}`),
+          datasets
+        },
+        options: {
+          plugins: { legend: { position: 'top' } },
+          responsive: true,
+          scales: { y: { beginAtZero: true, title: { display: true, text: 'Peso (kg)' } } }
+        }
+      });
     }
 
     detectarUsuario(user => {
