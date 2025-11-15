@@ -369,10 +369,13 @@ const enfase = estado.enfase || "geral";
   // ============================================================
   // 9. CHAMADA AO BACKEND (Apps Script via Worker) + OFFLINE
   // ============================================================
- const SCRIPT_URL =
-  FEMFLOW.SCRIPT_URL ||
-  localStorage.getItem("femflow_script") ||
-  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+ // 🔥 Endereço correto SEMPRE vem do Core
+const SCRIPT_URL = 
+    (typeof FEMFLOW !== "undefined" && FEMFLOW.SCRIPT_URL)
+    ? FEMFLOW.SCRIPT_URL
+    : "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+
+
 
 // usamos o estado completo aqui
 const url = `${SCRIPT_URL
