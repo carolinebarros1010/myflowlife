@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Histórico de Treinos · MaleFlow</title>
+  <link rel="stylesheet" href="assets/style-maleflow.css" />
+  <style>
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    th { background: #f3f7f6; }
+    .page { max-width: 960px; margin: auto; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1>📊 Histórico de Treinos</h1>
+    <div id="historico"></div>
+  </main>
+
+  <script type="module">
+    import { db } from './js/firebase.js';
+    import { detectarUsuario } from './js/firebase.js';
+    import { collection, getDocs, doc } from 'https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js';
+
+    async function carregarHistorico(uid) {
+      const ciclosRef = collection(db, `usuarios/${uid}/ciclos`);
+      const ciclosSnap = await getDocs(ciclosRef);
+      const container = document.getElementById("historico");
+
+      if (ciclosSnap.empty) {
+        container.innerHTML = '<p>Nenhum treino registrado ainda.</p>';
+        return;
+      }
+
+      for (const cicloDoc of ciclosSnap.docs) {
+        const cicloId = cicloDoc.id;
+        const diasRef = collection(db, `usuarios/${uid}/ciclos/${cicloId}/dias`);
+        const diasSnap = await getDocs(diasRef);
+
+        if (!diasSnap.empty) {
+          const tabela = document.createElement('table');
+          const cabecalho = document.createElement('thead');
+          cabecalho.innerHTML = `<tr><th colspan="4">Ciclo: ${cicloId}</th></tr><tr><th>Dia</th><th>Exercício</th><th>Peso (kg)</th><th>Data</th></tr>`;
+          tabela.appendChild(cabecalho);
+
+          const corpo = document.createElement('tbody');
+
+          for (const diaDoc of diasSnap.docs) {
+            const diaId = diaDoc.id;
+            const data = diaDoc.data();
+            Object.entries(data).forEach(([key, val]) => {
+              corpo.innerHTML += `<tr><td>${diaId}</td><td>${val.nome || key}</td><td>${val.peso || '-'}</td><td>${val?.registradoEm?.toDate?.().toLocaleDateString?.() || '-'}</td></tr>`;
+            });
+          }
+
+          tabela.appendChild(corpo);
+          container.appendChild(tabela);
+        }
+      }
+    }
+
+    detectarUsuario(user => {
+      if (user) {
+        carregarHistorico(user.uid);
+      } else {
+        document.getElementById("historico").innerHTML = '<p>Você precisa estar logado para ver seu histórico.</p>';
+      }
+    });
+  </script>
+</body>
+</html>
