@@ -502,8 +502,10 @@ const url = `${SCRIPT_URL
     }
 
     if (raw.length) {
+      raw = raw.filter((v, i, a) =>
+  a.findIndex(t => t.titulo === v.titulo && t.box === v.box) === i
+);
       const boxMap = new Map();
-
       raw.forEach(ex => {
         const boxName = ex.box || "Box 1";
         if (!boxMap.has(boxName)) boxMap.set(boxName, []);
