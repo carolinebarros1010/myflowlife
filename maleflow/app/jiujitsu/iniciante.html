@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MaleFlow · Ciclo 1 Iniciante — Jiu-Jitsu</title>
+  <link rel="stylesheet" href="../assets/style-maleflow.css" />
+  <link rel="stylesheet" href="../assets/temporizador.css" />
+  <script type="module" src="../js/firebase.js"></script>
+  <script type="module" src="../js/valida-perfil.js"></script>
+  <script type="module" src="../js/salvar-treino.js"></script>
+  <script type="module" src="../js/temporizador.js"></script>
+</head>
+<body>
+<section class="page" data-dia>
+  <header class="head">
+    <img class="logo" src="../assets/logo maleflow.jpg" alt="MaleFlow logo" />
+    <div class="title">
+      <h1>MaleFlow · Ciclo 1 Iniciante — Jiu-Jitsu</h1>
+      <p>Nível Iniciante · Dias 1–4</p>
+    </div>
+    <span class="chip">20DIF · Base Funcional</span>
+  </header>
+
+  <section class="card">
+    <h3>Resumo do Ciclo</h3>
+    <p>Iniciação à musculação integrada com estímulos funcionais leves do Jiu-Jitsu. Estrutura de 4 dias, ideal para adaptação, mobilidade e controle corporal. Cada sessão com 2 exercícios de força para membros inferiores e 2 para superiores + estímulo funcional técnico no meio do treino.</p>
+  </section>
+
+  <!-- Dia 1 -->
+  <div class="day-block">
+    <h2>Dia 1 — Mobilidade e Coordenação</h2>
+    <p><strong>Aquecimento:</strong> caminhada leve + mobilidade articular</p>
+    <ul>
+      <li>Leg Press 45º — 2x12 <input type="text" data-exercicio="Leg Press 45º" placeholder="kg"></li>
+      <li>Flexora Sentado — 2x12 <input type="text" data-exercicio="Flexora Sentado" placeholder="kg"></li>
+      <li><strong>🔥 Estímulo funcional:</strong> deslocamento técnico base Jiu-Jitsu — 3x20s</li>
+      <li>Supino Máquina — 2x12 <input type="text" data-exercicio="Supino Máquina" placeholder="kg"></li>
+      <li>Puxada Frontal — 2x12 <input type="text" data-exercicio="Puxada Frontal" placeholder="kg"></li>
+      <li>Prancha com joelho ao solo — 30s</li>
+    </ul>
+    <p><strong>Resfriamento:</strong> Alongamento leve + respiração consciente</p>
+  </div>
+
+  <!-- Dia 2 -->
+  <div class="day-block">
+    <h2>Dia 2 — Consciência Postural</h2>
+    <p><strong>Aquecimento:</strong> bike leve + rotação torácica</p>
+    <ul>
+      <li>Extensora Máquina — 2x12 <input type="text" data-exercicio="Extensora" placeholder="kg"></li>
+      <li>Passada Curta Guiada — 2x12 <input type="text" data-exercicio="Passada Curta" placeholder="kg"></li>
+      <li><strong>🔥 Estímulo funcional:</strong> saída de quadril + rotação — 3x12</li>
+      <li>Remada Máquina — 2x12 <input type="text" data-exercicio="Remada Máquina" placeholder="kg"></li>
+      <li>Crucifixo Reto — 2x12 <input type="text" data-exercicio="Crucifixo Reto" placeholder="kg"></li>
+      <li>Core com bola — 30s</li>
+    </ul>
+    <p><strong>Resfriamento:</strong> Respiração + mobilidade cervical</p>
+  </div>
+
+  <!-- Dia 3 -->
+  <div class="day-block">
+    <h2>Dia 3 — Ativação com Técnica</h2>
+    <p><strong>Aquecimento:</strong> elíptico leve + articulações</p>
+    <ul>
+      <li>Stiff com halteres — 2x12 <input type="text" data-exercicio="Stiff Halteres" placeholder="kg"></li>
+      <li>Step-up banco — 2x10 <input type="text" data-exercicio="Step-up" placeholder="kg"></li>
+      <li><strong>🔥 Estímulo funcional:</strong> scramble curto solo — 3x15s</li>
+      <li>Supino Declinado Máquina — 2x10 <input type="text" data-exercicio="Supino Declinado" placeholder="kg"></li>
+      <li>Remada Unilateral — 2x10 <input type="text" data-exercicio="Remada Unilateral" placeholder="kg"></li>
+      <li>Abdominal canivete solo — 3x10</li>
+    </ul>
+    <p><strong>Resfriamento:</strong> Liberação + respiração profunda</p>
+  </div>
+
+  <!-- Dia 4 -->
+  <div class="day-block">
+    <h2>Dia 4 — Recuperação com Leveza</h2>
+    <p><strong>Aquecimento:</strong> caminhada leve + mobilidade leve</p>
+    <ul>
+      <li>Cadeira Abdutora — 2x15 <input type="text" data-exercicio="Cadeira Abdutora" placeholder="kg"></li>
+      <li>Extensora Unilateral — 2x10 <input type="text" data-exercicio="Extensora Unilateral" placeholder="kg"></li>
+      <li><strong>🔥 Estímulo funcional:</strong> flow solo jiu-jitsu leve — 2x30s</li>
+      <li>Pull down Polia Baixa — 2x12 <input type="text" data-exercicio="Pull Down" placeholder="kg"></li>
+      <li>Crucifixo Invertido Máquina — 2x12 <input type="text" data-exercicio="Crucifixo Invertido" placeholder="kg"></li>
+      <li>Prancha leve com apoio joelho — 30s</li>
+    </ul>
+    <p><strong>Resfriamento:</strong> Alongamento guiado e respiração nasal</p>
+  </div>
+
+  <!-- Campo de PSE -->
+  <div style="margin-top: 2rem">
+    <label for="pseTreino" style="font-weight: 600; display:block; margin-bottom: 4px">🧠 PSE do treino (1 a 10):</label>
+    <input type="range" id="pseTreino" min="1" max="10" step="1" value="6" style="width: 100%" oninput="pseOutput.value = this.value">
+    <output id="pseOutput" style="display:block; text-align:center; margin-top: 4px; font-size: 1.2rem">6</output>
+  </div>
+
+  <div style="margin: 2rem auto; text-align: center">
+    <button id="btnSalvarTreino">💾 Salvar Treino</button>
+  </div>
+
+  <footer>
+    <div>MaleFlow · Base e Mobilidade Funcional</div>
+    <div>Próximo nível: Ciclo 1 Intermediário</div>
+  </footer>
+</section>
+</body>
+</html>
