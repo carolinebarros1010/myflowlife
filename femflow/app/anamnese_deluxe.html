@@ -198,7 +198,10 @@
         // avança para o quiz (anamnese.js assume a partir daqui)
         document.getElementById("cadastro").classList.add("hidden");
         document.getElementById("quiz").classList.remove("hidden");
-
+        
+// 🔥 Inicia o quiz imediatamente após aparecer
+if (window.iniciarQuizFemFlow) iniciarQuizFemFlow();
+        
         // opcional: expõe dados básicos para o anamnese.js (se quiser usar)
         window.FEMFLOW = window.FEMFLOW || {};
         FEMFLOW._leadCadastro = { nome:nomeV, email:emailV, telefone:telV || "" };
