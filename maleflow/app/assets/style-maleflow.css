@@ -1,0 +1,96 @@
+/* style-maleFlow.css — estilo geral do app */
+
+:root {
+  --bg: #e0f0ec;
+  --white: #ffffff;
+  --ink: #1e2a2f;
+  --muted: #4b5b60;
+  --line: #cccccc;
+  --chip: #e6f1ef;
+  --accent: #244b46;
+}
+
+body {
+  margin: 0;
+  padding: 2rem;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Lato', sans-serif;
+}
+
+.page {
+  background: var(--white);
+  border-radius: 18px;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.12);
+  padding: 18px 22px;
+  max-width: 1080px;
+  margin: auto;
+  display: grid;
+  gap: 14px;
+}
+
+h1, h2, h3 {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--accent);
+}
+
+.card, .day-block {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--chip);
+  margin-top: 12px;
+}
+
+.day-block ul {
+  padding-left: 1.2rem;
+}
+
+input[type="text"], select {
+  padding: 6px 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  margin-top: 4px;
+}
+
+button {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #163c35;
+}
+
+.nav-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.nav-buttons button {
+  background: var(--chip);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 6px 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
