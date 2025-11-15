@@ -1,7 +1,7 @@
-// salvar-treino.js — Salva pesos + data no Firebase
+// salvar-treino.js — Salva pesos + data + PSE no Firebase
 import { db } from './firebase.js';
 import { detectarUsuario } from './firebase.js';
-import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js';
+import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js';
 
 const cicloAtual = 'ciclo1';
 const diaAtual = 'dia1';
@@ -22,7 +22,7 @@ async function salvarTreino(uid) {
 
   if (pseInput && pseInput.value) {
     registro.pse = {
-      valor: pseInput.value,
+      valor: parseInt(pseInput.value),
       registradoEm: new Date()
     };
   }
@@ -36,9 +36,18 @@ async function salvarTreino(uid) {
   const ref = doc(db, `usuarios/${uid}/ciclos/${cicloAtual}/dias/${diaAtual}`);
   await setDoc(ref, registro, { merge: true });
   alert("✅ Treino salvo!");
+  exibirRecomendacaoPSE(registro.pse?.valor);
 }
 
-// Botão de salvar
+function exibirRecomendacaoPSE(valor) {
+  if (!valor) return;
+  let msg = "";
+  if (valor <= 4) msg = "Recuperação leve. Considere subir carga amanhã.";
+  else if (valor <= 7) msg = "Boa carga moderada. Mantenha consistência.";
+  else msg = "Carga alta. Considere descanso ativo amanhã.";
+  alert(`🧠 PSE: ${valor} → ${msg}`);
+}
+
 const botao = document.getElementById("btnSalvarTreino");
 if (botao) {
   detectarUsuario(user => {
