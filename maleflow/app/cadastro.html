@@ -5,22 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cadastro · MaleFlow</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/style-maleflow.css" />
   <style>
-    body {
-      font-family: 'Lato', sans-serif;
-      background: #e0f0ec;
-      margin: 0;
-      padding: 2rem;
-      display: flex;
-      justify-content: center;
-    }
     .card {
       background: #fff;
       padding: 2rem;
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       max-width: 520px;
-      width: 100%;
+      margin: 60px auto;
     }
     h1 {
       font-family: 'Montserrat', sans-serif;
@@ -57,7 +50,7 @@
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card" id="formPerfil" style="display:none">
     <h1>Cadastro Inicial · MaleFlow</h1>
     <label for="nome">Nome completo:</label>
     <input type="text" id="nome" placeholder="Ex: Ricardo Silva" />
@@ -83,11 +76,13 @@
   </div>
 
   <script type="module">
-    import { db } from './firebase.js';
-    import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js';
-    import { detectarUsuario } from './firebase.js';
+    import { db } from './js/firebase.js';
+    import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js';
+    import { detectarUsuario } from './js/firebase.js';
 
-    function salvarCadastro() {
+    const next = new URLSearchParams(window.location.search).get("next") || "index.html";
+
+    async function salvarCadastro() {
       detectarUsuario(async user => {
         if (!user) {
           alert("Você precisa estar logado.");
@@ -113,9 +108,23 @@
         }, { merge: true });
 
         alert("Cadastro salvo com sucesso!");
-        window.location.href = "jiu-ciclo1.html"; // Redireciona após cadastro
+        window.location.href = next;
       });
     }
+
+    detectarUsuario(async user => {
+      if (!user) return;
+      const ref = doc(db, `usuarios/${user.uid}`);
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : null;
+      if (data?.nome && data?.registro) {
+        // perfil já existe → redireciona
+        window.location.href = next;
+      } else {
+        // mostra formulário
+        document.getElementById('formPerfil').style.display = 'block';
+      }
+    });
   </script>
 </body>
 </html>
