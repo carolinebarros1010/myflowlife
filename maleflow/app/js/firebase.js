@@ -1,43 +1,41 @@
 // firebase.js — Integração MaleFlow com Firebase
 
-// 1. Inicialização do Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-analytics.js";
 
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SUA_AUTH_DOMAIN",
-  projectId: "SUA_PROJECT_ID",
-  storageBucket: "SUA_BUCKET",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID"
+  apiKey: "AIzaSyAU83ezlbZt7n4OpGcZp8fcrVZ0ZWTkMXA",
+  authDomain: "male-flow.firebaseapp.com",
+  projectId: "male-flow",
+  storageBucket: "male-flow.firebasestorage.app",
+  messagingSenderId: "88249220728",
+  appId: "1:88249220728:web:b746e5384b9ee6623a378d",
+  measurementId: "G-6WKRP3Z6VT"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+const analytics = getAnalytics(app);
 
-// 2. Autenticar com Google
 export function loginGoogle() {
   return signInWithPopup(auth, provider);
 }
 
-// 3. Salvar treino de um dia
 export async function salvarTreino(uid, ciclo, dia, dados) {
   const ref = doc(db, `usuarios/${uid}/ciclos/${ciclo}/dias/${dia}`);
   await setDoc(ref, dados, { merge: true });
 }
 
-// 4. Buscar treino salvo
 export async function buscarTreino(uid, ciclo, dia) {
   const ref = doc(db, `usuarios/${uid}/ciclos/${ciclo}/dias/${dia}`);
   const snap = await getDoc(ref);
   return snap.exists() ? snap.data() : null;
 }
 
-// 5. Detectar login automático
 export function detectarUsuario(callback) {
   onAuthStateChanged(auth, user => {
     if (user) callback(user);
