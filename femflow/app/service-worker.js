@@ -21,8 +21,7 @@ const ASSETS = [
   "./js/ciclo.js",
   "./js/treino.js",
   "./js/anamnese.js",
-  "./js/memoria.js",
-
+ 
   // Logos / ícones
   "./assets/logofemflowterracota.png",
   "./assets/icons/icon-192.png",
