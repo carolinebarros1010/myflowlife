@@ -2,12 +2,14 @@ import { db } from './firebase.js';
 import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js';
 import { detectarUsuario } from './firebase.js';
 
-// Salva nome e registro do aluno no Firestore
+// Salva nome, registro, nível e esporte do aluno no Firestore
 async function salvarPerfil(uid, nome, registro) {
   const ref = doc(db, `usuarios/${uid}`);
   await setDoc(ref, {
     nome: nome.trim(),
     registro: registro.trim(),
+    nivel: "iniciante",             // default no primeiro cadastro
+    esporteAtual: "jiujitsu",       // default inicial
     atualizadoEm: new Date()
   }, { merge: true });
 
@@ -34,11 +36,9 @@ detectarUsuario(async user => {
 
         if (nome.trim() && registro.trim()) {
           salvarPerfil(user.uid, nome, registro);
-        } 
-             else {
+        } else {
           alert('Preencha todos os campos antes de salvar.');
         }
-        
       });
     }
   }
