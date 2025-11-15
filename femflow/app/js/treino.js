@@ -562,6 +562,7 @@ const url = `${SCRIPT_URL
         if (prog < 30) {
           localStorage.setItem("femflow_dia_treino", prog + 1);
           FEMFLOW.toast(`Treino salvo! Próximo: Dia ${prog + 1}`);
+          setTimeout(() => FEMFLOW.router("flowcenter"), 1200);
         } else {
           FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
         }
