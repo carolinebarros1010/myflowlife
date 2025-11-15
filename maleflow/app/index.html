@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MaleFlow • Início</title>
+  <link rel="stylesheet" href="assets/style-maleflow.css" />
+  <style>
+    .cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 2rem; }
+    .card-esporte {
+      background: white; border: 1px solid #ccd; border-radius: 16px; width: 280px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08); overflow: hidden; cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .card-esporte:hover { transform: scale(1.02); }
+    .thumb { height: 140px; background-size: cover; background-position: center; }
+    .info { padding: 16px; }
+    .info h3 { margin: 0 0 8px; font-size: 1.2rem; }
+    .info p { margin: 0; font-size: 0.95rem; color: #555; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1>Escolha seu esporte base</h1>
+    <section class="cards">
+      <div class="card-esporte" onclick="window.location.href='jiu-ciclo1.html'">
+        <div class="thumb" style="background-image:url('assets/jiujitsu.jpg')"></div>
+        <div class="info">
+          <h3>Jiu-Jitsu</h3>
+          <p>Mobilidade, força em cadeia, rotação e controle corporal</p>
+        </div>
+      </div>
+      <div class="card-esporte" onclick="window.location.href='bike-ciclo1.html'">
+        <div class="thumb" style="background-image:url('assets/bike.jpg')"></div>
+        <div class="info">
+          <h3>Ciclismo</h3>
+          <p>Força de perna, estabilidade, resistência e postura</p>
+        </div>
+      </div>
+      <div class="card-esporte" onclick="window.location.href='surf-ciclo1.html'">
+        <div class="thumb" style="background-image:url('assets/surf.jpg')"></div>
+        <div class="info">
+          <h3>Surf</h3>
+          <p>Explosão, equilíbrio, mobilidade torácica e força de remada</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
