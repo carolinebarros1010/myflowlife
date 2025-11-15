@@ -34,9 +34,11 @@ detectarUsuario(async user => {
 
         if (nome.trim() && registro.trim()) {
           salvarPerfil(user.uid, nome, registro);
-        } else {
+        } 
+             else {
           alert('Preencha todos os campos antes de salvar.');
         }
+        
       });
     }
   }
