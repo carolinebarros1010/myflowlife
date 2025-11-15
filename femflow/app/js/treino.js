@@ -592,5 +592,7 @@ const url = `${SCRIPT_URL
       FEMFLOW.toast("📴 Sem conexão para registrar descanso agora. Você pode repetir esse dia depois.");
     }
   });
-
+  window.addEventListener("femflow:langchange", () => {
+   location.reload();
+});
 });
