@@ -1,4 +1,4 @@
-// salvar-treino.js — Salva pesos + data + PSE no Firebase
+// js/salvar-treino.js — Salva pesos + data + PSE no Firebase
 import { db } from './firebase.js';
 import { detectarUsuario } from './firebase.js';
 import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js';
