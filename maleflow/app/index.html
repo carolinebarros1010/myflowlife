@@ -45,48 +45,86 @@
       color: #555;
     }
   </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAU83ezlbZt7n4OpGcZp8fcrVZ0ZWTkMXA",
+      authDomain: "male-flow.firebaseapp.com",
+      projectId: "male-flow",
+      storageBucket: "male-flow.appspot.com",
+      messagingSenderId: "88249220728",
+      appId: "1:88249220728:web:b746e5384b9ee6623a378d",
+      measurementId: "G-6WKRP3Z6VT"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    window.irParaTreino = async function(esporte) {
+      onAuthStateChanged(auth, async user => {
+        if (!user) {
+          alert("Faça login para acessar seu treino.");
+          return;
+        }
+
+        const docRef = doc(db, "usuarios", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const nivel = docSnap.data()?.nivel || "iniciante";
+          location.href = `app/${esporte}/${nivel}.html`;
+        } else {
+          alert("Perfil não encontrado.");
+        }
+      });
+    }
+  </script>
 </head>
 <body>
   <main class="page">
     <h1>Escolha seu esporte</h1>
     <section class="cards">
-      <div class="card-esporte" onclick="window.location.href='jiujitsu/ciclo1.html'">
+      <div class="card-esporte" onclick="irParaTreino('jiujitsu')">
         <div class="thumb" style="background-image:url('assets/jiujitsu.jpg')"></div>
         <div class="info"><h3>Jiu-Jitsu</h3><p>Força, rotação, mobilidade e base funcional</p></div>
       </div>
-      <div class="card-esporte" onclick="window.location.href='surf/ciclo1.html'">
+      <div class="card-esporte" onclick="irParaTreino('surf')">
         <div class="thumb" style="background-image:url('assets/surf.jpg')"></div>
         <div class="info"><h3>Surf</h3><p>Explosão, equilíbrio, remada e mobilidade torácica</p></div>
       </div>
-      <div class="card-esporte" onclick="window.location.href='bike/ciclo1.html'">
+      <div class="card-esporte" onclick="irParaTreino('bikeoffroad')">
         <div class="thumb" style="background-image:url('assets/mountainbike.jpg')"></div>
         <div class="info"><h3>Mountain Bike</h3><p>Resistência de perna, core e técnica de subida</p></div>
       </div>
-      <div class="card-esporte" onclick="window.location.href='estrada/ciclo1.html'">
+      <div class="card-esporte" onclick="irParaTreino('estrada')">
         <div class="thumb" style="background-image:url('assets/estrada.jpg')"></div>
         <div class="info"><h3>Ciclismo de Estrada</h3><p>Cadência, endurance e controle postural</p></div>
       </div>
-      <div class="card-esporte" onclick="window.location.href='skate/ciclo1.html'">
+      <div class="card-esporte" onclick="irParaTreino('skate')">
         <div class="thumb" style="background-image:url('assets/skate.jpg')"></div>
         <div class="info"><h3>Skate</h3><p>Estabilidade, tornozelos, equilíbrio e explosão</p></div>
       </div>
-      <div class="card-esporte" onclick="window.location.href='remo/ciclo1.html'">
+      <div class="card-esporte" onclick="irParaTreino('remo')">
         <div class="thumb" style="background-image:url('assets/remo.jpg')"></div>
         <div class="info"><h3>Remo</h3><p>Tração, mobilidade torácica e core funcional</p></div>
       </div>
-      <div class="card-esporte" onclick="window.location.href='natacao/ciclo1.html'">
+      <div class="card-esporte" onclick="irParaTreino('natacao')">
         <div class="thumb" style="background-image:url('assets/natacao.jpg')"></div>
         <div class="info"><h3>Natação</h3><p>Estabilidade, escápulas, respiração e cadeia posterior</p></div>
       </div>
-      <div class="card-esporte" onclick="window.location.href='corrida5k/ciclo1.html'">
+      <div class="card-esporte" onclick="irParaTreino('corrida5k')">
         <div class="thumb" style="background-image:url('assets/corrida5k.jpg')"></div>
         <div class="info"><h3>Corrida 5km</h3><p>Base aeróbica, força de passada, economia de movimento</p></div>
       </div>
-      <div class="card-esporte" onclick="window.location.href='corrida10k/ciclo1.html'">
+      <div class="card-esporte" onclick="irParaTreino('corrida10k')">
         <div class="thumb" style="background-image:url('assets/corrida10k.jpg')"></div>
         <div class="info"><h3>Corrida 10km</h3><p>Volume controlado, técnica de corrida, core e endurance</p></div>
       </div>
-      <div class="card-esporte" onclick="window.location.href='maratona/ciclo1.html'">
+      <div class="card-esporte" onclick="irParaTreino('maratona')">
         <div class="thumb" style="background-image:url('assets/maratona.jpg')"></div>
         <div class="info"><h3>Maratona</h3><p>Longo prazo, força estrutural e resistência mental</p></div>
       </div>
@@ -94,4 +132,5 @@
   </main>
 </body>
 </html>
+
 
