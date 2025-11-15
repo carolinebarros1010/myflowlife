@@ -75,56 +75,59 @@
     <button onclick="salvarCadastro()">Salvar Cadastro</button>
   </div>
 
-  <script type="module">
-    import { db } from './js/firebase.js';
-    import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js';
-    import { detectarUsuario } from './js/firebase.js';
+ <script type="module">
+  import { db } from './js/firebase.js';
+  import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js';
+  import { detectarUsuario } from './js/firebase.js';
 
-    const next = new URLSearchParams(window.location.search).get("next") || "index.html";
+  const next = new URLSearchParams(window.location.search).get("next") || "index.html";
 
-    async function salvarCadastro() {
-      detectarUsuario(async user => {
-        if (!user) {
-          alert("Você precisa estar logado.");
-          return;
-        }
-        const nome = document.getElementById("nome").value;
-        const registro = document.getElementById("registro").value;
-        const experiencia = document.getElementById("experiencia").value;
-        const local = document.getElementById("local").value;
-
-        if (!nome || !registro) {
-          alert("Preencha todos os campos.");
-          return;
-        }
-
-        const ref = doc(db, `usuarios/${user.uid}`);
-        await setDoc(ref, {
-          nome,
-          registro,
-          experiencia,
-          local,
-          atualizadoEm: new Date()
-        }, { merge: true });
-
-        alert("Cadastro salvo com sucesso!");
-        window.location.href = next;
-      });
-    }
-
+  async function salvarCadastro() {
     detectarUsuario(async user => {
-      if (!user) return;
-      const ref = doc(db, `usuarios/${user.uid}`);
-      const snap = await getDoc(ref);
-      const data = snap.exists() ? snap.data() : null;
-      if (data?.nome && data?.registro) {
-        // perfil já existe → redireciona
-        window.location.href = next;
-      } else {
-        // mostra formulário
-        document.getElementById('formPerfil').style.display = 'block';
+      if (!user) {
+        alert("Você precisa estar logado.");
+        return;
       }
+
+      const nome = document.getElementById("nome").value.trim();
+      const registro = document.getElementById("registro").value.trim();
+      const nivel = document.getElementById("experiencia").value;
+      const local = document.getElementById("local").value;
+
+      if (!nome || !registro) {
+        alert("Preencha todos os campos.");
+        return;
+      }
+
+      const ref = doc(db, `usuarios/${user.uid}`);
+      await setDoc(ref, {
+        nome,
+        registro,
+        nivel,               // necessário para redirecionamento
+        esporteAtual: "jiujitsu", // padrão inicial
+        local,
+        atualizadoEm: new Date()
+      }, { merge: true });
+
+      alert("Cadastro salvo com sucesso!");
+      window.location.href = next;
     });
-  </script>
+  }
+
+  window.salvarCadastro = salvarCadastro;
+
+  detectarUsuario(async user => {
+    if (!user) return;
+    const ref = doc(db, `usuarios/${user.uid}`);
+    const snap = await getDoc(ref);
+    const data = snap.exists() ? snap.data() : null;
+    if (data?.nome && data?.registro) {
+      window.location.href = next;
+    } else {
+      document.getElementById('formPerfil').style.display = 'block';
+    }
+  });
+</script>
+
 </body>
 </html>
