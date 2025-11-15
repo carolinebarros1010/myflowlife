@@ -198,6 +198,11 @@
         // avança para o quiz (anamnese.js assume a partir daqui)
         document.getElementById("cadastro").classList.add("hidden");
         document.getElementById("quiz").classList.remove("hidden");
+
+    requestAnimationFrame(() => {
+  if (window.iniciarQuizFemFlow) iniciarQuizFemFlow();
+});
+   
         
 // 🔥 Inicia o quiz imediatamente após aparecer
 if (window.iniciarQuizFemFlow) iniciarQuizFemFlow();
