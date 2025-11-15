@@ -45,44 +45,48 @@
       color: #555;
     }
   </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAU83ezlbZt7n4OpGcZp8fcrVZ0ZWTkMXA",
-      authDomain: "male-flow.firebaseapp.com",
-      projectId: "male-flow",
-      storageBucket: "male-flow.appspot.com",
-      messagingSenderId: "88249220728",
-      appId: "1:88249220728:web:b746e5384b9ee6623a378d",
-      measurementId: "G-6WKRP3Z6VT"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyAU83ezlbZt7n4OpGcZp8fcrVZ0ZWTkMXA",
+    authDomain: "male-flow.firebaseapp.com",
+    projectId: "male-flow",
+    storageBucket: "male-flow.appspot.com",
+    messagingSenderId: "88249220728",
+    appId: "1:88249220728:web:b746e5384b9ee6623a378d",
+    measurementId: "G-6WKRP3Z6VT"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
 
-    window.irParaTreino = async function(esporte) {
-      onAuthStateChanged(auth, async user => {
-        if (!user) {
-          alert("Faça login para acessar seu treino.");
-          return;
-        }
+  window.irParaTreino = function(esporte) {
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        // Redireciona para cadastro com redirect
+        location.href = `cadastro.html?next=index.html`;
+        return;
+      }
 
-        const docRef = doc(db, "usuarios", user.uid);
-        const docSnap = await getDoc(docRef);
+      const ref = doc(db, "usuarios", user.uid);
+      const snap = await getDoc(ref);
 
-        if (docSnap.exists()) {
-          const nivel = docSnap.data()?.nivel || "iniciante";
-          location.href = `app/${esporte}/${nivel}.html`;
-        } else {
-          alert("Perfil não encontrado.");
-        }
-      });
-    }
-  </script>
+      if (!snap.exists()) {
+        // Perfil ainda não criado → cadastro
+        location.href = `cadastro.html?next=index.html`;
+        return;
+      }
+
+      const dados = snap.data();
+      const nivel = dados?.nivel || "iniciante";
+      location.href = `app/${esporte}/${nivel}.html`;
+    });
+  }
+</script>
 </head>
 <body>
   <main class="page">
