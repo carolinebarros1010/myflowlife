@@ -1,5 +1,5 @@
 // =======================================================================
-// FemFlow — Treino Diário 2025 (Versão HÍBRIDA PREMIUM + Performance View)
+// FemFlow v02 — Treino Diário 2025 (Versão HÍBRIDA PREMIUM + Performance View)
 // Box0 + Box1(+HIIT/Cardio) + Box2(+HIIT/Cardio) + Box3 (se existir) + Finalização
 // - Híbrido: Apps Script (treino-dia) + Firebase exercícios
 // - Pronto para PWA/TWA e modo offline (snapshot do último treino)
