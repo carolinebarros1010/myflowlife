@@ -487,13 +487,9 @@ salvarDescanso: async function (fase = "menstrual") {
     observacao: "Descanso ativo",
   });
 
-  let diaTreino = Number(localStorage.getItem("femflow_dia_treino") || 1);
-  if (diaTreino < 30) {
-    localStorage.setItem("femflow_dia_treino", String(diaTreino + 1));
-    console.log(`💤 Descanso registrado → Avançando para Dia ${diaTreino + 1}`);
-  }
+  // mantém o mesmo dia — não avança
 
-  setTimeout(() => this.router("flowcenter"), 1800);
+  setTimeout(() => this.router("flowcenter"), 1200);
 },
 
 validarAssinatura: async function (id) {
