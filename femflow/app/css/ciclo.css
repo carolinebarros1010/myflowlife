@@ -1,0 +1,46 @@
+/* ===========================================================
+   FEMFLOW — CICLO.CSS
+   Estilos exclusivos da página de ciclo
+=========================================================== */
+
+.page-ciclo .header-ciclo {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.page-ciclo .titulo-ciclo {
+  font-size: 1.7rem;
+  color: var(--teal);
+  font-weight: 700;
+}
+
+.page-ciclo .subtitulo-ciclo {
+  font-size: 1rem;
+  color: var(--terracota);
+}
+
+.page-ciclo #cicloSection {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+}
+
+/* Quiz */
+.page-ciclo .quiz-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-ciclo .quiz-content {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(12px);
+  padding: 1.4rem;
+  border-radius: 16px;
+  max-width: 340px;
+  width: 90%;
+}
