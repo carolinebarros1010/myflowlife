@@ -5,316 +5,261 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>FemFlow • Home</title>
   <link rel="manifest" href="manifest.json"/>
-  <meta name="theme-color" content="#335953"/>
+
   <style>
-    :root{ --bege:#fff7f2; --terracota:#cc6a5a; --teal:#335953; --texto:#4d3f3a; }
-    *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(180deg,#fffdfb 0%, #f3ece6 100%);
-         color:var(--texto);font-family:"Lato",system-ui,Segoe UI,Arial,sans-serif}
-    header{display:flex;justify-content:center;padding:16px 14px}
-    .logo{height:56px}
-    .wrap{max-width:1160px;margin:0 auto;padding:0 14px 22px}
+    :root{
+      --bege:#fff7f2;
+      --terracota:#cc6a5a;
+      --teal:#335953;
+      --texto:#4d3f3a;
+    }
+    *{box-sizing:border-box;}
 
-    /* vídeo topo */
-    .video{position:relative;padding-top:56.25%;border-radius:16px;overflow:hidden;
-           box-shadow:0 10px 24px rgba(0,0,0,.12);background:#000}
-    .video iframe,.video video{position:absolute;inset:0;width:100%;height:100%}
+    body{
+      margin:0; 
+      background:linear-gradient(180deg,#fffdfb 0%, #f3ece6 100%);
+      color:var(--texto);
+      font-family:"Lato",system-ui,Segoe UI,Arial,sans-serif;
+    }
 
-    /* título da vitrine */
-    h1{font-size:1.25rem;color:var(--teal);margin:14px 2px 10px;font-weight:900}
+    header{display:flex;justify-content:center;padding:16px;}
+    .wrap{max-width:1160px;margin:0 auto;padding:0 14px 22px;}
 
-    /* carrossel horizontal (scroll lateral) */
+    /* Vídeo */
+    .video{
+      position:relative;padding-top:56.25%;border-radius:16px;overflow:hidden;
+      box-shadow:0 10px 24px rgba(0,0,0,.12);
+      background:#000;margin-bottom:20px;
+    }
+    .video iframe{position:absolute;inset:0;width:100%;height:100%;}
+
+    h1{
+      font-size:1.25rem;color:var(--teal);
+      margin:14px 2px 10px;font-weight:900;
+    }
+
+    /* Netflix Carrossel */
     .rail{
-      display:flex; gap:12px; overflow-x:auto; -webkit-overflow-scrolling:touch;
-      padding:2px 2px 10px; margin:0 -8px 8px; scroll-snap-type:x mandatory;
+      display:flex;gap:12px;overflow-x:auto;padding-bottom:16px;
+      scroll-snap-type:x mandatory;
     }
-    .rail::-webkit-scrollbar{display:none} /* mobile clean */
-    .card{
-      flex:0 0 220px; scroll-snap-align:start;
-      background:#fff;border-radius:16px;overflow:hidden;border:1px solid rgba(204,106,90,.14);
-      box-shadow:0 6px 16px rgba(0,0,0,.08);cursor:pointer;transition:transform .2s ease,box-shadow .2s ease
-    }
-    .card:active{transform:scale(.98)}
-    .thumb{position:relative;height:140px;background:#fff;display:flex;align-items:center;justify-content:center}
-    .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .ph{font-weight:900;font-size:28px;color:#fff;z-index:1}
-    .badge{position:absolute;right:10px;top:10px;background:rgba(51,89,83,.92);color:#fff;border-radius:999px;
-           padding:4px 10px;font-size:.8rem;font-weight:800}
-    .info{padding:12px}
-    .ttl{margin:0 0 6px;color:var(--teal);font-weight:900}
-    .desc{margin:0;color:#94786f;font-size:.92rem;min-height:38px}
+    .rail::-webkit-scrollbar{display:none;}
 
-    /* CTA Flow Center */
-    .cta{
-      display:block;width:100%;max-width:480px;margin:16px auto 4px;padding:12px 16px;
-      border:0;border-radius:14px;font-weight:900;letter-spacing:.2px;cursor:pointer;
-      background:linear-gradient(135deg,var(--teal),var(--terracota));color:#fff;
-      box-shadow:0 10px 22px rgba(0,0,0,.12)
+    .card{
+      flex:0 0 200px;
+      background:#fff;border-radius:16px;overflow:hidden;
+      border:1px solid rgba(204,106,90,.14);
+      transition:transform .2s ease;
+      cursor:pointer;
+      scroll-snap-align:start;
+      box-shadow:0 6px 16px rgba(0,0,0,.08);
     }
-    footer{padding:16px 0 24px;text-align:center;color:#9a8077;font-size:.9rem}
+    .card:active{transform:scale(.97);}
+    
+    .thumb{
+      height:120px;
+      background:#ddd;
+      display:flex;align-items:center;justify-content:center;
+      position:relative;
+    }
+    .badge{
+      position:absolute;top:8px;right:8px;background:rgba(51,89,83,.9);
+      padding:4px 10px;color:#fff;border-radius:12px;font-size:.78rem;
+    }
+    .info{padding:12px;}
+    .ttl{font-weight:900;color:var(--teal);margin:0 0 4px;}
+    .desc{margin:0;color:#94786f;font-size:.9rem;}
+
+    /* CTA */
+    .cta{
+      margin:20px auto 4px;display:block;width:100%;
+      max-width:380px;padding:12px;border-radius:14px;
+      font-weight:900;letter-spacing:.2px;cursor:pointer;
+      border:0;background:linear-gradient(135deg,var(--teal),var(--terracota));color:#fff;
+      box-shadow:0 10px 22px rgba(0,0,0,.12);
+    }
+
+    footer{padding:16px 0;text-align:center;color:#94786f;font-size:.9rem;}
   </style>
 </head>
+
 <body>
-  <!-- 🌸 TOPO AUTO do CORE (injetado via femflow-core.js) -->
-  
+
   <main class="wrap">
-    <!-- Vídeo -->
+
+    <!-- Vídeo topo -->
     <section class="video">
-    <iframe
-  src="https://www.youtube-nocookie.com/embed/DyX8F1ChSDw"
-  title="Boas-vindas FemFlow"
-  frameborder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-  allowfullscreen>
-</iframe>
+      <iframe src="https://www.youtube-nocookie.com/embed/DyX8F1ChSDw"
+        title="FemFlow boas-vindas"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen></iframe>
     </section>
 
-    <!-- Vitrine (scroll lateral) -->
-    <h1>Programas de 30 dias</h1>
-    <section class="rail" id="railProdutos"></section>
 
-    <!-- CTAs lado a lado -->
-    <div style="display:flex;gap:10px;justify-content:center;margin:16px 0 4px">
-     <button type="button" id="btnFlow" class="cta" style="max-width:260px">Ir para o Flow Center</button>
-<button type="button" id="btnCad"  class="cta" style="max-width:260px;background:#fff;color:#335953;border:1px solid #e6d8d2">
-  Cadastro
-</button>
-    </div>
+    <!-- ============================ -->
+    <!--        FILEIRA 1            -->
+    <!--  ÊNFASES MUSCULARES         -->
+    <!-- ============================ -->
+    <h1>Ênfases Musculares</h1>
+    <section class="rail" id="railMuscular"></section>
+
+
+    <!-- ============================ -->
+    <!--        FILEIRA 2            -->
+    <!--        ESPORTES             -->
+    <!-- ============================ -->
+    <h1>Esportes</h1>
+    <section class="rail" id="railEsportes"></section>
+
+
+    <!-- ============================ -->
+    <!--        FILEIRA 3            -->
+    <!--       TREINOS EM CASA        -->
+    <!-- ============================ -->
+    <h1>Treinos em Casa</h1>
+    <section class="rail" id="railCasa"></section>
+
+
+    <!-- CTAs -->
+    <button id="btnFlow" class="cta">Ir para o Flow Center</button>
+    <button id="btnCad"  class="cta" style="background:#fff;color:#335953;border:1px solid #e6d8d2">
+      Cadastro
+    </button>
+
   </main>
 
   <footer>FemFlow • escolha seu foco e comece hoje</footer>
 
-  <!-- Firebase compat (antes do femflow-core.js) -->
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-  <!-- Core e UI -->
-  <script>
-    window.FEMFLOW_DISABLE_UI = true; // garante que o topo apareça
-  </script>
+  <!-- Core -->
+  <script> window.FEMFLOW_DISABLE_UI = true; </script>
+  <script src="./femflow-core.js"></script>
 
-     <script src="./femflow-core.js"></script>
-
-  <!-- Sincronização e controle -->
-  <script>
-  async function syncEntitlement() {
-    try {
-      const email = localStorage.getItem('femflow_email') || '';
-      const id    = localStorage.getItem('femflow_id') || '';
-      if (!email && !id) return;
-      if (!window.FEMFLOW?.SCRIPT_URL) return;
-
-      // usa email; se não tiver, cai pro id
-      const q = email ? `email=${encodeURIComponent(email)}` : `id=${encodeURIComponent(id)}`;
-      const url = `${FEMFLOW.SCRIPT_URL}?action=status&${q}`;
-
-      const r = await fetch(url);
-      const j = await r.json();
-
-      if (j?.id) localStorage.setItem('femflow_id', j.id);
-      if (j?.program) localStorage.setItem('femflow_program', j.program);
-      else localStorage.removeItem('femflow_program');
-
-      if (j?.expiryISO) localStorage.setItem('femflow_program_expiry', j.expiryISO);
-      else localStorage.removeItem('femflow_program_expiry');
-
-      if (j?.cycle?.startDate) localStorage.setItem('femflow_startDate', j.cycle.startDate);
-      if (j?.cycle?.length)    localStorage.setItem('femflow_cycleLength', j.cycle.length);
-    } catch(e) {
-      console.warn('syncEntitlement failed', e);
-    }
-  }
-
-  // --- Checa direito ativo (programa válido) ---
-  function hasEntitlement() {
-    const sku = localStorage.getItem('femflow_program');
-    const exp = localStorage.getItem('femflow_program_expiry');
-    if (!sku || !exp) return false;
-    return new Date() <= new Date(exp);
-  }
-  </script>
 
 <script>
- // === PROGRAMA DE ACESSO LIVRE (assinatura mensal única) ===
-const PRODUTOS = [
-  { sku:'INICIANTE_ADAPTACAO', titulo:'Adaptação',  enfase:'adaptacao',   color:'#e6b299', desc:'Transição suave e fortalecimento geral' },
-  { sku:'INICIANTE_BEACH',     titulo:'Beach',      enfase:'beach',       color:'#e3a689', desc:'Desempenho para beach tennis e areia' },
-  { sku:'INICIANTE_BRACO',     titulo:'Braço',      enfase:'braco',       color:'#d9876b', desc:'Foco em força e definição dos braços' },
-  { sku:'INICIANTE_CASA',      titulo:'Em Casa',    enfase:'casa',        color:'#d1a697', desc:'Treinos leves e sem equipamentos' },
-  { sku:'INICIANTE_CORRIDA',   titulo:'Corrida',    enfase:'corrida',     color:'#b8a59c', desc:'Base aeróbica e resistência progressiva' },
-  { sku:'INICIANTE_COSTAS',    titulo:'Costas',     enfase:'costas',      color:'#a6b8c8', desc:'Remadas, postura e estabilidade' },
-  { sku:'INICIANTE_GERAL',     titulo:'Geral',      enfase:'geral',       color:'#cc6a5a', desc:'Corpo completo e equilíbrio muscular' },
-  { sku:'INICIANTE_GLUTEO',    titulo:'Glúteos',    enfase:'gluteo',      color:'#d98f80', desc:'Ênfase em glúteo médio e máximo' },
-  { sku:'INICIANTE_NATACAO',   titulo:'Natação',    enfase:'natacao',     color:'#80a8b3', desc:'Estabilidade de tronco e propulsão aquática' },
-  { sku:'INICIANTE_POSTERIOR', titulo:'Posteriores',enfase:'posteriores', color:'#b58fb5', desc:'Cadeia posterior e estabilidade pélvica' },
-  { sku:'INICIANTE_QUADRICEPS',titulo:'Quadríceps', enfase:'quadriceps',  color:'#9fb7ac', desc:'Ênfase em extensão de joelhos e pernas' },
-  { sku:'INICIANTE_REMO',      titulo:'Remo / Canoa', enfase:'remo',      color:'#7f9d94', desc:'Força de tração e core para remadores' }
+/* ==========================================================
+   LISTAS DAS 3 FILEIRAS
+========================================================== */
+
+const LISTA_MUSCULAR = [
+  { titulo:"Glúteo", enfase:"gluteo", color:"#d98f80", desc:"Foco total no glúteo" },
+  { titulo:"Costas", enfase:"costas", color:"#a6b8c8", desc:"Remadas e postura" },
+  { titulo:"Peito", enfase:"peito", color:"#e6a09b", desc:"Força de empurrar" },
+  { titulo:"Braço", enfase:"braco", color:"#d38b6e", desc:"Bíceps + tríceps" },
+  { titulo:"Posterior", enfase:"posterior", color:"#b58fb5", desc:"Cadeia posterior" },
+  { titulo:"Quadríceps", enfase:"quadriceps", color:"#9fb7ac", desc:"Pernas fortes" }
 ];
 
-  const rail = document.getElementById('railProdutos');
+const LISTA_ESPORTES = [
+  { titulo:"Corrida", enfase:"corrida", color:"#b8a59c", desc:"Base aeróbica" },
+  { titulo:"Natação", enfase:"natacao", color:"#80a8b3", desc:"Propulsão aquática" },
+  { titulo:"Remo", enfase:"remo", color:"#7f9d94", desc:"Tração e core" },
+  { titulo:"Bike", enfase:"bike", color:"#9cc2c1", desc:"Cardio leve/moderado" },
+  { titulo:"Beach", enfase:"beach", color:"#e3a689", desc:"Areia, agilidade e potência" }
+];
 
-  // === Monta os cards ===
-  function cardHTML(p){
-    return `
-      <article class="card" data-enfase="${p.enfase}">
-        <div class="thumb" style="background:${p.color}">
-          <div class="ph">${p.titulo.charAt(0)}</div>
-          <span class="badge">${p.titulo}</span>
-        </div>
-        <div class="info">
-          <h3 class="ttl">${p.titulo}</h3>
-          <p class="desc">${p.desc||''}</p>
-        </div>
-      </article>`;
-  }
+const LISTA_CASA = [
+  { titulo:"Em Casa", enfase:"casa", color:"#d1a697", desc:"Sem equipamentos" },
+  { titulo:"Casa Glúteo", enfase:"casa_gluteo", color:"#dc9d8c", desc:"Glúteos em casa" },
+  { titulo:"Casa Core", enfase:"casa_core", color:"#cababa", desc:"Abdômen e lombar" },
+  { titulo:"Elástico", enfase:"casa_elastico", color:"#d8c4b0", desc:"Treino com elástico" },
+  { titulo:"Halter", enfase:"casa_halter", color:"#c6b4a4", desc:"Halter em casa" }
+];
 
-  function render(){
-    rail.innerHTML = PRODUTOS.map(cardHTML).join('');
-    rail.querySelectorAll('.card').forEach(el=>{
-      el.addEventListener('click', ()=>onChoose(el.dataset.enfase));
-    });
-  }
 
-  // === Clique no card → define ênfase e vai pro FlowCenter ===
-async function onChoose(enfase) {
-  const id = localStorage.getItem('femflow_id');
+/* ==========================================================
+   MONTAGEM DOS CARDS
+========================================================== */
 
-  // 1️⃣ Atualiza localStorage
-  localStorage.setItem('femflow_enfase', enfase);
+function cardHTML(p){
+  return `
+    <article class="card" data-enfase="${p.enfase}">
+      <div class="thumb" style="background:${p.color}">
+        <span class="badge">${p.titulo}</span>
+      </div>
+      <div class="info">
+        <h3 class="ttl">${p.titulo}</h3>
+        <p class="desc">${p.desc||''}</p>
+      </div>
+    </article>`;
+}
 
-  // 2️⃣ Atualiza coluna ENFASE no backend
+
+/* ==========================================================
+   RENDERIZAÇÃO
+========================================================== */
+
+function renderRail(el, lista){
+  el.innerHTML = lista.map(cardHTML).join("");
+  el.querySelectorAll(".card").forEach(c=>{
+    c.onclick = () => onChoose(c.dataset.enfase);
+  });
+}
+
+
+/* ==========================================================
+   FUNÇÃO PRINCIPAL — onChoose
+========================================================== */
+
+async function onChoose(enfase){
+  const id = localStorage.getItem("femflow_id");
+
+  // LocalStorage
+  localStorage.setItem("femflow_enfase", enfase);
+
+  // Backend
   if (id) {
     try {
       await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "setenfase",
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+          action:"setenfase",
           id,
           enfase
         })
       });
-      console.log("✓ Enfase atualizada no backend:", enfase);
-    } catch (e) {
-      console.warn("⚠️ Não foi possível atualizar a ênfase no backend.", e);
+    } catch(e){
+      console.warn("Falha ao enviar ênfase ao backend:", e);
     }
   }
 
-  // 3️⃣ Checa ciclo antes de ir pro flowcenter
-  const cicloOk =
-    localStorage.getItem('femflow_cycle_configured') === 'yes' &&
-    localStorage.getItem('femflow_startDate') &&
-    localStorage.getItem('femflow_cycleLength');
+  // Checa ciclo
+  const cicloOK =
+    localStorage.getItem("femflow_cycle_configured")==="yes" &&
+    localStorage.getItem("femflow_startDate") &&
+    localStorage.getItem("femflow_cycleLength");
 
-  if (!cicloOk) {
+  if (!cicloOK){
     FEMFLOW.toast("🌿 Configure seu ciclo primeiro");
-    location.href = 'ciclo.html';
+    location.href="ciclo.html";
   } else {
-    location.href = 'flowcenter.html';
+    location.href="flowcenter.html";
   }
 }
 
-   // === Inicialização ===
-  (async () => {
-    await syncEntitlement();
-    render();
-    document.getElementById('btnFlow').onclick = () => location.href='flowcenter.html';
-    document.getElementById('btnCad').onclick  = () => location.href='index.html';
-  })();
 
-  // PWA (instalação opcional)
-  if ('serviceWorker' in navigator) {
-    addEventListener('load', ()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
-  }
+/* ==========================================================
+   INIT
+========================================================== */
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+
+  renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
+  renderRail(document.getElementById("railEsportes"),  LISTA_ESPORTES);
+  renderRail(document.getElementById("railCasa"),      LISTA_CASA);
+
+  document.getElementById("btnFlow").onclick = ()=>location.href="flowcenter.html";
+  document.getElementById("btnCad").onclick  = ()=>location.href="index.html";
+});
+
 </script>
 
-<script>
-(async function verificarAssinatura() {
-  const id = localStorage.getItem("femflow_id");
-  if (!id) return;
-
-  let linkHotmart = "https://pay.hotmart.com/SEU-LINK-MENSAL";
-
-  try {
-    // 1️⃣ Busca produtos (continua GET)
-    const respProd = await fetch(`${FEMFLOW.SCRIPT_URL}?action=products`);
-    const dataProd = await respProd.json();
-    if (dataProd.products?.length > 0) {
-      const produtoFemFlow = dataProd.products.find(p =>
-        p.titulo.toLowerCase().includes("femflow")
-      );
-      linkHotmart = produtoFemFlow?.hotmart || dataProd.products[0].hotmart || linkHotmart;
-    }
-
-    // 2️⃣ Validação via Core (POST)
-    const data = await FEMFLOW.validarAssinatura(id);
-
-    if (data.status !== "ok" || !data.expiryISO) return;
-
-    const exp = new Date(data.expiryISO);
-    const hoje = new Date();
-    const diff = Math.ceil((exp - hoje) / (1000 * 60 * 60 * 24));
-
-    if (diff <= 0) {
-      mostrarBanner("💳 Sua assinatura expirou.", "🔁 Renovar agora", linkHotmart);
-    } else if (diff <= 5) {
-      mostrarBanner(`⏳ Sua assinatura expira em ${diff} dia${diff > 1 ? "s" : ""}.`, "Renovar agora", linkHotmart);
-    }
-
-  } catch (err) {
-    console.warn("⚠️ Falha ao verificar assinatura:", err);
-  }
-
-  function mostrarBanner(msg, btnText, link) {
-    const bar = document.createElement("div");
-    bar.style.position = "fixed";
-    bar.style.bottom = "0";
-    bar.style.left = "0";
-    bar.style.width = "100%";
-    bar.style.background = "#cc6a5a";
-    bar.style.color = "white";
-    bar.style.padding = "10px 16px";
-    bar.style.fontFamily = "Lato, sans-serif";
-    bar.style.display = "flex";
-    bar.style.justifyContent = "space-between";
-    bar.style.alignItems = "center";
-    bar.style.zIndex = "9999";
-    bar.style.boxShadow = "0 -3px 10px rgba(0,0,0,0.2)";
-
-    const span = document.createElement("span");
-    span.textContent = msg;
-    span.style.fontSize = "0.95rem";
-    span.style.flex = "1";
-
-    const btn = document.createElement("button");
-    btn.textContent = btnText;
-    btn.style.background = "white";
-    btn.style.color = "#cc6a5a";
-    btn.style.border = "none";
-    btn.style.borderRadius = "20px";
-    btn.style.padding = "6px 14px";
-    btn.style.fontWeight = "600";
-    btn.style.cursor = "pointer";
-    btn.onclick = () => window.open(link, "_blank");
-
-    const close = document.createElement("span");
-    close.textContent = "×";
-    close.style.cursor = "pointer";
-    close.style.marginLeft = "10px";
-    close.style.fontSize = "1.2rem";
-    close.onclick = () => bar.remove();
-
-    bar.appendChild(span);
-    bar.appendChild(btn);
-    bar.appendChild(close);
-    document.body.appendChild(bar);
-  }
-})();
-</script>
-
-  <!-- Ativa o topo do CORE -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => FEMFLOW.initTreino());
-  </script>
 </body>
 </html>
+
