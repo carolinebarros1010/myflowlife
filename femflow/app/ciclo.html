@@ -168,6 +168,106 @@
     el.addEventListener('touchstart', ()=>{fired=true;handler();}, {passive:true});
     el.addEventListener('click', e=>{if(!fired)handler();fired=false;});
   }
+    function faseAltaPorNivel() {
+  const nivel = (localStorage.getItem("nivel_atual") || "iniciante").toLowerCase();
+
+  if (nivel === "iniciante") return "luteal";
+  if (nivel === "intermediaria") return "follicular";
+  return "ovulatory"; // avançada
+}
+
+  function iniciarMenopausaTecnica() {
+
+  const faseAlta = faseAltaPorNivel();
+
+  salvarCiclo({
+    perfil: "menopausa_tecnica",
+    start: new Date(),
+    length: 28,
+    faseAlta,
+    faseCalc: faseAlta, // começa na fase alta
+    dia: 1
+  });
+
+  FEMFLOW.toast("🌙 Menopausa Técnica: fase energética configurada.");
+  FEMFLOW.router("home");
+}
+    
+ function concluirQuizMenopausa(score) {
+
+  const faseAltaNivel = faseAltaPorNivel();
+
+  // Score define entrada na fase alta ou baixa
+  const entraAlta = (score <= 3);
+
+  const faseCalc = entraAlta ? faseAltaNivel : "menstrual";
+  const diaInicial = entraAlta ? 1 : 24;
+
+  salvarCiclo({
+    perfil: "menopausa",
+    start: new Date(),
+    length: 28,
+    faseAlta: faseAltaNivel,
+    faseCalc,
+    dia: diaInicial
+  });
+
+  FEMFLOW.toast("🌸 Ciclo energético da Menopausa configurado.");
+  FEMFLOW.router("home");
+}
+    function concluirQuizIrregular(score) {
+
+  const faseAltaNivel = faseAltaPorNivel();
+
+  const entraAlta = (score <= 3);
+
+  const faseCalc = entraAlta ? faseAltaNivel : "menstrual";
+  const diaInicial = entraAlta ? 1 : 24;
+
+  salvarCiclo({
+    perfil: "irregular",
+    start: new Date(),
+    length: 28,
+    faseAlta: faseAltaNivel,
+    faseCalc,
+    dia: diaInicial
+  });
+
+  FEMFLOW.toast("✨ Ciclo energético configurado.");
+  FEMFLOW.router("home");
+}
+
+ function salvarCiclo(data) {
+
+  const {
+    perfil,
+    start,
+    length,
+    faseAlta,
+    faseCalc,
+    dia
+  } = data;
+
+  localStorage.setItem("femflow_perfilHormonal", perfil);
+  localStorage.setItem("femflow_cycleLength", length);
+  localStorage.setItem("femflow_startDate", start.toISOString());
+  localStorage.setItem("femflow_faseAlta", faseAlta); 
+  localStorage.setItem("femflow_fase_atual", faseCalc);
+  localStorage.setItem("dia_ciclo", String(dia));
+  localStorage.setItem("femflow_cycle_configured", "yes");
+
+  // Atualiza Apps Script
+  fetch(FEMFLOW.SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "setfase",
+      id: localStorage.getItem("femflow_id"),
+      fase: faseCalc
+    })
+  });
+}
+
 
   // ============================================================
   // VARIÁVEIS
