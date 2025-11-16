@@ -176,39 +176,53 @@ const perguntasDiuHormonal = [
 ];
 
 /* ============================================================
-   SALVAR CICLO — PADRÃO FINAL FEMFLOW 2.6
+   SALVAR CICLO — PADRÃO FINAL FEMFLOW 2.7
 ============================================================ */
-async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}){
+async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}) {
 
+  // 🔹 1) SALVA PERFIL LOCALMENTE
   localStorage.setItem("femflow_perfilHormonal", perfil);
   localStorage.setItem("femflow_cycle_configured", "yes");
 
+  // 🔹 2) SALVA DADOS DO CICLO LOCALMENTE
   localStorage.setItem("femflow_startDate",
     (start instanceof Date ? start : new Date(start)).toISOString()
   );
+  localStorage.setItem("femflow_cycleLength", String(length || 28));
+  localStorage.setItem("dia_ciclo", String(dia || 1));
 
-  localStorage.setItem("femflow_cycleLength", String(length||28));
-  localStorage.setItem("dia_ciclo", String(dia||1));
-
-  if(faseAlta) localStorage.setItem("femflow_faseAlta", faseAlta);
+  if (faseAlta)
+    localStorage.setItem("femflow_faseAlta", faseAlta);
 
   localStorage.setItem("femflow_fase_atual", faseCalc.toLowerCase());
 
-  try{
-    await fetch(FEMFLOW.SCRIPT_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        action:"setfase",
-        id:localStorage.getItem("femflow_id"),
-        fase:faseCalc.toLowerCase()
+  // 🔹 3) ENVIA PERFIL HORMONAL AO BACKEND (NOVO)
+  try {
+    await salvarPerfilHormonal(perfil);
+  } catch (e) {
+    console.warn("Erro ao salvar perfil hormonal no backend:", e);
+  }
+
+  // 🔹 4) ATUALIZA FASE NO BACKEND (igual antes)
+  try {
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setfase",
+        id: localStorage.getItem("femflow_id"),
+        fase: faseCalc.toLowerCase()
       })
     });
-  } catch(e){}
+  } catch (e) {
+    console.warn("Erro ao atualizar fase:", e);
+  }
 
+  // 🔹 5) REDIRECIONA PARA O FLOWCENTER
   FEMFLOW.toast("✨ Ciclo configurado!");
-  setTimeout(()=>location.href="flowcenter.html",800);
+  setTimeout(() => location.href = "flowcenter.html", 800);
 }
+
 
 /* ============================================================
    PERFIS PRINCIPAIS
