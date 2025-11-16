@@ -1,5 +1,5 @@
 /* ===========================================================
-   🌸 FEMFLOW CORE SCRIPT v2.3 — Versão Corrigida Final
+   🌸 FEMFLOW CORE SCRIPT v2.4 — Versão Corrigida Final
    =========================================================== */
 
 window.FEMFLOW = {
@@ -178,31 +178,71 @@ toast(msg, erro=false, top=false) { /* ... igual ... */ },
 =========================================================== */
 autoCiclo() {
 
+  const perfil = localStorage.getItem("femflow_perfilHormonal");
   const cicloOK = localStorage.getItem("femflow_cycle_configured") === "yes";
+
   if (!cicloOK) return;
 
-  const ciclo = Number(localStorage.getItem("femflow_cycleLength") || 28);
   const startISO = localStorage.getItem("femflow_startDate");
   if (!startISO) return;
 
+  const ciclo = 28;
   const start = new Date(startISO);
   const hoje = new Date();
-  const diff = Math.floor((hoje - start) / 86400000);  
 
-  // Dia REAL baseado na data
-  const diaCiclo = ((diff % ciclo) + ciclo) % ciclo + 1;
-  localStorage.setItem("dia_ciclo", diaCiclo);
+  const diff = Math.floor((hoje - start) / 86400000);
+  const dia = ((diff % ciclo) + ciclo) % ciclo + 1;
 
-  // Fase fisiológica padrão
-  let fase = "folicular";
-  if (diaCiclo <= 5) fase = "menstrual";
-  else if (diaCiclo <= 13) fase = "folicular";
-  else if (diaCiclo <= 17) fase = "ovulatoria";
-  else fase = "lutea";
+  localStorage.setItem("dia_ciclo", dia);
+
+  // ======================================================
+  // 🔥 MENOPAUSA / DIU hormonal → Ciclo ENERGÉTICO 23+5
+  // ======================================================
+  if (perfil === "menopausa" || perfil === "menopausa_tecnica") {
+
+    const faseAlta = localStorage.getItem("femflow_faseAlta") || "luteal";
+
+    let faseFinal;
+    if (dia <= 23) {
+      faseFinal = faseAlta;   // 23 dias de fase alta
+    } else {
+      faseFinal = "menstrual"; // 5 dias baixa energia
+    }
+
+    localStorage.setItem("femflow_fase_atual", faseFinal);
+
+    console.log(`🌕 Menopausa | Dia ${dia}/28 → ${faseFinal}`);
+    return;
+  }
+
+  // ======================================================
+  // 🔥 IRREGULAR → mesmo motor energético
+  // ======================================================
+  if (perfil === "irregular") {
+
+    const faseAlta = localStorage.getItem("femflow_faseAlta") || "follicular";
+
+    const faseFinal = (dia <= 23) ? faseAlta : "menstrual";
+
+    localStorage.setItem("femflow_fase_atual", faseFinal);
+
+    console.log(`✨ Irregular | Dia ${dia}/28 → ${faseFinal}`);
+    return;
+  }
+
+  // ======================================================
+  // 🔥 REGULAR → ciclo fisiológico normal
+  // ======================================================
+  let fase = "follicular";
+
+  if (dia <= 5) fase = "menstrual";
+  else if (dia <= 13) fase = "follicular";
+  else if (dia <= 17) fase = "ovulatory";
+  else fase = "luteal";
 
   localStorage.setItem("femflow_fase_atual", fase);
 
-  console.log(`🌿 Ciclo REAL | Dia ${diaCiclo}/${ciclo} → ${fase}`);
+  console.log(`🌿 Regular | Dia ${dia} → ${fase}`);
 },
 
 /* ===========================================================
