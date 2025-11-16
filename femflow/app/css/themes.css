@@ -1,0 +1,36 @@
+/* ===========================================================
+   FEMFLOW — THEMES.CSS
+   Gradientes + efeitos por página, sem duplicações
+=========================================================== */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4) 0%, transparent 60%),
+              radial-gradient(circle at 80% 80%, rgba(255,240,230,0.35) 0%, transparent 70%);
+  filter: blur(32px);
+}
+
+/* ---------- TEMA GERAL ---------- */
+body.page-default {
+  background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+}
+
+/* ---------- TEMA DA PÁGINA CICLO ---------- */
+body.page-ciclo {
+  background: linear-gradient(180deg, #FBE9E1 0%, #EFBDA6 100%);
+}
+
+/* ---------- TEMA DA PÁGINA TREINO ---------- */
+body.page-treino {
+  background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+}
+
+/* ---------- TEMA DA PÁGINA EVOLUÇÃO ---------- */
+body.page-evolucao {
+  background: linear-gradient(180deg, #FCE3D5 0%, #F4E1D7 100%);
+}
