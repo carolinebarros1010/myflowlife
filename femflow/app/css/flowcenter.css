@@ -1,0 +1,202 @@
+/* ==========================================================
+   FemFlow – flowcenter.css
+   Evolução visual 2025: leve, elegante e 100% responsivo
+   ========================================================== */
+
+:root {
+  --terracota: #cc6a5a;
+  --terracota-light: #f3c5b9;
+  --bege: #fff5ef;
+  --bege-claro: #fffaf7;
+  --verde: #335953;
+  --texto: #5b4f49;
+
+  --radius: 20px;
+  --glass: rgba(255,255,255,0.45);
+  --shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* ==========================================================
+   BASE DA PÁGINA
+========================================================== */
+body {
+  margin: 0;
+  padding: 80px 16px 40px;
+  font-family: "Lato", sans-serif;
+  background: linear-gradient(180deg, #fff7f2 0%, #fceae3 100%);
+  color: var(--texto);
+  text-align: center;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* brilho sutil no fundo */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.55), transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(204,106,90,0.18), transparent 70%),
+    radial-gradient(circle at 50% 100%, rgba(255,235,225,0.45), transparent 80%);
+  filter: blur(40px);
+}
+
+/* ==========================================================
+   TÍTULOS
+========================================================== */
+h1 {
+  font-family: "Playfair Display", serif;
+  color: var(--terracota);
+  font-size: 1.9rem;
+  margin: 0;
+}
+
+h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.3rem;
+  color: var(--verde);
+  margin-top: 4px;
+}
+
+.subtitle {
+  color: #7b6e68;
+  margin-top: 6px;
+  font-size: 1rem;
+  font-style: italic;
+}
+
+/* ==========================================================
+   CÍRCULO HORMONAL SVG (mantido 100% compatível)
+========================================================== */
+.phase-svg {
+  width: 280px;
+  height: 280px;
+  margin: 20px auto 16px auto;
+  position: relative;
+  padding: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  box-shadow:
+    rgba(204,106,90,0.15) 0 8px 25px,
+    inset rgba(255,255,255,0.5) 0 4px 10px;
+  backdrop-filter: blur(12px);
+}
+
+/* animação do texto central */
+#centerPhase {
+  animation: pulseCenter 3s ease-in-out infinite;
+}
+
+@keyframes pulseCenter {
+  0%, 100% {
+    opacity: 0.9;
+    text-shadow: 0 0 4px rgba(255,255,255,0.4);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(255,255,255,0.8);
+  }
+}
+
+/* setor ativo */
+.path-active {
+  fill: var(--terracota) !important;
+  stroke: rgba(204,106,90,0.35);
+  stroke-width: 3px;
+  transition: fill 0.6s ease, stroke 0.4s ease;
+}
+
+/* texto ativo */
+.label-active {
+  fill: var(--terracota);
+  font-weight: 900;
+  text-shadow: 0 0 3px rgba(204,106,90,0.3);
+}
+
+/* setores */
+.phase-svg path {
+  transition: fill 0.5s ease;
+}
+
+/* ==========================================================
+   PAINEL DE FASE ATUAL
+========================================================== */
+.current-phase {
+  margin-top: 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--verde);
+  font-family: "Lato", sans-serif;
+}
+
+/* ==========================================================
+   TOOLBAR
+========================================================== */
+.toolbar {
+  margin: 28px auto 16px;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.tool {
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 14px;
+  cursor: pointer;
+  border: 1px solid rgba(204,106,90,0.25);
+  background: rgba(255,255,255,0.75);
+  color: var(--terracota);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  transition: 0.25s ease;
+}
+
+.tool:hover {
+  background: var(--terracota);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* ==========================================================
+   DEBUG PANEL (opcional)
+========================================================== */
+#debugPanel {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(255,255,255,0.92);
+  padding: 10px 12px;
+  font-size: 12px;
+  font-family: monospace;
+  border-radius: 8px;
+  color: #333;
+  max-width: 240px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  z-index: 999;
+}
+
+#debugPanel b {
+  color: var(--terracota);
+}
+
+/* ==========================================================
+   RESPONSIVO
+========================================================== */
+@media (max-width: 480px) {
+
+  h1 { font-size: 1.6rem; }
+  h3 { font-size: 1.15rem; }
+
+  .phase-svg {
+    width: 240px;
+    height: 240px;
+  }
+
+  .tool {
+    flex: 1 1 45%;
+  }
+}
