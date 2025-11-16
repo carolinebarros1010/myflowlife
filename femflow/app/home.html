@@ -176,9 +176,31 @@ const PRODUTOS = [
   }
 
   // === Clique no card → define ênfase e vai pro FlowCenter ===
-function onChoose(enfase){
+async function onChoose(enfase) {
+  const id = localStorage.getItem('femflow_id');
+
+  // 1️⃣ Atualiza localStorage
   localStorage.setItem('femflow_enfase', enfase);
 
+  // 2️⃣ Atualiza coluna ENFASE no backend
+  if (id) {
+    try {
+      await fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "setenfase",
+          id,
+          enfase
+        })
+      });
+      console.log("✓ Enfase atualizada no backend:", enfase);
+    } catch (e) {
+      console.warn("⚠️ Não foi possível atualizar a ênfase no backend.", e);
+    }
+  }
+
+  // 3️⃣ Checa ciclo antes de ir pro flowcenter
   const cicloOk =
     localStorage.getItem('femflow_cycle_configured') === 'yes' &&
     localStorage.getItem('femflow_startDate') &&
@@ -191,7 +213,8 @@ function onChoose(enfase){
     location.href = 'flowcenter.html';
   }
 }
-  // === Inicialização ===
+
+   // === Inicialização ===
   (async () => {
     await syncEntitlement();
     render();
