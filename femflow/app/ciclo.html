@@ -300,5 +300,27 @@ function salvarCiclo({perfil, start, length, fase, faseCalc, dia}) {
       setTimeout(()=>location.href=prox,900);
     }
   </script>
+  <script>
+async function atualizarFaseBackend(fase) {
+
+  const id = localStorage.getItem("femflow_id");
+  if (!id) return;
+
+  try {
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        action: "setfase",
+        id: id,
+        fase: fase
+      })
+    });
+    console.log("✅ Fase enviada ao backend:", fase);
+  } catch (err) {
+    console.warn("⚠️ Falha ao enviar fase ao backend:", err);
+  }
+}
+</script>
 </body>
 </html>
