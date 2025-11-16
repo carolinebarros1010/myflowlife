@@ -1,86 +1,78 @@
 /* ===========================================================
-   🌿 FEMFLOW — TREINO (VERSÃO MINIMALISTA 2025)
-   -----------------------------------------------------------
-   • Visual leve, limpo, elegante
-   • Ideal para conteúdo dinâmico do Firebase
-   • Mantém carrossel, timers e inputs funcionais
+   🌸 FEMFLOW • TREINO DIÁRIO — LIGHT 2025
+   Elegância suave • Leveza visual • Identidade FemFlow
    =========================================================== */
 
 :root {
   --teal: #335953;
   --terracota: #cc6a5a;
-  --areia: #f5eee9;
-  --bege: #fffaf7;
-  --cinza: #6d6d6d;
-  --linha: rgba(0,0,0,0.07);
+  --bege: #fff8f4;
+  --areia: #f6efe9;
+  --linha: rgba(0, 0, 0, 0.06);
+  --texto: #4a4a4a;
+  --suave: #faf7f4;
 }
 
-/* =========================================
-   BASE DO BODY
-========================================= */
+/* ===========================================================
+   BASE
+=========================================================== */
 body {
   margin: 0;
-  padding-top: 80px;
-  background: var(--bege);
+  padding-top: 90px;
   font-family: "Lato", sans-serif;
+  background: var(--bege);
   color: var(--teal);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* =========================================
+/* ===========================================================
    CABEÇALHO
-========================================= */
-header {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
+=========================================================== */
 header h1 {
   margin: 0;
   font-family: "Playfair Display", serif;
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.65rem;
+  color: var(--teal);
 }
 
 header .subtitle {
-  font-size: 0.85rem;
-  color: var(--cinza);
+  font-size: 0.9rem;
+  color: #7a6c66;
+  margin-top: 4px;
 }
 
-/* Dia do Programa */
 #tituloDiaTreino {
-  margin-top: 6px;
-  font-size: 1.1rem;
-  font-family: "Playfair Display", serif;
+  margin-top: 10px;
+  font-size: 1.15rem;
   color: var(--terracota);
+  font-family: "Playfair Display", serif;
 }
 
-/* =========================================
-   CARROSSEL MINIMALISTA
-========================================= */
+/* ===========================================================
+   CARROSSEL MINIMALISTA E PREMIUM
+=========================================================== */
 .carousel-container {
   overflow: hidden;
   width: 100%;
-  height: calc(100vh - 200px);
+  height: calc(100vh - 230px);
 }
 
 .carousel-track {
   display: flex;
-  flex-wrap: nowrap;
-  width: 100%;
   transition: transform 0.5s ease;
   padding-bottom: 120px;
 }
 
-/* Card do exercício */
+/* CARD DO EXERCÍCIO */
 .carousel-item {
   flex: 0 0 100%;
-  padding: 1rem;
-  max-width: 95%;
+  padding: 1rem 1.2rem;
   margin: 0 auto;
+  max-width: 94%;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 18px;
   border: 1px solid var(--linha);
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.6s ease;
 }
 
 @keyframes fadeIn {
@@ -88,42 +80,45 @@ header .subtitle {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* =========================================
-   BOXES INTERNOS DOS EXERCÍCIOS
-========================================= */
+/* ===========================================================
+   BOX DO TREINO — super leve e com respiro
+=========================================================== */
 .box {
-  margin-bottom: 1rem;
-  padding: 0.6rem 0.8rem;
-  border-radius: 12px;
+  padding: 0.8rem 0.9rem;
+  border-radius: 14px;
+  background: var(--suave);
   border: 1px solid var(--linha);
-  background: #fff;
-  text-align: left;
+  margin-bottom: 1.2rem;
 }
 
 .box h3 {
+  margin: 0 0 8px;
   font-family: "Playfair Display", serif;
-  font-size: 1rem;
-  margin-bottom: 6px;
+  font-size: 1.05rem;
   color: var(--teal);
 }
 
-/* TEXTOS */
 .box p {
   margin: 4px 0;
-  font-size: 0.9rem;
+  color: var(--texto);
+  font-size: 0.92rem;
   line-height: 1.45;
-  color: #555;
 }
 
-/* =========================================
-   BLOCO DE EXERCÍCIO (Nome + Vídeo + Inputs)
-========================================= */
+/* ===========================================================
+   EXERCÍCIO (nome + vídeo + inputs)
+=========================================================== */
 .ex {
-  padding: 10px;
-  border-radius: 10px;
-  background: #faf7f4;
-  border: 1px solid var(--linha);
   margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--linha);
+}
+
+.ex-head b {
+  font-size: 0.95rem;
+  color: var(--teal);
 }
 
 .ex-head {
@@ -132,23 +127,18 @@ header .subtitle {
   align-items: center;
 }
 
-.ex-head b {
-  font-size: 0.9rem;
-  color: var(--teal);
-}
-
-.ex-head .vid {
-  color: var(--terracota);
+.vid {
   font-size: 1.2rem;
+  color: var(--terracota);
   text-decoration: none;
 }
 
-/* GRID DAS REP / CARGA / TEMPO */
+/* Inputs em 3 colunas */
 .ex-grid {
+  margin-top: 10px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
   gap: 6px;
-  margin-top: 8px;
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .ex-grid label {
@@ -159,68 +149,77 @@ header .subtitle {
 .ex-grid input {
   width: 100%;
   padding: 6px;
-  font-size: 0.8rem;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #ddd;
+  font-size: 0.82rem;
   text-align: center;
+  background: #fdfcfc;
 }
 
-/* =========================================
-   TIMERS SUPER MINIMALISTAS
-========================================= */
+/* ===========================================================
+   TIMERS FEMFLOW (super minimalistas)
+=========================================================== */
 .subtimer {
   margin-top: 6px;
   padding: 4px 10px;
-  border-radius: 8px;
-  background: #f4ede9;
+  border-radius: 10px;
+  background: #f2ebe6;
   color: var(--teal);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   display: inline-block;
 }
 
-.subtimer.running {
-  background: #e6f3ee;
-}
+.subtimer.running { background: #e7f3ed; }
+.subtimer.done    { background: #f4e2dc; }
 
-.subtimer.done {
-  background: #f1dfdb;
-}
-
-/* =========================================
-   BOX EXTRA (HIIT ou CARDIO)
-========================================= */
+/* ===========================================================
+   HIIT / CARDIO — estilo FemFlow
+=========================================================== */
 .box-extra {
   margin-top: 14px;
-  padding: 10px;
-  background: #fffdfc;
-  border-radius: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff;
   border-left: 3px solid var(--terracota);
 }
 
-.box-extra h4 {
-  margin: 4px 0;
-  font-size: 0.9rem;
-  color: var(--teal);
-}
-
-.box-extra p {
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-/* Versão cardio */
 .box-extra.cardio {
   border-left: 3px solid var(--teal);
   background: #f4faf7;
 }
 
-/* =========================================
-   BARRA FIXA DO RODAPÉ
-========================================= */
+.box-extra h4 {
+  font-size: 0.95rem;
+  margin: 4px 0 6px;
+  color: var(--teal);
+}
+
+.box-extra p {
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+/* ===========================================================
+   BARRA DE PROGRESSO
+=========================================================== */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: var(--terracota);
+  width: 0%;
+  z-index: 9999;
+  transition: width 0.4s ease;
+}
+
+/* ===========================================================
+   RODAPÉ FIXO
+=========================================================== */
 .fix-footer {
   position: fixed;
-  bottom: 14px;
+  bottom: 16px;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -229,16 +228,16 @@ header .subtitle {
 
 #salvarTreinoBtn,
 .secundario {
-  padding: 10px 18px;
-  border-radius: 16px;
-  border: none;
-  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 18px;
   font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
   cursor: pointer;
 }
 
 #salvarTreinoBtn {
-  background: var(--teal);
+  background: linear-gradient(135deg, var(--teal), var(--terracota));
   color: #fff;
 }
 
@@ -248,16 +247,6 @@ header .subtitle {
   color: var(--teal);
 }
 
-/* =========================================
-   BARRA DE PROGRESSO SUPERIOR
-========================================= */
-.progress-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 4px;
-  width: 0%;
-  background: var(--terracota);
-  z-index: 9999;
-  transition: width 0.4s ease;
+.secundario:hover {
+  background: var(--bege);
 }
