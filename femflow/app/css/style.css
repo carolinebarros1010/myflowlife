@@ -1221,6 +1221,123 @@ video {
 .quiz-modal {
   pointer-events: none; /* só recoloque para auto quando realmente abrir */
 }
+/* HEADER FEMFLOW FIXO */
+#femflowHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 54px;
+  background: #fff5ef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  z-index: 9999;
+}
+
+#femflowHeader .ff-logo {
+  height: 28px;
+  object-fit: contain;
+}
+
+#femflowHeader .ff-menu-btn {
+  background: none;
+  border: none;
+  font-size: 26px;
+  color: #335953;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background .15s;
+}
+
+#femflowHeader .ff-menu-btn:active {
+  background: rgba(0,0,0,0.08);
+}
+
+/* --- MENU MODAL --- */
+.ff-menu-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+  z-index: 10000;
+}
+
+.ff-menu-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ff-menu-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+/* BOX DO MENU */
+.ff-menu-box {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 78%;
+  max-width: 330px;
+  height: 100%;
+  background: #fff;
+  padding: 26px 22px;
+  border-radius: 20px 0 0 20px;
+  transform: translateX(100%);
+  transition: transform .30s ease;
+  overflow-y: auto;
+}
+
+.ff-menu-modal.active .ff-menu-box {
+  transform: translateX(0%);
+}
+
+.ff-menu-title {
+  font-family: "Playfair Display";
+  color: #335953;
+  margin-bottom: 10px;
+}
+
+/* BOTÕES */
+.ff-menu-box button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #fff5ef;
+  color: #335953;
+  border: 1px solid #e2d5cc;
+  font-weight: 700;
+  text-align: left;
+  font-size: 1.05rem;
+}
+
+.ff-menu-box button:active {
+  background: #f0dbd1;
+}
+
+.ff-logout {
+  margin-top: 30px;
+  background: #ffe8e4;
+  color: #a23a2a;
+}
+
+/* EVITA CONTEÚDO FICAR ATRÁS DO HEADER */
+body {
+  padding-top: 60px !important;
+}
+
+body.ff-menu-open {
+  overflow: hidden;
+}
 
 
 
