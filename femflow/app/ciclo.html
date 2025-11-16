@@ -148,200 +148,210 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="./femflow-core.js"></script>
 
-  <script>
-    // ========= HELPERS =========
-    function parseDateLocalYYYYMMDD(s){
-      const [y,m,d] = s.split('-').map(Number);
-      return new Date(y, m-1, d, 12, 0, 0);
-    }
+<script>
+/* ================= HELPERS ================= */
 
-    function bindTap(el, handler){
-      if(!el) return;
-      let fired=false;
-      el.addEventListener('touchstart', ()=>{fired=true;handler();}, {passive:true});
-      el.addEventListener('click', (e)=>{if(!fired)handler();fired=false;});
-    }
+function parseDateLocalYYYYMMDD(s){
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m-1, d, 12, 0, 0);
+}
 
-    // ========= VARIÁVEIS =========
-    let perfil=null, quizIdx=0, quizScore=0;
-    const perguntas=[
-      "Você sentiu variações fortes de energia nos últimos dias?",
-      "Percebeu sensibilidade nos seios ou inchaço?",
-      "Teve oscilações de humor sem motivo aparente?",
-      "Está dormindo pior ou suando mais que o normal?",
-      "Sente cólica, dor pélvica ou leve sangramento?"
-    ];
-    const quizPerg=document.getElementById('quizPergunta');
-    const quizStep=document.getElementById('quizStep');
-    const regularBox=document.getElementById('regularBox');
-    const quizBox=document.getElementById('quizBox');
+function bindTap(el, handler){
+  if(!el) return;
+  let fired=false;
+  el.addEventListener('touchstart', ()=>{fired=true;handler();}, {passive:true});
+  el.addEventListener('click', e=>{ if(!fired) handler(); fired=false; });
+}
 
-    // ========= PERFIL =========
-    document.querySelectorAll('.perfil-btn').forEach(btn=>{
-      bindTap(btn, ()=>{
-        document.querySelectorAll('.perfil-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        perfil=btn.dataset.perfil;
-        regularBox.style.display=(perfil==='regular')?'block':'none';
-        quizBox.style.display=(perfil==='regular')?'none':'block';
-        if(perfil!=='regular') iniciarQuiz();
-      });
-    });
+/* ================= VARIÁVEIS ================= */
 
-    // ========= QUIZ =========
-    function iniciarQuiz(){
-      quizIdx=0; quizScore=0;
-      quizPerg.textContent=perguntas[quizIdx];
-      quizStep.textContent=`Pergunta ${quizIdx+1} de ${perguntas.length}`;
-      quizBox.style.display='block';
-    }
-    function responderQuiz(v){
-      quizScore+=v?1:0;
-      quizIdx++;
-      if(quizIdx<perguntas.length){
-        quizPerg.textContent=perguntas[quizIdx];
-        quizStep.textContent=`Pergunta ${quizIdx+1} de ${perguntas.length}`;
-      } else {
-        concluirQuiz();
-      }
-    }
-    function concluirQuiz(){
-      const fase = quizScore<=2?'folicular':quizScore<=3?'ovulatoria':quizScore<=4?'lutea':'menstrual';
-      salvarCiclo({perfil, fase:fase.toLowerCase()});
-    }
+let perfil=null, quizIdx=0, quizScore=0;
 
-    bindTap(document.getElementById('btnQuizSim'), ()=>responderQuiz(true));
-    bindTap(document.getElementById('btnQuizNao'), ()=>responderQuiz(false));
+const perguntas=[
+  "Você sentiu variações fortes de energia nos últimos dias?",
+  "Percebeu sensibilidade nos seios ou inchaço?",
+  "Teve oscilações de humor sem motivo aparente?",
+  "Está dormindo pior ou suando mais que o normal?",
+  "Sente cólica, dor pélvica ou leve sangramento?"
+];
 
-    // ========= CONFIRMAR REGULAR =========
-    bindTap(document.getElementById('btnConfirmarRegular'), ()=>{
-      const s=document.getElementById('dataUltima').value;
-      const len=parseInt(document.getElementById('duracao').value||28,10);
-      if(!s||len<21||len>35){alert('Preencha corretamente data e duração do ciclo.');return;}
+const quizPerg=document.getElementById('quizPergunta');
+const quizStep=document.getElementById('quizStep');
+const regularBox=document.getElementById('regularBox');
+const quizBox=document.getElementById('quizBox');
 
-     const start = parseDateLocalYYYYMMDD(s);
-const today = new Date();
 
-// 🔧 Cálculo robusto do dia do ciclo
-const umDia = 24 * 60 * 60 * 1000;
-let diff = Math.floor((today.getTime() - start.getTime()) / umDia);
+/* ================= PERFIL ================= */
 
-// evita diff negativo
-if (diff < 0) diff = 0;
+document.querySelectorAll('.perfil-btn').forEach(btn=>{
+  bindTap(btn, ()=>{
+    document.querySelectorAll('.perfil-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
 
-// normaliza para 1 → len
-let diaRaw = ((diff % len) + len) % len;
-const diaCiclo = diaRaw === 0 ? 1 : diaRaw + 1;
+    perfil=btn.dataset.perfil;
 
-// 🔥 Cálculo da fase correto (USANDO diaCiclo)
-let fase;
-if (diaCiclo <= 5)            fase = "menstrual";
-else if (diaCiclo <= 13)      fase = "follicular";
-else if (diaCiclo <= 17)      fase = "ovulatory";
-else                          fase = "luteal";
+    regularBox.style.display = (perfil==='regular') ? 'block' : 'none';
+    quizBox.style.display     = (perfil==='regular') ? 'none'  : 'block';
 
-// envia tudo para salvarCiclo
-salvarCiclo({
-  perfil: 'regular',
-  start,
-  length: len,
-  faseCalc: fase,
-  dia: diaCiclo
+    if (perfil !== 'regular') iniciarQuiz();
+  });
 });
- 
-   // ========= SALVAR =========
-function salvarCiclo({perfil:'regular',start,length:len,faseCalc:fase,dia: diaCiclo}) {
 
-  // ============================================
-  // PADRÃO ÚNICO DO APP
-  // femflow_fase_atual
-  // ============================================
+
+/* ================= QUIZ ================= */
+
+function iniciarQuiz(){
+  quizIdx=0; 
+  quizScore=0;
+  quizPerg.textContent = perguntas[0];
+  quizStep.textContent = `Pergunta 1 de ${perguntas.length}`;
+  quizBox.style.display='block';
+}
+
+function responderQuiz(v){
+  quizScore += v ? 1 : 0;
+  quizIdx++;
+
+  if (quizIdx < perguntas.length){
+    quizPerg.textContent = perguntas[quizIdx];
+    quizStep.textContent = `Pergunta ${quizIdx+1} de ${perguntas.length}`;
+  } else {
+    concluirQuiz();
+  }
+}
+
+function concluirQuiz(){
+  let fase = quizScore<=2 ? 'folicular'
+           : quizScore<=3 ? 'ovulatoria'
+           : quizScore<=4 ? 'lutea'
+           : 'menstrual';
+
+  salvarCiclo({
+    perfil,
+    faseCalc: fase.toLowerCase()
+  });
+}
+
+bindTap(document.getElementById('btnQuizSim'), ()=>responderQuiz(true));
+bindTap(document.getElementById('btnQuizNao'), ()=>responderQuiz(false));
+
+
+/* ================= CONFIRMAR REGULAR ================= */
+
+bindTap(document.getElementById('btnConfirmarRegular'), ()=>{
+
+  const s   = document.getElementById('dataUltima').value;
+  const len = parseInt(document.getElementById('duracao').value||28,10);
+
+  if(!s || len<21 || len>35){
+    alert('Preencha corretamente data e duração do ciclo.');
+    return;
+  }
+
+  const start  = parseDateLocalYYYYMMDD(s);
+  const today  = new Date();
+  const umDia  = 24*60*60*1000;
+  let diff     = Math.floor((today - start) / umDia);
+
+  if (diff < 0) diff = 0;
+
+  let diaRaw   = ((diff % len) + len) % len;
+  const diaCiclo = diaRaw === 0 ? 1 : diaRaw + 1;
+
+  let fase;
+  if (diaCiclo <= 5)       fase = "menstrual";
+  else if (diaCiclo <=13)  fase = "follicular";
+  else if (diaCiclo <=17)  fase = "ovulatory";
+  else                     fase = "luteal";
+
+  salvarCiclo({
+    perfil:'regular',
+    start,
+    length: len,
+    faseCalc: fase,
+    dia: diaCiclo
+  });
+
+});
+
+
+/* ================= SALVAR CICLO (FINAL OFICIAL) ================= */
+
+function salvarCiclo({perfil, start, length, faseCalc, dia}){
+
+  // SAVE LOCAL
   localStorage.setItem('femflow_perfilHormonal', perfil);
   localStorage.setItem('femflow_cycle_configured','yes');
   localStorage.setItem('femflow_program_active','yes');
   localStorage.setItem('femflow_program_startISO', new Date().toISOString());
 
-  let faseFinal = "menstrual";
+  let faseFinal = (faseCalc || 'menstrual').toLowerCase();
 
-  if (perfil === 'regular') {
-
-    const dataInicio = (start instanceof Date ? start : new Date(start));
-    const cicloLen   = String(length || 28);
-
-    // define fase calculada
-    faseFinal = (faseCalc || 'menstrual').toLowerCase();
-
+  if (perfil === 'regular'){
+    const dataInicio = start instanceof Date ? start : new Date(start);
     localStorage.setItem('femflow_startDate', dataInicio.toISOString());
-    localStorage.setItem('femflow_cycleLength', cicloLen);
+    localStorage.setItem('femflow_cycleLength', String(length || 28));
     localStorage.setItem('dia_ciclo', String(dia || 1));
-
   } else {
-
-    // PERFIL IRREGULAR OU MANUAL
-    const faseMap = {
-      follicular: "follicular",
-      ovulatory: "ovulatory",
-      ovulatoria: "ovulatory",
-      luteal: "luteal",
-      lutea: "luteal",
-      menstrual: "menstrual"
+    // irregular
+    const map = {
+      follicular:"follicular",
+      ovulatory:"ovulatory",
+      ovulatoria:"ovulatory",
+      luteal:"luteal",
+      lutea:"luteal",
+      menstrual:"menstrual"
     };
+    faseFinal = map[faseCalc] || faseCalc || "follicular";
 
-    faseFinal = (faseMap[fase] || fase || "follicular").toLowerCase();
-
-    let diaSim = 1;
-    if (faseFinal === "follicular") diaSim = 6;
-    if (faseFinal === "ovulatory") diaSim = 14;
-    if (faseFinal === "luteal") diaSim = 18;
+    let diaSim = faseFinal==="follicular"?6:
+                 faseFinal==="ovulatory"?14:
+                 faseFinal==="luteal"?18:1;
 
     localStorage.setItem('femflow_startDate', new Date().toISOString());
     localStorage.setItem('femflow_cycleLength', '28');
     localStorage.setItem('dia_ciclo', String(diaSim));
   }
 
-  // --------------------------------------------
-  // NOVA CHAVE ÚNICA DO SISTEMA
-  // --------------------------------------------
+  // new official key
   localStorage.setItem("femflow_fase_atual", faseFinal);
 
-  // remove chaves antigas
+  // remove old
   localStorage.removeItem("fase_sugerida");
   localStorage.removeItem("fase_atual");
 
-  // trava ciclo configurado
   localStorage.setItem('femflow_perfilHormonal_locked','yes');
 
   (window.FEMFLOW?.toast || alert)("✨ Ciclo configurado com sucesso!");
 
-  // envia fase para GS
   atualizarFaseBackend(faseFinal);
 
+  const prox = localStorage.getItem('femflow_enfase') ? 'flowcenter.html' : 'home.html';
+  setTimeout(()=>location.href=prox, 900);
+}
 
-      const prox=localStorage.getItem('femflow_enfase')?'flowcenter.html':'home.html';
-      setTimeout(()=>location.href=prox,900);
-    }
-  </script>
-  <script>
-async function atualizarFaseBackend(fase) {
+/* ================= BACKEND ================= */
 
+async function atualizarFaseBackend(fase){
   const id = localStorage.getItem("femflow_id");
   if (!id) return;
 
   try {
     await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        action: "setfase",
-        id: id,
-        fase: fase
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        action:"setfase",
+        id,
+        fase
       })
     });
-    console.log("✅ Fase enviada ao backend:", fase);
-  } catch (err) {
-    console.warn("⚠️ Falha ao enviar fase ao backend:", err);
+    console.log("✅ fase enviada backend:", fase);
+  } catch(err){
+    console.warn("⚠️ erro enviando fase:", err);
   }
 }
+
 </script>
 </body>
 </html>
