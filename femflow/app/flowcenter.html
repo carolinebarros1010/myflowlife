@@ -120,6 +120,50 @@ path {
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     FEMFLOW.inserirHeaderApp?.();
+/********************************************************************
+ * 🔄 SINCRONIZAÇÃO AUTOMÁTICA DE ÊNFASE (FlowCenter)
+ * - Garante que planilha e localStorage estejam alinhados.
+ * - Corrige dado antigo: se local ≠ backend, atualiza Apps Script.
+ ********************************************************************/
+(async () => {
+  const id = localStorage.getItem("femflow_id");
+  if (!id || !FEMFLOW.SCRIPT_URL) return;
+
+  try {
+    // 1️⃣ Puxa dados reais do backend
+    const resp = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`);
+    const json = await resp.json();
+
+    if (json?.status !== "ok") return;
+
+    const enfaseBackend = (json.enfase || "").toLowerCase().trim();
+    const enfaseLocal   = (localStorage.getItem("femflow_enfase") || "").toLowerCase().trim();
+
+    // 2️⃣ Se backend tem "nenhuma", mas o local já tem uma ênfase → atualiza backend
+    if (enfaseLocal && enfaseLocal !== enfaseBackend) {
+      console.log("🔄 Atualizando backend com nova ênfase:", enfaseLocal);
+
+      await fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "setenfase",
+          id,
+          enfase: enfaseLocal
+        })
+      });
+    }
+
+    // 3️⃣ Se backend tem uma ênfase e local está vazio → atualiza front
+    if (!enfaseLocal && enfaseBackend) {
+      console.log("⬅️ Atualizando localStorage com ênfase do backend:", enfaseBackend);
+      localStorage.setItem("femflow_enfase", enfaseBackend);
+    }
+
+  } catch (err) {
+    console.warn("⚠️ Falha ao sincronizar ênfase:", err);
+  }
+})();
 
     const lang = localStorage.getItem("femflow_lang") || "pt";
     const T = {
