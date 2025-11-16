@@ -8,65 +8,16 @@
   <link rel="manifest" href="manifest.json" />
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
-  <style>
-    :root {
-      --terracota:#cc6a5a;
-      --bege:#fff5ef;
-      --verde:#335953;
-      --texto:#5b4f49;
-    }
-    body{
-      background:var(--bege);
-      color:var(--texto);
-      font-family:"Lato",sans-serif;
-      margin:0;
-      text-align:center;
-      padding:20px;
-    }
-    h1{
-      font-family:"Playfair Display",serif;
-      color:var(--terracota);
-      margin-bottom:8px;
-    }
-    p.sub{color:#7b6e68;margin-bottom:28px;}
+  <!-- FEMFLOW CSS GLOBAL -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/core.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/themes.css">
 
-    .card{
-      background:#fff;
-      border-radius:18px;
-      padding:24px 20px;
-      box-shadow:0 6px 18px rgba(0,0,0,0.08);
-      max-width:440px;
-      margin:0 auto 20px;
-      text-align:left;
-    }
-    label{display:block;margin-top:10px;font-weight:700;color:var(--verde);}
-    input,button{
-      width:100%;padding:10px 12px;margin-top:6px;
-      border:1px solid #e6d8d2;border-radius:10px;font-size:1rem;
-      font-family:"Lato",sans-serif;box-sizing:border-box;
-    }
-    button{
-      background:var(--verde);color:#fff;font-weight:700;cursor:pointer;
-      transition:.3s;margin-top:16px;
-    }
-    button:hover{background:var(--terracota);}
+  <!-- CSS ESPECÍFICO DA PÁGINA -->
+  <link rel="stylesheet" href="css/ciclo.css">
 
-    .perfil-btns{
-      display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:16px;
-    }
-    .perfil-btn{
-      flex:1 1 45%;
-      background:#fff;border:2px solid var(--verde);
-      border-radius:12px;padding:10px;
-      font-weight:700;color:var(--verde);cursor:pointer;
-      transition:.3s;
-    }
-    .perfil-btn.active{background:var(--verde);color:#fff;}
-
-    .quiz-box{display:none;margin-top:20px;}
-    .quiz-btns{display:flex;justify-content:center;gap:16px;margin-top:10px;}
-    .quiz-btns button{width:40%;}
-  </style>
+  <!-- NUNCA MAIS USAR <style> AQUI -->
 </head>
 
 <body>
