@@ -257,9 +257,30 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("btnFlow").onclick = ()=>location.href="flowcenter.html";
   document.getElementById("btnCad").onclick  = ()=>location.href="index.html";
 });
+// === 🌺 INSTALAÇÃO PWA ===
+let deferredPrompt = null;
 
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (btnInstall) btnInstall.style.display = 'inline-block';
+});
+
+btnInstall?.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`📲 Resultado da instalação: ${outcome}`);
+    deferredPrompt = null;
+    btnInstall.style.display = 'none';
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('✅ FemFlow foi instalado como PWA!');
+  if (btnInstall) btnInstall.style.display = 'none';
+});
 </script>
-
 </body>
 </html>
 
