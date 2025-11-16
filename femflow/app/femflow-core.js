@@ -130,16 +130,17 @@ logout() {
 },
 
 /* ===========================================================
-   🔹 CABEÇALHO E MENU
+   🔹 CABEÇALHO E MENU — FEMFLOW 2025 TWA EDITION
 =========================================================== */
 inserirHeaderApp() {
+  // evita múltiplas injeções
+  if (document.getElementById("femflowHeader")) return;
+
   const header = document.createElement("div");
   header.id = "femflowHeader";
   header.innerHTML = `
-    <div class="ff-header">
-      <img src="${this.LOGO}" class="ff-logo" />
-      <button id="ffMenuBtn" class="ff-menu-btn">☰</button>
-    </div>
+    <img src="${this.LOGO}" class="ff-logo" alt="FemFlow">
+    <button id="ffMenuBtn" class="ff-menu-btn">☰</button>
   `;
   document.body.prepend(header);
 
@@ -149,6 +150,9 @@ inserirHeaderApp() {
 },
 
 criarMenuModal(page) {
+  // evita menus duplicados
+  if (document.getElementById("femflowMenuModal")) return;
+
   const modal = document.createElement("div");
   modal.id = "femflowMenuModal";
   modal.className = "ff-menu-modal";
@@ -156,34 +160,66 @@ criarMenuModal(page) {
   modal.innerHTML = this._getMenuHTML(page);
   document.body.appendChild(modal);
 
-  setTimeout(() => modal.classList.add("active"), 10);
+  // trava scroll
+  document.body.classList.add("ff-menu-open");
+
+  setTimeout(() => modal.classList.add("active"), 15);
+
   this._bindMenuAcoes(page, modal);
 },
 
 _getMenuHTML(page) {
   return `
+    <div class="ff-menu-overlay"></div>
+
     <div class="ff-menu-box">
       <button class="ff-close">✕</button>
-      <h3>Menu</h3>
-      <button data-nav="home">🏡 Início</button>
+      <h3 class="ff-menu-title">Menu</h3>
+
+      <button data-nav="home" class="mm-home">🏡 Início</button>
       <button data-nav="flowcenter">📋 FlowCenter</button>
       <button data-nav="treino">💪 Treino</button>
       <button data-nav="respiracao">🌬️ Respiração</button>
       <button data-nav="evolucao">📈 Evolução</button>
-      <button id="ffLogoutBtn">🚪 Sair</button>
+
+      <button id="ffLogoutBtn" class="ff-logout">🚪 Sair</button>
     </div>
   `;
 },
 
 _bindMenuAcoes(page, modal) {
-  modal.querySelector(".ff-close").onclick = () =>
-    modal.classList.remove("active");
 
+  const fechar = () => {
+    modal.classList.remove("active");
+    document.body.classList.remove("ff-menu-open");
+    setTimeout(() => modal.remove(), 180);
+  };
+
+  modal.querySelector(".ff-close").onclick = fechar;
+  modal.querySelector(".ff-menu-overlay").onclick = fechar;
+
+  // HOME — comportamento especial
+  modal.querySelector(".mm-home").onclick = () => {
+    fechar();
+    FEMFLOW.toast("🏠 Voltando ao início...");
+    this.router("home");
+  };
+
+  // Demais rotas
   modal.querySelectorAll("[data-nav]").forEach(btn => {
-    btn.onclick = () => this.router(btn.dataset.nav);
+    if (!btn.classList.contains("mm-home")) {
+      btn.onclick = () => {
+        fechar();
+        this.router(btn.dataset.nav);
+      };
+    }
   });
 
-  document.getElementById("ffLogoutBtn").onclick = () => this.logout();
+  // Logout
+  modal.querySelector("#ffLogoutBtn").onclick = () => {
+    fechar();
+    this.logout();
+  };
 },
 
    /* ===========================================================
