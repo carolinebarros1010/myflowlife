@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         enfase: "geral",
         nivel: "iniciante",
         fase: "folicular",
-        faseSugerida: "folicular",
+        // faseSugerida REMOVIDA
         diaCiclo: 1,
         cicloOK: false
       };
@@ -352,9 +352,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ============================================================
 
 // Garante que o que veio do Core também esteja salvo em localStorage
-if (estado.faseSugerida && !localStorage.getItem("fase_sugerida")) {
-  localStorage.setItem("fase_sugerida", estado.faseSugerida);
-}
+// ❌ remover fase sugerida do Core
+// ✔️ usar somente fase real configurada no ciclo
+
 if (estado.nivel && !localStorage.getItem("nivel_atual")) {
   localStorage.setItem("nivel_atual", estado.nivel);
 }
@@ -366,46 +366,49 @@ if (estado.diaCiclo && !localStorage.getItem("dia_ciclo")) {
 const enfase = estado.enfase || "geral";
 
 
-  // ============================================================
-  // 9. CHAMADA AO BACKEND (Apps Script via Worker) + OFFLINE
-  // ============================================================
- // 🔥 Endereço correto SEMPRE vem do Core
+// ============================================================
+// 9. CHAMADA AO BACKEND (Apps Script via Worker) + OFFLINE
+// ============================================================
+
+// 🔥 Endereço correto SEMPRE vem do Core
 const SCRIPT_URL = 
-    (typeof FEMFLOW !== "undefined" && FEMFLOW.SCRIPT_URL)
+  (typeof FEMFLOW !== "undefined" && FEMFLOW.SCRIPT_URL)
     ? FEMFLOW.SCRIPT_URL
     : "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
+// 🔥 Fase REAL do ciclo — SEMPRE vem do ciclo configurado
+const faseReal =
+  localStorage.getItem("femflow_fase_atual") ||   // fase salva no ciclo.html
+  estado.fase ||                                  // fallback do Core
+  "menstrual";                                     // fallback final seguro
 
-
-// usamos o estado completo aqui
-const url = `${SCRIPT_URL
-  }?action=treino` +
+// 🔗 Monta a URL final para treino
+const url = `${SCRIPT_URL}?action=treino` +
   `&id=${encodeURIComponent(id)}` +
   `&enfase=${encodeURIComponent(estado.enfase || "geral")}` +
-  `&fase=${encodeURIComponent(estado.faseSugerida || estado.fase || "folicular")}` +
+  `&fase=${encodeURIComponent(faseReal)}` +
   `&diaCiclo=${encodeURIComponent(estado.diaCiclo || 1)}`;
 
 
-  let j = null;
-  let offlineSnap = null;
+let j = null;
+let offlineSnap = null;
+
+try {
+  const resp = await fetch(url);
+  const txt  = await resp.text();
+  console.log("📡 Resposta bruta treino:", txt.slice(0, 300));
 
   try {
-    const resp = await fetch(url);
-    const txt  = await resp.text();
-    console.log("📡 Resposta bruta treino:", txt.slice(0, 300));
-
-    try {
-      j = JSON.parse(txt);
-    } catch (e) {
-      console.error("❌ Resposta não-JSON:", txt);
-      // tenta offline
-      offlineSnap = carregarSnapshotOffline();
-    }
-
+    j = JSON.parse(txt);
   } catch (e) {
-    console.warn("⚠️ Falha de rede no treino:", e);
+    console.error("❌ Resposta não-JSON:", txt);
     offlineSnap = carregarSnapshotOffline();
   }
+
+} catch (e) {
+  console.warn("⚠️ Falha de rede no treino:", e);
+  offlineSnap = carregarSnapshotOffline();
+}
 
   // ------------------------------------------------------------
   // 9.1. MODO OFFLINE: usa último snapshot salvo
@@ -416,7 +419,7 @@ const url = `${SCRIPT_URL
       document.body.classList.add("ff-offline-mode");
 
       metaTreino = {
-        fase: offlineSnap.meta?.fase || localStorage.getItem("fase_sugerida") || "folicular",
+        fase: offlineSnap.meta?.fase || localStorage.getItem("femflow_fase_atual") || "folicular",
         diaCiclo: offlineSnap.meta?.diaCiclo || Number(localStorage.getItem("dia_ciclo") || 1),
         diaPrograma: offlineSnap.meta?.diaPrograma || diaPrograma
       };
@@ -448,7 +451,7 @@ const url = `${SCRIPT_URL
     j.exSource = "firebase";
     j.firebaseQuery = j.firebaseQuery || {
       nivel: localStorage.getItem("nivel_atual"),
-      fase:  localStorage.getItem("fase_sugerida"),
+      fase: localStorage.getItem("femflow_fase_atual"),
       enfase,
       diaKey: `dia_${localStorage.getItem("dia_ciclo")}`
     };
@@ -456,7 +459,7 @@ const url = `${SCRIPT_URL
 
   // Atualiza metaTreino com dados reais do backend
   metaTreino = {
-    fase: j.fase || localStorage.getItem("fase_sugerida"),
+    fase: j.fase || localStorage.getItem("femflow_fase_atual"),
     diaCiclo: j.diaCiclo || Number(localStorage.getItem("dia_ciclo") || 1),
     diaPrograma: j.diaPrograma || diaPrograma
   };
@@ -557,7 +560,7 @@ const url = `${SCRIPT_URL
       try {
         await FEMFLOW.salvarTreino({
           id,
-          fase: metaTreino.fase || localStorage.getItem("fase_sugerida"),
+          fase: metaTreino.fase || localStorage.getItem("femflow_fase_atual"),
           treino: "dia",
           tipo_dia: "treino",
           pse
@@ -583,7 +586,7 @@ const url = `${SCRIPT_URL
   // ============================================================
   document.querySelector("#descansoBtn")?.addEventListener("click", async () => {
     try {
-      await FEMFLOW.salvarDescanso(metaTreino.fase || localStorage.getItem("fase_sugerida"));
+      await FEMFLOW.salvarDescanso(metaTreino.fase || localStorage.getItem("femflow_fase_atual"));
 
       let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
       if (prog < 30) {
