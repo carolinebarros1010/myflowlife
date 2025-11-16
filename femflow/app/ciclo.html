@@ -228,32 +228,73 @@
     });
 
     // ========= SALVAR =========
-    function salvarCiclo({perfil,start,length,fase,faseCalc,dia}){
-      localStorage.setItem('femflow_perfilHormonal', perfil);
-      localStorage.setItem('femflow_cycle_configured','yes');
-      localStorage.setItem('femflow_program_active','yes');
-      localStorage.setItem('femflow_program_startISO', new Date().toISOString());
+   // ========= SALVAR =========
+function salvarCiclo({perfil, start, length, fase, faseCalc, dia}) {
 
-      if(perfil==='regular'){
-        localStorage.setItem('femflow_startDate',(start instanceof Date?start:new Date(start)).toISOString());
-        localStorage.setItem('femflow_cycleLength',String(length||28));
-        localStorage.removeItem('fase_sugerida');
-        localStorage.setItem('dia_ciclo',String(dia||1));
-        localStorage.setItem('fase_atual',(faseCalc||'menstrual').toLowerCase());
-      } else {
-        localStorage.setItem('femflow_startDate',new Date().toISOString());
-        localStorage.setItem('femflow_cycleLength','28');
-        const faseMap={follicular:'folicular',ovulatory:'ovulatoria',luteal:'lutea',menstrual:'menstrual'};
-        fase=(faseMap[fase]||fase||'folicular').toLowerCase();
-        let diaSim=1;
-        if(fase==='folicular')diaSim=6; else if(fase==='ovulatoria')diaSim=14; else if(fase==='lutea')diaSim=18;
-        localStorage.setItem('fase_sugerida',fase);
-        localStorage.setItem('fase_atual',fase);
-        localStorage.setItem('dia_ciclo',String(diaSim));
-      }
+  // ============================================
+  // PADRÃO ÚNICO DO APP
+  // femflow_fase_atual
+  // ============================================
+  localStorage.setItem('femflow_perfilHormonal', perfil);
+  localStorage.setItem('femflow_cycle_configured','yes');
+  localStorage.setItem('femflow_program_active','yes');
+  localStorage.setItem('femflow_program_startISO', new Date().toISOString());
 
-      localStorage.setItem('femflow_perfilHormonal_locked','yes');
-      (window.FEMFLOW?.toast||alert)('✨ Ciclo configurado com sucesso!');
+  let faseFinal = "menstrual";
+
+  if (perfil === 'regular') {
+
+    const dataInicio = (start instanceof Date ? start : new Date(start));
+    const cicloLen   = String(length || 28);
+
+    // define fase calculada
+    faseFinal = (faseCalc || 'menstrual').toLowerCase();
+
+    localStorage.setItem('femflow_startDate', dataInicio.toISOString());
+    localStorage.setItem('femflow_cycleLength', cicloLen);
+    localStorage.setItem('dia_ciclo', String(dia || 1));
+
+  } else {
+
+    // PERFIL IRREGULAR OU MANUAL
+    const faseMap = {
+      follicular: "follicular",
+      ovulatory: "ovulatory",
+      ovulatoria: "ovulatory",
+      luteal: "luteal",
+      lutea: "luteal",
+      menstrual: "menstrual"
+    };
+
+    faseFinal = (faseMap[fase] || fase || "follicular").toLowerCase();
+
+    let diaSim = 1;
+    if (faseFinal === "follicular") diaSim = 6;
+    if (faseFinal === "ovulatory") diaSim = 14;
+    if (faseFinal === "luteal") diaSim = 18;
+
+    localStorage.setItem('femflow_startDate', new Date().toISOString());
+    localStorage.setItem('femflow_cycleLength', '28');
+    localStorage.setItem('dia_ciclo', String(diaSim));
+  }
+
+  // --------------------------------------------
+  // NOVA CHAVE ÚNICA DO SISTEMA
+  // --------------------------------------------
+  localStorage.setItem("femflow_fase_atual", faseFinal);
+
+  // remove chaves antigas
+  localStorage.removeItem("fase_sugerida");
+  localStorage.removeItem("fase_atual");
+
+  // trava ciclo configurado
+  localStorage.setItem('femflow_perfilHormonal_locked','yes');
+
+  (window.FEMFLOW?.toast || alert)("✨ Ciclo configurado com sucesso!");
+
+  // envia fase para GS
+  atualizarFaseBackend(faseFinal);
+
 
       const prox=localStorage.getItem('femflow_enfase')?'flowcenter.html':'home.html';
       setTimeout(()=>location.href=prox,900);
