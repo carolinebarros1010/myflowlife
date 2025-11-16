@@ -1,5 +1,5 @@
 // =======================================================================
-// FemFlow v02 — Treino Diário 2025 (Versão HÍBRIDA PREMIUM + Performance View)
+// FemFlow v03 — Treino Diário 2025 (Versão HÍBRIDA PREMIUM + Performance View)
 // Box0 + Box1(+HIIT/Cardio) + Box2(+HIIT/Cardio) + Box3 (se existir) + Finalização
 // - Híbrido: Apps Script (treino-dia) + Firebase exercícios
 // - Pronto para PWA/TWA e modo offline (snapshot do último treino)
@@ -110,6 +110,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const diff = startX - endX;
     if (Math.abs(diff) > 40) moveTo(diff > 0 ? "next" : "prev");
   });
+// ============================================================
+// 3.1 FUNÇÃO GLOBAL — TEMPO PADRÃO ROBUSTO
+// ============================================================
+function tempoPadrao(raw) {
+ let total = tempoPadrao(el.dataset.total || el.textContent);
+el.dataset.total = total;
+el.textContent = fmt(total);
 
   // ============================================================
   // 4. TIMERS DE EXERCÍCIO
@@ -126,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const startTimer = el => {
     clearTimer(el);
-    let remain = Number(el.dataset.remain || el.dataset.total || 45);
+    let remain = parseTempo(el.dataset.remain || el.dataset.total);
     el.dataset.remain = remain;
 
     el.classList.add("running");
@@ -158,17 +165,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const resetTimer = el => {
     clearTimer(el);
-    el.dataset.remain = el.dataset.total;
-    el.textContent = fmt(Number(el.dataset.total || 45));
+    const total = parseTempo(el.dataset.total);
+el.dataset.remain = total;
+el.textContent = fmt(total);
     el.classList.remove("running", "done");
   };
+  
+// 🔧 Parser robusto para qualquer valor de tempo
+function parseTempo(raw) {
+  if (raw === undefined || raw === null) return 45;
 
+  // se já for número
+  if (typeof raw === "number" && raw > 0) return Math.floor(raw);
+
+  // se vier como string vazia
+  if (String(raw).trim() === "") return 45;
+
+  // tenta extrair números
+  const n = Number(String(raw).replace(/[^\d]/g, ""));
+  if (isNaN(n) || n <= 0) return 45;
+
+  return Math.floor(n);
+}
+  
   const bindTimers = root => {
     root.querySelectorAll(".subtimer").forEach(el => {
-      if (!el.dataset.total) {
-        const raw = el.textContent.replace(/\D/g, "");
-        el.dataset.total = raw || "45";
-      }
+      let total = parseTempo(el.dataset.total || el.textContent);
+el.dataset.total = total;
+el.textContent = fmt(total);
+
 
       el.textContent = fmt(Number(el.dataset.total));
 
@@ -271,7 +296,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <label>Séries</label><input inputmode="numeric" value="${e.series ?? ""}">
                 <label>Reps</label><input inputmode="numeric" value="${e.reps ?? ""}">
                 <label>Timer</label>
-                <div class="subtimer" data-total="${e.tempo ?? 45}">${fmt(e.tempo ?? 45)}</div>
+                <div class="subtimer" data-total="${parseTempo(e.tempo)}"> ${fmt(parseTempo(e.tempo))}
+                </div>
+
               </div>
             </div>
           `).join("")}
@@ -365,6 +392,167 @@ if (estado.diaCiclo && !localStorage.getItem("dia_ciclo")) {
 // Enfase agora vem SEMPRE do Core
 const enfase = estado.enfase || "geral";
 
+// ============================================================
+// 8.1 ENGINE HORMONAL 3.0 — DIA DO FIREBASE + FASE NORMALIZADA
+// ============================================================
+
+/*
+  ✔ NORMALIZAÇÃO
+     - follicular → folicular
+     - ovulatory → ovulatoria
+     - luteal → lutea
+     - menstrual → menstrual
+
+  ✔ TABELAS AVANÇADAS (para perfis energéticos):
+     - folicular: 6–13 repetido até formar 23 dias
+     - ovulatoria: 14–17 repetido até formar 23 dias
+     - lutea: 18–30 repetido até formar 23 dias
+     - menstrual: 1–5 (fisiológico e fixo)
+
+  ✔ PERFIS ENERGÉTICOS:
+     - menopausa
+     - menopausa_tecnica
+     - irregular
+     - diu_hormonal
+
+     → 23 dias faseAlta + 5 dias fase menstrual
+
+  ✔ PERFIS FISIOLÓGICOS:
+     - regular
+     - diu_cobre
+
+     → diaCiclo real = diaFirebase
+*/
+
+function getDiaFirebase() {
+
+  const faseReal = (
+    localStorage.getItem("femflow_fase_atual") ||
+    estado.fase ||
+    "menstrual"
+  ).toLowerCase();
+
+  const perfil = (
+    localStorage.getItem("femflow_perfilHormonal") ||
+    "regular"
+  ).toLowerCase();
+
+  const faseAlta = (
+    localStorage.getItem("femflow_faseAlta") ||
+    "folicular"
+  ).toLowerCase();
+
+  const diaCiclo = Number(
+    localStorage.getItem("dia_ciclo") ||
+    estado.diaCiclo ||
+    1
+  );
+
+  // ------------------------------------------------------------
+  // 1. Normalização da fase para nomes do Firebase
+  // ------------------------------------------------------------
+  const faseMap = {
+    follicular: "folicular",
+    folicular: "folicular",
+    ovulatory: "ovulatoria",
+    ovulatoria: "ovulatoria",
+    luteal: "lutea",
+    lutea: "lutea",
+    menstrual: "menstrual"
+  };
+
+  // faseReal normalizada
+  let faseFirebase = faseMap[faseReal] || "folicular";
+
+  // ------------------------------------------------------------
+  // 2. PERFIS FISIOLÓGICOS (regular, diu_cobre)
+  // ------------------------------------------------------------
+  const perfilFisiologico = ["regular", "diu", "diu_cobre"];
+
+  if (perfilFisiologico.includes(perfil)) {
+    return {
+      faseFirebase,
+      diaFirebase: diaCiclo,
+      diaKey: `dia_${diaCiclo}`
+    };
+  }
+
+  // ------------------------------------------------------------
+  // 3. PERFIS ENERGÉTICOS (23+5)
+  // ------------------------------------------------------------
+  const perfilEnergetico = ["menopausa", "menopausa_tecnica", "irregular", "diu_hormonal"];
+
+  if (!perfilEnergetico.includes(perfil)) {
+    // fallback seguro
+    return {
+      faseFirebase,
+      diaFirebase: diaCiclo,
+      diaKey: `dia_${diaCiclo}`
+    };
+  }
+
+  // ------------------------------------------------------------
+  // 4. SE DIA <= 23 → faseAlta | SE > 23 → menstrual
+  // ------------------------------------------------------------
+  let faseFinal = (diaCiclo <= 23) ? faseAlta : "menstrual";
+  let faseNorm = faseMap[faseFinal] || "folicular";
+
+  // ------------------------------------------------------------
+  // 5. TABELAS AVANÇADAS PARA 23 DIAS
+  // ------------------------------------------------------------
+  function gerarTabela(inicio, fim) {
+    let arr = [];
+    while (arr.length < 23) {
+      for (let d = inicio; d <= fim; d++) {
+        if (arr.length >= 23) break;
+        arr.push(d);
+      }
+    }
+    return arr;
+  }
+
+  const tabelaFaseAlta = {
+    folicular: gerarTabela(6, 13),
+    ovulatoria: gerarTabela(14, 17),
+    lutea: gerarTabela(18, 30)
+  };
+
+  const tabelaMenstrual = [1, 2, 3, 4, 5];
+
+  // ------------------------------------------------------------
+  // 6. DIA DO FIREBASE BASEADO NA FASE FINAL
+  // ------------------------------------------------------------
+  let diaFirebase;
+
+  if (faseNorm === "menstrual") {
+    diaFirebase = tabelaMenstrual[(diaCiclo - 24) % 5] || 1;
+  } else {
+    diaFirebase = tabelaFaseAlta[faseNorm][diaCiclo - 1] || 1;
+  }
+
+  return {
+    faseFirebase: faseNorm,
+    diaFirebase,
+    diaKey: `dia_${diaFirebase}`
+  };
+}
+
+// ============================================================
+// 8.2 — EXECUTA ENGINE HORMONAL E PREPARA DADOS DO FIREBASE
+// ============================================================
+
+const hormonal = getDiaFirebase();
+
+console.log("⚙️  Engine Hormonal 3.0:", hormonal);
+
+// Substitui a faseReal pela faseFirebase normalizada
+const faseFirebase = hormonal.faseFirebase;
+
+// Dia firebase final (após tabelas avançadas)
+const diaFirebase = hormonal.diaFirebase;
+
+// DiaKey final
+const diaKey = hormonal.diaKey;
 
 // ============================================================
 // 9. CHAMADA AO BACKEND (Apps Script via Worker) + OFFLINE
@@ -376,19 +564,18 @@ const SCRIPT_URL =
     ? FEMFLOW.SCRIPT_URL
     : "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-// 🔥 Fase REAL do ciclo — SEMPRE vem do ciclo configurado
-const faseReal =
-  localStorage.getItem("femflow_fase_atual") ||   // fase salva no ciclo.html
-  estado.fase ||                                  // fallback do Core
-  "menstrual";                                     // fallback final seguro
+// 🔥 faseFirebase e diaFirebase agora vêm da ENGINE HORMONAL
+// já estão definidos como:
+//   faseFirebase
+//   diaFirebase
+//   diaKey
 
-// 🔗 Monta a URL final para treino
+// Monta a URL final do treino
 const url = `${SCRIPT_URL}?action=treino` +
   `&id=${encodeURIComponent(id)}` +
   `&enfase=${encodeURIComponent(estado.enfase || "geral")}` +
-  `&fase=${encodeURIComponent(faseReal)}` +
-  `&diaCiclo=${encodeURIComponent(estado.diaCiclo || 1)}`;
-
+  `&fase=${encodeURIComponent(faseFirebase)}` +
+  `&diaCiclo=${encodeURIComponent(diaFirebase)}`;   // ← agora sincronizado com Engine Hormonal
 
 let j = null;
 let offlineSnap = null;
@@ -419,8 +606,8 @@ try {
       document.body.classList.add("ff-offline-mode");
 
       metaTreino = {
-        fase: offlineSnap.meta?.fase || localStorage.getItem("femflow_fase_atual") || "folicular",
-        diaCiclo: offlineSnap.meta?.diaCiclo || Number(localStorage.getItem("dia_ciclo") || 1),
+        fase: offlineSnap.meta?.fase || faseFirebase,
+        diaCiclo: offlineSnap.meta?.diaCiclo || diaFirebase,
         diaPrograma: offlineSnap.meta?.diaPrograma || diaPrograma
       };
 
@@ -451,16 +638,16 @@ try {
     j.exSource = "firebase";
     j.firebaseQuery = j.firebaseQuery || {
       nivel: localStorage.getItem("nivel_atual"),
-      fase: localStorage.getItem("femflow_fase_atual"),
+      fase: faseFirebase,
       enfase,
-      diaKey: `dia_${localStorage.getItem("dia_ciclo")}`
+      diaKey
     };
   }
 
   // Atualiza metaTreino com dados reais do backend
   metaTreino = {
-    fase: j.fase || localStorage.getItem("femflow_fase_atual"),
-    diaCiclo: j.diaCiclo || Number(localStorage.getItem("dia_ciclo") || 1),
+    fase: j.fase || faseFirebase,
+    diaCiclo: j.diaCiclo || diaFirebase,
     diaPrograma: j.diaPrograma || diaPrograma
   };
 
@@ -481,7 +668,7 @@ try {
   // ============================================================
   const lista = [];
 
-  // Box 0 (conexão) e Box Final vêm do backend (Apps Script)
+  // Box 0 (conexão) e Box Final vêm do backend
   let boxIntro = null;
   let boxFinal = null;
 
@@ -499,8 +686,8 @@ try {
     try {
       raw = await FEMFLOW.buscarExerciciosFirebase(
         j.firebaseQuery.nivel,
-        j.firebaseQuery.fase,
-        j.firebaseQuery.diaKey,
+        faseFirebase,
+        diaKey,
         j.firebaseQuery.enfase
       );
     } catch (e) {
@@ -509,8 +696,12 @@ try {
 
     if (raw.length) {
       raw = raw.filter((v, i, a) =>
-  a.findIndex(t => t.titulo === v.titulo && t.box === v.box) === i
-);
+        a.findIndex(t =>
+          t.titulo === v.titulo &&
+          t.box === v.box
+        ) === i
+      );
+
       const boxMap = new Map();
       raw.forEach(ex => {
         const boxName = ex.box || "Box 1";
@@ -525,7 +716,7 @@ try {
           return na - nb;
         })
         .forEach(([boxName, arr]) => {
-          const idx = Number((boxName.match(/\d+/) || [0])[0]); // 1,2,3...
+          const idx = Number((boxName.match(/\d+/) || [0])[0]);
           const extras = extrasByBox.get(idx) || [];
 
           lista.push({
@@ -537,7 +728,8 @@ try {
               link: ex.link || ex.url || "",
               series: ex.series ?? 3,
               reps: ex.reps ?? 12,
-              tempo: ex.tempo ?? 45
+              tempo: parseTempo(ex.tempo)
+
             }))
           });
         });
@@ -560,7 +752,7 @@ try {
       try {
         await FEMFLOW.salvarTreino({
           id,
-          fase: metaTreino.fase || localStorage.getItem("femflow_fase_atual"),
+          fase: metaTreino.fase || faseFirebase,
           treino: "dia",
           tipo_dia: "treino",
           pse
@@ -586,7 +778,7 @@ try {
   // ============================================================
   document.querySelector("#descansoBtn")?.addEventListener("click", async () => {
     try {
-      await FEMFLOW.salvarDescanso(metaTreino.fase || localStorage.getItem("femflow_fase_atual"));
+      await FEMFLOW.salvarDescanso(metaTreino.fase || faseFirebase);
 
       let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
       if (prog < 30) {
@@ -600,7 +792,12 @@ try {
       FEMFLOW.toast("📴 Sem conexão para registrar descanso agora. Você pode repetir esse dia depois.");
     }
   });
+
+  // ============================================================
+  // 16. RELOAD QUANDO MUDAR IDIOMA
+  // ============================================================
   window.addEventListener("femflow:langchange", () => {
-   location.reload();
-});
+    location.reload();
+  });
+
 });
