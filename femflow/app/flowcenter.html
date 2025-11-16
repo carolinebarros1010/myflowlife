@@ -214,13 +214,13 @@ if (window.localStorage && navigator.serviceWorker) {
 // 🔄 Sincronização de Dados FemFlow (Web ↔ PWA ↔ Mobile)
 // ===================================================
 try {
-  const sharedKeys = [
-    "femflow_startDate",
-    "femflow_cycleLength",
-    "fase_sugerida",
-    "femflow_enfase",
-    "femflow_perfilHormonal"
-  ];
+const sharedKeys = [
+  "femflow_startDate",
+  "femflow_cycleLength",
+  "femflow_fase_atual",
+  "femflow_enfase",
+  "femflow_perfilHormonal"
+];
 
   // 🔹 1. Lê backup global (criado no login)
   const backup = JSON.parse(localStorage.getItem("femflow_backup") || "{}");
@@ -271,18 +271,29 @@ document.head.appendChild(styleSync);
     const perfil = localStorage.getItem("femflow_perfilHormonal") || "regular";
     const ciclo  = parseInt(localStorage.getItem("femflow_cycleLength") || 28);
     const inicio = new Date(localStorage.getItem("femflow_startDate") || new Date());
-    const faseSugerida = localStorage.getItem("fase_sugerida");
+    // Fase real salva pela usuária em ciclo.html
+const faseManual = (localStorage.getItem("femflow_fase_atual") || "").toLowerCase();
 
-    let fase = "menstrual";
-    if (perfil === "regular") {
-      const diff = Math.floor((new Date() - inicio)/(1000*60*60*24));
-      const dia = (diff % ciclo) + 1;
-      if (dia>5 && dia<=13) fase="follicular";
-      else if (dia<=17) fase="ovulatory";
-      else fase="luteal";
-    } else if (faseSugerida) {
-      fase = faseSugerida.toLowerCase();
-    }
+let fase = "menstrual"; 
+
+// 1) Se ela selecionou manualmente → prioriza
+if (faseManual && faseManual.length > 0) {
+  fase = faseManual;
+} 
+// 2) Caso contrário → calcula pelo ciclo
+else if (perfil === "regular") {
+  const diff = Math.floor((new Date() - inicio) / (1000 * 60 * 60 * 24));
+  const dia = (diff % ciclo) + 1;
+
+  if (dia <= 5) fase = "menstrual";
+  else if (dia <= 13) fase = "follicular";
+  else if (dia <= 17) fase = "ovulatory";
+  else fase = "luteal";
+
+  // Salva fase calculada (coerência)
+  localStorage.setItem("femflow_fase_atual", fase);
+}
+
 
     // === Atualiza UI ===
     document.getElementById("centerPhase").textContent = L.fases[fase];
@@ -330,7 +341,7 @@ document.getElementById("lbl-luteal").classList.toggle("label-active",     fase=
     };
     dbg.innerHTML = Object.entries(debugData)
       .map(([k,v])=>`<b>${k}</b>: ${v||'—'}`).join("<br>");
-    dbg.hidden = false; // coloque true se quiser ocultar em produção
+    dbg.hidden = true; // coloque true se quiser ocultar em produção
 
   });
     // === Mudança dinâmica de idioma (fix real-time) ===
@@ -364,7 +375,7 @@ window.addEventListener("femflow:langchange", () => {
   
 
   // Reaplica nomes de fases e status atual
- const fase = (localStorage.getItem("fase_sugerida") || "menstrual").toLowerCase();
+const fase = (localStorage.getItem("femflow_fase_atual") || "menstrual").toLowerCase();
   document.getElementById("centerPhase").textContent = L.fases[fase];
   document.getElementById("t_current").textContent   = `${L.faseAtual} ${L.fases[fase]}`;
   document.getElementById("lbl-menstrual").textContent  = L.fases.menstrual;
