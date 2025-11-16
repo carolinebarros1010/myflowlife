@@ -696,78 +696,45 @@ enviarNovaSenha: async function(id, token, novaSenha) {
     setTimeout(() => toast.remove(), 3000);
   },
 
-  /* =======================================================
-     🔹 7. AUTO CICLO
-  ======================================================= */
+ /* =======================================================
+   🔹 7. AUTO CICLO — v2025 (corrigido)
+======================================================= */
 autoCiclo() {
-  const perfil = localStorage.getItem("femflow_perfilHormonal") || "regular";
+
+  // ciclo configurado?
+  const cicloOK = localStorage.getItem("femflow_cycle_configured") === "yes";
+  if (!cicloOK) return;
+
   const ciclo = Number(localStorage.getItem("femflow_cycleLength") || 28);
-  let dia = Number(localStorage.getItem("dia_ciclo") || 1);
+  const startISO = localStorage.getItem("femflow_startDate");
 
-  // 🎨 Função auxiliar de log bonito
-  const logCiclo = (fase, diaCiclo, tipo) => {
-    const emoji = fase === "menstrual" ? "🩸" :
-                  fase === "folicular" ? "🌱" :
-                  fase === "ovulatoria" ? "🔥" : "🌙";
-    const cor = fase === "menstrual" ? "color:#d64242" :
-                fase === "folicular" ? "color:#2a8f5a" :
-                fase === "ovulatoria" ? "color:#c98625" :
-                "color:#6b4c9a";
-    console.log(
-      `%c${emoji} ${tipo} | Dia ${diaCiclo}/${ciclo} → ${fase.toUpperCase()}`,
-      `${cor}; font-weight:700;`
-    );
-  };
+  // segurança
+  if (!startISO) return;
 
-  // 🌿 Caso REGULAR → calcula fase real baseada na data de início
-  if (perfil === "regular") {
-    const startDate = new Date(localStorage.getItem("femflow_startDate") || new Date());
-    const hoje = new Date();
-    const diffDias = Math.floor((hoje - startDate) / (1000 * 60 * 60 * 24)) + 1;
+  const startDate = new Date(startISO);
+  const hoje = new Date();
 
-    // Se o ciclo passou do limite, reinicia
-    const diaCiclo = ((diffDias - 1) % ciclo) + 1;
-    localStorage.setItem("dia_ciclo", diaCiclo);
+  // dias desde o início → ciclo fisiológico
+  const diff = Math.floor((hoje - startDate) / 86400000);
+  const diaCiclo = ((diff % ciclo) + ciclo) % ciclo + 1;
 
-    // Define fase com base no ciclo fisiológico
-    const fase = (() => {
-      if (diaCiclo <= 5) return "menstrual";
-      if (diaCiclo <= 13) return "folicular";
-      if (diaCiclo <= 17) return "ovulatoria";
-      return "lutea";
-    })();
+  localStorage.setItem("dia_ciclo", diaCiclo);
 
-    localStorage.setItem("fase_atual", fase);
-    localStorage.setItem("fase_sugerida", fase);
+  // fase fisiológica normal
+  let fase = "folicular";
+  if (diaCiclo <= 5) fase = "menstrual";
+  else if (diaCiclo <= 13) fase = "folicular";
+  else if (diaCiclo <= 17) fase = "ovulatoria";
+  else fase = "lutea";
 
-    logCiclo(fase, diaCiclo, "🔹 Regular");
-    return;
-  }
+  // chave final
+  localStorage.setItem("femflow_fase_atual", fase);
 
-  // 🌸 Caso IRREGULAR / DIU / MENOPAUSA → ciclo simbólico contínuo
-  dia = (dia % ciclo) + 1;
-  localStorage.setItem("dia_ciclo", dia);
-
-  const fase = (() => {
-    if (dia <= 5) return "menstrual";
-    if (dia <= 13) return "folicular";
-    if (dia <= 17) return "ovulatoria";
-    return "lutea";
-  })();
-
-  localStorage.setItem("fase_atual", fase);
-  localStorage.setItem("fase_sugerida", fase);
-
-  if (dia === 1) {
-    this.toast("🌸 Novo ciclo simbólico iniciado!");
-    localStorage.setItem(
-      `femflow_reiniciado_${localStorage.getItem("femflow_id")}`,
-      new Date().toISOString()
-    );
-  }
-
-  logCiclo(fase, dia, "🔸 Simbólico");
-},
+  console.log(
+    `%c🌸 Ciclo real | Dia ${diaCiclo}/${ciclo} → ${fase}`,
+    "color:#335953;font-weight:700;"
+  );
+}
 
   /* =======================================================
      🔹 8. ROTEADOR
