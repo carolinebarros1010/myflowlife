@@ -219,17 +219,38 @@
       const len=parseInt(document.getElementById('duracao').value||28,10);
       if(!s||len<21||len>35){alert('Preencha corretamente data e duração do ciclo.');return;}
 
-      const start=parseDateLocalYYYYMMDD(s);
-      const today=new Date();
-      const diff=Math.floor((today-start)/(1000*60*60*24));
-      const dia=((diff%len)+len)%len+1;
-      const fase=(()=>{if(dia<=5)return'menstrual';if(dia<=13)return'folicular';if(dia<=17)return'ovulatoria';return'lutea';})();
-      salvarCiclo({perfil:'regular',start,length:len,faseCalc:fase,dia});
-    });
+     const start = parseDateLocalYYYYMMDD(s);
+const today = new Date();
 
-    // ========= SALVAR =========
+// 🔧 Cálculo robusto do dia do ciclo
+const umDia = 24 * 60 * 60 * 1000;
+let diff = Math.floor((today.getTime() - start.getTime()) / umDia);
+
+// evita diff negativo
+if (diff < 0) diff = 0;
+
+// normaliza para 1 → len
+let diaRaw = ((diff % len) + len) % len;
+const diaCiclo = diaRaw === 0 ? 1 : diaRaw + 1;
+
+// 🔥 Cálculo da fase correto (USANDO diaCiclo)
+let fase;
+if (diaCiclo <= 5)            fase = "menstrual";
+else if (diaCiclo <= 13)      fase = "follicular";
+else if (diaCiclo <= 17)      fase = "ovulatory";
+else                          fase = "luteal";
+
+// envia tudo para salvarCiclo
+salvarCiclo({
+  perfil: 'regular',
+  start,
+  length: len,
+  faseCalc: fase,
+  dia: diaCiclo
+});
+ 
    // ========= SALVAR =========
-function salvarCiclo({perfil, start, length, fase, faseCalc, dia}) {
+function salvarCiclo({perfil:'regular',start,length:len,faseCalc:fase,dia: diaCiclo}) {
 
   // ============================================
   // PADRÃO ÚNICO DO APP
