@@ -5,168 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FemFlow • Minha Evolução</title>
 
+  <!-- Manifest / PWA -->
   <link rel="manifest" href="manifest.json" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <!-- CSS FemFlow Core -->
+  <link rel="stylesheet" href="css/core.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/evolucao.css">
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    :root {
-      --terracota: #CC6A5A;
-      --pessego: #F4D4C8;
-      --teal: #335953;
-      --bege: #FFF5EF;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Lato", sans-serif;
-      background: var(--bege);
-      color: var(--teal);
-      text-align: center;
-      padding-top: 90px;
-    }
-
-    h1 {
-      font-family: 'Playfair Display', serif;
-      color: var(--terracota);
-      margin: 0;
-      font-size: 1.8rem;
-    }
-
-    .evo-container {
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 0 16px;
-      box-sizing: border-box;
-    }
-
-    .section {
-      margin-top: 26px;
-    }
-
-    /* Barra de progresso */
-    .barra-progresso {
-      width: 100%;
-      height: 18px;
-      background: rgba(240,236,233,0.8);
-      border-radius: 20px;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-
-    .preenchimento-progresso {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--terracota), var(--pessego), var(--teal));
-      transition: width 1.2s ease-in-out;
-    }
-
-    .texto-progresso {
-      font-weight: bold;
-      margin-bottom: 0.4rem;
-    }
-
-    /* Gráficos responsivos */
-    .chart-container {
-      position: relative;
-      width: 100%;
-      height: 260px;
-      margin: 0 auto;
-    }
-
-    canvas {
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    /* Mensagem final */
-    .mensagem-final {
-      background: rgba(239,189,166,0.4);
-      border-left: 4px solid var(--terracota);
-      padding: 16px;
-      color: var(--teal);
-      font-weight: 600;
-      border-radius: 12px;
-      margin-top: 18px;
-      display: none;
-    }
-
-    .btn-novo-ciclo {
-      background: var(--teal);
-      color: white;
-      padding: 10px 16px;
-      border-radius: 14px;
-      border: none;
-      cursor: pointer;
-      margin-top: 12px;
-    }
-    .btn-novo-ciclo:hover {
-      background: var(--terracota);
-    }
-
-    #voltarFlow {
-      background: var(--terracota);
-      color: #fff;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 20px;
-      font-weight: bold;
-      margin-top: 34px;
-      margin-bottom: 40px;
-      cursor: pointer;
-      width: 90%;
-      max-width: 330px;
-    }
-    #voltarFlow:hover {
-      background: var(--teal);
-    }
-  </style>
 </head>
 
 <body>
 
   <h1 id="tituloPagina">Minha Evolução</h1>
-  <p id="subtituloPagina" class="subtitle">Acompanhe como seu corpo responde ao treino</p>
+  <p id="subtituloPagina" class="evo-subtitle">Acompanhe como seu corpo responde ao treino</p>
 
   <div class="evo-container">
 
     <!-- PROGRESSO -->
-    <div class="section">
-      <h3 id="tituloProgresso">🌿 Progresso do seu programa</h3>
+    <section class="evo-card">
+      <h2 id="tituloProgresso">🌿 Progresso do seu programa</h2>
       <p id="progressoTexto" class="texto-progresso"></p>
-      <div class="barra-progresso">
-        <div id="progressoBarra" class="preenchimento-progresso"></div>
+
+      <div class="evo-progress">
+        <div id="progressoBarra" class="evo-progress-fill"></div>
       </div>
-    </div>
+    </section>
 
     <!-- GRÁFICO PSE -->
-    <div class="section">
+    <section class="evo-card evo-chart">
       <h3 id="tituloPSE">📈 Evolução do Esforço Percebido (PSE)</h3>
-
       <div class="chart-container">
         <canvas id="graficoPSE"></canvas>
       </div>
+      <p id="legendaPSE" class="evo-legend">🩵 Leve • 🍑 Moderado • ❤️ Intenso</p>
+    </section>
 
-      <p id="legendaPSE">🩵 Leve • 🍑 Moderado • ❤️ Intenso</p>
-    </div>
-
-    <!-- MENSAGEM FINAL -->
-    <div id="mensagemFinal" class="mensagem-final">
+    <!-- MENSAGEM FINAL / NOVO CICLO -->
+    <section id="mensagemFinal" class="mensagem-final">
       <span id="textoMensagemFinal"></span>
-      <button id="novoCicloBtn" class="btn-novo-ciclo"></button>
-    </div>
+      <button id="novoCicloBtn" class="evo-btn"></button>
+    </section>
 
-    <button id="voltarFlow">← Voltar ao Flow Center</button>
+    <button id="voltarFlow" class="evo-btn" style="margin-top:20px">← Voltar ao Flow Center</button>
 
   </div>
 
   <!-- CORE -->
   <script src="scripts/femflow-core.js"></script>
 
-  <!-- === FUNÇÕES NECESSÁRIAS DO ANTIGO memoria.js === -->
+  <!-- FUNÇÕES AUXILIARES -->
   <script>
     function calcularProgresso(id, total = 30) {
       const dia = Number(localStorage.getItem("femflow_dia_treino") || 1);
@@ -181,13 +77,15 @@
         `femflow_reiniciado_${id}`
       ];
       keys.forEach(k => localStorage.removeItem(k));
-      localStorage.setItem("femflow_dia_treino","1");
+      localStorage.setItem("femflow_dia_treino", "1");
     }
   </script>
 
-  <!-- === LÓGICA PRINCIPAL === -->
+  <!-- LÓGICA PRINCIPAL -->
   <script>
-  // TRADUÇÃO
+  /* ============================================================
+     TRADUÇÃO DINÂMICA
+  ============================================================ */
   window.addEventListener("femflow:langchange", traduzir);
   document.addEventListener("DOMContentLoaded", traduzir);
 
@@ -203,7 +101,7 @@
         final: "✨ Parabéns! Você concluiu seu ciclo de 30 dias FemFlow.<br>Respire, celebre e permita-se descansar.",
         novo: "🔄 Iniciar novo ciclo",
         back: "← Voltar ao Flow Center",
-        progText: x => `Você completou ${x}% do programa`,
+        progText: x => `Você completou ${x}% do programa`
       },
       en: {
         titulo: "My Evolution",
@@ -232,7 +130,9 @@
     }
   }
 
-  // LÓGICA
+  /* ============================================================
+     LÓGICA PRINCIPAL
+  ============================================================ */
   document.addEventListener("DOMContentLoaded", async () => {
 
     FEMFLOW.inserirHeaderApp?.();
@@ -240,7 +140,7 @@
     const id = localStorage.getItem("femflow_id");
     if (!id) { FEMFLOW.router("ciclo"); return; }
 
-    // Progresso
+    // PROGRESSO
     const prog = calcularProgresso(id, 30);
     window.__prog = prog;
     traduzir();
@@ -255,7 +155,7 @@
       };
     }
 
-    // Histórico
+    // HISTÓRICO PSE
     const hist = await FEMFLOW.buscarHistorico(id, 40);
 
     if (!hist || !hist.length) {
@@ -263,7 +163,7 @@
       return;
     }
 
-    // Gráfico
+    // GRÁFICO PSE
     new Chart(document.getElementById("graficoPSE"), {
       type: "line",
       data: {
@@ -284,7 +184,7 @@
       }
     });
 
-    // Voltar
+    // VOLTAR
     document.getElementById("voltarFlow").onclick = () => FEMFLOW.router("flowcenter");
   });
   </script>
