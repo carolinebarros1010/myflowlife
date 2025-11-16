@@ -139,24 +139,50 @@ function bindTap(el, handler){
 }
 
 /* ============================================================
-   FASE ALTA POR NÍVEL  (FemFlow Energy 23+5)
+   FASE ALTA POR NÍVEL (FemFlow Engine 2025)
 ============================================================ */
 function faseAltaPorNivel(){
   const nivel=(localStorage.getItem("nivel_atual")||"iniciante").toLowerCase();
   if(nivel==="iniciante") return "luteal";
   if(nivel==="intermediaria") return "follicular";
-  return "ovulatory"; // avançada
+  return "ovulatory";
 }
 
 /* ============================================================
-   SALVAR CICLO — PADRÃO FINAL FEMFLOW 2.5
+   LISTA DE PERGUNTAS PARA CADA PERFIL
+============================================================ */
+const perguntasIrregular = [
+  "Você sentiu mudanças de energia ao longo da semana?",
+  "Percebeu sensibilidade nos seios, inchaço ou retenção?",
+  "Você teve oscilações emocionais sem motivo claro?",
+  "Sentiu cólicas, peso abdominal ou desconforto pélvico?",
+  "Você se sentiu sem vontade de treinar nos últimos dias?"
+];
+
+const perguntasMenopausa = [
+  "Nos últimos dias, você sentiu sua energia mais instável do que o normal?",
+  "Você teve ondas de calor, calor interno ou suor noturno?",
+  "Seu humor tem variado (sensibilidade, irritação ou tristeza súbita)?",
+  "Seu sono ficou mais leve, interrompido ou não restaurador?",
+  "Você tem sentido baixa disposição para iniciar treinos?"
+];
+
+const perguntasDiuHormonal = [
+  "Nos últimos dias, sua motivação para treinar caiu?",
+  "Você sentiu cansaço constante ou sensação de peso corporal?",
+  "Você percebeu irritabilidade, sensibilidade emocional ou desânimo?",
+  "Você sentiu inchaço, peso no ventre ou sensibilidade nos seios?",
+  "Seu corpo parece lento ou travado quando pensa em treinar?"
+];
+
+/* ============================================================
+   SALVAR CICLO — PADRÃO FINAL FEMFLOW 2.6
 ============================================================ */
 async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}){
 
   localStorage.setItem("femflow_perfilHormonal", perfil);
   localStorage.setItem("femflow_cycle_configured", "yes");
 
-  // Data de início do ciclo
   localStorage.setItem("femflow_startDate",
     (start instanceof Date ? start : new Date(start)).toISOString()
   );
@@ -164,13 +190,10 @@ async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}){
   localStorage.setItem("femflow_cycleLength", String(length||28));
   localStorage.setItem("dia_ciclo", String(dia||1));
 
-  // salva fase alta se existir
   if(faseAlta) localStorage.setItem("femflow_faseAlta", faseAlta);
 
-  // fase atual
   localStorage.setItem("femflow_fase_atual", faseCalc.toLowerCase());
 
-  // envia para backend
   try{
     await fetch(FEMFLOW.SCRIPT_URL,{
       method:"POST",
@@ -181,33 +204,28 @@ async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}){
         fase:faseCalc.toLowerCase()
       })
     });
-  } catch(e){ console.warn("Backend falhou:",e); }
+  } catch(e){}
 
   FEMFLOW.toast("✨ Ciclo configurado!");
   setTimeout(()=>location.href="home.html",800);
 }
 
 /* ============================================================
-   PERFIS
+   PERFIS PRINCIPAIS
 ============================================================ */
-let perfil=null, quizIdx=0, quizScore=0;
+let perfil=null;
+let perfilInterno=null;
+let perguntasAtuais=[];
+let quizIdx=0, quizScore=0;
 
-const perguntas=[
-  "Você sentiu variações fortes de energia nos últimos dias?",
-  "Percebeu sensibilidade nos seios ou inchaço?",
-  "Teve oscilações de humor sem motivo aparente?",
-  "Está dormindo pior ou suando mais que o normal?",
-  "Sente cólica, dor pélvica ou leve sangramento?"
-];
-
-const quizPerg     = document.getElementById("quizPergunta");
-const quizStep     = document.getElementById("quizStep");
-const regularBox   = document.getElementById("regularBox");
-const quizBox      = document.getElementById("quizBox");
-const diuBox       = document.getElementById("diuSubmenu");
+const quizPerg   = document.getElementById("quizPergunta");
+const quizStep   = document.getElementById("quizStep");
+const quizBox    = document.getElementById("quizBox");
+const regularBox = document.getElementById("regularBox");
+const diuBox     = document.getElementById("diuSubmenu");
 
 /* ============================================================
-   CLIQUE DO PERFIL
+   BOTÕES DE PERFIL
 ============================================================ */
 document.querySelectorAll(".perfil-btn[data-perfil]").forEach(btn=>{
   bindTap(btn, ()=>{
@@ -224,8 +242,11 @@ document.querySelectorAll(".perfil-btn[data-perfil]").forEach(btn=>{
     if(perfil==="regular"){
       regularBox.style.display="block";
     }
-    else if(perfil==="irregular" || perfil==="menopausa"){
-      iniciarQuiz();
+    else if(perfil==="irregular"){
+      iniciarQuizIrregular();
+    }
+    else if(perfil==="menopausa"){
+      iniciarQuizMenopausa();
     }
     else if(perfil==="diu"){
       diuBox.style.display="block";
@@ -247,19 +268,36 @@ document.querySelectorAll("[data-diu]").forEach(btn=>{
       regularBox.style.display="block";
     }
     if(tipo==="hormonal"){
-      iniciarMenopausaTecnica();
+      iniciarQuizDiuHormonal();
     }
   });
 });
 
 /* ============================================================
-   QUIZ (Irregular + Menopausa)
+   QUIZS DOS TRÊS PERFIS
 ============================================================ */
-function iniciarQuiz(){
-  quizIdx=0;
-  quizScore=0;
-  quizPerg.textContent=perguntas[0];
-  quizStep.textContent=`Pergunta 1 de ${perguntas.length}`;
+function iniciarQuizIrregular(){
+  perfilInterno="irregular_quiz";
+  perguntasAtuais = perguntasIrregular;
+  quizIdx=0; quizScore=0;
+  quizPerg.textContent=perguntasAtuais[0];
+  quizStep.textContent=`Pergunta 1 de ${perguntasAtuais.length}`;
+  quizBox.style.display="block";
+}
+function iniciarQuizMenopausa(){
+  perfilInterno="menopausa_quiz";
+  perguntasAtuais = perguntasMenopausa;
+  quizIdx=0; quizScore=0;
+  quizPerg.textContent=perguntasAtuais[0];
+  quizStep.textContent=`Pergunta 1 de ${perguntasAtuais.length}`;
+  quizBox.style.display="block";
+}
+function iniciarQuizDiuHormonal(){
+  perfilInterno="diu_hormonal_quiz";
+  perguntasAtuais = perguntasDiuHormonal;
+  quizIdx=0; quizScore=0;
+  quizPerg.textContent=perguntasAtuais[0];
+  quizStep.textContent=`Pergunta 1 de ${perguntasAtuais.length}`;
   quizBox.style.display="block";
 }
 
@@ -270,26 +308,27 @@ function responderQuiz(v){
   quizScore+=v?1:0;
   quizIdx++;
 
-  if(quizIdx<perguntas.length){
-    quizPerg.textContent=perguntas[quizIdx];
-    quizStep.textContent=`Pergunta ${quizIdx+1} de ${perguntas.length}`;
+  if(quizIdx<perguntasAtuais.length){
+    quizPerg.textContent=perguntasAtuais[quizIdx];
+    quizStep.textContent=`Pergunta ${quizIdx+1} de ${perguntasAtuais.length}`;
   } else {
     finalizarQuiz();
   }
 }
 
 /* ============================================================
-   LÓGICA DO QUIZ ENERGÉTICO 23+5
+   FINALIZAÇÃO DO QUIZ (ENERGÉTICO 23+5)
 ============================================================ */
 function finalizarQuiz(){
 
   const faseAltaNivel = faseAltaPorNivel();
-  const entraAlta     = (quizScore <= 3);
+  const entraAlta = (quizScore <= 3);
 
-  const faseCalc      = entraAlta ? faseAltaNivel : "menstrual";
-  const diaInicial    = entraAlta ? 1 : 24;
+  const faseCalc   = entraAlta ? faseAltaNivel : "menstrual";
+  const diaInicial = entraAlta ? 1 : 24;
 
-  if(perfil==="irregular"){
+  // IRREGULAR
+  if(perfilInterno==="irregular_quiz"){
     salvarCiclo({
       perfil:"irregular",
       start:new Date(),
@@ -301,9 +340,23 @@ function finalizarQuiz(){
     return;
   }
 
-  if(perfil==="menopausa"){
+  // MENOPAUSA
+  if(perfilInterno==="menopausa_quiz"){
     salvarCiclo({
       perfil:"menopausa",
+      start:new Date(),
+      length:28,
+      faseCalc,
+      faseAlta:faseAltaNivel,
+      dia:diaInicial
+    });
+    return;
+  }
+
+  // DIU HORMONAL (MENOPAUSA TÉCNICA)
+  if(perfilInterno==="diu_hormonal_quiz"){
+    salvarCiclo({
+      perfil:"menopausa_tecnica",
       start:new Date(),
       length:28,
       faseCalc,
@@ -315,23 +368,7 @@ function finalizarQuiz(){
 }
 
 /* ============================================================
-   MENOPAUSA TÉCNICA (DIU HORMONAL)
-============================================================ */
-function iniciarMenopausaTecnica(){
-  const faseAlta = faseAltaPorNivel();
-
-  salvarCiclo({
-    perfil:"menopausa_tecnica",
-    start:new Date(),
-    length:28,
-    faseAlta,
-    faseCalc:faseAlta,
-    dia:1
-  });
-}
-
-/* ============================================================
-   REGULAR
+   REGULAR — FISIOLÓGICO
 ============================================================ */
 bindTap(document.getElementById("btnConfirmarRegular"), ()=>{
   const s=document.getElementById("dataUltima").value;
