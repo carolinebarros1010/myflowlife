@@ -490,7 +490,7 @@ router(dest) {
    /* ===========================================================
    🔥 FIREBASE — INICIALIZAÇÃO
 =========================================================== */
-(function initFirebase() {
+function initFirebase() {
   if (window._femflowFirebaseReady) return;
 
   const cfg = {
