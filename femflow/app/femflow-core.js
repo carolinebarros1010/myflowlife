@@ -487,10 +487,10 @@ router(dest) {
   };
   window.location.href = map[dest] || "index.html";
 },
-   /* ===========================================================
+/* ===========================================================
    🔥 FIREBASE — INICIALIZAÇÃO
 =========================================================== */
-function initFirebase() {
+initFirebase() {
   if (window._femflowFirebaseReady) return;
 
   const cfg = {
@@ -507,8 +507,7 @@ function initFirebase() {
 
   window._femflowFirebaseReady = true;
   console.log("🔥 Firebase conectado");
-})();
-
+},
 
 /* ===========================================================
    🔹 BUSCA EXERCÍCIOS NO FIREBASE — HÍBRIDO + CACHE
