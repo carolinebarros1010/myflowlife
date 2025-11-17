@@ -13,9 +13,9 @@ _isPublicPage() {
 },
 
 /* ===========================================================
-   ⚙️ INICIALIZAÇÃO GERAL
+   ⚙️ INICIALIZAÇÃO GERAL (agora async)
 =========================================================== */
-initTreino() {
+async initTreino() {
   console.log("💫 FemFlow Core v2.7 ativo");
 
   this.criarModalPSE();
@@ -28,7 +28,7 @@ initTreino() {
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
   const protegidas = ["flowcenter.html", "treino.html", "evolucao.html"];
 
-   if (protegidas.includes(p)) {
+  if (protegidas.includes(p)) {
 
     // inicializa firebase automaticamente
     await this.initFirebase();
@@ -49,6 +49,7 @@ initTreino() {
     this.inserirHeaderApp();
   }
 },
+
 
 /* ===========================================================
    📌 ESTADO GLOBAL
