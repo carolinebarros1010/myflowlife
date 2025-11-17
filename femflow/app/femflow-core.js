@@ -512,7 +512,7 @@ initFirebase() {
 /* ===========================================================
    🔹 BUSCA EXERCÍCIOS NO FIREBASE — HÍBRIDO + CACHE
 =========================================================== */
-FEMFLOW.buscarExerciciosFirebase = async function (nivel, fase, diaKey, enfase) {
+buscarExerciciosFirebase: async function (nivel, fase, diaKey, enfase) {
 
   const norm = s =>
     (s || "").toString()
@@ -526,12 +526,11 @@ FEMFLOW.buscarExerciciosFirebase = async function (nivel, fase, diaKey, enfase) 
   enfase = norm(enfase || localStorage.getItem("femflow_enfase")     || "geral");
   diaKey = norm(diaKey || localStorage.getItem("dia_ciclo")          || "1");
 
-  const grupoId = `${nivel}_${enfase}`;
+  const grupoId  = `${nivel}_${enfase}`;
   const cacheKey = `ff_fb_${grupoId}_${fase}_${diaKey}`;
-  const now = Date.now();
+  const now      = Date.now();
 
   try {
-    // cache válido por 12 horas
     const cache = JSON.parse(localStorage.getItem(cacheKey));
     if (cache && now - cache.time < 12 * 60 * 60 * 1000) {
       console.log("📦 Cache Firebase:", cache.data);
@@ -566,8 +565,7 @@ FEMFLOW.buscarExerciciosFirebase = async function (nivel, fase, diaKey, enfase) 
     console.error("Erro Firebase:", err);
     return null;
   }
-};
-
+},
 
 /* ===========================================================
    🎨 ANIMAÇÕES GLOBAIS
