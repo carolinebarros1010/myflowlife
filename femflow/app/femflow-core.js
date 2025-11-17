@@ -28,7 +28,11 @@ initTreino() {
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
   const protegidas = ["flowcenter.html", "treino.html", "evolucao.html"];
 
-  if (protegidas.includes(p)) {
+   if (protegidas.includes(p)) {
+
+    // inicializa firebase automaticamente
+    await this.initFirebase();
+
     const cicloOk =
       localStorage.getItem("femflow_cycle_configured") === "yes" &&
       localStorage.getItem("femflow_startDate") &&
@@ -488,48 +492,67 @@ router(dest) {
   window.location.href = map[dest] || "index.html";
 },
 /* ===========================================================
-   🔥 FIREBASE — INICIALIZAÇÃO
+   🔥 FIREBASE — INICIALIZAÇÃO (v2.8 corrigido)
 =========================================================== */
-initFirebase() {
-  if (window._femflowFirebaseReady) return;
+initFirebase: async function () {
+  try {
 
-  const cfg = {
-    apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
-    authDomain: "femflow-ebec2.firebaseapp.com",
-    projectId: "femflow-ebec2",
-    storageBucket: "femflow-ebec2.appspot.com",
-    messagingSenderId: "1043953159611",
-    appId: "1:1043953159611:web:d12b82f744740f3124c89e",
-    measurementId: "G-6F644L5VTW",
-  };
+    // evita inicializar novamente
+    if (window._femflowFirebaseReady) return;
 
-  if (!firebase.apps.length) firebase.initializeApp(cfg);
+    const cfg = {
+      apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
+      authDomain: "femflow-ebec2.firebaseapp.com",
+      projectId: "femflow-ebec2",
+      storageBucket: "femflow-ebec2.appspot.com",
+      messagingSenderId: "1043953159611",
+      appId: "1:1043953159611:web:d12b82f744740f3124c89e",
+      measurementId: "G-6F644L5VTW",
+    };
 
-  window._femflowFirebaseReady = true;
-  console.log("🔥 Firebase conectado");
+    if (!firebase.apps.length) {
+      firebase.initializeApp(cfg);
+    }
+
+    window._femflowFirebaseReady = true;
+    console.log("🔥 Firebase inicializado");
+
+  } catch (err) {
+    console.error("❌ Erro ao inicializar Firebase:", err);
+  }
 },
 
+
 /* ===========================================================
-   🔹 BUSCA EXERCÍCIOS NO FIREBASE — HÍBRIDO + CACHE
+   🔹 BUSCA EXERCÍCIOS NO FIREBASE — HÍBRIDO + CACHE (v2.8)
 =========================================================== */
 buscarExerciciosFirebase: async function (nivel, fase, diaKey, enfase) {
 
+  // garante firebase pronto
+  if (!window._femflowFirebaseReady) {
+    await this.initFirebase();
+  }
+
   const norm = s =>
-    (s || "").toString()
+    (s || "")
+      .toString()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
       .trim();
 
-  nivel  = norm(nivel  || localStorage.getItem("nivel_atual")      || "iniciante");
-  fase   = norm(fase   || localStorage.getItem("femflow_fase_atual") || "follicular");
-  enfase = norm(enfase || localStorage.getItem("femflow_enfase")     || "geral");
-  diaKey = norm(diaKey || localStorage.getItem("dia_ciclo")          || "1");
+  nivel  = norm(nivel  || localStorage.getItem("nivel_atual")         || "iniciante");
+  fase   = norm(fase   || localStorage.getItem("femflow_fase_atual")  || "follicular");
+  enfase = norm(enfase || localStorage.getItem("femflow_enfase")      || "geral");
+  diaKey = String(Number(diaKey || localStorage.getItem("dia_ciclo")  || 1));
 
   const grupoId  = `${nivel}_${enfase}`;
   const cacheKey = `ff_fb_${grupoId}_${fase}_${diaKey}`;
   const now      = Date.now();
 
+  /* ----------------------------------------------------------
+     1. CACHE LOCAL — 12 horas
+  ----------------------------------------------------------- */
   try {
     const cache = JSON.parse(localStorage.getItem(cacheKey));
     if (cache && now - cache.time < 12 * 60 * 60 * 1000) {
@@ -538,6 +561,9 @@ buscarExerciciosFirebase: async function (nivel, fase, diaKey, enfase) {
     }
   } catch (_) {}
 
+  /* ----------------------------------------------------------
+     2. FIRESTORE
+  ----------------------------------------------------------- */
   try {
     const snap = await firebase.firestore()
       .collection("femflow")
@@ -559,6 +585,7 @@ buscarExerciciosFirebase: async function (nivel, fase, diaKey, enfase) {
     }));
 
     console.log("🔥 Firebase:", data);
+
     return data;
 
   } catch (err) {
@@ -566,6 +593,7 @@ buscarExerciciosFirebase: async function (nivel, fase, diaKey, enfase) {
     return null;
   }
 },
+
 
 /* ===========================================================
    🎨 ANIMAÇÕES GLOBAIS
