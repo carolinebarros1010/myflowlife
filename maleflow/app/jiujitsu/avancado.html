@@ -11,6 +11,7 @@
 <script type="module" src="../js/salvar-treino.js"></script>
 <script type="module" src="../js/temporizador.js"></script>
 </head>
+
 <body>
 <section class="page" data-dia>
 <header class="head">
@@ -22,13 +23,11 @@
 <span class="chip">20DIF · Potência e Controle Técnico</span>
 </header>
 
-
 <div class="nav-buttons">
 <button>Jiu-Jitsu</button>
 <button>Bike</button>
 <button>Surf</button>
 </div>
-
 
 <section class="card">
 <h3>Resumo do Programa</h3>
@@ -118,5 +117,42 @@
     <div>Próximo ciclo: Intercâmbio de esporte ou recuperação</div>
   </footer>
 </section>
+
+<!-- SCRIPT PARA GERAR DESCANSOS AUTOMÁTICOS -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const itens = document.querySelectorAll("ul li");
+
+  itens.forEach(li => {
+    const texto = li.innerText;
+
+    const match = texto.match(/(\d+)\s*x\s*(\d+)/i);
+    if (!match) return;
+
+    const repeticoes = parseInt(match[2]);
+
+    let descanso = "";
+    if (repeticoes <= 8) {
+      descanso = "⏱️ Descanso: 90 s";
+    } else if (repeticoes <= 12) {
+      descanso = "⏱️ Descanso: 60 s";
+    } else {
+      descanso = "⏱️ Descanso: 45 s";
+    }
+
+    if (!li.querySelector(".descanso")) {
+      const span = document.createElement("span");
+      span.className = "descanso";
+      span.style.display = "block";
+      span.style.fontSize = "0.9rem";
+      span.style.color = "#4caf50";
+      span.style.marginTop = "3px";
+      span.innerText = descanso;
+      li.appendChild(span);
+    }
+  });
+});
+</script>
+
 </body>
 </html>
