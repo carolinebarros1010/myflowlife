@@ -36,20 +36,57 @@ body {
 
 /* ------------------- SEÇÃO VÍDEO ------------------- */
 .video {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto 20px auto;
+
+  /* Mantém a proporção 16:9 */
   position: relative;
-  padding-top: 56.25%;
+  aspect-ratio: 16 / 9;
+
+  /* Visual */
   border-radius: 16px;
   overflow: hidden;
   background: #000;
-  margin-bottom: 20px;
-  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+
+  /* Evita bugs do Safari iOS */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 .video iframe {
   position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
+  inset: 0;
+  border: none;
+
+  /* Suavidade */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* ========= Ajuste para telas bem estreitas (Android pequenos) =========== */
+@media (max-width: 360px) {
+  .video {
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+}
+
+/* ========= Ajuste para tablets =========== */
+@media (min-width: 780px) {
+  .video {
+    max-width: 960px;
+    border-radius: 20px;
+  }
+}
+
+/* ========= Ajuste notch iOS (safe-area) =========== */
+@supports(padding: env(safe-area-inset-top)) {
+  .video {
+    margin-top: calc(env(safe-area-inset-top) * 0.4);
+  }
 }
 
 /* ------------------- TÍTULOS DAS FILEIRAS ------------------- */
