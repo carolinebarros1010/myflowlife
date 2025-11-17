@@ -188,29 +188,68 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("btnFlow").onclick = ()=>location.href="flowcenter.html";
   document.getElementById("btnCad").onclick  = ()=>location.href="index.html";
 });
-// === 🌺 INSTALAÇÃO PWA ===
+// === 🌺 INSTALAÇÃO / DOWNLOAD DO APP ===
 let deferredPrompt = null;
 
-window.addEventListener('beforeinstallprompt', (e) => {
+// Captura segura
+const btnInstall = document.getElementById("btnInstall");
+
+// Links das lojas
+const PLAY_URL = "https://play.google.com/store/apps/details?id=com.myflowlife.femflow";
+const APPLE_URL = "https://apps.apple.com/app/id0000000000"; // << substitua quando tiver o ID real
+
+// Detecta plataforma
+function isAndroid() {
+  return /Android/i.test(navigator.userAgent);
+}
+
+function isIOS() {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// Banner de instalação PWA detectado
+window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  if (btnInstall) btnInstall.style.display = 'inline-block';
+
+  if (btnInstall) btnInstall.style.display = "inline-block";
 });
 
-btnInstall?.addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`📲 Resultado da instalação: ${outcome}`);
-    deferredPrompt = null;
-    btnInstall.style.display = 'none';
-  }
+// Clique do botão
+if (btnInstall) {
+  btnInstall.addEventListener("click", async () => {
+    // 📱 iOS → App Store
+    if (isIOS()) {
+      window.location.href = APPLE_URL;
+      return;
+    }
+
+    // 🤖 Android → Play Store
+    if (isAndroid()) {
+      window.location.href = PLAY_URL;
+      return;
+    }
+
+    // 💻 Desktop/PWA → fluxo normal de instalação
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`📲 Resultado da instalação: ${outcome}`);
+      deferredPrompt = null;
+      btnInstall.style.display = "none";
+    } else {
+      // fallback (se não houver deferredPrompt)
+      window.location.href = PLAY_URL;
+    }
+  });
+}
+
+// Após instalar PWA
+window.addEventListener("appinstalled", () => {
+  console.log("✅ FemFlow instalado como PWA!");
+  if (btnInstall) btnInstall.style.display = "none";
 });
 
-window.addEventListener('appinstalled', () => {
-  console.log('✅ FemFlow foi instalado como PWA!');
-  if (btnInstall) btnInstall.style.display = 'none';
-});
 </script>
 </body>
 </html>
