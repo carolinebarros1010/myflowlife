@@ -35,35 +35,22 @@ body {
 }
 
 /* ------------------- SEÇÃO VÍDEO ------------------- */
+/* Vídeo FemFlow — versão compacta */
 .video {
   width: 100%;
-  max-width: 860px;
-  margin: 0 auto 20px auto;
-
-  /* Mantém a proporção 16:9 */
-  position: relative;
-  aspect-ratio: 16 / 9;
-
-  /* Visual */
-  border-radius: 16px;
+  aspect-ratio: 16/9;
+  max-height: 240px;               /* 🔥 limita altura no celular */
+  border-radius: 18px;
   overflow: hidden;
   background: #000;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-
-  /* Evita bugs do Safari iOS */
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  box-shadow: 0 8px 20px rgba(0,0,0,.12);
+  margin: 0 auto 22px;
 }
 
 .video iframe {
-  position: absolute;
   width: 100%;
   height: 100%;
-  inset: 0;
-  border: none;
-
-  /* Suavidade */
-  transform: translateZ(0);
-  will-change: transform;
+  border: 0;
 }
 
 /* ========= Ajuste para telas bem estreitas (Android pequenos) =========== */
