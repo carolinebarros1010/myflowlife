@@ -54,10 +54,9 @@ body {
 }
 
 /* ========= Ajuste para telas bem estreitas (Android pequenos) =========== */
-@media (max-width: 360px) {
+@media (max-width: 380px) {
   .video {
-    border-radius: 12px;
-    margin-bottom: 16px;
+    max-height: 190px;
   }
 }
 
