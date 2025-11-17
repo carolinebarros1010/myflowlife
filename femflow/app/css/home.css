@@ -38,20 +38,37 @@ body {
 /* Vídeo FemFlow — versão compacta */
 .video {
   width: 100%;
-  aspect-ratio: 16/9;
-  max-height: 240px;               /* 🔥 limita altura no celular */
-  border-radius: 18px;
-  overflow: hidden;
-  background: #000;
-  box-shadow: 0 8px 20px rgba(0,0,0,.12);
-  margin: 0 auto 22px;
+  padding: 0 15px;
+  margin: 20px auto 0;
 }
 
-.video iframe {
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #000;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+.video-wrapper::before {
+  content: "";
+  display: block;
+  padding-top: 56.25%; /* proporção 16:9 */
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   border: 0;
+  border-radius: 20px;
 }
+
 
 /* ========= Ajuste para telas bem estreitas (Android pequenos) =========== */
 @media (max-width: 380px) {
