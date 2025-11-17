@@ -68,43 +68,52 @@ h3 {
 }
 
 /* ==========================================================
-   CÍRCULO HORMONAL SVG (mantido 100% compatível)
+   CÍRCULO HORMONAL SVG (versão ajustada e compatível)
 ========================================================== */
 .phase-svg {
-  width: 280px;
-  height: 280px;
+  width: 220px;                 /* antes 280px — agora alinhado ao gráfico */
+  height: 220px;
   margin: 20px auto 16px auto;
   position: relative;
-  padding: 6px;
+
+  padding: 4px;                 /* antes 6px — anel externo fino */
+
   border-radius: 50%;
-  background: rgba(255,255,255,0.6);
+  background: rgba(244, 208, 198, 0.40); /* rosa pastel leve */
+
+  /* sombra discreta para evitar “borda grossa” */
   box-shadow:
-    rgba(204,106,90,0.15) 0 8px 25px,
-    inset rgba(255,255,255,0.5) 0 4px 10px;
-  backdrop-filter: blur(12px);
+    0 3px 8px rgba(0,0,0,0.05),
+    inset 0 2px 6px rgba(255,255,255,0.35);
+
+  backdrop-filter: blur(6px);   /* blur suave */
 }
 
 /* animação do texto central */
 #centerPhase {
-  animation: pulseCenter 3s ease-in-out infinite;
+  animation: phasePulse 2.5s ease-in-out infinite;
+  font-weight: 700;
+  fill: #ffffff;
 }
 
-@keyframes pulseCenter {
+@keyframes phasePulse {
   0%, 100% {
-    opacity: 0.9;
+    opacity: 0.85;
+    transform: scale(1);
     text-shadow: 0 0 4px rgba(255,255,255,0.4);
   }
   50% {
     opacity: 1;
-    text-shadow: 0 0 10px rgba(255,255,255,0.8);
+    transform: scale(1.05);
+    text-shadow: 0 0 10px rgba(255,255,255,0.85);
   }
 }
 
-/* setor ativo */
+/* setor ativo (pedaço de pizza → terracota + união visual) */
 .path-active {
   fill: var(--terracota) !important;
   stroke: rgba(204,106,90,0.35);
-  stroke-width: 3px;
+  stroke-width: 2px;
   transition: fill 0.6s ease, stroke 0.4s ease;
 }
 
@@ -115,7 +124,7 @@ h3 {
   text-shadow: 0 0 3px rgba(204,106,90,0.3);
 }
 
-/* setores */
+/* transição suave para todos os setores */
 .phase-svg path {
   transition: fill 0.5s ease;
 }
