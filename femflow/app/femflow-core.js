@@ -594,9 +594,8 @@ buscarExerciciosFirebase: async function (nivel, fase, diaKey, enfase) {
     return null;
   }
 },
-
-
-/* ===========================================================
+};  
+   /* ===========================================================
    🎨 ANIMAÇÕES GLOBAIS
 =========================================================== */
 const style = document.createElement("style");
@@ -635,8 +634,7 @@ style.innerHTML = `
 }
 `;
 document.head.appendChild(style);
-
-
+   
 /* ===========================================================
    🛠 AUTOEXECUÇÃO
 =========================================================== */
