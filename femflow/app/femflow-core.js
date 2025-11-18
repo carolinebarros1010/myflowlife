@@ -316,44 +316,27 @@ autoCiclo() {
   console.log(`🌿 Regular | Dia ${dia} → ${fase}`);
 },
 /* ===========================================================
-   🔹 SALVAR PERFIL HORMONAL (2025)
+   🔹 SALVAR PERFIL HORMONAL (versão oficial)
 =========================================================== */
-salvarPerfilHormonal: async function (perfil) {
-
-  if (!perfil) {
-    console.warn("⚠️ Perfil hormonal vazio.");
-    return { ok: false, msg: "perfil vazio" };
-  }
-
-  const id = localStorage.getItem("femflow_id");
-  if (!id) {
-    console.warn("⚠️ ID ausente ao salvar perfil hormonal");
-    return { ok: false, msg: "id indefinido" };
-  }
-
+salvarPerfilHormonal: async function(perfil) {
   try {
-    const resp = await fetch(this.SCRIPT_URL, {
+    const res = await fetch(this.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        action: "salvarPerfilHormonal",
-        id,
+        action: "setPerfilHormonal",
+        id: localStorage.getItem("femflow_id"),
         perfil
       })
     });
 
-    const j = await resp.json();
-    console.log("🌿 Perfil hormonal salvo:", j);
-
-    if (j.ok) {
-      localStorage.setItem("femflow_perfilHormonal", perfil);
-    }
-
+    const j = await res.json();
+    console.log("💾 Perfil hormonal salvo:", j);
     return j;
 
-  } catch (err) {
-    console.error("❌ Erro ao salvar perfil hormonal:", err);
-    return { ok: false, msg: "erro fetch" };
+  } catch (e) {
+    console.warn("Erro salvarPerfilHormonal:", e);
+    return { ok: false };
   }
 },
 
