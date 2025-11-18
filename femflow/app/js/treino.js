@@ -77,145 +77,146 @@ document.addEventListener('DOMContentLoaded', async () => {
     diaCiclo: null,
     diaPrograma
   };
+  
+// ============================================================
+// 3. NAVEGAÇÃO DO CARROSSEL + SWIPE
+// ============================================================
+const moveTo = (dir) => {
+  if (dir === "next" && current < boxes.length - 1) {
+    current++;
+    navigator.vibrate?.([30]);
+  } else if (dir === "prev" && current > 0) {
+    current--;
+    navigator.vibrate?.([20]);
+  }
+  track.style.transform = `translateX(-${current * 100}%)`;
+  bar.style.width = boxes.length
+    ? `${((current + 1) / boxes.length) * 100}%`
+    : "0%";
+};
 
-  // ============================================================
-  // 3. NAVEGAÇÃO DO CARROSSEL + SWIPE
-  // ============================================================
-  const moveTo = (dir) => {
-    if (dir === "next" && current < boxes.length - 1) {
-      current++;
-      navigator.vibrate?.([30]);
-    } else if (dir === "prev" && current > 0) {
-      current--;
-      navigator.vibrate?.([20]);
-    }
-    // "stay" não altera índice, só atualiza barra
-    track.style.transform = `translateX(-${current * 100}%)`;
-    bar.style.width = boxes.length
-      ? `${((current + 1) / boxes.length) * 100}%`
-      : "0%";
-  };
+let startX = 0, endX = 0;
 
-  let startX = 0, endX = 0;
+track.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+}, { passive: true });
 
-  track.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
-  }, { passive: true });
+track.addEventListener("touchmove", e => {
+  endX = e.touches[0].clientX;
+}, { passive: true });
 
-  track.addEventListener("touchmove", e => {
-    endX = e.touches[0].clientX;
-  }, { passive: true });
+track.addEventListener("touchend", () => {
+  const diff = startX - endX;
+  if (Math.abs(diff) > 40) moveTo(diff > 0 ? "next" : "prev");
+}, { passive: true });   // ✅ FECHAMENTO CORRETO DO EVENTO
 
-  track.addEventListener("touchend", () => {
-    const diff = startX - endX;
-    if (Math.abs(diff) > 40) moveTo(diff > 0 ? "next" : "prev");
-  });
+
+// ============================================================
+// 3.1 TIMERS — bindTimers
+// ============================================================
+function bindTimers(root) {
+  root.querySelectorAll(".subtimer").forEach(el => {
+
+    let total = parseTempo(el.dataset.total || el.textContent);
+    el.dataset.total = total;
+    el.textContent = fmt(total);
+
+    // clique: start/pause
+    el.addEventListener("click", () => {
+      if (el.classList.contains("running")) {
+        pauseTimer(el);
+      } else {
+        startTimer(el);
+      }
+    });
+
+    // toque longo: reset
+    let t;
+    el.addEventListener("touchstart", () => t = Date.now(), { passive: true });
+    el.addEventListener("touchend", () => {
+      if (Date.now() - t > 500) resetTimer(el);
+    }, { passive: true });
+
+  }); // fecha forEach
+}     // fecha bindTimers
+
 // ============================================================
 // 3.1 FUNÇÃO GLOBAL — TEMPO PADRÃO ROBUSTO
 // ============================================================
-function tempoPadrao(raw) {
- let total = tempoPadrao(el.dataset.total || el.textContent);
-el.dataset.total = total;
-el.textContent = fmt(total);
+function tempoPadrao(el) {
+  const total = parseTempo(el.dataset.total || el.textContent);
+  el.dataset.total = total;
+  el.textContent = fmt(total);
+  return total;
+}
 
-  // ============================================================
-  // 4. TIMERS DE EXERCÍCIO
-  // ============================================================
-  const fmt = s => `00:${String(Math.max(0, Math.floor(s))).padStart(2, "0")}`;
-  const intervals = new WeakMap();
+ // ============================================================
+// 4. TIMERS DE EXERCÍCIO
+// ============================================================
+const fmt = s => `00:${String(Math.max(0, Math.floor(s))).padStart(2, "0")}`;
+const intervals = new WeakMap();
 
-  const clearTimer = el => {
-    const id = intervals.get(el);
-    if (id) clearInterval(id);
-    intervals.delete(el);
-    el.classList.remove("running");
-  };
+function clearTimer(el) {
+  const id = intervals.get(el);
+  if (id) clearInterval(id);
+  intervals.delete(el);
+  el.classList.remove("running");
+}
 
-  const startTimer = el => {
-    clearTimer(el);
-    let remain = parseTempo(el.dataset.remain || el.dataset.total);
+function startTimer(el) {
+  clearTimer(el);
+  let remain = parseTempo(el.dataset.remain || el.dataset.total);
+  el.dataset.remain = remain;
+
+  el.classList.add("running");
+  el.textContent = fmt(remain);
+
+  const int = setInterval(() => {
+    remain--;
     el.dataset.remain = remain;
-
-    el.classList.add("running");
     el.textContent = fmt(remain);
 
-    const int = setInterval(() => {
-      remain--;
-      el.dataset.remain = remain;
-      el.textContent = fmt(remain);
+    if (remain <= 0) {
+      clearInterval(int);
+      intervals.delete(el);
+      el.classList.remove("running");
+      el.classList.add("done");
+      navigator.vibrate?.([60, 40, 60]);
+    }
+  }, 1000);
 
-      if (remain <= 0) {
-        clearInterval(int);
-        intervals.delete(el);
-        el.classList.remove("running");
-        el.classList.add("done");
-        navigator.vibrate?.([60, 40, 60]);
-      }
-    }, 1000);
+  intervals.set(el, int);
+}
 
-    intervals.set(el, int);
-  };
+function pauseTimer(el) {
+  const id = intervals.get(el);
+  if (id) clearInterval(id);
+  intervals.delete(el);
+  el.classList.remove("running");
+}
 
-  const pauseTimer = el => {
-    const id = intervals.get(el);
-    if (id) clearInterval(id);
-    intervals.delete(el);
-    el.classList.remove("running");
-  };
+function resetTimer(el) {
+  clearTimer(el);
+  const total = parseTempo(el.dataset.total);
+  el.dataset.remain = total;
+  el.textContent = fmt(total);
+  el.classList.remove("running", "done");
+}
 
-  const resetTimer = el => {
-    clearTimer(el);
-    const total = parseTempo(el.dataset.total);
-el.dataset.remain = total;
-el.textContent = fmt(total);
-    el.classList.remove("running", "done");
-  };
-  
 // 🔧 Parser robusto para qualquer valor de tempo
 function parseTempo(raw) {
   if (raw === undefined || raw === null) return 45;
 
-  // se já for número
   if (typeof raw === "number" && raw > 0) return Math.floor(raw);
 
-  // se vier como string vazia
   if (String(raw).trim() === "") return 45;
 
-  // tenta extrair números
   const n = Number(String(raw).replace(/[^\d]/g, ""));
   if (isNaN(n) || n <= 0) return 45;
 
   return Math.floor(n);
 }
-  
-  const bindTimers = root => {
-    root.querySelectorAll(".subtimer").forEach(el => {
-      let total = parseTempo(el.dataset.total || el.textContent);
-el.dataset.total = total;
-el.textContent = fmt(total);
-
-
-      el.textContent = fmt(Number(el.dataset.total));
-
-      // clique: start/pause
-      el.addEventListener("click", () => {
-        if (el.classList.contains("running")) {
-          pauseTimer(el);
-        } else {
-          startTimer(el);
-        }
-      });
-
-      // toque longo: reset
-      let t;
-      el.addEventListener("touchstart", () => t = Date.now(), { passive: true });
-      el.addEventListener("touchend", () => {
-        if (Date.now() - t > 500) resetTimer(el);
-      });
-    });
-  };
-
-  // ============================================================
+   // ============================================================
   // 5. NORMALIZAÇÃO DE LINKS
   // ============================================================
   const normLink = u => {
@@ -580,22 +581,25 @@ const url = `${SCRIPT_URL}?action=treino` +
 let j = null;
 let offlineSnap = null;
 
-try {
-  const resp = await fetch(url);
-  const txt  = await resp.text();
-  console.log("📡 Resposta bruta treino:", txt.slice(0, 300));
-
+await (async () => {
   try {
-    j = JSON.parse(txt);
+    const resp = await fetch(url);
+    const txt  = await resp.text();
+    console.log("📡 Resposta bruta treino:", txt.slice(0, 300));
+
+    try {
+      j = JSON.parse(txt);
+    } catch (e) {
+      console.error("❌ Resposta não-JSON:", txt);
+      offlineSnap = carregarSnapshotOffline();
+    }
+
   } catch (e) {
-    console.error("❌ Resposta não-JSON:", txt);
+    console.warn("⚠️ Falha de rede no treino:", e);
     offlineSnap = carregarSnapshotOffline();
   }
+})();
 
-} catch (e) {
-  console.warn("⚠️ Falha de rede no treino:", e);
-  offlineSnap = carregarSnapshotOffline();
-}
 
   // ------------------------------------------------------------
   // 9.1. MODO OFFLINE: usa último snapshot salvo
