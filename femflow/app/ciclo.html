@@ -148,7 +148,7 @@ async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}) {
 
   // 🔹 3) ENVIA PERFIL HORMONAL AO BACKEND (NOVO)
   try {
-    await salvarPerfilHormonal(perfil);
+   await FEMFLOW.salvarPerfilHormonal(perfil);
   } catch (e) {
     console.warn("Erro ao salvar perfil hormonal no backend:", e);
   }
