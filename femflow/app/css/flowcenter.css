@@ -76,18 +76,19 @@ h3 {
   height: 240px;
   }
 .phase-wrapper {
-  width: 260px;
-  height: 260px;
-  padding: 10px;     /* anel externo mais fino */
+  width: 250px;
+  height: 250px;
+  padding: 4px;   /* 👈 ANEL MUITO FINO */
+
   margin: 10px auto 12px auto;
 
   border-radius: 50%;
-  background: rgba(251, 228, 220, 0.40);
+  background: rgba(251, 228, 220, 0.35); /* mais delicado */
   box-shadow:
-    0 3px 10px rgba(0,0,0,0.05),
-    inset 0 2px 6px rgba(255,255,255,0.35);
+    0 2px 6px rgba(0,0,0,0.04),
+    inset 0 1px 4px rgba(255,255,255,0.35);
 
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
