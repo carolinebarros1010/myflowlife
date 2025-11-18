@@ -70,23 +70,32 @@ h3 {
 /* ==========================================================
    CÍRCULO HORMONAL SVG (versão ajustada e compatível)
 ========================================================== */
+/* SVG LIMPO — somente tamanho */
 .phase-svg {
-  width: 220px;                 /* antes 280px — agora alinhado ao gráfico */
+  width: 220px;
   height: 220px;
+  display: block;
+  margin: 0 auto;
+}
+.phase-wrapper {
+  width: 232px;   /* 220px + padding */
+  height: 232px;
   margin: 20px auto 16px auto;
-  position: relative;
 
-  padding: 4px;                 /* antes 6px — anel externo fino */
+  padding: 4px;
 
   border-radius: 50%;
-  background: rgba(244, 208, 198, 0.40); /* rosa pastel leve */
+  background: rgba(244, 208, 198, 0.40);
 
-  /* sombra discreta para evitar “borda grossa” */
   box-shadow:
     0 3px 8px rgba(0,0,0,0.05),
     inset 0 2px 6px rgba(255,255,255,0.35);
 
-  backdrop-filter: blur(6px);   /* blur suave */
+  backdrop-filter: blur(6px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* animação do texto central */
