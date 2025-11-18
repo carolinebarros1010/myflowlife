@@ -1,4 +1,4 @@
-/* style-maleFlow.css — estilo geral do app */
+/* style-maleFlow.css — estilo geral do app (versão responsiva) */
 
 :root {
   --bg: #e0f0ec;
@@ -10,49 +10,120 @@
   --accent: #244b46;
 }
 
+/* ------------------------- */
+/* BASE & RESET              */
+/* ------------------------- */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
-  padding: 2rem;
+  padding: 2rem 1rem;
   background: var(--bg);
   color: var(--ink);
   font-family: 'Lato', sans-serif;
+  width: 100%;
+  overflow-x: hidden;
 }
+
+/* ------------------------- */
+/* LOGO RESPONSIVO           */
+/* ------------------------- */
+
+.logo-img {
+  height: auto;
+  max-height: 72px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 12px auto;
+}
+
+/* ------------------------- */
+/* PAGE (container principal)*/
+/* ------------------------- */
 
 .page {
   background: var(--white);
   border-radius: 18px;
   box-shadow: 0 6px 30px rgba(0, 0, 0, 0.12);
-  padding: 18px 22px;
+  padding: 20px 24px;
   max-width: 1080px;
   margin: auto;
+  width: 100%;
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
+
+/* ------------------------- */
+/* TITULAÇÃO                 */
+/* ------------------------- */
 
 h1, h2, h3 {
   font-family: 'Montserrat', sans-serif;
   color: var(--accent);
+  word-break: break-word;
 }
 
-.card, .day-block {
+/* ------------------------- */
+/* CARDS E DAY-BLOCK        */
+/* ------------------------- */
+
+.card,
+.day-block {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 16px;
   background: var(--chip);
   margin-top: 12px;
+  width: 100%;
 }
 
 .day-block ul {
-  padding-left: 1.2rem;
+  padding-left: 1rem;
+  margin-top: 8px;
 }
 
-input[type="text"], select {
+.day-block li {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.day-block input[type="text"] {
+  width: 90px;
+}
+
+/* ------------------------- */
+/* FORM ELEMENTS             */
+/* ------------------------- */
+
+input[type="text"],
+select {
   padding: 6px 10px;
   font-size: 1rem;
   border-radius: 6px;
   border: 1px solid var(--line);
   margin-top: 4px;
+  background: white;
+  display: block;
 }
+
+/* ------------------------- */
+/* BOTÕES                    */
+/* ------------------------- */
 
 button {
   background-color: var(--accent);
@@ -73,6 +144,7 @@ button:hover {
   justify-content: center;
   gap: 12px;
   margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 
 .nav-buttons button {
@@ -85,6 +157,10 @@ button:hover {
   cursor: pointer;
 }
 
+/* ------------------------- */
+/* FOOTER                    */
+/* ------------------------- */
+
 footer {
   border-top: 1px solid var(--line);
   padding-top: 12px;
@@ -93,4 +169,64 @@ footer {
   justify-content: space-between;
   flex-wrap: wrap;
   margin-top: 20px;
+}
+
+/* ------------------------- */
+/* RESPONSIVIDADE MOBILE     */
+/* ------------------------- */
+
+@media (max-width: 768px) {
+
+  body {
+    padding: 1rem;
+  }
+
+  .page {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .day-block li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .day-block input[type="text"] {
+    width: 100%;
+  }
+
+  input[type="text"],
+  select {
+    width: 100%;
+  }
+
+  footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .logo-img {
+    max-height: 56px;
+  }
+
+  .page {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  .day-block {
+    padding: 14px;
+  }
 }
