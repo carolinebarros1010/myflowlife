@@ -50,7 +50,14 @@ header{
   border-bottom:1px solid var(--border);
 }
 .nav{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.5rem 0}
-.logo-img{height:auto;max-height:72px;width:auto;display:block}
+.logo-img {
+  height: auto;
+  max-height: 72px;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  object-fit: contain;
+}
 .nav-links{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
 .cta-header{
   padding:.7rem 1.1rem; border-radius:999px;
