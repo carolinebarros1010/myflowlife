@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MaleFlow · Surf Iniciante</title>
+<title>MaleFlow · Surf Intermediário</title>
 
 <link rel="stylesheet" href="../assets/style-maleflow.css" />
 <link rel="stylesheet" href="../assets/temporizador.css" />
@@ -20,10 +20,10 @@
 <header class="head">
 <img class="logo-wrapper" src="../assets/logomaleflow.jpg" alt="MaleFlow logo" />
 <div class="title">
-<h1>MaleFlow · Surf Iniciante</h1>
-<p>Performance Oceânica · Nível Iniciante · 4 dias de treino</p>
+<h1>MaleFlow · Surf Intermediário</h1>
+<p>Performance Oceânica · Nível Intermediário · 4 dias de treino</p>
 </div>
-<span class="chip">20DIF · Estabilidade e Base Técnica</span>
+<span class="chip">20DIF · Técnica, Força e Estabilidade</span>
 </header>
 
 <div class="nav-buttons">
@@ -34,8 +34,9 @@
 
 <section class="card">
 <h3>Resumo do Programa</h3>
-<p>Treino de iniciação ao surf com foco em estabilidade de tronco, ativação escapular e força aplicada à remada. Estrutura de 2 exercícios principais, 1 estímulo funcional técnico (HIIT), 2 exercícios complementares e finalização com core específico para surf. Deve ser repetido por 20 dias antes de progressão.</p>
+<p>Treino intermediário com foco em força aplicada à remada, estabilidade de tronco, desenvolvimento de ombros e aceleração lateral para manobras. Estrutura de 3 exercícios principais de musculação, 1 estímulo funcional técnico (HIIT), 2 complementares e finalização com core.</p>
 </section>
+
 
 
 <!-- ===================================================== -->
@@ -43,40 +44,48 @@
 <!-- ===================================================== -->
 
 <div class="day-block">
-  <h2>Dia 1 — Força de Base da Remada</h2>
-  <p><strong>Aquecimento:</strong> elíptico leve + mobilidade torácica</p>
+  <h2>Dia 1 — Remada + Ombro</h2>
+  <p><strong>Aquecimento:</strong> mobilidade torácica + banda elástica</p>
 
   <ul>
-    <!-- FORÇA -->
+
+    <!-- FORÇA (3) -->
     <li>
       <a href="https://www.youtube.com/watch?v=sb6x8Al32BQ" target="_blank">
         Remada Curvada com Halteres
-      </a> — 4x10
+      </a> — 4x10 
       <input type="text" data-exercicio="Remada Curvada Halteres" placeholder="kg">
     </li>
 
     <li>
       <a href="https://www.youtube.com/watch?v=5dwFn0E9Bp0" target="_blank">
         Puxada Aberta na Polia
-      </a> — 3x12
-      <input type="text" data-exercicio="Puxada Aberta Polia" placeholder="kg">
+      </a> — 3x12 
+      <input type="text" data-exercicio="Puxada Polia Aberta" placeholder="kg">
+    </li>
+
+    <li>
+      <a href="https://www.youtube.com/watch?v=VKJM4-8NhDc" target="_blank">
+        Elevação Lateral com Isometria
+      </a> — 3x12 
+      <input type="text" data-exercicio="Elevação Lateral Isometria" placeholder="kg">
     </li>
 
     <!-- HIIT -->
-    <li><strong>🔥 Estímulo funcional:</strong> pop-up técnico — 4x20s</li>
+    <li><strong>🔥 Estímulo funcional:</strong> pop-up explosivo — 4x20s</li>
 
-    <!-- COMPLEMENTARES -->
+    <!-- COMPLEMENTARES (2) -->
     <li>
       <a href="https://www.youtube.com/watch?v=eMiS0th-FI4" target="_blank">
-        Remada Baixa com Triângulo
-      </a> — 3x12
+        Remada Baixa com Triângulo (controle)
+      </a> — 3x10 
       <input type="text" data-exercicio="Remada Baixa Triângulo" placeholder="kg">
     </li>
 
     <li>
       <a href="https://www.youtube.com/watch?v=UU7UrTcodzE" target="_blank">
         Peck Deck com Isometria
-      </a> — 3x12
+      </a> — 3x12 
       <input type="text" data-exercicio="Peck Deck Isometria" placeholder="kg">
     </li>
 
@@ -86,10 +95,12 @@
         Abdômen Remador
       </a> — 3x15
     </li>
+
   </ul>
 
-  <p><strong>Resfriamento:</strong> mobilidade torácica + respiração 3 min</p>
+  <p><strong>Resfriamento:</strong> mobilidade + respiração</p>
 </div>
+
 
 
 <!-- ===================================================== -->
@@ -97,23 +108,31 @@
 <!-- ===================================================== -->
 
 <div class="day-block">
-  <h2>Dia 2 — Estabilidade do Ombro</h2>
-  <p><strong>Aquecimento:</strong> mobilidade escapular + elástico leve</p>
+  <h2>Dia 2 — Estabilidade de Costas + Ombros</h2>
+  <p><strong>Aquecimento:</strong> mobilidade escapular + ativação de serrátil</p>
 
   <ul>
-    <!-- FORÇA -->
+
+    <!-- FORÇA (3) -->
     <li>
       <a href="https://www.youtube.com/watch?v=sb6x8Al32BQ" target="_blank">
-        Remada Baixa Controle de Tempo
-      </a> — 3x12
+        Remada Baixa com Controle de Tempo
+      </a> — 3x12 
       <input type="text" data-exercicio="Remada Baixa Tempo" placeholder="kg">
     </li>
 
     <li>
-      <a href="https://www.youtube.com/watch?v=VKJM4-8NhDc" target="_blank">
-        Elevação Lateral com Isometria
-      </a> — 3x12
-      <input type="text" data-exercicio="Elevação Lateral Isometria" placeholder="kg">
+      <a href="https://www.youtube.com/watch?v=oQ5YVJncb-U" target="_blank">
+        Desenvolvimento no Smith
+      </a> — 3x12 
+      <input type="text" data-exercicio="Desenvolvimento Smith" placeholder="kg">
+    </li>
+
+    <li>
+      <a href="https://www.youtube.com/watch?v=5dwFn0E9Bp0" target="_blank">
+        Puxada Neutra
+      </a> — 3x12 
+      <input type="text" data-exercicio="Puxada Neutra" placeholder="kg">
     </li>
 
     <!-- HIIT -->
@@ -138,10 +157,12 @@
         Abdômen Reverso
       </a> — 3x15
     </li>
+
   </ul>
 
-  <p><strong>Resfriamento:</strong> respiração + alongamento escapular</p>
+  <p><strong>Resfriamento:</strong> liberação + respiração</p>
 </div>
+
 
 
 <!-- ===================================================== -->
@@ -149,23 +170,31 @@
 <!-- ===================================================== -->
 
 <div class="day-block">
-  <h2>Dia 3 — Corpo Inteiro Dinâmico</h2>
-  <p><strong>Aquecimento:</strong> caminhada + mobilidade ativa</p>
+  <h2>Dia 3 — Força Global para Pop-Up</h2>
+  <p><strong>Aquecimento:</strong> bike leve + mobilidade ativa</p>
 
   <ul>
+
     <!-- FORÇA -->
     <li>
       <a href="https://www.youtube.com/watch?v=oQ5YVJncb-U" target="_blank">
         Stiff com Halteres
-      </a> — 4x10
+      </a> — 4x10 
       <input type="text" data-exercicio="Stiff Halteres" placeholder="kg">
     </li>
 
     <li>
       <a href="https://www.youtube.com/watch?v=rQiHRddO0N4" target="_blank">
         Afundo com Halter
-      </a> — 3x12
+      </a> — 3x12 
       <input type="text" data-exercicio="Afundo Halter" placeholder="kg">
+    </li>
+
+    <li>
+      <a href="https://www.youtube.com/watch?v=eMiS0th-FI4" target="_blank">
+        Remada Baixa com Triângulo
+      </a> — 3x10 
+      <input type="text" data-exercicio="Remada Triângulo" placeholder="kg">
     </li>
 
     <!-- HIIT -->
@@ -173,17 +202,17 @@
 
     <!-- COMPLEMENTARES -->
     <li>
-      <a href="https://www.youtube.com/watch?v=eMiS0th-FI4" target="_blank">
-        Remada Baixa com Triângulo
-      </a> — 3x10
-      <input type="text" data-exercicio="Remada Baixa" placeholder="kg">
+      <a href="https://www.youtube.com/watch?v=oyNkUzI3JXs" target="_blank">
+        Extensora com Pico de Contração
+      </a> — 3x12 
+      <input type="text" data-exercicio="Extensora Pico" placeholder="kg">
     </li>
 
     <li>
-      <a href="https://www.youtube.com/watch?v=oyNkUzI3JXs" target="_blank">
-        Extensora com Pico de Contração
-      </a> — 3x12
-      <input type="text" data-exercicio="Extensora Pico" placeholder="kg">
+      <a href="https://www.youtube.com/watch?v=UU7UrTcodzE" target="_blank">
+        Peck Deck com Isometria
+      </a> — 3x12 
+      <input type="text" data-exercicio="Peck Deck Isometria" placeholder="kg">
     </li>
 
     <!-- CORE -->
@@ -192,10 +221,12 @@
         Abdominal com Rotação Cruzada
       </a> — 3x20
     </li>
+
   </ul>
 
-  <p><strong>Resfriamento:</strong> liberação miofascial + respiração</p>
+  <p><strong>Resfriamento:</strong> respiração + mobilidade leve</p>
 </div>
+
 
 
 <!-- ===================================================== -->
@@ -203,35 +234,42 @@
 <!-- ===================================================== -->
 
 <div class="day-block">
-  <h2>Dia 4 — Recuperação com Técnica</h2>
-  <p><strong>Aquececimento:</strong> caminhada leve + mobilidade leve</p>
+  <h2>Dia 4 — Força Leve + Técnica</h2>
+  <p><strong>Aquecimento:</strong> caminhada + mobilidade leve</p>
 
   <ul>
+
     <!-- FORÇA -->
     <li>
       <a href="https://www.youtube.com/watch?v=sb6x8Al32BQ" target="_blank">
         Remada Baixa Controle
-      </a> — 3x12
+      </a> — 3x12 
       <input type="text" data-exercicio="Remada Controle" placeholder="kg">
     </li>
 
-    <!-- COMPLEMENTARES -->
     <li>
       <a href="https://www.youtube.com/watch?v=oyNkUzI3JXs" target="_blank">
         Extensora com Isometria
-      </a> — 3x12
+      </a> — 3x12 
       <input type="text" data-exercicio="Extensora Isometria" placeholder="kg">
     </li>
 
     <li>
       <a href="https://www.youtube.com/watch?v=eMiS0th-FI4" target="_blank">
         Remada Baixa com Triângulo
-      </a> — 3x12
+      </a> — 3x12 
       <input type="text" data-exercicio="Remada Triângulo" placeholder="kg">
     </li>
 
     <!-- HIIT -->
-    <li><strong>🔥 Estímulo funcional:</strong> pop-up suave + correção técnica — 3x30s</li>
+    <li><strong>🔥 Estímulo funcional:</strong> pop-up técnico suave — 3x30s</li>
+
+    <!-- COMPLEMENTAR -->
+    <li>
+      <a href="https://www.youtube.com/watch?v=_gjwDqgPJ1w" target="_blank">
+        Alongamento Peitoral
+      </a> — 2x20s
+    </li>
 
     <!-- CORE -->
     <li>
@@ -241,35 +279,37 @@
     </li>
   </ul>
 
-  <p><strong>Resfriamento:</strong> alongamento + respiração consciente</p>
+  <p><strong>Resfriamento:</strong> alongamento + respiração</p>
 </div>
 
 
+
 <!-- ===================================================== -->
-<!-- ==================== PSE ============================ -->
+<!-- ======================== PSE ======================== -->
 <!-- ===================================================== -->
 
 <div style="margin-top: 2rem">
 <label for="pseTreino"><strong>🧠 PSE do treino (1 a 10):</strong></label>
-<input type="range" id="pseTreino" min="1" max="10" value="6" step="1" style="width:100%" oninput="pseOutput.value = this.value">
-<output id="pseOutput" style="display:block; text-align:center; margin-top:4px; font-size:1.2rem">6</output>
+<input type="range" id="pseTreino" min="1" max="10" value="6" step="1" style="width:100%" 
+oninput="pseOutput.value = this.value">
+<output id="pseOutput" 
+style="display:block; text-align:center; margin-top:4px; font-size:1.2rem">6</output>
 </div>
 
-<!-- Botão Salvar -->
+
 <div style="margin: 2rem auto; text-align:center">
 <button id="btnSalvarTreino">💾 Salvar Treino</button>
 </div>
 
 
 <footer>
-<div>MaleFlow · Potência Funcional e Controle Neuromuscular</div>
-<div>Próximo ciclo: Progressão para Surf Intermediário</div>
+<div>MaleFlow · Força Funcional e Controle Neuromuscular</div>
+<div>Próximo ciclo: Surf Avançado</div>
 </footer>
 
 </section>
 
 
-<!-- SCRIPT DE DESCANSO AUTOMÁTICO -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const itens = document.querySelectorAll("ul li");
