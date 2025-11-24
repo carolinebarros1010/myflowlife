@@ -549,15 +549,18 @@ initFirebase: async function () {
 
 
 /* ===========================================================
-   🔹 BUSCA EXERCÍCIOS NO FIREBASE — HÍBRIDO + CACHE (v2.8)
+   🔹 BUSCA EXERCÍCIOS NO FIREBASE — HÍBRIDO + CACHE (v2.9 FINAL)
 =========================================================== */
 buscarExerciciosFirebase: async function (nivel, fase, diaKey, enfase) {
 
-  // garante firebase pronto
+  // garante firebase inicializado
   if (!window._femflowFirebaseReady) {
     await this.initFirebase();
   }
 
+  /* -----------------------------
+      NORMALIZAÇÃO
+  ------------------------------ */
   const norm = s =>
     (s || "")
       .toString()
@@ -566,59 +569,72 @@ buscarExerciciosFirebase: async function (nivel, fase, diaKey, enfase) {
       .toLowerCase()
       .trim();
 
-  nivel  = norm(nivel  || localStorage.getItem("nivel_atual")         || "iniciante");
-  fase   = norm(fase   || localStorage.getItem("femflow_fase_atual")  || "follicular");
-  enfase = norm(enfase || localStorage.getItem("femflow_enfase")      || "geral");
-  diaKey = String(Number(diaKey || localStorage.getItem("dia_ciclo")  || 1));
+  const nivelNorm  = norm(nivel  || localStorage.getItem("nivel_atual")        || "iniciante");
+  const faseNorm   = norm(fase   || localStorage.getItem("femflow_fase_atual") || "follicular");
+  const enfaseNorm = norm(enfase || localStorage.getItem("femflow_enfase")     || "geral");
 
-  const grupoId  = `${nivel}_${enfase}`;
-  const cacheKey = `ff_fb_${grupoId}_${fase}_${diaKey}`;
+  // blindagem do diaKey (sempre "dia_XX")
+  const rawDia = diaKey || localStorage.getItem("dia_ciclo") || 1;
+  const diaNorm = String(rawDia).startsWith("dia_")
+    ? String(rawDia)
+    : "dia_" + String(Number(rawDia));
+
+  const grupoId  = `${nivelNorm}_${enfaseNorm}`;
+  const cacheKey = `ff_fb_${grupoId}_${faseNorm}_${diaNorm}`;
   const now      = Date.now();
 
-  /* ----------------------------------------------------------
-     1. CACHE LOCAL — 12 horas
-  ----------------------------------------------------------- */
+
+  /* ===========================================================
+     1. CACHE LOCAL — 12 HORAS
+  ============================================================ */
   try {
     const cache = JSON.parse(localStorage.getItem(cacheKey));
-    if (cache && now - cache.time < 12 * 60 * 60 * 1000) {
+    if (cache && (now - cache.time) < 12 * 60 * 60 * 1000) {
       console.log("📦 Cache Firebase:", cache.data);
       return cache.data;
     }
   } catch (_) {}
 
-  /* ----------------------------------------------------------
-     2. FIRESTORE
-  ----------------------------------------------------------- */
-  try {
-    const snap = await firebase.firestore()
-      .collection("femflow")
-      .doc(grupoId)
-      .collection(fase)
-      .doc(diaKey)
-      .get();
 
-    if (!snap.exists) {
-      console.warn("⚠️ Firebase vazio:", grupoId, fase, diaKey);
-      return null;
+  /* ===========================================================
+     2. FIRESTORE — CAMINHO REAL DO SEU BANCO
+        exercicios/{grupoId}/fases/{fase}/dias/{diaKey}/exercicios
+  ============================================================ */
+  try {
+    const colRef = firebase.firestore()
+      .collection("exercicios")
+      .doc(grupoId)
+      .collection("fases")
+      .doc(faseNorm)
+      .collection("dias")
+      .doc(diaNorm)
+      .collection("exercicios");
+
+    const snap = await colRef.get();
+
+    if (snap.empty) {
+      console.warn("⚠️ Firebase vazio:", grupoId, faseNorm, diaNorm);
+      return [];
     }
 
-    const data = snap.data();
+    const lista = [];
+    snap.forEach(doc => lista.push(doc.data()));
 
+    // salva cache
     localStorage.setItem(cacheKey, JSON.stringify({
       time: now,
-      data
+      data: lista
     }));
 
-    console.log("🔥 Firebase:", data);
-
-    return data;
+    console.log("🔥 Firebase:", lista);
+    return lista;
 
   } catch (err) {
-    console.error("Erro Firebase:", err);
-    return null;
+    console.error("❌ Erro Firebase:", err);
+    return [];
   }
 },
-};  
+
    /* ===========================================================
    🎨 ANIMAÇÕES GLOBAIS
 =========================================================== */
