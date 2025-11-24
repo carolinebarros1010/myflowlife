@@ -154,6 +154,105 @@ body {
   margin-left: 8px;
   white-space: nowrap;
 }
+  /* =============================================== */
+/*         RESPONSIVIDADE FEMFLOW 2025             */
+/* =============================================== */
+
+/* ---------------- BLOCO DO EXERCÍCIO ---------------- */
+.ex-title {
+  font-weight: 600;
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+.protocol {
+  margin-left: 4px;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--texto);
+  opacity: 0.8;
+}
+
+/* ---------------- CHIP TÉCNICO ---------------- */
+.desc-chip {
+  background: #efd5c7;
+  color: #8a5b47;
+  padding: 4px 12px;
+  border-radius: 30px;
+  font-size: 0.78rem;
+  white-space: normal;             /* <- permite quebra suave */
+  max-width: 100%;                 /* <- não estoura para fora */
+  flex-shrink: 0;
+}
+
+/* ---------------- RESPONSIVIDADE CELULAR ---------------- */
+@media (max-width: 640px) {
+
+  .day-block {
+    padding: 14px;
+  }
+
+  .day-block h2 {
+    font-size: 1.1rem;
+  }
+
+  .ex-title {
+    flex-direction: column;        /* <- chip vai para baixo do exercício */
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .desc-chip {
+    width: 100%;                   /* <- vira uma faixa fluida */
+    text-align: left;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+  }
+
+  .protocol {
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
+
+  .tabs-container {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .tab-btn {
+    padding: 6px 14px;
+    font-size: 0.9rem;
+  }
+
+}
+
+/* ---------------- RESPONSIVIDADE EXTRA PEQUENA ---------------- */
+@media (max-width: 420px) {
+
+  body {
+    padding: 0.8rem;
+  }
+
+  .page {
+    padding: 16px;
+  }
+
+  .ex-title {
+    font-size: 0.95rem;
+  }
+
+  .desc-chip {
+    font-size: 0.78rem;
+  }
+
+  .protocol {
+    font-size: 0.75rem;
+  }
+}
 </style>
 
 </head>
