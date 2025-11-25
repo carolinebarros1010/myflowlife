@@ -261,7 +261,12 @@ header .subtitle {
 }
 
 .ex-head b { font-size: 0.95rem; }
-.ex-head .vid { font-size: 1.1rem; }
+.ex-head .vid {
+  font-size: 1.3rem;
+  margin-left: auto;
+  transform: translateY(2px);
+}
+
 
 /* Inputs leves */
 .ex-grid {
