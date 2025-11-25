@@ -569,21 +569,15 @@ const diaKey = hormonal.diaKey;
 // 9. CHAMADA AO BACKEND (Apps Script via Worker) + OFFLINE
 // ============================================================
 
-// 🔥 Endereço correto SEMPRE vem do Core
-const SCRIPT_URL = 
+// 1) Fonte segura do Script
+const SCRIPT_URL =
   (typeof FEMFLOW !== "undefined" && FEMFLOW.SCRIPT_URL)
     ? FEMFLOW.SCRIPT_URL
     : "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-// 🔥 faseFirebase e diaFirebase agora vêm da ENGINE HORMONAL
-// já estão definidos como:
-//   faseFirebase
-//   diaFirebase
-//   diaKey
-
-// 🔥 MONTAGEM CORRETA DA URL DO TREINO (versão 100% compatível)
+// 2) Montagem correta da URL — usando SCRIPT_URL (não FEMFLOW.SCRIPT_URL!!)
 const url =
-  `${FEMFLOW.SCRIPT_URL}?action=treino` +
+  `${SCRIPT_URL}?action=treino` +
   `&id=${encodeURIComponent(id)}` +
   `&enfase=${encodeURIComponent(estado.enfase || "geral")}` +
   `&fase=${encodeURIComponent(faseFirebase)}` +
@@ -591,9 +585,6 @@ const url =
   `&diaFirebase=${encodeURIComponent(diaFirebase)}` +
   `&diaKey=${encodeURIComponent("dia_" + diaFirebase)}`;
 
-// -----------------------------
-// 🔍 Rede + Fallback offline
-// -----------------------------
 let j = null;
 let offlineSnap = null;
 
