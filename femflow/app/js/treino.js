@@ -387,8 +387,6 @@ function getDiaFirebase() {
     "folicular"
   ).toLowerCase();
 
-const perfil = (localStorage.getItem("femflow_perfilHormonal") || "regular").toLowerCase();
-
 let diaCiclo;
 
 // fisiológico
