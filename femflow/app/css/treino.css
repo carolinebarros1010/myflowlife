@@ -260,41 +260,6 @@ header .subtitle {
   transform: translateY(2px);
 }
 
-.ex-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr; /* Séries | input | reps */
-  grid-template-rows: auto auto;      /* Linha 1 = inputs, Linha 2 = timer */
-  gap: 8px 10px; 
-  align-items: center;
-}
-
-/* Labels */
-.ex-grid label {
-  font-size: 0.75rem;
-  color: var(--teal);
-  opacity: 0.8;
-}
-
-/* Inputs das séries/reps */
-.ex-grid input {
-  width: 100%;
-  padding: 6px 8px;
-  border-radius: 10px;
-  border: 1px solid #e2d3c9;
-  text-align: center;
-  font-size: 0.9rem;
-  background: #fff;
-}
-
-/* Timer ocupa a linha inteira */
-.ex-grid .timer-wrapper {
-  grid-column: 1 / 4;     /* ocupa as 3 colunas */
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 /* ============================================================
    💗 BOX EXTRA — HIIT / CARDIO
 ============================================================ */
@@ -401,38 +366,128 @@ body.ff-flow-lutea {
 ============================================================ */
 @media (max-height: 720px), (max-width: 430px) {
 
-  /* grid compacta para reps/series/timer */
-  .ex-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-  }
+ /* ============================================================
+   🌸 FemFlow – Exercício Premium 2025
+============================================================ */
 
-  .ex-grid label {
-    font-size: 0.7rem;
-  }
+/* Container do exercício */
+.ff-ex {
+  background: #fafafa;
+  border-radius: 18px;
+  padding: 18px 16px;
+  margin: 18px 0;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+  animation: fadeIn 0.3s ease;
+}
 
-  .ex-grid input {
-    padding: 3px 4px;
-    font-size: 0.75rem;
-    border-radius: 6px;
-  }
+/* Cabeçalho (nome + vídeo) */
+.ff-ex-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
 
-  /* timer barra mais fina */
-  .timer-bar {
-    height: 16px;
-    margin-top: 10px;
-  }
+.ff-ex-title {
+  font-size: 1rem;
+  font-family: "Playfair Display", serif;
+  color: var(--teal);
+}
 
-  .timer-label {
-    font-size: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    right: 8px;
-  }
+.ff-ex-video {
+  font-size: 1.3rem;
+  text-decoration: none;
+  color: var(--teal);
+  opacity: 0.9;
+}
 
-  /* melhora o espaço perto do rodapé */
-  .fix-footer {
-    bottom: 10px !important;
+.ff-ex-video:hover {
+  opacity: 1;
+}
+
+/* Linha de inputs (Séries / Reps) */
+.ff-ex-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.ff-ex-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ff-ex-group label {
+  font-size: 0.77rem;
+  color: var(--teal);
+  opacity: 0.75;
+}
+
+.ff-ex-group input {
+  width: 100%;
+  padding: 8px;
+  text-align: center;
+  border-radius: 10px;
+  border: 1px solid #e2d3c9;
+  background: #fff;
+  font-size: 0.9rem;
+}
+
+/* Timer */
+.ff-ex-timer-wrapper {
+  margin-top: 8px;
+}
+
+.timer-label-text {
+  font-size: 0.78rem;
+  color: var(--teal);
+  opacity: 0.75;
+}
+
+/* Barra */
+.ff-timer-bar {
+  width: 100%;
+  height: 14px;
+  background: #e1dfdf;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+/* Preenchimento animado */
+.ff-timer-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--terracota));
+  transition: width 1s linear;
+}
+
+/* Número */
+.ff-timer-count {
+  position: absolute;
+  right: 0;
+  top: -22px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+/* ============================
+   💛 Destaque Ovulatorio
+=============================== */
+body.ff-performance-ovulation .ff-ex {
+  border: 1px solid #ffd5c7;
+  box-shadow: 0 3px 14px rgba(255,180,150,0.45);
+}
+
+/* Mobile */
+@media (max-width: 430px) {
+  .ff-ex-row {
+    flex-direction: column;
   }
 }
 
