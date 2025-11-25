@@ -271,6 +271,26 @@ function openWeek(n){
  document.querySelectorAll('.tabs button')[n-1].classList.add('active');
 }
 </script>
+<script>
+// adiciona eventos em vez de onclick inline
+document.addEventListener("DOMContentLoaded", () => {
+  const tabs = document.querySelectorAll(".tabs button");
+  const weeks = document.querySelectorAll(".week");
+
+  tabs.forEach((btn, index) => {
+    btn.addEventListener("click", () => {
+      // remove ativos
+      tabs.forEach(b => b.classList.remove("active"));
+      weeks.forEach(w => w.classList.remove("active"));
+
+      // ativa selecionado
+      btn.classList.add("active");
+      weeks[index].classList.add("active");
+    });
+  });
+});
+</script>
 
 </body>
 </html>
+
