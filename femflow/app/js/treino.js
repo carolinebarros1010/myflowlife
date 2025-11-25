@@ -333,6 +333,33 @@ function parseTempo(raw) {
         </div>
       `;
     }
+    if (box.tipo === "hiitcardio") {
+  return `
+    <div class="box treino">
+      <div class="perf-strip">
+        💫 HIIT / Cardio – Fase do ciclo
+      </div>
+
+      <h3>${box.titulo}</h3>
+
+      <div class="box-extra-wrapper">
+        ${box.itens.map(h => `
+          <div class="box-extra ${h.kind === "cardio" ? "cardio" : "hiit"}">
+            <div class="box-extra-tag">
+              ${h.kind === "cardio" ? "💗 Cardio Leve" : "🔥 HIIT"}
+            </div>
+
+            <h4>${h.titulo}</h4>
+            <p>${h.descricao}</p>
+            ${h.protocolo ? `<p><b>Protocolo:</b> ${h.protocolo}</p>` : ""}
+            <p><b>Duração:</b> ${(h.tempo_total / 60).toFixed(0)} min</p>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
 
     if (box.tipo === "resfriamento")
       return `
@@ -732,19 +759,28 @@ await (async () => {
           const idx = Number((boxName.match(/\d+/) || [0])[0]);
           const extras = extrasByBox.get(idx) || [];
 
-          lista.push({
-            tipo: "exercicios",
-            titulo: boxName,
-            extras,
-            itens: arr.map(ex => ({
-              exercicio: ex.titulo || ex.nome || "Exercício",
-              link: ex.link || ex.url || "",
-              series: ex.series ?? 3,
-              reps: ex.reps ?? 12,
-              tempo: parseTempo(ex.tempo)
+          // 1) Adiciona o Box de Exercícios normalmente
+lista.push({
+  tipo: "exercicios",
+  titulo: boxName,
+  extras: [],            // <- não mistura aqui!
+  itens: arr.map(ex => ({
+    exercicio: ex.titulo || ex.nome || "Exercício",
+    link: ex.link || ex.url || "",
+    series: ex.series ?? 3,
+    reps: ex.reps ?? 12,
+    tempo: parseTempo(ex.tempo)
+  }))
+});
 
-            }))
-          });
+// 2) Se houver HIIT/Cardio para este box, vira um slide separado
+if (extras.length) {
+  lista.push({
+    tipo: "hiitcardio",
+    titulo: `HIIT / Cardio — Box ${idx}`,
+    itens: extras
+  });
+}
         });
     }
   }
