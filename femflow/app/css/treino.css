@@ -63,45 +63,41 @@ header .subtitle {
 }
 
 /* ============================================================
-   🌀 CARROSSEL
+   🌀 CARROSSEL — VERSÃO CORRIGIDA E CENTRALIZADA 2025
 ============================================================ */
 
+/* ===== CARROSSEL - Espaço entre boxes sem desalinhamento ===== */
+
 .carousel-container {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   width: 100%;
-  height: 100vh;              /* FULLSCREEN */
-  position: relative;
-  touch-action: pan-x;
+  height: 100vh;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
 }
 
 .carousel-track {
   display: flex;
   flex-wrap: nowrap;
-  width: 100%;
   height: 100%;
-  transition: transform 0.45s ease;
-  gap: 22px;                   /* ESPAÇO ENTRE TELAS */
-  padding: 0 22px;
-}
-.carousel-track:active {
-  cursor: grabbing;
+  padding: 0 16px; /* bordas internas suaves */
+  gap: 18px;       /* ← AQUI está o espaçamento real entre telas */
 }
 
 .carousel-item {
-  flex: 0 0 calc(100% - 44px);  /* tela cheia com borda */
-  height: calc(100% - 100px);   /* deixa espaço para o footer */
-  background: #ffffff;
-  border-radius: 24px;          /* premium */
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
-  padding: 24px;
-  overflow-y: auto;
+  flex: 0 0 calc(100vw - 32px); /* 100% da tela MENOS padding lateral */
+  max-width: calc(100vw - 32px);
+  height: calc(100vh - 200px);
   scroll-snap-align: center;
-  animation: fadeIn 0.45s ease;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  padding: 20px;
+  overflow-y: auto;
 }
-.carousel-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
-}
+
+
 
 /* ============================================================
    ⏱ TIMERS
@@ -245,8 +241,8 @@ header .subtitle {
 }
 
 .ex {
-  margin: 22px 0;                /* espaçamento grande */
-  padding: 20px 18px;
+  margin: 16px 0;
+  padding: 14px 12px;
   border-radius: 20px;           /* premium */
   background: #fafafa;
   box-shadow: 0 2px 10px rgba(0,0,0,0.04);
@@ -397,12 +393,7 @@ body.ff-flow-lutea {
    ============================================================ */
 @media (max-height: 720px), (max-width: 430px) {
 
-  /* reduz altura disponível do card */
-  .carousel-item {
-    height: calc(100vh - 170px);
-    padding: 20px 18px;
-  }
-
+ 
   /* bloco de exercício mais compacto */
   .ex {
     padding: 14px 12px;
@@ -421,10 +412,10 @@ body.ff-flow-lutea {
   }
 
   .ex-grid input {
-    padding: 3px 4px;
-    font-size: 0.75rem;
-    border-radius: 6px;
-  }
+  padding: 3px 4px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+}
 
   /* timer barra mais fina */
   .timer-bar {
