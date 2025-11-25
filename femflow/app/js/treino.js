@@ -284,105 +284,140 @@ function parseTempo(raw) {
     }
   };
 
-  const criarBoxHTML = (box) => {
+ const criarBoxHTML = (box) => {
 
-    // Banner de Performance (apenas em box de treino, modo ovulatório)
-    const perfHeader = (perfMode === "ovulation" && box.tipo === "exercicios") ? `
-  <div class="perf-strip">
-    🌕 Performance Mode • Pico de energia do ciclo
-  </div>` : "";
+  // Banner ovulatório
+  const perfHeader =
+    (perfMode === "ovulation" && box.tipo === "exercicios")
+      ? `<div class="perf-strip">🌕 Performance Mode • Pico de energia do ciclo</div>`
+      : "";
 
-
-    if (box.tipo === "texto")
-      return `
-        <div class="box texto">
-          <h3>${box.titulo}</h3>
-          <p>${box.mensagem}</p>
-        </div>
-      `;
-
-    if (box.tipo === "exercicios") {
-      const extras = box.extras || [];
-      return `
-        <div class="box treino">
-          ${perfHeader}
-          <h3>${box.titulo}</h3>
-          ${box.itens.map(e => `
-            <div class="ex">
-              <div class="ex-head">
-                <b>${e.exercicio}</b>
-                ${e.link ? `<a class="vid" target="_blank" href="${normLink(e.link)}">🎥</a>` : ""}
-              </div>
-              <div class="ex-grid">
-                <label>Séries</label><input inputmode="numeric" value="${e.series ?? ""}">
-                <label>Reps</label><input inputmode="numeric" value="${e.reps ?? ""}">
-                <label>Timer</label>
-                <div class="timer-bar" data-total="${parseTempo(e.tempo)}">
-  <div class="timer-fill"></div>
-  <span class="timer-label">${fmt(parseTempo(e.tempo))}</span>
-</div>
-
-              </div>
-            </div>
-          `).join("")}
-
-          ${extras.length ? `
-            <div class="box-extra-wrapper">
-              ${extras.map(h => `
-                <div class="box-extra ${h.kind === "cardio" ? "cardio" : "hiit"}">
-                  <div class="box-extra-tag">
-                    ${h.kind === "cardio" ? "💗 Cardio Leve / Moderado" : "🔥 HIIT Fase do Ciclo"}
-                  </div>
-                  <h4>${h.titulo}</h4>
-                  <p>${h.descricao}</p>
-                  ${h.protocolo ? `<p><b>Protocolo sugerido:</b> ${h.protocolo}</p>` : ""}
-                  ${h.equipamentos ? `<p><b>Onde você pode fazer:</b> ${h.equipamentos}</p>` : ""}
-                  <p><b>Duração aproximada:</b> ${(h.tempo_total / 60).toFixed(0)} min</p>
-                </div>
-              `).join("")}
-            </div>
-          ` : ""}
-        </div>
-      `;
-    }
-    if (box.tipo === "hiitcardio") {
-  return `
-    <div class="box treino">
-      <div class="perf-strip">
-        💫 HIIT / Cardio – Fase do ciclo
+  // -----------------------------
+  // TEXTO
+  // -----------------------------
+  if (box.tipo === "texto") {
+    return `
+      <div class="box texto">
+        <h3>${box.titulo}</h3>
+        <p>${box.mensagem}</p>
       </div>
+    `;
+  }
 
-      <h3>${box.titulo}</h3>
+  // -----------------------------
+  // EXERCÍCIOS
+  // -----------------------------
+  if (box.tipo === "exercicios") {
+    const extras = box.extras || [];
 
-      <div class="box-extra-wrapper">
-        ${box.itens.map(h => `
-          <div class="box-extra ${h.kind === "cardio" ? "cardio" : "hiit"}">
-            <div class="box-extra-tag">
-              ${h.kind === "cardio" ? "💗 Cardio Leve" : "🔥 HIIT"}
+    return `
+      <div class="box treino">
+        ${perfHeader}
+        <h3>${box.titulo}</h3>
+
+        ${box.itens.map(e => `
+          <div class="ex">
+
+            <!-- Cabeçalho (nome + vídeo) -->
+            <div class="ex-head">
+              <b>${e.exercicio}</b>
+              ${e.link ? `<a class="vid" target="_blank" href="${normLink(e.link)}">🎥</a>` : ""}
             </div>
 
-            <h4>${h.titulo}</h4>
-            <p>${h.descricao}</p>
-            ${h.protocolo ? `<p><b>Protocolo:</b> ${h.protocolo}</p>` : ""}
-            <p><b>Duração:</b> ${(h.tempo_total / 60).toFixed(0)} min</p>
+            <!-- GRID UNIFICADO -->
+            <div class="ex-grid">
+
+              <!-- Séries -->
+              <label>Séries</label>
+              <input inputmode="numeric" value="${e.series ?? ""}">
+
+              <!-- Reps -->
+              <label>Reps</label>
+              <input inputmode="numeric" value="${e.reps ?? ""}">
+
+              <!-- Timer (linha inteira) -->
+              <div class="timer-wrapper">
+                <span class="timer-text">Timer</span>
+
+                <div class="timer-bar" data-total="${parseTempo(e.tempo)}">
+                  <div class="timer-fill"></div>
+                  <span class="timer-label">${fmt(parseTempo(e.tempo))}</span>
+                </div>
+              </div>
+
+            </div> <!-- fim ex-grid -->
+
           </div>
         `).join("")}
+
+        <!-- HIIT / CARDIO EXTRA -->
+        ${extras.length ? `
+          <div class="box-extra-wrapper">
+            ${extras.map(h => `
+              <div class="box-extra ${h.kind === "cardio" ? "cardio" : "hiit"}">
+                <div class="box-extra-tag">
+                  ${h.kind === "cardio" ? "💗 Cardio Leve / Moderado" : "🔥 HIIT Fase do Ciclo"}
+                </div>
+
+                <h4>${h.titulo}</h4>
+                <p>${h.descricao}</p>
+                ${h.protocolo ? `<p><b>Protocolo sugerido:</b> ${h.protocolo}</p>` : ""}
+                ${h.equipamentos ? `<p><b>Onde você pode fazer:</b> ${h.equipamentos}</p>` : ""}
+                <p><b>Duração aproximada:</b> ${(h.tempo_total / 60).toFixed(0)} min</p>
+              </div>
+            `).join("")}
+          </div>
+        ` : ""}
+
       </div>
-    </div>
-  `;
-}
+    `;
+  }
 
+  // -----------------------------
+  // HIITCARDIO (slide separado)
+  // -----------------------------
+  if (box.tipo === "hiitcardio") {
+    return `
+      <div class="box treino">
+        <div class="perf-strip">💫 HIIT / Cardio – Fase do ciclo</div>
 
-    if (box.tipo === "resfriamento")
-      return `
-        <div class="box resfriamento">
-          <h3>${box.titulo}</h3>
-          <p>${box.mensagem}</p>
+        <h3>${box.titulo}</h3>
+
+        <div class="box-extra-wrapper">
+          ${box.itens.map(h => `
+            <div class="box-extra ${h.kind === "cardio" ? "cardio" : "hiit"}">
+
+              <div class="box-extra-tag">
+                ${h.kind === "cardio" ? "💗 Cardio Leve" : "🔥 HIIT"}
+              </div>
+
+              <h4>${h.titulo}</h4>
+              <p>${h.descricao}</p>
+              ${h.protocolo ? `<p><b>Protocolo:</b> ${h.protocolo}</p>` : ""}
+              <p><b>Duração:</b> ${(h.tempo_total / 60).toFixed(0)} min</p>
+
+            </div>
+          `).join("")}
         </div>
-      `;
+      </div>
+    `;
+  }
 
-    return "";
-  };
+  // -----------------------------
+  // RESFRIAMENTO
+  // -----------------------------
+  if (box.tipo === "resfriamento") {
+    return `
+      <div class="box resfriamento">
+        <h3>${box.titulo}</h3>
+        <p>${box.mensagem}</p>
+      </div>
+    `;
+  }
+
+  return "";
+};
+
 
   const render = (lista) => {
     boxes = lista;
