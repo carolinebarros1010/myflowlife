@@ -273,11 +273,10 @@ function parseTempo(raw) {
 
     // Banner de Performance (apenas em box de treino, modo ovulatório)
     const perfHeader = (perfMode === "ovulation" && box.tipo === "exercicios") ? `
-      <div class="perf-banner">
-        🌕 <b>Performance Mode</b> — Pico de energia do seu ciclo
-        <p>Fase ovulatória: coordenação, força e potência a favor do seu treino.</p>
-      </div>
-    ` : "";
+  <div class="perf-strip">
+    🌕 Performance Mode • Pico de energia do ciclo
+  </div>` : "";
+
 
     if (box.tipo === "texto")
       return `
