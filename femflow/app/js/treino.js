@@ -79,21 +79,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   
 // ============================================================
-// 3. NAVEGAÇÃO DO CARROSSEL + SWIPE
+// 3. NAVEGAÇÃO DO CARROSSEL + SWIPE (VERSÃO CORRIGIDA 2025)
 // ============================================================
 const moveTo = (dir) => {
-  if (dir === "next" && current < boxes.length - 1) {
+  const total = boxes.length;
+
+  if (dir === "next" && current < total - 1) {
     current++;
     navigator.vibrate?.([30]);
   } else if (dir === "prev" && current > 0) {
     current--;
     navigator.vibrate?.([20]);
   }
-  track.style.transform = `translateX(-${current * 100}%)`;
-  bar.style.width = boxes.length
-    ? `${((current + 1) / boxes.length) * 100}%`
-    : "0%";
+
+  // 👉 Pega o slide correto dentro da faixa
+  const item = track.children[current];
+  if (!item) return;
+
+  // 👉 Faz o scroll automático até o item (corrige padding + gap)
+  track.scrollTo({
+    left: item.offsetLeft - 16, // -16px = padding do container
+    behavior: "smooth"
+  });
+
+  // 👉 Atualiza barra superior
+  bar.style.width = total ? `${((current + 1) / total) * 100}%` : "0%";
 };
+
 
 let startX = 0, endX = 0;
 
