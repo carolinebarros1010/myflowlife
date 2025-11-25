@@ -645,20 +645,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
         .forEach(([boxName, arr]) => {
           const idx = Number((boxName.match(/\d+/) || [0])[0]);
-          const extras = extrasByBox.get(idx) || [];
+    const extras = extrasByBox.get(idx) || [];
 
-          lista.push({
-            tipo: "exercicios",
-            titulo: boxName,
-            extras: extras,
-            itens: arr.map(ex => ({
-              exercicio: ex.titulo || ex.nome || "Exercício",
-              link: ex.link || ex.url || "",
-              series: ex.series ?? 3,
-              reps: ex.reps ?? 12,
-              tempo: parseTempo(ex.tempo)
-            }))
-          });
+lista.push({
+  tipo: "exercicios",
+  titulo: boxName,
+  extras,  
+  itens: arr.map(ex => ({
+    exercicio: ex.titulo || ex.nome || "Exercício",
+    link: ex.link || ex.url || "",
+    series: ex.series ?? 3,
+    reps: ex.reps ?? 12,
+    tempo: parseTempo(ex.tempo)
+  }))
+});
         });
     }
   }
