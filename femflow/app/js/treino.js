@@ -163,30 +163,36 @@ function clearTimer(el) {
   el.classList.remove("running");
 }
 
-function startTimer(el) {
-  clearTimer(el);
-  let remain = parseTempo(el.dataset.remain || el.dataset.total);
-  el.dataset.remain = remain;
+function startTimer(bar) {
+  const total = parseTempo(bar.dataset.total);
+  let remain = total;
 
-  el.classList.add("running");
-  el.textContent = fmt(remain);
+  const fill = bar.querySelector(".timer-fill");
+  const label = bar.querySelector(".timer-label");
+
+  fill.style.width = "100%";
+
+  bar.classList.add("running");
 
   const int = setInterval(() => {
+
     remain--;
-    el.dataset.remain = remain;
-    el.textContent = fmt(remain);
+    label.textContent = fmt(remain);
+    const pct = (remain / total) * 100;
+    fill.style.width = pct + "%";
 
     if (remain <= 0) {
       clearInterval(int);
-      intervals.delete(el);
-      el.classList.remove("running");
-      el.classList.add("done");
+      fill.style.width = "0%";
+      bar.classList.add("done");
       navigator.vibrate?.([60, 40, 60]);
     }
+
   }, 1000);
 
-  intervals.set(el, int);
+  intervals.set(bar, int);
 }
+
 
 function pauseTimer(el) {
   const id = intervals.get(el);
