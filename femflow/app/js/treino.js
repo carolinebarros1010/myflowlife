@@ -387,11 +387,19 @@ function getDiaFirebase() {
     "folicular"
   ).toLowerCase();
 
-  const diaCiclo = Number(
-    localStorage.getItem("dia_ciclo") ||
-    estado.diaCiclo ||
-    1
-  );
+const perfil = (localStorage.getItem("femflow_perfilHormonal") || "regular").toLowerCase();
+
+let diaCiclo;
+
+// fisiológico
+if (["regular", "diu", "diu_cobre", "irregular"].includes(perfil)) {
+   diaCiclo = Number(localStorage.getItem("dia_ciclo") || estado.diaCiclo || 1);
+}
+// energético 23+5
+else {
+   diaCiclo = Number(localStorage.getItem("dia_energetico") || 1);
+}
+
 
   // ------------------------------------------------------------
   // 1) Mapa de normalização de fase
@@ -528,6 +536,29 @@ function getDiaFirebase() {
       offlineSnap = carregarSnapshotOffline();
     }
   })();
+
+   function avancarDiaHormonal() {
+
+  const perfil = (localStorage.getItem("femflow_perfilHormonal") || "regular").toLowerCase();
+
+  // PERFIL FISIOLÓGICO → dia_ciclo real
+  if (["regular", "diu", "diu_cobre", "irregular"].includes(perfil)) {
+
+    let d = Number(localStorage.getItem("dia_ciclo") || 1);
+
+    d = (d >= 28) ? 1 : d + 1;
+
+    localStorage.setItem("dia_ciclo", d);
+    return;
+  }
+
+  // PERFIL ENERGÉTICO 23+5 → diaEnergetico
+  let dEner = Number(localStorage.getItem("dia_energetico") || 1);
+
+  dEner = (dEner >= 28) ? 1 : dEner + 1;
+
+  localStorage.setItem("dia_energetico", dEner);
+}
 
   // ============================================================
   // 14. MODO OFFLINE
@@ -714,6 +745,7 @@ lista.push({
         let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
         if (prog < 30) {
           localStorage.setItem("femflow_dia_treino", prog + 1);
+           avancarDiaHormonal();
           FEMFLOW.toast(`Treino salvo! Próximo: Dia ${prog + 1}`);
           setTimeout(() => FEMFLOW.router("flowcenter"), 1200);
         } else {
@@ -739,6 +771,7 @@ lista.push({
       let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
       if (prog < 30) {
         localStorage.setItem("femflow_dia_treino", prog + 1);
+         avancarDiaHormonal();
         FEMFLOW.toast(`🌿 Descanso registrado. Próximo: Dia ${prog + 1}`);
       } else {
         FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
