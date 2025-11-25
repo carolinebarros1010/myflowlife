@@ -386,3 +386,54 @@ body.ff-flow-lutea {
   font-size: 0.8rem;
   line-height: 1.4;
 }
+
+/* ============================================================
+   📱 MODO COMPACTO — Ajusta reps/séries/timers no celular
+   ============================================================ */
+@media (max-height: 720px), (max-width: 430px) {
+
+  /* reduz altura disponível do card */
+  .carousel-item {
+    height: calc(100vh - 170px);
+    padding: 20px 18px;
+  }
+
+  /* bloco de exercício mais compacto */
+  .ex {
+    padding: 14px 12px;
+    margin: 16px 0;
+    border-radius: 16px;
+  }
+
+  /* grid compacta para reps/series/timer */
+  .ex-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .ex-grid label {
+    font-size: 0.7rem;
+  }
+
+  .ex-grid input {
+    padding: 3px 4px;
+    font-size: 0.75rem;
+    border-radius: 6px;
+  }
+
+  /* timer barra mais fina */
+  .timer-bar {
+    height: 8px;
+    margin-top: 10px;
+  }
+
+  .timer-label {
+    top: -18px;
+    font-size: 0.75rem;
+  }
+
+  /* melhora o espaço perto do rodapé */
+  .fix-footer {
+    bottom: 10px !important;
+  }
+}
