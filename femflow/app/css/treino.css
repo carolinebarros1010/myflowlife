@@ -356,6 +356,18 @@ body.ff-flow-lutea {
 /* ============================================================
    🌟 BANNER PERFORMANCE (Ovulação)
 ============================================================ */
+.perf-strip {
+  width: 100%;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, #ffd4c7, #ffede7);
+  color: var(--terracota);
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  text-align: center;
+  letter-spacing: 0.03em;
+}
 
 .perf-banner {
   background: rgba(255,255,255,0.9);
