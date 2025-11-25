@@ -70,7 +70,7 @@ header .subtitle {
   overflow-x: auto;
   overflow-y: hidden;
   width: 100%;
-  height: 100dvh;
+  height: 100vh;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
 }
@@ -79,21 +79,19 @@ header .subtitle {
   display: flex;
   flex-wrap: nowrap;
   height: 100%;
-  padding: 0 16px; 
-  gap: 18px;
 }
 
 .carousel-item {
-  flex: 0 0 calc(100vw - 32px - 18px);
-  max-width: calc(100vw - 32px - 18px);
+  flex: 0 0 calc(100vw - 32px);
+  max-width: calc(100vw - 32px);
   height: calc(100dvh - 130px);
   scroll-snap-align: center;
   background: #fff;
   border-radius: 24px;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
   padding: 20px;
-  overflow-y: auto;
-}
+    overscroll-behavior: contain;
+ }
 
 
 /* ============================================================
@@ -239,8 +237,8 @@ header .subtitle {
 
 .ex {
   margin: 16px 0;
-  padding: 14px 12px;
-  border-radius: 20px;           /* premium */
+  padding: 18px 14px;
+  border-radius: 16px;           /* premium */
   background: #fafafa;
   box-shadow: 0 2px 10px rgba(0,0,0,0.04);
 }
@@ -391,14 +389,7 @@ body.ff-flow-lutea {
 @media (max-height: 720px), (max-width: 430px) {
 
  
-  /* bloco de exercício mais compacto */
-  .ex {
-    padding: 14px 12px;
-    margin: 16px 0;
-    border-radius: 16px;
-  }
-
-  /* grid compacta para reps/series/timer */
+   /* grid compacta para reps/series/timer */
   .ex-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 4px;
@@ -416,13 +407,15 @@ body.ff-flow-lutea {
 
   /* timer barra mais fina */
   .timer-bar {
-    height: 8px;
+    height: 16px;
     margin-top: 10px;
   }
 
   .timer-label {
-    top: -18px;
     font-size: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 8px;
   }
 
   /* melhora o espaço perto do rodapé */
