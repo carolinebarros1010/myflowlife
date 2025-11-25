@@ -359,11 +359,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     bindTimers(track);
   };
 
-  // ============================================================
-  // 11. ENGINE HORMONAL 3.0 — TURNOVER por nível e perfil
-  // ============================================================
+ // ============================================================
+// 11. ENGINE HORMONAL 3.0 — COMPLETA (Turnover + Perfeito)
+// ============================================================
 
- function getDiaFirebase() {
+function getDiaFirebase() {
 
   const faseReal = (
     localStorage.getItem("femflow_fase_atual") ||
@@ -376,7 +376,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     "regular"
   ).toLowerCase();
 
-  const faseAlta = (
+  const nivel = (
+    localStorage.getItem("nivel_atual") ||
+    estado.nivel ||
+    "iniciante"
+  ).toLowerCase();
+
+  const faseAltaManual = (
     localStorage.getItem("femflow_faseAlta") ||
     "folicular"
   ).toLowerCase();
@@ -387,7 +393,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     1
   );
 
-  // 🔥 TABELA DE NORMALIZAÇÃO
+  // ------------------------------------------------------------
+  // 1) Mapa de normalização de fase
+  // ------------------------------------------------------------
   const faseMap = {
     follicular: "folicular",
     folicular: "folicular",
@@ -398,50 +406,71 @@ document.addEventListener('DOMContentLoaded', async () => {
     menstrual: "menstrual"
   };
 
-  let faseFirebase = faseMap[faseReal] || "folicular";
+  let faseFirebase = faseMap[faseReal] || "menstrual";
 
-  // ============================================================
-  // 1. PERFIS FISIOLÓGICOS (REGULAR / DIU COBRE)
-  // ============================================================
+  // ------------------------------------------------------------
+  // 2) PERFIS FISIOLÓGICOS → usa dia real do ciclo
+  // ------------------------------------------------------------
   if (["regular", "diu", "diu_cobre", "irregular"].includes(perfil)) {
     return {
       faseFirebase,
-      diaFirebase: diaCiclo,      // <-- CORRETO
+      diaFirebase: diaCiclo,
       diaKey: `dia_${diaCiclo}`
     };
   }
 
-  // ============================================================
-  // 2. PERFIS ENERGÉTICOS (23+5) — menopausa / técnica / irregular / diu hormonal
-  // ============================================================
-  const tabuFaseAlta = {
+  // ------------------------------------------------------------
+  // 3) PERFIS ENERGÉTICOS (23 dias + 5 menstrual)
+  // menopausa, menopausa_tecnica, diu_hormonal
+  // ------------------------------------------------------------
+
+  // Tabelas fisiológicas reais
+  const fisiologico = {
     folicular:  [6,7,8,9,10,11,12,13],
     ovulatoria: [14,15,16,17],
-    lutea:      Array.from({length: 13}, (_,i)=>18+i) // 18-30
+    lutea:      Array.from({length: 13}, (_,i)=>18+i) // 18–30
   };
 
-  // Repete até formar 23 dias
-  function rep(arr) {
-    let final = [];
-    while (final.length < 23) final = final.concat(arr);
-    return final.slice(0, 23);
+  // Repete até completar 23 dias
+  function repetir(arr) {
+    let x = [];
+    while (x.length < 23) x = x.concat(arr);
+    return x.slice(0, 23);
   }
 
-  const tabela23 = {
-    folicular:  rep(tabuFaseAlta.folicular),
-    ovulatoria: rep(tabuFaseAlta.ovulatoria),
-    lutea:      rep(tabuFaseAlta.lutea)
+  const tabelas23 = {
+    folicular: repetir(fisiologico.folicular),
+    ovulatoria: repetir(fisiologico.ovulatoria),
+    lutea: repetir(fisiologico.lutea)
   };
 
-  const tabelaMenstrual = [1,2,3,4,5];
+  const menstrual5 = [1,2,3,4,5];
 
-  // Determina fase final
+  // ------------------------------------------------------------
+  // 4) Determina faseAlta pelo nível escolhido
+  // ------------------------------------------------------------
+  let faseAltaNivel = "folicular";
+
+  if (nivel === "iniciante")       faseAltaNivel = "lutea";
+  if (nivel === "intermediaria")   faseAltaNivel = "folicular";
+  if (nivel === "avancada")        faseAltaNivel = "ovulatoria";
+
+  // automático OU manual, prevalece manual
+  const faseAlta = faseMap[faseAltaManual] || faseAltaNivel;
+
+  // ------------------------------------------------------------
+  // 5) 23 dias faseAlta + 5 menstrual
+  // ------------------------------------------------------------
   let faseFinal = diaCiclo <= 23 ? faseAlta : "menstrual";
-  let faseNorm = faseMap[faseFinal] || "folicular";
+  let faseNorm  = faseMap[faseFinal] || "menstrual";
 
-  let diaFirebase = (faseNorm === "menstrual")
-        ? tabelaMenstrual[(diaCiclo - 24) % 5] || 1
-        : tabela23[faseNorm][diaCiclo - 1] || 1;
+  let diaFirebase;
+
+  if (faseNorm === "menstrual") {
+    diaFirebase = menstrual5[(diaCiclo - 24) % 5] || 1;
+  } else {
+    diaFirebase = tabelas23[faseNorm][diaCiclo - 1] || 1;
+  }
 
   return {
     faseFirebase: faseNorm,
