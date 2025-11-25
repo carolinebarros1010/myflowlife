@@ -115,20 +115,20 @@ track.addEventListener("touchend", () => {
 // 3.1 TIMERS — bindTimers
 // ============================================================
 function bindTimers(root) {
-  root.querySelectorAll(".subtimer").forEach(el => {
+  root.querySelectorAll(".timer-bar").forEach(el => {
 
     let total = parseTempo(el.dataset.total || el.textContent);
     el.dataset.total = total;
     el.textContent = fmt(total);
 
     // clique: start/pause
-    el.addEventListener("click", () => {
-      if (el.classList.contains("running")) {
-        pauseTimer(el);
-      } else {
-        startTimer(el);
-      }
-    });
+ el.addEventListener("click", () => {
+  if (el.classList.contains("running")) {
+    pauseTimer(el);
+  } else {
+    startTimer(el);
+  }
+});
 
     // toque longo: reset
     let t;
@@ -164,6 +164,8 @@ function clearTimer(el) {
 }
 
 function startTimer(bar) {
+  clearTimer(bar);
+
   const total = parseTempo(bar.dataset.total);
   let remain = total;
 
@@ -171,42 +173,43 @@ function startTimer(bar) {
   const label = bar.querySelector(".timer-label");
 
   fill.style.width = "100%";
+  label.textContent = fmt(remain);
 
   bar.classList.add("running");
 
   const int = setInterval(() => {
-
     remain--;
     label.textContent = fmt(remain);
+
     const pct = (remain / total) * 100;
     fill.style.width = pct + "%";
 
     if (remain <= 0) {
       clearInterval(int);
       fill.style.width = "0%";
+      bar.classList.remove("running");
       bar.classList.add("done");
       navigator.vibrate?.([60, 40, 60]);
     }
-
   }, 1000);
 
   intervals.set(bar, int);
 }
 
 
-function pauseTimer(el) {
-  const id = intervals.get(el);
+function pauseTimer(bar) {
+  const id = intervals.get(bar);
   if (id) clearInterval(id);
-  intervals.delete(el);
-  el.classList.remove("running");
+  bar.classList.remove("running");
 }
 
-function resetTimer(el) {
-  clearTimer(el);
-  const total = parseTempo(el.dataset.total);
-  el.dataset.remain = total;
-  el.textContent = fmt(total);
-  el.classList.remove("running", "done");
+function resetTimer(bar) {
+  clearTimer(bar);
+  const total = parseTempo(bar.dataset.total);
+  bar.querySelector(".timer-fill").style.width = "100%";
+  bar.querySelector(".timer-label").textContent = fmt(total);
+  bar.classList.remove("running", "done");
+  bar.dataset.remain = total;
 }
 
 // 🔧 Parser robusto para qualquer valor de tempo
