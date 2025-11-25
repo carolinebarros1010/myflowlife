@@ -1,19 +1,19 @@
 /* =======================================================================
-   FemFlow v04 — Treino Diário 2025
-   ENGINE HORMONAL 3.0 (Turnover) + HIIT Inline + Carrossel 2025 + Offline
-======================================================================= */
+   FemFlow v05 — Treino Diário 2025 (FINAL ESTÁVEL)
+   ENGINE HORMONAL 3.0 • TURNOVER • HIIT INLINE • OFFLINE 2.0 • FIREBASE
+   ======================================================================= */
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
-  // -----------------------------------------------------------
-  // 0. Chave offline
-  // -----------------------------------------------------------
+  /* -----------------------------------------------------------
+   * 0. CONSTANTES
+   * ----------------------------------------------------------- */
   const OFFLINE_KEY_TREINO = "femflow_offline_treino_v1";
 
-  // -----------------------------------------------------------
-  // 1. LOGIN E CICLO
-  // -----------------------------------------------------------
-  const id = localStorage.getItem('femflow_id');
+  /* -----------------------------------------------------------
+   * 1. VERIFICAÇÃO DE LOGIN + CICLO
+   * ----------------------------------------------------------- */
+  const id = localStorage.getItem("femflow_id");
   if (!id) {
     FEMFLOW.toast("⚠️ Faça login novamente.");
     location.href = "index.html?ret=treino.html";
@@ -31,26 +31,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // -----------------------------------------------------------
-  // 2. ESTADO TREINO (Core)
-  // -----------------------------------------------------------
-  const estado = (window.FEMFLOW && typeof FEMFLOW.getEstadoTreino === "function")
-    ? FEMFLOW.getEstadoTreino()
-    : {
-        enfase: "geral",
-        nivel: "iniciante",
-        fase: "folicular",
-        diaCiclo: 1,
-        cicloOK: false
-      };
+  /* -----------------------------------------------------------
+   * 2. ESTADO DO TREINO (vindo do Core)
+   * ----------------------------------------------------------- */
+  const estado =
+    window.FEMFLOW && typeof FEMFLOW.getEstadoTreino === "function"
+      ? FEMFLOW.getEstadoTreino()
+      : {
+          enfase: "geral",
+          nivel: "iniciante",
+          fase: "folicular",
+          diaCiclo: 1,
+          cicloOK: false,
+        };
 
-  console.log("🔎 EstadoTreino:", estado);
+  console.log("🔍 EstadoTreino:", estado);
 
-  // -----------------------------------------------------------
-  // 3. ELEMENTOS ESSENCIAIS
-  // -----------------------------------------------------------
-  const track     = document.querySelector("#carouselTrack");
-  const bar       = document.querySelector("#progressBar");
+  /* -----------------------------------------------------------
+   * 3. ELEMENTOS DA INTERFACE
+   * ----------------------------------------------------------- */
+  const track = document.querySelector("#carouselTrack");
+  const bar = document.querySelector("#progressBar");
   const tituloDia = document.querySelector("#tituloDiaTreino");
 
   if (!track || !bar) {
@@ -59,23 +60,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   let current = 0;
-  let boxes   = [];
+  let boxes = [];
 
-  // -----------------------------------------------------------
-  // Dia do Programa (1–30)
-  // -----------------------------------------------------------
+  /* -----------------------------------------------------------
+   * 4. DIA PROGRAMA (1–30)
+   * ----------------------------------------------------------- */
   const diaPrograma = Number(localStorage.getItem("femflow_dia_treino") || 1);
   if (tituloDia) tituloDia.textContent = `Dia ${diaPrograma} do Programa`;
 
   let metaTreino = {
     fase: null,
     diaCiclo: null,
-    diaPrograma
+    diaPrograma,
   };
 
-  // ============================================================
-  // 4. CARROSSEL 2025
-  // ============================================================
+  /* -----------------------------------------------------------
+   * 5. CARROSSEL 2025 (versão estável)
+   * ----------------------------------------------------------- */
   const moveTo = (dir) => {
     const total = boxes.length;
 
@@ -92,25 +93,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     track.scrollTo({
       left: item.offsetLeft - 16,
-      behavior: "smooth"
+      behavior: "smooth",
     });
 
     bar.style.width = total ? `${((current + 1) / total) * 100}%` : "0%";
   };
 
-  let startX = 0, endX = 0;
-  track.addEventListener("touchstart", e => startX = e.touches[0].clientX, { passive: true });
-  track.addEventListener("touchmove",  e => endX   = e.touches[0].clientX, { passive: true });
+  let startX = 0,
+    endX = 0;
+  track.addEventListener("touchstart", (e) => (startX = e.touches[0].clientX), {
+    passive: true,
+  });
+  track.addEventListener("touchmove", (e) => (endX = e.touches[0].clientX), {
+    passive: true,
+  });
 
-  track.addEventListener("touchend", () => {
-    const diff = startX - endX;
-    if (Math.abs(diff) > 40) moveTo(diff > 0 ? "next" : "prev");
-  }, { passive: true });
+  track.addEventListener(
+    "touchend",
+    () => {
+      const diff = startX - endX;
+      if (Math.abs(diff) > 40) moveTo(diff > 0 ? "next" : "prev");
+    },
+    { passive: true }
+  );
 
-  // ============================================================
-  // 5. TIMERS
-  // ============================================================
-  const fmt = s => `00:${String(Math.max(0, Math.floor(s))).padStart(2, "0")}`;
+  /* -----------------------------------------------------------
+   * 6. TIMERS (versão estável)
+   * ----------------------------------------------------------- */
+  const fmt = (s) =>
+    `00:${String(Math.max(0, Math.floor(s))).padStart(2, "0")}`;
   const intervals = new WeakMap();
 
   function parseTempo(raw) {
@@ -132,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const total = parseTempo(bar.dataset.total);
     let remain = total;
 
-    const fill  = bar.querySelector(".timer-fill");
+    const fill = bar.querySelector(".timer-fill");
     const label = bar.querySelector(".timer-label");
 
     fill.style.width = "100%";
@@ -172,44 +183,56 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function bindTimers(root) {
-    root.querySelectorAll(".timer-bar").forEach(el => {
+    root.querySelectorAll(".timer-bar").forEach((el) => {
       const total = parseTempo(el.dataset.total || el.textContent);
       el.dataset.total = total;
       el.textContent = fmt(total);
 
-      el.addEventListener("click", () => {
-        if (el.classList.contains("running")) pauseTimer(el);
-        else startTimer(el);
-      });
+      el.addEventListener("click", () =>
+        el.classList.contains("running") ? pauseTimer(el) : startTimer(el)
+      );
 
       let t;
-      el.addEventListener("touchstart", () => t = Date.now(), { passive: true });
-      el.addEventListener("touchend", () => {
-        if (Date.now() - t > 500) resetTimer(el);
-      }, { passive: true });
+      el.addEventListener(
+        "touchstart",
+        () => (t = Date.now()),
+        { passive: true }
+      );
+      el.addEventListener(
+        "touchend",
+        () => {
+          if (Date.now() - t > 500) resetTimer(el);
+        },
+        { passive: true }
+      );
     });
   }
-  // ============================================================
-  // 6. NORMALIZAÇÃO DE LINKS
-  // ============================================================
-  const normLink = u => {
+
+  /* -----------------------------------------------------------
+   * 7. NORMALIZAÇÃO DE LINKS DE VÍDEO
+   * ----------------------------------------------------------- */
+  const normLink = (u) => {
     if (!u) return "";
     let s = String(u).trim();
-    if (/^youtu\.be/.test(s)) s = "https://" + s;
-    if (/^www\.youtube/.test(s)) s = "https://" + s;
-    if (/^http/.test(s)) return s;
-    if (/youtube|youtu\.be/.test(s)) return "https://" + s;
+
+    // Converte automaticamente formatos problemáticos
+    if (s.startsWith("youtu.be")) s = "https://" + s;
+    if (s.startsWith("www.youtube")) s = "https://" + s;
+    if (!s.startsWith("http") && (s.includes("youtube") || s.includes("youtu.be")))
+      s = "https://" + s;
+
     return s;
   };
 
-  // ============================================================
-  // 7. PERFORMANCE VIEW (cores)
-  // ============================================================
+  /* -----------------------------------------------------------
+   * 8. PERFORMANCE VIEW (cores por fase hormonal)
+   * ----------------------------------------------------------- */
   let perfMode = "none";
 
   const aplicarPerformanceView = (faseStr = "") => {
     const f = (faseStr || "").toLowerCase();
 
+    // remove classes antigas
     document.body.classList.remove(
       "ff-performance-ovulation",
       "ff-flow-menstrual",
@@ -217,6 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       "ff-flow-lutea"
     );
 
+    // aplica nova cor
     if (f.includes("ovulat")) {
       perfMode = "ovulation";
       document.body.classList.add("ff-performance-ovulation");
@@ -234,59 +258,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  // ============================================================
-  // 8. HIIT INLINE — dentro do box final de exercícios
-  // ============================================================
+  /* -----------------------------------------------------------
+   * 9. HIIT Inline — inserido após o último exercício do Box
+   * ----------------------------------------------------------- */
   function criarBoxHIIT(extras) {
     if (!extras || !extras.length) return "";
 
     return `
       <div class="box-extra-wrapper">
-        ${extras.map(h => `
+        ${extras
+          .map(
+            (h) => `
           <div class="box-extra ${h.kind === "cardio" ? "cardio" : "hiit"}">
 
             <div class="box-extra-tag">
-              ${h.kind === "cardio" ? "💗 Cardio Leve / Moderado" : "🔥 HIIT / Intensidade"}
+              ${
+                h.kind === "cardio"
+                  ? "💗 Cardio Leve / Moderado"
+                  : "🔥 HIIT / Intensidade"
+              }
             </div>
 
             <h4>${h.titulo}</h4>
             <p>${h.descricao}</p>
 
-            ${h.protocolo ? `<p><b>Protocolo:</b> ${h.protocolo}</p>` : ""}
-            ${h.equipamentos ? `<p><b>Equipamentos:</b> ${h.equipamentos}</p>` : ""}
+            ${
+              h.protocolo
+                ? `<p><b>Protocolo:</b> ${h.protocolo}</p>`
+                : ""
+            }
+            ${
+              h.equipamentos
+                ? `<p><b>Equipamentos:</b> ${h.equipamentos}</p>`
+                : ""
+            }
 
             <p><b>Duração:</b> ${(h.tempo_total / 60).toFixed(0)} min</p>
           </div>
-        `).join("")}
+        `
+          )
+          .join("")}
       </div>
     `;
   }
 
-  // ============================================================
-  // 9. CRIAÇÃO DOS BOXES (HTML final)
-  // ============================================================
+  /* -----------------------------------------------------------
+   * 10. CRIAÇÃO DOS BOXES DE TREINO (HTML Final)
+   * ----------------------------------------------------------- */
   const criarBoxHTML = (box) => {
-
+    // Banner ovulatório
     const perfHeader =
-      (perfMode === "ovulation" && box.tipo === "exercicios")
+      perfMode === "ovulation" && box.tipo === "exercicios"
         ? `<div class="perf-strip">🌕 Performance Mode • Pico de energia</div>`
         : "";
 
-    // -----------------------------
-    // TEXTO
-    // -----------------------------
+    /* ----------------------------
+     * TEXTO INFORMATIVO
+     * ---------------------------- */
     if (box.tipo === "texto") {
       return `
         <div class="box texto">
           <h3>${box.titulo}</h3>
           <p>${box.mensagem}</p>
-        </div>
-      `;
+        </div>`;
     }
 
-    // -----------------------------
-    // EXERCÍCIOS (com HIIT inline)
-    // -----------------------------
+    /* ----------------------------
+     * EXERCÍCIOS (com HIIT Inline)
+     * ---------------------------- */
     if (box.tipo === "exercicios") {
       const extras = box.extras || [];
 
@@ -296,12 +335,20 @@ document.addEventListener('DOMContentLoaded', async () => {
           ${perfHeader}
           <h3>${box.titulo}</h3>
 
-          ${box.itens.map(e => `
+          ${box.itens
+            .map(
+              (e) => `
             <div class="ex">
 
               <div class="ex-head">
                 <b>${e.exercicio}</b>
-                ${e.link ? `<a class="vid" target="_blank" href="${normLink(e.link)}">🎥</a>` : ""}
+                ${
+                  e.link
+                    ? `<a class="vid" target="_blank" href="${normLink(
+                        e.link
+                      )}">🎥</a>`
+                    : ""
+                }
               </div>
 
               <div class="ex-grid">
@@ -313,191 +360,210 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 <div class="timer-wrapper">
                   <span class="timer-text">Timer</span>
+
                   <div class="timer-bar" data-total="${parseTempo(e.tempo)}">
                     <div class="timer-fill"></div>
-                    <span class="timer-label">${fmt(parseTempo(e.tempo))}</span>
+                    <span class="timer-label">${fmt(
+                      parseTempo(e.tempo)
+                    )}</span>
                   </div>
-                </div>
 
+                </div>
               </div>
             </div>
-          `).join("")}
+        `
+            )
+            .join("")}
 
+          <!-- HIIT adicionado no final -->
           ${criarBoxHIIT(extras)}
 
-        </div>
-      `;
+        </div>`;
     }
 
-    // -----------------------------
-    // RESFRIAMENTO
-    // -----------------------------
+    /* ----------------------------
+     * RESFRIAMENTO
+     * ---------------------------- */
     if (box.tipo === "resfriamento") {
       return `
         <div class="box resfriamento">
           <h3>${box.titulo}</h3>
           <p>${box.mensagem}</p>
-        </div>
-      `;
+        </div>`;
     }
 
     return "";
   };
 
-  // ============================================================
-  // 10. RENDERIZAÇÃO DOS BOXES
-  // ============================================================
-  const render = (lista) => {
-    boxes = lista;
+     /* ============================================================
+   * 11. ENGINE HORMONAL 3.0 — TURNOVER + FISIO + ENERGÉTICO
+   * ============================================================ */
 
-    track.innerHTML = lista
-      .map(b => `<div class="carousel-item">${criarBoxHTML(b)}</div>`)
-      .join("");
+  function getDiaFirebase() {
 
-    current = 0;
-    moveTo("stay");
-    bindTimers(track);
-  };
+    /* ------------------------------------------
+     * 1. Carregar dados salvos
+     * ------------------------------------------ */
+    const faseReal = (
+      localStorage.getItem("femflow_fase_atual") ||
+      estado.fase ||
+      "menstrual"
+    ).toLowerCase();
 
- // ============================================================
-// 11. ENGINE HORMONAL 3.0 — COMPLETA (Turnover + Perfeito)
-// ============================================================
+    const perfil = (
+      localStorage.getItem("femflow_perfilHormonal") ||
+      "regular"
+    ).toLowerCase();
 
-function getDiaFirebase() {
+    const faseAltaManual = (
+      localStorage.getItem("femflow_faseAlta") ||
+      "folicular"
+    ).toLowerCase();
 
-  const faseReal = (
-    localStorage.getItem("femflow_fase_atual") ||
-    estado.fase ||
-    "menstrual"
-  ).toLowerCase();
+    const nivel = (
+      estado.nivel ||
+      localStorage.getItem("nivel_atual") ||
+      "iniciante"
+    ).toLowerCase();
 
-  const perfil = (
-    localStorage.getItem("femflow_perfilHormonal") ||
-    "regular"
-  ).toLowerCase();
+    // dia real informado pela aluna
+    const diaCiclo = Number(
+      localStorage.getItem("dia_ciclo") ||
+      estado.diaCiclo ||
+      1
+    );
 
-  const nivel = (
-    localStorage.getItem("nivel_atual") ||
-    estado.nivel ||
-    "iniciante"
-  ).toLowerCase();
+    // turnover energético
+    let diaEner = Number(localStorage.getItem("femflow_dia_energetico") || 1);
 
-  const faseAltaManual = (
-    localStorage.getItem("femflow_faseAlta") ||
-    "folicular"
-  ).toLowerCase();
+    /* ------------------------------------------
+     * 2. Normalização de nomes de fase
+     * ------------------------------------------ */
+    const faseMap = {
+      follicular: "folicular",
+      folicular: "folicular",
+      ovulatory: "ovulatoria",
+      ovulatoria: "ovulatoria",
+      luteal: "lutea",
+      lutea: "lutea",
+      menstrual: "menstrual"
+    };
 
-let diaCiclo;
+    const faseFirebaseFromReal = faseMap[faseReal] || "folicular";
 
-// fisiológico
-if (["regular", "diu", "diu_cobre", "irregular"].includes(perfil)) {
-   diaCiclo = Number(localStorage.getItem("dia_ciclo") || estado.diaCiclo || 1);
-}
-// energético 23+5
-else {
-   diaCiclo = Number(localStorage.getItem("dia_energetico") || 1);
-}
+    /* ============================================================
+     * 3. PERFIL FISIOLÓGICO
+     *    (regular, diu cobre, irregular)
+     * ============================================================ */
+    if (["regular", "diu", "diu_cobre", "irregular"].includes(perfil)) {
 
+      return {
+        faseFirebase: faseFirebaseFromReal,
+        diaFirebase: diaCiclo,     // sempre o dia real
+        diaKey: `dia_${diaCiclo}`,
+        turnover: false
+      };
+    }
 
-  // ------------------------------------------------------------
-  // 1) Mapa de normalização de fase
-  // ------------------------------------------------------------
-  const faseMap = {
-    follicular: "folicular",
-    folicular: "folicular",
-    ovulatory: "ovulatoria",
-    ovulatoria: "ovulatoria",
-    luteal: "lutea",
-    lutea: "lutea",
-    menstrual: "menstrual"
-  };
+    /* ============================================================
+     * 4. PERFIL ENERGÉTICO — Menopausa / Diu Hormonal / Técnica
+     * ============================================================ */
 
-  let faseFirebase = faseMap[faseReal] || "menstrual";
+    /* ----------------------------------------------
+     * 4.1 DEFINIÇÃO DA FASE ALTA POR NÍVEL DA ALUNA
+     * ---------------------------------------------- */
+    let faseAlta;
 
-  // ------------------------------------------------------------
-  // 2) PERFIS FISIOLÓGICOS → usa dia real do ciclo
-  // ------------------------------------------------------------
-  if (["regular", "diu", "diu_cobre", "irregular"].includes(perfil)) {
+    if (perfil === "menopausa" || perfil === "menopausa_tecnica") {
+      if (nivel === "iniciante") {
+        faseAlta = "lutea";       // iniciantes → baixa energia estável
+      } else if (nivel === "intermediaria") {
+        faseAlta = "folicular";   // intermediárias → fase de crescimento
+      } else {
+        faseAlta = "ovulatoria";  // avançadas → pico de potência
+      }
+    } else if (perfil === "diu_hormonal") {
+      // DIU hormonal comporta-se igual à menopausa técnica
+      faseAlta = faseAltaManual || "folicular";
+    } else {
+      // fallback seguro
+      faseAlta = faseAltaManual || "folicular";
+    }
+
+    faseAlta = faseAlta.toLowerCase();
+    const faseAltaNorm = faseMap[faseAlta] || "folicular";
+
+    /* ----------------------------------------------
+     * 4.2 TABELAS BASE 23+5 COM TURNOVER
+     * ---------------------------------------------- */
+
+    const diasFolicular = [6,7,8,9,10,11,12,13];
+    const diasOvulatoria = [14,15,16,17];
+    const diasLutea = Array.from({length: 13}, (_,i)=>18+i);  // 18–30
+    const diasMenstrual = [1,2,3,4,5];
+
+    // repete a sequência até formar 23 dias
+    function rep(arr) {
+      const out = [];
+      while (out.length < 23) out.push(...arr);
+      return out.slice(0, 23);
+    }
+
+    const tabela23 = {
+      folicular:  rep(diasFolicular),
+      ovulatoria: rep(diasOvulatoria),
+      lutea:      rep(diasLutea)
+    };
+
+    /* ----------------------------------------------
+     * 4.3 APLICAÇÃO DO TURNOVER
+     * ---------------------------------------------- */
+
+    // turnover sempre entre 1–28
+    if (diaEner < 1 || diaEner > 28) diaEner = 1;
+
+    let faseFinal = diaEner <= 23 ? faseAltaNorm : "menstrual";
+
+    let diaFirebase;
+
+    if (faseFinal === "menstrual") {
+      const idx = (diaEner - 24) % 5;
+      diaFirebase = diasMenstrual[idx] || 1;
+    } else {
+      diaFirebase = tabela23[faseFinal][diaEner - 1] || 1;
+    }
+
+    /* ----------------------------------------------
+     * 4.4 SALVA PROGRESSO DO TURNOVER
+     * ---------------------------------------------- */
+
+    // turnover só avança quando salvamos ou descansamos
+    // aqui apenas definimos, não avançamos
+    const faseFirebase = faseFinal;
+
     return {
       faseFirebase,
-      diaFirebase: diaCiclo,
-      diaKey: `dia_${diaCiclo}`
+      diaFirebase,
+      diaKey: `dia_${diaFirebase}`,
+      turnover: true
     };
   }
+  /* ============================================================
+   * 12. EXECUTA ENGINE HORMONAL
+   * ============================================================ */
 
-  // ------------------------------------------------------------
-  // 3) PERFIS ENERGÉTICOS (23 dias + 5 menstrual)
-  // menopausa, menopausa_tecnica, diu_hormonal
-  // ------------------------------------------------------------
-
-  // Tabelas fisiológicas reais
-  const fisiologico = {
-    folicular:  [6,7,8,9,10,11,12,13],
-    ovulatoria: [14,15,16,17],
-    lutea:      Array.from({length: 13}, (_,i)=>18+i) // 18–30
-  };
-
-  // Repete até completar 23 dias
-  function repetir(arr) {
-    let x = [];
-    while (x.length < 23) x = x.concat(arr);
-    return x.slice(0, 23);
-  }
-
-  const tabelas23 = {
-    folicular: repetir(fisiologico.folicular),
-    ovulatoria: repetir(fisiologico.ovulatoria),
-    lutea: repetir(fisiologico.lutea)
-  };
-
-  const menstrual5 = [1,2,3,4,5];
-
-  // ------------------------------------------------------------
-  // 4) Determina faseAlta pelo nível escolhido
-  // ------------------------------------------------------------
-  let faseAltaNivel = "folicular";
-
-  if (nivel === "iniciante")       faseAltaNivel = "lutea";
-  if (nivel === "intermediaria")   faseAltaNivel = "folicular";
-  if (nivel === "avancada")        faseAltaNivel = "ovulatoria";
-
-  // automático OU manual, prevalece manual
-  const faseAlta = faseMap[faseAltaManual] || faseAltaNivel;
-
-  // ------------------------------------------------------------
-  // 5) 23 dias faseAlta + 5 menstrual
-  // ------------------------------------------------------------
-  let faseFinal = diaCiclo <= 23 ? faseAlta : "menstrual";
-  let faseNorm  = faseMap[faseFinal] || "menstrual";
-
-  let diaFirebase;
-
-  if (faseNorm === "menstrual") {
-    diaFirebase = menstrual5[(diaCiclo - 24) % 5] || 1;
-  } else {
-    diaFirebase = tabelas23[faseNorm][diaCiclo - 1] || 1;
-  }
-
-  return {
-    faseFirebase: faseNorm,
-    diaFirebase,
-    diaKey: `dia_${diaFirebase}`
-  };
-}
-
-  // ============================================================
-  // 12. EXECUTA ENGINE HORMONAL
-  // ============================================================
   const hormonal = getDiaFirebase();
   console.log("⚙️ Engine Hormonal 3.0:", hormonal);
 
   const faseFirebase = hormonal.faseFirebase;
-  const diaFirebase  = hormonal.diaFirebase;
-  const diaKey       = hormonal.diaKey;
+  const diaFirebase = hormonal.diaFirebase;
+  const diaKey = hormonal.diaKey;
 
-  // ============================================================
-  // 13. CHAMADA AO BACKEND (Apps Script)
-  // ============================================================
+  /* ============================================================
+   * 13. CHAMADA AO BACKEND (Apps Script via Cloudflare Worker)
+   * Fetch Seguro — Protegido contra HTML / Erros / Timeout
+   * ============================================================ */
+
   const SCRIPT_URL =
     (typeof FEMFLOW !== "undefined" && FEMFLOW.SCRIPT_URL)
       ? FEMFLOW.SCRIPT_URL
@@ -515,52 +581,9 @@ else {
   let j = null;
   let offlineSnap = null;
 
-  await (async () => {
-    try {
-      const resp = await fetch(url);
-      const txt  = await resp.text();
-
-      console.log("📡 Resposta bruta treino:", txt.slice(0, 400));
-
-      try {
-        j = JSON.parse(txt);
-      } catch (e) {
-        console.error("❌ Resposta não-JSON:", txt);
-        offlineSnap = carregarSnapshotOffline();
-      }
-
-    } catch (e) {
-      console.warn("⚠️ Falha de rede:", e);
-      offlineSnap = carregarSnapshotOffline();
-    }
-  })();
-
-   function avancarDiaHormonal() {
-
-  const perfil = (localStorage.getItem("femflow_perfilHormonal") || "regular").toLowerCase();
-
-  // PERFIL FISIOLÓGICO → dia_ciclo real
-  if (["regular", "diu", "diu_cobre", "irregular"].includes(perfil)) {
-
-    let d = Number(localStorage.getItem("dia_ciclo") || 1);
-
-    d = (d >= 28) ? 1 : d + 1;
-
-    localStorage.setItem("dia_ciclo", d);
-    return;
-  }
-
-  // PERFIL ENERGÉTICO 23+5 → diaEnergetico
-  let dEner = Number(localStorage.getItem("dia_energetico") || 1);
-
-  dEner = (dEner >= 28) ? 1 : dEner + 1;
-
-  localStorage.setItem("dia_energetico", dEner);
-}
-
-  // ============================================================
-  // 14. MODO OFFLINE
-  // ============================================================
+  /* -------------------------------------------------------
+   * Funções de snapshot OFFLINE (antes do uso)
+   * ------------------------------------------------------- */
   const carregarSnapshotOffline = () => {
     try {
       const raw = localStorage.getItem(OFFLINE_KEY_TREINO);
@@ -578,7 +601,9 @@ else {
         meta: {
           fase: meta.fase || null,
           diaCiclo: meta.diaCiclo || null,
-          diaPrograma: meta.diaPrograma || null
+          diaPrograma: meta.diaPrograma || null,
+          diaEnergetico: localStorage.getItem("femflow_dia_energetico") || null,
+          perfil: localStorage.getItem("femflow_perfilHormonal") || null,
         },
         lista
       };
@@ -588,7 +613,46 @@ else {
     }
   };
 
-  if (!j) {
+  /* -------------------------------------------------------
+   * Fetch seguro com proteção HTML + fallback offline
+   * ------------------------------------------------------- */
+  await (async () => {
+    try {
+      const resp = await fetch(url);
+      const txt = await resp.text();
+
+      // 1) Proteção contra Cloudflare/HTML
+      if (txt.trim().startsWith("<")) {
+        console.error("❌ HTML recebido:", txt.slice(0, 200));
+        throw new Error("HTML_RESPONSE");
+      }
+
+      // 2) Tentar converter para JSON
+      try {
+        j = JSON.parse(txt);
+      } catch (e) {
+        console.error("❌ JSON inválido:", txt);
+        throw new Error("INVALID_JSON");
+      }
+
+    } catch (e) {
+      console.warn("⚠️ Falha no fetch:", e);
+      offlineSnap = carregarSnapshotOffline();
+    }
+  })();
+
+  /* ============================================================
+   * 14. VALIDAÇÃO ROBUSTA DO OBJETO j
+   * ============================================================ */
+
+  const jInvalido =
+    !j ||
+    typeof j !== "object" ||
+    Array.isArray(j) ||
+    (!j.status && !j.boxes);
+
+  if (jInvalido) {
+
     if (offlineSnap && Array.isArray(offlineSnap.lista)) {
       FEMFLOW.toast("📴 Modo offline — usando treino salvo.");
       document.body.classList.add("ff-offline-mode");
@@ -596,27 +660,30 @@ else {
       metaTreino = {
         fase: offlineSnap.meta?.fase || faseFirebase,
         diaCiclo: offlineSnap.meta?.diaCiclo || diaFirebase,
-        diaPrograma: offlineSnap.meta?.diaPrograma || diaPrograma
+        diaPrograma: offlineSnap.meta?.diaPrograma || diaPrograma,
       };
 
       aplicarPerformanceView(metaTreino.fase);
       render(offlineSnap.lista);
+
       return;
     }
 
-    FEMFLOW.toast("Sem treino disponível. Verifique conexão.");
-    render([{ tipo: "texto", titulo: "Erro", mensagem: "Não foi possível carregar treino." }]);
+    FEMFLOW.toast("⚠️ Erro ao carregar treino — tente novamente.");
+    render([
+      {
+        tipo: "texto",
+        titulo: "Erro",
+        mensagem: "Não foi possível carregar o treino. Verifique conexão."
+      }
+    ]);
     return;
   }
 
-  if (!j || j.status === "id_not_found") {
-    render([{ tipo: "texto", titulo: "Sem treino", mensagem: "Faça login novamente." }]);
-    return;
-  }
+  /* ============================================================
+   * 15. METADADOS DO BACKEND
+   * ============================================================ */
 
-  // ============================================================
-  // 15. METADATA DO BACKEND
-  // ============================================================
   if (!j.exSource) {
     j.exSource = "firebase";
     j.firebaseQuery = {
@@ -635,9 +702,9 @@ else {
 
   aplicarPerformanceView(metaTreino.fase);
 
-  // ============================================================
-  // 16. ORGANIZAÇÃO DE HIIT POR BOX (mapeamento)
-  // ============================================================
+  /* ============================================================
+   * 16. ORGANIZAÇÃO DE HIIT / CARDIO POR BOX
+   * ============================================================ */
   const extrasByBox = new Map();
   (j.hiitCardio || []).forEach(entry => {
     const b = Number(entry.box || 0);
@@ -645,10 +712,11 @@ else {
     extrasByBox.set(b, entry.extras);
   });
 
-  // ============================================================
-  // 17. MONTAGEM DA LISTA FINAL DE BOXES
-  // ============================================================
+  /* ============================================================
+   * 17. MONTAGEM DA LISTA FINAL DE BOXES
+   * ============================================================ */
   const lista = [];
+
   let boxIntro = null;
   let boxFinal = null;
 
@@ -659,9 +727,9 @@ else {
 
   if (boxIntro) lista.push(boxIntro);
 
-  // ------------------------------------------------------------
-  // Exercícios do Firebase organizados por box
-  // ------------------------------------------------------------
+  /* ------------------------------------------------------------
+   * EXERCÍCIOS DO FIREBASE ORGANIZADOS POR BOX
+   * ------------------------------------------------------------ */
   if (j.exSource === "firebase") {
     let raw = [];
 
@@ -677,6 +745,7 @@ else {
     }
 
     if (raw.length) {
+      // remove duplicatas
       raw = raw.filter((v, i, a) =>
         a.findIndex(t =>
           t.titulo === v.titulo &&
@@ -684,6 +753,7 @@ else {
         ) === i
       );
 
+      // organiza por box
       const boxMap = new Map();
       raw.forEach(ex => {
         const boxName = ex.box || "Box 1";
@@ -691,6 +761,7 @@ else {
         boxMap.get(boxName).push(ex);
       });
 
+      // ordena Box 1 → Box 2 → Box 3
       [...boxMap.entries()]
         .sort((a, b) => {
           const na = Number((a[0].match(/\d+/) || [999])[0]);
@@ -699,38 +770,61 @@ else {
         })
         .forEach(([boxName, arr]) => {
           const idx = Number((boxName.match(/\d+/) || [0])[0]);
-    const extras = extrasByBox.get(idx) || [];
+          const extras = extrasByBox.get(idx) || [];
 
-lista.push({
-  tipo: "exercicios",
-  titulo: boxName,
-  extras,  
-  itens: arr.map(ex => ({
-    exercicio: ex.titulo || ex.nome || "Exercício",
-    link: ex.link || ex.url || "",
-    series: ex.series ?? 3,
-    reps: ex.reps ?? 12,
-    tempo: parseTempo(ex.tempo)
-  }))
-});
+          lista.push({
+            tipo: "exercicios",
+            titulo: boxName,
+            extras,
+            itens: arr.map(ex => ({
+              exercicio: ex.titulo || ex.nome || "Exercício",
+              link: ex.link || ex.url || "",
+              series: ex.series ?? 3,
+              reps: ex.reps ?? 12,
+              tempo: parseTempo(ex.tempo)
+            }))
+          });
         });
     }
   }
 
   if (boxFinal) lista.push(boxFinal);
-  // ============================================================
-  // 18. RENDERIZA E SALVA SNAPSHOT
-  // ============================================================
+
+  /* ============================================================
+   * 18. RENDERIZAÇÃO FINAL + SNAPSHOT OFFLINE
+   * ============================================================ */
   render(lista);
   salvarSnapshotOffline(metaTreino, lista);
 
-  // ============================================================
-  // 19. SALVAR TREINO (com PSE)
-  // ============================================================
+  /* ============================================================
+   * 19. AVANÇO DO TURNOVER ENERGÉTICO
+   *     (apenas quando treino é salvo ou descanso é salvo)
+   * ============================================================ */
+
+  function avancarTurnover() {
+    const perfil = (localStorage.getItem("femflow_perfilHormonal") || "regular").toLowerCase();
+
+    // Somente perfis energéticos usam turnover
+    if (!["menopausa", "menopausa_tecnica", "diu_hormonal"].includes(perfil)) {
+      return;
+    }
+
+    let diaEner = Number(localStorage.getItem("femflow_dia_energetico") || 1);
+    if (diaEner < 1 || diaEner > 28) diaEner = 1;
+
+    diaEner++;
+
+    if (diaEner > 28) diaEner = 1; // reset ciclo técnico
+
+    localStorage.setItem("femflow_dia_energetico", diaEner);
+  }
+
+  /* ============================================================
+   * 20. SALVAR TREINO (com PSE)
+   * ============================================================ */
   document.querySelector("#salvarTreinoBtn")?.addEventListener("click", async () => {
 
     FEMFLOW.abrirPSE(async (pse) => {
-
       try {
         await FEMFLOW.salvarTreino({
           id,
@@ -740,10 +834,13 @@ lista.push({
           pse
         });
 
+        // Avança turnover
+        avancarTurnover();
+
+        // Avança dia do PROGRAMA
         let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
         if (prog < 30) {
           localStorage.setItem("femflow_dia_treino", prog + 1);
-           avancarDiaHormonal();
           FEMFLOW.toast(`Treino salvo! Próximo: Dia ${prog + 1}`);
           setTimeout(() => FEMFLOW.router("flowcenter"), 1200);
         } else {
@@ -751,74 +848,91 @@ lista.push({
         }
 
       } catch (e) {
-        console.warn("Falha ao salvar treino (offline provável):", e);
-        FEMFLOW.toast("📴 Sem conexão. Tentaremos novamente depois.");
+        console.warn("Erro ao salvar treino:", e);
+        FEMFLOW.toast("📴 Sem conexão. O treino será enviado depois.");
       }
-
-    }); // fecha abrirPSE
+    });
   });
 
-  // ============================================================
-  // 20. SALVAR DESCANSO
-  // ============================================================
+  /* ============================================================
+   * 21. SALVAR DESCANSO
+   * ============================================================ */
   document.querySelector("#descansoBtn")?.addEventListener("click", async () => {
 
     try {
       await FEMFLOW.salvarDescanso(metaTreino.fase || faseFirebase);
 
+      // Avança turnover
+      avancarTurnover();
+
+      // Avança dia do PROGRAMA
       let prog = Number(localStorage.getItem("femflow_dia_treino") || 1);
       if (prog < 30) {
         localStorage.setItem("femflow_dia_treino", prog + 1);
-         avancarDiaHormonal();
         FEMFLOW.toast(`🌿 Descanso registrado. Próximo: Dia ${prog + 1}`);
       } else {
-        FEMFLOW.toast("🎉 Programa de 30 dias concluído!");
+        FEMFLOW.toast("🎉 Programa concluído!");
       }
 
     } catch (e) {
-      console.warn("Falha ao registrar descanso:", e);
-      FEMFLOW.toast("📴 Sem conexão. O descanso será registrado depois.");
+      console.warn("Erro ao registrar descanso:", e);
+      FEMFLOW.toast("📴 Sem conexão. O descanso será enviado depois.");
     }
-
   });
 
-  // ============================================================
-  // 21. RELOAD QUANDO HOUVER TROCA DE IDIOMA
-  // ============================================================
+  /* ============================================================
+   * 21. RELOAD AUTOMÁTICO QUANDO TROCAR IDIOMA
+   * ============================================================ */
   window.addEventListener("femflow:langchange", () => {
     location.reload();
   });
 
-}); // fecha DOMContentLoaded
+}); // <-- FECHA DOMContentLoaded
+
+
 
 /* =======================================================================
-   22. DEBUG OPCIONAL — pode ser removido sem impacto
+   22. DEBUG OPCIONAL — Ferramenta avançada de inspeção
    ======================================================================= */
 
-// Permite inspecionar rapidamente o estado hormonal direto no console
 window.FEMFLOW_DEBUG_TREINO = {
+
   getEstado() {
-    return {
-      faseFirebase,
-      diaFirebase,
-      diaKey,
-      metaTreino,
-      hormonal,
-      nivel: estado.nivel,
-      perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-      diaPrograma: Number(localStorage.getItem("femflow_dia_treino") || 1)
-    };
+    try {
+      return {
+        faseFirebase,
+        diaFirebase,
+        diaKey,
+        metaTreino,
+        hormonal,
+        nivel: localStorage.getItem("nivel_atual"),
+        perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
+        faseAtual: localStorage.getItem("femflow_fase_atual"),
+        diaEnergetico: localStorage.getItem("femflow_dia_energetico"),
+        diaPrograma: Number(localStorage.getItem("femflow_dia_treino") || 1)
+      };
+    } catch (e) {
+      console.warn("Erro ao ler DEBUG:", e);
+      return { erro: true };
+    }
   },
 
   log() {
     console.log("====== FEMFLOW DEBUG TREINO ======");
-    console.log("Estado:", this.getEstado());
+    console.log(this.getEstado());
     console.log("==================================");
+  },
+
+  // Utilitário para testes
+  setDiaEner(d) {
+    localStorage.setItem("femflow_dia_energetico", d);
+    console.log("Novo dia energético:", d);
   }
 };
 
+
 /* =======================================================================
    FIM DO ARQUIVO — FemFlow v04 (2025)
-   ENGINE HORMONAL 3.0 + CARROSSEL 2025 + HIIT INLINE + SNAPSHOT OFFLINE
-======================================================================= */
+   ENGINE HORMONAL 3.0 • TURNOVER • HIIT INLINE • CARROSSEL 2025
+   ============================================================= */
 
