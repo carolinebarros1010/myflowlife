@@ -581,13 +581,19 @@ const SCRIPT_URL =
 //   diaFirebase
 //   diaKey
 
-// Monta a URL final do treino
-const url = `${SCRIPT_URL}?action=treino` +
+// 🔥 MONTAGEM CORRETA DA URL DO TREINO (versão 100% compatível)
+const url =
+  `${FEMFLOW.SCRIPT_URL}?action=treino` +
   `&id=${encodeURIComponent(id)}` +
   `&enfase=${encodeURIComponent(estado.enfase || "geral")}` +
   `&fase=${encodeURIComponent(faseFirebase)}` +
-  `&diaCiclo=${encodeURIComponent(diaFirebase)}`;   // ← agora sincronizado com Engine Hormonal
+  `&nivel=${encodeURIComponent(estado.nivel)}` +
+  `&diaFirebase=${encodeURIComponent(diaFirebase)}` +
+  `&diaKey=${encodeURIComponent("dia_" + diaFirebase)}`;
 
+// -----------------------------
+// 🔍 Rede + Fallback offline
+// -----------------------------
 let j = null;
 let offlineSnap = null;
 
@@ -595,7 +601,8 @@ await (async () => {
   try {
     const resp = await fetch(url);
     const txt  = await resp.text();
-    console.log("📡 Resposta bruta treino:", txt.slice(0, 300));
+
+    console.log("📡 Resposta bruta treino:", txt.slice(0, 400));
 
     try {
       j = JSON.parse(txt);
@@ -609,6 +616,7 @@ await (async () => {
     offlineSnap = carregarSnapshotOffline();
   }
 })();
+
 
 
   // ------------------------------------------------------------
