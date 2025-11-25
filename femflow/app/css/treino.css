@@ -96,7 +96,6 @@ header .subtitle {
   overscroll-behavior: contain;
 }
 
-
 /* ============================================================
    ⏱ TIMERS
 ============================================================ */
@@ -121,6 +120,7 @@ header .subtitle {
 .subtimer.done {
   background: #f4e1dd;
 }
+
 /* ============================================================
    ⏱ barra timer
 ============================================================ */
@@ -151,7 +151,6 @@ header .subtitle {
   font-weight: 600;
   color: var(--teal);
 }
-
 
 /* ============================================================
    📊 PROGRESSO SUPERIOR
@@ -296,7 +295,6 @@ header .subtitle {
   gap: 8px;
 }
 
-
 /* ============================================================
    💗 BOX EXTRA — HIIT / CARDIO
 ============================================================ */
@@ -400,11 +398,10 @@ body.ff-flow-lutea {
 
 /* ============================================================
    📱 MODO COMPACTO — Ajusta reps/séries/timers no celular
-   ============================================================ */
+============================================================ */
 @media (max-height: 720px), (max-width: 430px) {
 
- 
-   /* grid compacta para reps/series/timer */
+  /* grid compacta para reps/series/timer */
   .ex-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 4px;
@@ -415,10 +412,10 @@ body.ff-flow-lutea {
   }
 
   .ex-grid input {
-  padding: 3px 4px;
-  font-size: 0.75rem;
-  border-radius: 6px;
-}
+    padding: 3px 4px;
+    font-size: 0.75rem;
+    border-radius: 6px;
+  }
 
   /* timer barra mais fina */
   .timer-bar {
@@ -438,3 +435,4 @@ body.ff-flow-lutea {
     bottom: 10px !important;
   }
 }
+
