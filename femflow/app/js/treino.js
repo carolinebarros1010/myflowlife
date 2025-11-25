@@ -335,45 +335,37 @@ document.addEventListener("DOMContentLoaded", async () => {
           ${perfHeader}
           <h3>${box.titulo}</h3>
 
-          ${box.itens
-            .map(
-              (e) => `
-            <div class="ex">
+          ${box.itens.map(e => `
+  <div class="ff-ex">
 
-              <div class="ex-head">
-                <b>${e.exercicio}</b>
-                ${
-                  e.link
-                    ? `<a class="vid" target="_blank" href="${normLink(
-                        e.link
-                      )}">🎥</a>`
-                    : ""
-                }
-              </div>
+    <div class="ff-ex-head">
+      <b class="ff-ex-title">${e.exercicio}</b>
+      ${e.link ? `<a class="ff-ex-video" target="_blank" href="${normLink(e.link)}">🎥</a>` : ""}
+    </div>
 
-              <div class="ex-grid">
-                <label>Séries</label>
-                <input inputmode="numeric" value="${e.series ?? ""}">
+    <div class="ff-ex-row">
+      <div class="ff-ex-group">
+        <label>Séries</label>
+        <input type="text" inputmode="numeric" value="${e.series ?? ""}">
+      </div>
 
-                <label>Reps</label>
-                <input inputmode="numeric" value="${e.reps ?? ""}">
+      <div class="ff-ex-group">
+        <label>Reps</label>
+        <input type="text" inputmode="numeric" value="${e.reps ?? ""}">
+      </div>
+    </div>
 
-                <div class="timer-wrapper">
-                  <span class="timer-text">Timer</span>
+    <div class="ff-ex-timer-wrapper">
+      <label class="timer-label-text">Timer</label>
+      <div class="ff-timer-bar" data-total="${parseTempo(e.tempo)}">
+        <div class="ff-timer-fill"></div>
+        <span class="ff-timer-count">${fmt(parseTempo(e.tempo))}</span>
+      </div>
+    </div>
 
-                  <div class="timer-bar" data-total="${parseTempo(e.tempo)}">
-                    <div class="timer-fill"></div>
-                    <span class="timer-label">${fmt(
-                      parseTempo(e.tempo)
-                    )}</span>
-                  </div>
+  </div>
+`).join("")}
 
-                </div>
-              </div>
-            </div>
-        `
-            )
-            .join("")}
 
           <!-- HIIT adicionado no final -->
           ${criarBoxHIIT(extras)}
