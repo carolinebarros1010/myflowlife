@@ -1,8 +1,9 @@
 // =======================================================================
-// FemFlow v03 — Treino Diário 2025 (Versão HÍBRIDA PREMIUM + Performance View)
+// FemFlow v04 — Treino Diário 2025 (Versão HÍBRIDA PREMIUM + Performance View)
 // Box0 + Box1(+HIIT/Cardio) + Box2(+HIIT/Cardio) + Box3 (se existir) + Finalização
 // - Híbrido: Apps Script (treino-dia) + Firebase exercícios
 // - Pronto para PWA/TWA e modo offline (snapshot do último treino)
+// - ajuste de hiit dentro do box após ultimo exercicio
 // =======================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -284,6 +285,32 @@ function parseTempo(raw) {
     }
   };
 
+function criarBoxHIIT(extras) {
+  if (!extras || !extras.length) return "";
+
+  return `
+    <div class="box-extra-wrapper">
+      ${extras.map(h => `
+        <div class="box-extra ${h.kind === "cardio" ? "cardio" : "hiit"}">
+
+          <div class="box-extra-tag">
+            ${h.kind === "cardio" ? "💗 Cardio Leve / Moderado" : "🔥 HIIT / Intensidade"}
+          </div>
+
+          <h4>${h.titulo}</h4>
+          <p>${h.descricao}</p>
+
+          ${h.protocolo ? `<p><b>Protocolo:</b> ${h.protocolo}</p>` : ""}
+          ${h.equipamentos ? `<p><b>Equipamentos:</b> ${h.equipamentos}</p>` : ""}
+
+          <p><b>Duração:</b> ${(h.tempo_total / 60).toFixed(0)} min</p>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+  
  const criarBoxHTML = (box) => {
 
   // Banner ovulatório
@@ -308,100 +335,48 @@ function parseTempo(raw) {
   // EXERCÍCIOS
   // -----------------------------
   if (box.tipo === "exercicios") {
-    const extras = box.extras || [];
+  const extras = box.extras || [];
 
-    return `
-      <div class="box treino">
-        ${perfHeader}
-        <h3>${box.titulo}</h3>
+  return `
+    <div class="box treino">
 
-        ${box.itens.map(e => `
-          <div class="ex">
+      ${perfHeader}
+      <h3>${box.titulo}</h3>
 
-            <!-- Cabeçalho (nome + vídeo) -->
-            <div class="ex-head">
-              <b>${e.exercicio}</b>
-              ${e.link ? `<a class="vid" target="_blank" href="${normLink(e.link)}">🎥</a>` : ""}
+      ${box.itens.map(e => `
+        <div class="ex">
+
+          <div class="ex-head">
+            <b>${e.exercicio}</b>
+            ${e.link ? `<a class="vid" target="_blank" href="${normLink(e.link)}">🎥</a>` : ""}
+          </div>
+
+          <div class="ex-grid">
+
+            <label>Séries</label>
+            <input inputmode="numeric" value="${e.series ?? ""}">
+
+            <label>Reps</label>
+            <input inputmode="numeric" value="${e.reps ?? ""}">
+
+            <div class="timer-wrapper">
+              <span class="timer-text">Timer</span>
+              <div class="timer-bar" data-total="${parseTempo(e.tempo)}">
+                <div class="timer-fill"></div>
+                <span class="timer-label">${fmt(parseTempo(e.tempo))}</span>
+              </div>
             </div>
 
-            <!-- GRID UNIFICADO -->
-            <div class="ex-grid">
-
-              <!-- Séries -->
-              <label>Séries</label>
-              <input inputmode="numeric" value="${e.series ?? ""}">
-
-              <!-- Reps -->
-              <label>Reps</label>
-              <input inputmode="numeric" value="${e.reps ?? ""}">
-
-              <!-- Timer (linha inteira) -->
-              <div class="timer-wrapper">
-                <span class="timer-text">Timer</span>
-
-                <div class="timer-bar" data-total="${parseTempo(e.tempo)}">
-                  <div class="timer-fill"></div>
-                  <span class="timer-label">${fmt(parseTempo(e.tempo))}</span>
-                </div>
-              </div>
-
-            </div> <!-- fim ex-grid -->
-
           </div>
-        `).join("")}
-
-        <!-- HIIT / CARDIO EXTRA -->
-        ${extras.length ? `
-          <div class="box-extra-wrapper">
-            ${extras.map(h => `
-              <div class="box-extra ${h.kind === "cardio" ? "cardio" : "hiit"}">
-                <div class="box-extra-tag">
-                  ${h.kind === "cardio" ? "💗 Cardio Leve / Moderado" : "🔥 HIIT Fase do Ciclo"}
-                </div>
-
-                <h4>${h.titulo}</h4>
-                <p>${h.descricao}</p>
-                ${h.protocolo ? `<p><b>Protocolo sugerido:</b> ${h.protocolo}</p>` : ""}
-                ${h.equipamentos ? `<p><b>Onde você pode fazer:</b> ${h.equipamentos}</p>` : ""}
-                <p><b>Duração aproximada:</b> ${(h.tempo_total / 60).toFixed(0)} min</p>
-              </div>
-            `).join("")}
-          </div>
-        ` : ""}
-
-      </div>
-    `;
-  }
-
-  // -----------------------------
-  // HIITCARDIO (slide separado)
-  // -----------------------------
-  if (box.tipo === "hiitcardio") {
-    return `
-      <div class="box treino">
-        <div class="perf-strip">💫 HIIT / Cardio – Fase do ciclo</div>
-
-        <h3>${box.titulo}</h3>
-
-        <div class="box-extra-wrapper">
-          ${box.itens.map(h => `
-            <div class="box-extra ${h.kind === "cardio" ? "cardio" : "hiit"}">
-
-              <div class="box-extra-tag">
-                ${h.kind === "cardio" ? "💗 Cardio Leve" : "🔥 HIIT"}
-              </div>
-
-              <h4>${h.titulo}</h4>
-              <p>${h.descricao}</p>
-              ${h.protocolo ? `<p><b>Protocolo:</b> ${h.protocolo}</p>` : ""}
-              <p><b>Duração:</b> ${(h.tempo_total / 60).toFixed(0)} min</p>
-
-            </div>
-          `).join("")}
         </div>
-      </div>
-    `;
-  }
+      `).join("")}
+
+      <!-- AQUI ENTRA O HIIT INLINE -->
+      ${criarBoxHIIT(extras)}
+
+    </div>
+  `;
+}
 
   // -----------------------------
   // RESFRIAMENTO
@@ -820,14 +795,6 @@ lista.push({
   }))
 });
 
-// 2) Se houver HIIT/Cardio para este box, vira um slide separado
-if (extras.length) {
-  lista.push({
-    tipo: "hiitcardio",
-    titulo: `HIIT / Cardio — Box ${idx}`,
-    itens: extras
-  });
-}
         });
     }
   }
