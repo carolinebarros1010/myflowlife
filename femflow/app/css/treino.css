@@ -258,29 +258,41 @@ header .subtitle {
   transform: translateY(2px);
 }
 
-
-/* Inputs leves */
 .ex-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  font-size: 0.8rem;
+  grid-template-columns: 1fr 1fr 1fr; /* Séries | input | reps */
+  grid-template-rows: auto auto;      /* Linha 1 = inputs, Linha 2 = timer */
+  gap: 8px 10px; 
+  align-items: center;
 }
 
+/* Labels */
 .ex-grid label {
-  text-align: left;
   font-size: 0.75rem;
+  color: var(--teal);
   opacity: 0.8;
 }
 
+/* Inputs das séries/reps */
 .ex-grid input {
   width: 100%;
-  padding: 4px 6px;
-  border-radius: 8px;
+  padding: 6px 8px;
+  border-radius: 10px;
   border: 1px solid #e2d3c9;
-  font-size: 0.85rem;
   text-align: center;
+  font-size: 0.9rem;
+  background: #fff;
 }
+
+/* Timer ocupa a linha inteira */
+.ex-grid .timer-wrapper {
+  grid-column: 1 / 4;     /* ocupa as 3 colunas */
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 
 /* ============================================================
    💗 BOX EXTRA — HIIT / CARDIO
