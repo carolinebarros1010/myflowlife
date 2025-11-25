@@ -363,96 +363,92 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 11. ENGINE HORMONAL 3.0 — TURNOVER por nível e perfil
   // ============================================================
 
-  function getDiaFirebase() {
+ function getDiaFirebase() {
 
-    const faseReal = (
-      localStorage.getItem("femflow_fase_atual") ||
-      estado.fase ||
-      "menstrual"
-    ).toLowerCase();
+  const faseReal = (
+    localStorage.getItem("femflow_fase_atual") ||
+    estado.fase ||
+    "menstrual"
+  ).toLowerCase();
 
-    const perfil = (
-      localStorage.getItem("femflow_perfilHormonal") ||
-      "regular"
-    ).toLowerCase();
+  const perfil = (
+    localStorage.getItem("femflow_perfilHormonal") ||
+    "regular"
+  ).toLowerCase();
 
-    const nivel = (
-      localStorage.getItem("nivel_atual") ||
-      estado.nivel ||
-      "iniciante"
-    ).toLowerCase();
+  const faseAlta = (
+    localStorage.getItem("femflow_faseAlta") ||
+    "folicular"
+  ).toLowerCase();
 
-    const diaPrograma = Number(localStorage.getItem("femflow_dia_treino") || 1);
+  const diaCiclo = Number(
+    localStorage.getItem("dia_ciclo") ||
+    estado.diaCiclo ||
+    1
+  );
 
-    // ------------------------------------------------------------
-    // PERFIS FISIOLÓGICOS — ciclo real
-    // ------------------------------------------------------------
-    const perfisFis = ["regular", "diu_cobre", "irregular"];
+  // 🔥 TABELA DE NORMALIZAÇÃO
+  const faseMap = {
+    follicular: "folicular",
+    folicular: "folicular",
+    ovulatory: "ovulatoria",
+    ovulatoria: "ovulatoria",
+    luteal: "lutea",
+    lutea: "lutea",
+    menstrual: "menstrual"
+  };
 
-    if (perfisFis.includes(perfil)) {
-      return {
-        faseFirebase: faseReal,
-        diaFirebase: diaPrograma,
-        diaKey: `dia_${diaPrograma}`
-      };
-    }
+  let faseFirebase = faseMap[faseReal] || "folicular";
 
-    // ------------------------------------------------------------
-    // PERFIS ENERGÉTICOS — TURNOVER
-    // menopausa, menopausa_tecnica, diu_hormonal
-    // ------------------------------------------------------------
-    const perfisEner = ["menopausa", "menopausa_tecnica", "diu_hormonal"];
-    if (!perfisEner.includes(perfil)) {
-      return {
-        faseFirebase: faseReal,
-        diaFirebase: diaPrograma,
-        diaKey: `dia_${diaPrograma}`
-      };
-    }
-
-    // ------------------------------------------------------------
-    // ENGINE = turnover fisiológico por nível
-    // ------------------------------------------------------------
-    const tabelas = {
-      lutea:       [18,19,20,21,22,23,24,25,26,27,28,29,30],   // 13 dias
-      folicular:   [6,7,8,9,10,11,12,13],                      // 8 dias
-      ovulatoria:  [14,15,16,17]                               // 4 dias
-    };
-
-    const faseAltaPorNivel = {
-      iniciante:     "lutea",
-      intermediaria: "folicular",
-      avancada:      "ovulatoria"
-    };
-
-    const faseDominante = faseAltaPorNivel[nivel] || "lutea";
-    const tabela = tabelas[faseDominante];
-
-    // ------------------------------------------------------------
-    // MENSTRUAL REAL — dias 1 à 5 do programa
-    // ------------------------------------------------------------
-    if (diaPrograma <= 5) {
-      return {
-        faseFirebase: "menstrual",
-        diaFirebase: diaPrograma,
-        diaKey: `dia_${diaPrograma}`
-      };
-    }
-
-    // ------------------------------------------------------------
-    // TURNOVER — diaPrograma > 5
-    // ------------------------------------------------------------
-    const diaEnergetico = diaPrograma - 5;
-
-    const idx = (diaEnergetico - 1) % tabela.length;  
-    const diaFisiologico = tabela[idx];
-
+  // ============================================================
+  // 1. PERFIS FISIOLÓGICOS (REGULAR / DIU COBRE)
+  // ============================================================
+  if (["regular", "diu", "diu_cobre", "irregular"].includes(perfil)) {
     return {
-      faseFirebase: faseDominante,
-      diaFirebase: diaFisiologico,
-      diaKey: `dia_${diaFisiologico}`
+      faseFirebase,
+      diaFirebase: diaCiclo,      // <-- CORRETO
+      diaKey: `dia_${diaCiclo}`
     };
   }
+
+  // ============================================================
+  // 2. PERFIS ENERGÉTICOS (23+5) — menopausa / técnica / irregular / diu hormonal
+  // ============================================================
+  const tabuFaseAlta = {
+    folicular:  [6,7,8,9,10,11,12,13],
+    ovulatoria: [14,15,16,17],
+    lutea:      Array.from({length: 13}, (_,i)=>18+i) // 18-30
+  };
+
+  // Repete até formar 23 dias
+  function rep(arr) {
+    let final = [];
+    while (final.length < 23) final = final.concat(arr);
+    return final.slice(0, 23);
+  }
+
+  const tabela23 = {
+    folicular:  rep(tabuFaseAlta.folicular),
+    ovulatoria: rep(tabuFaseAlta.ovulatoria),
+    lutea:      rep(tabuFaseAlta.lutea)
+  };
+
+  const tabelaMenstrual = [1,2,3,4,5];
+
+  // Determina fase final
+  let faseFinal = diaCiclo <= 23 ? faseAlta : "menstrual";
+  let faseNorm = faseMap[faseFinal] || "folicular";
+
+  let diaFirebase = (faseNorm === "menstrual")
+        ? tabelaMenstrual[(diaCiclo - 24) % 5] || 1
+        : tabela23[faseNorm][diaCiclo - 1] || 1;
+
+  return {
+    faseFirebase: faseNorm,
+    diaFirebase,
+    diaKey: `dia_${diaFirebase}`
+  };
+}
 
   // ============================================================
   // 12. EXECUTA ENGINE HORMONAL
