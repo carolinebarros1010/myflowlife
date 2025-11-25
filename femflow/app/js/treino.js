@@ -297,8 +297,10 @@ function parseTempo(raw) {
                 <label>Séries</label><input inputmode="numeric" value="${e.series ?? ""}">
                 <label>Reps</label><input inputmode="numeric" value="${e.reps ?? ""}">
                 <label>Timer</label>
-                <div class="subtimer" data-total="${parseTempo(e.tempo)}"> ${fmt(parseTempo(e.tempo))}
-                </div>
+                <div class="timer-bar" data-total="${parseTempo(e.tempo)}">
+  <div class="timer-fill"></div>
+  <span class="timer-label">${fmt(parseTempo(e.tempo))}</span>
+</div>
 
               </div>
             </div>
