@@ -86,3 +86,89 @@
   background: #ffe8e4;
   color: #a23a2a;
 }
+/* ----------------------------------------
+   HEADER BASE
+---------------------------------------- */
+#femflowHeader {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 58px;
+  background: #fff5ef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 9999;
+}
+
+.ff-logo {
+  height: 28px;
+}
+
+/* BOTÃO MENU */
+.ff-menu-btn {
+  font-size: 28px;
+  background: none;
+  border: none;
+  color: var(--teal);
+}
+
+/* ----------------------------------------
+   MENU LATERAL
+---------------------------------------- */
+.ff-menu-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: .25s;
+  z-index: 10000;
+}
+
+.ff-menu-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ff-menu-box {
+  width: 78%;
+  max-width: 330px;
+  background: white;
+  height: 100%;
+  padding: 28px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translateX(100%);
+  transition: transform .3s;
+}
+
+.ff-menu-modal.active .ff-menu-box {
+  transform: translateX(0);
+}
+
+.ff-menu-box button {
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 1px solid #e2d5cc;
+  background: #fff5ef;
+  color: var(--teal);
+}
+
+.ff-logout {
+  background: #ffe6e6!important;
+  color: #a12828!important;
+}
+
+/* Tema Dark */
+body.dark {
+  background: #222;
+  color: #eee;
+}
+
