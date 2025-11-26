@@ -54,7 +54,7 @@ window.FEMFLOW = {
 
     h.innerHTML = `
       <div class="logo-area">
-        <img src="./assets/logo_femflow_white.png" class="logo-img" />
+        <img src="./assets/logofemflowterracota.png" class="logo-img" />
       </div>
       <nav>
         <button class="btn-home">Home</button>
