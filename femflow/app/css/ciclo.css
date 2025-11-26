@@ -243,3 +243,12 @@ button:hover {
   .card { padding: 20px 16px; }
   .perfil-btn { flex: 1 1 46%; }
 }
+.cycle-info {
+  font-size: 0.95rem;
+  color: #cc6a5a;
+  margin-top: -10px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
