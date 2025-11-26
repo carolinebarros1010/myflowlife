@@ -69,21 +69,31 @@ window.FEMFLOW = {
   /* -----------------------------------------------------------
      ✓ CABEÇALHO DINÂMICO
   ----------------------------------------------------------- */
- inserirHeaderApp() {
-  if (document.getElementById("femflowHeader")) return;
+ // ------------------------------------------------------------
+// ✓ HEADER COM BOTÃO DE MENU (Hamburger) — 2025
+// ------------------------------------------------------------
+inserirHeaderApp() {
+  if (document.querySelector("#femflowHeader")) return;
 
-  const header = document.createElement("div");
-  header.id = "femflowHeader";
-  header.innerHTML = `
-    <img src="${this.LOGO}" class="ff-logo" alt="FemFlow">
-    <button id="ffMenuBtn" class="ff-menu-btn">☰</button>
+  const h = document.createElement("header");
+  h.id = "femflowHeader";
+
+  h.innerHTML = `
+    <img src="./assets/logofemflowterracotasf.png" class="ff-logo" alt="FemFlow">
+
+    <button id="ffMenuBtn" class="ff-menu-btn">
+      &#9776;
+    </button>
   `;
-  document.body.prepend(header);
 
-  document.getElementById("ffMenuBtn").onclick = () => {
-    this.criarMenuModal(location.pathname.split("/").pop());
+  document.body.prepend(h);
+
+  // Abre modal
+  h.querySelector("#ffMenuBtn").onclick = () => {
+    document.querySelector(".ff-menu-modal")?.classList.add("active");
   };
 },
+
    criarMenuModal(page) {
   if (document.getElementById("ffMenuModal")) return;
 
@@ -106,46 +116,85 @@ window.FEMFLOW = {
   this._bindMenuAcoes(page, modal);
 },
 
-_getMenuHTML(page) {
-  return `
-    <button class="ff-menu-item" data-go="home">🏠 Home</button>
-    <button class="ff-menu-item" data-go="flowcenter">🔄 FlowCenter</button>
-    <button class="ff-menu-item" data-go="respiracao">💨 Respiração</button>
-    <button class="ff-menu-item" data-go="treino">🏃 Treino</button>
-    <button class="ff-menu-item" data-go="evolucao">📈 Evolução</button>
-    <button class="ff-menu-item" data-go="ciclo">🌙 Ajustar Ciclo</button>
+// ------------------------------------------------------------
+// ✓ MENU LATERAL FEMFLOW — COMPLETO
+// ------------------------------------------------------------
+inserirMenuLateral() {
+  if (document.querySelector(".ff-menu-modal")) return;
 
-    <hr>
+  const modal = document.createElement("div");
+  modal.className = "ff-menu-modal";
 
-    <button class="ff-menu-item" data-go="lang">🌐 Idioma</button>
+  modal.innerHTML = `
+    <div class="ff-menu-box">
 
-    <hr>
+      <h2 class="ff-menu-title">Menu</h2>
 
-    <button class="ff-menu-item ff-logout" data-go="logout">🚪 Sair</button>
+      <button class="ff-menu-op" data-go="idioma">🌐 Idioma</button>
+      <button class="ff-menu-op" data-go="ciclo">🎯 Ajustar ciclo</button>
+      <button class="ff-menu-op" data-go="respiracao">💨 Respiração</button>
+      <button class="ff-menu-op" data-go="treinos">🏃 Meus Treinos</button>
+      <button class="ff-menu-op" data-go="tema">🌓 Tema</button>
+
+      <button class="ff-logout" data-go="logout">🚪 Sair</button>
+
+    </div>
   `;
+
+  document.body.appendChild(modal);
+
+  // Fecha ao clicar fora
+  modal.onclick = e => {
+    if (e.target.classList.contains("ff-menu-modal")) {
+      modal.classList.remove("active");
+    }
+  };
+
+  // Eventos do menu
+  modal.querySelectorAll(".ff-menu-op, .ff-logout").forEach(btn => {
+    btn.onclick = () => this._acaoMenu(btn.dataset.go);
+  });
 },
 
-_bindMenuAcoes(page, modal) {
-  modal.querySelectorAll(".ff-menu-item").forEach(btn => {
-    btn.onclick = () => {
-      const go = btn.dataset.go;
 
-      if (go === "logout") {
-        localStorage.clear();
-        location.href = "index.html";
-        return;
-      }
+// ------------------------------------------------------------
+// ✓ AÇÕES DO MENU FEMFLOW
+// ------------------------------------------------------------
+_acaoMenu(op) {
 
-      if (go === "lang") {
-        this._alternarIdioma?.();
-        modal.remove();
-        return;
-      }
+  const modal = document.querySelector(".ff-menu-modal");
+  modal?.classList.remove("active");
 
-      this.router(go);
-      modal.remove();
-    };
-  });
+  switch(op){
+
+    case "idioma":
+      this._alternarIdioma();
+      break;
+
+    case "ciclo":
+      this.router("ciclo.html");
+      break;
+
+    case "respiracao":
+      this.router("respiracao.html");
+      break;
+
+    case "treinos":
+      this.router("evolucao.html");
+      break;
+
+    case "tema":
+      document.body.classList.toggle("dark");
+      localStorage.setItem("femflow_theme",
+        document.body.classList.contains("dark") ? "dark" : "light"
+      );
+      break;
+
+    case "logout":
+      localStorage.clear();
+      this.router("index.html");
+      break;
+  }
 },
 
 
@@ -370,6 +419,7 @@ _bindMenuAcoes(page, modal) {
     "evolucao.html",
     "ciclo.html"
   ];
+    
 
   /* ------------------------------------------------------------
      2) HEADER — apenas nas páginas internas certas
@@ -392,14 +442,14 @@ _bindMenuAcoes(page, modal) {
     this.criarModalPSE();
   }
 
-  /* ------------------------------------------------------------
-     5) CARREGAR PERFIL — apenas páginas internas
-  ------------------------------------------------------------ */
-  const internas = ["flowcenter.html", "treino.html", "respiracao.html", "evolucao.html"];
+ // Menu aparece somente nas páginas internas
+const internas = ["flowcenter.html","treino.html","respiracao.html","evolucao.html"];
 
-  if (internas.includes(p)) {
-    await this.carregarPerfil();
-  }
+if (internas.includes(p)) {
+  this.inserirHeaderApp();
+  this.inserirMenuLateral();
+}
+
 
   this.log("Init concluído para", p);
 },
