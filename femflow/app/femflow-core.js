@@ -244,20 +244,25 @@ window.FEMFLOW = {
   /* -----------------------------------------------------------
      ✓ INICIALIZAÇÃO GERAL (treino.html, ciclo.html, etc.)
   ----------------------------------------------------------- */
-  async init() {
-    const p = location.pathname.split("/").pop();
+ async init() {
+  const p = location.pathname.split("/").pop();
 
-    // Header sempre
+  // ❌ NÃO insere header em index, cadastro e anamnese
+  const paginasSemHeader = ["index.html", "home.html", "anamnese_deluxe.html"];
+
+  // Header e botão voltar só em páginas internas
+  if (!paginasSemHeader.includes(p)) {
     this.inserirHeaderApp();
     this.inserirBotaoVoltar();
     this.criarModalPSE();
-
-    // Carrega perfil sempre que entrar em páginas internas
-    if (!["index.html", "cadastro.html", "anamnese_deluxe.html"].includes(p)) {
-      await this.carregarPerfil();
-    }
   }
-};
+
+  // Carregar perfil apenas quando necessário
+  if (!paginasSemHeader.includes(p)) {
+    await this.carregarPerfil();
+  }
+}
+
 
 
 /* ===========================================================
