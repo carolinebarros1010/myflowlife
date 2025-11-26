@@ -5,7 +5,9 @@
 ============================================================ */
 /* Remove o padding do header no login */
 body.login-page {
+   margin-top: 0 !important;
   padding-top: 0 !important;
+   height: auto;
 }
 /* --- WRAPPER GLOBAL DO LOGIN (RESPONSIVO) --- */
 .login-wrapper {
@@ -34,7 +36,8 @@ body.login-page {
   border: 1px solid rgba(255,255,255,0.55);
   animation: fadeIn 0.5s ease;
   box-sizing: border-box; /* ← evita expansão inesperada */ 
-  margin: 0 auto; 
+  margin: 0 auto;
+   margin-top: 0 !important;
 }
 
 /* LOGO */
