@@ -458,8 +458,7 @@ if (internas.includes(p)) {
      ✓ BOTAO RECOMECAR ASSIDUIDADE 
   ----------------------------------------------------------- */
    modalRetomarTreino(dias) {
-        modalRetomarTreino(dias) {
-    this.log("Modal Retomar Treino → Usuária parou há", dias, "dias");
+       this.log("Modal Retomar Treino → Usuária parou há", dias, "dias");
   if (document.querySelector("#retomar-modal")) return;
 
   const box = document.createElement("div");
