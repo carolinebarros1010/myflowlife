@@ -1,10 +1,140 @@
 
-:root {
-  --terracota: #CC6A5A;
-  --bege: #FFF5EF;
-  --verde: #335953;
-  --texto: #5B4F49;
-}
+    :root {
+      --terracota: #CC6A5A;
+      --bege: #FFF5EF;
+      --verde: #335953;
+      --texto: #5B4F49;
+    }
+
+    body {
+      background-color: var(--bege);
+      color: var(--texto);
+      font-family: "Lato", sans-serif;
+      text-align: center;
+      margin: 0;
+      padding-top: calc(85px + env(safe-area-inset-top, 0px));
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      color: var(--terracota);
+      font-size: 2.2rem;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    h1 span:first-child {
+      display: block;
+      color: var(--texto);
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    h1 span:last-child {
+      display: block;
+      color: var(--terracota);
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
+
+    p.sub {
+      margin-top: 10px;
+      margin-bottom: 35px;
+      font-size: 1rem;
+      color: var(--texto);
+    }
+
+    .btn-protocolo {
+      width: 90%;
+      max-width: 340px;
+      border: none;
+      border-radius: 25px;
+      padding: 14px 18px;
+      font-size: 1.05em;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 8px auto;
+      display: block;
+      transition: all 0.3s ease;
+    }
+
+    .btn-protocolo:hover {
+      transform: scale(1.03);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .box { background: #CC6A5A; color: #fff; }
+    .moon { background: #E2B5A5; color: #5A4032; }
+    .energy { background: #335953; color: #fff; }
+    .calm { background: #EAD5C8; color: #5A4032; }
+    .fire { background: #B44C3B; color: #fff; }
+
+    #breathModal {
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: calc(100vh - 100px);
+      background: var(--bege);
+      transition: background 0.6s ease;
+      padding-top: 60px;
+    }
+
+    #breathCircle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: var(--terracota);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 3em;
+      font-weight: 700;
+      box-shadow: 0 0 25px rgba(204, 106, 90, 0.25);
+      margin-bottom: 20px;
+    }
+
+    #faseLabel {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3em;
+      color: var(--texto);
+      font-style: italic;
+      transition: opacity 0.5s;
+    }
+
+    #countdown {
+      font-size: 1.2em;
+      margin-top: 8px;
+      color: var(--verde);
+      display: none;
+    }
+
+    #btnStart {
+      margin-top: 30px;
+      background: var(--verde);
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      padding: 12px 24px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #btnStart:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    footer {
+      margin-top: 40px;
+      color: #A87E72;
+      font-size: 0.9em;
+    }
+ 
 
 /* ======== ESCOPADO ======== */
 .pagina-respiracao {
