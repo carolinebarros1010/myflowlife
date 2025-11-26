@@ -707,8 +707,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     localStorage.setItem("femflow_dia_energetico", diaEner);
   }
+ /* ============================================================
+   * 19. CANCELAR TREINO 
+   * ============================================================ */
+   document.querySelector("#cancelarTreinoBtn")?.addEventListener("click", () => {
+    FEMFLOW.toast("Treino cancelado. Você pode ajustar sua ênfase.");
+    FEMFLOW.router("home");
+});
+
   /* ============================================================
-   * 19. SALVAR TREINO (com PSE)
+   * 19.1. SALVAR TREINO (com PSE)
    * ============================================================ */
 
   document.querySelector("#salvarTreinoBtn")?.addEventListener("click", async () => {
