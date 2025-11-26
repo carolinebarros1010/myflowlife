@@ -216,32 +216,7 @@ _acaoMenu(op) {
 },
 
 
-  /* -----------------------------------------------------------
-     ✓ BOTÃO VOLTAR (somente páginas internas)
-  ----------------------------------------------------------- */
-  inserirBotaoVoltar() {
-    if (document.querySelector(".btn-voltar")) return;
-
-    const map = {
-      "treino.html": "flowcenter.html",
-      "flowcenter.html": "home.html",
-      "respiracao.html": "flowcenter.html",
-      "evolucao.html": "flowcenter.html",
-      "ciclo.html": "home.html"
-    };
-
-    const p = location.pathname.split("/").pop();
-
-    if (!map[p]) return;
-
-    const b = document.createElement("button");
-    b.className = "btn-voltar";
-    b.textContent = "← Voltar";
-    b.onclick = () => this.router(map[p]);
-
-    document.body.appendChild(b);
-  },
-
+ 
   /* -----------------------------------------------------------
      ✓ MODAL PSE (compatível com treino.js 2025)
   ----------------------------------------------------------- */
@@ -428,26 +403,13 @@ _acaoMenu(op) {
   ];
 
 
-  const paginasComVoltar = [
-    "treino.html",
-    "respiracao.html",
-    "evolucao.html",
-    "ciclo.html"
-  ];
-    
+   
 
   /* ------------------------------------------------------------
      2) HEADER — apenas nas páginas internas certas
   ------------------------------------------------------------ */
   if (paginasComHeader.includes(p)) {
     this.inserirHeaderApp();
-  }
-
-  /* ------------------------------------------------------------
-     3) BOTÃO VOLTAR — nunca no FlowCenter
-  ------------------------------------------------------------ */
-  if (paginasComVoltar.includes(p) && p !== "flowcenter.html") {
-    this.inserirBotaoVoltar();
   }
 
 
