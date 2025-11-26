@@ -4,9 +4,23 @@
    Usa as variáveis e resets já definidos em themes.css & core.css
 ============================================================ */
 
+/* --- WRAPPER GLOBAL DO LOGIN (RESPONSIVO) --- */
+.login-wrapper {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;          /* ← garante o espaço lateral no iPhone/Samsung */
+  box-sizing: border-box;
+}
+
+
 /* ---- CONTAINER PRINCIPAL ---- */
 .login-card {
-  width: 92%;
+  width: 100%;
   max-width: 400px;
   padding: 2.2rem 1.7rem;
   border-radius: 26px;
@@ -16,11 +30,13 @@
   text-align: center;
   border: 1px solid rgba(255,255,255,0.55);
   animation: fadeIn 0.5s ease;
+  box-sizing: border-box; /* ← evita expansão inesperada */ 
+  margin: 0 auto; 
 }
 
 /* LOGO */
 .login-card .logo {
-  width: 120px;
+  width: 130px;
   margin-bottom: 1rem;
 }
 
