@@ -105,3 +105,49 @@ input, select {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+.retomar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.retomar-card {
+  background: #fff5ef;
+  padding: 24px;
+  width: 90%;
+  max-width: 350px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  color: #335953;
+}
+
+.retomar-card button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+}
+
+.recomecar-btn {
+  background: #cc6a5a;
+  color: white;
+}
+
+.continuar-btn {
+  background: #e5e5e5;
+  color: #333;
+}
+
+.cancelar-btn {
+  background: transparent;
+  color: #777;
+}
+
