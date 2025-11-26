@@ -258,12 +258,6 @@ window.FEMFLOW = {
 } // ← FECHA a função init
 
 }; // ← FECHA o objeto FEMFLOW (ATENÇÃO!)
-
-document.addEventListener("DOMContentLoaded", () => {
-  window.FEMFLOW.init();
-});
-
-
 /* ===========================================================
    AUTO-START
 =========================================================== */
