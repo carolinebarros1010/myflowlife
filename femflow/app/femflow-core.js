@@ -57,8 +57,8 @@ window.FEMFLOW = {
         <img src="./assets/logofemflowterracota.png" class="logo-img" />
       </div>
       <nav>
-        <button class="btn-home">Home</button>
-        <button class="btn-flow">Flowcenter</button>
+        <button class="btn-home1">Home</button>
+        <button class="btn-flow1">Flowcenter</button>
       </nav>
     `;
 
