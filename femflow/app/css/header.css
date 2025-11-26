@@ -102,12 +102,12 @@
 }
 
 .ff-logo {
-  height: 28px;
+  height: 44px;
 }
 
 /* BOTÃO MENU */
 .ff-menu-btn {
-  font-size: 28px;
+  font-size: 32px;
   background: none;
   border: none;
   color: var(--teal);
