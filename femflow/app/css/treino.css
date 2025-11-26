@@ -18,7 +18,7 @@
 
 body {
   margin: 0;
-  padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  padding-top: calc(85px + env(safe-area-inset-top, 0px));
   font-family: "Lato", sans-serif;
   background: linear-gradient(180deg, var(--bege) 0%, var(--areia) 100%);
   color: var(--teal);
