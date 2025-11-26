@@ -89,9 +89,13 @@
 const modo = url.get("continuar");
 
 if (modo === "1") {
-  document.querySelector("#cycleMessage").innerHTML =
-    "Ajuste sua fase atual para calibrar o treino de hoje.";
+  const msg = document.getElementById("cycleMessage");
+  if (msg) {
+    msg.textContent =
+      "Ajuste sua fase atual para calibrar o treino de hoje.";
+  }
 }
+
 
 /* ============================================================
    HELPERS
