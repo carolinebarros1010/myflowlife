@@ -150,4 +150,12 @@ input, select {
   background: transparent;
   color: #777;
 }
+.ff-close {
+  background: #eee;
+  color: #555;
+}
+
+.ff-close:active {
+  background: #ddd;
+}
 
