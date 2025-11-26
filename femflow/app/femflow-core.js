@@ -271,6 +271,35 @@ window.FEMFLOW = {
     await this.carregarPerfil();
   }
 } // ← FECHA a função init
+     /* -----------------------------------------------------------
+     ✓ BOTAO RECOMECAR ASSIDUIDADE 
+  ----------------------------------------------------------- */
+   modalRetomarTreino(dias) {
+  if (document.querySelector("#retomar-modal")) return;
+
+  const box = document.createElement("div");
+  box.id = "retomar-modal";
+  box.className = "retomar-backdrop";
+
+  box.innerHTML = `
+    <div class="retomar-card">
+      <h2>Retomar treino</h2>
+      <p>Você está há <strong>${dias} dias</strong> sem treinar.</p>
+      <p>O que deseja fazer?</p>
+
+      <button id="btnRecomecar" class="recomecar-btn">Recomeçar</button>
+      <button id="btnContinuar" class="continuar-btn">Continuar</button>
+      <button id="btnCancelarRetomar" class="cancelar-btn">Cancelar</button>
+    </div>
+  `;
+
+  document.body.appendChild(box);
+
+  document.querySelector("#btnRecomecar").onclick = () => this.recomecarPrograma();
+  document.querySelector("#btnContinuar").onclick = () => this.continuarPrograma();
+  document.querySelector("#btnCancelarRetomar").onclick = () => box.remove();
+}
+
 
 }; // ← FECHA o objeto FEMFLOW (ATENÇÃO!)
 /* ===========================================================
