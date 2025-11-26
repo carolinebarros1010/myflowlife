@@ -245,19 +245,24 @@ window.FEMFLOW = {
      ✓ INICIALIZAÇÃO GERAL (treino.html, ciclo.html, etc.)
   ----------------------------------------------------------- */
  async init() {
+
+  // 🔒 Regra ABSOLUTA: páginas com classe login-page NUNCA recebem header
+  if (document.body.classList.contains("login-page")) {
+    return; // não adiciona header, não adiciona voltar, não cria modal
+  }
+
+  // 🔍 DETECTA o arquivo atual
   let p = location.pathname;
+  p = p.split("?")[0];
+  if (p.endsWith("/")) p = "index.html";
+  else p = p.split("/").pop() || "index.html";
 
-// normaliza removendo query string
-p = p.split("?")[0];
-
-// normaliza barras finais
-if (p.endsWith("/")) p = p.slice(0, -1);
-
-// pega apenas o nome do arquivo
-p = p.split("/").pop() || "index.html";
-
-
-  const paginasSemHeader = ["index.html", "home.html", "anamnese_deluxe.html", "ciclo.html"];
+  const paginasSemHeader = [
+    "index.html",
+    "home.html",
+    "ciclo.html",
+    "anamnese_deluxe.html"
+  ];
 
   if (!paginasSemHeader.includes(p)) {
     this.inserirHeaderApp();
