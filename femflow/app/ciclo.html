@@ -83,6 +83,15 @@
 <script src="./femflow-core.js"></script>
 
 <script>
+
+  const url = new URLSearchParams(location.search);
+const modo = url.get("continuar");
+
+if (modo === "1") {
+  document.querySelector("#cycleMessage").innerHTML =
+    "Ajuste sua fase atual para calibrar o treino de hoje.";
+}
+
 /* ============================================================
    HELPERS
 ============================================================ */
