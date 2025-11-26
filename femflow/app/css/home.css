@@ -33,13 +33,20 @@ body {
   margin: 0 auto;
   padding: 0 14px 22px;
 }
+/* Mobile → remove largura fixa e deixa full width */
+@media (max-width: 768px) {
+  .wrap {
+    max-width: 100%;
+    padding: 0 12px 22px; /* "respiro" lateral perfeito */
+  }
+}
 
 /* ------------------- SEÇÃO VÍDEO ------------------- */
 /* container do vídeo */
 /* ------------------- SEÇÃO VÍDEO ------------------- */
 .video {
   width: 100%;
-  max-width: min(600px, 100%);
+  max-width: 480px;
   margin: 20px auto;
   padding: 0;
   display: flex;
@@ -73,7 +80,7 @@ body {
 }
 
 /* Ajuste fino mobile */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .video {
     max-width: 100%;
   }
@@ -118,7 +125,7 @@ h1 {
 
 /* ------------------- CARDS DAS FILEIRAS ------------------- */
 .card {
-  flex: 0 0 200px;
+  flex: 0 0 170px;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
@@ -213,7 +220,7 @@ footer {
   }
 
   .card {
-    flex: 0 0 170px;
+    flex: 0 0 160px; /* tamanho Netflix */
   }
 }
 
