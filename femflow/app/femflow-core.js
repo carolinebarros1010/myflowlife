@@ -339,37 +339,70 @@ _bindMenuAcoes(page, modal) {
   /* -----------------------------------------------------------
      ✓ INICIALIZAÇÃO GERAL (treino.html, ciclo.html, etc.)
   ----------------------------------------------------------- */
-  async init() {
+ async init() {
 
-    const pagina = location.pathname.split("/").pop();
-    this.log("Inicializando FemFlow — Página:", pagina);
+  const p = (location.pathname.split("/").pop() || "").toLowerCase();
 
-    // Se for página de login → não carrega UI
-    if (document.body.classList.contains("login-page")) {
-      this.log("Página de login detectada → Header desligado");
-      return;
-    }
+  /* ------------------------------------------------------------
+     1) Páginas SEM header
+  ------------------------------------------------------------ */
+  const paginasSemHeader = [
+    "index.html",
+    "anamnese_deluxe.html",
+    "home.html",
+    "ciclo.html"
+  ];
 
-    // Configurações globais da interface
+  const paginasComHeader = [
+    "flowcenter.html",
+    "treino.html",
+    "respiracao.html",
+    "evolucao.html"
+  ];
+
+  const paginasComPSE = [
+    "treino.html"
+  ];
+
+  const paginasComVoltar = [
+    "treino.html",
+    "respiracao.html",
+    "evolucao.html",
+    "ciclo.html"
+  ];
+
+  /* ------------------------------------------------------------
+     2) HEADER — apenas nas páginas internas certas
+  ------------------------------------------------------------ */
+  if (paginasComHeader.includes(p)) {
     this.inserirHeaderApp();
+  }
+
+  /* ------------------------------------------------------------
+     3) BOTÃO VOLTAR — nunca no FlowCenter
+  ------------------------------------------------------------ */
+  if (paginasComVoltar.includes(p) && p !== "flowcenter.html") {
     this.inserirBotaoVoltar();
+  }
+
+  /* ------------------------------------------------------------
+     4) MODAL PSE — apenas no treino
+  ------------------------------------------------------------ */
+  if (paginasComPSE.includes(p)) {
     this.criarModalPSE();
-    this.log("UI configurada ✔");
+  }
 
-    // Carregamento de perfil
-    if (!["index.html","anamnese_deluxe.html"].includes(pagina)) {
-      this.log("Carregando perfil do backend...");
-      const perfil = await this.carregarPerfil();
+  /* ------------------------------------------------------------
+     5) CARREGAR PERFIL — apenas páginas internas
+  ------------------------------------------------------------ */
+  const internas = ["flowcenter.html", "treino.html", "respiracao.html", "evolucao.html"];
 
-      if (!perfil) {
-        this.warn("Nenhum perfil encontrado → sessão inválida → voltar para login");
-        location.href = "index.html";
-        return;
-      }
+  if (internas.includes(p)) {
+    await this.carregarPerfil();
+  }
 
-      this.log("Perfil carregado ✔", perfil);
-    }
-  },
+  this.log("Init concluído para", p);
+},
 // ← FECHA a função init
      /* -----------------------------------------------------------
      ✓ BOTAO RECOMECAR ASSIDUIDADE 
