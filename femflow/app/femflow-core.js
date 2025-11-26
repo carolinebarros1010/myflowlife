@@ -15,6 +15,28 @@ window.FEMFLOW = {
   SCRIPT_URL:
     "https://api-myflowlife.falling-wildflower-a8c0.workers.dev",
 
+    /* -----------------------------------------------------------
+     ✓ SISTEMA DE LOG FEMFLOW (Modo DEV + Logs Pro)
+  ----------------------------------------------------------- */
+  dev() { 
+    return localStorage.getItem("femflow_dev") === "on"; 
+  },
+
+  log(...args) {
+    if (!this.dev()) return;
+    console.log("%c[FEMFLOW]", "color:#cc6a5a;font-weight:bold;", ...args);
+  },
+
+  warn(...args) {
+    if (!this.dev()) return;
+    console.warn("%c[FEMFLOW ⚠]", "color:#e07f67;font-weight:bold;", ...args);
+  },
+
+  error(...args) {
+    if (!this.dev()) return;
+    console.error("%c[FEMFLOW ❌]", "color:#b74333;font-weight:bold;", ...args);
+  },
+ 
   /* -----------------------------------------------------------
      ✓ TOAST UNIVERSAL
   ----------------------------------------------------------- */
@@ -38,9 +60,10 @@ window.FEMFLOW = {
   /* -----------------------------------------------------------
      ✓ ROUTER INTELIGENTE
   ----------------------------------------------------------- */
-  router(pagina) {
-    if (!pagina.endsWith(".html")) pagina += ".html";
-    location.href = pagina;
+ router(pagina) {
+    const destino = pagina.endsWith(".html") ? pagina : pagina + ".html";
+    this.log("Router →", destino);
+    location.href = destino;
   },
 
   /* -----------------------------------------------------------
@@ -198,36 +221,36 @@ _bindMenuAcoes(page, modal) {
   /* -----------------------------------------------------------
      ✓ SALVAR TREINO (versão híbrida Firebase + GAS)
   ----------------------------------------------------------- */
-  async salvarTreino({ pse, treino, fase, diaFirebase, obs = "" }) {
+    async salvarTreino({ pse, treino, fase, diaFirebase, obs = "" }) {
+
+    this.log("Salvando treino:", { pse, treino, fase, diaFirebase });
+
     const id = localStorage.getItem("femflow_id");
-    if (!id) return this.toast("Erro: sem ID.", true);
+    if (!id) {
+      this.error("Salvar treino sem ID.");
+      return;
+    }
 
     try {
       const r = await fetch(this.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
         body: JSON.stringify({
-          action: "salvarTreino",
-          id,
-          pse,
-          treino,
-          fase,
-          diaFirebase,
-          obs
+          action:"salvarTreino", id, pse, treino, fase, diaFirebase, obs
         })
       });
 
       const j = await r.json();
-      if (j.status === "ok") {
-        this.toast("Treino salvo! 🌸");
-      } else {
-        this.toast("Erro ao salvar treino.", true);
-      }
+      this.log("Resposta salvarTreino()", j);
+
+      if (j.status === "ok") this.toast("Treino salvo! 🌸");
+      else this.error("Erro salvar treino:", j);
+
     } catch (err) {
-      this.toast("Erro de conexão.", true);
-      console.error(err);
+      this.error("Erro de conexão ao salvar treino:", err);
     }
   },
+
 
   /* -----------------------------------------------------------
      ✓ SALVAR DESCANSO (compatível com treino.js)
@@ -256,82 +279,104 @@ _bindMenuAcoes(page, modal) {
   /* -----------------------------------------------------------
      ✓ BUSCA DE EXERCÍCIOS (Firebase)
   ----------------------------------------------------------- */
-  async buscarExerciciosFirebase(pasta, fase, diaKey) {
-    try {
-      const url =
-        `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/` +
-        `${encodeURIComponent(`exercicios/${pasta}/${fase}/${diaKey}.json`)}?alt=media`;
+   async buscarExerciciosFirebase(pasta, fase, diaKey) {
+    const url =
+      `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/` +
+      `${encodeURIComponent(`exercicios/${pasta}/${fase}/${diaKey}.json`)}?alt=media`;
 
+    this.log("Firebase:", { pasta, fase, diaKey, url });
+
+    try {
       const r = await fetch(url);
-      return await r.json();
+      const json = await r.json();
+      this.log("Firebase resposta:", json);
+      return json;
+
     } catch (err) {
-      console.warn("Erro Firebase:", err);
+      this.error("Erro Firebase:", err);
       return null;
     }
   },
 
+
   /* -----------------------------------------------------------
      ✓ AUTO LOAD DO USUÁRIO (login → páginas internas)
   ----------------------------------------------------------- */
-  async carregarPerfil() {
+    async carregarPerfil() {
     const id = localStorage.getItem("femflow_id");
-    if (!id) return null;
+    if (!id) {
+      this.warn("carregarPerfil(): ID não encontrado no localStorage");
+      return null;
+    }
 
     try {
+      this.log("Validando ID com backend:", id);
+
       const r = await fetch(`${this.SCRIPT_URL}?action=validar&id=${id}`);
       const j = await r.json();
 
+      this.log("Resposta validar():", j);
+
       if (j.status !== "ok") return null;
 
-      // Salvar sessão local atualizada
       localStorage.setItem("femflow_nome", j.nome);
       localStorage.setItem("femflow_fase", j.fase);
       localStorage.setItem("femflow_enfase", j.enfase);
       localStorage.setItem("femflow_diaCiclo", j.diaCiclo);
       localStorage.setItem("femflow_nivel", j.nivel);
 
+      this.log("Perfil atualizado no localStorage.");
+
       return j;
 
     } catch (err) {
-      console.error("Erro validar perfil:", err);
+      this.error("Erro validar perfil:", err);
       return null;
     }
   },
 
+
   /* -----------------------------------------------------------
      ✓ INICIALIZAÇÃO GERAL (treino.html, ciclo.html, etc.)
   ----------------------------------------------------------- */
- async init() {
+  async init() {
 
-  // 🔒 Regra ABSOLUTA: páginas com classe login-page NUNCA recebem header
-  if (document.body.classList.contains("login-page")) {
-    return; // não adiciona header, não adiciona voltar, não cria modal
-  }
+    const pagina = location.pathname.split("/").pop();
+    this.log("Inicializando FemFlow — Página:", pagina);
 
-  // 🔍 DETECTA o arquivo atual
-  let p = location.pathname;
-  p = p.split("?")[0];
-  if (p.endsWith("/")) p = "index.html";
-  else p = p.split("/").pop() || "index.html";
+    // Se for página de login → não carrega UI
+    if (document.body.classList.contains("login-page")) {
+      this.log("Página de login detectada → Header desligado");
+      return;
+    }
 
-  const paginasSemHeader = [
-    "index.html",
-    "home.html",
-    "ciclo.html",
-    "anamnese_deluxe.html"
-  ];
-
-  if (!paginasSemHeader.includes(p)) {
+    // Configurações globais da interface
     this.inserirHeaderApp();
     this.inserirBotaoVoltar();
     this.criarModalPSE();
-    await this.carregarPerfil();
-  }
-}, // ← FECHA a função init
+    this.log("UI configurada ✔");
+
+    // Carregamento de perfil
+    if (!["index.html","anamnese_deluxe.html"].includes(pagina)) {
+      this.log("Carregando perfil do backend...");
+      const perfil = await this.carregarPerfil();
+
+      if (!perfil) {
+        this.warn("Nenhum perfil encontrado → sessão inválida → voltar para login");
+        location.href = "index.html";
+        return;
+      }
+
+      this.log("Perfil carregado ✔", perfil);
+    }
+  },
+// ← FECHA a função init
      /* -----------------------------------------------------------
      ✓ BOTAO RECOMECAR ASSIDUIDADE 
   ----------------------------------------------------------- */
    modalRetomarTreino(dias) {
+        modalRetomarTreino(dias) {
+    this.log("Modal Retomar Treino → Usuária parou há", dias, "dias");
   if (document.querySelector("#retomar-modal")) return;
 
   const box = document.createElement("div");
