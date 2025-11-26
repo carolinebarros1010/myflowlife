@@ -247,22 +247,21 @@ window.FEMFLOW = {
  async init() {
   const p = location.pathname.split("/").pop();
 
-  // ❌ NÃO insere header em index, cadastro e anamnese
-  const paginasSemHeader = ["index.html", "home.html", "anamnese_deluxe.html"];
+  const paginasSemHeader = ["index.html", "cadastro.html", "anamnese_deluxe.html"];
 
-  // Header e botão voltar só em páginas internas
   if (!paginasSemHeader.includes(p)) {
     this.inserirHeaderApp();
     this.inserirBotaoVoltar();
     this.criarModalPSE();
-  }
-
-  // Carregar perfil apenas quando necessário
-  if (!paginasSemHeader.includes(p)) {
     await this.carregarPerfil();
   }
-}
+} // ← FECHA a função init
 
+}; // ← FECHA o objeto FEMFLOW (ATENÇÃO!)
+
+document.addEventListener("DOMContentLoaded", () => {
+  window.FEMFLOW.init();
+});
 
 
 /* ===========================================================
