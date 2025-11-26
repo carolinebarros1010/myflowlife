@@ -245,9 +245,19 @@ window.FEMFLOW = {
      ✓ INICIALIZAÇÃO GERAL (treino.html, ciclo.html, etc.)
   ----------------------------------------------------------- */
  async init() {
-  const p = location.pathname.split("/").pop();
+  let p = location.pathname;
 
-  const paginasSemHeader = ["index.html", "cadastro.html", "anamnese_deluxe.html"];
+// normaliza removendo query string
+p = p.split("?")[0];
+
+// normaliza barras finais
+if (p.endsWith("/")) p = p.slice(0, -1);
+
+// pega apenas o nome do arquivo
+p = p.split("/").pop() || "index.html";
+
+
+  const paginasSemHeader = ["index.html", "home.html", "anamnese_deluxe.html", "ciclo.html"];
 
   if (!paginasSemHeader.includes(p)) {
     this.inserirHeaderApp();
