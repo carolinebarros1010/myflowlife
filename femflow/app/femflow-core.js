@@ -129,7 +129,8 @@ inserirMenuLateral() {
     <div class="ff-menu-box">
 
       <h2 class="ff-menu-title">Menu</h2>
-
+      
+      <button class="ff-menu-op ff-close" data-go="fechar">✖️ Fechar menu</button>
       <button class="ff-menu-op" data-go="idioma">🌐 Idioma</button>
       <button class="ff-menu-op" data-go="ciclo">🎯 Ajustar ciclo</button>
       <button class="ff-menu-op" data-go="respiracao">💨 Respiração</button>
@@ -168,6 +169,10 @@ _acaoMenu(op) {
   modal?.classList.remove("active");
 
   switch(op){
+        
+case "fechar":
+  document.querySelector(".ff-menu-modal")?.classList.remove("active");
+  break;
 
     case "idioma":
       this._alternarIdioma();
