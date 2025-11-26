@@ -46,28 +46,85 @@ window.FEMFLOW = {
   /* -----------------------------------------------------------
      ✓ CABEÇALHO DINÂMICO
   ----------------------------------------------------------- */
-  inserirHeaderApp() {
-    if (document.querySelector("header.femflow-header")) return;
+ inserirHeaderApp() {
+  if (document.getElementById("femflowHeader")) return;
 
-    const h = document.createElement("header");
-    h.className = "femflow-header";
+  const header = document.createElement("div");
+  header.id = "femflowHeader";
+  header.innerHTML = `
+    <img src="${this.LOGO}" class="ff-logo" alt="FemFlow">
+    <button id="ffMenuBtn" class="ff-menu-btn">☰</button>
+  `;
+  document.body.prepend(header);
 
-    h.innerHTML = `
-      <div class="logo-area">
-        <img src="./assets/logofemflowterracota.png" class="logo-img" />
-      </div>
-      <nav>
-        <button class="btn-home">Home</button>
-        <button class="btn-flow">Flowcenter</button>
-      </nav>
-    `;
+  document.getElementById("ffMenuBtn").onclick = () => {
+    this.criarMenuModal(location.pathname.split("/").pop());
+  };
+},
+   criarMenuModal(page) {
+  if (document.getElementById("ffMenuModal")) return;
 
-    document.body.prepend(h);
+  const modal = document.createElement("div");
+  modal.id = "ffMenuModal";
+  modal.className = "ff-menu-modal";
 
-    // Bind
-    h.querySelector(".btn-home").onclick = () => this.router("home");
-    h.querySelector(".btn-flow").onclick = () => this.router("flowcenter");
-  },
+  modal.innerHTML = `
+    <div class="ff-menu-box">
+      ${this._getMenuHTML(page)}
+    </div>
+  `;
+
+  modal.onclick = (e) => {
+    if (e.target.id === "ffMenuModal") modal.remove();
+  };
+
+  document.body.appendChild(modal);
+
+  this._bindMenuAcoes(page, modal);
+},
+
+_getMenuHTML(page) {
+  return `
+    <button class="ff-menu-item" data-go="home">🏠 Home</button>
+    <button class="ff-menu-item" data-go="flowcenter">🔄 FlowCenter</button>
+    <button class="ff-menu-item" data-go="respiracao">💨 Respiração</button>
+    <button class="ff-menu-item" data-go="treino">🏃 Treino</button>
+    <button class="ff-menu-item" data-go="evolucao">📈 Evolução</button>
+    <button class="ff-menu-item" data-go="ciclo">🌙 Ajustar Ciclo</button>
+
+    <hr>
+
+    <button class="ff-menu-item" data-go="lang">🌐 Idioma</button>
+
+    <hr>
+
+    <button class="ff-menu-item ff-logout" data-go="logout">🚪 Sair</button>
+  `;
+},
+
+_bindMenuAcoes(page, modal) {
+  modal.querySelectorAll(".ff-menu-item").forEach(btn => {
+    btn.onclick = () => {
+      const go = btn.dataset.go;
+
+      if (go === "logout") {
+        localStorage.clear();
+        location.href = "index.html";
+        return;
+      }
+
+      if (go === "lang") {
+        this._alternarIdioma?.();
+        modal.remove();
+        return;
+      }
+
+      this.router(go);
+      modal.remove();
+    };
+  });
+},
+
 
   /* -----------------------------------------------------------
      ✓ BOTÃO VOLTAR (somente páginas internas)
@@ -334,6 +391,87 @@ continuarPrograma() {
 
 
 }; // ← FECHA o objeto FEMFLOW (ATENÇÃO!)
+
+
+// CSS do Header + Menu (FemFlow Signature 2025)
+(function(){
+  const style = document.createElement("style");
+  style.innerHTML = `
+    #femflowHeader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 56px;
+      background: #fff5ef;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 9999;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .ff-logo { height: 28px; }
+
+    .ff-menu-btn {
+      background: none;
+      border: none;
+      font-size: 26px;
+      color: var(--teal);
+    }
+
+    .ff-menu-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(3px);
+      z-index: 99999;
+    }
+
+    .ff-menu-box {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 78%;
+      max-width: 320px;
+      height: 100%;
+      background: white;
+      padding: 24px;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.2);
+      animation: slideIn .3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to   { transform: translateX(0); }
+    }
+
+    .ff-menu-item {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      background: #fff5ef;
+      border: 1px solid #e4d5cc;
+      text-align: left;
+      color: var(--teal);
+      font-weight: 600;
+      font-family: "Lato";
+    }
+
+    .ff-menu-item:active {
+      background: #f7dbd3;
+    }
+
+    .ff-menu-item.ff-logout {
+      background: #ffe6e4;
+      color: #b44135;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
 /* ===========================================================
    AUTO-START
 =========================================================== */
