@@ -12,14 +12,16 @@ body.login-page {
 /* --- WRAPPER GLOBAL DO LOGIN (RESPONSIVO) --- */
 .login-wrapper {
   width: 100%;
-  min-height: 100vh;
+  min-height: calc(100vh - 2rem);
 
   display: flex;
   justify-content: center;
   align-items: center;
 
   padding: 20px;          /* ← garante o espaço lateral no iPhone/Samsung */
-  box-sizing: border-box;
+  box-sizing: border-box;  
+   /* força centralização real */
+  min-height: 100svh; /* usa viewport real do iPhone / Android */
 }
 
 
@@ -27,7 +29,7 @@ body.login-page {
 .login-card {
   width: 100%;
   max-width: 400px;
-  padding: 2.2rem 1.7rem;
+  padding: 1.6rem 1.4rem !important;
   border-radius: 26px;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(14px);
@@ -38,7 +40,8 @@ body.login-page {
   box-sizing: border-box; /* ← evita expansão inesperada */ 
   margin: 0 auto;
    margin-top: 0 !important;
-}
+    margin-bottom: 1rem;
+ }
 
 /* LOGO */
 .login-card .logo {
