@@ -327,7 +327,7 @@ _bindMenuAcoes(page, modal) {
     this.criarModalPSE();
     await this.carregarPerfil();
   }
-} // ← FECHA a função init
+}, // ← FECHA a função init
      /* -----------------------------------------------------------
      ✓ BOTAO RECOMECAR ASSIDUIDADE 
   ----------------------------------------------------------- */
