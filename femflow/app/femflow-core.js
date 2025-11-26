@@ -299,6 +299,38 @@ window.FEMFLOW = {
   document.querySelector("#btnContinuar").onclick = () => this.continuarPrograma();
   document.querySelector("#btnCancelarRetomar").onclick = () => box.remove();
 }
+ /* -----------------------------------------------------------
+✓ BOTAO RESET ASSIDUIDADE 
+  ----------------------------------------------------------- */
+async recomecarPrograma() {
+  const id = localStorage.getItem("femflow_id");
+
+  await fetch(this.SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "resetprograma",
+      id
+    })
+  });
+
+  this.toast("✨ Novo ciclo iniciado!");
+
+  // Remove modal
+  document.querySelector("#retomar-modal")?.remove();
+
+  // Volta para home para iniciar novo fluxo
+  this.router("home.html");
+}
+
+continuarPrograma() {
+  // Apenas fecha o modal
+  document.querySelector("#retomar-modal")?.remove();
+
+  // Vai para ciclo para ajustar fase atual
+  this.router("ciclo.html?continuar=1");
+}
+
 
 
 }; // ← FECHA o objeto FEMFLOW (ATENÇÃO!)
