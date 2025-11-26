@@ -275,7 +275,31 @@ document.getElementById("lbl-luteal").classList.toggle("label-active",     fase=
 
     // === Botões ===
     document.getElementById("toBreath").onclick = ()=> FEMFLOW.router("respiracao");
-    document.getElementById("toTrain").onclick  = ()=> FEMFLOW.router("treino");
+    document.getElementById("toTrain").onclick = async () => {
+
+  const id = localStorage.getItem("femflow_id");
+  if (!id) return FEMFLOW.router("index.html");
+
+  try {
+    // 🔍 Consulta o backend
+    const r = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`);
+    const j = await r.json();
+
+    // 🌿 Caso diasSemTreinar >= 7 → mostrar modal
+    if (j.alert) {
+      FEMFLOW.modalRetomarTreino(j.diasSemTreinar);
+      return;
+    }
+
+    // 🚀 Caso contrário → seguir normal
+    FEMFLOW.router("treino");
+
+  } catch (err) {
+    console.warn("Erro ao validar treino:", err);
+    FEMFLOW.router("treino");
+  }
+};
+
     document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao");
 
 
