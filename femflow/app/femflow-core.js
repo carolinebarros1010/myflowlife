@@ -135,6 +135,8 @@ inserirMenuLateral() {
       <button class="ff-menu-op" data-go="respiracao">💨 Respiração</button>
       <button class="ff-menu-op" data-go="treinos">🏃 Meus Treinos</button>
       <button class="ff-menu-op" data-go="tema">🌓 Tema</button>
+      <button class="ff-menu-op" data-go="voltar">🔙 Voltar</button>
+
 
       <button class="ff-logout" data-go="logout">🚪 Sair</button>
 
@@ -194,6 +196,22 @@ _acaoMenu(op) {
       localStorage.clear();
       this.router("index.html");
       break;
+        
+   case "voltar":
+   const rota = {
+    "treino.html": "flowcenter.html",
+    "flowcenter.html": "home.html",
+    "respiracao.html": "flowcenter.html",
+    "evolucao.html": "flowcenter.html",
+    "ciclo.html": "home.html"
+  };
+
+  const atual = location.pathname.split("/").pop();
+  const destino = rota[atual] || "home.html";
+
+  this.router(destino);
+  break;
+       
   }
 },
 
@@ -409,9 +427,6 @@ _acaoMenu(op) {
     "evolucao.html"
   ];
 
-  const paginasComPSE = [
-    "treino.html"
-  ];
 
   const paginasComVoltar = [
     "treino.html",
@@ -435,12 +450,6 @@ _acaoMenu(op) {
     this.inserirBotaoVoltar();
   }
 
-  /* ------------------------------------------------------------
-     4) MODAL PSE — apenas no treino
-  ------------------------------------------------------------ */
-  if (paginasComPSE.includes(p)) {
-    this.criarModalPSE();
-  }
 
  // Menu aparece somente nas páginas internas
 const internas = ["flowcenter.html","treino.html","respiracao.html","evolucao.html"];
