@@ -3,7 +3,10 @@
    Arquivo exclusivo do index.html
    Usa as variáveis e resets já definidos em themes.css & core.css
 ============================================================ */
-
+/* Remove o padding do header no login */
+body.login-page {
+  padding-top: 0 !important;
+}
 /* --- WRAPPER GLOBAL DO LOGIN (RESPONSIVO) --- */
 .login-wrapper {
   width: 100%;
