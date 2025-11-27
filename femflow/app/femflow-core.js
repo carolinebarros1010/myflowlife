@@ -16,6 +16,8 @@
     diaKey: "dia_08"
 });
  - FEMFLOW.buscarExerciciosFirebase("iniciante_gluteo", "folicular", "dia_05");
+ - codigo -- limpeza cache: caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+
 
     
    =========================================================== */
