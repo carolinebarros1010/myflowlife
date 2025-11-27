@@ -165,7 +165,7 @@ function calcularEngineHormonal() {
   const dataInicio = localStorage.getItem("femflow_startDate");
 
   // diaCiclo REAL salvo pela aluna (ciclo.html -> FEMFLOW.setFase)
-  let diaCiclo = Number(localStorage.getItem("dia_ciclo") || 1);
+  let diaCiclo = Number(localStorage.getItem("femflow_diaciclo") || 1);
 
   /* -----------------------------------------------------------
    * 6.1 PERFIS FISIOLÓGICOS
