@@ -61,6 +61,9 @@
 
   <!-- Core no mesmo nível do arquivo -->
   <script src="./femflow-core.js"></script>
+    <!-- Lógica híbrida (Apps Script + Firebase) com timers + HIIT/Cardio por box -->
+  <script src="js/treino.js"></script>
+  
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       if (window.FEMFLOW && typeof FEMFLOW.inserirHeaderApp === "function") {
@@ -71,8 +74,7 @@
     });
   </script>
 
-  <!-- Lógica híbrida (Apps Script + Firebase) com timers + HIIT/Cardio por box -->
-  <script src="js/treino.js"></script>
+
 
   <script>
   window.addEventListener("femflow:langchange", () => {
