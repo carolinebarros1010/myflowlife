@@ -447,6 +447,132 @@ async buscarExerciciosFirebase(pasta, fase, diaKey) {
     }
   },
 
+/* -----------------------------------------------------------
+   ✓ INSPECTOR FULL — FEMFLOW 2025
+   Console: FEMFLOW.inspect()
+----------------------------------------------------------- */
+inspect() {
+
+  console.clear();
+  console.log("%c🔍 FEMFLOW INSPECTOR — FULL MODE (2025)", "font-size:18px;font-weight:bold;color:#cc6a5a;");
+
+  /* -----------------------------------------------------------
+     1) Dados principais do front
+  ----------------------------------------------------------- */
+  console.groupCollapsed("📌 LOCALSTORAGE");
+  const keys = [
+    "femflow_id", "femflow_email", "femflow_nome",
+    "femflow_fase", "femflow_enfase",
+    "femflow_nivel", "femflow_diaCiclo",
+    "femflow_cycleLength", "femflow_startDate",
+    "femflow_perfilHormonal", "femflow_dia_treino",
+    "femflow_dev", "femflow_theme",
+    "femflow_dia_energetico"
+  ];
+  keys.forEach(k => console.log(k, "→", localStorage.getItem(k)));
+  console.groupEnd();
+
+
+  /* -----------------------------------------------------------
+     2) Motor hormonal atual
+  ----------------------------------------------------------- */
+  console.groupCollapsed("🌙 ENGINE HORMONAL");
+  try {
+    const h = calcularEngineHormonal();
+    console.log("Engine Hormonal →", h);
+  } catch (e) {
+    console.warn("Erro na engine hormonal:", e);
+  }
+  console.groupEnd();
+
+
+  /* -----------------------------------------------------------
+     3) Firebase Query completa
+  ----------------------------------------------------------- */
+  console.groupCollapsed("🔥 FIREBASE QUERY");
+  try {
+    const nivel  = localStorage.getItem("femflow_nivel")  || "iniciante";
+    const enfase = localStorage.getItem("femflow_enfase") || "geral";
+
+    const hormonal = calcularEngineHormonal();
+    const pasta = `${nivel}_${enfase}`;
+    const firebaseQuery = {
+      pasta,
+      fase: hormonal.faseFirebase,
+      diaKey: hormonal.diaKey
+    };
+    console.table(firebaseQuery);
+
+    const url =
+      `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/` +
+      encodeURIComponent(`exercicios/${pasta}/${hormonal.faseFirebase}/${hormonal.diaKey}.json`) +
+      `?alt=media`;
+
+    console.log("URL:", url);
+
+  } catch (e) {
+    console.warn("Erro ao montar query Firebase:", e);
+  }
+  console.groupEnd();
+
+
+  /* -----------------------------------------------------------
+     4) Snapshot Offline
+  ----------------------------------------------------------- */
+  console.groupCollapsed("📦 SNAPSHOT OFFLINE");
+  try {
+    const snap = JSON.parse(localStorage.getItem("femflow_offline_treino_v1"));
+    if (!snap) console.log("Nenhum snapshot existente.");
+    else {
+      console.log("Meta:", snap.meta);
+      console.log("Boxes:", snap.lista);
+    }
+  } catch (e) {
+    console.warn("Erro ao ler snapshot:", e);
+  }
+  console.groupEnd();
+
+
+  /* -----------------------------------------------------------
+     5) Backend GET treino
+  ----------------------------------------------------------- */
+  console.groupCollapsed("🛠 BACKEND (ULTIMA RESPOSTA)");
+  try {
+    console.warn("→ Ativar logs da função executarTreinoDia() para ver resposta completa.");
+  } catch (e) {}
+  console.groupEnd();
+
+
+  /* -----------------------------------------------------------
+     6) DOM (Carrossel / Treino)
+  ----------------------------------------------------------- */
+  console.groupCollapsed("📱 DOM — TREINO.HTML");
+  try {
+    const track = document.querySelector("#carouselTrack");
+    const boxes = track ? track.children.length : 0;
+
+    console.log("Track encontrado:", !!track);
+    console.log("Total de boxes:", boxes);
+
+    const bar = document.querySelector("#progressBar");
+    console.log("ProgressBar:", bar?.style.width);
+
+  } catch (e) {
+    console.warn("DOM não disponível:", e);
+  }
+  console.groupEnd();
+
+
+  /* -----------------------------------------------------------
+     7) Dispositivo
+  ----------------------------------------------------------- */
+  console.groupCollapsed("📱 DEVICE INFO");
+  console.log("UserAgent:", navigator.userAgent);
+  console.log("Viewport:", window.innerWidth, "x", window.innerHeight);
+  console.groupEnd();
+
+  console.log("%c✔ INSPEÇÃO COMPLETA — FIM", "font-weight:bold;color:#4ba387;font-size:16px;");
+}
 
   /* -----------------------------------------------------------
      ✓ INICIALIZAÇÃO GERAL (treino.html, ciclo.html, etc.)
