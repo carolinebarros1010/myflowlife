@@ -146,7 +146,7 @@ async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}) {
   localStorage.setItem("femflow_cycle_configured", "yes");
   localStorage.setItem("femflow_startDate", start.toISOString());
   localStorage.setItem("femflow_cycleLength", String(length));
-  localStorage.setItem("dia_ciclo", String(dia));
+  localStorage.setItem("femflow_diaciclo", String(dia));
   localStorage.setItem("femflow_fase_atual", faseCalc.toLowerCase());
   if (faseAlta) localStorage.setItem("femflow_faseAlta", faseAlta);
 
@@ -179,7 +179,7 @@ async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}) {
         dia: dia
       })
     });
-  } catch(e){ console.warn("Erro dia ciclo:", e); }
+  } catch(e){ console.warn("Erro ao atualizar diaciclo:", e); }
 
   FEMFLOW.toast("✨ Ciclo configurado!");
   setTimeout(()=>location.href="flowcenter.html",800);
