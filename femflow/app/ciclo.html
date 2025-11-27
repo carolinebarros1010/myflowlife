@@ -150,18 +150,20 @@ async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}) {
   localStorage.setItem("femflow_fase_atual", faseCalc.toLowerCase());
   if (faseAlta) localStorage.setItem("femflow_faseAlta", faseAlta);
 
-  // BACKEND — perfil hormonal
+ // 🔹 3) ENVIA PERFIL HORMONAL AO BACKEND (via POST)
   try {
-    await fetch(FEMFLOW.SCRIPT_URL,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        action:"setperfilhormonal",
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",  // Aqui usamos POST para enviar os dados
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setperfilhormonal",  // Ação no backend
         id: localStorage.getItem("femflow_id"),
-        fase: faseCalc.toLowerCase()
+        perfil: perfil  // Envia o perfil para o backend
       })
     });
-  } catch(e){ console.warn("Erro salvar perfil:", e); }
+  } catch (e) {
+    console.warn("Erro ao salvar perfil hormonal no backend:", e);
+  }
 
   // BACKEND — fase
   try {
