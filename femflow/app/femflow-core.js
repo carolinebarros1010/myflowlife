@@ -323,27 +323,92 @@ case "fechar":
     }
   },
 
-  /* -----------------------------------------------------------
-     ✓ BUSCA DE EXERCÍCIOS (Firebase)
-  ----------------------------------------------------------- */
-   async buscarExerciciosFirebase(pasta, fase, diaKey) {
-    const url =
-      `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/` +
-      `${encodeURIComponent(`exercicios/${pasta}/${fase}/${diaKey}.json`)}?alt=media`;
+/* -----------------------------------------------------------
+   ✓ BUSCA DE EXERCÍCIOS (Firebase) — DEBUG PRO 2025
+----------------------------------------------------------- */
+async buscarExerciciosFirebase(pasta, fase, diaKey) {
 
-    this.log("Firebase:", { pasta, fase, diaKey, url });
+  // ---------- 1) DEBUG DE ENTRADA ----------
+  this.log("🔥 Firebase: Início da busca", {
+    pasta,
+    fase,
+    diaKey
+  });
 
-    try {
-      const r = await fetch(url);
-      const json = await r.json();
-      this.log("Firebase resposta:", json);
-      return json;
+  const url =
+    `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/` +
+    `${encodeURIComponent(`exercicios/${pasta}/${fase}/${diaKey}.json`)}?alt=media`;
 
-    } catch (err) {
-      this.error("Erro Firebase:", err);
+  // Mostra a URL final
+  this.log("📡 URL Firebase:", url);
+
+  try {
+    // ---------- 2) REQUISIÇÃO ----------
+    const r = await fetch(url);
+
+    // Loga status da resposta
+    this.log("📥 Firebase Status HTTP:", {
+      ok: r.ok,
+      status: r.status,
+      statusText: r.statusText
+    });
+
+    // Se o arquivo não existe — 404
+    if (!r.ok) {
+      this.warn("⚠️ Firebase retornou erro HTTP", {
+        pasta,
+        fase,
+        diaKey,
+        status: r.status
+      });
       return null;
     }
-  },
+
+    // ---------- 3) TENTA LER JSON ----------
+    let json = null;
+
+    try {
+      json = await r.json();
+    } catch (jsonErr) {
+      this.error("❌ Erro ao interpretar JSON do Firebase", jsonErr);
+      return null;
+    }
+
+    // DEBUG: Resposta bruta
+    this.log("📦 Firebase JSON bruto:", json);
+
+    // ---------- 4) VALIDAÇÃO ----------
+    if (!json) {
+      this.warn("⚠️ Firebase retornou vazio.");
+      return null;
+    }
+
+    if (json.error) {
+      this.error("❌ Firebase error:", json.error);
+      return null;
+    }
+
+    if (!Array.isArray(json)) {
+      this.warn("⚠️ Retorno não é lista de exercícios", {
+        tipo: typeof json
+      });
+      return null;
+    }
+
+    // DEBUG: Quantidade de exercícios
+    this.log("✅ Firebase retornou exercícios:", {
+      quantidade: json.length
+    });
+
+    return json;
+
+  } catch (err) {
+    // ---------- 5) ERRO GERAL ----------
+    this.error("🔥 ERRO FATAL NA CONEXÃO COM O FIREBASE:", err);
+    return null;
+  }
+},
+
 
 
   /* -----------------------------------------------------------
