@@ -502,31 +502,39 @@ async function executarTreinoDia() {
 
   console.log("📁 Firebase Query:", firebaseQuery);
 
-  /* ---------------------------------------------
+ /* ---------------------------------------------
    * 4) CHAMAR BACKEND (GET → treino)
    * --------------------------------------------- */
-  const url =
-    `${SCRIPT_URL}?action=treino` +
-    `&id=${encodeURIComponent(id)}` +
-    `&fase=${encodeURIComponent(faseFirebase)}` +
-    `&diaFirebase=${encodeURIComponent(diaFirebase)}` +
-    `&diaKey=${encodeURIComponent(diaKey)}` +
-    `&nivel=${encodeURIComponent(nivel)}` +
-    `&enfase=${encodeURIComponent(enfase)}`;
+const url =
+  `${SCRIPT_URL}?action=treino` +
+  `&id=${encodeURIComponent(id)}` +
+  `&fase=${encodeURIComponent(faseFirebase)}` +
+  `&diaFirebase=${encodeURIComponent(diaFirebase)}` +
+  `&diaKey=${encodeURIComponent(diaKey)}` +
+  `&nivel=${encodeURIComponent(nivel)}` +
+  `&enfase=${encodeURIComponent(enfase)}` +
+  `&diaCiclo=${encodeURIComponent(localStorage.getItem("femflow_diaCiclo"))}`; // Adicionando o diaCiclo na consulta
 
-  let j = null;
+let j = null;
 
-  try {
-    const resp = await fetch(url);
-    j = await resp.json();
-  } catch (e) {
-    console.error("❌ GET treino falhou:", e);
-  }
+try {
+  const resp = await fetch(url);
+  j = await resp.json();
+} catch (e) {
+  console.error("❌ GET treino falhou:", e);
+}
 
-  if (!j || j.status !== "ok") {
-    FEMFLOW.toast("❌ Falha ao carregar treino.");
-    return;
-  }
+if (!j || j.status !== "ok") {
+  FEMFLOW.toast("❌ Falha ao carregar treino.");
+  return;
+}
+
+// Agora você pode usar o valor de j.diaCiclo para garantir que o ciclo foi carregado corretamente
+console.log("🔥 DiaCiclo recebido do backend:", j.diaCiclo);
+
+// Atualizando o valor de DiaCiclo no frontend (se necessário)
+localStorage.setItem("femflow_diaCiclo", j.diaCiclo);
+
 
   /* ---------------------------------------------
    * 5) Box0 e BoxFinal vindos do BACKEND
