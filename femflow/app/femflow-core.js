@@ -5,6 +5,19 @@
    - Firebase (buscarExerciciosFirebase)
    - Backend GAS 2025 (fase, enfase, diaCiclo, treino-dia)
    - Todas as páginas antigas (home, flowcenter, respiracao, anamnese)
+
+    - FEMFLOW.inspect();
+    - FEMFLOW.debugBackend();
+    - FEMFLOW.debugFirebaseRaw("iniciante_gluteo", "folicular", "dia_08");
+    - FEMFLOW_DEBUG_TREINO.log();
+     - FEMFLOW_DEBUG_TREINO.printFirebaseQuery({
+    pasta: "iniciante_gluteo",
+    fase: "folicular",
+    diaKey: "dia_08"
+});
+ - FEMFLOW.buscarExerciciosFirebase("iniciante_gluteo", "folicular", "dia_05");
+
+    
    =========================================================== */
 
 window.FEMFLOW = {
@@ -572,7 +585,86 @@ inspect() {
   console.groupEnd();
 
   console.log("%c✔ INSPEÇÃO COMPLETA — FIM", "font-weight:bold;color:#4ba387;font-size:16px;");
-}
+},
+
+  /* -----------------------------------------------------------
+   ✓ DEBUG — VER DADO CRU DO BACKEND (GET treino)
+   Console: FEMFLOW.debugBackend()
+----------------------------------------------------------- */
+async debugBackend() {
+
+  console.clear();
+  console.log("%c🔍 DEBUG BACKEND RAW — GET TREINO", "font-size:18px;font-weight:bold;color:#cc6a5a;");
+
+  const id = localStorage.getItem("femflow_id");
+  if (!id) {
+    console.error("❌ Sem ID. Faça login.");
+    return;
+  }
+
+  // Recalcular engine hormonal como o treino.js
+  let h = null;
+  try {
+    h = calcularEngineHormonal();
+  } catch (err) {
+    console.warn("Engine hormonal falhou:", err);
+  }
+
+  // Montar URL idêntica à usada no treino.js
+  const url =
+    `${this.SCRIPT_URL}?action=treino` +
+    `&id=${encodeURIComponent(id)}` +
+    `&fase=${encodeURIComponent(h?.faseFirebase || "")}` +
+    `&diaFirebase=${encodeURIComponent(h?.diaFirebase || "")}` +
+    `&diaKey=${encodeURIComponent(h?.diaKey || "")}` +
+    `&nivel=${encodeURIComponent(localStorage.getItem("femflow_nivel") || "")}` +
+    `&enfase=${encodeURIComponent(localStorage.getItem("femflow_enfase") || "")}`;
+
+  // Mostra a URL final usada
+  console.log("%c📡 URL GET →", "color:#cc6a5a;font-weight:bold;", url);
+
+  try {
+
+    // Fazer requisição
+    const r = await fetch(url);
+
+    console.log("%c📥 HTTP Status:", "color:#cc6a5a;font-weight:bold;", {
+      ok: r.ok,
+      status: r.status,
+      statusText: r.statusText
+    });
+
+    const raw = await r.text(); // ← texto cru
+    console.log("%c📦 RAW TEXT DO BACKEND:", "color:#cc6a5a;font-weight:bold;", raw);
+
+    // Tentar parsear para JSON
+    let json = null;
+    try {
+      json = JSON.parse(raw);
+      console.log("%c🔍 JSON PARSEADO:", "color:#4ba387;font-weight:bold;", json);
+    } catch (err) {
+      console.warn("⚠️ JSON inválido (não parseou).");
+      return;
+    }
+
+    // Destacar campos importantes
+    console.groupCollapsed("🧩 CAMPOS IMPORTANTES DO BACKEND");
+    console.log("status:", json.status);
+    console.log("fase:", json.fase);
+    console.log("diaFirebase:", json.diaFirebase);
+    console.log("diaCiclo:", json.diaCiclo);
+    console.log("boxes:", json.boxes);
+    console.log("hiitCardio:", json.hiitCardio);
+    console.log("erro:", json.error);
+    console.groupEnd();
+
+  } catch (err) {
+    console.error("%c❌ ERRO AO BUSCAR BACKEND RAW:", "color:#b74333;font-weight:bold;", err);
+  }
+
+  console.log("%c✔ DEBUG BACKEND FINALIZADO", "font-weight:bold;color:#4ba387;font-size:16px;");
+},
+ 
 
   /* -----------------------------------------------------------
      ✓ INICIALIZAÇÃO GERAL (treino.html, ciclo.html, etc.)
