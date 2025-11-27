@@ -152,7 +152,15 @@ async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}) {
 
   // BACKEND — perfil hormonal
   try {
-    await FEMFLOW.salvarPerfilHormonal(perfil);
+    await fetch(FEMFLOW.SCRIPT_URL,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        action:"setperfilhormonal",
+        id: localStorage.getItem("femflow_id"),
+        fase: faseCalc.toLowerCase()
+      })
+    });
   } catch(e){ console.warn("Erro salvar perfil:", e); }
 
   // BACKEND — fase
