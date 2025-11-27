@@ -182,7 +182,6 @@ function calcularEngineHormonal() {
       diaKey: `dia_${diaCiclo}`
     };
   }
-
   /* -----------------------------------------------------------
    * 6.2 PERFIL MENOPAUSA TÉCNICA — NIVEL ALTERA O 23+5
    * iniciante      → 23 dias lutea + 5 menstrual
@@ -233,6 +232,7 @@ function calcularEngineHormonal() {
     diaKey: "dia_1"
   };
 }
+   window.calcularEngineHormonal = calcularEngineHormonal;
 
 /* ------------------------------------------------------------
    * Auxiliar: converte dia (1–30) em fase
