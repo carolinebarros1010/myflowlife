@@ -841,15 +841,9 @@ calcularEngineHormonal() {
     return window.calcularEngineHormonal();
 },
 
-
+   
 }; // ← FECHA o objeto FEMFLOW (ATENÇÃO!)
 
-_faseDoNumero(dia) {
-  if (dia >= 1 && dia <= 5) return "menstrual";
-  if (dia <= 13) return "folicular";
-  if (dia <= 17) return "ovulatoria";
-  return "lutea";
-}
 
 // CSS do Header + Menu (FemFlow Signature 2025)
 (function(){
