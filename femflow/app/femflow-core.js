@@ -774,10 +774,82 @@ continuarPrograma() {
   this.router("ciclo.html?continuar=1");
 },
 
+   calcularEngineHormonal() {
+
+  let perfil = (localStorage.getItem("femflow_perfilHormonal") || "regular")
+    .toLowerCase().trim();
+
+  const faseManual =
+    localStorage.getItem("femflow_fase_manual") ||
+    localStorage.getItem("femflow_fase") ||
+    null;
+
+  const cicloDuracao = Number(localStorage.getItem("femflow_cycleLength") || 28);
+  const dataInicio = localStorage.getItem("femflow_startDate");
+
+  let diaCiclo = Number(localStorage.getItem("dia_ciclo") || 1);
+
+  if (["regular", "diu", "diu_cobre", "irregular"].includes(perfil)) {
+    const fase = (faseManual || "folicular").toLowerCase();
+    return {
+      modo: "ciclo_real",
+      faseFirebase: fase,
+      diaFirebase: diaCiclo,
+      diaKey: `dia_${diaCiclo}`
+    };
+  }
+
+  if (perfil === "menopausa" || perfil === "tecnica" || perfil === "diu_hormonal") {
+
+    const nivel = (localStorage.getItem("femflow_nivel") || "iniciante")
+      .toLowerCase();
+
+    let total = 23;
+    let zonaInicio = 18;
+
+    if (nivel === "intermediaria") {
+      total = 23;
+      zonaInicio = 6;
+    }
+
+    if (nivel === "avancada") {
+      total = 32;
+      zonaInicio = 14;
+    }
+
+    let diaEner = Number(localStorage.getItem("femflow_dia_energetico") || 1);
+    const diaFirebase = zonaInicio + ((diaEner - 1) % total);
+    const fase = this._faseDoNumero(diaFirebase);
+
+    return {
+      modo: "menopausa",
+      faseFirebase: fase,
+      diaFirebase: diaFirebase,
+      diaKey: `dia_${diaFirebase}`
+    };
+  }
+
+  return {
+    modo: "fallback",
+    faseFirebase: "folicular",
+    diaFirebase: 1,
+    diaKey: "dia_1"
+  };
+},
+   
+calcularEngineHormonal() {
+    return window.calcularEngineHormonal();
+},
 
 
 }; // ← FECHA o objeto FEMFLOW (ATENÇÃO!)
 
+_faseDoNumero(dia) {
+  if (dia >= 1 && dia <= 5) return "menstrual";
+  if (dia <= 13) return "folicular";
+  if (dia <= 17) return "ovulatoria";
+  return "lutea";
+}
 
 // CSS do Header + Menu (FemFlow Signature 2025)
 (function(){
