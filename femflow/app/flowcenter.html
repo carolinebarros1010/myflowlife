@@ -300,6 +300,8 @@ document.getElementById("lbl-luteal").classList.toggle("label-active",     fase=
   }
 };
 
+
+    
     document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao");
 
 
@@ -313,9 +315,47 @@ document.getElementById("lbl-luteal").classList.toggle("label-active",     fase=
       enfase: localStorage.getItem("femflow_enfase"),
       program: localStorage.getItem("femflow_program_active")
     };
+    
     dbg.innerHTML = Object.entries(debugData)
       .map(([k,v])=>`<b>${k}</b>: ${v||'—'}`).join("<br>");
     dbg.hidden = true; // coloque true se quiser ocultar em produção
+
+    
+    document.addEventListener("DOMContentLoaded", () => {
+  // Calcular a fase e o dia do ciclo
+  const cicloHormonal = FEMFLOW.calcularEngineHormonal();
+  
+  // Debug: Verificar e exibir a fase e o dia calculados para o FlowCenter
+  console.log("🌸 Fase e data calculadas para o FlowCenter:", {
+    fase: cicloHormonal.faseFirebase,   // A fase calculada
+    dia: cicloHormonal.diaFirebase,     // O dia do ciclo
+    diaKey: cicloHormonal.diaKey,       // A chave do dia
+    modo: cicloHormonal.modo            // O modo do ciclo (real, menopausa, etc.)
+  });
+
+  // O resto do código que você já tem para o FlowCenter...
+  
+  // Atualizar a UI com a fase
+  document.getElementById("centerPhase").textContent = L.fases[cicloHormonal.faseFirebase];
+  document.getElementById("t_current").textContent = `${L.faseAtual} ${L.fases[cicloHormonal.faseFirebase]}`;
+  
+  // Destacar a fase no gráfico
+  ["menstrual", "follicular", "ovulatory", "luteal"].forEach(s => {
+    const el = document.getElementById(`seg-${s}`);
+    el.style.fill = (s === cicloHormonal.faseFirebase) ? "#cc6a5a" : "#f9e0d8";
+    el.classList.toggle("path-active", s === cicloHormonal.faseFirebase);
+  });
+
+  // Destacar rótulo da fase ativa
+  document.getElementById("lbl-menstrual").classList.toggle("label-active", cicloHormonal.faseFirebase === "menstrual");
+  document.getElementById("lbl-follicular").classList.toggle("label-active", cicloHormonal.faseFirebase === "follicular");
+  document.getElementById("lbl-ovulatory").classList.toggle("label-active", cicloHormonal.faseFirebase === "ovulatory");
+  document.getElementById("lbl-luteal").classList.toggle("label-active", cicloHormonal.faseFirebase === "luteal");
+  
+  // Atualizar outros elementos conforme necessário...
+});
+
+    
 
   });
     // === Mudança dinâmica de idioma (fix real-time) ===
