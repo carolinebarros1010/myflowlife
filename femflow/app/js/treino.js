@@ -183,46 +183,70 @@ function calcularEngineHormonal() {
     };
   }
   /* -----------------------------------------------------------
-   * 6.2 PERFIL MENOPAUSA TÉCNICA — NIVEL ALTERA O 23+5
-   * iniciante      → 23 dias lutea + 5 menstrual
-   * intermediaria  → 23 dias folicular + 5 menstrual
-   * avancada       → 32 dias ovulatória + 5 menstrual
-   * ----------------------------------------------------------- */
-  if (perfil === "menopausa" || perfil === "tecnica" || perfil === "diu_hormonal") {
+ * 6.2 PERFIL MENOPAUSA / TÉCNICO / DIU HORMONAL — 23+5
+ * iniciante      → 23 dias lutea + 5 menstrual
+ * intermediaria  → 23 dias folicular + 5 menstrual
+ * avancada       → 32 dias ovulatória + 5 menstrual
+ *
+ * REGRA EXTRA: se o ciclo (quiz 23+5) estiver em BAIXA ENERGIA,
+ *              ou seja, femflow_fase_atual = "menstrual",
+ *              o backend SEMPRE deve ver fase "menstrual".
+ * ----------------------------------------------------------- */
+if (perfil === "menopausa" || perfil === "tecnica" || perfil === "diu_hormonal") {
 
-    const nivel = (
-      localStorage.getItem("femflow_nivel") ||
-      "iniciante"
-    ).toLowerCase();
+  const nivel = (
+    localStorage.getItem("femflow_nivel") ||
+    "iniciante"
+  ).toLowerCase();
 
-    let total = 23;        // padrão
-    let zonaInicio = 18;   // lutea (iniciante)
+  const faseAtualFront = (
+    localStorage.getItem("femflow_fase_atual") || ""
+  ).toLowerCase().trim();
 
-    if (nivel === "intermediaria") {
-      total = 23;
-      zonaInicio = 6;      // folicular
-    }
+  // 🔻 6.2.1 — BAIXA ENERGIA: força FASE MENSTRUAL no backend
+  if (faseAtualFront === "menstrual") {
 
-    if (nivel === "avancada") {
-      total = 32;
-      zonaInicio = 14;     // ovulatória extendida
-    }
-
-    // contador energético salvo no localStorage
+    // usamos um ciclo curto 1–5 só para mapear em dias menstruais
     let diaEner = Number(localStorage.getItem("femflow_dia_energetico") || 1);
-
-    // turnover infinito: ciclo artificial
-    const diaFirebase = zonaInicio + ((diaEner - 1) % total);
-
-    const fase = faseDoNumero(diaFirebase);
+    const diaFirebase = ((diaEner - 1) % 5) + 1;  // 1..5 sempre
 
     return {
-      modo: "menopausa",
-      faseFirebase: fase,
-      diaFirebase: diaFirebase,
+      modo: "menopausa_baixa",
+      faseFirebase: "menstrual",
+      diaFirebase,
       diaKey: `dia_${diaFirebase}`
     };
   }
+
+  // 🔺 6.2.2 — ENERGIA ALTA: segue a lógica 23 (fase alta)
+  let total = 23;        // padrão
+  let zonaInicio = 18;   // lutea (iniciante)
+
+  if (nivel === "intermediaria") {
+    total = 23;
+    zonaInicio = 6;      // folicular
+  }
+
+  if (nivel === "avancada") {
+    total = 32;
+    zonaInicio = 14;     // ovulatória extended
+  }
+
+  // contador energético salvo no localStorage
+  let diaEner = Number(localStorage.getItem("femflow_dia_energetico") || 1);
+
+  // turnover infinito: ciclo artificial de fase alta
+  const diaFirebase = zonaInicio + ((diaEner - 1) % total);
+
+  const fase = faseDoNumero(diaFirebase);
+
+  return {
+    modo: "menopausa_alta",
+    faseFirebase: fase,
+    diaFirebase,
+    diaKey: `dia_${diaFirebase}`
+  };
+}
 
   // fallback
   return {
