@@ -695,7 +695,8 @@ FEMFLOW._buscarExerciciosTreino = async function (firebaseQuery) {
 
   this.log("📁 Pasta Firebase:", pasta);
 
-  const lista = await this.buscarExerciciosFirebase(pasta, fase, diaKey);
+  // ✔ Função correta !!!
+  const lista = await this._carregarExerciciosFirebase(pasta, fase, diaKey);
 
   if (!lista || !Array.isArray(lista)) {
     this.warn("⚠ Firebase retornou vazio para:", firebaseQuery);
@@ -704,7 +705,6 @@ FEMFLOW._buscarExerciciosTreino = async function (firebaseQuery) {
 
   return lista;
 };
-
 
 
 
