@@ -1,15 +1,17 @@
 /* ================================================================
-   FemFlow — treino.js FRONT-END TOTAL v1.3
+   FemFlow — treino.js FRONT-END TOTAL v2.0 (Arquitetura A)
    ---------------------------------------------------------------
-   • Sem backend, sem GAS
-   • Usa femflow-core + treino-engine + Firestore
+   • Fase hormonal REAL → backend
+   • Dia do programa → local (1–30)
+   • Sem Engine Hormonal local
+   • Usa core.js + treino-engine + Firestore
    • Snapshot Offline
    • PSE 100% LocalStorage
 ================================================================ */
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  FEMFLOW.log("🚀 treino.js FRONT-END v1.3 iniciado!");
+  FEMFLOW.log("🚀 treino.js v2.0 (Arquitetura A) iniciado!");
 
   const OFFLINE_KEY = "femflow_offline_treino_v1";
 
@@ -17,17 +19,15 @@ document.addEventListener("DOMContentLoaded", async () => {
    * 1. LOGIN OBRIGATÓRIO
    * ----------------------------------------------------------- */
   const id = localStorage.getItem("femflow_id");
-
   if (!id) {
     FEMFLOW.toast("⚠️ Faça login novamente.");
     return location.href = "index.html?ret=treino.html";
   }
 
   /* -----------------------------------------------------------
-   * 2. GARANTIR QUE O CICLO JÁ FOI CONFIGURADO
+   * 2. CICLO PRECISA ESTAR CONFIGURADO
    * ----------------------------------------------------------- */
   const cicloOK = localStorage.getItem("femflow_cycle_configured") === "yes";
-
   if (!cicloOK) {
     FEMFLOW.toast("⚠️ Configure seu ciclo primeiro.");
     return location.href = "ciclo.html";
@@ -36,14 +36,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* -----------------------------------------------------------
    * 3. ELEMENTOS HTML
    * ----------------------------------------------------------- */
-  const track   = document.querySelector("#carouselTrack");
-  const bar     = document.querySelector("#progressBar");
-  const titulo  = document.querySelector("#tituloDiaTreino");
-  const btnRest = document.querySelector("#descansoBtn");
-  const btnSalvar = document.querySelector("#salvarTreinoBtn");
+  const track      = document.querySelector("#carouselTrack");
+  const bar        = document.querySelector("#progressBar");
+  const titulo     = document.querySelector("#tituloDiaTreino");
+  const btnRest    = document.querySelector("#descansoBtn");
+  const btnSalvar  = document.querySelector("#salvarTreinoBtn");
 
   if (!track || !bar) {
-    FEMFLOW.error("❌ Estrutura do treino.html não encontrada.");
+    FEMFLOW.log("❌ Estrutura do treino.html não encontrada.");
     return;
   }
 
@@ -52,30 +52,23 @@ document.addEventListener("DOMContentLoaded", async () => {
    * ----------------------------------------------------------- */
   let boxes = [];
   let current = 0;
-  const diaPrograma = Number(localStorage.getItem("femflow_dia_treino") || 1);
 
+  const diaPrograma = Number(localStorage.getItem("femflow_dia_treino") || 1);
   if (titulo) titulo.textContent = `Dia ${diaPrograma} do Programa`;
 
   /* ============================================================
-   * 5. CARROSSEL — Swipe + Progresso
+   * 5. CARROSSEL — Swipe
    * ============================================================ */
   function moveTo(dir) {
     const total = boxes.length;
 
-    if (dir === "next" && current < total - 1) {
-      current++; navigator.vibrate?.([20]);
-    } 
-    else if (dir === "prev" && current > 0) {
-      current--; navigator.vibrate?.([20]);
-    }
+    if (dir === "next" && current < total - 1) current++;
+    else if (dir === "prev" && current > 0) current--;
 
     const item = track.children[current];
     if (!item) return;
 
-    track.scrollTo({
-      left: item.offsetLeft - 16,
-      behavior: "smooth"
-    });
+    track.scrollTo({ left: item.offsetLeft - 16, behavior: "smooth" });
 
     bar.style.width = `${((current + 1) / total) * 100}%`;
   }
@@ -88,15 +81,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   /* ============================================================
-   * 6. TIMER (HIIT / CARDIO)
+   * 6. TIMER
    * ============================================================ */
   const intervals = new WeakMap();
-  const fmt = s => `00:${String(s).padStart(2,"0")}`;
-
-  const parseTempo = raw => {
-    const n = Number(String(raw).replace(/[^\d]/g, ""));
-    return n > 0 ? n : 45;
-  };
+  const fmt = s => `00:${String(s).padStart(2, "0")}`;
+  const parseTempo = raw => Number(String(raw).replace(/[^\d]/g, "")) || 45;
 
   function bindTimers(root) {
     root.querySelectorAll(".ff-timer-bar").forEach(el => {
@@ -128,13 +117,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (el.classList.contains("running")) {
           clearInterval(intervals.get(el));
           el.classList.remove("running");
-        } else start();
+        } else {
+          start();
+        }
       };
     });
   }
 
   /* ============================================================
-   * 7. RENDERIZAR BOXES
+   * 7. RENDER BOXES
    * ============================================================ */
   function renderBoxes(lista) {
     track.innerHTML = "";
@@ -144,7 +135,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const div = document.createElement("div");
       div.className = "carousel-item";
 
-      /* BOX 0 / FINAL */
       if (box.tipo === "box0" || box.tipo === "final") {
         div.innerHTML = `
           <h3 class="ff-ex-titulo">${box.titulo}</h3>
@@ -155,34 +145,32 @@ document.addEventListener("DOMContentLoaded", async () => {
         `;
       }
 
-      /* EXERCÍCIOS */
-else if (box.tipo === "treino") {
-  div.innerHTML = `
-    <h3 class="ff-ex-titulo">Box ${box.box}</h3>
-    <div class="ff-series">
-      ${box.exercicios
-        .map(ex => `
-          <div class="ff-serie-item">
-            <span class="ff-ex-nome">${ex.nome}</span>
+      else if (box.tipo === "treino") {
+        div.innerHTML = `
+          <h3 class="ff-ex-titulo">Box ${box.box}</h3>
+          <div class="ff-series">
+            ${box.exercicios
+              .map(ex => `
+                <div class="ff-serie-item">
+                  <span class="ff-ex-nome">${ex.nome}</span>
 
-            <div class="ff-ex-info">
-              <span class="ff-ex-series">Séries: <b>${ex.series}</b></span>
-              <span class="ff-ex-reps">Reps: <b>${ex.reps}</b></span>
-              <span class="ff-ex-int">Intervalo: <b>${ex.intervalo}s</b></span>
-            </div>
+                  <div class="ff-ex-info">
+                    <span class="ff-ex-series">Séries: <b>${ex.series}</b></span>
+                    <span class="ff-ex-reps">Reps: <b>${ex.reps}</b></span>
+                    <span class="ff-ex-int">Intervalo: <b>${ex.intervalo}s</b></span>
+                  </div>
 
-            <div class="ff-timer-bar" data-total="${ex.intervalo}">
-              <div class="ff-timer-fill"></div>
-              <span class="ff-timer-count">${fmt(ex.intervalo)}</span>
-            </div>
+                  <div class="ff-timer-bar" data-total="${ex.intervalo}">
+                    <div class="ff-timer-fill"></div>
+                    <span class="ff-timer-count">${fmt(ex.intervalo)}</span>
+                  </div>
+                </div>
+              `)
+              .join("")}
           </div>
-        `)
-        .join("")}
-    </div>
-  `;
-}
+        `;
+      }
 
-      /* HIIT / CARDIO */
       else if (box.tipo === "hiit" || box.tipo === "cardio") {
         div.innerHTML = `
           <h3 class="ff-ex-titulo">${box.titulo}</h3>
@@ -202,25 +190,21 @@ else if (box.tipo === "treino") {
   }
 
   /* ============================================================
-   * 8. BOTÃO SALVAR TREINO → abre PSE
+   * 8. SALVAR TREINO
    * ============================================================ */
   if (btnSalvar) {
     btnSalvar.onclick = () => {
-      FEMFLOW.abrirPSE(v => {
+      FEMFLOW.abrirPSE(async v => {
 
         const hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
-
-        hist.push({
-          data: Date.now(),
-          pse: Number(v)
-        });
-
+        hist.push({ data: Date.now(), pse: Number(v) });
         localStorage.setItem("femflow_hist", JSON.stringify(hist));
 
         FEMFLOW.toast("Treino salvo! 💾🌸");
 
-        // avança o dia do programa
         localStorage.setItem("femflow_dia_treino", String(diaPrograma + 1));
+
+        await FEMFLOW.salvarTreino({ pse: v });
 
         setTimeout(() => FEMFLOW.router("flowcenter"), 600);
       });
@@ -228,38 +212,36 @@ else if (box.tipo === "treino") {
   }
 
   /* ============================================================
-   * 9. BOTÃO DESCANSO
+   * 9. DESCANSO
    * ============================================================ */
   if (btnRest) {
-    btnRest.onclick = () => {
+    btnRest.onclick = async () => {
       const hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
-
-      hist.push({
-        data: Date.now(),
-        pse: 0,              // PSE 0 = descanso
-        descanso: true
-      });
-
+      hist.push({ data: Date.now(), pse: 0, descanso: true });
       localStorage.setItem("femflow_hist", JSON.stringify(hist));
 
       FEMFLOW.toast("Descanso registrado 🌿");
-      setTimeout(() => location.href = "flowcenter.html", 800);
+      await FEMFLOW.salvarDescanso();
+      setTimeout(() => FEMFLOW.router("flowcenter"), 800);
     };
   }
 
   /* ============================================================
    * 10. SNAPSHOT OFFLINE
    * ============================================================ */
-  const salvarSnapshot = (meta, lista) =>
+  const salvarSnapshot = (meta, lista) => {
     localStorage.setItem(OFFLINE_KEY, JSON.stringify({
       meta, lista, salvoEm: Date.now()
     }));
+  };
 
   const carregarSnapshot = () => {
     try {
       const raw = localStorage.getItem(OFFLINE_KEY);
       return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   };
 
   if (!navigator.onLine) {
@@ -272,24 +254,27 @@ else if (box.tipo === "treino") {
   }
 
   /* ============================================================
-   * 11. ENGINE HORMONAL FINAL
+   * 11. SINCRONIZAR CICLO COM BACKEND
    * ============================================================ */
-  const E = FEMFLOW.calcularEngineHormonal();
-  FEMFLOW.log("🧬 ENGINE", E);
+  await FEMFLOW.syncCiclo();
+
+  const fase     = FEMFLOW.getFaseAtual();
+  const diaCiclo = Number(localStorage.getItem("femflow_diaCiclo"));
 
   /* ============================================================
-   * 12. MONTAR TREINO FINAL
+   * 12. MONTAR TREINO FINAL (Fase REAL)
    * ============================================================ */
+  FEMFLOW.log("🧬 TREINO → fase:", fase, "diaCiclo:", diaCiclo);
+
   const listaMontada = await FEMFLOW.engineTreino.montarTreino({
-    nivel: localStorage.getItem("femflow_nivel"),
-    enfase: localStorage.getItem("femflow_enfase"),
-    fase: E.faseFirebase,
-    diaCiclo: E.diaFirebase
+    nivel:   localStorage.getItem("femflow_nivel"),
+    enfase:  localStorage.getItem("femflow_enfase"),
+    fase:    fase,
+    diaCiclo: diaCiclo
   });
 
-  salvarSnapshot({ engine: E }, listaMontada);
+  salvarSnapshot({ fase, diaCiclo }, listaMontada);
 
   renderBoxes(listaMontada);
 
 });
-
