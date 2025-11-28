@@ -353,21 +353,27 @@ function finalizarQuiz(){
   const nivel = (localStorage.getItem("nivel_atual") || "iniciante").toLowerCase();
   const entraAlta = quizScore <= 3;   // true = alta energia
 
-  // 🔥 1. Se PERFIL é IRREGULAR (perfilInterno === "irregular_quiz")
+  /* ============================================================
+     1) PERFIL IRREGULAR — fase aproximada
+  ============================================================ */
   if (perfilInterno === "irregular_quiz") {
 
-    // fase aproximada
     let faseAprox = "";
     if (quizScore >= 4) faseAprox = "luteal";
     else if (quizScore === 3) faseAprox = "ovulatory";
     else if (quizScore === 2) faseAprox = "follicular";
     else faseAprox = "menstrual";
 
-    // conversão para o dia inicial fisiológico REAL
     let diaInicial = 1;
     if (faseAprox === "follicular") diaInicial = 6;
     if (faseAprox === "ovulatory")  diaInicial = 14;
     if (faseAprox === "luteal")     diaInicial = 18;
+
+    // LOG DEBUG IRREGULAR
+    console.log("🔍 IRREGULAR.DEBUG → faseAprox:", faseAprox);
+    console.log("🔍 IRREGULAR.DEBUG → diaInicial:", diaInicial);
+    console.log("🔍 IRREGULAR.DEBUG → perfilInterno:", perfilInterno);
+    console.log("🔍 IRREGULAR.DEBUG → score:", quizScore);
 
     salvarCiclo({
       perfil: "irregular",
@@ -380,35 +386,38 @@ function finalizarQuiz(){
     return;
   }
 
-  // 🔥 2. Se PERFIL é MENOPAUSA ou DIU hormonal → usar dinâmica ENERGÉTICA
+  /* ============================================================
+     2) PERFIL ENERGÉTICO (DIU hormonal ou menopausa)
+  ============================================================ */
   const faseAltaNivel = faseAltaPorNivel();
-  const diaEnergetico = 1; // sempre começamos do 1 no ciclo energético
+  const diaEnergetico = 1; // sempre começa 1 energético
 
   let faseCalc, diaReal;
 
-  // ALTA ENERGIA → aplicar faseAltaNivel com loop fisiológico real
   if (entraAlta) {
     faseCalc = faseAltaNivel;
 
     if (faseAltaNivel === "luteal") {
-      diaReal = 18 + ((diaEnergetico - 1) % 11); // 18–28
-    }
-    else if (faseAltaNivel === "follicular") {
-      diaReal = 6 + ((diaEnergetico - 1) % 8);   // 6–13
-    }
-    else if (faseAltaNivel === "ovulatory") {
-      diaReal = 14 + ((diaEnergetico - 1) % 4);  // 14–17
-    }
-    else {
+      diaReal = 18 + ((diaEnergetico - 1) % 11);
+    } else if (faseAltaNivel === "follicular") {
+      diaReal = 6 + ((diaEnergetico - 1) % 8);
+    } else if (faseAltaNivel === "ovulatory") {
+      diaReal = 14 + ((diaEnergetico - 1) % 4);
+    } else {
       diaReal = 1;
     }
-  }
-   
-  // BAIXA ENERGIA → menstrual 1–5
-  else {
+
+  } else {
     faseCalc = "menstrual";
-    diaReal = 1 + ((diaEnergetico - 1) % 5); // 1–5
+    diaReal = 1 + ((diaEnergetico - 1) % 5);
   }
+
+  // LOG DEBUG ENERGÉTICO
+  console.log("🔋 ENERGETICO.DEBUG → faseAltaNivel:", faseAltaNivel);
+  console.log("🔋 ENERGETICO.DEBUG → faseCalc final:", faseCalc);
+  console.log("🔋 ENERGETICO.DEBUG → diaReal:", diaReal);
+  console.log("🔋 ENERGETICO.DEBUG → score:", quizScore);
+  console.log("🔋 ENERGETICO.DEBUG → perfilInterno:", perfilInterno);
 
   salvarCiclo({
     perfil: perfilInterno.replace("_quiz",""),
@@ -418,14 +427,8 @@ function finalizarQuiz(){
     faseAlta: faseAltaNivel,
     dia: diaReal
   });
-   console.log("🔍 CICLO.DEBUG → Perfil selecionado:", perfil);
-console.log("🔍 CICLO.DEBUG → PerfilInterno:", perfilInterno);
-console.log("🔍 CICLO.DEBUG → Perguntas do Quiz:", perguntasAtuais);
-console.log("🔍 CICLO.DEBUG → Score do Quiz:", quizScore);
-console.log("🔍 CICLO.DEBUG → faseCalc:", faseCalc);
-console.log("🔍 CICLO.DEBUG → diaInicial:", diaInicial);
-console.log("🔍 CICLO.DEBUG → faseAltaNivel:", faseAltaNivel);
 }
+
 
 /* ============================================================
    PERFIL REGULAR — FISIOLÓGICO REAL
