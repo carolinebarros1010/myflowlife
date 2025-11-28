@@ -681,42 +681,77 @@ FEMFLOW._salvarSnapshotTreino = function (j, lista) {
 
 
 
-/* ===========================================================
-   7) Carregar arquivos do Firebase (JSON via Storage)
-=========================================================== */
+/* =============================================================
+   7) Carregar exercícios do Firebase (estrutura por arquivos)
+   Compatível com:
+   /exercicios/{pasta}/fases/{fasePT}/dias/{diaKey}/exercicios/*
+============================================================= */
 FEMFLOW._carregarExerciciosFirebase = async function (pasta, fase, diaKey) {
 
-  const url =
-    `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/` +
-    encodeURIComponent(`exercicios/${pasta}/${fase}/${diaKey}.json`) +
-    `?alt=media`;
+  // 1) Tradução inglês → português para compatibilizar com Firebase
+  const faseMap = {
+    follicular: "follicular",
+    ovulatory:  "ovulatoria",
+    luteal:     "lutea",
+    menstrual:  "menstrual"
+  };
 
-  this.log("🔥 Firebase URL:", url);
+  const fasePT = faseMap[fase] || fase;
+
+  // 2) Caminho base
+  const firebasePath = `exercicios/${pasta}/fases/${fasePT}/dias/${diaKey}/exercicios`;
+
+  this.log("🔥 Firebase Path:", firebasePath);
+
+  // 3) URL da pasta
+  const listUrl =
+    `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/` +
+    `?prefix=${encodeURIComponent(firebasePath)}`;
+
+  this.log("📡 Firebase LIST URL:", listUrl);
 
   try {
-    const r = await fetch(url);
+    // 4) LISTAR arquivos da pasta
+    const listRes = await fetch(listUrl);
+    const listJson = await listRes.json();
 
-    if (!r.ok) {
-      this.warn("⚠ Firebase HTTP Status:", r.status);
+    if (!listJson.items || !Array.isArray(listJson.items)) {
+      this.warn("⚠ Nenhum arquivo encontrado no Firebase para:", firebasePath);
       return [];
     }
 
-    const txt = await r.text();
+    const arquivos = listJson.items;
+    this.log("📦 Arquivos encontrados:", arquivos);
 
-    try {
-      const j = JSON.parse(txt);
-      this.log("🔥 Firebase JSON retornado:", j);
-      return j;
-    } catch (e) {
-      this.warn("⚠ Firebase retornou texto não JSON:", txt);
-      return [];
+    // 5) Baixar cada arquivo JSON individual
+    const listaFinal = [];
+
+    for (const item of arquivos) {
+      try {
+        const fileUrl =
+          `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/` +
+          `${encodeURIComponent(item.name)}?alt=media`;
+
+        const r = await fetch(fileUrl);
+        const txt = await r.text();
+        const obj = JSON.parse(txt);
+
+        listaFinal.push(obj);
+
+      } catch (e) {
+        this.warn("⚠ Erro ao ler arquivo do Firebase:", item.name, e);
+      }
     }
+
+    this.log("🔥 Firebase Exercícios FINAL:", listaFinal);
+    return listaFinal;
 
   } catch (err) {
     this.error("❌ Erro ao acessar Firebase:", err);
     return [];
   }
 };
+
 /* ===========================================================
    🌸 BLOCO 4 — DEBUG, INSPECTOR, INIT, AUTO-START
 =========================================================== */
