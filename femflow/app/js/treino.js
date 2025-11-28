@@ -398,7 +398,13 @@ FEMFLOW.debugTreino = function () {
 
     let listaFirebase = null;
     try {
-      listaFirebase = await FEMFLOW._buscarExerciciosTreino(pasta, faseFirebase, diaKey);
+      listaFirebase = await FEMFLOW._buscarExerciciosTreino({
+    pasta,
+    fase: faseFirebase,
+    diaKey,
+    nivel,
+    enfase
+});
     } catch (e) {
       console.error("❌ Firebase erro:", e);
     }
