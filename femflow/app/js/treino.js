@@ -1,14 +1,15 @@
 /* ================================================================
-   FemFlow — treino.js FRONT-END TOTAL v1.2
+   FemFlow — treino.js FRONT-END TOTAL v1.3
    ---------------------------------------------------------------
    • Sem backend, sem GAS
-   • Usa femflow-core + treino-engine v1.1 + Firestore
+   • Usa femflow-core + treino-engine + Firestore
    • Snapshot Offline
+   • PSE 100% LocalStorage
 ================================================================ */
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  FEMFLOW.log("🚀 treino.js FRONT-END v1.2 iniciado!");
+  FEMFLOW.log("🚀 treino.js FRONT-END v1.3 iniciado!");
 
   const OFFLINE_KEY = "femflow_offline_treino_v1";
 
@@ -35,10 +36,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* -----------------------------------------------------------
    * 3. ELEMENTOS HTML
    * ----------------------------------------------------------- */
-  const track  = document.querySelector("#carouselTrack");
-  const bar    = document.querySelector("#progressBar");
-  const titulo = document.querySelector("#tituloDiaTreino");
+  const track   = document.querySelector("#carouselTrack");
+  const bar     = document.querySelector("#progressBar");
+  const titulo  = document.querySelector("#tituloDiaTreino");
   const btnRest = document.querySelector("#descansoBtn");
+  const btnSalvar = document.querySelector("#salvarTreinoBtn");
 
   if (!track || !bar) {
     FEMFLOW.error("❌ Estrutura do treino.html não encontrada.");
@@ -132,7 +134,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ============================================================
-   * 7. RENDERIZAR BOXES (agora compatível com engine v1.1)
+   * 7. RENDERIZAR BOXES
    * ============================================================ */
   function renderBoxes(lista) {
     track.innerHTML = "";
@@ -142,9 +144,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const div = document.createElement("div");
       div.className = "carousel-item";
 
-      /* ----------------------
-       * BOX 0 / FINAL (texto)
-       * ---------------------- */
+      /* BOX 0 / FINAL */
       if (box.tipo === "box0" || box.tipo === "final") {
         div.innerHTML = `
           <h3 class="ff-ex-titulo">${box.titulo}</h3>
@@ -155,9 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         `;
       }
 
-      /* ----------------------
-       * EXERCÍCIOS DO FIREBASE
-       * ---------------------- */
+      /* EXERCÍCIOS */
       else if (box.tipo === "treino") {
         div.innerHTML = `
           <h3 class="ff-ex-titulo">Box ${box.box}</h3>
@@ -169,9 +167,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         `;
       }
 
-      /* ----------------------
-       * HIIT / CARDIO
-       * ---------------------- */
+      /* HIIT / CARDIO */
       else if (box.tipo === "hiit" || box.tipo === "cardio") {
         div.innerHTML = `
           <h3 class="ff-ex-titulo">${box.titulo}</h3>
@@ -189,17 +185,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindTimers(track);
     moveTo("reset");
   }
-   
-btnSalvar.onclick = () => {
-  FEMFLOW.abrirPSE(v => {
-    const hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
-    hist.push({ data: Date.now(), pse: v });
-    localStorage.setItem("femflow_hist", JSON.stringify(hist));
-  });
-};
 
   /* ============================================================
-   * 8. SNAPSHOT OFFLINE
+   * 8. BOTÃO SALVAR TREINO → abre PSE
+   * ============================================================ */
+  if (btnSalvar) {
+    btnSalvar.onclick = () => {
+      FEMFLOW.abrirPSE(v => {
+
+        const hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
+
+        hist.push({
+          data: Date.now(),
+          pse: Number(v)
+        });
+
+        localStorage.setItem("femflow_hist", JSON.stringify(hist));
+
+        FEMFLOW.toast("Treino salvo! 💾🌸");
+
+        // avança o dia do programa
+        localStorage.setItem("femflow_dia_treino", String(diaPrograma + 1));
+
+        setTimeout(() => FEMFLOW.router("flowcenter"), 600);
+      });
+    };
+  }
+
+  /* ============================================================
+   * 9. BOTÃO DESCANSO
+   * ============================================================ */
+  if (btnRest) {
+    btnRest.onclick = () => {
+      const hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
+
+      hist.push({
+        data: Date.now(),
+        pse: 0,              // PSE 0 = descanso
+        descanso: true
+      });
+
+      localStorage.setItem("femflow_hist", JSON.stringify(hist));
+
+      FEMFLOW.toast("Descanso registrado 🌿");
+      setTimeout(() => location.href = "flowcenter.html", 800);
+    };
+  }
+
+  /* ============================================================
+   * 10. SNAPSHOT OFFLINE
    * ============================================================ */
   const salvarSnapshot = (meta, lista) =>
     localStorage.setItem(OFFLINE_KEY, JSON.stringify({
@@ -213,9 +247,6 @@ btnSalvar.onclick = () => {
     } catch { return null; }
   };
 
-  /* ============================================================
-   * 9. MODO OFFLINE
-   * ============================================================ */
   if (!navigator.onLine) {
     const snap = carregarSnapshot();
     if (snap?.lista) {
@@ -226,24 +257,13 @@ btnSalvar.onclick = () => {
   }
 
   /* ============================================================
-   * 10. BOTÃO DESCANSAR
-   * ============================================================ */
-  if (btnRest) {
-    btnRest.onclick = async () => {
-      if (!confirm("Deseja registrar descanso hoje?")) return;
-      FEMFLOW.toast("Descanso registrado 🌿");
-      setTimeout(() => location.href = "flowcenter.html", 800);
-    };
-  }
-
-  /* ============================================================
-   * 11. ENGINE HORMONAL FINAL (core)
+   * 11. ENGINE HORMONAL FINAL
    * ============================================================ */
   const E = FEMFLOW.calcularEngineHormonal();
   FEMFLOW.log("🧬 ENGINE", E);
 
   /* ============================================================
-   * 12. CHAMAR ENGINE DE TREINO (treino-engine v1.1)
+   * 12. MONTAR TREINO FINAL
    * ============================================================ */
   const listaMontada = await FEMFLOW.engineTreino.montarTreino({
     nivel: localStorage.getItem("femflow_nivel"),
@@ -252,10 +272,9 @@ btnSalvar.onclick = () => {
     diaCiclo: E.diaFirebase
   });
 
-  /* Snapshot */
   salvarSnapshot({ engine: E }, listaMontada);
 
-  /* Renderiza treino */
   renderBoxes(listaMontada);
 
 });
+
