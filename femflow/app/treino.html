@@ -6,21 +6,15 @@
 
   <title>FemFlow — Treino Diário</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="favicon.ico">
-
-  <!-- PWA -->
+  <link rel="icon" href="favicon.ico">
   <link rel="manifest" href="manifest.json">
 
-  <!-- CSS FemFlow -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
   <link rel="stylesheet" href="css/treino.css">
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
 
@@ -29,13 +23,14 @@
   <!-- Progress Bar -->
   <div class="progress-bar" id="progressBar"></div>
 
+  <!-- Header -->
   <header class="treino-header">
     <h1>Treino Diário</h1>
 
     <h2 id="tituloDiaTreino"
         style="text-align:center;
                color:#335953;
-               margin: 10px 0;
+               margin:10px 0;
                font-family:'Playfair Display',serif;
                font-weight:700;">
       Dia do Programa
@@ -51,36 +46,37 @@
 
   <!-- Rodapé Fixado -->
   <div class="fix-footer">
-    <button id="btnSalvarTreino">💾 Salvar treino</button>
-    <button id="btnDescansar" class="secundario">🌿 Descanso</button>
-    <button id="btnCancelarTreino" class="secundario">Cancelar Treino</button>
+    <button id="salvarTreinoBtn">💾 Salvar treino</button>
+    <button id="descansoBtn" class="secundario">🌿 Descanso</button>
+    <button id="cancelarTreinoBtn" class="secundario">Cancelar</button>
   </div>
 
-  <!-- Firebase compat -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-  <!-- FEMFLOW CORE v4.1 -->
+  <!-- FEMFLOW CORE -->
   <script src="./femflow-core.js"></script>
 
-  <!-- TREINO ENGINE (pasta JS) -->
+  <!-- ENGINE & TREINO -->
   <script src="./js/treino-engine.js"></script>
-
-  <!-- TREINO FRONT-END TOTAL (pasta JS) -->
   <script src="./js/treino.js"></script>
 
-  <!-- Init fallback -->
+  <!-- INIT (garantia) -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
         FEMFLOW.init();
-      } else {
-        console.warn("⚠️ FEMFLOW Core não encontrado ou ainda carregando.");
       }
     });
+
+    // Cancelar Treino → volta ao FlowCenter
+    document.getElementById("cancelarTreinoBtn").onclick = () => {
+      FEMFLOW.router("flowcenter");
+    };
   </script>
 
-  <!-- Idioma -->
+  <!-- MULTI-IDIOMA -->
   <script>
     window.addEventListener("femflow:langchange", () => {
       const lang = localStorage.getItem("femflow_lang") || "pt";
@@ -88,20 +84,22 @@
         pt: {
           titulo: "Treino Diário",
           salvar: "💾 Salvar treino",
-          descanso: "🌿 Descanso"
+          descanso: "🌿 Descanso",
+          cancelar: "Cancelar"
         },
         en: {
           titulo: "Daily Workout",
-          salvar: "💾 Save workout",
-          descanso: "🌿 Rest"
+          salvar: "💾 Save Workout",
+          descanso: "🌿 Rest",
+          cancelar: "Cancel"
         }
       };
 
       const L = T[lang];
-
       document.querySelector(".treino-header h1").textContent = L.titulo;
-      document.getElementById("btnSalvarTreino").textContent = L.salvar;
-      document.getElementById("btnDescansar").textContent = L.descanso;
+      document.getElementById("salvarTreinoBtn").textContent = L.salvar;
+      document.getElementById("descansoBtn").textContent = L.descanso;
+      document.getElementById("cancelarTreinoBtn").textContent = L.cancelar;
     });
   </script>
 
