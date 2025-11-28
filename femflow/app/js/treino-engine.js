@@ -1,11 +1,11 @@
 /* ============================================================
-   FEMFLOW • TREINO ENGINE v1.0 — FRONT-END TOTAL
+   FEMFLOW • TREINO ENGINE v1.1 — FRONT-END TOTAL
    ------------------------------------------------------------
-   - Regras de BOX (menstrual, folicular, ovulatório, lútea)
-   - Regras por nível (iniciante / intermediária / avançada)
-   - Busca multi-box no Firebase
+   - Regras completas por fase × nível
    - Box0 + BoxFinal fixos
-   - HIIT + CARDIO 100% no front
+   - HIIT + Cardio 100% no Front
+   - Divisão multi-box por pastas Firebase
+   - Totalmente compatível com treino.js v1.0
    ============================================================ */
 
 window.FEMFLOW = window.FEMFLOW || {};
@@ -38,7 +38,7 @@ FEMFLOW.engineTreino.regras = {
 };
 
 /* ============================================================
-   2) BOX 0 — Mobilidade fixa (geral)
+   2) BOX 0 — Mobilidade fixa
 ============================================================ */
 FEMFLOW.engineTreino.box0 = () => ({
   tipo: "box0",
@@ -58,11 +58,11 @@ FEMFLOW.engineTreino.box0 = () => ({
 FEMFLOW.engineTreino.boxFinal = () => ({
   tipo: "final",
   titulo: "🧘‍♀️ Resfriamento & Respiração",
-  descricao: "Desacelere corpo e mente.",
+  descricao: "Desacelere corpo e mente com presença.",
   passos: [
     "Alongamento leve — 2 min",
     "Respiração Calm Flow — 1 min",
-    "Retorne ao Flow Center com presença"
+    "Retorne ao Flow Center com leveza"
   ]
 });
 
@@ -85,7 +85,7 @@ FEMFLOW.engineTreino.criarBoxEspecial = function (tipo, fase) {
       tipo: "hiit",
       titulo: `🔥 HIIT — ${fase}`,
       protocolo: pick(baseHiit),
-      descricao: "Alta intensidade para ativar coordenação e potência.",
+      descricao: "Alta intensidade para potência controlada.",
       opcoesAcademia: ["Bike", "Esteira", "Elíptico", "Remo"],
       opcoesCasa: ["Polichinelo", "High Knees", "Burpee", "Agachamento com salto"],
       tempo_total: 360
@@ -95,7 +95,7 @@ FEMFLOW.engineTreino.criarBoxEspecial = function (tipo, fase) {
   return {
     tipo: "cardio",
     titulo: "💗 Cardio Leve — 10 min",
-    descricao: "Movimento suave e contínuo para recuperar.",
+    descricao: "Movimento contínuo para circulação e recuperação.",
     opcoesAcademia: ["Esteira leve", "Bike leve", "Remo suave"],
     opcoesCasa: ["Caminhada no lugar", "Corrida estacionária leve"],
     tempo_total: 600
@@ -118,25 +118,26 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
   const diaKey = `dia_${diaCiclo}`;
 
   const db = firebase.firestore();
-  const col = db
+
+  const snap = await db
     .collection("exercicios")
     .doc(pasta)
     .collection("fases")
     .doc(fase)
     .collection("dias")
     .doc(diaKey)
-    .collection("exercicios");
+    .collection("exercicios")
+    .get();
 
-  const snap = await col.get();
   if (snap.empty) return [];
 
   const todos = [];
   snap.forEach(d => todos.push(d.data()));
 
-  // embaralha
+  // embaralha aleatoriamente
   const shuffled = todos.sort(() => Math.random() - 0.5);
 
-  // divide em boxes conforme exPorBox
+  // divisão por box
   let cursor = 0;
   const boxes = [];
 
@@ -162,18 +163,17 @@ FEMFLOW.engineTreino.montarTreino = async function ({
   nivel,
   enfase,
   fase,
-  diaCiclo,
-  firebaseList
+  diaCiclo
 }) {
 
   const regras = this.regras[nivel][fase];
 
-  const listaFinal = [];
+  const lista = [];
 
   // BOX 0
-  listaFinal.push(this.box0());
+  lista.push(this.box0());
 
-  // BOXES COM EXERCÍCIOS
+  // BOXES COM EXERCÍCIOS (Firebase)
   const boxesFirebase = await this.buscarMultiBox({
     nivel,
     enfase,
@@ -183,20 +183,16 @@ FEMFLOW.engineTreino.montarTreino = async function ({
     exPorBox: regras.ex
   });
 
-  listaFinal.push(...boxesFirebase);
+  lista.push(...boxesFirebase);
 
-  // HIIT + CARDIO
+  // BOXES ESPECIAIS
   for (let i = 0; i < regras.totalBoxes; i++) {
-    if (regras.hiit[i]) {
-      listaFinal.push(this.criarBoxEspecial("hiit", fase));
-    }
-    if (regras.cardio[i]) {
-      listaFinal.push(this.criarBoxEspecial("cardio", fase));
-    }
+    if (regras.hiit[i])   lista.push(this.criarBoxEspecial("hiit", fase));
+    if (regras.cardio[i]) lista.push(this.criarBoxEspecial("cardio", fase));
   }
 
   // BOX FINAL
-  listaFinal.push(this.boxFinal());
+  lista.push(this.boxFinal());
 
-  return listaFinal;
+  return lista;
 };
