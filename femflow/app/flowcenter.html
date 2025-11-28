@@ -4,400 +4,135 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>FemFlow • Flow Center</title>
-  <!-- Favicon FemFlow -->
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" href="favicon.ico">
-<meta name="msapplication-TileImage" content="favicon.ico">
 
-<!-- Fallback absoluto -->
-<link rel="icon" href="favicon.ico">
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico">
 
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
 
-  <link rel="manifest" href="manifest.json" />
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
- <link rel="stylesheet" href="css/core.css">
-<link rel="stylesheet" href="css/header.css">
-<link rel="stylesheet" href="css/themes.css">
-<link rel="stylesheet" href="css/flowcenter.css">
-
+  <!-- CSS Base -->
+  <link rel="stylesheet" href="css/core.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/flowcenter.css">
 </head>
 
 <body>
+
   <h1>FemFlow</h1>
-  <h3>Fase Hormonal</h3>
-  <p class="subtitle">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
+  <h3 id="tituloFlow">Fase Hormonal</h3>
+  <p class="subtitle" id="subFlow">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
 
-<div class="phase-wrapper">
-  <div class="phase-svg">
-    <svg viewBox="0 0 300 300" width="260" height="260">
-      <circle cx="150" cy="150" r="120" fill="#fff5ef"></circle>
-      <g stroke="#fff5ef" stroke-width="3">
-        <path id="seg-menstrual"  d="M150,150 L150,30 A120,120 0 0,1 270,150 Z" fill="#f9e0d8"></path>
-        <path id="seg-follicular" d="M150,150 L270,150 A120,120 0 0,1 150,270 Z" fill="#f9e0d8"></path>
-        <path id="seg-ovulatory"  d="M150,150 L150,270 A120,120 0 0,1 30,150 Z" fill="#f9e0d8"></path>
-        <path id="seg-luteal"     d="M150,150 L30,150 A120,120 0 0,1 150,30 Z" fill="#f9e0d8"></path>
-      </g>
+  <!-- CÍRCULO HORMONAL -->
+  <div class="phase-wrapper">
+    <div class="phase-svg">
+      <svg viewBox="0 0 300 300" width="260" height="260">
+        <circle cx="150" cy="150" r="120" fill="#fff5ef"></circle>
+        <g stroke="#fff5ef" stroke-width="3">
+          <path id="seg-menstrual"  d="M150,150 L150,30 A120,120 0 0,1 270,150 Z" fill="#f9e0d8"></path>
+          <path id="seg-follicular" d="M150,150 L270,150 A120,120 0 0,1 150,270 Z" fill="#f9e0d8"></path>
+          <path id="seg-ovulatory"  d="M150,150 L150,270 A120,120 0 0,1 30,150 Z" fill="#f9e0d8"></path>
+          <path id="seg-luteal"     d="M150,150 L30,150 A120,120 0 0,1 150,30 Z" fill="#f9e0d8"></path>
+        </g>
 
-      <circle cx="150" cy="150" r="65" fill="none" stroke="#fff5ef" stroke-width="2"></circle>
-      <circle cx="150" cy="150" r="63" fill="#cc6a5a"></circle>
+        <circle cx="150" cy="150" r="65" fill="none" stroke="#fff5ef" stroke-width="2"></circle>
+        <circle cx="150" cy="150" r="63" fill="#cc6a5a"></circle>
 
-      <text id="lbl-menstrual"  x="215" y="95"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(45,215,95)">Menstrual</text>
-      <text id="lbl-follicular" x="215" y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(135,215,215)">Folicular</text>
-      <text id="lbl-ovulatory"  x="85"  y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(225,85,215)">Ovulatória</text>
-      <text id="lbl-luteal"     x="85"  y="85"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(315,85,85)">Lútea</text>
-
-      <text id="centerPhase" x="150" y="155" text-anchor="middle" font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff">—</text>
-    </svg>
+        <text id="centerPhase" x="150" y="155" text-anchor="middle"
+              font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff">—</text>
+      </svg>
+    </div>
   </div>
-</div>
-
 
   <div class="current-phase" id="t_current">Fase atual: —</div>
 
   <div class="toolbar">
-  <button class="tool" id="toBreath">💨 Respiração</button>
-  <button class="tool" id="toTrain">🏃 Treino</button>
-  <button class="tool" id="toEvolution">📈 Evolução</button>
-</div>
+    <button class="tool" id="toBreath">💨 Respiração</button>
+    <button class="tool" id="toTrain">🏃 Treino</button>
+    <button class="tool" id="toEvolution">📈 Evolução</button>
+  </div>
 
-
-  <div id="debugPanel" hidden></div>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="./femflow-core.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="femflow-core.js"></script>
 
   <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    FEMFLOW.inserirHeaderApp?.();
-/********************************************************************
- * 🔄 SINCRONIZAÇÃO AUTOMÁTICA DE ÊNFASE (FlowCenter)
- * - Garante que planilha e localStorage estejam alinhados.
- * - Corrige dado antigo: se local ≠ backend, atualiza Apps Script.
- ********************************************************************/
-(async () => {
-  const id = localStorage.getItem("femflow_id");
-  if (!id || !FEMFLOW.SCRIPT_URL) return;
+  document.addEventListener("DOMContentLoaded", async () => {
 
-  try {
-    // 1️⃣ Puxa dados reais do backend
-    const resp = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`);
-    const json = await resp.json();
+    /* --------------------------------------------------------
+       1) Header + Menu
+    -------------------------------------------------------- */
+    FEMFLOW.inserirHeaderApp();
+    FEMFLOW.inserirMenuLateral();
 
-    if (json?.status !== "ok") return;
+    /* --------------------------------------------------------
+       2) Carrega ciclo do backend (garante fase atual correta)
+    -------------------------------------------------------- */
+    await FEMFLOW.carregarCicloBackend();
 
-    const enfaseBackend = (json.enfase || "").toLowerCase().trim();
-    const enfaseLocal   = (localStorage.getItem("femflow_enfase") || "").toLowerCase().trim();
+    /* --------------------------------------------------------
+       3) Engine hormonal final (backend → fase + dia)
+    -------------------------------------------------------- */
+    const H = FEMFLOW.calcularEngineHormonal();
 
-    // 2️⃣ Se backend tem "nenhuma", mas o local já tem uma ênfase → atualiza backend
-    if (enfaseLocal && enfaseLocal !== enfaseBackend) {
-      console.log("🔄 Atualizando backend com nova ênfase:", enfaseLocal);
+    console.log("🌸 ENGINE FLOWCENTER:", H);
 
-      await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "setenfase",
-          id,
-          enfase: enfaseLocal
-        })
-      });
-    }
+    const fase = H.faseFirebase;
 
-    // 3️⃣ Se backend tem uma ênfase e local está vazio → atualiza front
-    if (!enfaseLocal && enfaseBackend) {
-      console.log("⬅️ Atualizando localStorage com ênfase do backend:", enfaseBackend);
-      localStorage.setItem("femflow_enfase", enfaseBackend);
-    }
-
-  } catch (err) {
-    console.warn("⚠️ Falha ao sincronizar ênfase:", err);
-  }
-})();
-
+    /* --------------------------------------------------------
+       4) Idioma
+    -------------------------------------------------------- */
     const lang = localStorage.getItem("femflow_lang") || "pt";
     const T = {
       pt:{
         titulo:"Fase Hormonal",
         frase:"Seu corpo tem um ritmo. Vamos acompanhar juntas.",
         faseAtual:"Fase atual:",
-        botoes:{breath:"💨 Respiração",train:"🏃 Treino"},
+        botoes:{breath:"💨 Respiração",train:"🏃 Treino", evo:"📈 Evolução"},
         fases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"}
       },
       en:{
         titulo:"Hormonal Phase",
-       frase: "Your body moves in cycles. Let’s follow its rhythm together.",
+        frase:"Your body moves in cycles. Let’s follow its rhythm.",
         faseAtual:"Current phase:",
-       botoes:{breath:"💨 Breathing", train:"🏃 Workout"},
+        botoes:{breath:"💨 Breathing",train:"🏃 Workout", evo:"📈 Progress"},
         fases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"}
       }
     };
     const L = T[lang];
 
-    document.querySelector("h3").textContent = L.titulo;
-    document.querySelector(".subtitle").textContent = L.frase;
-    document.getElementById("toBreath").textContent = L.botoes.breath;
-    document.getElementById("toTrain").textContent  = L.botoes.train;
-    
-// 🚨 Sincronização entre contextos FemFlow (PWA / Web)
-if (window.localStorage && navigator.serviceWorker) {
-  try {
-    const sharedKeys = ["femflow_startDate", "femflow_cycleLength", "fase_sugerida", "femflow_enfase", "femflow_perfilHormonal"];
-    const backup = JSON.parse(localStorage.getItem("femflow_backup") || "{}");
+    document.getElementById("tituloFlow").textContent = L.titulo;
+    document.getElementById("subFlow").textContent    = L.frase;
 
-    // Se backup existir e dados principais estiverem faltando, restaura
-    sharedKeys.forEach(k => {
-      if (!localStorage.getItem(k) && backup[k]) {
-        localStorage.setItem(k, backup[k]);
-      }
-    });
-
-    // Atualiza backup global
-    const snapshot = {};
-    sharedKeys.forEach(k => snapshot[k] = localStorage.getItem(k));
-    localStorage.setItem("femflow_backup", JSON.stringify(snapshot));
-  } catch (err) {
-    console.warn("⚠️ Falha ao sincronizar dados locais:", err);
-  }
-}
-   // ===================================================
-// 🔄 Sincronização de Dados FemFlow (Web ↔ PWA ↔ Mobile)
-// ===================================================
-try {
-const sharedKeys = [
-  "femflow_startDate",
-  "femflow_cycleLength",
-  "femflow_fase_atual",
-  "femflow_enfase",
-  "femflow_perfilHormonal"
-];
-
-  // 🔹 1. Lê backup global (criado no login)
-  const backup = JSON.parse(localStorage.getItem("femflow_backup") || "{}");
-  let restored = false;
-
-  // 🔹 2. Se houver dados faltando, restaura
-  sharedKeys.forEach(k => {
-    if (!localStorage.getItem(k) && backup[k]) {
-      localStorage.setItem(k, backup[k]);
-      restored = true;
-    }
-  });
-
-  // 🔹 3. Se restaurou, exibe aviso rápido
-  if (restored) {
-    const note = document.createElement("div");
-    note.textContent = "🌸 Sincronizando seus dados hormonais...";
-    note.style = `
-      position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-      background: rgba(204,106,90,0.9); color: #fff; font-size: 13px;
-      font-family: 'Lato', sans-serif; padding: 8px 14px;
-      border-radius: 20px; z-index: 9999; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      animation: fadeOut 3s forwards ease-in-out;
-    `;
-    document.body.appendChild(note);
-    setTimeout(() => note.remove(), 3000);
-  }
-
-  // 🔹 4. Atualiza backup (mantém coerência)
-  const snapshot = {};
-  sharedKeys.forEach(k => (snapshot[k] = localStorage.getItem(k)));
-  localStorage.setItem("femflow_backup", JSON.stringify(snapshot));
-} catch (err) {
-  console.warn("⚠️ Falha ao sincronizar backup FemFlow:", err);
-}
-
-// 🔹 Animação fade-out do aviso (opcional)
-const styleSync = document.createElement("style");
-styleSync.textContent = `
-@keyframes fadeOut {
-  0% { opacity: 1; }
-  70% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(10px); }
-}`;
-document.head.appendChild(styleSync);
- 
-    // === CÁLCULO DE FASE ===
-    const perfil = localStorage.getItem("femflow_perfilHormonal") || "regular";
-    const ciclo  = parseInt(localStorage.getItem("femflow_cycleLength") || 28);
-    const inicio = new Date(localStorage.getItem("femflow_startDate") || new Date());
-    // Fase real salva pela usuária em ciclo.html
-const faseManual = (localStorage.getItem("femflow_fase_atual") || "").toLowerCase();
-
-let fase = "menstrual"; 
-
-// 1) Se ela selecionou manualmente → prioriza
-if (faseManual && faseManual.length > 0) {
-  fase = faseManual;
-} 
-// 2) Caso contrário → calcula pelo ciclo
-else if (perfil === "regular") {
-  const diff = Math.floor((new Date() - inicio) / (1000 * 60 * 60 * 24));
-  const dia = (diff % ciclo) + 1;
-
-  if (dia <= 5) fase = "menstrual";
-  else if (dia <= 13) fase = "follicular";
-  else if (dia <= 17) fase = "ovulatory";
-  else fase = "luteal";
-
-  // Salva fase calculada (coerência)
-  localStorage.setItem("femflow_fase_atual", fase);
-}
-
-
-    // === Atualiza UI ===
+    /* --------------------------------------------------------
+       5) Atualiza a UI com a fase
+    -------------------------------------------------------- */
     document.getElementById("centerPhase").textContent = L.fases[fase];
-    document.getElementById("t_current").textContent   = `${L.faseAtual} ${L.fases[fase]}`;
+    document.getElementById("t_current").textContent   =
+      `${L.faseAtual} ${L.fases[fase]}`;
 
-    document.getElementById("lbl-menstrual").textContent  = L.fases.menstrual;
-    document.getElementById("lbl-follicular").textContent = L.fases.follicular;
-    document.getElementById("lbl-ovulatory").textContent  = L.fases.ovulatory;
-    document.getElementById("lbl-luteal").textContent     = L.fases.luteal;
-
-    // destaca fase atual no gráfico
     ["menstrual","follicular","ovulatory","luteal"].forEach(s=>{
-      const el=document.getElementById(`seg-${s}`);
-      el.style.fill=(s===fase)?"#cc6a5a":"#f9e0d8";
+      const el = document.getElementById(`seg-${s}`);
+      el.style.fill = (s === fase) ? "#cc6a5a" : "#f9e0d8";
     });
-    // destaca fase atual no gráfico
-["menstrual","follicular","ovulatory","luteal"].forEach(s=>{
-  const el=document.getElementById(`seg-${s}`);
-  el.style.fill=(s===fase)?"#cc6a5a":"#f9e0d8";
-  el.classList.toggle("path-active", s===fase);
-});
 
-// destaca rótulo da fase ativa
-document.getElementById("lbl-menstrual").classList.toggle("label-active",  fase==="menstrual");
-document.getElementById("lbl-follicular").classList.toggle("label-active", fase==="follicular");
-document.getElementById("lbl-ovulatory").classList.toggle("label-active",  fase==="ovulatory");
-document.getElementById("lbl-luteal").classList.toggle("label-active",     fase==="luteal");
-
-    // === Botões ===
-    document.getElementById("toBreath").onclick = ()=> FEMFLOW.router("respiracao");
-    document.getElementById("toTrain").onclick = async () => {
-
-  const id = localStorage.getItem("femflow_id");
-  if (!id) return FEMFLOW.router("index.html");
-
-  try {
-    // 🔍 Consulta o backend
-    const r = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`);
-    const j = await r.json();
-
-    // 🌿 Caso diasSemTreinar >= 7 → mostrar modal
-    if (j.alert) {
-      FEMFLOW.modalRetomarTreino(j.diasSemTreinar);
-      return;
-    }
-
-    // 🚀 Caso contrário → seguir normal
-    FEMFLOW.router("treino");
-
-  } catch (err) {
-    console.warn("Erro ao validar treino:", err);
-    FEMFLOW.router("treino");
-  }
-};
-
-
-    
+    /* --------------------------------------------------------
+       6) Botões (via router do Core)
+    -------------------------------------------------------- */
+    document.getElementById("toBreath").onclick   = () => FEMFLOW.router("respiracao");
+    document.getElementById("toTrain").onclick    = () => FEMFLOW.router("treino");
     document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao");
 
-
-    // === Diagnóstico visível (só em debug) ===
-    const dbg = document.getElementById("debugPanel");
-    const debugData = {
-      perfil,
-      fase,
-      ciclo,
-      startDate: localStorage.getItem("femflow_startDate"),
-      enfase: localStorage.getItem("femflow_enfase"),
-      program: localStorage.getItem("femflow_program_active")
-    };
-    
-    dbg.innerHTML = Object.entries(debugData)
-      .map(([k,v])=>`<b>${k}</b>: ${v||'—'}`).join("<br>");
-    dbg.hidden = true; // coloque true se quiser ocultar em produção
-
-    
-    document.addEventListener("DOMContentLoaded", () => {
-  // Calcular a fase e o dia do ciclo
-  const cicloHormonal = FEMFLOW.calcularEngineHormonal();
-  
-  // Debug: Verificar e exibir a fase e o dia calculados para o FlowCenter
-  console.log("🌸 Fase e data calculadas para o FlowCenter:", {
-    fase: cicloHormonal.faseFirebase,   // A fase calculada
-    dia: cicloHormonal.diaFirebase,     // O dia do ciclo
-    diaKey: cicloHormonal.diaKey,       // A chave do dia
-    modo: cicloHormonal.modo            // O modo do ciclo (real, menopausa, etc.)
   });
 
-  // O resto do código que você já tem para o FlowCenter...
-  
-  // Atualizar a UI com a fase
-  document.getElementById("centerPhase").textContent = L.fases[cicloHormonal.faseFirebase];
-  document.getElementById("t_current").textContent = `${L.faseAtual} ${L.fases[cicloHormonal.faseFirebase]}`;
-  
-  // Destacar a fase no gráfico
-  ["menstrual", "follicular", "ovulatory", "luteal"].forEach(s => {
-    const el = document.getElementById(`seg-${s}`);
-    el.style.fill = (s === cicloHormonal.faseFirebase) ? "#cc6a5a" : "#f9e0d8";
-    el.classList.toggle("path-active", s === cicloHormonal.faseFirebase);
-  });
-
-  // Destacar rótulo da fase ativa
-  document.getElementById("lbl-menstrual").classList.toggle("label-active", cicloHormonal.faseFirebase === "menstrual");
-  document.getElementById("lbl-follicular").classList.toggle("label-active", cicloHormonal.faseFirebase === "follicular");
-  document.getElementById("lbl-ovulatory").classList.toggle("label-active", cicloHormonal.faseFirebase === "ovulatory");
-  document.getElementById("lbl-luteal").classList.toggle("label-active", cicloHormonal.faseFirebase === "luteal");
-  
-  // Atualizar outros elementos conforme necessário...
-});
-
-    
-
-  });
-    // === Mudança dinâmica de idioma (fix real-time) ===
-window.addEventListener("femflow:langchange", () => {
-  console.log("🌐 Idioma alterado via menu FemFlow");
-
-  const newLang = localStorage.getItem("femflow_lang") || "pt";
-  const T = {
-    pt:{
-      titulo:"Fase Hormonal",
-      frase:"Seu corpo tem um ritmo. Vamos acompanhar juntas.",
-      faseAtual:"Fase atual:",
-      botoes:{breath:"💨 Respiração",train:"🏃 Treino"},
-      fases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"}
-    },
-    en:{
-      titulo:"Hormonal Phase",
-      frase:"Your body has a rhythm. Let's follow it together.",
-      faseAtual:"Current phase:",
-      botoes:{breath:"💨 Breathing",train:"🏃 Training"},
-      fases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"}
-    }
-  };
-  const L = T[newLang];
-
-  // Reaplica todos os textos
-  document.querySelector("h3").textContent = L.titulo;
-  document.querySelector(".subtitle").textContent = L.frase;
-  document.getElementById("toBreath").textContent = L.botoes.breath;
-  document.getElementById("toTrain").textContent  = L.botoes.train;
-  
-
-  // Reaplica nomes de fases e status atual
-const fase = (localStorage.getItem("femflow_fase_atual") || "menstrual").toLowerCase();
-  document.getElementById("centerPhase").textContent = L.fases[fase];
-  document.getElementById("t_current").textContent   = `${L.faseAtual} ${L.fases[fase]}`;
-  document.getElementById("lbl-menstrual").textContent  = L.fases.menstrual;
-  document.getElementById("lbl-follicular").textContent = L.fases.follicular;
-  document.getElementById("lbl-ovulatory").textContent  = L.fases.ovulatory;
-  document.getElementById("lbl-luteal").textContent     = L.fases.luteal;
-});
   </script>
+
 </body>
 </html>
+
 
