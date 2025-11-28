@@ -445,4 +445,32 @@ body.ff-performance-ovulation .ff-ex {
   background: #ffe5e5;
   transform: scale(1.05);
 }
+/* BOX ESPECIAL — HIIT / CARDIO */
+.ff-box-especial {
+  background: #fce8e3;
+  border: 2px solid #cc6a5a;
+  padding: 20px;
+  border-radius: 20px;
+  margin: 20px auto;
+  color: #335953;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  text-align: center;
+}
+
+.ff-box-especial h3 {
+  font-family: "Playfair Display", serif;
+  color: #cc6a5a;
+  margin-bottom: 10px;
+}
+
+.ff-box-especial ul {
+  padding: 0;
+  margin: 12px 0 0;
+  list-style: none;
+}
+
+.ff-box-especial li {
+  margin: 4px 0;
+  font-size: 0.95rem;
+}
 
