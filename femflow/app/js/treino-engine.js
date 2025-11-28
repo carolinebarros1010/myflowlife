@@ -1,11 +1,13 @@
 /* ============================================================
-   FEMFLOW • TREINO ENGINE v1.1 — FRONT-END TOTAL
+   FEMFLOW • TREINO ENGINE v1.2 — FRONT-END TOTAL (2025)
    ------------------------------------------------------------
    - Regras completas por fase × nível
    - Box0 + BoxFinal fixos
    - HIIT + Cardio 100% no Front
-   - Divisão multi-box por pastas Firebase
-   - Totalmente compatível com treino.js v1.0
+   - Multi-box por pastas Firebase
+   - Intervalo por reps (6–8 → 90s, 8–12 → 60s, 12–18 → 45s)
+   - Séries por fase × nível (menstrual, folicular, etc.)
+   - Compatível com treino.js v1.3
    ============================================================ */
 
 window.FEMFLOW = window.FEMFLOW || {};
@@ -17,7 +19,7 @@ FEMFLOW.engineTreino = {};
 FEMFLOW.engineTreino.regras = {
   iniciante: {
     menstrual:   { totalBoxes: 1, ex: [4],     hiit: [0],   cardio: [1] },
-    folicular:   { totalBoxes: 2, ex: [3,3],   hiit: [1,0], cardio: [0,1] },
+    folicular:   { totalBoxes: 2, ex: [3,3],   hiit: [1,1], cardio: [0,1] },
     ovulatoria:  { totalBoxes: 2, ex: [3,3],   hiit: [1,1], cardio: [0,0] },
     lutea:       { totalBoxes: 2, ex: [3,3],   hiit: [1,0], cardio: [0,1] }
   },
@@ -38,7 +40,35 @@ FEMFLOW.engineTreino.regras = {
 };
 
 /* ============================================================
-   2) BOX 0 — Mobilidade fixa
+   2) FUNÇÃO — INTERVALO POR REPS
+============================================================ */
+FEMFLOW.engineTreino.calcularIntervaloPorReps = function (reps) {
+  reps = Number(reps || 0);
+
+  if (reps >= 6 && reps <= 8) return 90;
+  if (reps > 8 && reps <= 12) return 60;
+  if (reps > 12 && reps <= 18) return 45;
+
+  return 60; // fallback
+};
+
+/* ============================================================
+   3) FUNÇÃO — SÉRIES POR FASE × NÍVEL
+============================================================ */
+FEMFLOW.engineTreino.calcularSeries = function (fase, nivel) {
+  fase = (fase || "").toLowerCase();
+  nivel = (nivel || "").toLowerCase();
+
+  if (fase === "menstrual")   return (nivel === "iniciante") ? 2 : 3;
+  if (fase === "folicular")   return (nivel === "iniciante") ? 3 : 4;
+  if (fase === "ovulatoria")  return 4;
+  if (fase === "lutea")       return (nivel === "iniciante") ? 3 : 4;
+
+  return 3; // fallback
+};
+
+/* ============================================================
+   4) BOX 0 — Mobilidade fixa
 ============================================================ */
 FEMFLOW.engineTreino.box0 = () => ({
   tipo: "box0",
@@ -53,7 +83,7 @@ FEMFLOW.engineTreino.box0 = () => ({
 });
 
 /* ============================================================
-   3) BOX FINAL — Resfriamento
+   5) BOX FINAL — Resfriamento
 ============================================================ */
 FEMFLOW.engineTreino.boxFinal = () => ({
   tipo: "final",
@@ -67,7 +97,7 @@ FEMFLOW.engineTreino.boxFinal = () => ({
 });
 
 /* ============================================================
-   4) BOX ESPECIAL (HIIT e Cardio)
+   6) BOX ESPECIAL (HIIT e Cardio)
 ============================================================ */
 FEMFLOW.engineTreino.criarBoxEspecial = function (tipo, fase) {
 
@@ -86,8 +116,6 @@ FEMFLOW.engineTreino.criarBoxEspecial = function (tipo, fase) {
       titulo: `🔥 HIIT — ${fase}`,
       protocolo: pick(baseHiit),
       descricao: "Alta intensidade para potência controlada.",
-      opcoesAcademia: ["Bike", "Esteira", "Elíptico", "Remo"],
-      opcoesCasa: ["Polichinelo", "High Knees", "Burpee", "Agachamento com salto"],
       tempo_total: 360
     };
   }
@@ -96,14 +124,12 @@ FEMFLOW.engineTreino.criarBoxEspecial = function (tipo, fase) {
     tipo: "cardio",
     titulo: "💗 Cardio Leve — 10 min",
     descricao: "Movimento contínuo para circulação e recuperação.",
-    opcoesAcademia: ["Esteira leve", "Bike leve", "Remo suave"],
-    opcoesCasa: ["Caminhada no lugar", "Corrida estacionária leve"],
     tempo_total: 600
   };
 };
 
 /* ============================================================
-   5) BUSCA MULTI-BOX NO FIREBASE
+   7) BUSCA MULTI-BOX NO FIREBASE
 ============================================================ */
 FEMFLOW.engineTreino.buscarMultiBox = async function ({
   nivel,
@@ -132,49 +158,39 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
   if (snap.empty) return [];
 
   const todos = [];
-  snap.forEach(d => todos.push(d.data()));
+  snap.forEach(doc => todos.push(doc.data()));
 
-  FEMFLOW.engineTreino.calcularIntervaloPorReps = function (reps) {
-  reps = Number(reps || 0);
-
-  if (reps >= 6 && reps <= 8)   return 90;
-  if (reps > 8 && reps <= 12)   return 60;
-  if (reps > 12 && reps <= 18)  return 45;
-
-  // fallback se reps não vier
-  return 60;
-};
- 
-
-  // embaralha aleatoriamente
+  // embaralha
   const shuffled = todos.sort(() => Math.random() - 0.5);
 
-  // divisão por box
   let cursor = 0;
   const boxes = [];
 
-for (let i = 0; i < qtdBoxes; i++) {
-  const q = exPorBox[i];
-  const bloco = shuffled.slice(cursor, cursor + q);
-  cursor += q;
+  const seriesPadrao = FEMFLOW.engineTreino.calcularSeries(fase, nivel);
 
-  // ⭐ aplica intervalo baseado nos reps
-  bloco.forEach(ex => {
-    ex.intervalo = FEMFLOW.engineTreino.calcularIntervaloPorReps(ex.reps);
-  });
+  for (let i = 0; i < qtdBoxes; i++) {
+    const q = exPorBox[i];
+    const bloco = shuffled.slice(cursor, cursor + q);
+    cursor += q;
 
-  boxes.push({
-    tipo: "treino",
-    box: i + 1,
-    exercicios: bloco
-  });
-}
+    bloco.forEach(ex => {
+      ex.reps      = Number(ex.reps || 0);
+      ex.series    = seriesPadrao;
+      ex.intervalo = FEMFLOW.engineTreino.calcularIntervaloPorReps(ex.reps);
+    });
+
+    boxes.push({
+      tipo: "treino",
+      box: i + 1,
+      exercicios: bloco
+    });
+  }
 
   return boxes;
 };
 
 /* ============================================================
-   6) ENGINE FINAL — montarTreino()
+   8) ENGINE FINAL — montarTreino()
 ============================================================ */
 FEMFLOW.engineTreino.montarTreino = async function ({
   nivel,
@@ -184,13 +200,10 @@ FEMFLOW.engineTreino.montarTreino = async function ({
 }) {
 
   const regras = this.regras[nivel][fase];
-
   const lista = [];
 
-  // BOX 0
   lista.push(this.box0());
 
-  // BOXES COM EXERCÍCIOS (Firebase)
   const boxesFirebase = await this.buscarMultiBox({
     nivel,
     enfase,
@@ -202,14 +215,13 @@ FEMFLOW.engineTreino.montarTreino = async function ({
 
   lista.push(...boxesFirebase);
 
-  // BOXES ESPECIAIS
   for (let i = 0; i < regras.totalBoxes; i++) {
     if (regras.hiit[i])   lista.push(this.criarBoxEspecial("hiit", fase));
     if (regras.cardio[i]) lista.push(this.criarBoxEspecial("cardio", fase));
   }
 
-  // BOX FINAL
   lista.push(this.boxFinal());
 
   return lista;
 };
+
