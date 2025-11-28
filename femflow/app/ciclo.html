@@ -137,90 +137,112 @@ const perguntasDiuHormonal = [
 ];
   
 /* ============================================================
-   SALVAR CICLO (LOCAL + BACKEND)
+   SALVAR CICLO (LOCAL + BACKEND) — VERSÃO CORRIGIDA 2025
 ============================================================ */
-async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}) {
+async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
 
- console.log("💾 SALVAR.CICLO.DEBUG =====================================");
-console.log("perfil:", perfil);
-console.log("faseCalc:", faseCalc);
-console.log("dia:", dia);
-console.log("start:", start);
-console.log("length:", length);
-console.log("faseAlta:", faseAlta);
-console.log("-------------------------------------------------------------");
-console.log("LOCALSTORAGE → antes de salvar:");
-console.log({
-  perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-  faseAtual: localStorage.getItem("femflow_fase_atual"),
-  diaCiclo: localStorage.getItem("femflow_diaciclo")
-});
+  console.log("💾 SALVAR.CICLO.DEBUG =====================================");
+  console.log("perfil:", perfil);
+  console.log("faseCalc:", faseCalc);
+  console.log("dia:", dia);
+  console.log("start:", start);
+  console.log("length:", length);
+  console.log("faseAlta:", faseAlta);
+  console.log("-------------------------------------------------------------");
+  console.log("LOCALSTORAGE → antes de salvar:");
+  console.log({
+    perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
+    faseAtual: localStorage.getItem("femflow_fase_atual"),
+    diaCiclo: localStorage.getItem("femflow_diaciclo")
+  });
 
-  
-  // LOCAL
+  /* ============================================================
+     1) SALVAR NO LOCALSTORAGE
+  ============================================================ */
   localStorage.setItem("femflow_perfilHormonal", perfil);
   localStorage.setItem("femflow_cycle_configured", "yes");
   localStorage.setItem("femflow_startDate", start.toISOString());
   localStorage.setItem("femflow_cycleLength", String(length));
   localStorage.setItem("femflow_diaciclo", String(dia));
   localStorage.setItem("femflow_fase_atual", faseCalc.toLowerCase());
-  if (faseAlta) localStorage.setItem("femflow_faseAlta", faseAlta);
-
-  console.log("LOCALSTORAGE → depois de salvar:");
-console.log({
-  perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-  faseAtual: localStorage.getItem("femflow_fase_atual"),
-  diaCiclo: localStorage.getItem("femflow_diaciclo")
-});
   
-console.log("🌐 BACKEND.POST → enviando perfil:", perfil);
-console.log("🌐 BACKEND.POST → enviando faseCalc:", faseCalc);
-console.log("🌐 BACKEND.POST → enviando dia:", dia);
-
- // 🔹 3) ENVIA PERFIL HORMONAL AO BACKEND (via POST)
-  try {
-    await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",  // Aqui usamos POST para enviar os dados
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "setperfilhormonal",  // Ação no backend
-        id: localStorage.getItem("femflow_id"),
-        perfil: perfil  // Envia o perfil para o backend
-      })
-    });
-  } catch (e) {
-    console.warn("Erro ao salvar perfil hormonal no backend:", e);
+  if (faseAlta) {
+    localStorage.setItem("femflow_faseAlta", faseAlta);
   }
 
-  // BACKEND — fase
-  try {
-    await fetch(FEMFLOW.SCRIPT_URL,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        action:"setfase",
-        id: localStorage.getItem("femflow_id"),
-        fase: faseCalc.toLowerCase()
-      })
-    });
-  } catch(e){ console.warn("Erro fase:", e); }
+  console.log("LOCALSTORAGE → depois de salvar:");
+  console.log({
+    perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
+    faseAtual: localStorage.getItem("femflow_fase_atual"),
+    diaCiclo: localStorage.getItem("femflow_diaciclo")
+  });
 
-  // BACKEND — dia do ciclo (NOVIDADE)
-  try {
-    await fetch(FEMFLOW.SCRIPT_URL,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        action:"setdiaciclo",
-        id: localStorage.getItem("femflow_id"),
-        dia: dia
-      })
-    });
-  } catch(e){ console.warn("Erro ao atualizar diaciclo:", e); }
+  /* ============================================================
+     2) DEBUG — DADOS QUE VÃO AO BACKEND
+  ============================================================ */
+  console.log("🌐 BACKEND.POST → enviando ao backend:");
+  console.log({
+    id: localStorage.getItem("femflow_id"),
+    perfil,
+    faseCalc,
+    dia
+  });
 
+  /* ============================================================
+     3) ENVIAR AO BACKEND — POST PARA 3 FUNÇÕES
+     (executados em paralelo com Promise.all)
+  ============================================================ */
+  try {
+    await Promise.all([
+
+      // PERFIL HORMONAL
+      fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "setperfilhormonal",
+          id: localStorage.getItem("femflow_id"),
+          perfil
+        })
+      }),
+
+      // FASE
+      fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "setfase",
+          id: localStorage.getItem("femflow_id"),
+          fase: faseCalc.toLowerCase()
+        })
+      }),
+
+      // DIA DO CICLO
+      fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "setdiaciclo",
+          id: localStorage.getItem("femflow_id"),
+          dia
+        })
+      })
+
+    ]);
+
+    console.log("✔ BACKEND.POST → todos enviados com sucesso");
+
+  } catch (e) {
+    console.error("❌ ERRO AO ENVIAR PARA O BACKEND:", e);
+  }
+
+  /* ============================================================
+     4) FINALIZAR
+  ============================================================ */
   FEMFLOW.toast("✨ Ciclo configurado!");
-  setTimeout(()=>location.href="flowcenter.html",800);
+  setTimeout(() => location.href = "flowcenter.html", 800);
 }
+
 
 /* ============================================================
    PERFIS E QUIZ
