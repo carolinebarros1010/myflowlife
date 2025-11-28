@@ -326,6 +326,11 @@ FEMFLOW.salvarDescanso = async function (fase) {
 =========================================================== */
 FEMFLOW.carregarPerfil = async function () {
 
+   console.log("🔄 GET.VALIDAR.DEBUG → Enviando:", {
+  id: localStorage.getItem("femflow_id")
+});
+
+
   const id = localStorage.getItem("femflow_id");
   if (!id) {
     this.warn("carregarPerfil(): ID não encontrado");
@@ -341,6 +346,17 @@ FEMFLOW.carregarPerfil = async function () {
     this.log("Resposta validar():", j);
 
     if (j.status !== "ok") return null;
+     
+console.log("🔄 GET.VALIDAR.DEBUG → Recebido do backend:", resposta);
+
+console.log("🔄 GET.VALIDAR.DEBUG → Campos importantes:");
+console.log({
+  fase: resposta.fase,
+  diaCiclo: resposta.diaCiclo,
+  nivel: resposta.nivel,
+  enfase: resposta.enfase,
+  produto: resposta.produto
+});
 
     /* ------------------------------
        Persistência local atualizada
@@ -366,6 +382,10 @@ FEMFLOW.carregarPerfil = async function () {
     this.error("Erro ao carregar perfil:", err);
     return null;
   }
+   console.log("📌 FRONT.USING → fase:", resposta.fase);
+console.log("📌 FRONT.USING → diaCiclo:", resposta.diaCiclo);
+console.log("📌 FRONT.USING → perfilHormonal:", localStorage.getItem("femflow_perfilHormonal"));
+
 };
 /* ===========================================================
    🌙 BLOCO 3 — PERFIL HORMONAL / ENERGÉTICO + ENGINE FINAL
