@@ -156,16 +156,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       /* EXERCÍCIOS */
-      else if (box.tipo === "treino") {
-        div.innerHTML = `
-          <h3 class="ff-ex-titulo">Box ${box.box}</h3>
-          <div class="ff-series">
-            ${box.exercicios
-              .map(ex => `<div class="ff-serie-item"><span>${ex.nome}</span></div>`)
-              .join("")}
+else if (box.tipo === "treino") {
+  div.innerHTML = `
+    <h3 class="ff-ex-titulo">Box ${box.box}</h3>
+    <div class="ff-series">
+      ${box.exercicios
+        .map(ex => `
+          <div class="ff-serie-item">
+            <span class="ff-ex-nome">${ex.nome}</span>
+
+            <div class="ff-ex-info">
+              <span class="ff-ex-series">Séries: <b>${ex.series}</b></span>
+              <span class="ff-ex-reps">Reps: <b>${ex.reps}</b></span>
+              <span class="ff-ex-int">Intervalo: <b>${ex.intervalo}s</b></span>
+            </div>
+
+            <div class="ff-timer-bar" data-total="${ex.intervalo}">
+              <div class="ff-timer-fill"></div>
+              <span class="ff-timer-count">${fmt(ex.intervalo)}</span>
+            </div>
           </div>
-        `;
-      }
+        `)
+        .join("")}
+    </div>
+  `;
+}
 
       /* HIIT / CARDIO */
       else if (box.tipo === "hiit" || box.tipo === "cardio") {
