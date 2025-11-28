@@ -3,17 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>FemFlow — Treino Diário</title>
+
   <!-- Favicon FemFlow -->
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" href="favicon.ico">
-<meta name="msapplication-TileImage" content="favicon.ico">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="favicon.ico">
 
-<!-- Fallback absoluto -->
-<link rel="icon" href="/femflow/app/favicon.ico">
-
-
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
 
   <!-- CSS FemFlow -->
@@ -26,13 +23,15 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
+
 <body>
+
+  <!-- Progress Bar -->
   <div class="progress-bar" id="progressBar"></div>
 
   <header class="treino-header">
     <h1>Treino Diário</h1>
-  
-    <!-- ✅ Contador do dia do programa -->
+
     <h2 id="tituloDiaTreino"
         style="text-align:center;
                color:#335953;
@@ -43,64 +42,64 @@
     </h2>
   </header>
 
+  <!-- Carrossel -->
   <div class="carousel-container">
     <div class="carousel-track" id="carouselTrack">
       <div class="carousel-item"><p>Carregando treino...</p></div>
     </div>
   </div>
 
+  <!-- Rodapé Fixado -->
   <div class="fix-footer">
     <button id="salvarTreinoBtn">💾 Salvar treino</button>
     <button id="descansoBtn" class="secundario">🌿 Descanso</button>
     <button id="cancelarTreinoBtn" class="secundario">Cancelar Treino</button>
   </div>
 
-  <!-- Firebase compat (antes do femflow-core.js) -->
+  <!-- Firebase compat (necessário somente uma vez no app) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-  <!-- Core no mesmo nível do arquivo -->
+  <!-- FEMFLOW CORE v4.1 -->
   <script src="./femflow-core.js"></script>
-    <!-- Lógica híbrida (Apps Script + Firebase) com timers + HIIT/Cardio por box -->
-  <script src="js/treino.js"></script>
-  
+
+  <!-- Inicialização Extra (fallback seguro) -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      if (window.FEMFLOW && typeof FEMFLOW.inserirHeaderApp === "function") {
-        FEMFLOW.inserirHeaderApp();
+      if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
+        FEMFLOW.init();
       } else {
         console.warn("⚠️ FEMFLOW Core não encontrado ou ainda carregando.");
       }
     });
   </script>
 
-
-
+  <!-- Idioma -->
   <script>
-  window.addEventListener("femflow:langchange", () => {
-    const lang = localStorage.getItem("femflow_lang") || "pt";
-    const T = {
-      pt: {
-        titulo: "Treino Diário",
-        subtitulo: "Fluxo de movimento e consciência",
-        salvar: "💾 Salvar treino",
-        descanso: "🌿 Descanso"
-      },
-      en: {
-        titulo: "Daily Workout",
-        subtitulo: "Flow of movement and awareness",
-        salvar: "💾 Save workout",
-        descanso: "🌿 Rest day"
-      }
-    };
-    const L = T[lang];
+    window.addEventListener("femflow:langchange", () => {
+      const lang = localStorage.getItem("femflow_lang") || "pt";
+      const T = {
+        pt: {
+          titulo: "Treino Diário",
+          salvar: "💾 Salvar treino",
+          descanso: "🌿 Descanso"
+        },
+        en: {
+          titulo: "Daily Workout",
+          salvar: "💾 Save workout",
+          descanso: "🌿 Rest"
+        }
+      };
 
-    document.querySelector("header h1").textContent = L.titulo;
-    document.querySelector(".subtitle").textContent = L.subtitulo;
-    document.getElementById("salvarTreinoBtn").textContent = L.salvar;
-    document.getElementById("descansoBtn").textContent = L.descanso;
-  });
+      const L = T[lang];
+
+      document.querySelector(".treino-header h1").textContent = L.titulo;
+      document.getElementById("salvarTreinoBtn").textContent = L.salvar;
+      document.getElementById("descansoBtn").textContent = L.descanso;
+    });
   </script>
+
 </body>
 </html>
+
 
