@@ -45,9 +45,11 @@
     <!-- GRÁFICO PSE -->
     <section class="evo-card evo-chart">
       <h3 id="tituloPSE">📈 Evolução do Esforço Percebido (PSE)</h3>
+
       <div class="chart-container">
         <canvas id="graficoPSE"></canvas>
       </div>
+
       <p id="legendaPSE" class="evo-legend">
         🩵 Leve • 🍑 Moderado • ❤️ Intenso
       </p>
@@ -125,7 +127,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!id){ FEMFLOW.router("index.html"); return; }
 
   /* -------------------------
-      PROGRESSO
+     PROGRESSO DO CICLO (30 dias)
   ------------------------- */
   const dia = Number(localStorage.getItem("femflow_dia_treino") || 1);
   const prog = Math.min(100, Math.round(((dia - 1) / 30) * 100));
@@ -143,22 +145,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* -------------------------
-      HISTÓRICO PSE
+     HISTÓRICO PSE — LOCALSTORAGE APENAS
   ------------------------- */
-  const hist = await FEMFLOW.buscarHistorico(id, 40);
+  let hist = [];
+  try {
+    hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
+  } catch {
+    hist = [];
+  }
 
-  if (!hist || !hist.length){
+  hist = hist.slice(-40); // limita a 40 registros
+
+  if (!hist.length){
     FEMFLOW.toast("🌿 Nenhum treino registrado");
-    return;
   }
 
   /* -------------------------
-      GRÁFICO
+     GRÁFICO PSE
   ------------------------- */
   new Chart(document.getElementById("graficoPSE"), {
     type: "line",
     data: {
-      labels: hist.map((t,i)=>i+1),
+      labels: hist.map((t,i)=> i+1),
       datasets: [{
         data: hist.map(t=>Number(t.pse)||0),
         borderColor: "#CC6A5A",
@@ -176,13 +184,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   /* -------------------------
-      BOTÕES
-  ------------------------- */// VOLTAR
-document.getElementById("voltarFlow").onclick = () =>
-  FEMFLOW.router("flowcenter");
+     BOTÕES
+  ------------------------- */
+  document.getElementById("voltarFlow").onclick = () =>
+    FEMFLOW.router("flowcenter");
 });
 </script>
 
 </body>
 </html>
+
 
