@@ -4,22 +4,19 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>FemFlow • Home</title>
-  <!-- Favicon FemFlow -->
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" href="favicon.ico">
-<meta name="msapplication-TileImage" content="favicon.ico">
 
-<!-- Fallback absoluto -->
-<link rel="icon" href="favicon.ico">
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico">
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json"/>
 
+  <!-- CSS Base -->
   <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/core.css">
-<link rel="stylesheet" href="css/header.css">
-<link rel="stylesheet" href="css/themes.css">
-<link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/core.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/home.css">
 
 </head>
 
@@ -27,44 +24,30 @@
 
   <main class="wrap">
 
-   <!-- Vídeo topo -->
-<section class="video">
-  <div class="video-wrapper">
-    <iframe 
-      src="https://www.youtube-nocookie.com/embed/DyX8F1ChSDw"
-      title="FemFlow boas-vindas"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen>
-    </iframe>
-  </div>
-</section>
+    <!-- VÍDEO TOPO -->
+    <section class="video">
+      <div class="video-wrapper">
+        <iframe 
+          src="https://www.youtube-nocookie.com/embed/DyX8F1ChSDw"
+          title="FemFlow boas-vindas"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </section>
 
-
-
-    <!-- ============================ -->
-    <!--        FILEIRA 1            -->
-    <!--  ÊNFASES MUSCULARES         -->
-    <!-- ============================ -->
+    <!-- FILEIRA 1 -->
     <h1>Ênfases Musculares</h1>
     <section class="rail" id="railMuscular"></section>
 
-
-    <!-- ============================ -->
-    <!--        FILEIRA 2            -->
-    <!--        ESPORTES             -->
-    <!-- ============================ -->
+    <!-- FILEIRA 2 -->
     <h1>Esportes</h1>
     <section class="rail" id="railEsportes"></section>
 
-
-    <!-- ============================ -->
-    <!--        FILEIRA 3            -->
-    <!--       TREINOS EM CASA        -->
-    <!-- ============================ -->
+    <!-- FILEIRA 3 -->
     <h1>Treinos em Casa</h1>
     <section class="rail" id="railCasa"></section>
-
 
     <!-- CTAs -->
     <button id="btnFlow" class="cta">Ir para o Flow Center</button>
@@ -76,20 +59,17 @@
 
   <footer>FemFlow • escolha seu foco e comece hoje</footer>
 
-
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-  <!-- Core -->
-  <script> window.FEMFLOW_DISABLE_UI = true; </script>
-  <script src="./femflow-core.js"></script>
-
+  <!-- CORE -->
+  <script src="femflow-core.js"></script>
 
 <script>
-/* ==========================================================
-   LISTAS DAS 3 FILEIRAS
-========================================================== */
+/* ============================================================
+   LISTAS DAS FILEIRAS
+=========================================================== */
 
 const LISTA_MUSCULAR = [
   { titulo:"Glúteo", enfase:"gluteo", color:"#d98f80", desc:"Foco total no glúteo" },
@@ -105,21 +85,21 @@ const LISTA_ESPORTES = [
   { titulo:"Natação", enfase:"natacao", color:"#80a8b3", desc:"Propulsão aquática" },
   { titulo:"Remo", enfase:"remo", color:"#7f9d94", desc:"Tração e core" },
   { titulo:"Bike", enfase:"bike", color:"#9cc2c1", desc:"Cardio leve/moderado" },
-  { titulo:"Beach", enfase:"beach", color:"#e3a689", desc:"Areia, agilidade e potência" }
+  { titulo:"Beach", enfase:"beach", color:"#e3a689", desc:"Areia e potência" }
 ];
 
 const LISTA_CASA = [
   { titulo:"Em Casa", enfase:"casa", color:"#d1a697", desc:"Sem equipamentos" },
   { titulo:"Casa Glúteo", enfase:"casa_gluteo", color:"#dc9d8c", desc:"Glúteos em casa" },
   { titulo:"Casa Core", enfase:"casa_core", color:"#cababa", desc:"Abdômen e lombar" },
-  { titulo:"Casa Elástico", enfase:"casa_elastico", color:"#d8c4b0", desc:"Treino com elástico" },
+  { titulo:"Casa Elástico", enfase:"casa_elastico", color:"#d8c4b0", desc:"Elástico" },
   { titulo:"Casa Halter", enfase:"casa_halter", color:"#c6b4a4", desc:"Halter em casa" }
 ];
 
 
-/* ==========================================================
-   MONTAGEM DOS CARDS
-========================================================== */
+/* ============================================================
+   RENDERIZAÇÃO DE CARDS
+=========================================================== */
 
 function cardHTML(p){
   return `
@@ -134,137 +114,79 @@ function cardHTML(p){
     </article>`;
 }
 
-
-/* ==========================================================
-   RENDERIZAÇÃO
-========================================================== */
-
 function renderRail(el, lista){
   el.innerHTML = lista.map(cardHTML).join("");
+
   el.querySelectorAll(".card").forEach(c=>{
-    c.onclick = () => onChoose(c.dataset.enfase);
+    c.onclick = () => selecionarEnfase(c.dataset.enfase);
   });
 }
 
 
-/* ==========================================================
-   FUNÇÃO PRINCIPAL — onChoose
-========================================================== */
+/* ============================================================
+   SALVAR ÊNFASE (agora 100% alinhado ao CORE v4.1)
+=========================================================== */
+async function selecionarEnfase(enfase){
 
-async function onChoose(enfase){
+  console.log("🎯 selecionarEnfase() → clicou na ênfase:", enfase);
+
   const id = localStorage.getItem("femflow_id");
+  console.log("🆔 femflow_id:", id);
 
-  // LocalStorage
+  // 1) Salva local
   localStorage.setItem("femflow_enfase", enfase);
+  console.log("💾 localStorage.femflow_enfase =", localStorage.getItem("femflow_enfase"));
 
-  // Backend
+  // 2) Envia para backend (se logada)
   if (id) {
     try {
-      await fetch(FEMFLOW.SCRIPT_URL, {
+      const resp = await fetch(FEMFLOW.SCRIPT_URL, {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
-          action:"setenfase",
+          action:"setenfase",   // 🔥 igual ao doPost
           id,
-          enfase
+          enfase               // ex: "gluteo", "corrida"
         })
       });
+
+      const raw = await resp.text();
+      console.log("📦 RESPOSTA RAW setenfase:", raw);
+
+      let json;
+      try {
+        json = JSON.parse(raw);
+        console.log("🔍 RESPOSTA JSON setenfase:", json);
+      } catch(e) {
+        console.warn("⚠ setenfase → JSON inválido:", e);
+      }
+
     } catch(e){
-      console.warn("Falha ao enviar ênfase ao backend:", e);
+      console.warn("❌ Falha ao enviar ênfase ao backend:", e);
     }
-  }
-
-  // Checa ciclo
-  const cicloOK =
-    localStorage.getItem("femflow_cycle_configured")==="yes" &&
-    localStorage.getItem("femflow_startDate") &&
-    localStorage.getItem("femflow_cycleLength");
-
-  if (!cicloOK){
-    FEMFLOW.toast("🌿 Configure seu ciclo primeiro");
-    location.href="ciclo.html";
   } else {
-    location.href="flowcenter.html";
+    console.warn("⚠ Sem femflow_id, só atualizei localStorage (nada na planilha).");
   }
+
+  // 3) Vai para FlowCenter
+  FEMFLOW.router("flowcenter");
 }
 
-
-/* ==========================================================
-   INIT
-========================================================== */
-
-document.addEventListener("DOMContentLoaded", async ()=>{
+/* ============================================================
+   INIT HOME
+=========================================================== */
+document.addEventListener("DOMContentLoaded", ()=>{
 
   renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
   renderRail(document.getElementById("railEsportes"),  LISTA_ESPORTES);
   renderRail(document.getElementById("railCasa"),      LISTA_CASA);
 
-  document.getElementById("btnFlow").onclick = ()=>location.href="flowcenter.html";
-  document.getElementById("btnCad").onclick  = ()=>location.href="index.html";
-});
-// === 🌺 INSTALAÇÃO / DOWNLOAD DO APP ===
-let deferredPrompt = null;
-
-// Captura segura
-const btnInstall = document.getElementById("btnInstall");
-
-// Links das lojas
-const PLAY_URL = "https://play.google.com/store/apps/details?id=com.myflowlife.femflow";
-const APPLE_URL = "https://apps.apple.com/app/id0000000000"; // << substitua quando tiver o ID real
-
-// Detecta plataforma
-function isAndroid() {
-  return /Android/i.test(navigator.userAgent);
-}
-
-function isIOS() {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
-// Banner de instalação PWA detectado
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-
-  if (btnInstall) btnInstall.style.display = "inline-block";
-});
-
-// Clique do botão
-if (btnInstall) {
-  btnInstall.addEventListener("click", async () => {
-    // 📱 iOS → App Store
-    if (isIOS()) {
-      window.location.href = APPLE_URL;
-      return;
-    }
-
-    // 🤖 Android → Play Store
-    if (isAndroid()) {
-      window.location.href = PLAY_URL;
-      return;
-    }
-
-    // 💻 Desktop/PWA → fluxo normal de instalação
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`📲 Resultado da instalação: ${outcome}`);
-      deferredPrompt = null;
-      btnInstall.style.display = "none";
-    } else {
-      // fallback (se não houver deferredPrompt)
-      window.location.href = PLAY_URL;
-    }
-  });
-}
-
-// Após instalar PWA
-window.addEventListener("appinstalled", () => {
-  console.log("✅ FemFlow instalado como PWA!");
-  if (btnInstall) btnInstall.style.display = "none";
+  document.getElementById("btnFlow").onclick = () => FEMFLOW.router("flowcenter");
+  document.getElementById("btnCad").onclick  = () => FEMFLOW.router("index");
 });
 
 </script>
+
 </body>
 </html>
 
