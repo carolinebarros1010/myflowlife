@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const track  = document.querySelector("#carouselTrack");
   const bar    = document.querySelector("#progressBar");
   const titulo = document.querySelector("#tituloDiaTreino");
-  const btnRest = document.querySelector("#btnDescansar");
+  const btnRest = document.querySelector("#descansoBtn");
 
   if (!track || !bar) {
     FEMFLOW.error("❌ Estrutura do treino.html não encontrada.");
