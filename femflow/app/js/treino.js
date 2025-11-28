@@ -189,6 +189,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindTimers(track);
     moveTo("reset");
   }
+   
+btnSalvar.onclick = () => {
+  FEMFLOW.abrirPSE(v => {
+    const hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
+    hist.push({ data: Date.now(), pse: v });
+    localStorage.setItem("femflow_hist", JSON.stringify(hist));
+  });
+};
 
   /* ============================================================
    * 8. SNAPSHOT OFFLINE
