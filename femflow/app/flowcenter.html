@@ -154,6 +154,21 @@
       el.style.fill = (s === fase) ? "#cc6a5a" : "#f9e0d8";
     });
 
+    // Reaplica nomes visíveis das fases no SVG
+document.getElementById("lbl-menstrual").textContent  = L.fases.menstrual;
+document.getElementById("lbl-follicular").textContent = L.fases.follicular;
+document.getElementById("lbl-ovulatory").textContent  = L.fases.ovulatory;
+document.getElementById("lbl-luteal").textContent     = L.fases.luteal;
+
+// Destaque ativo
+["menstrual","follicular","ovulatory","luteal"].forEach(s => {
+  const seg = document.getElementById(`seg-${s}`);
+  const lbl = document.getElementById(`lbl-${s}`);
+
+  seg.style.fill = (s === fase) ? "#cc6a5a" : "#f9e0d8";
+  lbl.classList.toggle("label-active", s === fase);
+});
+
     /* --------------------------------------------------------
        6) Botões (via router do Core)
     -------------------------------------------------------- */
