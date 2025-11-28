@@ -6,7 +6,7 @@
 
   <title>FemFlow — Treino Diário</title>
 
-  <!-- Favicon FemFlow -->
+  <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="favicon.ico">
 
@@ -51,19 +51,25 @@
 
   <!-- Rodapé Fixado -->
   <div class="fix-footer">
-    <button id="salvarTreinoBtn">💾 Salvar treino</button>
-    <button id="descansoBtn" class="secundario">🌿 Descanso</button>
-    <button id="cancelarTreinoBtn" class="secundario">Cancelar Treino</button>
+    <button id="btnSalvarTreino">💾 Salvar treino</button>
+    <button id="btnDescansar" class="secundario">🌿 Descanso</button>
+    <button id="btnCancelarTreino" class="secundario">Cancelar Treino</button>
   </div>
 
-  <!-- Firebase compat (necessário somente uma vez no app) -->
+  <!-- Firebase compat -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <!-- FEMFLOW CORE v4.1 -->
   <script src="./femflow-core.js"></script>
 
-  <!-- Inicialização Extra (fallback seguro) -->
+  <!-- TREINO ENGINE (pasta JS) -->
+  <script src="./js/treino-engine.js"></script>
+
+  <!-- TREINO FRONT-END TOTAL (pasta JS) -->
+  <script src="./js/treino.js"></script>
+
+  <!-- Init fallback -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
@@ -94,12 +100,10 @@
       const L = T[lang];
 
       document.querySelector(".treino-header h1").textContent = L.titulo;
-      document.getElementById("salvarTreinoBtn").textContent = L.salvar;
-      document.getElementById("descansoBtn").textContent = L.descanso;
+      document.getElementById("btnSalvarTreino").textContent = L.salvar;
+      document.getElementById("btnDescansar").textContent = L.descanso;
     });
   </script>
 
 </body>
 </html>
-
-
