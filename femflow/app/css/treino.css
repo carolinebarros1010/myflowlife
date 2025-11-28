@@ -473,4 +473,16 @@ body.ff-performance-ovulation .ff-ex {
   margin: 4px 0;
   font-size: 0.95rem;
 }
+.ff-ex-info {
+  font-size: 14px;
+  margin: 8px 0;
+  color: #444;
+  display: flex;
+  gap: 12px;
+}
 
+.ff-ex-series b,
+.ff-ex-reps b,
+.ff-ex-int b {
+  color: #000;
+}
