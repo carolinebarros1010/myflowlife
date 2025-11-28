@@ -1,212 +1,172 @@
+/* =======================================================================
+   🌸 FEMFLOW CORE v4.1 — 2025
+   ARQUIVO ÚNICO OFICIAL
+   Contém:
+   - Login
+   - Ciclo
+   - Engine Hormonal Final
+   - Treino Diário (Firebase + Backend)
+   - Snapshot Offline
+   - Inspector + Debug
+   - Header + Menu
+======================================================================= */
+
+window.FEMFLOW = {};
+
 /* ===========================================================
-   🌸 FEMFLOW CORE — V4 (2025)
-   BLOCO 1/5 — Configuração, Logs, Toast, Router, Header, Menu
+   1. CONFIGURAÇÃO GLOBAL
 =========================================================== */
 
-window.FEMFLOW = {
+FEMFLOW.SCRIPT_URL = "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-  /* -----------------------------------------------------------
-     ✓ CONFIG BASE
-  ----------------------------------------------------------- */
-  SCRIPT_URL: "https://api-myflowlife.falling-wildflower-a8c0.workers.dev",
+FEMFLOW.dev = () => localStorage.getItem("femflow_dev") === "on";
 
-  /* -----------------------------------------------------------
-     ✓ LOG SYSTEM (Modo DEV — ativar com: localStorage.setItem("femflow_dev","on"))
-  ----------------------------------------------------------- */
-  dev() { 
-    return localStorage.getItem("femflow_dev") === "on"; 
-  },
+/* ------------------------- LOG SYSTEM ------------------------- */
+FEMFLOW.log = (...a) => { if (FEMFLOW.dev()) console.log("%c[FEMFLOW]", "color:#cc6a5a", ...a); };
+FEMFLOW.warn = (...a) => { if (FEMFLOW.dev()) console.warn("%c[FEMFLOW ⚠]", "color:#e07f67", ...a); };
+FEMFLOW.error = (...a) => { if (FEMFLOW.dev()) console.error("%c[FEMFLOW ❌]", "color:#b74333", ...a); };
 
-  log(...args) {
-    if (!this.dev()) return;
-    console.log("%c[FEMFLOW]", "color:#cc6a5a;font-weight:bold;", ...args);
-  },
+/* ------------------------- TOAST ------------------------- */
+FEMFLOW.toast = function (msg, error = false, offline = false) {
+  let box = document.querySelector(".toast-box");
 
-  warn(...args) {
-    if (!this.dev()) return;
-    console.warn("%c[FEMFLOW ⚠]", "color:#e07f67;font-weight:bold;", ...args);
-  },
+  if (!box) {
+    box = document.createElement("div");
+    box.className = "toast-box";
+    document.body.appendChild(box);
+  }
 
-  error(...args) {
-    if (!this.dev()) return;
-    console.error("%c[FEMFLOW ❌]", "color:#b74333;font-weight:bold;", ...args);
-  },
+  box.textContent = msg;
+  box.style.background = error ? "#cc6a5a" : "#335953";
+  box.classList.add("visible");
 
-
-  /* -----------------------------------------------------------
-     ✓ TOAST UNIVERSAL
-  ----------------------------------------------------------- */
-  toast(msg, error = false, offline = false) {
-    let box = document.querySelector(".toast-box");
-
-    if (!box) {
-      box = document.createElement("div");
-      box.className = "toast-box";
-      document.body.appendChild(box);
-    }
-
-    box.textContent = msg;
-    box.style.background = error ? "#cc6a5a" : "#335953";
-    box.classList.add("visible");
-
-    if (!offline) {
-      setTimeout(() => box.classList.remove("visible"), 2400);
-    }
-  },
-
-
-  /* -----------------------------------------------------------
-     ✓ ROUTER
-  ----------------------------------------------------------- */
-  router(pagina) {
-    const destino = pagina.endsWith(".html") ? pagina : pagina + ".html";
-    this.log("Router →", destino);
-    location.href = destino;
-  },
-
-
-  /* ===========================================================
-     🌸 HEADER + MENU — FEMFLOW 2025
-  ============================================================ */
-
-  /* -----------------------------------------------------------
-     ✓ INSERIR HEADER FIXO
-  ----------------------------------------------------------- */
-  inserirHeaderApp() {
-    if (document.querySelector("#femflowHeader")) return;
-
-    const h = document.createElement("header");
-    h.id = "femflowHeader";
-
-    h.innerHTML = `
-      <img src="./assets/logofemflowterracotasf.png" class="ff-logo" alt="FemFlow">
-      <button id="ffMenuBtn" class="ff-menu-btn">&#9776;</button>
-    `;
-
-    document.body.prepend(h);
-
-    // Botão hamburger abre o menu lateral
-    h.querySelector("#ffMenuBtn").onclick = () => {
-      document.querySelector(".ff-menu-modal")?.classList.add("active");
-    };
-  },
-
-
-  /* -----------------------------------------------------------
-     ✓ CRIAR MENU LATERAL
-  ----------------------------------------------------------- */
-  inserirMenuLateral() {
-    if (document.querySelector(".ff-menu-modal")) return;
-
-    const modal = document.createElement("div");
-    modal.className = "ff-menu-modal";
-
-    modal.innerHTML = `
-      <div class="ff-menu-box">
-        <h2 class="ff-menu-title">Menu</h2>
-
-        <button class="ff-menu-op ff-close" data-go="fechar">✖️ Fechar menu</button>
-        <button class="ff-menu-op" data-go="idioma">🌐 Idioma</button>
-        <button class="ff-menu-op" data-go="ciclo">🎯 Ajustar ciclo</button>
-        <button class="ff-menu-op" data-go="respiracao">💨 Respiração</button>
-        <button class="ff-menu-op" data-go="treinos">🏃 Meus Treinos</button>
-        <button class="ff-menu-op" data-go="tema">🌓 Tema</button>
-        <button class="ff-menu-op" data-go="voltar">🔙 Voltar</button>
-
-        <button class="ff-logout" data-go="logout">🚪 Sair</button>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    // Fecha tocando fora
-    modal.onclick = e => {
-      if (e.target.classList.contains("ff-menu-modal")) {
-        modal.classList.remove("active");
-      }
-    };
-
-    // Ações
-    modal.querySelectorAll(".ff-menu-op, .ff-logout").forEach(btn => {
-      btn.onclick = () => this._acaoMenu(btn.dataset.go);
-    });
-  },
-
-
-  /* -----------------------------------------------------------
-     ✓ AÇÕES DO MENU LATERAL
-  ----------------------------------------------------------- */
-  _acaoMenu(op) {
-
-    const modal = document.querySelector(".ff-menu-modal");
-    modal?.classList.remove("active");
-
-    switch(op){
-
-      case "fechar":
-        modal?.classList.remove("active");
-        break;
-
-      case "idioma":
-        this._alternarIdioma?.();
-        break;
-
-      case "ciclo":
-        this.router("ciclo.html");
-        break;
-
-      case "respiracao":
-        this.router("respiracao.html");
-        break;
-
-      case "treinos":
-        this.router("evolucao.html");
-        break;
-
-      case "tema":
-        document.body.classList.toggle("dark");
-        localStorage.setItem(
-          "femflow_theme",
-          document.body.classList.contains("dark") ? "dark" : "light"
-        );
-        break;
-
-      case "logout":
-        localStorage.clear();
-        this.router("index.html");
-        break;
-
-      case "voltar":
-        const atual = location.pathname.split("/").pop();
-        const rota = {
-          "treino.html": "flowcenter.html",
-          "flowcenter.html": "home.html",
-          "respiracao.html": "flowcenter.html",
-          "evolucao.html": "flowcenter.html",
-          "ciclo.html": "home.html"
-        };
-        this.router(rota[atual] || "home.html");
-        break;
-    }
-  },
-
-
-  /* -----------------------------------------------------------
-     ✓ ALTERNAR IDIOMA (placeholder)
-  ----------------------------------------------------------- */
-  _alternarIdioma() {
-    this.toast("🌐 Alternar idioma — em desenvolvimento");
-  },
-
+  if (!offline) {
+    setTimeout(() => box.classList.remove("visible"), 2400);
+  }
 };
-/* FIM DO BLOCO 1/5 — Continua no Bloco 2 */
+
 /* ===========================================================
-   🌸 FEMFLOW CORE — V4 (2025)
-   BLOCO 2/5 — PSE, Salvar Treino, Salvar Descanso, Perfil
+   2. ROUTER + HEADER + MENU
+=========================================================== */
+
+FEMFLOW.router = pag => {
+  const destino = pag.endsWith(".html") ? pag : pag + ".html";
+  FEMFLOW.log("Router →", destino);
+  location.href = destino;
+};
+
+/* ------------------------- HEADER FIXO ------------------------- */
+FEMFLOW.inserirHeaderApp = function () {
+  if (document.querySelector("#femflowHeader")) return;
+
+  const h = document.createElement("header");
+  h.id = "femflowHeader";
+
+  h.innerHTML = `
+    <img src="./assets/logofemflowterracotasf.png" class="ff-logo" alt="FemFlow">
+    <button id="ffMenuBtn" class="ff-menu-btn">&#9776;</button>
+  `;
+
+  document.body.prepend(h);
+
+  h.querySelector("#ffMenuBtn").onclick = () =>
+    document.querySelector(".ff-menu-modal")?.classList.add("active");
+};
+
+/* ------------------------- MENU LATERAL ------------------------- */
+FEMFLOW.inserirMenuLateral = function () {
+  if (document.querySelector(".ff-menu-modal")) return;
+
+  const modal = document.createElement("div");
+  modal.className = "ff-menu-modal";
+
+  modal.innerHTML = `
+    <div class="ff-menu-box">
+      <h2 class="ff-menu-title">Menu</hh2>
+
+      <button class="ff-menu-op ff-close" data-go="fechar">✖️ Fechar menu</button>
+      <button class="ff-menu-op" data-go="idioma">🌐 Idioma</button>
+      <button class="ff-menu-op" data-go="ciclo">🎯 Ajustar ciclo</button>
+      <button class="ff-menu-op" data-go="respiracao">💨 Respiração</button>
+      <button class="ff-menu-op" data-go="treinos">🏃 Meus Treinos</button>
+      <button class="ff-menu-op" data-go="tema">🌓 Tema</button>
+      <button class="ff-menu-op" data-go="voltar">🔙 Voltar</button>
+
+      <button class="ff-logout" data-go="logout">🚪 Sair</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.onclick = e => {
+    if (e.target.classList.contains("ff-menu-modal")) {
+      modal.classList.remove("active");
+    }
+  };
+
+  modal.querySelectorAll(".ff-menu-op, .ff-logout").forEach(btn => {
+    btn.onclick = () => FEMFLOW._acaoMenu(btn.dataset.go);
+  });
+};
+
+/* -------------------- AÇÕES DO MENU -------------------- */
+FEMFLOW._acaoMenu = function (op) {
+  const modal = document.querySelector(".ff-menu-modal");
+  modal?.classList.remove("active");
+
+  switch (op) {
+    case "fechar":
+      modal?.classList.remove("active");
+      break;
+
+    case "idioma":
+      FEMFLOW.toast("🌐 Alternar idioma — em desenvolvimento");
+      break;
+
+    case "ciclo":
+      FEMFLOW.router("ciclo.html");
+      break;
+
+    case "respiracao":
+      FEMFLOW.router("respiracao.html");
+      break;
+
+    case "treinos":
+      FEMFLOW.router("evolucao.html");
+      break;
+
+    case "tema":
+      document.body.classList.toggle("dark");
+      localStorage.setItem("femflow_theme",
+        document.body.classList.contains("dark") ? "dark" : "light"
+      );
+      break;
+
+    case "logout":
+      localStorage.clear();
+      FEMFLOW.router("index.html");
+      break;
+
+    case "voltar":
+      const atual = location.pathname.split("/").pop();
+      const rota = {
+        "treino.html": "flowcenter.html",
+        "flowcenter.html": "home.html",
+        "respiracao.html": "flowcenter.html",
+        "evolucao.html": "flowcenter.html",
+        "ciclo.html": "home.html"
+      };
+      FEMFLOW.router(rota[atual] || "home.html");
+      break;
+  }
+};
+/* ===========================================================
+   🌸 BLOCO 2 — PSE, Salvar Treino, Salvar Descanso,
+   Carregar Perfil, Carregar Ciclo
 =========================================================== */
 
 /* -----------------------------------------------------------
-   ✓ MODAL PSE — compatível com treino.js v06
+   MODAL PSE — Compatível com treino.js v06
 ----------------------------------------------------------- */
 FEMFLOW.criarModalPSE = function () {
   if (document.querySelector("#modal-pse")) return;
@@ -292,7 +252,7 @@ FEMFLOW.salvarTreino = async function ({ pse, treino, fase, diaFirebase, obs = "
 
 
 /* ===========================================================
-   🌿 SALVAR DESCANSO (compatível treino.js)
+   🌿 SALVAR DESCANSO (Backend)
 =========================================================== */
 FEMFLOW.salvarDescanso = async function (fase) {
 
@@ -321,15 +281,12 @@ FEMFLOW.salvarDescanso = async function (fase) {
 
 /* ===========================================================
    📥 CARREGAR PERFIL — GET validar
-   Atualiza: fase, enfase, diaCiclo, nivel
-   backend controla tudo!
 =========================================================== */
 FEMFLOW.carregarPerfil = async function () {
 
-   console.log("🔄 GET.VALIDAR.DEBUG → Enviando:", {
-  id: localStorage.getItem("femflow_id")
-});
-
+  console.log("🔄 GET.VALIDAR.DEBUG → Enviando:", {
+    id: localStorage.getItem("femflow_id")
+  });
 
   const id = localStorage.getItem("femflow_id");
   if (!id) {
@@ -346,17 +303,8 @@ FEMFLOW.carregarPerfil = async function () {
     this.log("Resposta validar():", j);
 
     if (j.status !== "ok") return null;
-     
-console.log("🔄 GET.VALIDAR.DEBUG → Recebido do backend:", j);
 
-console.log("🔄 GET.VALIDAR.DEBUG → Campos importantes:");
-console.log({
-  fase: j.fase,
-  diaCiclo: j.diaCiclo,
-  nivel: j.nivel,
-  enfase: j.enfase,
-  produto: j.produto
-});
+    console.log("🔄 GET.VALIDAR.DEBUG → Recebido do backend:", j);
 
     /* ------------------------------
        Persistência local atualizada
@@ -382,96 +330,12 @@ console.log({
     this.error("Erro ao carregar perfil:", err);
     return null;
   }
-   console.log("📌 FRONT.USING → fase:", j.fase);
-console.log("📌 FRONT.USING → diaCiclo:", j.diaCiclo);
-console.log("📌 FRONT.USING → perfilHormonal:", localStorage.getItem("femflow_perfilHormonal"));
-
 };
+
+
 /* ===========================================================
-   🌙 BLOCO 3 — PERFIL HORMONAL / ENERGÉTICO + ENGINE FINAL
-   Front-End sincronizado 100% com Backend
-   Fluxo Final 2025 — Compatível com treino.js v06
+   📥 CARREGAR CICLO — sincroniza tudo com backend
 =========================================================== */
-
-
-/* -----------------------------------------------------------
-   ✓ SALVAR PERFIL DO CICLO NO BACKEND
-   Usado no ciclo.html — envia tudo para o GAS
------------------------------------------------------------ */
-FEMFLOW.salvarCicloBackend = async function ({ perfil, dia, fase, dataInicio }) {
-
-  const id = localStorage.getItem("femflow_id");
-  if (!id) {
-    this.error("Tentativa de salvar ciclo sem ID.");
-    return;
-  }
-
-  this.log("⬆ Enviando ciclo ao backend:", {
-    perfil,
-    dia,
-    fase,
-    dataInicio
-  });
-
-  /* 1) Perfil Hormonal / Energético */
-  await fetch(this.SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "setperfilhormonal",
-      id,
-      perfil
-    })
-  });
-
-  /* 2) Fase */
-  await fetch(this.SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "setfase",
-      id,
-      fase
-    })
-  });
-
-  /* 3) Dia do Ciclo */
-  await fetch(this.SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "setdiaciclo",
-      id,
-      dia
-    })
-  });
-
-  /* 4) Data de início — somente perfis hormonais */
-  if (dataInicio) {
-    await fetch(this.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "setdatainicio",
-        id,
-        dataInicio
-      })
-    });
-  }
-
-  this.toast("✨ Ciclo salvo!");
-};
-
-
-
-/* -----------------------------------------------------------
-   ✓ CARREGAR CICLO (GET validar)
-   Atualiza:
-   - fase  
-   - diaCiclo  
-   - ciclo_duracao  
-   - perfil Hormonal/Energético  
------------------------------------------------------------ */
 FEMFLOW.carregarCicloBackend = async function () {
 
   const id = localStorage.getItem("femflow_id");
@@ -505,16 +369,14 @@ FEMFLOW.carregarCicloBackend = async function () {
 };
 
 
-
 /* ===========================================================
-   🔥 ENGINE HORMONAL FINAL (NÃO CALCULA MAIS)
-   Backend fornece:
-   - fase
+   🔥 ENGINE HORMONAL FINAL (NÃO CALCULA MAIS NO FRONT)
+   Backend entrega:
+   - faseFirebase
    - diaCiclo
    - perfilHormonal
-
-   Front apenas interpreta para montar FirebaseQuery
 =========================================================== */
+
 FEMFLOW.calcularEngineHormonal = function () {
 
   this.log("⚙ Engine Hormonal Final executando…");
@@ -524,10 +386,8 @@ FEMFLOW.calcularEngineHormonal = function () {
   const diaCiclo = Number(localStorage.getItem("femflow_diaCiclo") || 1);
   const nivel    = (localStorage.getItem("femflow_nivel") || "iniciante").toLowerCase();
 
-
   /* -----------------------------------------------------------
-     CASO 1 — PERFIS HORMONAIS REAIS
-     regular, irregular, diu cobre, diu
+     1) PERFIS HORMONAIS REAIS
 ----------------------------------------------------------- */
   if (["regular", "irregular", "diu", "diu_cobre"].includes(perfil)) {
 
@@ -540,13 +400,9 @@ FEMFLOW.calcularEngineHormonal = function () {
     };
   }
 
-
   /* -----------------------------------------------------------
-     CASO 2 — PERFIS ENERGÉTICOS
-     menopausa, diu hormonal, técnica, energético
-     → cálculo em ciclos fixos 23 + key
+     2) PERFIS ENERGÉTICOS
 ----------------------------------------------------------- */
-
   if (["menopausa", "diu_hormonal", "tecnica", "energetico"].includes(perfil)) {
 
     let total = 23;
@@ -569,9 +425,8 @@ FEMFLOW.calcularEngineHormonal = function () {
     };
   }
 
-
   /* -----------------------------------------------------------
-     FALLBACK — nunca deve ocorrer
+     3) FALLBACK
 ----------------------------------------------------------- */
   return {
     modo: "fallback",
@@ -582,33 +437,20 @@ FEMFLOW.calcularEngineHormonal = function () {
 };
 
 
-
-/* -----------------------------------------------------------
-   ✓ TRADUTOR: Número → Fase
-   Necessário apenas para perfis energéticos
------------------------------------------------------------ */
+/* -------------------- TRADUTOR NÚMERO → FASE -------------------- */
 FEMFLOW._faseDoNumero = function (n) {
   if (n <= 5) return "menstrual";
   if (n <= 13) return "follicular";
   if (n <= 17) return "ovulatory";
   return "luteal";
 };
-
 /* ===========================================================
-   🌸 BLOCO 4 — EXECUTAR TREINO DO DIA
-   Integração completa:
-   - Backend GAS 2025 (GET treino)
-   - Engine hormonal final (bloco 3)
-   - Firebase (exercícios por pasta/fase/dia)
-   - Carrossel front-end
+   🌸 BLOCO 3 — EXECUTAR TREINO DO DIA
+   Integração Backend + Firebase + Engine Final + Carrossel
 =========================================================== */
 
-
 /* -----------------------------------------------------------
-   1) EXECUTAR TREINO DO DIA
-   → Chama backend
-   → Usa engine hormonal FINAL
-   → Monta UI automaticamente
+   1) EXECUTAR TREINO DO DIA — Função Principal
 ----------------------------------------------------------- */
 FEMFLOW.executarTreinoDia = async function () {
 
@@ -621,13 +463,18 @@ FEMFLOW.executarTreinoDia = async function () {
     return;
   }
 
-  // Engine final (fase e diaCiclo 100% backend)
+  /* -----------------------------------------------------------
+     A) ENGINE FINAL — usa somente backend (fase + diaCiclo)
+  ----------------------------------------------------------- */
   const H = this.calcularEngineHormonal();
-  this.log("⚙ Engine Final utilizada:", H);
+  this.log("⚙ Engine Final usada:", H);
 
-  const nivel = localStorage.getItem("femflow_nivel") || "";
+  const nivel  = localStorage.getItem("femflow_nivel")  || "";
   const enfase = localStorage.getItem("femflow_enfase") || "";
 
+  /* -----------------------------------------------------------
+     B) URL GET TREINO (backend 2025)
+  ----------------------------------------------------------- */
   const urlTreino =
     `${this.SCRIPT_URL}?action=treino` +
     `&id=${encodeURIComponent(id)}` +
@@ -645,61 +492,71 @@ FEMFLOW.executarTreinoDia = async function () {
     const r = await fetch(urlTreino);
     const txt = await r.text();
 
-    this.log("📦 Resposta RAW do backend:", txt);
+    this.log("📦 RAW BACKEND:", txt);
 
     try {
       dadosTreino = JSON.parse(txt);
     } catch (e) {
-      this.error("❌ Backend retornou JSON inválido:", e);
+      this.error("❌ JSON inválido:", e);
       this.toast("Erro ao interpretar treino.");
       return;
     }
 
   } catch (err) {
-    this.error("❌ Erro ao consultar backend:", err);
-    this.toast("Falha na conexão.");
+    this.error("❌ Conexão falhou:", err);
+    this.toast("Falha ao acessar servidor.");
     return;
   }
 
   if (!dadosTreino || dadosTreino.status !== "ok") {
-    this.error("Backend retornou erro ao carregar treino:", dadosTreino);
-    this.toast("Erro ao carregar treino.", true);
+    this.error("❌ Backend retornou erro:", dadosTreino);
+    this.toast("Erro ao montar treino.");
     return;
   }
 
   this.log("🔥 Treino recebido do backend:", dadosTreino);
 
-  // Agora monta a UI do treino
+  /* -----------------------------------------------------------
+     C) Montar UI do treino
+  ----------------------------------------------------------- */
   await this._montarTreinoUI(dadosTreino);
 };
 
 
 
-
-/* -----------------------------------------------------------
-   2) CARREGAR EXERCÍCIOS DO FIREBASE
------------------------------------------------------------ */
+/* ===========================================================
+   2) BUSCAR EXERCÍCIOS DO FIREBASE
+=========================================================== */
 FEMFLOW._buscarExerciciosTreino = async function (firebaseQuery) {
 
   if (!firebaseQuery) {
-    this.warn("FirebaseQuery ausente, backend não enviou.");
+    this.warn("⚠ firebaseQuery ausente — backend não enviou.");
     return [];
   }
 
-  const pasta = `${firebaseQuery.nivel || firebaseQuery.pasta || ""}_${firebaseQuery.enfase || ""}`
+  /* Exemplo de firebaseQuery:
+     {
+       nivel: "iniciante",
+       enfase: "gluteo",
+       fase: "follicular",
+       diaKey: "dia_06"
+     }
+  */
+
+  const pasta = `${firebaseQuery.nivel || ""}_${firebaseQuery.enfase || ""}`
     .replace("__", "_")
     .trim();
 
-  const fase = firebaseQuery.fase;
+  const fase   = firebaseQuery.fase;
   const diaKey = firebaseQuery.diaKey;
 
   this.log("📁 Pasta Firebase:", pasta);
 
-  // ✔ Função correta !!!
+  // A função verdadeira de leitura está abaixo
   const lista = await this._carregarExerciciosFirebase(pasta, fase, diaKey);
 
   if (!lista || !Array.isArray(lista)) {
-    this.warn("⚠ Firebase retornou vazio para:", firebaseQuery);
+    this.warn("⚠ Firebase vazio para query:", firebaseQuery);
     return [];
   }
 
@@ -708,9 +565,13 @@ FEMFLOW._buscarExerciciosTreino = async function (firebaseQuery) {
 
 
 
-/* -----------------------------------------------------------
-   3) MONTAR TELA DO TREINO (Carrossel)
------------------------------------------------------------ */
+/* ===========================================================
+   3) MONTAR UI COMPLETA DO TREINO
+   Backend entrega:
+   - boxes[0] → intro
+   - boxes[last] → final
+   - firebaseQuery → pasta/fase/diaKey
+=========================================================== */
 FEMFLOW._montarTreinoUI = async function (j) {
 
   const track = document.querySelector("#carouselTrack");
@@ -719,7 +580,7 @@ FEMFLOW._montarTreinoUI = async function (j) {
     return;
   }
 
-  track.innerHTML = ""; // limpa
+  track.innerHTML = "";
 
   /* -----------------------------------------------------------
      1) BOX 0 — Introdução
@@ -728,7 +589,7 @@ FEMFLOW._montarTreinoUI = async function (j) {
   track.appendChild(boxIntro);
 
   /* -----------------------------------------------------------
-     2) BOXES do FIREBASE
+     2) EXERCÍCIOS DO FIREBASE
   ----------------------------------------------------------- */
   const exList = await this._buscarExerciciosTreino(j.firebaseQuery);
 
@@ -738,13 +599,15 @@ FEMFLOW._montarTreinoUI = async function (j) {
   });
 
   /* -----------------------------------------------------------
-     3) BOX FINAL — encerramento
+     3) BOX FINAL
   ----------------------------------------------------------- */
-  const boxFinal = this._criarBoxTexto(j.boxes[j.boxes.length - 1]);
+  const boxFinal = this._criarBoxTexto(
+    j.boxes[j.boxes.length - 1] || { titulo: "Final", mensagem: "" }
+  );
   track.appendChild(boxFinal);
 
   /* -----------------------------------------------------------
-     4) SALVAR SNAPSHOT OFFLINE
+     4) SNAPSHOT OFFLINE
   ----------------------------------------------------------- */
   this._salvarSnapshotTreino(j, exList);
 
@@ -753,10 +616,9 @@ FEMFLOW._montarTreinoUI = async function (j) {
 
 
 
-
-/* -----------------------------------------------------------
+/* ===========================================================
    4) Criar BOX texto (Intro / Final)
------------------------------------------------------------ */
+=========================================================== */
 FEMFLOW._criarBoxTexto = function (box) {
   const el = document.createElement("div");
   el.className = "carousel-item";
@@ -773,9 +635,9 @@ FEMFLOW._criarBoxTexto = function (box) {
 
 
 
-/* -----------------------------------------------------------
+/* ===========================================================
    5) Criar BOX de Exercício (Firebase)
------------------------------------------------------------ */
+=========================================================== */
 FEMFLOW._criarBoxExercicio = function (ex) {
   const el = document.createElement("div");
   el.className = "carousel-item";
@@ -795,9 +657,9 @@ FEMFLOW._criarBoxExercicio = function (ex) {
 
 
 
-/* -----------------------------------------------------------
-   6) Snapshot Offline — salva treino localmente
------------------------------------------------------------ */
+/* ===========================================================
+   6) Snapshot Offline — salva treino completo
+=========================================================== */
 FEMFLOW._salvarSnapshotTreino = function (j, lista) {
 
   const snap = {
@@ -819,27 +681,45 @@ FEMFLOW._salvarSnapshotTreino = function (j, lista) {
 
 
 
-/* -----------------------------------------------------------
-   7) DEBUG Firebase Query
------------------------------------------------------------ */
-window.FEMFLOW_DEBUG_TREINO = {
-  printFirebaseQuery({ pasta, fase, diaKey }) {
-    console.log("🔥 Firebase Query:", {
-      pasta,
-      fase,
-      diaKey,
-      url:
-        `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/`
-        + encodeURIComponent(`exercicios/${pasta}/${fase}/${diaKey}.json`)
-        + `?alt=media`
-    });
+/* ===========================================================
+   7) Carregar arquivos do Firebase (JSON via Storage)
+=========================================================== */
+FEMFLOW._carregarExerciciosFirebase = async function (pasta, fase, diaKey) {
+
+  const url =
+    `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/` +
+    encodeURIComponent(`exercicios/${pasta}/${fase}/${diaKey}.json`) +
+    `?alt=media`;
+
+  this.log("🔥 Firebase URL:", url);
+
+  try {
+    const r = await fetch(url);
+
+    if (!r.ok) {
+      this.warn("⚠ Firebase HTTP Status:", r.status);
+      return [];
+    }
+
+    const txt = await r.text();
+
+    try {
+      const j = JSON.parse(txt);
+      this.log("🔥 Firebase JSON retornado:", j);
+      return j;
+    } catch (e) {
+      this.warn("⚠ Firebase retornou texto não JSON:", txt);
+      return [];
+    }
+
+  } catch (err) {
+    this.error("❌ Erro ao acessar Firebase:", err);
+    return [];
   }
 };
 /* ===========================================================
-   🌸 BLOCO 5 — DEBUG, INSPECTOR, INIT, AUTO-START
-   Parte final do FemFlow Core v4
+   🌸 BLOCO 4 — DEBUG, INSPECTOR, INIT, AUTO-START
 =========================================================== */
-
 
 /* -----------------------------------------------------------
    🔍 INSPECTOR — Console: FEMFLOW.inspect()
@@ -847,7 +727,8 @@ window.FEMFLOW_DEBUG_TREINO = {
 FEMFLOW.inspect = function () {
 
   console.clear();
-  console.log("%c🔍 FEMFLOW INSPECTOR — 2025", "font-size:18px;font-weight:bold;color:#cc6a5a;");
+  console.log("%c🔍 FEMFLOW INSPECTOR — 2025",
+              "font-size:18px;font-weight:bold;color:#cc6a5a;");
 
   /* ---------------------------
      LOCALSTORAGE
@@ -865,17 +746,18 @@ FEMFLOW.inspect = function () {
     "femflow_cycleLength",
     "femflow_startDate",
     "femflow_dia_energetico",
+    "femflow_dia_treino",
     "femflow_dev"
   ].forEach(k => console.log(k, "→", localStorage.getItem(k)));
   console.groupEnd();
 
 
   /* ---------------------------
-     ENGINE HORMONAL
+     ENGINE HORMONAL FINAL
   --------------------------- */
   console.groupCollapsed("🌙 ENGINE HORMONAL FINAL");
   try {
-    console.log(this.calcularEngineHormonal());
+    console.log(FEMFLOW.calcularEngineHormonal());
   } catch (e) {
     console.warn("Erro engine:", e);
   }
@@ -887,7 +769,7 @@ FEMFLOW.inspect = function () {
   --------------------------- */
   console.groupCollapsed("🔥 FIREBASE QUERY (calculada)");
   try {
-    const H = this.calcularEngineHormonal();
+    const H = FEMFLOW.calcularEngineHormonal();
     const pasta = `${localStorage.getItem("femflow_nivel")}_${localStorage.getItem("femflow_enfase")}`;
     const q = {
       pasta,
@@ -918,19 +800,20 @@ FEMFLOW.inspect = function () {
   }
   console.groupEnd();
 
-  console.log("%c✔ INSPEÇÃO FINALIZADA", "font-weight:bold;color:#4ba387;font-size:16px;");
+  console.log("%c✔ INSPEÇÃO FINALIZADA",
+              "font-weight:bold;color:#4ba387;font-size:16px;");
 };
 
 
 
-
 /* -----------------------------------------------------------
-   🔍 DEBUG BACKEND RAW — FEMFLOW.debugBackend()
+   🔍 DEBUG BACKEND — FEMFLOW.debugBackend()
 ----------------------------------------------------------- */
 FEMFLOW.debugBackend = async function () {
 
   console.clear();
-  console.log("%c🔍 DEBUG BACKEND — RAW GET TREINO", "font-size:20px;font-weight:bold;color:#cc6a5a;");
+  console.log("%c🔍 DEBUG BACKEND — RAW GET TREINO",
+              "font-size:20px;font-weight:bold;color:#cc6a5a;");
 
   const id = localStorage.getItem("femflow_id");
   if (!id) {
@@ -938,10 +821,10 @@ FEMFLOW.debugBackend = async function () {
     return;
   }
 
-  const H = this.calcularEngineHormonal();
+  const H = FEMFLOW.calcularEngineHormonal();
 
   const url =
-    `${this.SCRIPT_URL}?action=treino` +
+    `${FEMFLOW.SCRIPT_URL}?action=treino` +
     `&id=${id}` +
     `&fase=${H.faseFirebase}` +
     `&diaFirebase=${H.diaFirebase}` +
@@ -971,14 +854,14 @@ FEMFLOW.debugBackend = async function () {
 
 
 
-
 /* -----------------------------------------------------------
-   🔍 DEBUG FIREBASE (RAW)
+   🔍 DEBUG FIREBASE RAW — FEMFLOW.debugFirebaseRaw()
 ----------------------------------------------------------- */
 FEMFLOW.debugFirebaseRaw = async function (pasta, fase, diaKey) {
 
   console.clear();
-  console.log("%c🔥 DEBUG FIREBASE RAW", "font-size:20px;font-weight:bold;color:#cc6a5a;");
+  console.log("%c🔥 DEBUG FIREBASE RAW",
+              "font-size:20px;font-weight:bold;color:#cc6a5a;");
 
   const url =
     `https://firebasestorage.googleapis.com/v0/b/femflow-firebase.appspot.com/o/`
@@ -1008,10 +891,10 @@ FEMFLOW.debugFirebaseRaw = async function (pasta, fase, diaKey) {
 
 
 
-
 /* ===========================================================
    🔧 INIT — executado em TODAS as páginas
 =========================================================== */
+
 FEMFLOW.init = async function () {
 
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
@@ -1024,12 +907,17 @@ FEMFLOW.init = async function () {
     "evolucao.html"
   ];
 
+  /* -------------------------
+     HEADER E MENU
+  ------------------------- */
   if (paginasComHeader.includes(p)) {
     this.inserirHeaderApp();
     this.inserirMenuLateral();
   }
 
-  // Se estiver no treino.html, executa treino
+  /* -------------------------
+     EXECUTAR TREINO
+  ------------------------- */
   if (p === "treino.html") {
     await this.executarTreinoDia();
   }
@@ -1038,10 +926,8 @@ FEMFLOW.init = async function () {
 };
 
 
-
-
 /* ===========================================================
-   🚀 AUTO-START
+   🚀 AUTO-START — garante execução automática
 =========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   window.FEMFLOW.init();
