@@ -297,22 +297,77 @@ function responderQuiz(v){
 }
 
 /* ============================================================
-   FINAL DO QUIZ — cálculo energético 23+5
+   FINAL DO QUIZ — PERFIL ENERGÉTICO e PERFIL HORMONAL IRREGULAR
 ============================================================ */
 function finalizarQuiz(){
-  const faseAltaNivel = faseAltaPorNivel();
-  const entraAlta = quizScore <= 3;
 
-  const faseCalc = entraAlta ? faseAltaNivel : "menstrual";
-  const diaInicial = entraAlta ? 1 : 24;
+  const nivel = (localStorage.getItem("nivel_atual") || "iniciante").toLowerCase();
+  const entraAlta = quizScore <= 3;   // true = alta energia
+
+  // 🔥 1. Se PERFIL é IRREGULAR (perfilInterno === "irregular_quiz")
+  if (perfilInterno === "irregular_quiz") {
+
+    // fase aproximada
+    let faseAprox = "";
+    if (quizScore >= 4) faseAprox = "luteal";
+    else if (quizScore === 3) faseAprox = "ovulatory";
+    else if (quizScore === 2) faseAprox = "follicular";
+    else faseAprox = "menstrual";
+
+    // conversão para o dia inicial fisiológico REAL
+    let diaInicial = 1;
+    if (faseAprox === "follicular") diaInicial = 6;
+    if (faseAprox === "ovulatory")  diaInicial = 14;
+    if (faseAprox === "luteal")     diaInicial = 18;
+
+    salvarCiclo({
+      perfil: "irregular",
+      start: new Date(),
+      length: 28,
+      faseCalc: faseAprox,
+      dia: diaInicial
+    });
+
+    return;
+  }
+
+  // 🔥 2. Se PERFIL é MENOPAUSA ou DIU hormonal → usar dinâmica ENERGÉTICA
+  const faseAltaNivel = faseAltaPorNivel();
+  const diaEnergetico = 1; // sempre começamos do 1 no ciclo energético
+
+  let faseCalc, diaReal;
+
+  // ALTA ENERGIA → aplicar faseAltaNivel com loop fisiológico real
+  if (entraAlta) {
+    faseCalc = faseAltaNivel;
+
+    if (faseAltaNivel === "luteal") {
+      diaReal = 18 + ((diaEnergetico - 1) % 11); // 18–28
+    }
+    else if (faseAltaNivel === "follicular") {
+      diaReal = 6 + ((diaEnergetico - 1) % 8);   // 6–13
+    }
+    else if (faseAltaNivel === "ovulatory") {
+      diaReal = 14 + ((diaEnergetico - 1) % 4);  // 14–17
+    }
+    else {
+      diaReal = 1;
+    }
+  }
+
+  // BAIXA ENERGIA → menstrual 1–5
+  else {
+    faseCalc = "menstrual";
+    diaReal = 1 + ((diaEnergetico - 1) % 5); // 1–5
+  }
 
   salvarCiclo({
     perfil: perfilInterno.replace("_quiz",""),
-    start:new Date(),
-    length:28,
+    start: new Date(),
+    length: 28,
     faseCalc,
-    faseAlta:faseAltaNivel,
-    dia:diaInicial
+    faseAlta: faseAltaNivel,
+    dia: diaReal
   });
 }
 
