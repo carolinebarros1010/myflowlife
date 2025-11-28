@@ -134,6 +134,18 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
   const todos = [];
   snap.forEach(d => todos.push(d.data()));
 
+  FEMFLOW.engineTreino.calcularIntervaloPorReps = function (reps) {
+  reps = Number(reps || 0);
+
+  if (reps >= 6 && reps <= 8)   return 90;
+  if (reps > 8 && reps <= 12)   return 60;
+  if (reps > 12 && reps <= 18)  return 45;
+
+  // fallback se reps não vier
+  return 60;
+};
+ 
+
   // embaralha aleatoriamente
   const shuffled = todos.sort(() => Math.random() - 0.5);
 
@@ -141,17 +153,22 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
   let cursor = 0;
   const boxes = [];
 
-  for (let i = 0; i < qtdBoxes; i++) {
-    const q = exPorBox[i];
-    const bloco = shuffled.slice(cursor, cursor + q);
-    cursor += q;
+for (let i = 0; i < qtdBoxes; i++) {
+  const q = exPorBox[i];
+  const bloco = shuffled.slice(cursor, cursor + q);
+  cursor += q;
 
-    boxes.push({
-      tipo: "treino",
-      box: i + 1,
-      exercicios: bloco
-    });
-  }
+  // ⭐ aplica intervalo baseado nos reps
+  bloco.forEach(ex => {
+    ex.intervalo = FEMFLOW.engineTreino.calcularIntervaloPorReps(ex.reps);
+  });
+
+  boxes.push({
+    tipo: "treino",
+    box: i + 1,
+    exercicios: bloco
+  });
+}
 
   return boxes;
 };
