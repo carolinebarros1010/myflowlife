@@ -5,16 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>FemFlow • Flow Center</title>
 
-  <!-- Favicon -->
   <link rel="icon" href="favicon.ico">
-
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
-  <!-- CSS Base -->
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
@@ -27,13 +22,12 @@
   <h3 id="tituloFlow">Fase Hormonal</h3>
   <p class="subtitle" id="subFlow">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
 
-  <!-- ==========================
+  <!-- ================================
        CÍRCULO HORMONAL
-  =========================== -->
+  ================================= -->
   <div class="phase-wrapper">
     <div class="phase-svg">
       <svg viewBox="0 0 300 300" width="260" height="260">
-        <!-- Fundo -->
         <circle cx="150" cy="150" r="120" fill="#fff5ef"></circle>
 
         <g stroke="#fff5ef" stroke-width="3">
@@ -43,44 +37,15 @@
           <path id="seg-luteal"     d="M150,150 L30,150 A120,120 0 0,1 150,30 Z" fill="#f9e0d8"></path>
         </g>
 
-        <!-- Círculo interno -->
         <circle cx="150" cy="150" r="65" fill="none" stroke="#fff5ef" stroke-width="2"></circle>
         <circle cx="150" cy="150" r="63" fill="#cc6a5a"></circle>
 
-        <!-- Labels das fases -->
-        <text id="lbl-menstrual"
-              x="215" y="95"
-              font-family="Playfair Display"
-              font-size="14" font-weight="700"
-              fill="#cc6a5a"
-              text-anchor="middle"
-              transform="rotate(45,215,95)">Menstrual</text>
+        <!-- Labels -->
+        <text id="lbl-menstrual"  x="215" y="95"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(45,215,95)">Menstrual</text>
+        <text id="lbl-follicular" x="215" y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(135,215,215)">Folicular</text>
+        <text id="lbl-ovulatory"  x="85"  y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(225,85,215)">Ovulatória</text>
+        <text id="lbl-luteal"     x="85"  y="85"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(315,85,85)">Lútea</text>
 
-        <text id="lbl-follicular"
-              x="215" y="215"
-              font-family="Playfair Display"
-              font-size="14" font-weight="700"
-              fill="#cc6a5a"
-              text-anchor="middle"
-              transform="rotate(135,215,215)">Folicular</text>
-
-        <text id="lbl-ovulatory"
-              x="85" y="215"
-              font-family="Playfair Display"
-              font-size="14" font-weight="700"
-              fill="#cc6a5a"
-              text-anchor="middle"
-              transform="rotate(225,85,215)">Ovulatória</text>
-
-        <text id="lbl-luteal"
-              x="85" y="85"
-              font-family="Playfair Display"
-              font-size="14" font-weight="700"
-              fill="#cc6a5a"
-              text-anchor="middle"
-              transform="rotate(315,85,85)">Lútea</text>
-
-        <!-- Centro -->
         <text id="centerPhase"
               x="150" y="155"
               text-anchor="middle"
@@ -92,21 +57,15 @@
     </div>
   </div>
 
-  <!-- Fase atual -->
   <div class="current-phase" id="t_current">Fase atual: —</div>
 
-  <!-- NAV BUTTONS -->
+  <!-- NAV -->
   <div class="toolbar">
     <button class="tool" id="toBreath">💨 Respiração</button>
     <button class="tool" id="toTrain">🏃 Treino</button>
     <button class="tool" id="toEvolution">📈 Evolução</button>
   </div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
-  <!-- Core -->
   <script src="femflow-core.js"></script>
 
   <script>
@@ -116,15 +75,15 @@
     FEMFLOW.inserirMenuLateral();
 
     /* ================================
-       1) Carregar ciclo do backend
+       1) SYNC BACKEND → LOCAL
+       (Arquitetura A)
     ================================= */
-    await FEMFLOW.carregarCicloBackend();
+    await FEMFLOW.syncCiclo();
 
     /* ================================
-       2) Engine hormonal final
+       2) FASE REAL
     ================================= */
-    const H = FEMFLOW.calcularEngineHormonal();
-    const fase = H.faseFirebase;
+    const fase = FEMFLOW.getFaseAtual();
 
     /* ================================
        3) Idioma
@@ -137,13 +96,6 @@
         faseAtual:"Fase atual:",
         botoes:{breath:"💨 Respiração",train:"🏃 Treino", evo:"📈 Evolução"},
         fases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"}
-      },
-      en:{
-        titulo:"Hormonal Phase",
-        frase:"Your body moves in cycles. Let’s follow its rhythm.",
-        faseAtual:"Current phase:",
-        botoes:{breath:"💨 Breathing",train:"🏃 Workout", evo:"📈 Progress"},
-        fases:{menstrual:"Menstrual",follicular:"Follicular",ovulatory:"Ovulatory",luteal:"Luteal"}
       }
     };
     const L = T[lang];
@@ -152,25 +104,21 @@
     document.getElementById("subFlow").textContent    = L.frase;
 
     /* ================================
-       4) UI da fase atual
+       4) UI
     ================================= */
     document.getElementById("centerPhase").textContent = L.fases[fase];
-    document.getElementById("t_current").textContent =
-      `${L.faseAtual} ${L.fases[fase]}`;
+    document.getElementById("t_current").textContent   = `${L.faseAtual} ${L.fases[fase]}`;
 
     /* ================================
-       5) Pintar setor ativo + texto
+       5) Pintar fase ativa
     ================================= */
     ["menstrual","follicular","ovulatory","luteal"].forEach(s => {
-      const seg = document.getElementById(`seg-${s}`);
-      const lbl = document.getElementById(`lbl-${s}`);
-
-      seg.classList.toggle("path-active", s === fase);
-      lbl.classList.toggle("label-active", s === fase);
+      document.getElementById(`seg-${s}`).classList.toggle("path-active", s === fase);
+      document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === fase);
     });
 
     /* ================================
-       6) Botões (router do Core)
+       6) Navegação
     ================================= */
     document.getElementById("toBreath").onclick   = () => FEMFLOW.router("respiracao");
     document.getElementById("toTrain").onclick    = () => FEMFLOW.router("treino");
@@ -180,3 +128,4 @@
 
 </body>
 </html>
+
