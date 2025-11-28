@@ -134,6 +134,18 @@ FEMFLOW._acaoMenu = function (op) {
   }
 };
 
+FEMFLOW.buscarHistorico = async function (id, limit = 40) {
+  try {
+    const raw = localStorage.getItem("femflow_hist") || "[]";
+    const arr = JSON.parse(raw);
+    return arr.slice(-limit);
+  } catch {
+    return [];
+  }
+};
+
+
+
 /* ===========================================================
    3. PSE + Salvar Treino / Descanso
 =========================================================== */
