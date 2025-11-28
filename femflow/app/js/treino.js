@@ -1,8 +1,3 @@
-/* =======================================================================
-   FemFlow v06 — Treino Diário 2025
-   ENGINE HORMONAL 3.1 • TURNOVER • FIREBASE • SNAPSHOT OFFLINE
-======================================================================= */
-
 document.addEventListener("DOMContentLoaded", async () => {
 
   const OFFLINE_KEY_TREINO = "femflow_offline_treino_v1";
@@ -150,8 +145,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ============================================================
    * 6. ENGINE HORMONAL 3.1 — FINAL UNIFICADA (2025)
    * ============================================================ */
-
-  function calcularEngineHormonal() {
+  async function calcularEngineHormonal() {
     let perfil = (localStorage.getItem("femflow_perfilHormonal") || "regular")
       .toLowerCase()
       .trim();
@@ -255,8 +249,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.calcularEngineHormonal = calcularEngineHormonal;
 
   /* ------------------------------------------------------------
-     * Auxiliar: converte dia (1–30) em fase
-     ------------------------------------------------------------ */
+   * Auxiliar: converte dia (1–30) em fase
+   ------------------------------------------------------------ */
   function faseDoNumero(dia) {
     if (dia >= 1 && dia <= 5) return "menstrual";
     if (dia <= 13)           return "folicular";
@@ -267,7 +261,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ============================================================
    * 7. ENGINE ENERGÉTICA — avança quando salva treino
    ============================================================ */
-
   function engineEnergeticaAvancar() {
     let dia = Number(localStorage.getItem("femflow_dia_energetico") || 1);
     localStorage.setItem("femflow_dia_energetico", dia + 1);
@@ -349,7 +342,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       perfilHormonal: front.perfilHormonal
     };
   }
-
+  
   /* ============================================================
    * 5.1 — Carregar exercícios do Firebase
    * (pasta, fase, diaKey → retorna lista normalizada)
@@ -456,80 +449,86 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     return lista;
   }
-   /* ============================================================
- * BLOCO 6 — EXECUÇÃO FINAL DO TREINO
- * ============================================================ */
 
-async function executarTreinoDia() {
+  /* ============================================================
+   * EXECUÇÃO FINAL DO TREINO
+   ============================================================ */
 
-  /* ---------------------------------------------
-   * 1) DADOS ESSENCIAIS DO FRONT
-   * --------------------------------------------- */
-  const id = localStorage.getItem("femflow_id");
-  const nivel  = (localStorage.getItem("femflow_nivel")  || "iniciante").toLowerCase();
-  const enfase = (localStorage.getItem("femflow_enfase") || "geral").toLowerCase();
+  async function executarTreinoDia() {
 
-  if (!id) {
-    FEMFLOW.toast("⚠️ Refaça o login.");
-    return location.href = "index.html?ret=treino.html";
+    const id = localStorage.getItem("femflow_id");
+    const nivel = (localStorage.getItem("femflow_nivel") || "iniciante").toLowerCase();
+    const enfase = (localStorage.getItem("femflow_enfase") || "geral").toLowerCase();
+
+    if (!id) {
+      FEMFLOW.toast("⚠️ Refaça o login.");
+      return location.href = "index.html?ret=treino.html";
+    }
+
+    const diaPrograma = Number(localStorage.getItem("femflow_dia_treino") || 1);
+
+    const hormonal = calcularEngineHormonal();
+    const faseFirebase = hormonal.faseFirebase;
+    const diaFirebase = hormonal.diaFirebase;
+    const diaKey = hormonal.diaKey;
+
+    // Construção da consulta Firebase
+    const pastaFirebase = `${nivel}_${enfase}`;
+    const firebaseQuery = {
+      pasta: pastaFirebase,
+      fase: faseFirebase,
+      diaKey: diaKey
+    };
+
+    const url =
+      `${SCRIPT_URL}?action=treino` +
+      `&id=${encodeURIComponent(id)}` +
+      `&fase=${encodeURIComponent(faseFirebase)}` +
+      `&diaFirebase=${encodeURIComponent(diaFirebase)}` +
+      `&diaKey=${encodeURIComponent(diaKey)}` +
+      `&nivel=${encodeURIComponent(nivel)}` +
+      `&enfase=${encodeURIComponent(enfase)}` +
+      `&diaCiclo=${encodeURIComponent(localStorage.getItem("femflow_diaCiclo"))}`;
+
+    let j = null;
+
+    try {
+      const resp = await fetch(url);
+      j = await resp.json();
+    } catch (e) {
+      console.error("❌ GET treino falhou:", e);
+    }
+
+    if (!j || j.status !== "ok") {
+      FEMFLOW.toast("❌ Falha ao carregar treino.");
+      return;
+    }
+
+    console.log("🔥 DiaCiclo recebido do backend:", j.diaCiclo);
+
+    // Atualizando o valor de DiaCiclo no frontend (se necessário)
+    localStorage.setItem("femflow_diaCiclo", j.diaCiclo);
+
+    const box0 = j.boxes?.find(b => b.tipo === "texto") || null;
+    const boxFinal = j.boxes?.find(b => b.tipo === "resfriamento") || null;
+
+    const hiitCardio = j.hiitCardio || [];
+
+    const listaFinal = await gerarBoxesFinais(firebaseQuery, hiitCardio, box0, boxFinal);
+
+    if (!listaFinal.length) {
+      FEMFLOW.toast("Nenhum exercício encontrado.");
+    }
+
+    aplicarPerformanceView(faseFirebase);
+    render(listaFinal);
+
+    salvarSnapshotOffline({
+      fase: faseFirebase,
+      diaCiclo: hormonal.diaFirebase,
+      diaPrograma
+    }, listaFinal);
+
+    console.log("✅ Treino final renderizado!");
   }
-
-  const diaPrograma = Number(localStorage.getItem("femflow_dia_treino") || 1);
-
-  /* ---------------------------------------------
-   * 2) MOTOR HORMONAL 3.1 → devolve:
-   *    faseFirebase, diaFirebase e diaKey
-   * --------------------------------------------- */
-  const hormonal = calcularEngineHormonal();
-  const faseFirebase = hormonal.faseFirebase;
-  const diaFirebase  = hormonal.diaFirebase;
-  const diaKey       = hormonal.diaKey;
-
-  console.log("🔥 Engine Hormonal →", hormonal);
-
-  /* ---------------------------------------------
-   * 3) MONTAR QUERY do Firebase
-   * pasta = nivel_enfase
-   * --------------------------------------------- */
-  const pastaFirebase = `${nivel}_${enfase}`;  
-  const firebaseQuery = {
-    pasta: pastaFirebase,
-    fase: faseFirebase,
-    diaKey: diaKey
-  };
-
-  console.log("📁 Firebase Query:", firebaseQuery);
-
-  /* ---------------------------------------------
-   * 4) CHAMAR BACKEND (GET → treino)
-   * --------------------------------------------- */
-  const url =
-    `${SCRIPT_URL}?action=treino` +
-    `&id=${encodeURIComponent(id)}` +
-    `&fase=${encodeURIComponent(faseFirebase)}` +
-    `&diaFirebase=${encodeURIComponent(diaFirebase)}` +
-    `&diaKey=${encodeURIComponent(diaKey)}` +
-    `&nivel=${encodeURIComponent(nivel)}` +
-    `&enfase=${encodeURIComponent(enfase)}` +
-    `&diaCiclo=${encodeURIComponent(localStorage.getItem("femflow_diaCiclo"))}`; // Adicionando o diaCiclo na consulta
-
-  let j = null;
-
-  try {
-    const resp = await fetch(url);
-    j = await resp.json();
-  } catch (e) {
-    console.error("❌ GET treino falhou:", e);
-  }
-
-  if (!j || j.status !== "ok") {
-    FEMFLOW.toast("❌ Falha ao carregar treino.");
-    return;
-  }
-
-  // Agora você pode usar o valor de j.diaCiclo para garantir que o ciclo foi carregado corretamente
-  console.log("🔥 DiaCiclo recebido do backend:", j.diaCiclo);
-
-  // Atualizando o valor de DiaCiclo no frontend (se necessário)
-  localStorage.setItem("fem
-
+});
