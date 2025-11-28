@@ -189,6 +189,35 @@ function renderBoxes(lista, meta = {}) {
 
   bindTimers(track);
   moveTo("reset");
+
+   if (box.tipo === "hiit" || box.tipo === "cardio") {
+
+  div.classList.add("ff-box-especial");
+
+  div.innerHTML = `
+    <h3>${box.titulo}</h3>
+    <p>${box.descricao}</p>
+
+    ${box.protocolo ? `<p><strong>Protocolo:</strong> ${box.protocolo}</p>` : ""}
+
+    <h4>🏋️ Academia</h4>
+    <ul>${box.opcoesAcademia.map(o => `<li>${o}</li>`).join("")}</ul>
+
+    <h4>🏠 Casa</h4>
+    <ul>${box.opcoesCasa.map(o => `<li>${o}</li>`).join("")}</ul>
+
+    ${box.tempo_total ? `
+      <div class="ff-timer-bar" data-total="${box.tempo_total}">
+        <div class="ff-timer-fill"></div>
+        <span class="ff-timer-count">00:${String(box.tempo_total).padStart(2,"0")}</span>
+      </div>` 
+    : ""}
+  `;
+
+  track.appendChild(div);
+  return;
+}
+
 }
 
 
