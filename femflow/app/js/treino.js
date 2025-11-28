@@ -137,73 +137,60 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  /* ============================================================
-   * 7. RENDERIZAR BOXES DO TREINO
-   * ============================================================ */
-  function renderBoxes(lista) {
-     
-console.log("🔥 TREINO.ENGINE.DEBUG ================================");
-console.log("Front → fase:", fase);
-console.log("Front → nivel:", nivel);
-console.log("Front → enfase:", enfase);
-console.log("Front → diaFirebase:", diaFirebase);
-console.log("Front → diaKey:", diaKey);
-console.log("--------------------------------------------------------");
-console.log("PERFIL ENERGÉTICO localStorage:", localStorage.getItem("femflow_perfilHormonal"));
+ /* ============================================================
+ * 7. RENDERIZAR BOXES DO TREINO
+ * ============================================================ */
+function renderBoxes(lista, meta = {}) {
 
-     
-    track.innerHTML = "";
-    boxes = lista;
+  console.log("🔥 TREINO.RENDER.DEBUG ================================");
+  console.log("TOTAL BOXES:", Array.isArray(lista) ? lista.length : 0);
+  console.log("META:", meta);
+  console.log("LISTA (primeiros 3):", (lista || []).slice(0, 3));
+  console.log("=======================================================");
 
-    lista.forEach(box => {
-      const div = document.createElement("div");
-      div.className = "carousel-item";
+  track.innerHTML = "";
+  boxes = lista || [];
 
-      div.innerHTML = `
-        <h3 class="ff-ex-titulo">${box.titulo || ""}</h3>
-        <p class="ff-ex-sub">${box.subtitulo || ""}</p>
+  boxes.forEach(box => {
+    const div = document.createElement("div");
+    div.className = "carousel-item";
 
-        ${box.video ? `
-          <div class="ff-video">
-            <iframe src="${box.video}" frameborder="0"
-              allowfullscreen></iframe>
-          </div>` : ""}
+    div.innerHTML = `
+      <h3 class="ff-ex-titulo">${box.titulo || ""}</h3>
+      <p class="ff-ex-sub">${box.subtitulo || box.mensagem || box.descricao || ""}</p>
 
-        ${box.timer ? `
-          <div class="ff-timer-bar"
-               data-total="${box.timer}">
-            <div class="ff-timer-fill"></div>
-            <span class="ff-timer-count">00:${String(parseTempo(box.timer)).padStart(2, "0")}</span>
-          </div>` : ""}
+      ${box.video ? `
+        <div class="ff-video">
+          <iframe src="${box.video}" frameborder="0"
+            allowfullscreen></iframe>
+        </div>` : ""}
 
-        ${box.series ? `
-          <div class="ff-series">
-            ${box.series.map(s => `
-              <div class="ff-serie-item">
-                <span>${s}</span>
-              </div>
-            `).join("")}
-          </div>` : ""}
-      `;
+      ${box.timer || box.tempo_total ? `
+        <div class="ff-timer-bar"
+             data-total="${box.timer || box.tempo_total}">
+          <div class="ff-timer-fill"></div>
+          <span class="ff-timer-count">
+            00:${String(parseTempo(box.timer || box.tempo_total)).padStart(2, "0")}
+          </span>
+        </div>` : ""}
 
-      track.appendChild(div);
-    });
+      ${Array.isArray(box.series) ? `
+        <div class="ff-series">
+          ${box.series.map(s => `
+            <div class="ff-serie-item">
+              <span>${s}</span>
+            </div>
+          `).join("")}
+        </div>` : ""}
+    `;
 
-    bindTimers(track);
-    moveTo("reset");
+    track.appendChild(div);
+  });
 
-     console.log("🔥 TREINO.ENGINE.OUTPUT:", {
-  fase,
-  nivel,
-  enfase,
-  diaFirebase,
-  diaKey,
-  tipoDia,
-  regras: regra,
-  boxConfig
-});
+  bindTimers(track);
+  moveTo("reset");
+}
 
-  }
 
   /* ============================================================
    * 8. SNAPSHOT OFFLINE
@@ -228,17 +215,18 @@ console.log("PERFIL ENERGÉTICO localStorage:", localStorage.getItem("femflow_pe
   }
 
   /* ============================================================
-   * 9. USAR SNAPSHOT SE ESTIVER SEM INTERNET
-   * ============================================================ */
-  if (!navigator.onLine) {
-    FEMFLOW.warn("📵 Offline: carregando snapshot...");
-    const snap = carregarSnapshot();
-    if (snap?.lista) {
-      renderBoxes(snap.lista);
-      FEMFLOW.toast("Modo offline ⚡", false, true);
-      return;
-    }
+ * 9. USAR SNAPSHOT SE ESTIVER SEM INTERNET
+ * ============================================================ */
+if (!navigator.onLine) {
+  FEMFLOW.warn("📵 Offline: carregando snapshot...");
+  const snap = carregarSnapshot();
+  if (snap?.lista) {
+    renderBoxes(snap.lista, snap.meta || {});
+    FEMFLOW.toast("Modo offline ⚡", false, true);
+    return;
   }
+}
+
 
   /* ============================================================
    * 10. BOTÃO DESCANSAR
@@ -257,7 +245,92 @@ console.log("PERFIL ENERGÉTICO localStorage:", localStorage.getItem("femflow_pe
       }, 900);
     });
   }
-  /* ============================================================
+
+   /* ============================================================
+   🔍 TREINO INSPECTOR — Console Debug Pro 2025
+   ============================================================ */
+FEMFLOW.debugTreino = function () {
+
+  console.log("%c📟 TREINO INSPECTOR — 2025", 
+              "background:#333;color:#00e6b8;padding:6px;font-size:14px;border-radius:6px;");
+
+  /* -------------------------------
+   * A) LOCALSTORAGE
+   * ------------------------------- */
+  console.log("📦 LOCALSTORAGE");
+  const keys = [
+    "femflow_id",
+    "femflow_email",
+    "femflow_fase",
+    "femflow_diaCiclo",
+    "femflow_perfilHormonal",
+    "femflow_enfase",
+    "femflow_nivel",
+    "femflow_cycleLength",
+    "femflow_startDate",
+    "femflow_diaciclo",
+    "femflow_dia_treino",
+    "femflow_faseAlta"
+  ];
+
+  keys.forEach(k => {
+    console.log(`   ${k} →`, localStorage.getItem(k));
+  });
+
+  /* -------------------------------
+   * B) ENGINE HORMONAL (front)
+   * ------------------------------- */
+  console.log("\n⚙ ENGINE FRONT");
+  const fase = localStorage.getItem("femflow_fase");
+  const diaCiclo = localStorage.getItem("femflow_diaCiclo");
+  const nivel = localStorage.getItem("femflow_nivel");
+  const enfase = localStorage.getItem("femflow_enfase");
+
+  console.log({
+    fase,
+    diaCiclo,
+    nivel,
+    enfase
+  });
+
+  /* -------------------------------
+   * C) FIREBASE QUERY CALCULADA
+   * ------------------------------- */
+  const pasta = `${nivel}_${enfase}`;
+  const diaKey = "dia_" + diaCiclo;
+
+  console.log("\n🔥 FIREBASE QUERY CALCULADA");
+  console.table({
+    pasta,
+    fase,
+    diaKey
+  });
+
+  const urlFire = `https://firestore.googleapis.com/v1/projects/YOUR_FIREBASE_ID/databases/(default)/documents/${pasta}/${fase}/${diaKey}`;
+  console.log("URL suposta →", urlFire);
+
+  /* -------------------------------
+   * D) SNAPSHOT OFFLINE
+   * ------------------------------- */
+  console.log("\n📁 SNAPSHOT OFFLINE");
+  const snapRaw = localStorage.getItem("femflow_offline_treino_v1");
+
+  if (!snapRaw) {
+    console.log("   Nenhum snapshot salvo.");
+  } else {
+    try {
+      const snap = JSON.parse(snapRaw);
+      console.log("   snapshot.meta:", snap.meta);
+      console.log("   snapshot.lista:", snap.lista);
+    } catch (e) {
+      console.log("   Erro ao ler snapshot:", e);
+    }
+  }
+
+  console.log("\n✔ INSPEÇÃO FINALIZADA");
+};
+
+   /* ============================================================
    * 11. EXECUTAR TREINO DO DIA — GET BACKEND
    * ============================================================ */
   async function executarTreinoDia() {
@@ -271,61 +344,39 @@ console.log("PERFIL ENERGÉTICO localStorage:", localStorage.getItem("femflow_pe
 
     FEMFLOW.log("🚀 executando treino do dia…");
 
-    /* ------------------------------------------------------------
-     * 1) BUSCAR ENGINE PRONTA DO BACKEND (sem cálculo no front)
-     * ------------------------------------------------------------ */
+    /* ------------------------- ENGINE DO BACKEND ------------------------- */
     const fase = localStorage.getItem("femflow_fase") || "";
     const diaCiclo = localStorage.getItem("femflow_diaCiclo") || "";
     const nivel = localStorage.getItem("femflow_nivel") || "";
     const enfase = localStorage.getItem("femflow_enfase") || "";
 
-    FEMFLOW.log("📡 Engine hormonal carregada do backend:", {
-      fase,
-      diaCiclo,
-      nivel,
-      enfase
-    });
+    FEMFLOW.log("📡 Engine hormonal:", { fase, diaCiclo, nivel, enfase });
 
-    /* ------------------------------------------------------------
-     * 2) MONTAR URL GET FINAL (backend GAS 2025)
-     * ------------------------------------------------------------ */
+    /* ----------------------------- URL GET ------------------------------- */
     const url =
       `${FEMFLOW.SCRIPT_URL}?` +
-      `action=treino` +
-      `&id=${encodeURIComponent(id)}` +
+      `action=treino&id=${encodeURIComponent(id)}` +
       `&fase=${encodeURIComponent(fase)}` +
       `&diaCiclo=${encodeURIComponent(diaCiclo)}` +
       `&nivel=${encodeURIComponent(nivel)}` +
       `&enfase=${encodeURIComponent(enfase)}`;
 
-    FEMFLOW.log("🔗 URL GET →", url);
+    FEMFLOW.log("🔗 URL GET:", url);
 
-    let raw = null;
     let json = null;
 
     try {
       const r = await fetch(url);
-      raw = await r.text();
-
+      const raw = await r.text();
       FEMFLOW.log("📦 RAW BACKEND:", raw);
 
-      try {
-        json = JSON.parse(raw);
-      } catch (err) {
-        FEMFLOW.error("❌ JSON inválido:", err);
-        FEMFLOW.toast("Erro no servidor.", true);
-        return;
-      }
-
+      json = JSON.parse(raw);
     } catch (err) {
-      FEMFLOW.error("❌ Falha ao buscar backend:", err);
-      FEMFLOW.toast("Conexão falhou.", true);
+      FEMFLOW.error("❌ Erro ao carregar backend:", err);
+      FEMFLOW.toast("Erro no servidor.", true);
       return;
     }
 
-    /* ------------------------------------------------------------
-     * 3) VALIDAR RESPOSTA
-     * ------------------------------------------------------------ */
     if (!json || json.status !== "ok") {
       FEMFLOW.error("❌ Backend retornou erro:", json);
       FEMFLOW.toast("Erro ao montar treino.", true);
@@ -334,70 +385,58 @@ console.log("PERFIL ENERGÉTICO localStorage:", localStorage.getItem("femflow_pe
 
     FEMFLOW.log("🧩 BACKEND OK:", json);
 
-    /* ------------------------------------------------------------
-     * 4) SALVAR ENGINE NO LOCALSTORAGE
-     * ------------------------------------------------------------ */
+    /* ----------------- SALVAR ENGINE NO LOCALSTORAGE --------------------- */
     if (json.fase) localStorage.setItem("femflow_fase", json.fase);
     if (json.diaCiclo) localStorage.setItem("femflow_diaCiclo", json.diaCiclo);
 
-    /* ------------------------------------------------------------
-     * 5) BUSCAR EXERCÍCIOS NO FIREBASE
-     * ------------------------------------------------------------ */
+    /* --------------------------- FIREBASE ------------------------------- */
     const pasta = `${nivel}_${enfase}`;
-    const faseFirebase = json.fase || "folicular";
-    const diaKey = json.diaKey || ("dia_" + json.diaCiclo);
+    const faseFirebase = json.fase;
+    const diaKey = json.diaKey || `dia_${json.diaCiclo}`;
 
     FEMFLOW.log("🔥 Firebase Query:", { pasta, faseFirebase, diaKey });
 
-    const listaFirebase = await FEMFLOW.buscarExerciciosFirebase(
-      pasta,
-      faseFirebase,
-      diaKey
-    );
-
-    if (!listaFirebase) {
-      FEMFLOW.warn("⚠ Firebase vazio — usando somente boxes locais");
+    let listaFirebase = null;
+    try {
+      listaFirebase = await FEMFLOW._buscarExerciciosTreino(pasta, faseFirebase, diaKey);
+    } catch (e) {
+      console.error("❌ Firebase erro:", e);
     }
 
-    /* ------------------------------------------------------------
-     * 6) MONTAR BOXES FINAIS
-     * ------------------------------------------------------------ */
+    /* -------------------------- LISTA FINAL ------------------------------ */
     const listaFinal = [];
 
-    // → Boxes principais do backend (força)
-    if (Array.isArray(json.boxes)) {
-      json.boxes.forEach(b => listaFinal.push(b));
-    }
+    if (Array.isArray(json.boxes)) json.boxes.forEach(b => listaFinal.push(b));
+    if (Array.isArray(listaFirebase)) listaFirebase.forEach(ex => listaFinal.push(ex));
+    if (Array.isArray(json.hiitCardio)) json.hiitCardio.forEach(h => listaFinal.push(h));
 
-    // → Exercícios do Firebase
-    if (Array.isArray(listaFirebase)) {
-      listaFirebase.forEach(ex => listaFinal.push(ex));
-    }
+    FEMFLOW.log("📦 LISTA FINAL:", listaFinal);
 
-    // → HIIT/Cardio calculado no backend
-    if (Array.isArray(json.hiitCardio)) {
-      json.hiitCardio.forEach(h => listaFinal.push(h));
-    }
-
-    FEMFLOW.log("📦 LISTA FINAL MONTADA:", listaFinal);
-
-    /* ------------------------------------------------------------
-     * 7) SNAPSHOT OFFLINE
-     * ------------------------------------------------------------ */
+    /* ------------------------ SNAPSHOT OFFLINE --------------------------- */
     salvarSnapshot(
       {
         fase: json.fase,
         diaCiclo: json.diaCiclo,
         diaKey,
-        pasta
+        pasta,
+        tipo_dia: json.tipo_dia,
+        regras: json.regras,
+        boxConfig: json.boxConfig
       },
       listaFinal
     );
 
-    /* ------------------------------------------------------------
-     * 8) RENDERIZAR TREINO DO DIA
-     * ------------------------------------------------------------ */
-    renderBoxes(listaFinal);
+    /* ------------------------- RENDERIZAR ------------------------------- */
+    renderBoxes(listaFinal, {
+      fase: json.fase,
+      diaCiclo: json.diaCiclo,
+      diaKey,
+      nivel,
+      enfase,
+      tipo_dia: json.tipo_dia,
+      regras: json.regras,
+      boxConfig: json.boxConfig
+    });
   }
 
   /* ============================================================
@@ -406,4 +445,5 @@ console.log("PERFIL ENERGÉTICO localStorage:", localStorage.getItem("femflow_pe
   executarTreinoDia();
 
 }); // ← FIM DOMContentLoaded
+
 
