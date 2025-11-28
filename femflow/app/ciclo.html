@@ -135,12 +135,35 @@ const perguntasDiuHormonal = [
   "Inchaço ou peso no ventre?",
   "Seu corpo parece lento ou travado?"
 ];
-
+  
+console.log("🔍 CICLO.DEBUG → Perfil selecionado:", perfil);
+console.log("🔍 CICLO.DEBUG → PerfilInterno:", perfilInterno);
+console.log("🔍 CICLO.DEBUG → Perguntas do Quiz:", perguntasAtuais);
+console.log("🔍 CICLO.DEBUG → Score do Quiz:", quizScore);
+console.log("🔍 CICLO.DEBUG → faseCalc:", faseCalc);
+console.log("🔍 CICLO.DEBUG → diaInicial:", diaInicial);
+console.log("🔍 CICLO.DEBUG → faseAltaNivel:", faseAltaNivel);
 /* ============================================================
    SALVAR CICLO (LOCAL + BACKEND)
 ============================================================ */
 async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}) {
 
+ console.log("💾 SALVAR.CICLO.DEBUG =====================================");
+console.log("perfil:", perfil);
+console.log("faseCalc:", faseCalc);
+console.log("dia:", dia);
+console.log("start:", start);
+console.log("length:", length);
+console.log("faseAlta:", faseAlta);
+console.log("-------------------------------------------------------------");
+console.log("LOCALSTORAGE → antes de salvar:");
+console.log({
+  perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
+  faseAtual: localStorage.getItem("femflow_fase_atual"),
+  diaCiclo: localStorage.getItem("femflow_diaciclo")
+});
+
+  
   // LOCAL
   localStorage.setItem("femflow_perfilHormonal", perfil);
   localStorage.setItem("femflow_cycle_configured", "yes");
@@ -149,6 +172,17 @@ async function salvarCiclo({perfil, start, length, faseCalc, faseAlta, dia}) {
   localStorage.setItem("femflow_diaciclo", String(dia));
   localStorage.setItem("femflow_fase_atual", faseCalc.toLowerCase());
   if (faseAlta) localStorage.setItem("femflow_faseAlta", faseAlta);
+
+  console.log("LOCALSTORAGE → depois de salvar:");
+console.log({
+  perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
+  faseAtual: localStorage.getItem("femflow_fase_atual"),
+  diaCiclo: localStorage.getItem("femflow_diaciclo")
+});
+  
+console.log("🌐 BACKEND.POST → enviando perfil:", perfil);
+console.log("🌐 BACKEND.POST → enviando faseCalc:", faseCalc);
+console.log("🌐 BACKEND.POST → enviando dia:", dia);
 
  // 🔹 3) ENVIA PERFIL HORMONAL AO BACKEND (via POST)
   try {
