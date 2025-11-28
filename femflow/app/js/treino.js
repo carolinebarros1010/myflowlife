@@ -141,6 +141,17 @@ document.addEventListener("DOMContentLoaded", async () => {
    * 7. RENDERIZAR BOXES DO TREINO
    * ============================================================ */
   function renderBoxes(lista) {
+     
+console.log("🔥 TREINO.ENGINE.DEBUG ================================");
+console.log("Front → fase:", fase);
+console.log("Front → nivel:", nivel);
+console.log("Front → enfase:", enfase);
+console.log("Front → diaFirebase:", diaFirebase);
+console.log("Front → diaKey:", diaKey);
+console.log("--------------------------------------------------------");
+console.log("PERFIL ENERGÉTICO localStorage:", localStorage.getItem("femflow_perfilHormonal"));
+
+     
     track.innerHTML = "";
     boxes = lista;
 
@@ -180,6 +191,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     bindTimers(track);
     moveTo("reset");
+
+     console.log("🔥 TREINO.ENGINE.OUTPUT:", {
+  fase,
+  nivel,
+  enfase,
+  diaFirebase,
+  diaKey,
+  tipoDia,
+  regras: regra,
+  boxConfig
+});
+
   }
 
   /* ============================================================
