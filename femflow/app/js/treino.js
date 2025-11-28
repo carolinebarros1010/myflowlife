@@ -1,11 +1,14 @@
 /* ================================================================
-   FemFlow — treino.js FRONT-END TOTAL v1.0
-   Estrutura-base → sem backend, sem GAS, tudo local + Firebase
-   ================================================================ */
+   FemFlow — treino.js FRONT-END TOTAL v1.2
+   ---------------------------------------------------------------
+   • Sem backend, sem GAS
+   • Usa femflow-core + treino-engine v1.1 + Firestore
+   • Snapshot Offline
+================================================================ */
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  FEMFLOW.log("🚀 treino.js FRONT-END v1.0 iniciado!");
+  FEMFLOW.log("🚀 treino.js FRONT-END v1.2 iniciado!");
 
   const OFFLINE_KEY = "femflow_offline_treino_v1";
 
@@ -20,13 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* -----------------------------------------------------------
-   * 2. SINCRONIZAR CICLO DO BACKEND
-   * (garante fase, dia, perfilHormonal, faseAlta, etc.)
-   * ----------------------------------------------------------- */
-  await FEMFLOW.carregarCicloBackend();
-
-  /* -----------------------------------------------------------
-   * 3. CICLO OBRIGATÓRIO
+   * 2. GARANTIR QUE O CICLO JÁ FOI CONFIGURADO
    * ----------------------------------------------------------- */
   const cicloOK = localStorage.getItem("femflow_cycle_configured") === "yes";
 
@@ -36,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* -----------------------------------------------------------
-   * 4. ELEMENTOS HTML DO TREINO
+   * 3. ELEMENTOS HTML
    * ----------------------------------------------------------- */
   const track  = document.querySelector("#carouselTrack");
   const bar    = document.querySelector("#progressBar");
@@ -44,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnRest = document.querySelector("#btnDescansar");
 
   if (!track || !bar) {
-    FEMFLOW.error("❌ Erro: Estrutura interna do treino.html não encontrada.");
+    FEMFLOW.error("❌ Estrutura do treino.html não encontrada.");
     return;
   }
 
@@ -62,13 +59,12 @@ document.addEventListener("DOMContentLoaded", async () => {
    * ============================================================ */
   function moveTo(dir) {
     const total = boxes.length;
+
     if (dir === "next" && current < total - 1) {
-      current++;
-      navigator.vibrate?.([20]);
-    }
+      current++; navigator.vibrate?.([20]);
+    } 
     else if (dir === "prev" && current > 0) {
-      current--;
-      navigator.vibrate?.([20]);
+      current--; navigator.vibrate?.([20]);
     }
 
     const item = track.children[current];
@@ -90,20 +86,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   /* ============================================================
-   * 6. TIMERS (HIIT / CARDIO)
+   * 6. TIMER (HIIT / CARDIO)
    * ============================================================ */
   const intervals = new WeakMap();
   const fmt = s => `00:${String(s).padStart(2,"0")}`;
 
-  function parseTempo(raw) {
+  const parseTempo = raw => {
     const n = Number(String(raw).replace(/[^\d]/g, ""));
     return n > 0 ? n : 45;
-  }
+  };
 
   function bindTimers(root) {
     root.querySelectorAll(".ff-timer-bar").forEach(el => {
       const total = parseTempo(el.dataset.total);
-      const fill = el.querySelector(".ff-timer-fill");
+      const fill  = el.querySelector(".ff-timer-fill");
       const label = el.querySelector(".ff-timer-count");
       let remain = total;
 
@@ -126,19 +122,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         intervals.set(el, int);
       };
 
-      el.addEventListener("click", () => {
+      el.onclick = () => {
         if (el.classList.contains("running")) {
           clearInterval(intervals.get(el));
           el.classList.remove("running");
-        } else {
-          start();
-        }
-      });
+        } else start();
+      };
     });
   }
 
   /* ============================================================
-   * 7. RENDERIZAR BOXES
+   * 7. RENDERIZAR BOXES (agora compatível com engine v1.1)
    * ============================================================ */
   function renderBoxes(lista) {
     track.innerHTML = "";
@@ -148,26 +142,46 @@ document.addEventListener("DOMContentLoaded", async () => {
       const div = document.createElement("div");
       div.className = "carousel-item";
 
-      div.innerHTML = `
-        <h3 class="ff-ex-titulo">${box.titulo || ""}</h3>
-        <p class="ff-ex-sub">${box.subtitulo || box.descricao || ""}</p>
+      /* ----------------------
+       * BOX 0 / FINAL (texto)
+       * ---------------------- */
+      if (box.tipo === "box0" || box.tipo === "final") {
+        div.innerHTML = `
+          <h3 class="ff-ex-titulo">${box.titulo}</h3>
+          <p class="ff-ex-sub">${box.descricao}</p>
+          <ul class="ff-passos">
+            ${box.passos.map(p => `<li>${p}</li>`).join("")}
+          </ul>
+        `;
+      }
 
-        ${box.video ? `
-        <div class="ff-video">
-          <iframe src="${box.video}" frameborder="0" allowfullscreen></iframe>
-        </div>` : ""}
+      /* ----------------------
+       * EXERCÍCIOS DO FIREBASE
+       * ---------------------- */
+      else if (box.tipo === "treino") {
+        div.innerHTML = `
+          <h3 class="ff-ex-titulo">Box ${box.box}</h3>
+          <div class="ff-series">
+            ${box.exercicios
+              .map(ex => `<div class="ff-serie-item"><span>${ex.nome}</span></div>`)
+              .join("")}
+          </div>
+        `;
+      }
 
-        ${box.tempo_total ? `
-        <div class="ff-timer-bar" data-total="${box.tempo_total}">
-          <div class="ff-timer-fill"></div>
-          <span class="ff-timer-count">00:${String(box.tempo_total).padStart(2,"0")}</span>
-        </div>` : ""}
-
-        ${Array.isArray(box.series) ? `
-        <div class="ff-series">
-          ${box.series.map(s => `<div class="ff-serie-item"><span>${s}</span></div>`).join("")}
-        </div>` : ""}
-      `;
+      /* ----------------------
+       * HIIT / CARDIO
+       * ---------------------- */
+      else if (box.tipo === "hiit" || box.tipo === "cardio") {
+        div.innerHTML = `
+          <h3 class="ff-ex-titulo">${box.titulo}</h3>
+          <p class="ff-ex-sub">${box.descricao}</p>
+          <div class="ff-timer-bar" data-total="${box.tempo_total}">
+            <div class="ff-timer-fill"></div>
+            <span class="ff-timer-count">${fmt(box.tempo_total)}</span>
+          </div>
+        `;
+      }
 
       track.appendChild(div);
     });
@@ -179,19 +193,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ============================================================
    * 8. SNAPSHOT OFFLINE
    * ============================================================ */
-  function salvarSnapshot(meta, lista) {
-    const snap = { meta, lista, salvoEm: Date.now() };
-    localStorage.setItem(OFFLINE_KEY, JSON.stringify(snap));
-  }
+  const salvarSnapshot = (meta, lista) =>
+    localStorage.setItem(OFFLINE_KEY, JSON.stringify({
+      meta, lista, salvoEm: Date.now()
+    }));
 
-  function carregarSnapshot() {
+  const carregarSnapshot = () => {
     try {
       const raw = localStorage.getItem(OFFLINE_KEY);
       return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  }
+    } catch { return null; }
+  };
 
   /* ============================================================
    * 9. MODO OFFLINE
@@ -211,46 +223,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (btnRest) {
     btnRest.onclick = async () => {
       if (!confirm("Deseja registrar descanso hoje?")) return;
-
-      const fase = localStorage.getItem("femflow_fase");
-      await FEMFLOW.salvarDescanso(fase);
-
       FEMFLOW.toast("Descanso registrado 🌿");
       setTimeout(() => location.href = "flowcenter.html", 800);
     };
   }
 
   /* ============================================================
-   * 11. CHAMAR ENGINE NOVA DO FRONT-END (BLOCO 2)
+   * 11. ENGINE HORMONAL FINAL (core)
    * ============================================================ */
-  FEMFLOW.log("⚙️ Aguardando Engine Hormonal FRONT-END (Bloco 2)…");
+  const E = FEMFLOW.calcularEngineHormonal();
+  FEMFLOW.log("🧬 ENGINE", E);
 
-     /* ============================================================
-   * 12. EXECUTAR TREINO (usando engine do front-end)
+  /* ============================================================
+   * 12. CHAMAR ENGINE DE TREINO (treino-engine v1.1)
    * ============================================================ */
-  (async () => {
+  const listaMontada = await FEMFLOW.engineTreino.montarTreino({
+    nivel: localStorage.getItem("femflow_nivel"),
+    enfase: localStorage.getItem("femflow_enfase"),
+    fase: E.faseFirebase,
+    diaCiclo: E.diaFirebase
+  });
 
-    // 1) Engine hormonal (fase, pasta, dia, nivel, enfase…)
-    const E = FEMFLOW.engine.get();
-    FEMFLOW.log("🧬 ENGINE FINAL:", E);
+  /* Snapshot */
+  salvarSnapshot({ engine: E }, listaMontada);
 
-    // 2) Carrega exercícios do Firebase (mínimo 12)
-    const listaFirebase = await FEMFLOW.buscarExerciciosTreino(E, 12);
-
-    // 3) Chama a engine de treino (treino-engine.js)
-    const listaMontada = await FEMFLOW.engineTreino.montarTreino({
-      ...E,
-      firebaseList: listaFirebase
-    });
-
-    // 4) Snapshot offline
-    salvarSnapshot({ engine: E }, listaMontada);
-
-    // 5) Renderizar
-    renderBoxes(listaMontada);
-
-  })();
-
+  /* Renderiza treino */
+  renderBoxes(listaMontada);
 
 });
-
