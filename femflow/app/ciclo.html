@@ -152,7 +152,7 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
   console.log("LOCALSTORAGE → antes de salvar:");
   console.log({
     perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-    faseAtual: localStorage.getItem("femflow_fase "),
+    faseAtual: localStorage.getItem("femflow_fase"),
     diaCiclo: localStorage.getItem("femflow_diaCiclo")
   });
 
@@ -164,7 +164,7 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
   localStorage.setItem("femflow_startDate", start.toISOString());
   localStorage.setItem("femflow_cycleLength", String(length));
   localStorage.setItem("femflow_diaCiclo", String(dia));
-  localStorage.setItem("femflow_fase ", faseCalc.toLowerCase());
+  localStorage.setItem("femflow_fase", faseCalc.toLowerCase());
   
   if (faseAlta) {
     localStorage.setItem("femflow_faseAlta", faseAlta);
@@ -172,7 +172,7 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
 
   console.log({
   perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-  faseAtual: localStorage.getItem("femflow_fase "),
+  faseAtual: localStorage.getItem("femflow_fase"),
   diaCiclo: localStorage.getItem("femflow_diaCiclo")
 });
 
