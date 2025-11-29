@@ -132,48 +132,6 @@ FEMFLOW._acaoMenu = function (op) {
 };
 
 /* ===========================================================
-   3. MODAL PSE
-=========================================================== */
-
-FEMFLOW.criarModalPSE = function () {
-  if (document.querySelector("#modal-pse")) return;
-
-  const modal = document.createElement("div");
-  modal.id = "modal-pse";
-  modal.className = "modal oculto";
-
-  modal.innerHTML = `
-    <div class="modal-content">
-      <h2>Como foi o treino?</h2>
-      <div class="pse-list">
-        ${[1,2,3,4,5,6,7,8,9,10].map(n =>
-          `<button class="pse-opt" data-v="${n}">${n}</button>`
-        ).join("")}
-      </div>
-    </div>
-  `;
-
-  modal.onclick = e => {
-    if (e.target.id === "modal-pse") modal.classList.add("oculto");
-  };
-
-  document.body.appendChild(modal);
-};
-
-FEMFLOW.abrirPSE = function (cb) {
-  const modal = document.querySelector("#modal-pse");
-  if (!modal) return;
-  modal.classList.remove("oculto");
-
-  modal.querySelectorAll(".pse-opt").forEach(btn => {
-    btn.onclick = () => {
-      modal.classList.add("oculto");
-      if (cb) cb(btn.dataset.v);
-    };
-  });
-};
-
-/* ===========================================================
    4. ALTERAR NÍVEL — FULL BACKEND (coluna I)
 =========================================================== */
 
@@ -306,7 +264,6 @@ FEMFLOW.init = async function () {
 
     this.inserirHeaderApp();
     this.inserirMenuLateral();
-    this.criarModalPSE();
     this.initNivelSelector();
 
     await FEMFLOW.sincronizarECdisparar();
