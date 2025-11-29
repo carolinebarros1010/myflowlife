@@ -68,34 +68,44 @@
 
   <script src="femflow-core.js"></script>
 
-  <script>
+ <script>
   document.addEventListener("DOMContentLoaded", async () => {
-
+    // 0) Header + menu
     FEMFLOW.inserirHeaderApp();
     FEMFLOW.inserirMenuLateral();
 
     /* ================================
        1) SYNC BACKEND → LOCAL
-       (Arquitetura A)
+       (usa carregarCicloBackend)
     ================================= */
-    await FEMFLOW.syncCiclo();
+    await FEMFLOW.carregarCicloBackend();
 
     /* ================================
        2) FASE REAL
+       (lida do localStorage, setado pelo core)
     ================================= */
-    const fase = FEMFLOW.getFaseAtual();
+    const fase = localStorage.getItem("femflow_fase") || "follicular";
 
     /* ================================
        3) Idioma
     ================================= */
     const lang = localStorage.getItem("femflow_lang") || "pt";
     const T = {
-      pt:{
-        titulo:"Fase Hormonal",
-        frase:"Seu corpo tem um ritmo. Vamos acompanhar juntas.",
-        faseAtual:"Fase atual:",
-        botoes:{breath:"💨 Respiração",train:"🏃 Treino", evo:"📈 Evolução"},
-        fases:{menstrual:"Menstrual",follicular:"Folicular",ovulatory:"Ovulatória",luteal:"Lútea"}
+      pt: {
+        titulo: "Fase Hormonal",
+        frase: "Seu corpo tem um ritmo. Vamos acompanhar juntas.",
+        faseAtual: "Fase atual:",
+        botoes: {
+          breath: "💨 Respiração",
+          train: "🏃 Treino",
+          evo: "📈 Evolução"
+        },
+        fases: {
+          menstrual: "Menstrual",
+          follicular: "Folicular",
+          ovulatory: "Ovulatória",
+          luteal: "Lútea"
+        }
       }
     };
     const L = T[lang];
@@ -107,7 +117,8 @@
        4) UI
     ================================= */
     document.getElementById("centerPhase").textContent = L.fases[fase];
-    document.getElementById("t_current").textContent   = `${L.faseAtual} ${L.fases[fase]}`;
+    document.getElementById("t_current").textContent   =
+      `${L.faseAtual} ${L.fases[fase]}`;
 
     /* ================================
        5) Pintar fase ativa
@@ -120,18 +131,20 @@
     /* ================================
        6) Navegação
     ================================= */
-    document.getElementById("toBreath").onclick   = () => FEMFLOW.router("respiracao");
-    document.getElementById("toTrain").onclick    = () => FEMFLOW.router("treino");
-    document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao");
+    document.getElementById("toBreath").onclick    = () => FEMFLOW.router("respiracao.html");
+    document.getElementById("toTrain").onclick     = () => FEMFLOW.router("treino.html");
+    document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
+
+    /* ================================
+       7) diaPrograma
+       (se você já criou FEMFLOW.calcularDiaPrograma no core)
+    ================================= */
+    if (typeof FEMFLOW.calcularDiaPrograma === "function") {
+      const diaProg = FEMFLOW.calcularDiaPrograma();
+      localStorage.setItem("femflow_diaPrograma", diaProg);
+    }
   });
-    
-    await FEMFLOW.carregarCicloBackend();
-
-// recalcula diaPrograma sempre que abre flowcenter
-const diaProg = FEMFLOW.calcularDiaPrograma();
-localStorage.setItem("femflow_diaPrograma", diaProg);
-
-  </script>
+</script>
 
 </body>
 </html>
