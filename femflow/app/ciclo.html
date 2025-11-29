@@ -170,28 +170,23 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
     localStorage.setItem("femflow_faseAlta", faseAlta);
   }
 
-  console.log("LOCALSTORAGE → depois de salvar:");
   console.log({
-    perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-    faseAtual: localStorage.getItem("femflow_fase_atual"),
-    diaCiclo: localStorage.getItem("femflow_diaciclo")
-  });
+  perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
+  faseAtual: localStorage.getItem("femflow_fase_atual"),
+  diaCiclo: localStorage.getItem("femflow_diaciclo")
+});
 
-  /* ============================================================
-     2) DEBUG — DADOS QUE VÃO AO BACKEND
-  ============================================================ */
-  console.log("🌐 BACKEND.POST → enviando ao backend:");
-  console.log({
-    id: localStorage.getItem("femflow_id"),
-    perfil,
-    faseCalc,
-    dia
-  });
+/* ============================================================
+   2) DEBUG — DADOS QUE VÃO AO BACKEND
+============================================================ */
+console.log("🌐 BACKEND.POST → enviando ao backend:");
+console.log({
+  id: localStorage.getItem("femflow_id"),
+  perfil,
+  faseCalc,
+  dia
+});
 
-  /* ============================================================
-     3) ENVIAR AO BACKEND — POST PARA 3 FUNÇÕES
-     (executados em paralelo com Promise.all)
-  ============================================================ */
 /* ============================================================
    3) ENVIAR AO BACKEND — POST PARA 3 FUNÇÕES
    (executados em paralelo com Promise.all)
@@ -233,7 +228,7 @@ try {
       })
     }),
 
-    // SÓ SALVAR DATA MANUAL (coluna V)
+    // DATA MANUAL (coluna V)
     fetch(FEMFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -259,6 +254,7 @@ try {
 ============================================================ */
 FEMFLOW.toast("✨ Ciclo configurado!");
 setTimeout(() => location.href = "flowcenter.html", 800);
+
 
 /* ============================================================
    PERFIS E QUIZ
