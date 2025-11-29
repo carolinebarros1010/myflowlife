@@ -204,6 +204,22 @@ FEMFLOW.carregarPerfil = async function () {
 FEMFLOW.carregarCicloBackend = FEMFLOW.carregarPerfil;
 
 /* ===========================================================
+   4.1 DIA PROGRAMA — cálculo automático 1→30
+=========================================================== */
+FEMFLOW.calcularDiaPrograma = function () {
+  const start = new Date(localStorage.getItem("femflow_startDate") || new Date());
+  const hoje = new Date();
+
+  const diff = Math.floor((hoje - start) / 86400000) + 1;
+
+  // ciclo sempre 1–30
+  const diaPrograma = diff > 30 ? ((diff - 1) % 30) + 1 : diff;
+
+  localStorage.setItem("femflow_diaPrograma", diaPrograma);
+
+  return diaPrograma;
+};
+/* ===========================================================
    5. DISPARADOR femflow:ready PARA TREINO.JS
 =========================================================== */
 
