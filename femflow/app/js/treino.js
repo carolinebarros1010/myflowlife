@@ -13,6 +13,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   FEMFLOW.log("🚀 treino.js v2.0 (Arquitetura A) iniciado!");
 
+    // calcula dia do programa automaticamente
+  const diaProg = FEMFLOW.calcularDiaPrograma();
+
+  document.getElementById("tituloDiaTreino").textContent =
+    `Dia ${diaProg}`;
+
   const OFFLINE_KEY = "femflow_offline_treino_v1";
 
   /* -----------------------------------------------------------
