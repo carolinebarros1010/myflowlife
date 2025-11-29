@@ -1,6 +1,6 @@
 /* =======================================================================
    🌸 FEMFLOW CORE — VERSÃO FINAL 5.1 — 2025
-   Arquitetura A — 100% Sincronizado com Backend (Stargate)
+   Arquitetura Stargate — 100% sincronizado com Backend (Apps Script)
 ======================================================================= */
 
 window.FEMFLOW = {};
@@ -26,7 +26,6 @@ FEMFLOW.toast = (msg, error = false, offline = false) => {
   box.textContent = msg;
   box.style.background = error ? "#cc6a5a" : "#335953";
   box.classList.add("visible");
-
   if (!offline) setTimeout(() => box.classList.remove("visible"), 2400);
 };
 
@@ -51,6 +50,7 @@ FEMFLOW.inserirHeaderApp = function () {
   `;
 
   document.body.prepend(h);
+
   h.querySelector("#ffMenuBtn").onclick = () =>
     document.querySelector(".ff-menu-modal")?.classList.add("active");
 };
@@ -70,6 +70,7 @@ FEMFLOW.inserirMenuLateral = function () {
       <button class="ff-menu-op" data-go="ciclo">🎯 Ajustar ciclo</button>
       <button class="ff-menu-op" data-go="respiracao">💨 Respiração</button>
       <button class="ff-menu-op" data-go="treinos">🏃 Meus Treinos</button>
+      <button class="ff-menu-op" data-go="nivel">📊 Alterar nível</button>
       <button class="ff-menu-op" data-go="tema">🌓 Tema</button>
       <button class="ff-menu-op" data-go="voltar">🔙 Voltar</button>
 
@@ -97,6 +98,11 @@ FEMFLOW._acaoMenu = function (op) {
     case "ciclo": FEMFLOW.router("ciclo.html"); break;
     case "respiracao": FEMFLOW.router("respiracao.html"); break;
     case "treinos": FEMFLOW.router("evolucao.html"); break;
+
+    case "nivel":
+      const m = document.querySelector("#modal-nivel");
+      if (m) m.classList.remove("oculto");
+      break;
 
     case "tema":
       document.body.classList.toggle("dark");
@@ -126,7 +132,7 @@ FEMFLOW._acaoMenu = function (op) {
 };
 
 /* ===========================================================
-   3. PSE Modal + Salvar Treino
+   3. MODAL PSE
 =========================================================== */
 
 FEMFLOW.criarModalPSE = function () {
@@ -168,7 +174,66 @@ FEMFLOW.abrirPSE = function (cb) {
 };
 
 /* ===========================================================
-   4. CARREGAR PERFIL / CICLO (Stargate Backend)
+   4. ALTERAR NÍVEL — FULL BACKEND (coluna I)
+=========================================================== */
+
+FEMFLOW.initNivelSelector = function () {
+  const modal = document.querySelector("#modal-nivel");
+  if (!modal) return;
+
+  const fechar = document.querySelector("#fecharNivel");
+  fechar.onclick = () => modal.classList.add("oculto");
+
+  document.querySelectorAll(".nivel-btn").forEach(btn => {
+    btn.onclick = async () => {
+
+      const nivel = btn.dataset.nivel;
+      const id = localStorage.getItem("femflow_id");
+
+      if (!id) {
+        FEMFLOW.toast("Faça login novamente.", true);
+        return;
+      }
+
+      FEMFLOW.log("📈 SetNivel →", nivel);
+
+      /* 1 — SALVAR LOCAL */
+      localStorage.setItem("femflow_nivel", nivel);
+
+      /* 2 — SALVAR NO BACKEND */
+      try {
+        const r = await fetch(FEMFLOW.SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "setnivel",
+            id: id,
+            nivel: nivel
+          })
+        }).then(r => r.json());
+
+        FEMFLOW.log("Resposta backend setnivel:", r);
+
+        if (r.status === "ok") {
+          FEMFLOW.toast("Nível atualizado: " + nivel);
+        } else {
+          FEMFLOW.toast("Erro ao salvar no servidor", true);
+        }
+      } catch (e) {
+        FEMFLOW.error("Erro setnivel:", e);
+        FEMFLOW.toast("Erro de conexão", true);
+      }
+
+      modal.classList.add("oculto");
+
+      // sincroniza com backend novamente
+      await FEMFLOW.carregarCicloBackend();
+    };
+  });
+};
+
+/* ===========================================================
+   5. CARREGAR PERFIL / CICLO DO BACKEND (Stargate)
 =========================================================== */
 
 FEMFLOW.carregarPerfil = async function () {
@@ -182,8 +247,8 @@ FEMFLOW.carregarPerfil = async function () {
     if (j.status !== "ok") return null;
 
     /* BACKEND É SEMPRE A VERDADE */
-    localStorage.setItem("femflow_nome", j.nome);
-    localStorage.setItem("femflow_fase", j.fase);
+    localStorage.setItem("femflow_nome",  j.nome);
+    localStorage.setItem("femflow_fase",  j.fase);
     localStorage.setItem("femflow_enfase", j.enfase);
     localStorage.setItem("femflow_diaCiclo", j.diaCiclo);
     localStorage.setItem("femflow_nivel", j.nivel);
@@ -192,11 +257,12 @@ FEMFLOW.carregarPerfil = async function () {
     localStorage.setItem("femflow_startDate", j.data_inicio);
     localStorage.setItem("femflow_cycleLength", j.ciclo_duracao);
 
-    FEMFLOW.log("🌙 CICLO SINCRONIZADO (Stargate)", j);
+    FEMFLOW.log("🌙 CICLO STARGATE SYNC →", j);
 
     return j;
+
   } catch (e) {
-    FEMFLOW.error("Erro ao carregar perfil", e);
+    FEMFLOW.error("Erro carregarPerfil:", e);
     return null;
   }
 };
@@ -204,32 +270,32 @@ FEMFLOW.carregarPerfil = async function () {
 FEMFLOW.carregarCicloBackend = FEMFLOW.carregarPerfil;
 
 /* ===========================================================
-   4.1 DIA PROGRAMA — cálculo automático 1→30
+   6. DIA PROGRAMA — 1→30 automático
 =========================================================== */
+
 FEMFLOW.calcularDiaPrograma = function () {
   const start = new Date(localStorage.getItem("femflow_startDate") || new Date());
   const hoje = new Date();
 
   const diff = Math.floor((hoje - start) / 86400000) + 1;
-
-  // ciclo sempre 1–30
   const diaPrograma = diff > 30 ? ((diff - 1) % 30) + 1 : diff;
 
   localStorage.setItem("femflow_diaPrograma", diaPrograma);
 
   return diaPrograma;
 };
+
 /* ===========================================================
-   5. DISPARADOR femflow:ready PARA TREINO.JS
+   7. FEMFLOW READY EVENT
 =========================================================== */
+
 FEMFLOW.sincronizarECdisparar = async function () {
   const perfil = await FEMFLOW.carregarCicloBackend();
   window.dispatchEvent(new CustomEvent("femflow:ready", { detail: perfil }));
 };
 
-
 /* ===========================================================
-   6. INIT — Sincroniza ciclo automaticamente
+   8. INIT CORE
 =========================================================== */
 
 FEMFLOW.init = async function () {
@@ -240,14 +306,15 @@ FEMFLOW.init = async function () {
 
     this.inserirHeaderApp();
     this.inserirMenuLateral();
+    this.criarModalPSE();
+    this.initNivelSelector();
 
-    // 🔥 sempre sincroniza backend antes de exibir conteúdo
     await FEMFLOW.sincronizarECdisparar();
   }
 };
 
 /* ===========================================================
-   7. INSPECTOR
+   9. INSPECTOR
 =========================================================== */
 
 FEMFLOW.inspect = function () {
@@ -267,7 +334,7 @@ FEMFLOW.inspect = function () {
 };
 
 /* ===========================================================
-   AUTO-START
+   10. AUTO-START
 =========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   FEMFLOW.init();
