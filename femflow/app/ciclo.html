@@ -192,7 +192,12 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
      3) ENVIAR AO BACKEND — POST PARA 3 FUNÇÕES
      (executados em paralelo com Promise.all)
   ============================================================ */
- try {
+/* ============================================================
+   3) ENVIAR AO BACKEND — POST PARA 3 FUNÇÕES
+   (executados em paralelo com Promise.all)
+============================================================ */
+try {
+
   await Promise.all([
 
     // PERFIL HORMONAL
@@ -206,7 +211,7 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
       })
     }),
 
-    // FASE SOBERANA DEFINIDA MANUALMENTE
+    // FASE
     fetch(FEMFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -217,7 +222,7 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
       })
     }),
 
-    // DIA DO CICLO SOBERANO
+    // DIA DO CICLO
     fetch(FEMFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -228,8 +233,7 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
       })
     }),
 
-    // 💥 AQUI ESTÁ O ÚNICO SINAL DE "manual"
-    // Gravamos APENAS a data manual
+    // SÓ SALVAR DATA MANUAL (coluna V)
     fetch(FEMFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -245,23 +249,16 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
   console.log("✔ BACKEND.POST → todos enviados com sucesso");
 
 } catch (e) {
+
   console.error("❌ ERRO AO ENVIAR PARA O BACKEND:", e);
+
 }
 
-
-    console.log("✔ BACKEND.POST → todos enviados com sucesso");
-
-  } catch (e) {
-    console.error("❌ ERRO AO ENVIAR PARA O BACKEND:", e);
-  }
-
-  /* ============================================================
-     4) FINALIZAR
-  ============================================================ */
-  FEMFLOW.toast("✨ Ciclo configurado!");
-  setTimeout(() => location.href = "flowcenter.html", 800);
-}
-
+/* ============================================================
+   4) FINALIZAR
+============================================================ */
+FEMFLOW.toast("✨ Ciclo configurado!");
+setTimeout(() => location.href = "flowcenter.html", 800);
 
 /* ============================================================
    PERFIS E QUIZ
