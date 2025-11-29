@@ -124,6 +124,13 @@
     document.getElementById("toTrain").onclick    = () => FEMFLOW.router("treino");
     document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao");
   });
+    
+    await FEMFLOW.carregarCicloBackend();
+
+// recalcula diaPrograma sempre que abre flowcenter
+const diaProg = FEMFLOW.calcularDiaPrograma();
+localStorage.setItem("femflow_diaPrograma", diaProg);
+
   </script>
 
 </body>
