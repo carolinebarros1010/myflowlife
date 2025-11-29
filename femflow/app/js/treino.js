@@ -283,11 +283,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ============================================================
    * 11. SINCRONIZAR CICLO COM BACKEND
    * ============================================================ */
-  await FEMFLOW.carregarCicloBackend();
 
+await FEMFLOW.carregarCicloBackend();
 
-  const fase     = FEMFLOW.getFaseAtual();
-  const diaCiclo = Number(localStorage.getItem("femflow_diaCiclo"));
+const fase    = localStorage.getItem("femflow_fase");
+const diaCiclo = Number(localStorage.getItem("femflow_diaCiclo"));
+
 
   /* ============================================================
    * 12. MONTAR TREINO FINAL (Fase REAL)
