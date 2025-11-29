@@ -106,9 +106,9 @@ function bindTap(el, handler){
 ============================================================ */
 function faseAltaPorNivel(){
   const nivel=(localStorage.getItem("nivel_atual")||"iniciante").toLowerCase();
-  if(nivel==="iniciante") return "luteal";
-  if(nivel==="intermediaria") return "follicular";
-  return "ovulatory";
+  if(nivel==="iniciante") return "lutea";
+  if(nivel==="intermediaria") return "folicular";
+  return "ovulatoria";
 }
 
 /* ============================================================
@@ -152,8 +152,8 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
   console.log("LOCALSTORAGE → antes de salvar:");
   console.log({
     perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-    faseAtual: localStorage.getItem("femflow_fase_atual"),
-    diaCiclo: localStorage.getItem("femflow_diaciclo")
+    faseAtual: localStorage.getItem("femflow_fase "),
+    diaCiclo: localStorage.getItem("femflow_diaCiclo")
   });
 
   /* ============================================================
@@ -163,8 +163,8 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
   localStorage.setItem("femflow_cycle_configured", "yes");
   localStorage.setItem("femflow_startDate", start.toISOString());
   localStorage.setItem("femflow_cycleLength", String(length));
-  localStorage.setItem("femflow_diaciclo", String(dia));
-  localStorage.setItem("femflow_fase_atual", faseCalc.toLowerCase());
+  localStorage.setItem("femflow_diaCiclo", String(dia));
+  localStorage.setItem("femflow_fase ", faseCalc.toLowerCase());
   
   if (faseAlta) {
     localStorage.setItem("femflow_faseAlta", faseAlta);
@@ -172,8 +172,8 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
 
   console.log({
   perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-  faseAtual: localStorage.getItem("femflow_fase_atual"),
-  diaCiclo: localStorage.getItem("femflow_diaciclo")
+  faseAtual: localStorage.getItem("femflow_fase "),
+  diaCiclo: localStorage.getItem("femflow_diaCiclo")
 });
 
 /* ============================================================
@@ -371,15 +371,15 @@ function finalizarQuiz(){
   if (perfilInterno === "irregular_quiz") {
 
     let faseAprox = "";
-    if (quizScore >= 4) faseAprox = "luteal";
-    else if (quizScore === 3) faseAprox = "ovulatory";
-    else if (quizScore === 2) faseAprox = "follicular";
+    if (quizScore >= 4) faseAprox = "lutea";
+    else if (quizScore === 3) faseAprox = "ovulatoria";
+    else if (quizScore === 2) faseAprox = "folicular";
     else faseAprox = "menstrual";
 
     let diaInicial = 1;
-    if (faseAprox === "follicular") diaInicial = 6;
-    if (faseAprox === "ovulatory")  diaInicial = 14;
-    if (faseAprox === "luteal")     diaInicial = 18;
+    if (faseAprox === "folicular") diaInicial = 6;
+    if (faseAprox === "ovulatoria")  diaInicial = 14;
+    if (faseAprox === "lutea")     diaInicial = 18;
 
     // LOG DEBUG IRREGULAR
     console.log("🔍 IRREGULAR.DEBUG → faseAprox:", faseAprox);
@@ -409,11 +409,11 @@ function finalizarQuiz(){
   if (entraAlta) {
     faseCalc = faseAltaNivel;
 
-    if (faseAltaNivel === "luteal") {
+    if (faseAltaNivel === "lutea") {
       diaReal = 18 + ((diaEnergetico - 1) % 11);
-    } else if (faseAltaNivel === "follicular") {
+    } else if (faseAltaNivel === "folicular") {
       diaReal = 6 + ((diaEnergetico - 1) % 8);
-    } else if (faseAltaNivel === "ovulatory") {
+    } else if (faseAltaNivel === "ovulatoria") {
       diaReal = 14 + ((diaEnergetico - 1) % 4);
     } else {
       diaReal = 1;
@@ -467,9 +467,9 @@ bindTap(document.getElementById("btnConfirmarRegular"), ()=>{
 
   let fase="";
   if(dia<=5) fase="menstrual";
-  else if(dia<=13) fase="follicular";
-  else if(dia<=17) fase="ovulatory";
-  else fase="luteal";
+  else if(dia<=13) fase="folicular";
+  else if(dia<=17) fase="ovulatoria";
+  else fase="lutea";
 
   salvarCiclo({
     perfil:"regular",
