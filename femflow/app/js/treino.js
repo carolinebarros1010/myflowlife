@@ -199,22 +199,43 @@ document.addEventListener("DOMContentLoaded", async () => {
    * 8. SALVAR TREINO
    * ============================================================ */
   if (btnSalvar) {
-    btnSalvar.onclick = () => {
-      FEMFLOW.abrirPSE(async v => {
+   btnSalvar.onclick = () => {
+  FEMFLOW.abrirPSE(async (valorPSE) => {
 
-        const hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
-        hist.push({ data: Date.now(), pse: Number(v) });
-        localStorage.setItem("femflow_hist", JSON.stringify(hist));
+    const fase = localStorage.getItem("femflow_fase");
+    const diaFirebase = localStorage.getItem("femflow_diaCiclo");
 
-        FEMFLOW.toast("Treino salvo! 💾🌸");
+    const r = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "salvarTreino",
+        id: localStorage.getItem("femflow_id"),
+        pse: valorPSE,
+        fase,
+        diaFirebase,
+        treino: "Força",
+        obs: ""
+      })
+    });
 
-        localStorage.setItem("femflow_dia_treino", String(diaPrograma + 1));
+    const j = await r.json();
 
-        await FEMFLOW.salvarTreino({ pse: v });
+    // Atualiza fase e diaCiclo locais
+    if (j.novaFase)
+      localStorage.setItem("femflow_fase", j.novaFase);
 
-        setTimeout(() => FEMFLOW.router("flowcenter"), 600);
-      });
-    };
+    if (j.novoDiaCiclo)
+      localStorage.setItem("femflow_diaCiclo", j.novoDiaCiclo);
+
+    // Dia do programa continua sendo FRONT ONLY
+    FEMFLOW.calcularDiaPrograma();
+
+    FEMFLOW.toast("Treino salvo!");
+    FEMFLOW.router("flowcenter");
+  });
+};
+
   }
 
   /* ============================================================
