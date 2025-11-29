@@ -150,11 +150,11 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
   console.log("faseAlta:", faseAlta);
   console.log("-------------------------------------------------------------");
   console.log("LOCALSTORAGE → antes de salvar:");
-  console.log({
-    perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-    faseAtual: localStorage.getItem("femflow_fase"),
-    diaCiclo: localStorage.getItem("femflow_diaCiclo")
-  });
+console.log({
+  perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
+  faseAtual: localStorage.getItem("femflow_fase"),
+  diaCiclo: localStorage.getItem("femflow_diaCiclo")
+});
 
   /* ============================================================
      1) SALVAR NO LOCALSTORAGE
