@@ -222,11 +222,11 @@ FEMFLOW.calcularDiaPrograma = function () {
 /* ===========================================================
    5. DISPARADOR femflow:ready PARA TREINO.JS
 =========================================================== */
-
-FEMFLOW.sincronizarEC disparar = async function () {
+FEMFLOW.sincronizarECdisparar = async function () {
   const perfil = await FEMFLOW.carregarCicloBackend();
   window.dispatchEvent(new CustomEvent("femflow:ready", { detail: perfil }));
 };
+
 
 /* ===========================================================
    6. INIT — Sincroniza ciclo automaticamente
