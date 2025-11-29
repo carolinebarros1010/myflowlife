@@ -192,43 +192,62 @@ async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
      3) ENVIAR AO BACKEND — POST PARA 3 FUNÇÕES
      (executados em paralelo com Promise.all)
   ============================================================ */
-  try {
-    await Promise.all([
+ try {
+  await Promise.all([
 
-      // PERFIL HORMONAL
-      fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "setperfilhormonal",
-          id: localStorage.getItem("femflow_id"),
-          perfil
-        })
-      }),
-
-      // FASE
-      fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "setfase",
-          id: localStorage.getItem("femflow_id"),
-          fase: faseCalc.toLowerCase()
-        })
-      }),
-
-      // DIA DO CICLO
-      fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "setdiaciclo",
-          id: localStorage.getItem("femflow_id"),
-          dia
-        })
+    // PERFIL HORMONAL
+    fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setperfilhormonal",
+        id: localStorage.getItem("femflow_id"),
+        perfil
       })
+    }),
 
-    ]);
+    // FASE SOBERANA DEFINIDA MANUALMENTE
+    fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setfase",
+        id: localStorage.getItem("femflow_id"),
+        fase: faseCalc.toLowerCase()
+      })
+    }),
+
+    // DIA DO CICLO SOBERANO
+    fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setdiaciclo",
+        id: localStorage.getItem("femflow_id"),
+        dia
+      })
+    }),
+
+    // 💥 AQUI ESTÁ O ÚNICO SINAL DE "manual"
+    // Gravamos APENAS a data manual
+    fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setmanualstart",
+        id: localStorage.getItem("femflow_id"),
+        startDate: start.toISOString()
+      })
+    })
+
+  ]);
+
+  console.log("✔ BACKEND.POST → todos enviados com sucesso");
+
+} catch (e) {
+  console.error("❌ ERRO AO ENVIAR PARA O BACKEND:", e);
+}
+
 
     console.log("✔ BACKEND.POST → todos enviados com sucesso");
 
