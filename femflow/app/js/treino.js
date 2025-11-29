@@ -283,7 +283,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ============================================================
    * 11. SINCRONIZAR CICLO COM BACKEND
    * ============================================================ */
-  await FEMFLOW.syncCiclo();
+  await FEMFLOW.carregarCicloBackend();
+
 
   const fase     = FEMFLOW.getFaseAtual();
   const diaCiclo = Number(localStorage.getItem("femflow_diaCiclo"));
