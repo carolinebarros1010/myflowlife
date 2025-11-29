@@ -1,17 +1,6 @@
 /* =======================================================================
-   🌸 FEMFLOW CORE — VERSÃO FINAL LIMPA 2025
-   Mantém:
-   - Login
-   - Ciclo (backend)
-   - Salvar Treino / Descanso
-   - Menu / Header
-   - PSE Modal
-   - Debug / Inspector
-   Remove:
-   - Engine Hormonal antiga
-   - Executar Treino antigo
-   - Firebase antigo (Storage)
-   - UI antiga
+   🌸 FEMFLOW CORE — VERSÃO FINAL 5.1 — 2025
+   Arquitetura A — 100% Sincronizado com Backend (Stargate)
 ======================================================================= */
 
 window.FEMFLOW = {};
@@ -19,9 +8,10 @@ window.FEMFLOW = {};
 /* ===========================================================
    1. CONFIG GLOBAL
 =========================================================== */
-FEMFLOW.SCRIPT_URL = "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
-FEMFLOW.dev = () => localStorage.getItem("femflow_dev") === "on";
 
+FEMFLOW.SCRIPT_URL = "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+
+FEMFLOW.dev = () => localStorage.getItem("femflow_dev") === "on";
 FEMFLOW.log   = (...a) => { if (FEMFLOW.dev()) console.log("%c[FEMFLOW]", "color:#cc6a5a", ...a); };
 FEMFLOW.warn  = (...a) => { if (FEMFLOW.dev()) console.warn("%c[FEMFLOW ⚠]", "color:#e07f67", ...a); };
 FEMFLOW.error = (...a) => { if (FEMFLOW.dev()) console.error("%c[FEMFLOW ❌]", "color:#b74333", ...a); };
@@ -43,6 +33,7 @@ FEMFLOW.toast = (msg, error = false, offline = false) => {
 /* ===========================================================
    2. ROUTER + HEADER + MENU
 =========================================================== */
+
 FEMFLOW.router = pag => {
   const destino = pag.endsWith(".html") ? pag : pag + ".html";
   location.href = destino;
@@ -55,7 +46,7 @@ FEMFLOW.inserirHeaderApp = function () {
   h.id = "femflowHeader";
 
   h.innerHTML = `
-    <img src="./assets/logofemflowterracotasf.png" class="ff-logo" alt="FemFlow">
+    <img src="./assets/logofemflowterracotasf.png" class="ff-logo">
     <button id="ffMenuBtn" class="ff-menu-btn">&#9776;</button>
   `;
 
@@ -134,21 +125,10 @@ FEMFLOW._acaoMenu = function (op) {
   }
 };
 
-FEMFLOW.buscarHistorico = async function (id, limit = 40) {
-  try {
-    const raw = localStorage.getItem("femflow_hist") || "[]";
-    const arr = JSON.parse(raw);
-    return arr.slice(-limit);
-  } catch {
-    return [];
-  }
-};
-
-
-
 /* ===========================================================
-   3. PSE + Salvar Treino / Descanso
+   3. PSE Modal + Salvar Treino
 =========================================================== */
+
 FEMFLOW.criarModalPSE = function () {
   if (document.querySelector("#modal-pse")) return;
 
@@ -187,47 +167,10 @@ FEMFLOW.abrirPSE = function (cb) {
   });
 };
 
-FEMFLOW.salvarTreino = async function ({ pse, treino, fase, diaFirebase, obs = "" }) {
-  const id = localStorage.getItem("femflow_id");
-  if (!id) return;
-
-  try {
-    const r = await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "salvarTreino",
-        id, pse, treino, fase, diaFirebase, obs
-      })
-    });
-
-    const j = await r.json();
-    if (j.status === "ok") FEMFLOW.toast("Treino salvo! 🌸");
-  } catch {
-    FEMFLOW.toast("Erro ao salvar treino.", true);
-  }
-};
-
-FEMFLOW.salvarDescanso = async function (fase) {
-  const id = localStorage.getItem("femflow_id");
-  if (!id) return;
-
-  try {
-    await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "salvarDescanso", id, fase })
-    });
-
-    FEMFLOW.toast("Descanso registrado 🌿");
-  } catch {
-    FEMFLOW.toast("Erro ao registrar descanso.", true);
-  }
-};
-
 /* ===========================================================
-   4. CARREGAR PERFIL / CICLO (Backend)
+   4. CARREGAR PERFIL / CICLO (Stargate Backend)
 =========================================================== */
+
 FEMFLOW.carregarPerfil = async function () {
   const id = localStorage.getItem("femflow_id");
   if (!id) return null;
@@ -235,8 +178,10 @@ FEMFLOW.carregarPerfil = async function () {
   try {
     const r = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`);
     const j = await r.json();
+
     if (j.status !== "ok") return null;
 
+    /* BACKEND É SEMPRE A VERDADE */
     localStorage.setItem("femflow_nome", j.nome);
     localStorage.setItem("femflow_fase", j.fase);
     localStorage.setItem("femflow_enfase", j.enfase);
@@ -244,12 +189,14 @@ FEMFLOW.carregarPerfil = async function () {
     localStorage.setItem("femflow_nivel", j.nivel);
     localStorage.setItem("femflow_perfilHormonal", j.perfilHormonal || "regular");
 
-    if (j.data_inicio) localStorage.setItem("femflow_startDate", j.data_inicio);
-    if (j.ciclo_duracao) localStorage.setItem("femflow_cycleLength", j.ciclo_duracao);
+    localStorage.setItem("femflow_startDate", j.data_inicio);
+    localStorage.setItem("femflow_cycleLength", j.ciclo_duracao);
+
+    FEMFLOW.log("🌙 CICLO SINCRONIZADO (Stargate)", j);
 
     return j;
-
-  } catch {
+  } catch (e) {
+    FEMFLOW.error("Erro ao carregar perfil", e);
     return null;
   }
 };
@@ -257,8 +204,36 @@ FEMFLOW.carregarPerfil = async function () {
 FEMFLOW.carregarCicloBackend = FEMFLOW.carregarPerfil;
 
 /* ===========================================================
-   5. DEBUG / INSPECTOR — Mantido
+   5. DISPARADOR femflow:ready PARA TREINO.JS
 =========================================================== */
+
+FEMFLOW.sincronizarEC disparar = async function () {
+  const perfil = await FEMFLOW.carregarCicloBackend();
+  window.dispatchEvent(new CustomEvent("femflow:ready", { detail: perfil }));
+};
+
+/* ===========================================================
+   6. INIT — Sincroniza ciclo automaticamente
+=========================================================== */
+
+FEMFLOW.init = async function () {
+  const p = (location.pathname.split("/").pop() || "").toLowerCase();
+
+  if (["flowcenter.html","treino.html","respiracao.html","evolucao.html"]
+      .includes(p)) {
+
+    this.inserirHeaderApp();
+    this.inserirMenuLateral();
+
+    // 🔥 sempre sincroniza backend antes de exibir conteúdo
+    await FEMFLOW.sincronizarECdisparar();
+  }
+};
+
+/* ===========================================================
+   7. INSPECTOR
+=========================================================== */
+
 FEMFLOW.inspect = function () {
   console.clear();
   console.log("%c🔍 FEMFLOW INSPECTOR — 2025",
@@ -269,23 +244,10 @@ FEMFLOW.inspect = function () {
     "femflow_fase","femflow_diaCiclo",
     "femflow_perfilHormonal","femflow_enfase","femflow_nivel",
     "femflow_cycleLength","femflow_startDate",
-    "femflow_dia_energetico","femflow_dia_treino","femflow_dev"
+    "femflow_dia_treino","femflow_dev"
   ];
 
   keys.forEach(k => console.log(k, "→", localStorage.getItem(k)));
-};
-
-/* ===========================================================
-   6. INIT — Só inicia header/menu. NÃO EXECUTA TREINO.
-=========================================================== */
-FEMFLOW.init = async function () {
-  const p = (location.pathname.split("/").pop() || "").toLowerCase();
-
-  if (["flowcenter.html","treino.html","respiracao.html","evolucao.html"]
-      .includes(p)) {
-    this.inserirHeaderApp();
-    this.inserirMenuLateral();
-  }
 };
 
 /* ===========================================================
@@ -294,4 +256,3 @@ FEMFLOW.init = async function () {
 document.addEventListener("DOMContentLoaded", () => {
   FEMFLOW.init();
 });
-
