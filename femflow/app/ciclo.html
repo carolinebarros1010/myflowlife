@@ -259,7 +259,7 @@ setTimeout(() => location.href = "flowcenter.html", 800);
 /* ============================================================
    PERFIS E QUIZ
 ============================================================ */
-let perfil=null;
+let perfilSelecionado=null;
 let perfilInterno=null;
 let perguntasAtuais=[];
 let quizIdx=0, quizScore=0;
@@ -278,22 +278,22 @@ document.querySelectorAll(".perfil-btn[data-perfil]").forEach(btn=>{
     document.querySelectorAll(".perfil-btn[data-perfil]").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
 
-    perfil = btn.dataset.perfil;
+    perfilSelecionado = btn.dataset.perfil;
 
     regularBox.style.display="none";
     quizBox.style.display="none";
     diuBox.style.display="none";
 
-    if(perfil==="regular"){
+    if(perfilSelecionado==="regular"){
       regularBox.style.display="block";
     }
-    else if(perfil==="irregular"){
+    else if(perfilSelecionado==="irregular"){
       iniciarQuizIrregular();
     }
-    else if(perfil==="menopausa"){
+    else if(perfilSelecionado==="menopausa"){
       iniciarQuizMenopausa();
     }
-    else if(perfil==="diu"){
+    else if(perfilSelecionado==="diu"){
       diuBox.style.display="block";
     }
   });
