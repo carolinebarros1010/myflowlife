@@ -15,8 +15,8 @@
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
 
-  <!-- treino.css v3.2 (novo) -->
-  <link rel="stylesheet" href="css/treino.css?v3.2">
+  <!-- treino.css v3.3 (novo) -->
+  <link rel="stylesheet" href="css/treino.css?v3.3">
 
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -54,7 +54,9 @@
     <button id="cancelarTreinoBtn" class="btn-tertiary-clean">Cancelar</button>
   </div>
 
-  <!-- MODAL PSE (premium, centralizado) -->
+  <!-- ====================================================== -->
+  <!-- MODAL PSE -->
+  <!-- ====================================================== -->
   <div id="modalPSE" class="modal-pse-overlay hidden">
     <div class="modal-pse-card">
       <h3 class="modal-title">Como foi o treino?</h3>
@@ -69,15 +71,19 @@
     </div>
   </div>
 
-  <!-- MODAL RESPIRAÇÃO (slide-up estilo iOS) -->
+  <!-- ====================================================== -->
+  <!-- MODAL RESPIRAÇÃO (Sheet iOS) — totalmente oculto até clicar -->
+  <!-- ====================================================== -->
+  <div id="breathBackdrop" class="breath-backdrop hidden"></div>
+
   <div id="breathModal" class="breath-sheet hidden">
     <div class="breath-sheet-handle"></div>
 
     <div class="breath-sheet-content">
       <h3 id="breathTitle" class="breath-title">Respiração</h3>
 
-      <div id="breathCircle" class="breath-circle">5</div>
-      <div id="faseLabel" class="breath-phase">Preparar…</div>
+      <div id="breathCircle" class="breath-circle">—</div>
+      <div id="faseLabel" class="breath-phase"></div>
 
       <div class="breath-actions">
         <button id="btnStart" class="breath-start-btn">Iniciar</button>
@@ -103,8 +109,8 @@
 
   <!-- Scripts FemFlow -->
   <script src="./femflow-core.js"></script>
-  <script src="./js/treino-engine.js?v3.2"></script>
-  <script src="./js/treino.js?v3.2"></script>
+  <script src="./js/treino-engine.js?v3.3"></script>
+  <script src="./js/treino.js?v3.3"></script>
 
   <!-- Boot -->
   <script>
