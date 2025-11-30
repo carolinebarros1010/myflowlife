@@ -138,62 +138,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     boxes = lista || [];
 
     boxes.forEach(box => {
-      const div = document.createElement("div");
-      div.className = "carousel-item";
+        const div = document.createElement("div");
+        div.className = "carousel-item";
 
-      if (box.tipo === "box0" || box.tipo === "final") {
-        div.innerHTML = `
-          <h3 class="ff-ex-titulo">${box.titulo}</h3>
-          <p class="ff-ex-sub">${box.descricao}</p>
-          <ul class="ff-passos">
-            ${box.passos.map(p => `<li>${p}</li>`).join("")}
-          </ul>
-        `;
-      }
+        if (box.tipo === "box0" || box.tipo === "final") {
+            ...
+        } else if (box.tipo === "treino") {
+            div.innerHTML = `
+              <h3 class="ff-ex-titulo">Box ${box.box}</h3>
+              <div class="ff-series">
+                ${box.exercicios.map(ex => `
+                    <div class="ff-exercicio" data-intervalo="${ex.intervalo}">
+                      
+                      <h4 class="ff-ex-nome">${ex.titulo || ex.nome || "Sem título"}</h4>
 
-      else if (box.tipo === "treino") {
-        div.innerHTML = `
-          <h3 class="ff-ex-titulo">Box ${box.box}</h3>
-          <div class="ff-series">
-            ${box.exercicios
-              .map(ex => `
-                <div class="ff-serie-item">
-                  <span class="ff-ex-nome">${ex.titulo || ex.nome || "Sem título"}</span>
+                      <div class="ff-ex-info">
+                        Séries: <b>${ex.series}</b> —  
+                        Reps: <b>${ex.reps}</b>
+                      </div>
 
-                  <div class="ff-ex-info">
-                    <span class="ff-ex-series">Séries: <b>${ex.series}</b></span>
-                    <span class="ff-ex-reps">Reps: <b>${ex.reps}</b></span>
-                    <span class="ff-ex-int">Intervalo: <b>${ex.intervalo}s</b></span>
-                  </div>
+                      <button class="ff-btn-descanso">Descanso</button>
 
-                  <div class="ff-timer-bar" data-total="${ex.intervalo}">
-                    <div class="ff-timer-fill"></div>
-                    <span class="ff-timer-count">${fmt(ex.intervalo)}</span>
-                  </div>
-                </div>
-              `)
-              .join("")}
-          </div>
-        `;
-      }
+                      <div class="ff-timer">
+                        <div class="ff-timer-bar">
+                          <div class="ff-timer-fill"></div>
+                        </div>
+                        <div class="ff-timer-time">Descanso: ${ex.intervalo}s</div>
+                      </div>
 
-      else if (box.tipo === "hiit" || box.tipo === "cardio") {
-        div.innerHTML = `
-          <h3 class="ff-ex-titulo">${box.titulo}</h3>
-          <p class="ff-ex-sub">${box.descricao}</p>
-          <div class="ff-timer-bar" data-total="${box.tempo_total}">
-            <div class="ff-timer-fill"></div>
-            <span class="ff-timer-count">${fmt(box.tempo_total)}</span>
-          </div>
-        `;
-      }
+                    </div>
+                `).join("")}
+              </div>
+            `;
+        }
 
-      track.appendChild(div);
+        track.appendChild(div);
     });
 
-    bindTimers(track);
+    aplicarTimers(track); // ✅ substitui bindTimers
     moveTo("reset");
-  }
+}
+
 
   /* ============================================================
    * 8. SALVAR TREINO
