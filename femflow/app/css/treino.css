@@ -1,97 +1,54 @@
 /* ============================================================
-   🎨 FemFlow — TREINO.CSS (v3 Premium, otimizado 2025)
-   ------------------------------------------------------------
-   • Consolidado + Leve + Sem duplicações
-   • Ajustado para o treino.html atual (ff-exercicio, descanso, timers)
-   • Carrossel 2025 fixado sem overflow extra
-   • Layout Premium + Responsivo
-============================================================ */
+   🎨 FemFlow — TREINO.CSS (Versão Premium 2025)
+   ============================================================ */
 
-/* 🎨 Paleta FemFlow */
 :root {
   --teal: #335953;
   --terracota: #cc6a5a;
   --bege: #fff8f4;
   --areia: #f2e6dd;
-  --sombra: rgba(0, 0, 0, 0.08);
+  --cinza: #f4f4f4;
+  --sombra: rgba(0,0,0,0.08);
 }
 
-/* Base */
-* {
-  box-sizing: border-box;
-}
+/* ============================================================
+   BASE
+============================================================ */
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  padding-top: calc(85px + env(safe-area-inset-top, 0px));
+  padding: 0;
   font-family: "Lato", sans-serif;
-  background: linear-gradient(180deg, var(--bege) 0%, var(--areia) 100%);
+  background: linear-gradient(180deg, var(--bege), var(--areia));
+  color: var(--teal);
+  -webkit-font-smoothing: antialiased;
+  padding-top: calc(80px + env(safe-area-inset-top));
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+.treino-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.treino-header h1 {
+  font-family: "Playfair Display", serif;
+  margin: 5px 0 0;
   color: var(--teal);
 }
 
-/* ============================================================
-   🔸 CABEÇALHO
-============================================================ */
-.treino-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 12px;
-  text-align: center;
-}
-
-header h1 {
-  margin: 0;
-  font-family: "Playfair Display", serif;
-  font-size: 1.8rem;
-}
-
 #tituloDiaTreino {
-  margin-top: 6px;
-  font-size: 1.1rem;
   font-family: "Playfair Display", serif;
   color: var(--terracota);
+  margin-top: 4px;
+  font-size: 1.1rem;
 }
 
 /* ============================================================
-   🌀 CARROSSEL — FIX 2025
-============================================================ */
-
-.carousel-container {
-  overflow-x: auto;
-  overflow-y: hidden;
-  width: 100%;
-  height: calc(100dvh - 120px);
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
-
-.carousel-track {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 16px;
-  height: 100%;
-  padding: 0 16px;
-}
-
-.carousel-item {
-  flex: 0 0 calc(100vw - 32px);
-  max-width: calc(100vw - 32px);
-
-  /* FIX: altura dinâmica sem sobrar espaço */
-  min-height: calc(100dvh - 210px);
-  max-height: calc(100dvh - 160px);
-
-  scroll-snap-align: center;
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  padding: 20px;
-  overflow-y: auto;
-}
-
-/* ============================================================
-   📊 PROGRESSO
+   PROGRESS BAR
 ============================================================ */
 .progress-bar {
   position: fixed;
@@ -100,113 +57,156 @@ header h1 {
   height: 5px;
   width: 0%;
   background: var(--terracota);
-  z-index: 999;
-  transition: width 0.4s ease;
+  border-radius: 0 4px 4px 0;
+  z-index: 9999;
+  transition: width .45s ease;
 }
 
 /* ============================================================
-   🪶 BOTÕES FIXOS DE AÇÃO
+   CARROSSEL
 ============================================================ */
-.fix-footer {
-  position: fixed;
-  bottom: 15px;
+.carousel-container {
   width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  height: calc(100dvh - 120px);
+  -webkit-overflow-scrolling: touch;
+}
+
+.carousel-track {
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  gap: 15px;
+  padding: 0 15px;
+  height: 100%;
 }
 
-#salvarTreinoBtn,
-.secundario {
-  border: none;
-  border-radius: 24px;
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-#salvarTreinoBtn {
-  background: linear-gradient(135deg, var(--teal), var(--terracota));
-  color: white;
-}
-
-.secundario {
+.carousel-item {
+  flex: 0 0 calc(100vw - 30px);
+  max-width: calc(100vw - 30px);
+  height: calc(100dvh - 160px);
   background: #fff;
-  border: 1px solid rgba(51,89,83,0.25);
+  border-radius: 22px;
+  padding: 20px;
+  scroll-snap-align: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+/* Remove overscroll bounce */
+.carousel-item::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* ============================================================
+   BOX 0 / FINAL
+============================================================ */
+.ff-ex-titulo {
+  font-family: "Playfair Display", serif;
+  margin-top: 0;
+  font-size: 1.4rem;
   color: var(--teal);
 }
 
-/* Cancelar */
-#cancelarTreinoBtn {
-  background: #fff1f1;
-  color: #aa4a4a;
-  border: 1px solid #e6bcbc;
+.ff-ex-sub {
+  font-size: 0.95rem;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  color: #6b605a;
+}
+
+.ff-passos {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #4b4844;
+}
+
+/* botão de respiração */
+.ff-btn-breathe {
+  margin-top: 15px;
+  padding: 10px 14px;
+  width: 100%;
+  background: #f5e9e4;
+  border: 1px solid #e0c5bd;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  color: var(--terracota);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .25s;
+}
+
+.ff-btn-breathe:hover {
+  background: #fdece7;
+  transform: scale(1.03);
 }
 
 /* ============================================================
-   🎯 BOX — EXERCÍCIOS (NOVO PADRÃO)
+   EXERCÍCIOS (BOX DE TREINO)
 ============================================================ */
-
 .ff-exercicio {
-  background: #fafafa;
-  border-radius: 18px;
-  padding: 16px;
-  margin-bottom: 18px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-  animation: fadeIn 0.3s ease;
+  background: var(--cinza);
+  padding: 14px 14px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
 }
 
 .ff-ex-nome {
   font-family: "Playfair Display", serif;
-  font-size: 1rem;
-  margin-bottom: 6px;
+  font-size: 1.15rem;
+  margin: 0 0 6px;
   color: var(--teal);
 }
 
 .ff-ex-info {
-  font-size: 14px;
   display: flex;
   gap: 12px;
-  margin-bottom: 10px;
+  font-size: 0.87rem;
   color: #444;
-}
-
-.ff-ex-info b {
-  color: #000;
-}
-
-/* Botão descanso */
-.ff-btn-descanso {
-  display: inline-block;
-  padding: 8px 14px;
-  background: var(--areia);
-  border: 1px solid #d6c4ba;
-  border-radius: 14px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  color: var(--teal);
   margin-bottom: 10px;
-}
-
-.ff-btn-descanso:hover {
-  background: #f7eae2;
 }
 
 /* ============================================================
-   ⏳ TIMER — barra + texto
+   BOTÃO DESCANSO
 ============================================================ */
+.ff-btn-descanso {
+  background: #fff;
+  border: 1px solid #d7d3d0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 10px;
+  color: var(--teal);
+  transition: all .25s;
+}
 
+.ff-btn-descanso:hover {
+  background: var(--bege);
+  transform: scale(1.05);
+}
+
+/* ============================================================
+   TIMER
+============================================================ */
 .ff-timer {
+  width: 100%;
   margin-top: 6px;
 }
 
 .ff-timer-bar {
   width: 100%;
-  height: 14px;
-  background: #e4e2e2;
-  border-radius: 12px;
+  background: #ddd;
+  height: 12px;
+  border-radius: 10px;
   overflow: hidden;
   position: relative;
 }
@@ -219,35 +219,121 @@ header h1 {
 }
 
 .ff-timer-time {
-  text-align: right;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   margin-top: 4px;
   color: #555;
+  text-align: right;
 }
 
 /* ============================================================
-   💗 HIIT / CARDIO
+   HIIT / CARDIO - CAIXA PREMIUM
 ============================================================ */
-
-.box-extra {
-  background: #fff7f3;
-  border-left: 3px solid var(--terracota);
-  padding: 14px;
+.ff-box-especial {
+  background: #fdf3ef;
+  border: 1px solid #f2c8bf;
+  padding: 16px;
   border-radius: 16px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-  margin-top: 20px;
+  margin: 10px 0;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
 }
 
-.box-extra.cardio {
-  background: #f4faf8;
-  border-left-color: var(--teal);
+.ff-box-especial.hiit {
+  border-left: 4px solid var(--terracota);
+}
+
+.ff-box-especial.cardio {
+  border-left: 4px solid var(--teal);
+  background: #eef8f4;
+}
+
+.ff-hiit-proto {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #444;
+  font-weight: 500;
 }
 
 /* ============================================================
-   💫 ANIMAÇÃO
+   PSE — MODAL OBRIGATÓRIO
 ============================================================ */
+.ff-pse-box {
+  margin-top: 20px;
+  padding: 10px;
+  background: #fff7f3;
+  border: 1px solid #f0c0b7;
+  border-radius: 14px;
+  text-align: center;
+}
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+.ff-pse-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--terracota);
+}
+
+/* ============================================================
+   BOTÕES FIXOS (rodapé)
+============================================================ */
+.fix-footer {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+#salvarTreinoBtn,
+#descansoBtn,
+#cancelarTreinoBtn {
+  border: none;
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.14);
+  transition: all .25s;
+  font-size: 1rem;
+}
+
+#salvarTreinoBtn {
+  background: linear-gradient(135deg, var(--teal), var(--terracota));
+  color: white;
+}
+
+#descansoBtn {
+  background: #fff;
+  color: var(--teal);
+  border: 1px solid rgba(51,89,83,0.25);
+}
+
+#cancelarTreinoBtn {
+  background: #fff1f1;
+  color: #a44;
+  border: 1px solid #e5bcbc;
+}
+
+#salvarTreinoBtn:hover,
+#descansoBtn:hover,
+#cancelarTreinoBtn:hover {
+  transform: scale(1.05);
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+============================================================ */
+@media (max-width: 430px) {
+  .carousel-item {
+    padding: 18px;
+    height: calc(100dvh - 150px);
+  }
+
+  .ff-exercicio {
+    padding: 14px;
+  }
+
+  .ff-ex-nome {
+    font-size: 1.05rem;
+  }
 }
