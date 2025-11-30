@@ -17,16 +17,30 @@ FEMFLOW.engineTreino = {};
 /* ============================================================
    1) NORMALIZAR FASE VINDO DO BACKEND
 ============================================================ */
-FEMFLOW.engineTreino.normalizarFase = function (fase) {
-  const f = (fase || "").toLowerCase().trim();
+FEMFLOW.engineTreino.normalizarFase = function (faseRaw) {
+  if (!faseRaw) return "follicular";
 
-  if (f === "ovulatory") return "ovulatoria";
-  if (f === "follicular") return "follicular";
-  if (f === "luteal") return "lutea";
-  if (f === "menstrual") return "menstrual";
+  const f = faseRaw.toLowerCase().trim();
 
-  return "follicular";
+  const mapa = {
+    "ovulatory": "ovulatoria",
+    "ovulatório": "ovulatoria",
+    "ovulatoria": "ovulatoria",
+    "ovulação": "ovulatoria",
+    
+    "follicular": "follicular",
+    "folicular": "follicular",
+
+    "luteal": "lutea",
+    "lutea": "lutea",
+
+    "menstrual": "menstrual",
+    "menstruacao": "menstrual"
+  };
+
+  return mapa[f] || "follicular";
 };
+
 
 /* ============================================================
    2) REGRAS OFICIAIS (fase × nível)
