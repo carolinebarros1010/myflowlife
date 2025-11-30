@@ -1,10 +1,9 @@
 /* ============================================================
-   FEMFLOW • TREINO ENGINE v3.2 — PREMIUM 2025
+   FEMFLOW • TREINO ENGINE v3.3 — PREMIUM 2025
    ------------------------------------------------------------
-   - HIIT Rotativo Inteligente
-   - Duração automática (6–8 min)
-   - Sugestões automáticas
-   - Mantém toda a lógica anterior
+   - HIIT Rotativo Inteligente (NÃO inicia sozinho)
+   - Sugestões HIIT em cards com ícones
+   - Estrutura compatível com treino.js v3.3
 ============================================================ */
 
 window.FEMFLOW = window.FEMFLOW || {};
@@ -23,13 +22,10 @@ FEMFLOW.engineTreino.normalizarFase = function (faseRaw) {
     "ovulatório": "ovulatoria",
     "ovulatoria": "ovulatoria",
     "ovulação": "ovulatoria",
-
     "follicular": "follicular",
     "folicular": "follicular",
-
     "luteal": "lutea",
     "lutea": "lutea",
-
     "menstrual": "menstrual",
     "menstruacao": "menstrual"
   };
@@ -45,7 +41,7 @@ FEMFLOW.engineTreino.normalizarNivel = function (nivelRaw) {
 
   if (n.startsWith("inic")) return "iniciante";
   if (n.startsWith("inter")) return "intermediaria";
-  if (n.startsWith("avan")) return "avancada";
+  if (n.startsWith("avan"))  return "avancada";
 
   return "iniciante";
 };
@@ -101,7 +97,7 @@ FEMFLOW.engineTreino.regras = {
 };
 
 /* ============================================================
-   5) REPS → INTERVALO
+   5) EXTRATORES E INTERVALOS
 ============================================================ */
 FEMFLOW.engineTreino.extrairReps = function (raw) {
   if (!raw) return 10;
@@ -140,12 +136,12 @@ FEMFLOW.engineTreino.calcularSeries = function (fase, nivel) {
 FEMFLOW.engineTreino.boxAquecimento = () => ({
   tipo: "aquecimentoPremium",
   titulo: "🌿 Aquecimento Premium",
-  descricao: "Prepare articulações, postura, respiração e corpo de forma leve.",
+  descricao: "Prepare articulações, postura e respiração para o treino.",
   passos: [
     { nome: "Mobilidade de Quadril (40s)", desc: "Circule o quadril mantendo a coluna neutra." },
-    { nome: "Mobilidade Torácica (40s)", desc: "Gire o tronco suavemente ativando a respiração." },
-    { nome: "Mobilidade de Ombro (40s)", desc: "Eleve e circule ombros com coluna alinhada." },
-    { nome: "Caminhada Leve – 5 min", desc: "Ritmo leve, respiração nasal e postura ereta." }
+    { nome: "Mobilidade Torácica (40s)", desc: "Gire o tronco com respiração leve." },
+    { nome: "Mobilidade de Ombro (40s)", desc: "Eleve e circule ombros suavemente." },
+    { nome: "Caminhada Leve – 5 min", desc: "Postura ereta, respiração nasal." }
   ],
   protocolo: "wake"
 });
@@ -156,16 +152,16 @@ FEMFLOW.engineTreino.boxAquecimento = () => ({
 FEMFLOW.engineTreino.boxResfriamento = () => ({
   tipo: "resfriamentoPremium",
   titulo: "🧘 Resfriamento & Respiração",
-  descricao: "Integração final do treino, relaxamento e desaceleração do sistema.",
+  descricao: "Desacelere corpo e mente, integrando o treino.",
   protocolo: "release",
   passos: [
-    { nome: "Alongamentos Leves — 2 min", desc: "Respire pelo nariz e mantenha sem dor." },
-    { nome: "Respiração + Retorno — 1 min", desc: "Feche os olhos e permita o corpo retomar a calma." }
+    { nome: "Alongamentos Leves — 2 min", desc: "Respiração tranquila sem dor." },
+    { nome: "Respiração + Retorno — 1 min", desc: "Restaure a calma com foco no ar." }
   ]
 });
 
 /* ============================================================
-   9) HIIT ROTATIVO INTELIGENTE
+   9) HIIT ROTATIVO INTELIGENTE — NÃO INICIA AUTOMATICAMENTE
 ============================================================ */
 
 FEMFLOW.engineTreino._hiitUltimo = null;
@@ -176,9 +172,21 @@ FEMFLOW.engineTreino._protocolosHIIT = [
   { estimulo: 30, descanso: 30, nome: "30/30" }
 ];
 
-FEMFLOW.engineTreino._sugestoesHIIT = {
-  casa: "Burpees, polichinelo, corrida no lugar, saltitos ou joelho alto.",
-  academia: "Esteira, bike, remo, escada ou air bike."
+FEMFLOW.engineTreino._cardsHIIT = {
+  academia: [
+    { icon: "🏃‍♀️", nome: "Esteira" },
+    { icon: "🚴‍♀️", nome: "Bike" },
+    { icon: "🚣‍♀️", nome: "Remo" },
+    { icon: "🪜", nome: "Escada" },
+    { icon: "🔥", nome: "Air Bike" }
+  ],
+  casa: [
+    { icon: "🤸‍♀️", nome: "Burpees" },
+    { icon: "⭐", nome: "Polichinelo" },
+    { icon: "🏃", nome: "Corrida no lugar" },
+    { icon: "🦵", nome: "Joelho alto" },
+    { icon: "⬆️⬇️", nome: "Saltitos" }
+  ]
 };
 
 FEMFLOW.engineTreino.boxHIIT = function (fase, enfase) {
@@ -192,18 +200,21 @@ FEMFLOW.engineTreino.boxHIIT = function (fase, enfase) {
   const ciclo = prot.estimulo + prot.descanso;
   const ciclosTotais = Math.round(360 / ciclo);
 
-  const sugest = enfase === "casa" 
-    ? this._sugestoesHIIT.casa 
-    : this._sugestoesHIIT.academia;
+  const cardsAcademia = this._cardsHIIT.academia
+    .map(c => ({ icon: c.icon, nome: c.nome }));
+
+  const cardsCasa = this._cardsHIIT.casa
+    .map(c => ({ icon: c.icon, nome: c.nome }));
 
   return {
     tipo: "hiitPremium",
     titulo: `🔥 HIIT — ${prot.nome}`,
-    descricao: `Execute ${prot.estimulo}s forte e ${prot.descanso}s leve.`,
+    descricao: `Ciclo: ${prot.estimulo}s forte + ${prot.descanso}s leve.`,
     estimulo: prot.estimulo,
     descanso: prot.descanso,
     ciclos: ciclosTotais,
-    sugestao: sugest
+    cardsAcademia,
+    cardsCasa
   };
 };
 
@@ -214,7 +225,7 @@ FEMFLOW.engineTreino.boxCardio = function () {
   return {
     tipo: "cardio",
     titulo: "💗 Cardio Leve — 10 min",
-    descricao: "Movimento contínuo e suave.",
+    descricao: "Movimento contínuo, suave e respirado.",
     tempo_total: 600
   };
 };
@@ -274,7 +285,7 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
     cursor += qtEx;
 
     bloco.forEach(ex => {
-      ex.nome   = ex.nome || ex.titulo || ex.exercise || ex.label || "Exercício";
+      ex.nome   = ex.nome || ex.titulo || ex.exercise || "Exercício";
       ex.titulo = ex.titulo || ex.nome;
 
       ex.reps = this.extrairReps(ex.reps);
