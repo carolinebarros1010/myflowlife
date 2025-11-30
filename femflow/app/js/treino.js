@@ -158,7 +158,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             ${box.exercicios
               .map(ex => `
                 <div class="ff-serie-item">
-                  <span class="ff-ex-nome">${ex.nome}</span>
+                  <span class="ff-ex-nome">${ex.titulo || ex.nome || "Sem título"}</span>
 
                   <div class="ff-ex-info">
                     <span class="ff-ex-series">Séries: <b>${ex.series}</b></span>
