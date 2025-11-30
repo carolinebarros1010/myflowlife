@@ -9,13 +9,14 @@
   <link rel="icon" href="favicon.ico">
   <link rel="manifest" href="manifest.json">
 
+  <!-- CSS base FemFlow -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
 
-  <!-- treino.css ajustado, mas preservando TUDO -->
-  <link rel="stylesheet" href="css/treino.css?v3.1">
+  <!-- treino.css v3.2 (novo) -->
+  <link rel="stylesheet" href="css/treino.css?v3.2">
 
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -48,37 +49,40 @@
 
   <!-- Rodapé -->
   <div class="fix-footer">
-    <button id="salvarTreinoBtn">💾 Salvar treino</button>
-    <button id="descansoBtn" class="secundario">🌿 Descanso</button>
-    <button id="cancelarTreinoBtn" class="secundario">Cancelar</button>
+    <button id="salvarTreinoBtn" class="btn-primary-clean">💾 Salvar treino</button>
+    <button id="descansoBtn" class="btn-secondary-clean">🌿 Descanso</button>
+    <button id="cancelarTreinoBtn" class="btn-tertiary-clean">Cancelar</button>
   </div>
 
-  <!-- MODAL PSE -->
-  <div id="modalPSE" class="modal-pse">
-    <div class="modal-inner">
-      <h3>Como foi o treino?</h3>
+  <!-- MODAL PSE (premium, centralizado) -->
+  <div id="modalPSE" class="modal-pse-overlay hidden">
+    <div class="modal-pse-card">
+      <h3 class="modal-title">Como foi o treino?</h3>
 
-      <label>PSE (0 a 10)</label>
-      <input type="range" min="0" max="10" value="0" id="pseInput"/>
+      <label class="modal-label">PSE (0 a 10)</label>
+      <input type="range" min="0" max="10" value="0" id="pseInput" class="modal-slider"/>
 
       <div class="modal-actions">
-        <button id="btnConfirmarPSE">Salvar</button>
-        <button id="btnCancelarPSE" class="cancel">Cancelar</button>
+        <button id="btnConfirmarPSE" class="modal-btn-ok">Salvar</button>
+        <button id="btnCancelarPSE" class="modal-btn-cancel">Cancelar</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL RESPIRAÇÃO INLINE (Ajustado) -->
-  <div id="breathModal" class="breath-overlay hidden">
-    <div class="breath-box">
+  <!-- MODAL RESPIRAÇÃO (slide-up estilo iOS) -->
+  <div id="breathModal" class="breath-sheet hidden">
+    <div class="breath-sheet-handle"></div>
+
+    <div class="breath-sheet-content">
+      <h3 id="breathTitle" class="breath-title">Respiração</h3>
 
       <div id="breathCircle" class="breath-circle">5</div>
-      <div id="faseLabel" class="breath-fase">Preparar…</div>
+      <div id="faseLabel" class="breath-phase">Preparar…</div>
 
-      <!-- Responsáveis pelo bug aparecem apenas quando clicado -->
-      <button id="btnStart" class="breath-start">Iniciar</button>
-      <button id="btnRespClose" class="breath-close">Fechar</button>
-
+      <div class="breath-actions">
+        <button id="btnStart" class="breath-start-btn">Iniciar</button>
+        <button id="btnRespClose" class="breath-close-btn">Fechar</button>
+      </div>
     </div>
   </div>
 
@@ -97,11 +101,12 @@
     });
   </script>
 
-  <!-- FEMFLOW scripts -->
+  <!-- Scripts FemFlow -->
   <script src="./femflow-core.js"></script>
-  <script src="./js/treino-engine.js?v3.1"></script>
-  <script src="./js/treino.js?v3.1"></script>
+  <script src="./js/treino-engine.js?v3.2"></script>
+  <script src="./js/treino.js?v3.2"></script>
 
+  <!-- Boot -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
@@ -109,11 +114,8 @@
       }
     });
 
-    document.getElementById("cancelarTreinoBtn").onclick = () => {
-      FEMFLOW.router("flowcenter");
-    };
+    cancelarTreinoBtn.onclick = () => FEMFLOW.router("flowcenter");
   </script>
 
 </body>
 </html>
-
