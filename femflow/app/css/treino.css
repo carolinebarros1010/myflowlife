@@ -334,7 +334,7 @@ body {
   inset: 0;
   background: rgba(255,255,255,0.15);
   backdrop-filter: blur(8px);
-  z-index: 99997;
+  z-index: 200000;
 }
 
 .breath-backdrop.hidden {
@@ -351,7 +351,7 @@ body {
   box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
   transform: translateY(100%);
   transition: transform .35s ease;
-  z-index: 99998;
+  z-index: 200001;
   padding: 22px;
 }
 
