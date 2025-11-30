@@ -32,6 +32,34 @@ body {
   font-family: "Lato", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+.toast-box {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  background: var(--teal);
+  color: var(--terracota);
+
+  padding: 12px 22px;
+  border-radius: 16px;
+
+  font-size: .95rem;
+  font-weight: 600;
+  text-align: center;
+
+  box-shadow: 0 6px 22px rgba(0,0,0,0.20);
+
+  opacity: 0;
+  transition: opacity .35s ease, transform .35s ease;
+  z-index: 99999;
+}
+
+.toast-box.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-6px);
+}
+
 
 /* -------------------- HEADER -------------------- */
 .treino-header {
