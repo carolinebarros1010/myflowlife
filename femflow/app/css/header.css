@@ -42,15 +42,17 @@
    MENU LATERAL
 ---------------------------------------- */
 .ff-menu-modal {
-  background: var(--terracota-light, #e7b6a9);
-  color: var(--teal, #335953);
-  text-align: center;
-  padding: 8px 0;
-  font-size: .9rem;
-  font-weight: 600;
-  border-radius: 8px;
-  margin: 10px auto;
-  width: 80%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .30s ease;
+  z-index: 150000; /* acima do header */
 }
 
 .ff-menu-modal.active {
