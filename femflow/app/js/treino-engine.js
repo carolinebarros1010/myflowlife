@@ -304,33 +304,43 @@ FEMFLOW.engineTreino.montarTreino = async function ({
   diaCiclo
 }) {
 
-  const faseNorm  = this.normalizarFase(fase);
-  const nivelNorm = this.normalizarNivel(nivel);   // 👈 novo
+  const faseNorm = this.normalizarFase(fase);
 
-  FEMFLOW.log("🧬 ENGINE → nivel:", nivelNorm, "fase:", faseNorm, "dia:", diaCiclo);
+  FEMFLOW.log("🧬 ENGINE → nivel:", nivel, "fase:", faseNorm, "dia:", diaCiclo);
 
-  const regras = this.regras[nivelNorm][faseNorm]; // 👈 usa nivelNorm
+  const regras = this.regras[nivel][faseNorm];
   const lista = [];
 
+  // BOX 0
   lista.push(this.box0());
 
+  // BUSCA OS BOXES DO FIREBASE
   const boxesFirebase = await this.buscarMultiBox({
-    nivel:   nivelNorm,       // 👈 manda normalizado
+    nivel,
     enfase,
-    fase:    faseNorm,
+    fase: faseNorm,
     diaCiclo,
     qtdBoxes: regras.totalBoxes,
     exPorBox: regras.ex
   });
 
-  lista.push(...boxesFirebase);
-
+  // INTERCALA: BOX → HIIT/CARDIO → BOX → HIIT/CARDIO...
   for (let i = 0; i < regras.totalBoxes; i++) {
-    if (regras.hiit[i])   lista.push(this.criarBoxEspecial("hiit", faseNorm));
-    if (regras.cardio[i]) lista.push(this.criarBoxEspecial("cardio", faseNorm));
+
+    lista.push(boxesFirebase[i]);
+
+    if (regras.hiit[i]) {
+      lista.push(this.criarBoxEspecial("hiit", faseNorm));
+    }
+
+    if (regras.cardio[i]) {
+      lista.push(this.criarBoxEspecial("cardio", faseNorm));
+    }
   }
 
+  // FINAL
   lista.push(this.boxFinal());
+
   return lista;
 };
 
