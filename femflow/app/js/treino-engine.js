@@ -8,6 +8,7 @@
    - HIIT + Cardio dinâmicos
    - Multi-box via Firestore
    - Intervalo por reps (6–8→90s, 8–12→60s, 12–18→45s)
+   - Debug Firebase completo (somente com femflow_dev=on)
    ============================================================ */
 
 window.FEMFLOW = window.FEMFLOW || {};
@@ -19,16 +20,16 @@ FEMFLOW.engineTreino = {};
 FEMFLOW.engineTreino.normalizarFase = function (fase) {
   const f = (fase || "").toLowerCase().trim();
 
-  if (f === "ovulatory") return "ovulatoria";   // backend → engine
+  if (f === "ovulatory") return "ovulatoria";
   if (f === "follicular") return "follicular";
   if (f === "luteal") return "lutea";
   if (f === "menstrual") return "menstrual";
 
-  return "follicular"; // fallback
+  return "follicular";
 };
 
 /* ============================================================
-   2) REGRAS OFICIAIS
+   2) REGRAS OFICIAIS (fase × nível)
 ============================================================ */
 FEMFLOW.engineTreino.regras = {
   iniciante: {
@@ -59,18 +60,18 @@ FEMFLOW.engineTreino.regras = {
 FEMFLOW.engineTreino.calcularIntervaloPorReps = function (reps) {
   reps = Number(reps || 0);
 
-  if (reps >= 6 && reps <= 8) return 90;
+  if (reps >= 6 && reps <= 8)  return 90;
   if (reps > 8 && reps <= 12) return 60;
   if (reps > 12 && reps <= 18) return 45;
 
-  return 60; // fallback seguro
+  return 60;
 };
 
 /* ============================================================
    4) SERIES POR FASE × NÍVEL
 ============================================================ */
 FEMFLOW.engineTreino.calcularSeries = function (fase, nivel) {
-  fase = (fase || "").toLowerCase();
+  fase  = (fase || "").toLowerCase();
   nivel = (nivel || "").toLowerCase();
 
   if (fase === "menstrual")   return nivel === "iniciante" ? 2 : 3;
@@ -143,7 +144,45 @@ FEMFLOW.engineTreino.criarBoxEspecial = function (tipo, fase) {
 };
 
 /* ============================================================
-   8) FIREBASE: BUSCAR MULTI-BOX (com DEBUG)
+   8) NORMALIZAR NÍVEL
+============================================================ */
+FEMFLOW.engineTreino.normalizarNivel = function (nivelRaw) {
+  const n = (nivelRaw || "").toLowerCase();
+
+  if (n.startsWith("inic"))  return "iniciante";
+  if (n.startsWith("inter")) return "intermediaria";
+  if (n.startsWith("avan"))  return "avancada";
+
+  return "iniciante";
+};
+
+/* ============================================================
+   9) NORMALIZAR ENFASE
+============================================================ */
+FEMFLOW.engineTreino.normalizarEnfase = function (raw) {
+
+  const e = (raw || "").toLowerCase().trim();
+
+  const mapa = {
+    gluteo: "gluteo",
+    quadriceps: "quadriceps",
+    posteriores: "posteriores",
+    costas: "costas",
+    braco: "braco",
+    corrida: "corrida",
+    beach: "beach",
+    adaptacao: "adaptacao",
+    casa: "casa",
+    geral: "geral",
+    remo: "remo",
+    natacao: "natacao"
+  };
+
+  return mapa[e] || "geral";
+};
+
+/* ============================================================
+   10) FIREBASE: BUSCAR MULTI-BOX (com DEBUG completo)
 ============================================================ */
 FEMFLOW.engineTreino.buscarMultiBox = async function ({
   nivel,
@@ -158,7 +197,7 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
   const nivelNorm  = this.normalizarNivel(nivel);
   const enfaseNorm = this.normalizarEnfase(enfase);
 
-  const pasta = `${nivelNorm}_${enfaseNorm}`;
+  const pasta  = `${nivelNorm}_${enfaseNorm}`;
   const diaKey = `dia_${diaCiclo}`;
 
   FEMFLOW.log("📦 BUSCAR BOXES:", pasta, faseNorm, diaKey);
@@ -176,19 +215,13 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
     .get();
 
   if (snap.empty) {
-    FEMFLOW.log("⚠️ Firestore vazio para este dia/fase");
+    FEMFLOW.log("⚠️ Firestore vazio");
     return [];
   }
 
-  /* --------------------------
-     TRANSFORMAR SNAP EM LISTA
-  ---------------------------*/
   const todos = [];
   snap.forEach(doc => todos.push(doc.data()));
 
-  /* --------------------------
-     EMBARALHAR
-  ---------------------------*/
   const shuffled = todos.sort(() => Math.random() - 0.5);
 
   let cursor = 0;
@@ -198,6 +231,7 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
 
   for (let i = 0; i < qtdBoxes; i++) {
     const qtEx = exPorBox[i];
+
     const bloco = shuffled.slice(cursor, cursor + qtEx);
     cursor += qtEx;
 
@@ -214,27 +248,26 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
     });
   }
 
-  /* ============================================================
-     🔍 DEBUG COMPLETO FIREBASE
-  ============================================================ */
-  FEMFLOW.engineTreino.debugFirebase({
-    nivel,
-    enfase,
-    faseNorm,
-    diaCiclo,
-    pasta,
-    diaKey,
-    snap,
-    todos,
-    boxes
-  });
+  // DEBUG — SOMENTE SE femflow_dev = 'on'
+  if (FEMFLOW.dev()) {
+    FEMFLOW.engineTreino.debugFirebase({
+      nivel,
+      enfase,
+      faseNorm,
+      diaCiclo,
+      pasta,
+      diaKey,
+      todos,
+      boxes,
+      snapSize: snap.size
+    });
+  }
 
   return boxes;
 };
 
-
 /* ============================================================
-   9) ENGINE FINAL — montarTreino()
+   11) ENGINE FINAL — montarTreino()
 ============================================================ */
 FEMFLOW.engineTreino.montarTreino = async function ({
   nivel,
@@ -272,91 +305,30 @@ FEMFLOW.engineTreino.montarTreino = async function ({
 
   return lista;
 };
+
 /* ============================================================
-   10) NORMALIZADOR DE NIVEL
-============================================================ */
-FEMFLOW.engineTreino.normalizarNivel = function (nivelRaw) {
-  const n = (nivelRaw || "").toLowerCase();
-
-  if (n.startsWith("inic")) return "iniciante";
-  if (n.startsWith("inter")) return "intermediaria";
-  if (n.startsWith("avan")) return "avancada";
-
-  return "iniciante";
-};
-/* ============================================================
-   11) NORMALIZADOR DE ENFASE
-============================================================ */
-FEMFLOW.engineTreino.normalizarEnfase = function (enfaseRaw) {
-  const e = (enfaseRaw || "").toLowerCase().trim();
-
-  const mapa = {
-    gluteo: "gluteo",
-    quadriceps: "quadriceps",
-    posteriores: "posteriores",
-    costas: "costas",
-    braco: "braco",
-    corrida: "corrida",
-    beach: "beach",
-    adaptacao: "adaptacao",
-    casa: "casa",
-    geral: "geral",
-    remo: "remo",
-    natacao: "natacao"
-  };
-
-  if (mapa[e]) return mapa[e];
-
-  return "geral"; // fallback
-};
-/* ============================================================
-   🔍 DEBUG FIREBASE — MOSTRAR TUDO QUE ACONTECE
+   12) 🔍 DEBUG FIREBASE — EXTREMAMENTE DETALHADO
 ============================================================ */
 FEMFLOW.engineTreino.debugFirebase = function (info) {
 
-  const {
-    nivel,
-    enfase,
-    faseNorm,
-    diaCiclo,
-    pasta,
-    diaKey,
-    snap,
-    todos,
-    boxes
-  } = info;
-
   console.groupCollapsed(
-    `%c🔥 FIREBASE DEBUG — ${nivel} | ${enfase} | ${faseNorm} | Dia ${diaCiclo}`,
+    `%c🔥 FIREBASE DEBUG — ${info.nivel} | ${info.enfase} | ${info.faseNorm} | Dia ${info.diaCiclo}`,
     "color:#cc6a5a;font-weight:bold;"
   );
 
-  console.log("📁 Pasta Firebase:", pasta);
-  console.log("📄 Documento (dia):", diaKey);
+  console.log("📁 Pasta usada:", info.pasta);
+  console.log("📄 Documento dia:", info.diaKey);
+  console.log("📊 Total de docs:", info.snapSize);
 
-  console.log("🔎 Query:", {
-    collection: "exercicios",
-    doc: pasta,
-    subcollection: `fases/${faseNorm}/dias/${diaKey}/exercicios`
-  });
+  console.log("📌 Exercícios brutos (todos):");
+  console.table(info.todos);
 
-  if (!snap) {
-    console.log("❌ Snap = null / undefined");
-    console.groupEnd();
-    return;
-  }
-
-  console.log("📦 snap.empty:", snap.empty);
-  console.log("📊 Total de exercícios encontrados:", snap.size);
-
-  console.log("📌 Exercícios brutos:");
-  console.table(todos);
-
-  console.log("📦 BOXES CONSTRUÍDOS:");
-  boxes.forEach((b, i) => {
+  console.log("📦 BOXES montados:");
+  info.boxes.forEach((b, i) => {
     console.log(`--- BOX ${i + 1} ---`);
     console.table(b.exercicios);
   });
 
   console.groupEnd();
 };
+
