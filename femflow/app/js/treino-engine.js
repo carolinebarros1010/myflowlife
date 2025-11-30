@@ -1,25 +1,31 @@
 /* ============================================================
-   FEMFLOW • TREINO ENGINE v3.0 — Versão Premium 2025
+   FEMFLOW • TREINO ENGINE v3.0 — PREMIUM 2025
    ------------------------------------------------------------
-   ✔ Box 0 Premium (mobilidade + caminhada 5min + respiração Wake Flow)
-   ✔ Box Final Premium (pse + resfriamento + respiração Restore Flow)
-   ✔ HIIT com gatilhos 3-2-1 / 5-4-3-2-1
-   ✔ Intervalo dinâmico por reps
-   ✔ Normalização total de fase / nível / ênfase
-   ✔ Regras completas fase × nível
-   ✔ Multi-box Firebase com shuffle
-   ✔ Intercalação premium (BOX → HIIT/CARDIO → BOX)
-   ✔ Debug Firebase completo (dev mode)
+   TIPOS ESPECIAIS:
+   - aquecimentoPremium
+   - treino
+   - hiitPremium
+   - cardio
+   - resfriamentoPremium
+
+   SUPORTE COMPLETO:
+   - normalização fase/nivel/enfase
+   - reps → intervalo automático
+   - séries por fase hormonal
+   - box especial com respiração integrada
+   - pré-contagem (HIIT)
+   - render premium (treino.js)
 ============================================================ */
 
 window.FEMFLOW = window.FEMFLOW || {};
 FEMFLOW.engineTreino = {};
 
 /* ============================================================
-   1) NORMALIZAR FASE
+   1) NORMALIZAR FASE VINDO DO BACKEND
 ============================================================ */
 FEMFLOW.engineTreino.normalizarFase = function (faseRaw) {
   if (!faseRaw) return "follicular";
+
   const f = faseRaw.toLowerCase().trim();
 
   const mapa = {
@@ -27,7 +33,7 @@ FEMFLOW.engineTreino.normalizarFase = function (faseRaw) {
     "ovulatório": "ovulatoria",
     "ovulatoria": "ovulatoria",
     "ovulação": "ovulatoria",
-
+    
     "follicular": "follicular",
     "folicular": "follicular",
 
@@ -42,21 +48,90 @@ FEMFLOW.engineTreino.normalizarFase = function (faseRaw) {
 };
 
 /* ============================================================
-   2) NORMALIZAR NÍVEL
+   2) REGRAS OFICIAIS (fase × nível)
 ============================================================ */
-FEMFLOW.engineTreino.normalizarNivel = function (raw) {
-  const n = (raw || "").toLowerCase();
-  if (n.startsWith("inic")) return "iniciante";
+FEMFLOW.engineTreino.regras = {
+  iniciante: {
+    menstrual:   { totalBoxes: 1, ex: [3],     hiit: [0],   cardio: [1] },
+    folicular:   { totalBoxes: 2, ex: [3,3],   hiit: [1,1], cardio: [0,1] },
+    ovulatoria:  { totalBoxes: 2, ex: [3,3],   hiit: [1,1], cardio: [0,0] },
+    lutea:       { totalBoxes: 2, ex: [3,3],   hiit: [1,0], cardio: [0,1] }
+  },
+
+  intermediaria: {
+    menstrual:   { totalBoxes: 1, ex: [4],     hiit: [0],   cardio: [1] },
+    folicular:   { totalBoxes: 2, ex: [3,3],   hiit: [1,1], cardio: [0,0] },
+    ovulatoria:  { totalBoxes: 3, ex: [2,2,2], hiit: [1,1,1], cardio: [0,0,0] },
+    lutea:       { totalBoxes: 2, ex: [3,3],   hiit: [1,0], cardio: [0,1] }
+  },
+
+  avancada: {
+    menstrual:   { totalBoxes: 1, ex: [4],     hiit: [0],   cardio: [1] },
+    folicular:   { totalBoxes: 2, ex: [3,4],   hiit: [1,1], cardio: [0,0] },
+    ovulatoria:  { totalBoxes: 3, ex: [3,3,3], hiit: [1,1,1], cardio: [0,0,0] },
+    lutea:       { totalBoxes: 2, ex: [4,4],   hiit: [1,0], cardio: [0,1] }
+  }
+};
+
+/* ============================================================
+   3) INTERVALO POR REPS
+============================================================ */
+FEMFLOW.engineTreino.calcularIntervaloPorReps = function (reps) {
+  reps = Number(reps || 0);
+
+  if (reps >= 6 && reps <= 8)  return 90;
+  if (reps > 8 && reps <= 12) return 60;
+  if (reps > 12 && reps <= 18) return 45;
+
+  return 60;
+};
+
+/* ============================================================
+   4) SERIES POR FASE × NÍVEL
+============================================================ */
+FEMFLOW.engineTreino.calcularSeries = function (fase, nivel) {
+  fase  = (fase || "").toLowerCase();
+  nivel = (nivel || "").toLowerCase();
+
+  if (fase === "menstrual")   return nivel === "iniciante" ? 2 : 3;
+  if (fase === "follicular")  return nivel === "iniciante" ? 3 : 4;
+  if (fase === "ovulatoria")  return 4;
+  if (fase === "lutea")       return nivel === "iniciante" ? 3 : 4;
+
+  return 3;
+};
+
+/* ============================================================
+   5) TRATAMENTO DE REPS "6-8" → 6
+============================================================ */
+FEMFLOW.engineTreino.extrairReps = function (raw) {
+  if (!raw) return 10;
+
+  if (String(raw).includes("-")) {
+    return Number(raw.split("-")[0]) || 10;
+  }
+  return Number(raw) || 10;
+};
+
+/* ============================================================
+   6) NORMALIZAR NÍVEL
+============================================================ */
+FEMFLOW.engineTreino.normalizarNivel = function (nivelRaw) {
+  const n = (nivelRaw || "").toLowerCase();
+
+  if (n.startsWith("inic"))  return "iniciante";
   if (n.startsWith("inter")) return "intermediaria";
-  if (n.startsWith("avan")) return "avancada";
+  if (n.startsWith("avan"))  return "avancada";
+
   return "iniciante";
 };
 
 /* ============================================================
-   3) NORMALIZAR ÊNFASE
+   7) NORMALIZAR ENFASE
 ============================================================ */
 FEMFLOW.engineTreino.normalizarEnfase = function (raw) {
   const e = (raw || "").toLowerCase().trim();
+
   const mapa = {
     gluteo: "gluteo",
     quadriceps: "quadriceps",
@@ -64,145 +139,73 @@ FEMFLOW.engineTreino.normalizarEnfase = function (raw) {
     costas: "costas",
     braco: "braco",
     corrida: "corrida",
+    beach: "beach",
     adaptacao: "adaptacao",
     casa: "casa",
-    beach: "beach",
+    geral: "geral",
     remo: "remo",
-    natacao: "natacao",
-    geral: "geral"
+    natacao: "natacao"
   };
+
   return mapa[e] || "geral";
 };
 
 /* ============================================================
-   4) EXTRair REPS (6-8 → 6)
+   8) AQUECIMENTO PREMIUM
 ============================================================ */
-FEMFLOW.engineTreino.extrairReps = function (raw) {
-  if (!raw) return 10;
-  if (String(raw).includes("-")) return Number(raw.split("-")[0]) || 10;
-  return Number(raw) || 10;
-};
-
-/* ============================================================
-   5) INTERVALO POR REPS
-============================================================ */
-FEMFLOW.engineTreino.calcularIntervaloPorReps = function (reps) {
-  reps = Number(reps || 0);
-  if (reps >= 6 && reps <= 8) return 90;
-  if (reps > 8 && reps <= 12) return 60;
-  if (reps > 12 && reps <= 18) return 45;
-  return 60;
-};
-
-/* ============================================================
-   6) SERIES POR FASE × NÍVEL
-============================================================ */
-FEMFLOW.engineTreino.calcularSeries = function (fase, nivel) {
-  fase = (fase || "").toLowerCase();
-  nivel = (nivel || "").toLowerCase();
-
-  if (fase === "menstrual") return nivel === "iniciante" ? 2 : 3;
-  if (fase === "follicular") return nivel === "iniciante" ? 3 : 4;
-  if (fase === "ovulatoria") return 4;
-  if (fase === "lutea") return nivel === "iniciante" ? 3 : 4;
-
-  return 3;
-};
-
-/* ============================================================
-   7) BOX 0 — AQUecimento Premium
-============================================================ */
-FEMFLOW.engineTreino.box0 = () => ({
-  tipo: "box0",
+FEMFLOW.engineTreino.boxAquecimento = () => ({
+  tipo: "aquecimentoPremium",
   titulo: "🌿 Aquecimento Premium",
-  descricao:
-    "Prepare o corpo com mobilidade suave e 5 minutos de caminhada leve.",
+  descricao: "Prepare articulações, respiração e corpo para o treino.",
   passos: [
-    "Mobilidade de quadril — 40s",
-    "Mobilidade de coluna — 40s",
-    "Mobilidade de ombros — 40s",
-    "Caminhada leve — 5 minutos"
+    "Mobilidade de quadril – 40s",
+    "Mobilidade torácica – 40s",
+    "Mobilidade de ombro – 40s",
+    "Caminhada leve – 5 min"
   ],
-  respirar: "wake" // protocolo Wake Flow
+  protocolo: "wake"
 });
 
 /* ============================================================
-   8) BOX FINAL — Resfriamento Premium
+   9) RESFRIAMENTO PREMIUM
 ============================================================ */
-FEMFLOW.engineTreino.boxFinal = () => ({
-  tipo: "final",
-  titulo: "🧘‍♀️ Resfriamento Premium",
-  descricao: "Desacelere o corpo e sinalize recuperação profunda.",
+FEMFLOW.engineTreino.boxResfriamento = () => ({
+  tipo: "resfriamentoPremium",
+  titulo: "🧘 Resfriamento & Respiração",
+  descricao: "Desacelere corpo e mente, finalize seu treino e integre o aprendizado.",
+  protocolo: "release",
   passos: [
-    "Alongamento leve — 2 min",
-    "Respiração Restore Flow — 1 min",
-    "Finalize salvando seu treino"
-  ],
-  respirar: "restore" // protocolo Restore Flow
+    "Alongamentos leves — 2 min",
+    "Respiração + Retorno — 1 min"
+  ]
 });
 
 /* ============================================================
-   9) BOX ESPECIAL — HIIT / CARDIO
+   10) HIIT PREMIUM — com 3-2-1 / 5-4-3-2-1
 ============================================================ */
-FEMFLOW.engineTreino.criarBoxEspecial = function (tipo, fase) {
-  const baseHiit = [
-    "30\" forte / 30\" leve × 6",
-    "40\" forte / 20\" leve × 6",
-    "45\" forte / 15\" leve × 6",
-    "60\" forte / 30\" leve × 5"
-  ];
-
-  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
-
-  if (tipo === "hiit") {
-    return {
-      tipo: "hiit",
-      titulo: `🔥 HIIT — ${fase}`,
-      descricao:
-        "Alta intensidade controlada. Prepare-se para um bloco com estímulo forte.\nComeço automático com contagem 3–2–1.",
-      protocolo: pick(baseHiit),
-      tempo_total: 360,
-      startCountdown: true // usado pelo treino.js
-    };
-  }
-
+FEMFLOW.engineTreino.boxHIIT = function (fase) {
   return {
-    tipo: "cardio",
-    titulo: "💗 Cardio Leve",
-    descricao: "Movimento contínuo para circulação e respiração.",
-    tempo_total: 600,
-    startCountdown: false
+    tipo: "hiitPremium",
+    titulo: `🔥 HIIT — ${fase}`,
+    descricao: "Alta intensidade com controle total. Execute o estímulo forte seguido de descanso guiado.",
+    tempo_total: 360 // 6 min
   };
 };
 
 /* ============================================================
-   10) REGRAS OFICIAIS (fase × nível)
+   11) CARDIO LEVE
 ============================================================ */
-FEMFLOW.engineTreino.regras = {
-  iniciante: {
-    menstrual: { totalBoxes: 1, ex: [4], hiit: [0], cardio: [1] },
-    folicular: { totalBoxes: 2, ex: [3, 3], hiit: [1, 1], cardio: [0, 1] },
-    ovulatoria: { totalBoxes: 2, ex: [3, 3], hiit: [1, 1], cardio: [0, 0] },
-    lutea: { totalBoxes: 2, ex: [3, 3], hiit: [1, 0], cardio: [0, 1] }
-  },
-
-  intermediaria: {
-    menstrual: { totalBoxes: 1, ex: [4], hiit: [0], cardio: [1] },
-    folicular: { totalBoxes: 2, ex: [3, 3], hiit: [1, 1], cardio: [0, 0] },
-    ovulatoria: { totalBoxes: 3, ex: [2, 2, 2], hiit: [1, 1, 1], cardio: [0, 0, 0] },
-    lutea: { totalBoxes: 2, ex: [3, 3], hiit: [1, 0], cardio: [0, 1] }
-  },
-
-  avancada: {
-    menstrual: { totalBoxes: 1, ex: [5], hiit: [0], cardio: [1] },
-    folicular: { totalBoxes: 2, ex: [3, 4], hiit: [1, 1], cardio: [0, 0] },
-    ovulatoria: { totalBoxes: 3, ex: [3, 3, 3], hiit: [1, 1, 1], cardio: [0, 0, 0] },
-    lutea: { totalBoxes: 2, ex: [4, 4], hiit: [1, 0], cardio: [0, 1] }
-  }
+FEMFLOW.engineTreino.boxCardio = function () {
+  return {
+    tipo: "cardio",
+    titulo: "💗 Cardio Leve — 10 min",
+    descricao: "Movimento contínuo para circulação e leve subida de FC.",
+    tempo_total: 600
+  };
 };
 
 /* ============================================================
-   11) FIREBASE: BUSCAR EXERCÍCIOS
+   12) CARREGAR BOXES DO FIREBASE
 ============================================================ */
 FEMFLOW.engineTreino.buscarMultiBox = async function ({
   nivel,
@@ -212,16 +215,18 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
   qtdBoxes,
   exPorBox
 }) {
-  const faseNorm = this.normalizarFase(fase);
-  const nivelNorm = this.normalizarNivel(nivel);
+
+  const faseNorm   = this.normalizarFase(fase);
+  const nivelNorm  = this.normalizarNivel(nivel);
   const enfaseNorm = this.normalizarEnfase(enfase);
 
-  const pasta = `${nivelNorm}_${enfaseNorm}`;
+  const pasta  = `${nivelNorm}_${enfaseNorm}`;
   const diaKey = `dia_${diaCiclo}`;
 
-  FEMFLOW.log("📦 FIREBASE: pasta", pasta, "fase", faseNorm, "dia", diaKey);
+  FEMFLOW.log("📦 BUSCAR BOXES:", pasta, faseNorm, diaKey);
 
   const db = firebase.firestore();
+
   const snap = await db
     .collection("exercicios")
     .doc(pasta)
@@ -232,7 +237,10 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
     .collection("exercicios")
     .get();
 
-  if (snap.empty) return [];
+  if (snap.empty) {
+    FEMFLOW.log("⚠️ Firestore vazio");
+    return [];
+  }
 
   const todos = [];
   snap.forEach(doc => todos.push(doc.data()));
@@ -241,10 +249,12 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
 
   let cursor = 0;
   const boxes = [];
+
   const seriesPadrao = this.calcularSeries(faseNorm, nivelNorm);
 
   for (let i = 0; i < qtdBoxes; i++) {
     const qtEx = exPorBox[i];
+
     const bloco = shuffled.slice(cursor, cursor + qtEx);
     cursor += qtEx;
 
@@ -261,25 +271,11 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
     });
   }
 
-  if (FEMFLOW.dev()) {
-    FEMFLOW.engineTreino.debugFirebase({
-      nivel,
-      enfase,
-      faseNorm,
-      diaCiclo,
-      pasta,
-      diaKey,
-      todos,
-      boxes,
-      snapSize: snap.size
-    });
-  }
-
   return boxes;
 };
 
 /* ============================================================
-   12) ENGINE FINAL — Montar treino
+   13) ENGINE FINAL — montarTreino()
 ============================================================ */
 FEMFLOW.engineTreino.montarTreino = async function ({
   nivel,
@@ -287,18 +283,18 @@ FEMFLOW.engineTreino.montarTreino = async function ({
   fase,
   diaCiclo
 }) {
+
   const faseNorm = this.normalizarFase(fase);
 
-  FEMFLOW.log("🧬 ENGINE FINAL:", { nivel, fase: faseNorm, diaCiclo });
+  FEMFLOW.log("🧬 ENGINE → nivel:", nivel, "fase:", faseNorm, "dia:", diaCiclo);
 
   const regras = this.regras[nivel][faseNorm];
-
   const lista = [];
 
-  // BOX 0
-  lista.push(this.box0());
+  /* 1) AQUECIMENTO PREMIUM */
+  lista.push(this.boxAquecimento());
 
-  // EXERCÍCIOS FIREBASE
+  /* 2) FIREBASE BOXES */
   const boxesFirebase = await this.buscarMultiBox({
     nivel,
     enfase,
@@ -308,34 +304,22 @@ FEMFLOW.engineTreino.montarTreino = async function ({
     exPorBox: regras.ex
   });
 
-  // INTERCALAÇÃO PREMIUM
+  /* 3) INTERCALAÇÃO: BOX → HIIT/CARDIO → BOX... */
   for (let i = 0; i < regras.totalBoxes; i++) {
+
     lista.push(boxesFirebase[i]);
 
-    if (regras.hiit[i]) lista.push(this.criarBoxEspecial("hiit", faseNorm));
-    if (regras.cardio[i]) lista.push(this.criarBoxEspecial("cardio", faseNorm));
+    if (regras.hiit[i]) {
+      lista.push(this.boxHIIT(faseNorm));
+    }
+
+    if (regras.cardio[i]) {
+      lista.push(this.boxCardio());
+    }
   }
 
-  // BOX FINAL
-  lista.push(this.boxFinal());
+  /* 4) RESFRIAMENTO PREMIUM */
+  lista.push(this.boxResfriamento());
 
   return lista;
 };
-
-/* ============================================================
-   13) DEBUG
-============================================================ */
-FEMFLOW.engineTreino._debugLast = null;
-
-FEMFLOW.engineTreino.debugFirebase = function (info) {
-  FEMFLOW.engineTreino._debugLast = info;
-  console.groupCollapsed(
-    `%c🔥 FIREBASE DEBUG — ${info.nivel} | ${info.enfase} | ${info.faseNorm} | Dia ${info.diaCiclo}`,
-    "color:#cc6a5a;font-weight:bold"
-  );
-  console.log(info);
-  console.groupEnd();
-};
-
-FEMFLOW.engineTreino.debugFirebaseLast = () =>
-  console.log(FEMFLOW.engineTreino._debugLast);
