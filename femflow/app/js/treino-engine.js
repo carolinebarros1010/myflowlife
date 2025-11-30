@@ -290,19 +290,20 @@ FEMFLOW.engineTreino.montarTreino = async function ({
   diaCiclo
 }) {
 
-  const faseNorm = this.normalizarFase(fase);
+  const faseNorm  = this.normalizarFase(fase);
+  const nivelNorm = this.normalizarNivel(nivel);   // 👈 novo
 
-  FEMFLOW.log("🧬 ENGINE → nivel:", nivel, "fase:", faseNorm, "dia:", diaCiclo);
+  FEMFLOW.log("🧬 ENGINE → nivel:", nivelNorm, "fase:", faseNorm, "dia:", diaCiclo);
 
-  const regras = this.regras[nivel][faseNorm];
+  const regras = this.regras[nivelNorm][faseNorm]; // 👈 usa nivelNorm
   const lista = [];
 
   lista.push(this.box0());
 
   const boxesFirebase = await this.buscarMultiBox({
-    nivel,
+    nivel:   nivelNorm,       // 👈 manda normalizado
     enfase,
-    fase: faseNorm,
+    fase:    faseNorm,
     diaCiclo,
     qtdBoxes: regras.totalBoxes,
     exPorBox: regras.ex
@@ -316,9 +317,9 @@ FEMFLOW.engineTreino.montarTreino = async function ({
   }
 
   lista.push(this.boxFinal());
-
   return lista;
 };
+
 
 /* ============================================================
    12) 🔍 DEBUG FIREBASE — EXTREMAMENTE DETALHADO
