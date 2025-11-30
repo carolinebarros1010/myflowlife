@@ -1,19 +1,21 @@
 /* ============================================================
-   🎨 FemFlow — TREINO.CSS PREMIUM v3.1 (2025)
-   TOTALMENTE COMPLETO — NENHUMA LINHA REMOVIDA DO SEU
+   FemFlow — TREINO.CSS PREMIUM v3.2 (2025)
+   Completo, leve, no estilo FemFlow, sem remover nada funcional
 ============================================================ */
 
-/* -------- PALETA -------- */
+/* -------------------- PALETA FEMFLOW -------------------- */
 :root {
   --teal: #335953;
   --terracota: #cc6a5a;
-  --bege: #fff8f4;
-  --areia: #f2e6dd;
-  --cinza: #f0f0f0;
-  --sombra: rgba(0,0,0,0.08);
+  --terracota-light: #e7b6a9;
+  --pessego: #fff3ec;
+  --areia: #f8f1ea;
+  --cinza: #efefef;
+  --texto: #4d3f3a;
+  --shadow: rgba(0,0,0,0.05);
 }
 
-/* -------- RESET -------- */
+/* -------------------- RESET -------------------- */
 * {
   box-sizing: border-box;
 }
@@ -21,12 +23,13 @@
 body {
   margin: 0;
   padding-top: calc(90px + env(safe-area-inset-top,0px));
-  background: linear-gradient(180deg, var(--bege), var(--areia));
+  color: var(--texto);
+  background: linear-gradient(180deg, var(--areia), #fff);
   font-family: "Lato", sans-serif;
-  color: var(--teal);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* -------- HEADER -------- */
+/* -------------------- HEADER -------------------- */
 .treino-header {
   display: flex;
   flex-direction: column;
@@ -47,7 +50,7 @@ body {
   font-family: "Playfair Display", serif;
 }
 
-/* -------- PROGRESS BAR -------- */
+/* -------------------- PROGRESS BAR -------------------- */
 .progress-bar {
   position: fixed;
   top: 0;
@@ -55,15 +58,14 @@ body {
   height: 5px;
   width: 0%;
   background: var(--terracota);
-  border-radius: 0 3px 3px 0;
   transition: width .35s ease;
   z-index: 9999;
 }
 
-/* -------- CARROSSEL CORRIGIDO -------- */
+/* -------------------- CARROSSEL -------------------- */
 .carousel-container {
   width: 100%;
-  height: calc(100dvh - 140px);
+  height: calc(100dvh - 150px);
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
@@ -71,115 +73,179 @@ body {
 
 .carousel-track {
   display: flex;
-  gap: 12px;
-  padding: 0 12px;
+  gap: 14px;
+  padding: 0 14px;
   height: 100%;
+  scroll-snap-stop: always;
 }
 
 .carousel-item {
-  flex: 0 0 calc(100vw - 24px);
-  max-width: calc(100vw - 24px);
-  height: calc(100dvh - 170px);
-  background: #fff;
+  flex: 0 0 calc(100vw - 28px);
+  max-width: calc(100vw - 28px);
+  height: calc(100dvh - 185px);
+  background: #ffffff;
   border-radius: 22px;
-  padding: 16px;
+  padding: 20px;
   scroll-snap-align: center;
-  scroll-snap-stop: always;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   overflow-y: auto;
+  box-shadow: 0 4px 14px var(--shadow);
 }
 
-/* -------- RODAPÉ -------- */
+/* Scroll refinado */
+.carousel-item::-webkit-scrollbar {
+  width: 4px;
+}
+.carousel-item::-webkit-scrollbar-thumb {
+  background: #dcd2c7;
+  border-radius: 4px;
+}
+
+/* -------------------- BOTÕES FOOTER -------------------- */
 .fix-footer {
   position: fixed;
-  bottom: 12px;
+  bottom: 14px;
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   z-index: 9999;
 }
 
-/* -------- BOTÕES -------- */
-#salvarTreinoBtn,
-.secundario {
-  border-radius: 22px;
-  padding: 12px 22px;
+.btn-primary-clean {
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.btn-secondary-clean {
+  background: var(--pessego);
+  color: var(--teal);
+  border: 1px solid var(--terracota-light);
+  padding: 12px 24px;
+  border-radius: 20px;
   font-weight: 600;
   font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: .25s;
 }
 
-/* Botão salvar */
-#salvarTreinoBtn {
-  background: linear-gradient(135deg, var(--teal), var(--terracota));
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+.btn-tertiary-clean {
+  border: 1px solid #d28878;
+  color: #d28878;
+  background: #fff;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
-/* -------- TITULOS -------- */
+/* -------------------- BOX TÍTULOS -------------------- */
 .ff-ex-titulo {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
+  margin-bottom: 6px;
   font-family: "Playfair Display", serif;
-  margin: 0 0 8px;
 }
 
+/* -------------------- SUBTÍTULO -------------------- */
 .ff-ex-sub {
   font-size: .95rem;
   opacity: .75;
   margin-bottom: 16px;
 }
 
-/* -------- LISTA PASSOS -------- */
+/* -------------------- LISTA DE PASSOS -------------------- */
 .ff-passos {
   list-style: none;
-  margin: 0;
   padding: 0;
+  margin: 0;
 }
 
 .ff-passos li {
   background: #fafafa;
-  padding: 10px 12px;
-  margin-bottom: 10px;
+  border: 1px solid #ececec;
+  padding: 10px 14px;
+  margin-bottom: 12px;
   border-radius: 14px;
+  position: relative;
 }
 
-/* -------- BOX EXERCÍCIO -------- */
+/* Tooltip para descrições Limpo */
+.ff-passos li::after {
+  content: attr(data-desc);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -40px;
+  background: #fff7f4;
+  border: 1px solid #f0d3ca;
+  font-size: .8rem;
+  padding: 6px 8px;
+  border-radius: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: .3s;
+}
+
+.ff-passos li:hover::after {
+  opacity: 1;
+}
+
+/* -------------------- BOX EXERCÍCIOS -------------------- */
 .ff-ex-item {
   background: #fafafa;
   padding: 14px;
-  border-radius: 16px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  border-radius: 18px;
   margin-bottom: 18px;
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
-/* -------- INPUT PESO AJUSTADO -------- */
+.ff-ex-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ff-ex-nome a {
+  font-size: 1.1rem;
+  font-family: "Playfair Display", serif;
+  color: var(--teal);
+  text-decoration: none !important;
+}
+
+.ff-ex-info {
+  font-size: .9rem;
+  color: #666;
+  margin: 8px 0;
+  display: flex;
+  gap: 16px;
+}
+
+/* -------------------- INPUT PESO (ajustado 70x40) -------------------- */
 .ff-ex-peso {
-  width: 70px;
-  height: 40px;
-  padding: 4px 6px;
+  width: 70px !important;
+  height: 40px !important;
   border-radius: 10px;
   border: 1px solid #d2ccc5;
-  font-size: .85rem;
   text-align: center;
+  font-size: .85rem;
+  background: #fff;
 }
 
-/* -------- TIMERS -------- */
+/* -------------------- TIMER -------------------- */
 .ff-timer-bar {
   width: 100%;
   height: 16px;
   background: #e6e6e6;
   border-radius: 12px;
   position: relative;
-  margin-top: 8px;
 }
 
 .ff-timer-fill {
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, var(--teal), var(--terracota));
+  background: linear-gradient(90deg, var(--teal), var(--terracota-light));
 }
 
 .ff-timer-count {
@@ -188,60 +254,205 @@ body {
   top: -22px;
   font-size: .83rem;
   font-weight: 600;
-  color: var(--teal);
 }
 
-/* -------- MODAL RESPIRAÇÃO COMPACTO -------- */
-.breath-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999999;
-}
-
-.breath-overlay.hidden {
-  display: none;
-}
-
-/* -------- CÍRCULO -------- */
-.breath-circle {
-  width: 120px;
-  height: 120px;
-  background: linear-gradient(135deg, var(--teal), var(--terracota));
-  border-radius: 50%;
-  color: #fff;
-  font-size: 2.2rem;
-  font-weight: 700;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-/* -------- HIIT BUBBLE -------- */
+/* -------------------- HIIT BUBBLE -------------------- */
 .hiit-bubble {
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:14px;
+  gap:18px;
+  padding: 12px 0;
 }
 
 .hiit-circle {
-  width:120px;
-  height:120px;
+  width:140px;
+  height:140px;
   border-radius:50%;
-  background:linear-gradient(135deg,#335953,#cc6a5a);
+  background: linear-gradient(135deg, var(--terracota-light), var(--teal));
   display:flex;
   justify-content:center;
   align-items:center;
   color:white;
-  font-size:2rem;
+  font-size:2.2rem;
   font-weight:700;
+  animation: hiitPulse 1.8s infinite ease-in-out;
+}
+
+@keyframes hiitPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
 .hiit-phase {
+  font-size: 1rem;
+  opacity: .75;
+}
+
+.hiit-sugestoes {
+  font-size:.82rem;
+  background:#fff7f4;
+  border-left:3px solid var(--terracota-light);
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
+  text-align:center;
+}
+
+/* -------------------- MODAL RESPIRAÇÃO (sheet iOS) -------------------- */
+.breath-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  transform: translateY(100%);
+  transition: transform .35s ease;
+  z-index: 999999;
+  padding: 22px;
+}
+
+.breath-sheet.visible {
+  transform: translateY(0%);
+}
+
+.breath-sheet-handle {
+  width: 60px;
+  height: 6px;
+  background: #d9d9d9;
+  border-radius: 3px;
+  margin: 0 auto 14px;
+}
+
+.breath-title {
+  font-family: "Playfair Display", serif;
+  color: var(--teal);
+  text-align:center;
+  font-size:1.3rem;
+  margin-bottom:20px;
+}
+
+.breath-circle {
+  width:160px;
+  height:160px;
+  border-radius:50%;
+  background: linear-gradient(135deg, var(--terracota-light), var(--teal));
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:white;
+  font-size:2.3rem;
+  font-weight:700;
+  margin:0 auto;
+}
+
+.breath-phase {
   font-size:1rem;
+  text-align:center;
+  margin-top:12px;
   opacity:.75;
+}
+
+.breath-actions {
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-top:18px;
+}
+
+.breath-start-btn {
+  padding:12px 20px;
+  border-radius:16px;
+  background:var(--teal);
+  color:white;
+  border:none;
+  font-weight:700;
+}
+
+.breath-close-btn {
+  padding:12px 20px;
+  border-radius:16px;
+  background:#fff5f0;
+  color:var(--terracota);
+  border:1px solid var(--terracota-light);
+  font-weight:700;
+}
+
+/* -------------------- MODAL PSE (overlay premium clean) -------------------- */
+.modal-pse-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content:center;
+  align-items:center;
+  z-index: 999999;
+}
+
+.modal-pse-overlay.hidden {
+  display: none;
+}
+
+.modal-pse-card {
+  width: 90%;
+  max-width: 360px;
+  background:#fff;
+  padding:20px;
+  border-radius:22px;
+  box-shadow:0 6px 24px rgba(0,0,0,0.15);
+  text-align:center;
+}
+
+.modal-title {
+  font-size:1.2rem;
+  font-family:"Playfair Display", serif;
+  margin-bottom:16px;
+}
+
+.modal-label {
+  font-size:.9rem;
+  color:#333;
+}
+
+.modal-slider {
+  width:100%;
+  margin-top:10px;
+}
+
+.modal-actions {
+  display:flex;
+  gap:10px;
+  margin-top:16px;
+}
+
+.modal-btn-ok {
+  flex:1;
+  background:var(--teal);
+  color:white;
+  padding:12px;
+  border-radius:16px;
+  font-weight:700;
+  border:none;
+}
+
+.modal-btn-cancel {
+  flex:1;
+  background:#fff5f0;
+  color:var(--terracota);
+  padding:12px;
+  border-radius:16px;
+  border:1px solid var(--terracota-light);
+  font-weight:700;
+}
+
+/* -------------------- RESPONSIVIDADE -------------------- */
+@media (max-width: 430px) {
+  .ff-ex-info {
+    flex-direction: column;
+    gap: 6px;
+  }
 }
