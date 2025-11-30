@@ -1,6 +1,11 @@
 /* ============================================================
-   🎨 FemFlow — TREINO.CSS (Minimalista + Leve + Premium)
-   ============================================================ */
+   🎨 FemFlow — TREINO.CSS (v3 Premium, otimizado 2025)
+   ------------------------------------------------------------
+   • Consolidado + Leve + Sem duplicações
+   • Ajustado para o treino.html atual (ff-exercicio, descanso, timers)
+   • Carrossel 2025 fixado sem overflow extra
+   • Layout Premium + Responsivo
+============================================================ */
 
 /* 🎨 Paleta FemFlow */
 :root {
@@ -11,31 +16,27 @@
   --sombra: rgba(0, 0, 0, 0.08);
 }
 
-/* 🔹 Base */
+/* Base */
 * {
   box-sizing: border-box;
 }
 
 body {
-  margin: 10px;
+  margin: 0;
   padding-top: calc(85px + env(safe-area-inset-top, 0px));
   font-family: "Lato", sans-serif;
   background: linear-gradient(180deg, var(--bege) 0%, var(--areia) 100%);
   color: var(--teal);
-  -webkit-font-smoothing: antialiased;
 }
 
 /* ============================================================
    🔸 CABEÇALHO
 ============================================================ */
-.treino-header{
+.treino-header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding-top: 0px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   text-align: center;
 }
 
@@ -43,23 +44,13 @@ header h1 {
   margin: 0;
   font-family: "Playfair Display", serif;
   font-size: 1.8rem;
-  color: var(--teal);
-  letter-spacing: 0.5px;
-}
-
-header .subtitle {
-  margin: 0;
-  font-size: 0.95rem;
-  color: #7a6c66;
-  font-weight: 500;
-  letter-spacing: 0.2px;
 }
 
 #tituloDiaTreino {
-  margin-top: 8px;
-  color: var(--terracota);
+  margin-top: 6px;
   font-size: 1.1rem;
   font-family: "Playfair Display", serif;
+  color: var(--terracota);
 }
 
 /* ============================================================
@@ -70,7 +61,7 @@ header .subtitle {
   overflow-x: auto;
   overflow-y: hidden;
   width: 100%;
-  height: calc(100dvh - 85px); /* header real */
+  height: calc(100dvh - 120px);
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
 }
@@ -78,28 +69,30 @@ header .subtitle {
 .carousel-track {
   display: flex;
   flex-wrap: nowrap;
-  gap: 16px; /* FIX → evita colagem */
+  gap: 16px;
   height: 100%;
-  padding: 0 16px; /* compensação lateral */
+  padding: 0 16px;
 }
 
 .carousel-item {
   flex: 0 0 calc(100vw - 32px);
   max-width: calc(100vw - 32px);
-  height: calc(100dvh - 170px); /* FIX MAIS IMPORTANTE */
+
+  /* FIX: altura dinâmica sem sobrar espaço */
+  min-height: calc(100dvh - 210px);
+  max-height: calc(100dvh - 160px);
+
   scroll-snap-align: center;
   background: #fff;
   border-radius: 24px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
   padding: 20px;
-  padding-bottom: 110px; /* FIX → evita HIIT sumir */
-  overscroll-behavior: contain;
+  overflow-y: auto;
 }
 
 /* ============================================================
-   📊 PROGRESSO SUPERIOR
+   📊 PROGRESSO
 ============================================================ */
-
 .progress-bar {
   position: fixed;
   top: 0;
@@ -107,25 +100,20 @@ header .subtitle {
   height: 5px;
   width: 0%;
   background: var(--terracota);
-  border-radius: 0 3px 3px 0;
-  transition: width 0.4s ease;
   z-index: 999;
+  transition: width 0.4s ease;
 }
 
 /* ============================================================
    🪶 BOTÕES FIXOS DE AÇÃO
 ============================================================ */
-
 .fix-footer {
   position: fixed;
   bottom: 15px;
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 14px;
-  text-align: center;
-  font-size: 0.95rem;
-  opacity: 0.9;
+  gap: 12px;
 }
 
 #salvarTreinoBtn,
@@ -134,32 +122,125 @@ header .subtitle {
   border-radius: 24px;
   padding: 12px 20px;
   font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
   font-weight: 600;
-  font-family: "Lato", sans-serif;
+  cursor: pointer;
 }
 
 #salvarTreinoBtn {
   background: linear-gradient(135deg, var(--teal), var(--terracota));
   color: white;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-}
-
-#salvarTreinoBtn:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
 }
 
 .secundario {
   background: #fff;
-  color: var(--teal);
   border: 1px solid rgba(51,89,83,0.25);
+  color: var(--teal);
 }
 
-.secundario:hover {
-  background: var(--bege);
-  transform: scale(1.05);
+/* Cancelar */
+#cancelarTreinoBtn {
+  background: #fff1f1;
+  color: #aa4a4a;
+  border: 1px solid #e6bcbc;
+}
+
+/* ============================================================
+   🎯 BOX — EXERCÍCIOS (NOVO PADRÃO)
+============================================================ */
+
+.ff-exercicio {
+  background: #fafafa;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 18px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  animation: fadeIn 0.3s ease;
+}
+
+.ff-ex-nome {
+  font-family: "Playfair Display", serif;
+  font-size: 1rem;
+  margin-bottom: 6px;
+  color: var(--teal);
+}
+
+.ff-ex-info {
+  font-size: 14px;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.ff-ex-info b {
+  color: #000;
+}
+
+/* Botão descanso */
+.ff-btn-descanso {
+  display: inline-block;
+  padding: 8px 14px;
+  background: var(--areia);
+  border: 1px solid #d6c4ba;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--teal);
+  margin-bottom: 10px;
+}
+
+.ff-btn-descanso:hover {
+  background: #f7eae2;
+}
+
+/* ============================================================
+   ⏳ TIMER — barra + texto
+============================================================ */
+
+.ff-timer {
+  margin-top: 6px;
+}
+
+.ff-timer-bar {
+  width: 100%;
+  height: 14px;
+  background: #e4e2e2;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ff-timer-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--terracota));
+  transition: width 1s linear;
+}
+
+.ff-timer-time {
+  text-align: right;
+  font-size: 0.82rem;
+  margin-top: 4px;
+  color: #555;
+}
+
+/* ============================================================
+   💗 HIIT / CARDIO
+============================================================ */
+
+.box-extra {
+  background: #fff7f3;
+  border-left: 3px solid var(--terracota);
+  padding: 14px;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  margin-top: 20px;
+}
+
+.box-extra.cardio {
+  background: #f4faf8;
+  border-left-color: var(--teal);
 }
 
 /* ============================================================
@@ -169,320 +250,4 @@ header .subtitle {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ============================================================
-   🎯 BOX — EXERCÍCIOS
-============================================================ */
-
-.box h3 {
-  margin-top: 0;
-  margin-bottom: 8px;
-  font-family: "Playfair Display", serif;
-}
-
-.ex {
-  margin: 16px 0;
-  padding: 18px 14px;
-  border-radius: 16px;           /* premium */
-  background: #fafafa;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-}
-
-.ex-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.ex-head b { font-size: 0.95rem; }
-.ex-head .vid {
-  font-size: 1.3rem;
-  margin-left: auto;
-  transform: translateY(2px);
-}
-
-/* ============================================================
-   💗 BOX EXTRA — HIIT / CARDIO
-============================================================ */
-
-.box-extra-wrapper {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.box-extra {
-  border-radius: 16px;
-  padding: 10px 12px;
-  background: #fff7f3;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.06);
-  font-size: 0.85rem;
-}
-
-.box-extra-tag {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 4px;
-}
-
-.box-extra.hiit {
-  border-left: 3px solid var(--terracota);
-}
-
-.box-extra.cardio {
-  border-left: 3px solid var(--teal);
-  background: #f4faf8;
-}
-
-.box-extra h4 {
-  margin: 4px 0 6px;
-  font-size: 0.95rem;
-  color: var(--teal);
-}
-
-.box-extra p {
-  margin: 3px 0;
-  line-height: 1.35;
-}
-
-/* ============================================================
-   🌕 VIEWS ESPECIAIS POR FASE HORMONAL
-============================================================ */
-
-body.ff-performance-ovulation {
-  background: radial-gradient(circle at top, #ffe6e0 0%, #fff8f4 45%, #fce3d5 100%);
-}
-
-body.ff-flow-menstrual {
-  background: linear-gradient(180deg, #f8eef0 0%, #fff8f4 55%, #f4dde5 100%);
-}
-
-body.ff-flow-folicular {
-  background: linear-gradient(180deg, #e9f5f0 0%, #fff8f4 70%, #e8fbf5 100%);
-}
-
-body.ff-flow-lutea {
-  background: linear-gradient(180deg, #fff8f4 0%, #f9eddc 50%, #f4e2c7 100%);
-}
-
-/* ============================================================
-   🌟 BANNER PERFORMANCE (Ovulação)
-============================================================ */
-.perf-strip {
-  width: 100%;
-  padding: 8px 12px;
-  background: linear-gradient(90deg, #ffd4c7, #ffede7);
-  color: var(--terracota);
-  border-radius: 12px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  margin-bottom: 14px;
-  text-align: center;
-  letter-spacing: 0.03em;
-}
-
-.perf-banner {
-  background: rgba(255,255,255,0.9);
-  border-radius: 16px;
-  padding: 10px 14px;
-  margin-bottom: 10px;
-  border: 1px dashed rgba(204,106,90,0.55);
-  font-size: 0.85rem;
-  text-align: left;
-}
-
-.perf-banner b { color: var(--terracota); }
-
-.perf-banner p {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
-  line-height: 1.4;
-}
-
-/* ============================================================
-   📱 MODO COMPACTO — Ajusta reps/séries/timers no celular
-============================================================ */
-@media (max-height: 720px), (max-width: 430px) {
-
- /* ============================================================
-   🌸 FemFlow – Exercício Premium 2025
-============================================================ */
-
-/* Container do exercício */
-.ff-ex {
-  background: #fafafa;
-  border-radius: 18px;
-  padding: 18px 16px;
-  margin: 18px 0;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.05);
-  animation: fadeIn 0.3s ease;
-}
-
-/* Cabeçalho (nome + vídeo) */
-.ff-ex-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-}
-
-.ff-ex-title {
-  font-size: 1rem;
-  font-family: "Playfair Display", serif;
-  color: var(--teal);
-}
-
-.ff-ex-video {
-  font-size: 1.3rem;
-  text-decoration: none;
-  color: var(--teal);
-  opacity: 0.9;
-}
-
-.ff-ex-video:hover {
-  opacity: 1;
-}
-
-/* Linha de inputs (Séries / Reps) */
-.ff-ex-row {
-  display: flex;
-  gap: 16px;
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.ff-ex-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.ff-ex-group label {
-  font-size: 0.77rem;
-  color: var(--teal);
-  opacity: 0.75;
-}
-
-.ff-ex-group input {
-  width: 100%;
-  padding: 8px;
-  text-align: center;
-  border-radius: 10px;
-  border: 1px solid #e2d3c9;
-  background: #fff;
-  font-size: 0.9rem;
-}
-
-/* Timer */
-.ff-ex-timer-wrapper {
-  margin-top: 8px;
-}
-
-.timer-label-text {
-  font-size: 0.78rem;
-  color: var(--teal);
-  opacity: 0.75;
-}
-
-/* Barra */
-.ff-timer-bar {
-  width: 100%;
-  height: 14px;
-  background: #e1dfdf;
-  border-radius: 12px;
-  position: relative;
-  overflow: hidden;
-  margin-top: 8px;
-}
-
-/* Preenchimento animado */
-.ff-timer-fill {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, var(--teal), var(--terracota));
-  transition: width 1s linear;
-}
-
-/* Número */
-.ff-timer-count {
-  position: absolute;
-  right: 0;
-  top: -22px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--teal);
-}
-
-/* ============================
-   💛 Destaque Ovulatorio
-=============================== */
-body.ff-performance-ovulation .ff-ex {
-  border: 1px solid #ffd5c7;
-  box-shadow: 0 3px 14px rgba(255,180,150,0.45);
-}
-
-/* Mobile */
-@media (max-width: 430px) {
-  .ff-ex-row {
-    flex-direction: column;
-  }
-}
-
-   #cancelarTreinoBtn {
-  background: #fff1f1;
-  color: #aa4a4a;
-  border: 1px solid #e6bcbc;
-}
-
-#cancelarTreinoBtn:hover {
-  background: #ffe5e5;
-  transform: scale(1.05);
-}
-/* BOX ESPECIAL — HIIT / CARDIO */
-.ff-box-especial {
-  background: #fce8e3;
-  border: 2px solid #cc6a5a;
-  padding: 20px;
-  border-radius: 20px;
-  margin: 20px auto;
-  color: #335953;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  text-align: center;
-}
-
-.ff-box-especial h3 {
-  font-family: "Playfair Display", serif;
-  color: #cc6a5a;
-  margin-bottom: 10px;
-}
-
-.ff-box-especial ul {
-  padding: 0;
-  margin: 12px 0 0;
-  list-style: none;
-}
-
-.ff-box-especial li {
-  margin: 4px 0;
-  font-size: 0.95rem;
-}
-.ff-ex-info {
-  font-size: 14px;
-  margin: 8px 0;
-  color: #444;
-  display: flex;
-  gap: 12px;
-}
-
-.ff-ex-series b,
-.ff-ex-reps b,
-.ff-ex-int b {
-  color: #000;
 }
