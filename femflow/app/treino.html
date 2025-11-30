@@ -55,29 +55,20 @@
   <!-- ====================================================== -->
   <!-- 🚀 MODAL EVOLUÇÃO / PSE (NÃO REMOVE NADA SEU) -->
   <!-- ====================================================== -->
-  <div id="modalPSE" class="ff-modal hidden">
-    <div class="ff-modal-box">
+  <div id="modalPSE" class="modal-pse">
+  <div class="modal-inner">
+    <h3>Como foi o treino?</h3>
 
-      <h2 class="ff-modal-title">Como foi este exercício?</h2>
-      <p id="modalExNome" class="ff-modal-ex">Exercício</p>
+    <label>PSE (0 a 10)</label>
+    <input type="range" min="0" max="10" value="0" id="pseInput"/>
 
-      <label class="ff-label">Peso (kg)</label>
-      <input id="modalPeso" type="number" class="ff-input" placeholder="Ex: 20">
-
-      <label class="ff-label">Reps realizadas</label>
-      <input id="modalReps" type="number" class="ff-input">
-
-      <label class="ff-label">PSE (0 a 10)</label>
-      <input id="modalPseRange" type="range" min="0" max="10" value="0" class="ff-range">
-      <div id="modalPseValor" class="ff-range-number">0</div>
-
-      <div class="ff-modal-buttons">
-        <button id="modalSalvar" class="btn-primary">Salvar</button>
-        <button id="modalCancelar" class="btn-sec">Cancelar</button>
-      </div>
-
+    <div class="modal-actions">
+      <button id="btnConfirmarPSE">Salvar</button>
+      <button id="btnCancelarPSE" class="cancel">Cancelar</button>
     </div>
   </div>
+</div>
+
 
 
   <!-- ====================================================== -->
