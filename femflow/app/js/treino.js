@@ -284,10 +284,13 @@ document.addEventListener("DOMContentLoaded", async () => {
    * 11. SINCRONIZAR CICLO COM BACKEND
    * ============================================================ */
 
-await FEMFLOW.carregarCicloBackend();
+// 1) sincroniza e aguarda o retorno REAL do backend
+const perfil = await FEMFLOW.carregarCicloBackend();
 
-const fase    = localStorage.getItem("femflow_fase");
-const diaCiclo = Number(localStorage.getItem("femflow_diaCiclo"));
+// 2) usa SEMPRE o valor retornado
+const fase = perfil?.fase || localStorage.getItem("femflow_fase");
+const enfase = perfil?.enfase || localStorage.getItem("femflow_enfase");
+const diaCiclo = Number(perfil?.diaCiclo || localStorage.getItem("femflow_diaCiclo"));
 
 
   /* ============================================================
