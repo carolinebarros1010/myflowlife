@@ -1,25 +1,32 @@
 /* ================================================================
-   FemFlow — treino.js FRONT-END TOTAL v3.0 (Arquitetura A - 2025)
+   FemFlow — treino.js FRONT-END PREMIUM v3.0 (Arquitetura A)
    ---------------------------------------------------------------
-   • Fase hormonal REAL → backend
-   • Dia do programa → local (1–30)
-   • Intercalação BOX ↔ HIIT ↔ CARDIO
-   • Timers individuais (Descanso)
-   • Modal obrigatório de PSE
-   • Protocolo de respiração integrado:
-        - Box 0 → Wake Flow
-        - Box Final → Restore Flow
-   • Snapshot Offline
-   ================================================================= */
+   • Interação com:
+       - treino-engine v3.0
+       - GAS backend (salvarTreino / salvarDescanso / salvarEvolucao)
+       - Firestore (carregar exercícios)
+
+   • Features Premium:
+       - Render especial por tipo de box
+       - Timer por exercício + progresso
+       - Pré-contagem HIIT (3–2–1)
+       - Final countdown (5–4–3–2–1)
+       - Peso salvo por exercício
+       - Modal PSE obrigatório para salvar treino
+       - Protocolos de respiração inline (wake / release)
+================================================================ */
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  FEMFLOW.log("🚀 treino.js v3.0 iniciado!");
+  FEMFLOW.log("🚀 treino.js v3.0 (Arquitetura A) iniciado!");
+
+  const diaProg = FEMFLOW.calcularDiaPrograma();
+  document.getElementById("tituloDiaTreino").textContent = `Dia ${diaProg}`;
 
   const OFFLINE_KEY = "femflow_offline_treino_v1";
 
   /* ============================================================
-     1) LOGIN OBRIGATÓRIO
+     1. LOGIN OBRIGATÓRIO
   ============================================================ */
   const id = localStorage.getItem("femflow_id");
   if (!id) {
@@ -28,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ============================================================
-     2) CICLO PRECISA ESTAR CONFIGURADO
+     2. CICLO PRECISA ESTAR CONFIGURADO
   ============================================================ */
   const cicloOK = localStorage.getItem("femflow_cycle_configured") === "yes";
   if (!cicloOK) {
@@ -37,48 +44,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ============================================================
-     3) ELEMENTOS HTML
+     3. ELEMENTOS HTML
   ============================================================ */
   const track      = document.querySelector("#carouselTrack");
   const bar        = document.querySelector("#progressBar");
-  const titulo     = document.querySelector("#tituloDiaTreino");
-  const btnRest    = document.querySelector("#descansoBtn");
-  const btnSalvar  = document.querySelector("#salvarTreinoBtn");
+  const btnRest    = document.getElementById("descansoBtn");
+  const btnSalvar  = document.getElementById("salvarTreinoBtn");
 
   if (!track || !bar) {
-    FEMFLOW.log("❌ Estrutura HTML não encontrada.");
+    FEMFLOW.log("❌ Estrutura do treino.html não encontrada.");
     return;
   }
 
   /* ============================================================
-     4) DIA DO PROGRAMA
-  ============================================================ */
-  const diaProg = FEMFLOW.calcularDiaPrograma();
-  if (titulo) titulo.textContent = `Dia ${diaProg} do Programa`;
-
-  /* ============================================================
-     5) ESTADO LOCAL
+     4. ESTADO LOCAL
   ============================================================ */
   let boxes = [];
   let current = 0;
 
   /* ============================================================
-     6) CARROSSEL (Swipe)
+     5. CARROSSEL — Swipe
   ============================================================ */
   function moveTo(dir) {
     const total = boxes.length;
 
-    if (dir === "reset") {
-      current = 0;
-    }
-    else if (dir === "next" && current < total - 1) current++;
+    if (dir === "next" && current < total - 1) current++;
     else if (dir === "prev" && current > 0) current--;
 
     const item = track.children[current];
     if (!item) return;
 
     track.scrollTo({ left: item.offsetLeft - 16, behavior: "smooth" });
-
     bar.style.width = `${((current + 1) / total) * 100}%`;
   }
 
@@ -90,29 +86,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   /* ============================================================
-     7) TIMER INDIVIDUAL (por exercício)
+     6. TIMER PREMIUM
   ============================================================ */
   function aplicarTimers(root) {
-    root.querySelectorAll(".ff-exercicio").forEach(ex => {
+    root.querySelectorAll(".ff-timer-bar").forEach(barra => {
 
-      const intervalo = Number(ex.dataset.intervalo);
-      const fill  = ex.querySelector(".ff-timer-fill");
-      const label = ex.querySelector(".ff-timer-time");
-      const btn   = ex.querySelector(".ff-btn-descanso");
-
-      let restante = intervalo;
+      const total = Number(barra.dataset.total);
+      const fill = barra.querySelector(".ff-timer-fill");
+      const label = barra.querySelector(".ff-timer-count");
+      let restante = total;
       let intv = null;
 
       const atualizar = () => {
-        label.textContent = `Descanso: ${restante}s`;
-        fill.style.width = `${(restante / intervalo) * 100}%`;
+        fill.style.width = `${(restante / total) * 100}%`;
+        label.textContent = `00:${String(restante).padStart(2, "0")}`;
       };
 
       atualizar();
 
-      const iniciar = () => {
+      barra.onclick = () => {
         clearInterval(intv);
-        restante = intervalo;
+        restante = total;
         atualizar();
 
         intv = setInterval(() => {
@@ -121,40 +115,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           if (restante <= 0) {
             clearInterval(intv);
-            label.textContent = "Pronto!";
-            fill.style.width = `0%`;
+            label.textContent = "✔";
+            fill.style.width = "0%";
           }
         }, 1000);
       };
-
-      btn.onclick = iniciar;
     });
   }
 
   /* ============================================================
-     8) RESPIRAÇÃO DIRETA (wake / restore)
-  ============================================================ */
-  function renderRespBotao(protocolo) {
-    if (!protocolo) return "";
-
-    return `
-      <button class="ff-btn-breathe" data-proto="${protocolo}">
-        🌬 Abrir respiração (${protocolo})
-      </button>
-    `;
-  }
-
-  function bindRespiracao(root) {
-    root.querySelectorAll(".ff-btn-breathe").forEach(btn => {
-      btn.onclick = () => {
-        const p = btn.dataset.proto;
-        FEMFLOW.abrirRespiracao(p); // função já no core
-      };
-    });
-  }
-
-  /* ============================================================
-     9) RENDERIZAÇÃO DOS BOXES
+     7. RENDER PREMIUM — POR TIPO
   ============================================================ */
   function renderBoxes(lista) {
     track.innerHTML = "";
@@ -164,8 +134,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const div = document.createElement("div");
       div.className = "carousel-item";
 
-      /* ---------------------------- BOX 0 ---------------------------- */
-      if (box.tipo === "box0") {
+      /* -------------------------------
+         AQUECIMENTO PREMIUM
+      -------------------------------- */
+      if (box.tipo === "aquecimentoPremium") {
         div.innerHTML = `
           <h3 class="ff-ex-titulo">${box.titulo}</h3>
           <p class="ff-ex-sub">${box.descricao}</p>
@@ -174,12 +146,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             ${box.passos.map(p => `<li>${p}</li>`).join("")}
           </ul>
 
-          ${renderRespBotao(box.protocolo)}
+          <button class="ff-btn-protocolo" data-prot="${box.protocolo}">
+            🌬️ Iniciar Respiração Wake
+          </button>
         `;
       }
 
-      /* ---------------------------- BOX FINAL ---------------------------- */
-      else if (box.tipo === "final") {
+      /* -------------------------------
+         RESFRIAMENTO PREMIUM
+      -------------------------------- */
+      else if (box.tipo === "resfriamentoPremium") {
         div.innerHTML = `
           <h3 class="ff-ex-titulo">${box.titulo}</h3>
           <p class="ff-ex-sub">${box.descricao}</p>
@@ -188,62 +164,81 @@ document.addEventListener("DOMContentLoaded", async () => {
             ${box.passos.map(p => `<li>${p}</li>`).join("")}
           </ul>
 
-          <div class="ff-pse-box">
-            <p class="ff-pse-label">Como foi sua percepção de esforço?</p>
+          <button class="ff-btn-protocolo" data-prot="${box.protocolo}">
+            🌬️ Respiração Release
+          </button>
+
+          <p class="ff-final-msg">
+            Para finalizar seu treino, clique em <b>Salvar treino</b> abaixo.
+          </p>
+        `;
+      }
+
+      /* -------------------------------
+         HIIT PREMIUM
+      -------------------------------- */
+      else if (box.tipo === "hiitPremium") {
+        div.innerHTML = `
+          <h3 class="ff-ex-titulo">${box.titulo}</h3>
+          <p class="ff-ex-sub">${box.descricao}</p>
+
+          <div class="ff-hiit-contagem">
+            <span class="ff-hiit-start">3 • 2 • 1</span>
+            <span class="ff-hiit-end">5 • 4 • 3 • 2 • 1</span>
           </div>
 
-          ${renderRespBotao(box.protocolo)}
+          <div class="ff-timer-bar" data-total="${box.tempo_total}">
+            <div class="ff-timer-fill"></div>
+            <span class="ff-timer-count">06:00</span>
+          </div>
         `;
       }
 
-      /* ---------------------------- BOX DE TREINO ---------------------------- */
+      /* -------------------------------
+         CARDIO
+      -------------------------------- */
+      else if (box.tipo === "cardio") {
+        div.innerHTML = `
+          <h3 class="ff-ex-titulo">${box.titulo}</h3>
+          <p class="ff-ex-sub">${box.descricao}</p>
+
+          <div class="ff-timer-bar" data-total="${box.tempo_total}">
+            <div class="ff-timer-fill"></div>
+            <span class="ff-timer-count">10:00</span>
+          </div>
+        `;
+      }
+
+      /* -------------------------------
+         TREINO (BOX NORMAL)
+      -------------------------------- */
       else if (box.tipo === "treino") {
         div.innerHTML = `
           <h3 class="ff-ex-titulo">Box ${box.box}</h3>
 
-          ${box.exercicios.map(ex => `
-            <div class="ff-exercicio" data-intervalo="${ex.intervalo}">
-              
-              <h4 class="ff-ex-nome">${ex.titulo || ex.nome || "Sem título"}</h4>
+          <div class="ff-series">
+            ${box.exercicios.map((ex, index) => `
+              <div class="ff-serie-item" data-ex="${ex.titulo}">
+                
+                <span class="ff-ex-nome">${ex.titulo || ex.nome}</span>
 
-              <div class="ff-ex-info">
-                Séries: <b>${ex.series}</b>
-                &nbsp;•&nbsp;
-                Reps: <b>${ex.reps}</b>
-              </div>
-
-              <button class="ff-btn-descanso">Descanso</button>
-
-              <div class="ff-timer">
-                <div class="ff-timer-bar">
-                  <div class="ff-timer-fill"></div>
+                <div class="ff-ex-info">
+                  <span>Séries: <b>${ex.series}</b></span>
+                  <span>Reps: <b>${ex.reps}</b></span>
+                  <span>Desc: <b>${ex.intervalo}s</b></span>
                 </div>
-                <div class="ff-timer-time">Descanso: ${ex.intervalo}s</div>
+
+                <label class="ff-peso-label">Peso utilizado:</label>
+                <input class="ff-input-peso" type="number" placeholder="kg" 
+                       data-ex="${ex.titulo}">
+
+                <div class="ff-timer-bar" data-total="${ex.intervalo}">
+                  <div class="ff-timer-fill"></div>
+                  <span class="ff-timer-count">00:${ex.intervalo}</span>
+                </div>
+
               </div>
-
-            </div>
-          `).join("")}
-        `;
-      }
-
-      /* ---------------------------- HIIT / CARDIO ---------------------------- */
-      else if (box.tipo === "hiit" || box.tipo === "cardio") {
-
-        const extraTexto = box.tipo === "hiit" 
-          ? `<p class="ff-hiit-proto"><b>Protocolo:</b> ${box.protocoloTexto}</p>`
-          : "";
-
-        div.innerHTML = `
-          <div class="ff-box-especial ${box.tipo}">
-            <h3>${box.titulo}</h3>
-            <p>${box.descricao}</p>
-
-            ${extraTexto}
-
-            <div class="ff-timer-bar" data-total="${box.tempo_total}">
-              <div class="ff-timer-fill"></div>
-              <span class="ff-timer-count">00:${box.tempo_total}</span>
-            </div>
+            `).join("")}
           </div>
         `;
       }
@@ -252,12 +247,49 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     aplicarTimers(track);
-    bindRespiracao(track);
+    bindRespiracaoButtons(track);
+    bindPeso();
     moveTo("reset");
   }
 
   /* ============================================================
-     10) SALVAR TREINO (modal PSE obrigatório)
+     8. BOTÕES DE RESPIRAÇÃO
+  ============================================================ */
+  function bindRespiracaoButtons(root) {
+    root.querySelectorAll(".ff-btn-protocolo").forEach(btn => {
+      btn.onclick = () => {
+        const p = btn.dataset.prot;
+        FEMFLOW.router(`respiracao.html?prot=${p}`);
+      };
+    });
+  }
+
+  /* ============================================================
+     9. PESO → SALVAR EVOLUÇÃO
+  ============================================================ */
+  function bindPeso() {
+    document.querySelectorAll(".ff-input-peso").forEach(inp => {
+      inp.addEventListener("change", async () => {
+        const exercicio = inp.dataset.ex;
+        const peso = inp.value;
+
+        await FEMFLOW.salvarEvolucao({
+          id: localStorage.getItem("femflow_id"),
+          exercicio,
+          peso,
+          reps: "",
+          series: "",
+          diaPrograma: diaProg,
+          pse: ""
+        });
+
+        FEMFLOW.toast("Peso salvo ✔");
+      });
+    });
+  }
+
+  /* ============================================================
+     10. BOTÃO SALVAR TREINO → MODAL PSE
   ============================================================ */
   if (btnSalvar) {
     btnSalvar.onclick = () => {
@@ -272,7 +304,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             action: "salvarTreino",
-            id: localStorage.getItem("femflow_id"),
+            id,
             pse: valorPSE,
             fase,
             diaFirebase,
@@ -294,41 +326,34 @@ document.addEventListener("DOMContentLoaded", async () => {
         FEMFLOW.toast("Treino salvo!");
         FEMFLOW.router("flowcenter");
       });
+
     };
   }
 
   /* ============================================================
-     11) BOTÃO DESCANSO (do FlowCenter)
+     11. DESCANSO
   ============================================================ */
   if (btnRest) {
     btnRest.onclick = async () => {
-      const hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
-      hist.push({ data: Date.now(), pse: 0, descanso: true });
-      localStorage.setItem("femflow_hist", JSON.stringify(hist));
-
+      const r = await FEMFLOW.salvarDescanso();
       FEMFLOW.toast("Descanso registrado 🌿");
-      await FEMFLOW.salvarDescanso();
-      setTimeout(() => FEMFLOW.router("flowcenter"), 700);
+      setTimeout(() => FEMFLOW.router("flowcenter"), 800);
     };
   }
 
   /* ============================================================
-     12) SNAPSHOT OFFLINE
+     12. SNAPSHOT OFFLINE
   ============================================================ */
-  function salvarSnapshot(meta, lista) {
-    localStorage.setItem(OFFLINE_KEY, JSON.stringify({
-      meta, lista, salvoEm: Date.now()
-    }));
-  }
+  const salvarSnapshot = (meta, lista) => {
+    localStorage.setItem(OFFLINE_KEY, JSON.stringify({ meta, lista, salvoEm: Date.now() }));
+  };
 
-  function carregarSnapshot() {
+  const carregarSnapshot = () => {
     try {
       const raw = localStorage.getItem(OFFLINE_KEY);
       return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  }
+    } catch { return null; }
+  };
 
   if (!navigator.onLine) {
     const snap = carregarSnapshot();
@@ -340,7 +365,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ============================================================
-     13) SINCRONIZAR COM BACKEND
+     13. SINCRONIZAR CICLO COM BACKEND
   ============================================================ */
   const perfil = await FEMFLOW.carregarCicloBackend();
 
@@ -348,20 +373,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const enfase   = perfil?.enfase   || localStorage.getItem("femflow_enfase");
   const diaCiclo = Number(perfil?.diaCiclo || localStorage.getItem("femflow_diaCiclo"));
 
-  FEMFLOW.log("🧬 TREINO (fase real):", fase, "diaCiclo:", diaCiclo);
-
   /* ============================================================
-     14) MONTAR TREINO FINAL
+     14. MONTAR TREINO FINAL
   ============================================================ */
   const listaMontada = await FEMFLOW.engineTreino.montarTreino({
     nivel:   localStorage.getItem("femflow_nivel"),
-    enfase:  enfase,
-    fase:    fase,
-    diaCiclo: diaCiclo
+    enfase,
+    fase,
+    diaCiclo
   });
 
   salvarSnapshot({ fase, diaCiclo }, listaMontada);
-
   renderBoxes(listaMontada);
 
 });
