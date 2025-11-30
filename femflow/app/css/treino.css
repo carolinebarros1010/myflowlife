@@ -1,11 +1,17 @@
 /* ============================================================
-   FemFlow — TREINO.CSS PREMIUM v3.2 (2025)
-   Completo, leve, no estilo FemFlow, sem remover nada funcional
+   FemFlow — TREINO.CSS PREMIUM v3.3 (2025)
+   ------------------------------------------------------------
+   - Modal Respiração estilo iOS
+   - Botões Respiração FemFlow
+   - HIIT Start/Pause dentro do círculo
+   - Sugestões HIIT em cards
+   - Correções de layout
 ============================================================ */
 
 /* -------------------- PALETA FEMFLOW -------------------- */
 :root {
   --teal: #335953;
+  --teal-light: #4e746d;
   --terracota: #cc6a5a;
   --terracota-light: #e7b6a9;
   --pessego: #fff3ec;
@@ -16,9 +22,7 @@
 }
 
 /* -------------------- RESET -------------------- */
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -47,7 +51,6 @@ body {
   margin-top: 8px;
   color: var(--terracota);
   font-size: 1.15rem;
-  font-family: "Playfair Display", serif;
 }
 
 /* -------------------- PROGRESS BAR -------------------- */
@@ -92,9 +95,7 @@ body {
 }
 
 /* Scroll refinado */
-.carousel-item::-webkit-scrollbar {
-  width: 4px;
-}
+.carousel-item::-webkit-scrollbar { width: 4px; }
 .carousel-item::-webkit-scrollbar-thumb {
   background: #dcd2c7;
   border-radius: 4px;
@@ -108,7 +109,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 14px;
-  z-index: 9999;
+  z-index: 99999;
 }
 
 .btn-primary-clean {
@@ -128,7 +129,6 @@ body {
   padding: 12px 24px;
   border-radius: 20px;
   font-weight: 600;
-  font-size: 1rem;
 }
 
 .btn-tertiary-clean {
@@ -138,10 +138,9 @@ body {
   padding: 12px 24px;
   border-radius: 20px;
   font-weight: 600;
-  font-size: 1rem;
 }
 
-/* -------------------- BOX TÍTULOS -------------------- */
+/* -------------------- TÍTULOS -------------------- */
 .ff-ex-titulo {
   font-size: 1.35rem;
   margin-bottom: 6px;
@@ -171,7 +170,7 @@ body {
   position: relative;
 }
 
-/* Tooltip para descrições Limpo */
+/* Tooltip leve */
 .ff-passos li::after {
   content: attr(data-desc);
   position: absolute;
@@ -188,8 +187,25 @@ body {
   transition: .3s;
 }
 
-.ff-passos li:hover::after {
-  opacity: 1;
+.ff-passos li:hover::after { opacity: 1; }
+
+/* -------------------- BOTÃO RESPIRAÇÃO -------------------- */
+.ff-btn-protocolo {
+  width: 100%;
+  padding: 12px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--teal);
+  color: var(--teal);
+  font-weight: 600;
+  margin-top: 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: .25s;
+}
+
+.ff-btn-protocolo:hover {
+  background: var(--pessego);
 }
 
 /* -------------------- BOX EXERCÍCIOS -------------------- */
@@ -211,7 +227,7 @@ body {
   font-size: 1.1rem;
   font-family: "Playfair Display", serif;
   color: var(--teal);
-  text-decoration: none !important;
+  text-decoration: none;
 }
 
 .ff-ex-info {
@@ -222,7 +238,7 @@ body {
   gap: 16px;
 }
 
-/* -------------------- INPUT PESO (ajustado 70x40) -------------------- */
+/* -------------------- INPUT PESO -------------------- */
 .ff-ex-peso {
   width: 70px !important;
   height: 40px !important;
@@ -244,7 +260,6 @@ body {
 
 .ff-timer-fill {
   height: 100%;
-  width: 100%;
   background: linear-gradient(90deg, var(--teal), var(--terracota-light));
 }
 
@@ -266,23 +281,22 @@ body {
 }
 
 .hiit-circle {
-  width:140px;
-  height:140px;
+  width:160px;
+  height:160px;
   border-radius:50%;
   background: linear-gradient(135deg, var(--terracota-light), var(--teal));
   display:flex;
   justify-content:center;
   align-items:center;
   color:white;
-  font-size:2.2rem;
+  font-size:2.4rem;
   font-weight:700;
-  animation: hiitPulse 1.8s infinite ease-in-out;
+  position: relative;
+  transition: .3s;
 }
 
-@keyframes hiitPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1); }
+.hiit-circle.paused {
+  opacity: 0.6;
 }
 
 .hiit-phase {
@@ -290,17 +304,43 @@ body {
   opacity: .75;
 }
 
-.hiit-sugestoes {
-  font-size:.82rem;
-  background:#fff7f4;
-  border-left:3px solid var(--terracota-light);
-  padding:10px;
-  border-radius:10px;
-  margin-top:10px;
-  text-align:center;
+/* Sugestões HIIT — cards */
+.hiit-sugestoes-wrapper {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:12px;
+  width:100%;
 }
 
-/* -------------------- MODAL RESPIRAÇÃO (sheet iOS) -------------------- */
+.hiit-card {
+  background:#fff7f4;
+  border:1px solid #f0d3ca;
+  padding:12px;
+  border-radius:16px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  font-size:.9rem;
+}
+
+.hiit-card-icon {
+  font-size:1.4rem;
+}
+
+/* -------------------- MODAL RESPIRAÇÃO — Sheet iOS -------------------- */
+.breath-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  z-index: 99997;
+}
+
+.breath-backdrop.hidden {
+  display:none;
+}
+
 .breath-sheet {
   position: fixed;
   bottom: 0;
@@ -311,13 +351,15 @@ body {
   box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
   transform: translateY(100%);
   transition: transform .35s ease;
-  z-index: 999999;
+  z-index: 99998;
   padding: 22px;
 }
 
 .breath-sheet.visible {
-  transform: translateY(0%);
+  transform: translateY(0);
 }
+
+.hidden { display:none; }
 
 .breath-sheet-handle {
   width: 60px;
@@ -332,7 +374,7 @@ body {
   color: var(--teal);
   text-align:center;
   font-size:1.3rem;
-  margin-bottom:20px;
+  margin-bottom:18px;
 }
 
 .breath-circle {
@@ -344,7 +386,7 @@ body {
   justify-content:center;
   align-items:center;
   color:white;
-  font-size:2.3rem;
+  font-size:2.4rem;
   font-weight:700;
   margin:0 auto;
 }
@@ -381,7 +423,7 @@ body {
   font-weight:700;
 }
 
-/* -------------------- MODAL PSE (overlay premium clean) -------------------- */
+/* -------------------- MODAL PSE -------------------- */
 .modal-pse-overlay {
   position: fixed;
   inset: 0;
@@ -393,9 +435,7 @@ body {
   z-index: 999999;
 }
 
-.modal-pse-overlay.hidden {
-  display: none;
-}
+.modal-pse-overlay.hidden { display: none; }
 
 .modal-pse-card {
   width: 90%;
@@ -410,7 +450,7 @@ body {
 .modal-title {
   font-size:1.2rem;
   font-family:"Playfair Display", serif;
-  margin-bottom:16px;
+  margin-bottom:12px;
 }
 
 .modal-label {
@@ -449,7 +489,7 @@ body {
   font-weight:700;
 }
 
-/* -------------------- RESPONSIVIDADE -------------------- */
+/* -------------------- RESPONSIVO -------------------- */
 @media (max-width: 430px) {
   .ff-ex-info {
     flex-direction: column;
