@@ -332,3 +332,18 @@ body {
     gap: 4px;
   }
 }
+.ff-ex-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.ff-ex-peso {
+  width: 55px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid #d9d4cf;
+  font-size: 0.85rem;
+  text-align: center;
+}
