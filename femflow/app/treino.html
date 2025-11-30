@@ -52,10 +52,55 @@
   </div>
 
 
+  <!-- ====================================================== -->
+  <!-- 🚀 MODAL EVOLUÇÃO / PSE (NÃO REMOVE NADA SEU) -->
+  <!-- ====================================================== -->
+  <div id="modalPSE" class="ff-modal hidden">
+    <div class="ff-modal-box">
 
-  <!-- ========================================== -->
-  <!-- 🔥 Firebase (VERSÃO CORRETA DO SEU PROJETO) -->
-  <!-- ========================================== -->
+      <h2 class="ff-modal-title">Como foi este exercício?</h2>
+      <p id="modalExNome" class="ff-modal-ex">Exercício</p>
+
+      <label class="ff-label">Peso (kg)</label>
+      <input id="modalPeso" type="number" class="ff-input" placeholder="Ex: 20">
+
+      <label class="ff-label">Reps realizadas</label>
+      <input id="modalReps" type="number" class="ff-input">
+
+      <label class="ff-label">PSE (0 a 10)</label>
+      <input id="modalPseRange" type="range" min="0" max="10" value="0" class="ff-range">
+      <div id="modalPseValor" class="ff-range-number">0</div>
+
+      <div class="ff-modal-buttons">
+        <button id="modalSalvar" class="btn-primary">Salvar</button>
+        <button id="modalCancelar" class="btn-sec">Cancelar</button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- 🌬️ MODAL RESPIRAÇÃO (Modelo Premium • Bubbles) -->
+  <!-- ====================================================== -->
+  <div id="breathModal" class="breath-overlay hidden">
+    <div class="breath-box">
+
+      <div id="breathCircle" class="breath-circle">5</div>
+      <div id="faseLabel" class="breath-fase">Preparar…</div>
+      <div id="countdown" class="breath-timer"></div>
+
+      <button id="btnStart" class="breath-start">Iniciar</button>
+      <button id="btnRespClose" class="breath-close">Fechar</button>
+
+    </div>
+  </div>
+
+
+
+  <!-- ====================================================== -->
+  <!-- 🔥 Firebase (TEM QUE SER ESSA SUA CONFIG, NÃO ALTEREI) -->
+  <!-- ====================================================== -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
@@ -72,9 +117,9 @@
 
 
 
-  <!-- ========================================== -->
-  <!-- CORE + ENGINE + TREINO -->
-  <!-- ========================================== -->
+  <!-- ====================================================== -->
+  <!-- 🧠 CORE + ENGINE + TREINO  (inalterados) -->
+  <!-- ====================================================== -->
 
   <script src="./femflow-core.js"></script>
   <script src="./js/treino-engine.js"></script>
@@ -82,9 +127,9 @@
 
 
 
-  <!-- ========================================== -->
-  <!-- GARANTIA DE BOOT -->
-  <!-- ========================================== -->
+  <!-- ====================================================== -->
+  <!-- GARANTIA DE BOOT (MANTIDO DO JEITO QUE VOCÊ FEZ) -->
+  <!-- ====================================================== -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
@@ -99,9 +144,9 @@
 
 
 
-  <!-- ========================================== -->
-  <!-- MULTI-IDIOMA -->
-  <!-- ========================================== -->
+  <!-- ====================================================== -->
+  <!-- MULTI-IDIOMA (INALTERADO) -->
+  <!-- ====================================================== -->
   <script>
     window.addEventListener("femflow:langchange", () => {
       const lang = localStorage.getItem("femflow_lang") || "pt";
