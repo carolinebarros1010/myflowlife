@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
+
+  <!-- treino.css ajustado, mas preservando TUDO -->
   <link rel="stylesheet" href="css/treino.css?v3.1">
 
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -20,24 +22,31 @@
 
 <body>
 
+  <!-- Progress Bar -->
   <div class="progress-bar" id="progressBar"></div>
 
+  <!-- Header -->
   <header class="treino-header">
     <h1>Treino Diário</h1>
+
     <h2 id="tituloDiaTreino"
-        style="text-align:center;color:#335953;margin:10px 0;font-family:'Playfair Display',serif;font-weight:700;">
+        style="text-align:center;
+               color:#335953;
+               margin:10px 0;
+               font-family:'Playfair Display',serif;
+               font-weight:700;">
       Dia do Programa
     </h2>
   </header>
 
-  <!-- CARROSSEL CORRIGIDO -->
+  <!-- Carrossel -->
   <div class="carousel-container">
     <div class="carousel-track" id="carouselTrack">
       <div class="carousel-item"><p>Carregando treino...</p></div>
     </div>
   </div>
 
-  <!-- RODAPÉ -->
+  <!-- Rodapé -->
   <div class="fix-footer">
     <button id="salvarTreinoBtn">💾 Salvar treino</button>
     <button id="descansoBtn" class="secundario">🌿 Descanso</button>
@@ -59,19 +68,23 @@
     </div>
   </div>
 
-  <!-- MODAL RESPIRAÇÃO INLINE PREMIUM -->
+  <!-- MODAL RESPIRAÇÃO INLINE (Ajustado) -->
   <div id="breathModal" class="breath-overlay hidden">
     <div class="breath-box">
-      <div id="breathCircle" class="breath-circle">60</div>
-      <div id="faseLabel" class="breath-fase">Preparar...</div>
+
+      <div id="breathCircle" class="breath-circle">5</div>
+      <div id="faseLabel" class="breath-fase">Preparar…</div>
+
+      <!-- Responsáveis pelo bug aparecem apenas quando clicado -->
       <button id="btnStart" class="breath-start">Iniciar</button>
       <button id="btnRespClose" class="breath-close">Fechar</button>
+
     </div>
   </div>
 
-  <!-- FIREBASE -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <script>
     firebase.initializeApp({
@@ -84,16 +97,23 @@
     });
   </script>
 
-  <!-- SCRIPTS FEMFLOW -->
+  <!-- FEMFLOW scripts -->
   <script src="./femflow-core.js"></script>
   <script src="./js/treino-engine.js?v3.1"></script>
   <script src="./js/treino.js?v3.1"></script>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      FEMFLOW.init();
+      if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
+        FEMFLOW.init();
+      }
     });
-    cancelarTreinoBtn.onclick = () => FEMFLOW.router("flowcenter");
+
+    document.getElementById("cancelarTreinoBtn").onclick = () => {
+      FEMFLOW.router("flowcenter");
+    };
   </script>
+
 </body>
 </html>
+
