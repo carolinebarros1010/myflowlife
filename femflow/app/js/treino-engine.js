@@ -331,30 +331,4 @@ FEMFLOW.engineTreino.debugFirebase = function (info) {
 
   console.groupEnd();
 };
-/* ============================================================
-   Salva o último debug para você consultar depois no console
-============================================================ */
-FEMFLOW.engineTreino._debugLast = null;
-
-FEMFLOW.engineTreino.debugFirebase = function(info) {
-  FEMFLOW.engineTreino._debugLast = info;
-
-  console.groupCollapsed(
-    `%c🔥 FIREBASE DEBUG — ${info.nivel} | ${info.enfase} | ${info.faseNorm} | Dia ${info.diaCiclo}`,
-    "color:#cc6a5a;font-weight:bold"
-  );
-
-  console.log("📁 Pasta:", info.pasta);
-  console.log("📄 DiaKey:", info.diaKey);
-  console.log("📊 snap.size:", info.snap.size);
-  console.log("📌 TODOS:", info.todos);
-  console.log("📦 BOXES:", info.boxes);
-
-  console.groupEnd();
-};
-
-// acesso rápido:
-FEMFLOW.engineTreino.debugFirebaseLast = () => {
-  console.log("📌 Último DEBUG:", FEMFLOW.engineTreino._debugLast);
-};
 
