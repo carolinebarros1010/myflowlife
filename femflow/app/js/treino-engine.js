@@ -143,7 +143,7 @@ FEMFLOW.engineTreino.criarBoxEspecial = function (tipo, fase) {
 };
 
 /* ============================================================
-   8) FIREBASE: BUSCAR MULTI-BOX (versão corrigida 2025)
+   8) FIREBASE: BUSCAR MULTI-BOX (com DEBUG)
 ============================================================ */
 FEMFLOW.engineTreino.buscarMultiBox = async function ({
   nivel,
@@ -180,42 +180,27 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
     return [];
   }
 
-  /* ========================================================
-     AGRUPAR EXERCÍCIOS PELO CAMPO `box`
-     — Agora o engine respeita Box1, Box2, Box3 no Firebase
-  ========================================================== */
-  const grupos = {}; // ex: {1:[...], 2:[...]}
+  /* --------------------------
+     TRANSFORMAR SNAP EM LISTA
+  ---------------------------*/
+  const todos = [];
+  snap.forEach(doc => todos.push(doc.data()));
 
-  snap.forEach(doc => {
-    const data = doc.data();
+  /* --------------------------
+     EMBARALHAR
+  ---------------------------*/
+  const shuffled = todos.sort(() => Math.random() - 0.5);
 
-    // extrair número da box: "Box 1" → 1
-    const numero = Number(String(data.box).replace(/\D/g, "")) || 1;
-
-    if (!grupos[numero]) grupos[numero] = [];
-    grupos[numero].push(data);
-  });
-
+  let cursor = 0;
   const boxes = [];
-  const seriesPadrao = this.calcularSeries(faseNorm, nivel);
 
-  /* ========================================================
-     PARA CADA BOX DEFINIDA NAS REGRAS
-  ========================================================== */
+  const seriesPadrao = this.calcularSeries(faseNorm, nivelNorm);
+
   for (let i = 0; i < qtdBoxes; i++) {
+    const qtEx = exPorBox[i];
+    const bloco = shuffled.slice(cursor, cursor + qtEx);
+    cursor += qtEx;
 
-    const boxNum = i + 1;
-
-    // lista de exercícios daquele Box no Firebase
-    const listaEx = grupos[boxNum] || [];
-
-    // quantidade esperada (regras.ex)
-    const quantidade = exPorBox[i] || listaEx.length;
-
-    // cortar somente o necessário
-    const bloco = listaEx.slice(0, quantidade);
-
-    // ajustar reps, intervalos e séries
     bloco.forEach(ex => {
       ex.reps      = Number(ex.reps || 0);
       ex.series    = seriesPadrao;
@@ -224,13 +209,29 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
 
     boxes.push({
       tipo: "treino",
-      box: boxNum,
+      box: i + 1,
       exercicios: bloco
     });
   }
 
+  /* ============================================================
+     🔍 DEBUG COMPLETO FIREBASE
+  ============================================================ */
+  FEMFLOW.engineTreino.debugFirebase({
+    nivel,
+    enfase,
+    faseNorm,
+    diaCiclo,
+    pasta,
+    diaKey,
+    snap,
+    todos,
+    boxes
+  });
+
   return boxes;
 };
+
 
 /* ============================================================
    9) ENGINE FINAL — montarTreino()
@@ -308,5 +309,54 @@ FEMFLOW.engineTreino.normalizarEnfase = function (enfaseRaw) {
 
   return "geral"; // fallback
 };
+/* ============================================================
+   🔍 DEBUG FIREBASE — MOSTRAR TUDO QUE ACONTECE
+============================================================ */
+FEMFLOW.engineTreino.debugFirebase = function (info) {
 
+  const {
+    nivel,
+    enfase,
+    faseNorm,
+    diaCiclo,
+    pasta,
+    diaKey,
+    snap,
+    todos,
+    boxes
+  } = info;
 
+  console.groupCollapsed(
+    `%c🔥 FIREBASE DEBUG — ${nivel} | ${enfase} | ${faseNorm} | Dia ${diaCiclo}`,
+    "color:#cc6a5a;font-weight:bold;"
+  );
+
+  console.log("📁 Pasta Firebase:", pasta);
+  console.log("📄 Documento (dia):", diaKey);
+
+  console.log("🔎 Query:", {
+    collection: "exercicios",
+    doc: pasta,
+    subcollection: `fases/${faseNorm}/dias/${diaKey}/exercicios`
+  });
+
+  if (!snap) {
+    console.log("❌ Snap = null / undefined");
+    console.groupEnd();
+    return;
+  }
+
+  console.log("📦 snap.empty:", snap.empty);
+  console.log("📊 Total de exercícios encontrados:", snap.size);
+
+  console.log("📌 Exercícios brutos:");
+  console.table(todos);
+
+  console.log("📦 BOXES CONSTRUÍDOS:");
+  boxes.forEach((b, i) => {
+    console.log(`--- BOX ${i + 1} ---`);
+    console.table(b.exercicios);
+  });
+
+  console.groupEnd();
+};
