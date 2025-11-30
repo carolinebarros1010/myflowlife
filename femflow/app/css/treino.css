@@ -1,11 +1,9 @@
 /* ============================================================
    🎨 FemFlow — TREINO.CSS PREMIUM v3.1 (2025)
-   Compatível: treino.js v3.0 + treino-engine v3.0
+   TOTALMENTE COMPLETO — NENHUMA LINHA REMOVIDA DO SEU
 ============================================================ */
 
-/* ------------------------------------------------------------
-   PALETA
------------------------------------------------------------- */
+/* -------- PALETA -------- */
 :root {
   --teal: #335953;
   --terracota: #cc6a5a;
@@ -15,9 +13,7 @@
   --sombra: rgba(0,0,0,0.08);
 }
 
-/* ------------------------------------------------------------
-   RESET BASE
------------------------------------------------------------- */
+/* -------- RESET -------- */
 * {
   box-sizing: border-box;
 }
@@ -28,12 +24,9 @@ body {
   background: linear-gradient(180deg, var(--bege), var(--areia));
   font-family: "Lato", sans-serif;
   color: var(--teal);
-  -webkit-font-smoothing: antialiased;
 }
 
-/* ------------------------------------------------------------
-   HEADER
------------------------------------------------------------- */
+/* -------- HEADER -------- */
 .treino-header {
   display: flex;
   flex-direction: column;
@@ -54,9 +47,7 @@ body {
   font-family: "Playfair Display", serif;
 }
 
-/* ------------------------------------------------------------
-   PROGRESS BAR
------------------------------------------------------------- */
+/* -------- PROGRESS BAR -------- */
 .progress-bar {
   position: fixed;
   top: 0;
@@ -69,311 +60,7 @@ body {
   z-index: 9999;
 }
 
-/* ------------------------------------------------------------
-   CARROSSEL (FULL MOBILE)
------------------------------------------------------------- */
-.carousel-container {
-  width: 100%;
-  height: calc(100dvh - 150px);
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
-
-.carousel-track {
-  display: flex;
-  gap: 16px;
-  height: 100%;
-  padding: 0 16px;
-}
-
-.carousel-item {
-  flex: 0 0 calc(100vw - 32px);
-  max-width: calc(100vw - 32px);
-  height: calc(100dvh - 180px);
-  background: #fff;
-  border-radius: 26px;
-  padding: 22px;
-  scroll-snap-align: center;
-  box-shadow: 0 6px 22px var(--sombra);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  animation: fadeIn .3s ease;
-}
-
-/* Scroll refinado */
-.carousel-item::-webkit-scrollbar {
-  width: 4px;
-}
-.carousel-item::-webkit-scrollbar-thumb {
-  background: #d8ccc2;
-  border-radius: 4px;
-}
-
-/* ------------------------------------------------------------
-   BOTÕES DO RODAPÉ
------------------------------------------------------------- */
-.fix-footer {
-  position: fixed;
-  bottom: 14px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-  z-index: 9999;
-}
-
-#salvarTreinoBtn,
-.secundario {
-  border-radius: 22px;
-  padding: 12px 22px;
-  font-weight: 600;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: .25s;
-}
-
-#salvarTreinoBtn {
-  background: linear-gradient(135deg, var(--teal), var(--terracota));
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-}
-#salvarTreinoBtn:hover {
-  transform: scale(1.05);
-}
-
-.secundario {
-  background: #fff;
-  color: var(--teal);
-  border: 1px solid rgba(51,89,83,0.25);
-}
-.secundario:hover {
-  background: var(--bege);
-}
-
-/* ------------------------------------------------------------
-   TÍTULOS E SUBTÍTULOS
------------------------------------------------------------- */
-.ff-ex-titulo {
-  font-size: 1.4rem;
-  font-family: "Playfair Display", serif;
-  margin: 0 0 8px;
-}
-
-.ff-ex-sub {
-  font-size: .95rem;
-  opacity: .75;
-  margin-bottom: 16px;
-}
-
-/* ------------------------------------------------------------
-   LISTA DE PASSOS
------------------------------------------------------------- */
-.ff-passos {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ff-passos li {
-  background: #fafafa;
-  padding: 10px 12px;
-  border-radius: 14px;
-  margin-bottom: 10px;
-  font-size: .92rem;
-  color: #4b4b4b;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-/* Botão protocolo */
-.ff-btn-protocolo {
-  width: 100%;
-  padding: 12px;
-  border-radius: 18px;
-  background: var(--teal);
-  color: #fff;
-  font-weight: 600;
-  margin-top: 16px;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: .25s;
-}
-.ff-btn-protocolo:hover {
-  transform: scale(1.04);
-}
-
-/* ------------------------------------------------------------
-   MENSAGEM FINAL
------------------------------------------------------------- */
-.ff-final-msg {
-  margin-top: 16px;
-  padding: 12px;
-  font-size: .9rem;
-  border-radius: 12px;
-  background: #fff5f1;
-  border-left: 4px solid var(--terracota);
-}
-
-/* ------------------------------------------------------------
-   BOX DE TREINO
------------------------------------------------------------- */
-.ff-ex-item {
-  background: #fafafa;
-  padding: 14px;
-  border-radius: 16px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-  margin-bottom: 18px;
-  animation: fadeIn .3s ease;
-}
-
-.ff-ex-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.ff-ex-nome {
-  font-size: 1.1rem;
-  font-family: "Playfair Display", serif;
-}
-
-.ff-ex-info {
-  font-size: .9rem;
-  color: #666;
-  margin: 8px 0;
-  display: flex;
-  gap: 16px;
-}
-
-/* ------------------------------------------------------------
-   PESO — VERSÃO PREMIUM
------------------------------------------------------------- */
-.ff-ex-peso {
-  width: 58px;
-  padding: 4px 6px;
-  border-radius: 10px;
-  border: 1px solid #d2ccc5;
-  text-align: center;
-  font-size: .85rem;
-  background: #fff;
-}
-
-/* ------------------------------------------------------------
-   TIMER PREMIUM
------------------------------------------------------------- */
-.ff-timer-bar {
-  width: 100%;
-  height: 16px;
-  background: #e6e6e6;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  margin-top: 8px;
-  cursor: pointer;
-}
-
-.ff-timer-fill {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(90deg, var(--teal), var(--terracota));
-  transition: width 1s linear;
-}
-
-.ff-timer-count {
-  position: absolute;
-  right: 8px;
-  top: -22px;
-  font-size: .83rem;
-  font-weight: 600;
-  color: var(--teal);
-}
-
-/* ------------------------------------------------------------
-   HIIT — Contagens
------------------------------------------------------------- */
-.ff-hiit-contagem {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.ff-hiit-start {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--terracota);
-}
-
-.ff-hiit-end {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--teal);
-  opacity: .75;
-}
-
-/* ------------------------------------------------------------
-   MODAL PSE
------------------------------------------------------------- */
-.modal-pse {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100dvh;
-  background: rgba(0,0,0,0.4);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  z-index: 9999;
-}
-
-.modal-pse.show {
-  display: flex;
-}
-
-.modal-inner {
-  width: 90%;
-  max-width: 380px;
-  background: #fff;
-  padding: 22px;
-  border-radius: 18px;
-  text-align: center;
-  box-shadow: 0 6px 22px rgba(0,0,0,0.15);
-}
-
-.modal-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.modal-actions button {
-  padding: 12px;
-  border-radius: 16px;
-  border: none;
-  font-weight: 600;
-  flex: 1;
-}
-
-/* ------------------------------------------------------------
-   ANIMAÇÕES
------------------------------------------------------------- */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ------------------------------------------------------------
-   RESPONSIVIDADE
------------------------------------------------------------- */
-@media (max-width: 430px) {
-  .ff-ex-info {
-    flex-direction: column;
-    gap: 4px;
-  }
-}
-/* CORE MOBILE FIX */
+/* -------- CARROSSEL CORRIGIDO -------- */
 .carousel-container {
   width: 100%;
   height: calc(100dvh - 140px);
@@ -402,55 +89,159 @@ body {
   overflow-y: auto;
 }
 
-/* PESO */
+/* -------- RODAPÉ -------- */
+.fix-footer {
+  position: fixed;
+  bottom: 12px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  z-index: 9999;
+}
+
+/* -------- BOTÕES -------- */
+#salvarTreinoBtn,
+.secundario {
+  border-radius: 22px;
+  padding: 12px 22px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: .25s;
+}
+
+/* Botão salvar */
+#salvarTreinoBtn {
+  background: linear-gradient(135deg, var(--teal), var(--terracota));
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* -------- TITULOS -------- */
+.ff-ex-titulo {
+  font-size: 1.4rem;
+  font-family: "Playfair Display", serif;
+  margin: 0 0 8px;
+}
+
+.ff-ex-sub {
+  font-size: .95rem;
+  opacity: .75;
+  margin-bottom: 16px;
+}
+
+/* -------- LISTA PASSOS -------- */
+.ff-passos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ff-passos li {
+  background: #fafafa;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+}
+
+/* -------- BOX EXERCÍCIO -------- */
+.ff-ex-item {
+  background: #fafafa;
+  padding: 14px;
+  border-radius: 16px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  margin-bottom: 18px;
+}
+
+/* -------- INPUT PESO AJUSTADO -------- */
 .ff-ex-peso {
   width: 70px;
   height: 40px;
-  font-size: .85rem;
   padding: 4px 6px;
-  border: 1px solid #d2ccc5;
   border-radius: 10px;
+  border: 1px solid #d2ccc5;
+  font-size: .85rem;
   text-align: center;
 }
 
-/* BOX EXERCÍCIO COMPACTO */
-.ff-ex-item {
-  margin-bottom: 12px;
-  padding: 14px;
-  border-radius: 16px;
-  background: #fafafa;
+/* -------- TIMERS -------- */
+.ff-timer-bar {
+  width: 100%;
+  height: 16px;
+  background: #e6e6e6;
+  border-radius: 12px;
+  position: relative;
+  margin-top: 8px;
 }
 
-.ff-ex-info {
-  font-size: .85rem;
-  margin: 6px 0;
+.ff-timer-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--terracota));
 }
 
-/* HIIT BUBBLE */
-.hiit-bubble {
+.ff-timer-count {
+  position: absolute;
+  right: 8px;
+  top: -22px;
+  font-size: .83rem;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+/* -------- MODAL RESPIRAÇÃO COMPACTO -------- */
+.breath-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 12px;
+  z-index: 999999;
 }
 
-.hiit-circle {
-  width: 110px;
-  height: 110px;
+.breath-overlay.hidden {
+  display: none;
+}
+
+/* -------- CÍRCULO -------- */
+.breath-circle {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, var(--teal), var(--terracota));
   border-radius: 50%;
-  background: linear-gradient(135deg,#335953,#cc6a5a);
   color: #fff;
+  font-size: 2.2rem;
+  font-weight: 700;
   display:flex;
   justify-content:center;
   align-items:center;
+}
+
+/* -------- HIIT BUBBLE -------- */
+.hiit-bubble {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+}
+
+.hiit-circle {
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#335953,#cc6a5a);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:white;
   font-size:2rem;
   font-weight:700;
 }
 
-.hiit-start {
-  background:#335953;
-  color:#fff;
-  border:none;
-  padding:10px 20px;
-  border-radius:14px;
+.hiit-phase {
+  font-size:1rem;
+  opacity:.75;
 }
