@@ -1,11 +1,12 @@
 /* ============================================================
-   FemFlow — TREINO.CSS PREMIUM v3.3 (2025)
+   FemFlow — TREINO.CSS PREMIUM v3.5 (2025)
    ------------------------------------------------------------
-   - Modal Respiração estilo iOS
-   - Botões Respiração FemFlow
-   - HIIT Start/Pause dentro do círculo
-   - Sugestões HIIT em cards
-   - Correções de layout
+   - Cards compactos estilo B
+   - Séries/Reps/Desc em linha com ícones
+   - Botão iniciar descanso
+   - Footer fixo sem cobrir card
+   - Modal Respiração (sheet iOS)
+   - HIIT com menu Academia / Casa
 ============================================================ */
 
 /* -------------------- PALETA FEMFLOW -------------------- */
@@ -18,7 +19,7 @@
   --areia: #f8f1ea;
   --cinza: #efefef;
   --texto: #4d3f3a;
-  --shadow: rgba(0,0,0,0.05);
+  --shadow: rgba(0,0,0,0.06);
 }
 
 /* -------------------- RESET -------------------- */
@@ -32,34 +33,28 @@ body {
   font-family: "Lato", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
+/* -------------------- TOAST FEMFLOW -------------------- */
 .toast-box {
   position: fixed;
-  bottom: 20px;
+  bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
-
   background: var(--teal);
   color: var(--terracota);
-
-  padding: 12px 22px;
+  padding: 12px 24px;
   border-radius: 16px;
-
   font-size: .95rem;
-  font-weight: 600;
-  text-align: center;
-
+  font-weight: 700;
   box-shadow: 0 6px 22px rgba(0,0,0,0.20);
-
   opacity: 0;
   transition: opacity .35s ease, transform .35s ease;
   z-index: 99999;
 }
-
 .toast-box.visible {
   opacity: 1;
   transform: translateX(-50%) translateY(-6px);
 }
-
 
 /* -------------------- HEADER -------------------- */
 .treino-header {
@@ -67,14 +62,12 @@ body {
   flex-direction: column;
   align-items: center;
 }
-
 .treino-header h1 {
   margin: 0;
   font-size: 1.8rem;
   color: var(--teal);
   font-family: "Playfair Display", serif;
 }
-
 #tituloDiaTreino {
   margin-top: 8px;
   color: var(--terracota);
@@ -84,8 +77,7 @@ body {
 /* -------------------- PROGRESS BAR -------------------- */
 .progress-bar {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   height: 5px;
   width: 0%;
   background: var(--terracota);
@@ -96,10 +88,11 @@ body {
 /* -------------------- CARROSSEL -------------------- */
 .carousel-container {
   width: 100%;
-  height: calc(100dvh - 150px);
+  height: calc(100dvh - 120px) !important;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
+  scroll-snap-stop: always;
 }
 
 .carousel-track {
@@ -107,16 +100,17 @@ body {
   gap: 14px;
   padding: 0 14px;
   height: 100%;
-  scroll-snap-stop: always;
 }
 
 .carousel-item {
   flex: 0 0 calc(100vw - 28px);
   max-width: calc(100vw - 28px);
-  height: calc(100dvh - 185px);
+  height: auto !important;
+  min-height: calc(100dvh - 240px);
   background: #ffffff;
   border-radius: 22px;
   padding: 20px;
+  padding-bottom: 150px !important;
   scroll-snap-align: center;
   overflow-y: auto;
   box-shadow: 0 4px 14px var(--shadow);
@@ -129,11 +123,14 @@ body {
   border-radius: 4px;
 }
 
-/* -------------------- BOTÕES FOOTER -------------------- */
+/* -------------------- FOOTER -------------------- */
 .fix-footer {
   position: fixed;
-  bottom: 14px;
+  bottom: 0;
+  left: 0;
   width: 100%;
+  padding: 14px 0 calc(env(safe-area-inset-bottom, 12px));
+  background: transparent;
   display: flex;
   justify-content: center;
   gap: 14px;
@@ -168,79 +165,11 @@ body {
   font-weight: 600;
 }
 
-/* -------------------- TÍTULOS -------------------- */
-.ff-ex-titulo {
-  font-size: 1.35rem;
-  margin-bottom: 6px;
-  font-family: "Playfair Display", serif;
-}
-
-/* -------------------- SUBTÍTULO -------------------- */
-.ff-ex-sub {
-  font-size: .95rem;
-  opacity: .75;
-  margin-bottom: 16px;
-}
-
-/* -------------------- LISTA DE PASSOS -------------------- */
-.ff-passos {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.ff-passos li {
-  background: #fafafa;
-  border: 1px solid #ececec;
-  padding: 10px 14px;
-  margin-bottom: 12px;
-  border-radius: 14px;
-  position: relative;
-}
-
-/* Tooltip leve */
-.ff-passos li::after {
-  content: attr(data-desc);
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -40px;
-  background: #fff7f4;
-  border: 1px solid #f0d3ca;
-  font-size: .8rem;
-  padding: 6px 8px;
-  border-radius: 12px;
-  opacity: 0;
-  pointer-events: none;
-  transition: .3s;
-}
-
-.ff-passos li:hover::after { opacity: 1; }
-
-/* -------------------- BOTÃO RESPIRAÇÃO -------------------- */
-.ff-btn-protocolo {
-  width: 100%;
-  padding: 12px;
-  border-radius: 16px;
-  background: #fff;
-  border: 1px solid var(--teal);
-  color: var(--teal);
-  font-weight: 600;
-  margin-top: 14px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: .25s;
-}
-
-.ff-btn-protocolo:hover {
-  background: var(--pessego);
-}
-
 /* -------------------- BOX EXERCÍCIOS -------------------- */
 .ff-ex-item {
   background: #fafafa;
   padding: 14px;
-  border-radius: 18px;
+  border-radius: 16px;
   margin-bottom: 18px;
   box-shadow: 0 2px 8px var(--shadow);
 }
@@ -258,12 +187,21 @@ body {
   text-decoration: none;
 }
 
-.ff-ex-info {
+/* -------------------- INFO: SÉRIES / REPS / DESC -------------------- */
+.ff-info-line {
+  margin-top: 6px;
+  margin-bottom: 12px;
   font-size: .9rem;
-  color: #666;
-  margin: 8px 0;
   display: flex;
-  gap: 16px;
+  gap: 18px;
+  align-items: center;
+  color: var(--teal);
+}
+
+.ff-info-line span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* -------------------- INPUT PESO -------------------- */
@@ -277,168 +215,119 @@ body {
   background: #fff;
 }
 
-/* -------------------- TIMER -------------------- */
-.ff-timer-bar {
-  width: 100%;
-  height: 16px;
-  background: #e6e6e6;
-  border-radius: 12px;
-  position: relative;
+/* -------------------- DESCANSO TIMER -------------------- */
+.ff-descanso-wrap {
+  margin-top: 6px;
 }
 
-.ff-timer-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--teal), var(--terracota-light));
+.ff-descanso-btn {
+  background: #fff;
+  border: 1px solid var(--teal);
+  color: var(--teal);
+  padding: 8px 18px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: .25s;
 }
+.ff-descanso-btn:hover { background: var(--pessego); }
 
 .ff-timer-count {
-  position: absolute;
-  right: 8px;
-  top: -22px;
-  font-size: .83rem;
-  font-weight: 600;
+  float: right;
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--teal);
+  margin-top: 6px;
 }
 
-/* -------------------- HIIT BUBBLE -------------------- */
-.hiit-bubble {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:18px;
-  padding: 12px 0;
+.ff-timer-bar {
+  width: 100%;
+  height: 14px;
+  background: #e6e6e6;
+  border-radius: 12px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.ff-timer-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--terracota-light));
+  transition: width 1s linear;
 }
 
-.hiit-circle {
-  width:160px;
-  height:160px;
-  border-radius:50%;
-  background: linear-gradient(135deg, var(--terracota-light), var(--teal));
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  color:white;
-  font-size:2.4rem;
-  font-weight:700;
-  position: relative;
-  transition: .3s;
-}
-
-.hiit-circle.paused {
-  opacity: 0.6;
-}
-
-.hiit-phase {
-  font-size: 1rem;
-  opacity: .75;
-}
-
-/* Sugestões HIIT — cards */
-.hiit-sugestoes-wrapper {
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-top:12px;
-  width:100%;
-}
-
-.hiit-card {
-  background:#fff7f4;
-  border:1px solid #f0d3ca;
-  padding:12px;
-  border-radius:16px;
-  display:flex;
-  gap:12px;
-  align-items:center;
-  font-size:.9rem;
-}
-
-.hiit-card-icon {
-  font-size:1.4rem;
-}
-
-/* -------------------- MODAL RESPIRAÇÃO — Sheet iOS -------------------- */
+/* -------------------- MODAL RESPIRAÇÃO — SHEET iOS -------------------- */
 .breath-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(255,255,255,0.15);
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.25);
   backdrop-filter: blur(8px);
   z-index: 200000;
 }
-
-.breath-backdrop.hidden {
-  display:none;
-}
+.breath-backdrop.hidden { display:none; }
 
 .breath-sheet {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  left: 0; right: 0; bottom: 0;
   background: #ffffff;
   border-radius: 22px 22px 0 0;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  padding: 22px;
   transform: translateY(100%);
   transition: transform .35s ease;
+  box-shadow: 0 -6px 20px rgba(0,0,0,0.12);
   z-index: 200001;
-  padding: 22px;
 }
-
-.breath-sheet.visible {
-  transform: translateY(0);
-}
-
+.breath-sheet.visible { transform: translateY(0); }
 .hidden { display:none; }
 
 .breath-sheet-handle {
-  width: 60px;
-  height: 6px;
+  width: 50px; height: 6px;
   background: #d9d9d9;
   border-radius: 3px;
   margin: 0 auto 14px;
 }
 
 .breath-title {
+  text-align:center;
+  font-size: 1.3rem;
   font-family: "Playfair Display", serif;
   color: var(--teal);
-  text-align:center;
-  font-size:1.3rem;
-  margin-bottom:18px;
+  margin-bottom: 18px;
 }
 
 .breath-circle {
   width:160px;
   height:160px;
   border-radius:50%;
+  margin:0 auto;
   background: linear-gradient(135deg, var(--terracota-light), var(--teal));
-  display:flex;
-  justify-content:center;
-  align-items:center;
   color:white;
   font-size:2.4rem;
   font-weight:700;
-  margin:0 auto;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
 .breath-phase {
-  font-size:1rem;
+  margin-top: 12px;
   text-align:center;
-  margin-top:12px;
-  opacity:.75;
+  opacity: .75;
+  font-size: 1rem;
 }
 
 .breath-actions {
+  margin-top: 18px;
   display:flex;
   justify-content:center;
-  gap:12px;
-  margin-top:18px;
+  gap: 12px;
 }
 
 .breath-start-btn {
-  padding:12px 20px;
-  border-radius:16px;
-  background:var(--teal);
-  color:white;
+  padding: 12px 20px;
+  border-radius: 16px;
+  background: var(--teal);
   border:none;
+  color:white;
   font-weight:700;
 }
 
@@ -462,14 +351,13 @@ body {
   align-items:center;
   z-index: 999999;
 }
-
-.modal-pse-overlay.hidden { display: none; }
+.modal-pse-overlay.hidden { display:none; }
 
 .modal-pse-card {
   width: 90%;
   max-width: 360px;
   background:#fff;
-  padding:20px;
+  padding:22px;
   border-radius:22px;
   box-shadow:0 6px 24px rgba(0,0,0,0.15);
   text-align:center;
@@ -478,17 +366,13 @@ body {
 .modal-title {
   font-size:1.2rem;
   font-family:"Playfair Display", serif;
-  margin-bottom:12px;
 }
 
-.modal-label {
-  font-size:.9rem;
-  color:#333;
-}
+.modal-label { font-size: .9rem; }
 
 .modal-slider {
   width:100%;
-  margin-top:10px;
+  margin-top:12px;
 }
 
 .modal-actions {
@@ -502,25 +386,22 @@ body {
   background:var(--teal);
   color:white;
   padding:12px;
+  border:none;
   border-radius:16px;
   font-weight:700;
-  border:none;
 }
 
 .modal-btn-cancel {
   flex:1;
   background:#fff5f0;
   color:var(--terracota);
-  padding:12px;
-  border-radius:16px;
   border:1px solid var(--terracota-light);
+  border-radius:16px;
+  padding:12px;
   font-weight:700;
 }
 
 /* -------------------- RESPONSIVO -------------------- */
 @media (max-width: 430px) {
-  .ff-ex-info {
-    flex-direction: column;
-    gap: 6px;
-  }
+  .ff-info-line { gap: 10px; font-size: .85rem; }
 }
