@@ -155,7 +155,11 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
 }) {
 
   const faseNorm = this.normalizarFase(fase);
-  const pasta     = `${nivel}_${enfase}`;
+   const nivelNorm  = this.normalizarNivel(nivel);
+  const enfaseNorm = this.normalizarEnfase(enfase);
+
+  const pasta = `${nivelNorm}_${enfaseNorm}`;
+
   const diaKey    = `dia_${diaCiclo}`;
 
   FEMFLOW.log("📦 BUSCAR BOXES:", pasta, faseNorm, diaKey);
@@ -163,14 +167,15 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
   const db = firebase.firestore();
 
   const snap = await db
-    .collection("exercicios")
-    .doc(pasta)
-    .collection("fases")
-    .doc(faseNorm)
-    .collection("dias")
-    .doc(diaKey)
-    .collection("exercicios")
-    .get();
+  .collection("exercicios")
+  .doc(pasta)
+  .collection("fases")
+  .doc(faseNorm)
+  .collection("dias")
+  .doc(`dia_${diaCiclo}`)
+  .collection("exercicios")
+  .get();
+
 
   if (snap.empty) {
     FEMFLOW.log("⚠️ Firestore vazio para este dia/fase");
@@ -248,3 +253,42 @@ FEMFLOW.engineTreino.montarTreino = async function ({
 
   return lista;
 };
+/* ============================================================
+   10) NORMALIZADOR DE NIVEL
+============================================================ */
+FEMFLOW.engineTreino.normalizarNivel = function (nivelRaw) {
+  const n = (nivelRaw || "").toLowerCase();
+
+  if (n.startsWith("inic")) return "iniciante";
+  if (n.startsWith("inter")) return "intermediaria";
+  if (n.startsWith("avan")) return "avancada";
+
+  return "iniciante";
+};
+/* ============================================================
+   11) NORMALIZADOR DE ENFASE
+============================================================ */
+FEMFLOW.engineTreino.normalizarEnfase = function (enfaseRaw) {
+  const e = (enfaseRaw || "").toLowerCase().trim();
+
+  const mapa = {
+    gluteo: "gluteo",
+    quadriceps: "quadriceps",
+    posteriores: "posteriores",
+    costas: "costas",
+    braco: "braco",
+    corrida: "corrida",
+    beach: "beach",
+    adaptacao: "adaptacao",
+    casa: "casa",
+    geral: "geral",
+    remo: "remo",
+    natacao: "natacao"
+  };
+
+  if (mapa[e]) return mapa[e];
+
+  return "geral"; // fallback
+};
+
+
