@@ -194,6 +194,20 @@ FEMFLOW.engineTreino.normalizarEnfase = function (raw) {
 
   return mapa[e] || "geral";
 };
+/* ============================================================
+   9.1) AJUSTAR NUMBER SERIES (6-8) PARA 6
+============================================================ */
+
+FEMFLOW.engineTreino.extrairReps = function (raw) {
+  if (!raw) return 10; // fallback
+
+  // Se vier "6-8" -> retorna 6
+  if (String(raw).includes("-")) {
+    return Number(raw.split("-")[0]) || 10;
+  }
+
+  return Number(raw) || 10;
+};
 
 /* ============================================================
    10) FIREBASE: BUSCAR MULTI-BOX (com DEBUG completo)
@@ -250,7 +264,7 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
     cursor += qtEx;
 
     bloco.forEach(ex => {
-      ex.reps      = Number(ex.reps || 0);
+      ex.reps = this.extrairReps(ex.reps);
       ex.series    = seriesPadrao;
       ex.intervalo = this.calcularIntervaloPorReps(ex.reps);
     });
