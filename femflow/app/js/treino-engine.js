@@ -259,8 +259,17 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
     cursor += qtEx;
 
     bloco.forEach(ex => {
+
+      // 🔧 Ajuste 4 — Normalização dos nomes
+      ex.nome   = ex.nome   || ex.titulo || ex.exercise || ex.label || "Exercício";
+      ex.titulo = ex.titulo || ex.nome;
+
+      // Reps → intervalo automático
       ex.reps = this.extrairReps(ex.reps);
+
       ex.series = seriesPadrao;
+
+      // 🔧 Mantém intervalo original SEM alterar lógica
       ex.intervalo = this.calcularIntervaloPorReps(ex.reps);
     });
 
@@ -274,6 +283,7 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
   return boxes;
 };
 
+
 /* ============================================================
    13) ENGINE FINAL — montarTreino()
 ============================================================ */
@@ -284,11 +294,11 @@ FEMFLOW.engineTreino.montarTreino = async function ({
   diaCiclo
 }) {
 
-  const faseNorm = this.normalizarFase(fase);
+  const faseNorm  = this.normalizarFase(fase);
+  const nivelNorm = this.normalizarNivel(nivel);
 
-  FEMFLOW.log("🧬 ENGINE → nivel:", nivel, "fase:", faseNorm, "dia:", diaCiclo);
-
-  const regras = this.regras[nivel][faseNorm];
+  // 🔧 Ajuste 1: usa nivelNorm
+  const regras = this.regras[nivelNorm][faseNorm];
   const lista = [];
 
   /* 1) AQUECIMENTO PREMIUM */
@@ -296,7 +306,7 @@ FEMFLOW.engineTreino.montarTreino = async function ({
 
   /* 2) FIREBASE BOXES */
   const boxesFirebase = await this.buscarMultiBox({
-    nivel,
+    nivel: nivelNorm,   // 🔧 Corrigido
     enfase,
     fase: faseNorm,
     diaCiclo,
@@ -304,8 +314,11 @@ FEMFLOW.engineTreino.montarTreino = async function ({
     exPorBox: regras.ex
   });
 
-  /* 3) INTERCALAÇÃO: BOX → HIIT/CARDIO → BOX... */
+  /* 3) INTERCALA: BOX → HIIT/CARDIO → BOX... */
   for (let i = 0; i < regras.totalBoxes; i++) {
+
+    // 🔧 Ajuste 2: evita undefined
+    if (!boxesFirebase[i]) continue;
 
     lista.push(boxesFirebase[i]);
 
