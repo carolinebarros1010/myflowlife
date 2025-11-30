@@ -9,33 +9,28 @@
   <link rel="icon" href="favicon.ico">
   <link rel="manifest" href="manifest.json">
 
-  <!-- CSS base FemFlow -->
+  <!-- CSS FemFlow base -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
 
-  <!-- treino.css v3.3 -->
-  <link rel="stylesheet" href="css/treino.css?v3.3">
+  <!-- treino.css v3.5 -->
+  <link rel="stylesheet" href="css/treino.css?v3.5">
 
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-  <!-- Progress Bar -->
+  <!-- Barra de progresso -->
   <div class="progress-bar" id="progressBar"></div>
 
   <!-- Header -->
   <header class="treino-header">
     <h1>Treino Diário</h1>
-
     <h2 id="tituloDiaTreino"
-        style="text-align:center;
-               color:#335953;
-               margin:10px 0;
-               font-family:'Playfair Display',serif;
-               font-weight:700;">
+        style="text-align:center;color:#335953;margin:10px 0;font-family:'Playfair Display',serif;font-weight:700;">
       Dia do Programa
     </h2>
   </header>
@@ -47,7 +42,7 @@
     </div>
   </div>
 
-  <!-- Rodapé -->
+  <!-- Rodapé fixo -->
   <div class="fix-footer">
     <button id="salvarTreinoBtn" class="btn-primary-clean">💾 Salvar treino</button>
     <button id="descansoBtn" class="btn-secondary-clean">🌿 Descanso</button>
@@ -62,14 +57,7 @@
       <h3 class="modal-title">Como foi o treino?</h3>
 
       <label class="modal-label">PSE (0 a 10)</label>
-      <input
-        type="range"
-        min="0"
-        max="10"
-        value="0"
-        id="pseInput"
-        class="modal-slider"
-      />
+      <input type="range" min="0" max="10" value="0" id="pseInput" class="modal-slider"/>
 
       <div class="modal-actions">
         <button id="btnConfirmarPSE" class="modal-btn-ok">Salvar</button>
@@ -79,21 +67,26 @@
   </div>
 
   <!-- ====================================================== -->
-  <!-- 🌬️ MODAL RESPIRAÇÃO — Sheet iOS Premium (v3.3) -->
+  <!-- MODAL RESPIRAÇÃO — Sheet iOS -->
   <!-- ====================================================== -->
+
+  <!-- Backdrop -->
   <div id="breathBackdrop" class="breath-backdrop hidden"></div>
 
-  <div id="breathSheet" class="breath-sheet">
+  <!-- Sheet -->
+  <div id="breathModal" class="breath-sheet hidden">
     <div class="breath-sheet-handle"></div>
 
-    <div class="breath-title">Respiração</div>
+    <div class="breath-sheet-content">
+      <h3 id="breathTitle" class="breath-title">Respiração</h3>
 
-    <div id="breathCircle" class="breath-circle">5</div>
-    <div id="breathPhase" class="breath-phase">Preparar…</div>
+      <div id="breathCircle" class="breath-circle">–</div>
+      <div id="faseLabel" class="breath-phase"></div>
 
-    <div class="breath-actions">
-      <button id="breathStart" class="breath-start-btn">Iniciar</button>
-      <button id="breathClose" class="breath-close-btn">Fechar</button>
+      <div class="breath-actions">
+        <button id="btnStart" class="breath-start-btn">Iniciar</button>
+        <button id="btnRespClose" class="breath-close-btn">Fechar</button>
+      </div>
     </div>
   </div>
 
@@ -114,10 +107,10 @@
 
   <!-- Scripts FemFlow -->
   <script src="./femflow-core.js"></script>
-  <script src="./js/treino-engine.js?v3.3"></script>
-  <script src="./js/treino.js?v3.3"></script>
+  <script src="./js/treino-engine.js?v3.5"></script>
+  <script src="./js/treino.js?v3.5"></script>
 
-  <!-- Boot + Multi-idioma -->
+  <!-- Boot FemFlow -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
@@ -125,33 +118,7 @@
       }
     });
 
-    // Cancelar volta para o flowcenter
     cancelarTreinoBtn.onclick = () => FEMFLOW.router("flowcenter");
-
-    // Multi-idioma (mantido da versão antiga)
-    window.addEventListener("femflow:langchange", () => {
-      const lang = localStorage.getItem("femflow_lang") || "pt";
-      const T = {
-        pt: {
-          titulo: "Treino Diário",
-          salvar: "💾 Salvar treino",
-          descanso: "🌿 Descanso",
-          cancelar: "Cancelar"
-        },
-        en: {
-          titulo: "Daily Workout",
-          salvar: "💾 Save Workout",
-          descanso: "🌿 Rest",
-          cancelar: "Cancel"
-        }
-      };
-
-      const L = T[lang];
-      document.querySelector(".treino-header h1").textContent = L.titulo;
-      document.getElementById("salvarTreinoBtn").textContent = L.salvar;
-      document.getElementById("descansoBtn").textContent   = L.descanso;
-      document.getElementById("cancelarTreinoBtn").textContent = L.cancelar;
-    });
   </script>
 
 </body>
