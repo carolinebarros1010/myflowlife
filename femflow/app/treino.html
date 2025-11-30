@@ -13,87 +13,65 @@
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
-  <link rel="stylesheet" href="css/treino.css">
+  <link rel="stylesheet" href="css/treino.css?v3.1">
 
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-  <!-- Progress Bar -->
   <div class="progress-bar" id="progressBar"></div>
 
-  <!-- Header -->
   <header class="treino-header">
     <h1>Treino Diário</h1>
-
     <h2 id="tituloDiaTreino"
-        style="text-align:center;
-               color:#335953;
-               margin:10px 0;
-               font-family:'Playfair Display',serif;
-               font-weight:700;">
+        style="text-align:center;color:#335953;margin:10px 0;font-family:'Playfair Display',serif;font-weight:700;">
       Dia do Programa
     </h2>
   </header>
 
-  <!-- Carrossel -->
+  <!-- CARROSSEL CORRIGIDO -->
   <div class="carousel-container">
     <div class="carousel-track" id="carouselTrack">
       <div class="carousel-item"><p>Carregando treino...</p></div>
     </div>
   </div>
 
-  <!-- Rodapé Fixado -->
+  <!-- RODAPÉ -->
   <div class="fix-footer">
     <button id="salvarTreinoBtn">💾 Salvar treino</button>
     <button id="descansoBtn" class="secundario">🌿 Descanso</button>
     <button id="cancelarTreinoBtn" class="secundario">Cancelar</button>
   </div>
 
-
-  <!-- ====================================================== -->
-  <!-- 🚀 MODAL EVOLUÇÃO / PSE (NÃO REMOVE NADA SEU) -->
-  <!-- ====================================================== -->
+  <!-- MODAL PSE -->
   <div id="modalPSE" class="modal-pse">
-  <div class="modal-inner">
-    <h3>Como foi o treino?</h3>
+    <div class="modal-inner">
+      <h3>Como foi o treino?</h3>
 
-    <label>PSE (0 a 10)</label>
-    <input type="range" min="0" max="10" value="0" id="pseInput"/>
+      <label>PSE (0 a 10)</label>
+      <input type="range" min="0" max="10" value="0" id="pseInput"/>
 
-    <div class="modal-actions">
-      <button id="btnConfirmarPSE">Salvar</button>
-      <button id="btnCancelarPSE" class="cancel">Cancelar</button>
+      <div class="modal-actions">
+        <button id="btnConfirmarPSE">Salvar</button>
+        <button id="btnCancelarPSE" class="cancel">Cancelar</button>
+      </div>
     </div>
   </div>
-</div>
 
-
-
-  <!-- ====================================================== -->
-  <!-- 🌬️ MODAL RESPIRAÇÃO (Modelo Premium • Bubbles) -->
-  <!-- ====================================================== -->
+  <!-- MODAL RESPIRAÇÃO INLINE PREMIUM -->
   <div id="breathModal" class="breath-overlay hidden">
     <div class="breath-box">
-
-      <div id="breathCircle" class="breath-circle">5</div>
-      <div id="faseLabel" class="breath-fase">Preparar…</div>
-      <div id="countdown" class="breath-timer"></div>
-
+      <div id="breathCircle" class="breath-circle">60</div>
+      <div id="faseLabel" class="breath-fase">Preparar...</div>
       <button id="btnStart" class="breath-start">Iniciar</button>
       <button id="btnRespClose" class="breath-close">Fechar</button>
-
     </div>
   </div>
 
-
-
-  <!-- ====================================================== -->
-  <!-- 🔥 Firebase (TEM QUE SER ESSA SUA CONFIG, NÃO ALTEREI) -->
-  <!-- ====================================================== -->
+  <!-- FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 
   <script>
     firebase.initializeApp({
@@ -106,63 +84,16 @@
     });
   </script>
 
-
-
-  <!-- ====================================================== -->
-  <!-- 🧠 CORE + ENGINE + TREINO  (inalterados) -->
-  <!-- ====================================================== -->
-
+  <!-- SCRIPTS FEMFLOW -->
   <script src="./femflow-core.js"></script>
-  <script src="./js/treino-engine.js"></script>
-  <script src="./js/treino.js"></script>
+  <script src="./js/treino-engine.js?v3.1"></script>
+  <script src="./js/treino.js?v3.1"></script>
 
-
-
-  <!-- ====================================================== -->
-  <!-- GARANTIA DE BOOT (MANTIDO DO JEITO QUE VOCÊ FEZ) -->
-  <!-- ====================================================== -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
-        FEMFLOW.init();
-      }
+      FEMFLOW.init();
     });
-
-    document.getElementById("cancelarTreinoBtn").onclick = () => {
-      FEMFLOW.router("flowcenter");
-    };
+    cancelarTreinoBtn.onclick = () => FEMFLOW.router("flowcenter");
   </script>
-
-
-
-  <!-- ====================================================== -->
-  <!-- MULTI-IDIOMA (INALTERADO) -->
-  <!-- ====================================================== -->
-  <script>
-    window.addEventListener("femflow:langchange", () => {
-      const lang = localStorage.getItem("femflow_lang") || "pt";
-      const T = {
-        pt: {
-          titulo: "Treino Diário",
-          salvar: "💾 Salvar treino",
-          descanso: "🌿 Descanso",
-          cancelar: "Cancelar"
-        },
-        en: {
-          titulo: "Daily Workout",
-          salvar: "💾 Save Workout",
-          descanso: "🌿 Rest",
-          cancelar: "Cancel"
-        }
-      };
-
-      const L = T[lang];
-      document.querySelector(".treino-header h1").textContent = L.titulo;
-      document.getElementById("salvarTreinoBtn").textContent = L.salvar;
-      document.getElementById("descansoBtn").textContent = L.descanso;
-      document.getElementById("cancelarTreinoBtn").textContent = L.cancelar;
-    });
-  </script>
-
 </body>
 </html>
