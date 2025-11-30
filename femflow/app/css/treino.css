@@ -373,3 +373,84 @@ body {
     gap: 4px;
   }
 }
+/* CORE MOBILE FIX */
+.carousel-container {
+  width: 100%;
+  height: calc(100dvh - 140px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 12px;
+  padding: 0 12px;
+  height: 100%;
+}
+
+.carousel-item {
+  flex: 0 0 calc(100vw - 24px);
+  max-width: calc(100vw - 24px);
+  height: calc(100dvh - 170px);
+  background: #fff;
+  border-radius: 22px;
+  padding: 16px;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  overflow-y: auto;
+}
+
+/* PESO */
+.ff-ex-peso {
+  width: 70px;
+  height: 40px;
+  font-size: .85rem;
+  padding: 4px 6px;
+  border: 1px solid #d2ccc5;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* BOX EXERCÍCIO COMPACTO */
+.ff-ex-item {
+  margin-bottom: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #fafafa;
+}
+
+.ff-ex-info {
+  font-size: .85rem;
+  margin: 6px 0;
+}
+
+/* HIIT BUBBLE */
+.hiit-bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.hiit-circle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#335953,#cc6a5a);
+  color: #fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:2rem;
+  font-weight:700;
+}
+
+.hiit-start {
+  background:#335953;
+  color:#fff;
+  border:none;
+  padding:10px 20px;
+  border-radius:14px;
+}
