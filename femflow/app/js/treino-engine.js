@@ -143,7 +143,7 @@ FEMFLOW.engineTreino.criarBoxEspecial = function (tipo, fase) {
 };
 
 /* ============================================================
-   8) FIREBASE: BUSCAR MULTI-BOX
+   8) FIREBASE: BUSCAR MULTI-BOX (versão corrigida 2025)
 ============================================================ */
 FEMFLOW.engineTreino.buscarMultiBox = async function ({
   nivel,
@@ -154,50 +154,68 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
   exPorBox
 }) {
 
-  const faseNorm = this.normalizarFase(fase);
-   const nivelNorm  = this.normalizarNivel(nivel);
+  const faseNorm   = this.normalizarFase(fase);
+  const nivelNorm  = this.normalizarNivel(nivel);
   const enfaseNorm = this.normalizarEnfase(enfase);
 
   const pasta = `${nivelNorm}_${enfaseNorm}`;
-
-  const diaKey    = `dia_${diaCiclo}`;
+  const diaKey = `dia_${diaCiclo}`;
 
   FEMFLOW.log("📦 BUSCAR BOXES:", pasta, faseNorm, diaKey);
 
   const db = firebase.firestore();
 
   const snap = await db
-  .collection("exercicios")
-  .doc(pasta)
-  .collection("fases")
-  .doc(faseNorm)
-  .collection("dias")
-  .doc(`dia_${diaCiclo}`)
-  .collection("exercicios")
-  .get();
-
+    .collection("exercicios")
+    .doc(pasta)
+    .collection("fases")
+    .doc(faseNorm)
+    .collection("dias")
+    .doc(diaKey)
+    .collection("exercicios")
+    .get();
 
   if (snap.empty) {
     FEMFLOW.log("⚠️ Firestore vazio para este dia/fase");
     return [];
   }
 
-  const todos = [];
-  snap.forEach(doc => todos.push(doc.data()));
+  /* ========================================================
+     AGRUPAR EXERCÍCIOS PELO CAMPO `box`
+     — Agora o engine respeita Box1, Box2, Box3 no Firebase
+  ========================================================== */
+  const grupos = {}; // ex: {1:[...], 2:[...]}
 
-  const shuffled = todos.sort(() => Math.random() - 0.5);
+  snap.forEach(doc => {
+    const data = doc.data();
 
-  let cursor = 0;
+    // extrair número da box: "Box 1" → 1
+    const numero = Number(String(data.box).replace(/\D/g, "")) || 1;
+
+    if (!grupos[numero]) grupos[numero] = [];
+    grupos[numero].push(data);
+  });
+
   const boxes = [];
-
   const seriesPadrao = this.calcularSeries(faseNorm, nivel);
 
+  /* ========================================================
+     PARA CADA BOX DEFINIDA NAS REGRAS
+  ========================================================== */
   for (let i = 0; i < qtdBoxes; i++) {
-    const quantidade = exPorBox[i];
 
-    const bloco = shuffled.slice(cursor, cursor + quantidade);
-    cursor += quantidade;
+    const boxNum = i + 1;
 
+    // lista de exercícios daquele Box no Firebase
+    const listaEx = grupos[boxNum] || [];
+
+    // quantidade esperada (regras.ex)
+    const quantidade = exPorBox[i] || listaEx.length;
+
+    // cortar somente o necessário
+    const bloco = listaEx.slice(0, quantidade);
+
+    // ajustar reps, intervalos e séries
     bloco.forEach(ex => {
       ex.reps      = Number(ex.reps || 0);
       ex.series    = seriesPadrao;
@@ -206,7 +224,7 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
 
     boxes.push({
       tipo: "treino",
-      box: i + 1,
+      box: boxNum,
       exercicios: bloco
     });
   }
