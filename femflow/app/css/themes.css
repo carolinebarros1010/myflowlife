@@ -34,14 +34,3 @@ body.page-treino {
 body.page-evolucao {
   background: linear-gradient(180deg, #FCE3D5 0%, #F4E1D7 100%);
 }
-.femflow-debug-banner {
-  background: var(--terracota-light);
-  color: var(--teal);
-  text-align: center;
-  padding: 6px 10px;
-  font-weight: 600;
-  border-radius: 10px;
-  margin: 12px auto;
-  width: 85%;
-  font-size: .85rem;
-}
