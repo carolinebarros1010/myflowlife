@@ -216,28 +216,29 @@ document.addEventListener("DOMContentLoaded", async () => {
         div.innerHTML = `
           <h3 class="ff-ex-titulo">Box ${box.box}</h3>
 
-          <div class="ff-series">
-            ${box.exercicios.map((ex, index) => `
-              <div class="ff-serie-item" data-ex="${ex.titulo}">
-                
-                <span class="ff-ex-nome">${ex.titulo || ex.nome}</span>
+         <div class="ff-ex-item">
+  <div class="ff-ex-top">
+    <h4 class="ff-ex-nome">${ex.titulo || ex.nome || "Exercício"}</h4>
+    <input 
+      type="number"
+      class="ff-ex-peso"
+      placeholder="kg"
+      data-ex="${ex.titulo || ex.nome}"
+    />
+  </div>
 
-                <div class="ff-ex-info">
-                  <span>Séries: <b>${ex.series}</b></span>
-                  <span>Reps: <b>${ex.reps}</b></span>
-                  <span>Desc: <b>${ex.intervalo}s</b></span>
-                </div>
+  <div class="ff-ex-info">
+    Séries: <b>${ex.series}</b> —  
+    Reps: <b>${ex.reps}</b> —  
+    Desc: <b>${ex.intervalo}s</b>
+  </div>
 
-                <label class="ff-peso-label">Peso utilizado:</label>
-                <input class="ff-input-peso" type="number" placeholder="kg" 
-                       data-ex="${ex.titulo}">
+  <div class="ff-timer-bar" data-total="${ex.intervalo}">
+    <div class="ff-timer-fill"></div>
+    <span class="ff-timer-count">${fmt(ex.intervalo)}</span>
+  </div>
+</div>
 
-                <div class="ff-timer-bar" data-total="${ex.intervalo}">
-                  <div class="ff-timer-fill"></div>
-                  <span class="ff-timer-count">00:${ex.intervalo}</span>
-                </div>
-
-              </div>
             `).join("")}
           </div>
         `;
