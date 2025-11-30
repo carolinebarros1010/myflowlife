@@ -337,3 +337,42 @@ FEMFLOW.engineTreino.debugFirebase = function(info) {
 FEMFLOW.engineTreino.debugFirebaseLast = () => {
   console.log("📌 Último DEBUG:", FEMFLOW.engineTreino._debugLast);
 };
+
+function aplicarTimers(root) {
+  root.querySelectorAll(".ff-exercicio").forEach(ex => {
+    const intervalo = Number(ex.dataset.intervalo);
+    const fill = ex.querySelector(".ff-timer-fill");
+    const time = ex.querySelector(".ff-timer-time");
+    const btn = ex.querySelector(".ff-btn-descanso");
+
+    let restante = intervalo;
+    let intv = null;
+
+    const atualizar = () => {
+      time.textContent = `Descanso: ${restante}s`;
+      fill.style.width = `${(restante / intervalo) * 100}%`;
+    };
+
+    atualizar();
+
+    const iniciar = () => {
+      clearInterval(intv);
+      restante = intervalo;
+      atualizar();
+
+      intv = setInterval(() => {
+        restante--;
+        atualizar();
+
+        if (restante <= 0) {
+          clearInterval(intv);
+          time.textContent = "Pronto!";
+          fill.style.width = `0%`;
+        }
+      }, 1000);
+    };
+
+    btn.onclick = iniciar;
+  });
+}
+
