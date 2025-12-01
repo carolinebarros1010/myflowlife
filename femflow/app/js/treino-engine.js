@@ -87,29 +87,35 @@ FEMFLOW.engineTreino.detectarSerieEspecial = function (boxLabel) {
 /* ============================================================
    5) Organizar blocos (ordem REAL)
 ============================================================ */
-FEMFLOW.engineTreino.organizarBlocosSimples = function (blocosRaw) {
+FEMFLOW.engineTreino.organizarBlocosSimples = function (brutos) {
 
-  return blocosRaw
+  FEMFLOW.log("📑 organizarBlocosSimples() → recebidos:", brutos);
+
+  return brutos
     .map(b => {
+      const raw = String(b.box || "").trim();
 
-      b.boxRaw = String(b.box || "");
+      let boxNum = parseInt(raw.replace(/\D/g, ""));
 
-      // extrair número → 2E vira 2
-      b.boxNum =
-        parseInt(b.boxRaw.replace(/\D/g, "")) ||
-        (b.tipo === "hiit" ? 0 : 1);
+      // 🔥 PRIORIDADES FEMFLOW
+      if (b.tipo === "aquecimento") boxNum = -100;     // sempre antes de tudo
+      else if (b.tipo === "treino" && isNaN(boxNum)) boxNum = 1; 
+      else if (b.tipo === "hiit" && !isNaN(boxNum)) boxNum = boxNum; // HIIT segue o box
+      else if (b.tipo === "hiit" && isNaN(boxNum)) boxNum = 500;     // HIIT genérico → antes do cardio
+      else if (b.tipo === "cardio_final") boxNum = 900;  
+      else if (b.tipo === "resfriamento") boxNum = 999; 
 
-      b.serieEspecial = this.detectarSerieEspecial(b.boxRaw);
+      const serieEspecial = FEMFLOW.engineTreino.detectarSerieEspecial(raw);
+      const ordemNum = parseInt(b.ordem || 0) || 0;
 
-      b.ordemNum = parseInt(b.ordem) || 0;
-
-      return b;
+      return { ...b, boxNum, ordemNum, serieEspecial };
     })
     .sort((a, b) => {
       if (a.boxNum !== b.boxNum) return a.boxNum - b.boxNum;
       return a.ordemNum - b.ordemNum;
     });
 };
+
 
 /* ============================================================
    6) Intercalar HIIT entre boxes (Modo B)
