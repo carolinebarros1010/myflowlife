@@ -34,27 +34,39 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* -------------------- TOAST FEMFLOW -------------------- */
+/* ============================================================
+   FEMFLOW — TOAST PREMIUM (debug + mensagens gerais)
+============================================================ */
 .toast-box {
   position: fixed;
-  bottom: 22px;
+  bottom: 30px;
   left: 50%;
-  transform: translateX(-50%);
-  background: var(--teal);
-  color: var(--terracota);
-  padding: 12px 24px;
-  border-radius: 16px;
-  font-size: .95rem;
-  font-weight: 700;
-  box-shadow: 0 6px 22px rgba(0,0,0,0.20);
+  transform: translateX(-50%) translateY(20px);
+
+  background: linear-gradient(135deg, var(--terracota-light), var(--teal));
+  color: #ffffff;
+
+  padding: 12px 22px;
+  border-radius: 18px;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.2px;
+
+  box-shadow: 0 6px 22px rgba(0,0,0,0.18);
+
   opacity: 0;
   transition: opacity .35s ease, transform .35s ease;
-  z-index: 99999;
+
+  z-index: 999999; /* acima de tudo */
 }
+
 .toast-box.visible {
   opacity: 1;
-  transform: translateX(-50%) translateY(-6px);
+  transform: translateX(-50%) translateY(0);
 }
+
 
 /* -------------------- HEADER -------------------- */
 .treino-header {
