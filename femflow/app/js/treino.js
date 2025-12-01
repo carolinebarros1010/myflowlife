@@ -92,202 +92,227 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }
 
-  function renderTreino(lista) {
-    track.innerHTML = "";
+ function renderTreino(lista) {
+  track.innerHTML = "";
 
-    if (!lista || !lista.length) {
-      track.innerHTML = `
-        <div class="carousel-item">
-          <p>Nenhum treino disponível para hoje.</p>
-        </div>
-      `;
-      return;
-    }
+  if (!lista || !lista.length) {
+    track.innerHTML = `
+      <div class="carousel-item">
+        <p>Nenhum treino disponível para hoje.</p>
+      </div>
+    `;
+    return;
+  }
 
-    lista.forEach((box) => {
-      let html = `<div class="carousel-item">`;
+  lista.forEach((box) => {
+    let html = `<div class="carousel-item">`;
 
-      switch (box.tipo) {
+    switch (box.tipo) {
 
-        /* ================== AQUECIMENTO ================== */
-        case "aquecimentoPremium":
-          html += `
-            <h2 class="ff-ex-titulo">${box.titulo}</h2>
-            <p class="ff-ex-sub">${box.descricao}</p>
-            <ul class="ff-passos">
-              ${
-                box.passos
-                  .map(p => `
-                    <li data-desc="${p.desc || ""}">${p.nome}</li>
-                  `)
-                  .join("")
-              }
-            </ul>
-            <button class="ff-btn-protocolo ff-resp-btn"
-        data-proto="wake" data-origem="aquecimento">
-  <span class="icon">💨</span>
-  <span>Respiração Wake</span>
-</button>
-          `;
-        break;
+      /* =======================================================
+         AQUECIMENTO PREMIUM
+      ======================================================= */
+      case "aquecimentoPremium":
+        html += `
+          <h2 class="ff-ex-titulo">${box.titulo}</h2>
+          <p class="ff-ex-sub">${box.descricao}</p>
 
-        /* ================== TREINO (BOXES DO FIREBASE) ================== */
-        case "treino":
-          html += `<h2 class="ff-ex-titulo">Box ${box.box}</h2>`;
+          <ul class="ff-passos">
+            ${
+              box.passos
+                .map(p => `
+                  <li data-desc="${p.desc || ""}">
+                    ${p.nome}
+                  </li>
+                `)
+                .join("")
+            }
+          </ul>
 
-          box.exercicios.forEach(ex => {
-            const titulo  = ex.titulo || ex.nome || "Exercício";
-            const youtube = ex.youtube || ex.link || "#";
+          <button class="ff-btn-protocolo ff-resp-btn"
+                  data-proto="wake" data-origem="aquecimento">
+            💨 Respiração Wake
+          </button>
+        `;
+      break;
 
-            const intervalSeg = Number(ex.intervalo) || 60;
+      /* =======================================================
+         TREINO (FIREBASE)
+      ======================================================= */
+      case "treino":
+        html += `<h2 class="ff-ex-titulo">Box ${box.box}</h2>`;
 
-            html += `
-              <div class="ff-ex-item">
-                <div class="ff-ex-top">
-                  <div class="ff-ex-nome">
-                    <a href="${youtube}" ${youtube !== "#" ? 'target="_blank" rel="noopener"' : ""}>
-                      ${titulo}
-                    </a>
-                  </div>
-
-                  <input class="ff-ex-peso"
-                         type="number"
-                         placeholder="kg"
-                         data-ex="${titulo}">
-                </div>
-
-                <div class="ff-info-line">
-                  <span>🌀 <b>${ex.series}</b>x</span>
-                  <span>🔁 <b>${ex.reps}</b></span>
-                  <span>⏱️ <b>${intervalSeg}s</b></span>
-                </div>
-
-                <div class="ff-descanso-wrap">
-                  <button class="ff-descanso-btn">
-                    ▶️ Iniciar descanso
-                  </button>
-                  <span class="ff-timer-count">${fmtTime(intervalSeg)}</span>
-                  <div class="ff-timer-bar" data-timer="${intervalSeg}">
-                    <div class="ff-timer-fill"></div>
-                  </div>
-                </div>
-              </div>
-            `;
-          });
-        break;
-
-        /* ================== HIIT PREMIUM ================== */
-        case "hiitPremium": {
-          const est  = Number(box.estimulo) || 40;
-          const rec  = Number(box.descanso) || 20;
-          const cyc  = Number(box.ciclos)   || 6;
+        box.exercicios.forEach(ex => {
+          const titulo = ex.titulo || ex.nome || "Exercício";
+          const youtube = ex.youtube || ex.link || "#";
+          const intervalSeg = Number(ex.intervalo) || 60;
 
           html += `
-            <h2 class="ff-ex-titulo">${box.titulo}</h2>
-            <p class="ff-ex-sub">
-              ${box.descricao || `Ciclo: ${est}s forte + ${rec}s leve.`}
-            </p>
+            <div class="ff-ex-item">
 
-            <div class="hiit-bubble">
-              <div class="breath-circle hiit-circle"
-                   data-estimulo="${est}"
-                   data-descanso="${rec}"
-                   data-ciclos="${cyc}">
-                ▶
+              <!-- TOPO -->
+              <div class="ff-ex-top">
+                <div class="ff-ex-nome">
+                  <a href="${youtube}"
+                     ${youtube !== "#" ? 'target="_blank" rel="noopener"' : ""}>
+                    ${titulo}
+                  </a>
+                </div>
+
+                <input class="ff-ex-peso"
+                       type="number"
+                       placeholder="kg"
+                       data-ex="${titulo}">
               </div>
-              <div class="breath-phase hiit-phase">
-                Toque no círculo para iniciar
+
+              <!-- INFO -->
+              <div class="ff-info-line">
+                <span>🌀 <b>${ex.series}</b>x</span>
+                <span>🔁 <b>${ex.reps}</b></span>
+                <span>⏱️ <b>${intervalSeg}s</b></span>
+              </div>
+
+              <!-- TIMER DESCANSO -->
+              <div class="ff-descanso-wrap">
+                <button class="ff-descanso-btn btnStartTimer">
+                  ▶️ Iniciar descanso
+                </button>
+
+                <span class="ff-timer-count">${fmtTime(intervalSeg)}</span>
+
+                <div class="ff-timer-bar" data-timer="${intervalSeg}">
+                  <div class="ff-timer-fill"></div>
+                </div>
               </div>
             </div>
+          `;
+        });
+      break;
 
-            <button class="ff-descanso-btn hiit-opcoes-btn">
-              ⚙️ Opções de exercício
+      /* =======================================================
+         HIIT PREMIUM — MODELO B
+      ======================================================= */
+      case "hiitPremium": {
+        const est = Number(box.estimulo) || 40;
+        const rec = Number(box.descanso) || 20;
+        const ciclos = Number(box.ciclos) || 6;
+
+        html += `
+          <h2 class="ff-ex-titulo">${box.titulo}</h2>
+          <p class="ff-ex-sub">${box.descricao}</p>
+
+          <div class="hiit-bubble">
+
+            <div class="breath-circle hiit-circle"
+                 data-estimulo="${est}"
+                 data-descanso="${rec}"
+                 data-ciclos="${ciclos}">
+              ▶
+            </div>
+
+            <div class="breath-phase hiit-phase">
+              Toque no círculo para iniciar
+            </div>
+          </div>
+
+          <button class="ff-descanso-btn hiit-opcoes-btn">
+            ⚙️ Opções de exercício
+          </button>
+
+          <div class="hiit-opcoes hidden">
+
+            <p><b>Academia</b></p>
+            ${
+              (box.cardsAcademia || [])
+                .map(c => `
+                  <div class="hiit-card">
+                    <span class="hiit-card-icon">${c.icon || "🏃‍♀️"}</span>
+                    <span>${c.nome}</span>
+                  </div>
+                `)
+                .join("")
+            }
+
+            <p style="margin-top:12px;"><b>Casa</b></p>
+            ${
+              (box.cardsCasa || [])
+                .map(c => `
+                  <div class="hiit-card">
+                    <span class="hiit-card-icon">${c.icon || "⭐"}</span>
+                    <span>${c.nome}</span>
+                  </div>
+                `)
+                .join("")
+            }
+          </div>
+        `;
+      }
+      break;
+
+      /* =======================================================
+         CARDIO
+      ======================================================= */
+      case "cardio": {
+        const total = Number(box.tempo_total) || 600;
+
+        html += `
+          <h2 class="ff-ex-titulo">${box.titulo}</h2>
+          <p class="ff-ex-sub">${box.descricao}</p>
+
+          <div class="ff-descanso-wrap">
+            <button class="ff-descanso-btn btnStartTimer">
+              ▶️ Iniciar cardio
             </button>
 
-            <div class="hiit-opcoes hidden">
-              <p><b>Academia</b></p>
-              ${
-                (box.cardsAcademia || [])
-                  .map(c => `
-                    <div class="hiit-card">
-                      <span class="hiit-card-icon">${c.icon || "🏃‍♀️"}</span>
-                      <span>${c.nome}</span>
-                    </div>
-                  `)
-                  .join("")
-              }
-              <p style="margin-top:10px;"><b>Casa</b></p>
-              ${
-                (box.cardsCasa || [])
-                  .map(c => `
-                    <div class="hiit-card">
-                      <span class="hiit-card-icon">${c.icon || "⭐"}</span>
-                      <span>${c.nome}</span>
-                    </div>
-                  `)
-                  .join("")
-              }
+            <span class="ff-timer-count">${fmtTime(total)}</span>
+
+            <div class="ff-timer-bar" data-timer="${total}">
+              <div class="ff-timer-fill"></div>
             </div>
-          `;
-        }
-        break;
-
-        /* ================== CARDIO ================== */
-        case "cardio": {
-          const total = Number(box.tempo_total) || 600;
-
-          html += `
-            <h2 class="ff-ex-titulo">${box.titulo}</h2>
-            <p class="ff-ex-sub">${box.descricao}</p>
-
-            <div class="ff-descanso-wrap">
-              <button class="ff-descanso-btn">
-                ▶️ Iniciar cardio
-              </button>
-              <span class="ff-timer-count">${fmtTime(total)}</span>
-              <div class="ff-timer-bar" data-timer="${total}">
-                <div class="ff-timer-fill"></div>
-              </div>
-            </div>
-          `;
-        }
-        break;
-
-        /* ================== RESFRIAMENTO ================== */
-        case "resfriamentoPremium":
-          html += `
-            <h2 class="ff-ex-titulo">${box.titulo}</h2>
-            <p class="ff-ex-sub">${box.descricao}</p>
-
-            <ul class="ff-passos">
-              ${
-                box.passos
-                  .map(p => `
-                    <li data-desc="${p.desc || ""}">${p.nome}</li>
-                  `)
-                  .join("")
-              }
-            </ul>
-
-           <button class="ff-btn-protocolo ff-resp-btn"
-        data-proto="release" data-origem="resfriamento">
-  <span class="icon">🌬️</span>
-  <span>Respiração Release</span>
-</button>
-
-          `;
-        break;
+          </div>
+        `;
       }
+      break;
 
-      html += `</div>`;
-      track.insertAdjacentHTML("beforeend", html);
-    });
+      /* =======================================================
+         RESFRIAMENTO PREMIUM
+      ======================================================= */
+      case "resfriamentoPremium":
+        html += `
+          <h2 class="ff-ex-titulo">${box.titulo}</h2>
+          <p class="ff-ex-sub">${box.descricao}</p>
 
-    initTimers();
-    initHIIT();
-    initBreathing();
-    initPeso();
-  }
+          <ul class="ff-passos">
+            ${
+              box.passos
+                .map(p => `
+                  <li data-desc="${p.desc || ""}">
+                    ${p.nome}
+                  </li>
+                `)
+                .join("")
+            }
+          </ul>
+
+          <button class="ff-btn-protocolo ff-resp-btn"
+                  data-proto="release"
+                  data-origem="resfriamento">
+            🌬️ Respiração Release
+          </button>
+        `;
+      break;
+    }
+
+    html += `</div>`;
+    track.insertAdjacentHTML("beforeend", html);
+  });
+
+  // === Inicializa funções ===
+  initTimers();
+  initHIIT();
+  initBreathing();
+  initPeso();
+}
 
   /* ============================================================
      3. TIMERS — DESCANSO / CARDIO
