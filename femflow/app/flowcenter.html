@@ -79,9 +79,10 @@
     /* 1 — Sincroniza com backend */
     await FEMFLOW.carregarCicloBackend();
 
-    /* 2 — Nome da aluna (via CORE atualizado) */
-    const nome = FEMFLOW.getNome();
-    const first = nome.split(" ")[0];
+   /* 2 – Nome da aluna (via CORE atualizado) */
+const nome = localStorage.getItem("femflow_nome") || "Aluna";
+const first = nome.split(" ")[0];  // pega apenas o primeiro nome
+
 
     /* 3 — Fase atual */
     const fase = localStorage.getItem("femflow_fase") || "follicular";
