@@ -414,5 +414,11 @@ body {
   margin-bottom: 14px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
+.ff-ex-titulo {
+  font-size: 1.05rem;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  line-height: 1.15;
+}
 
 
