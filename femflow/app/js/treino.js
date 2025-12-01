@@ -543,4 +543,3 @@ function renderExercicio(ex) {
     };
   }
 
-});
