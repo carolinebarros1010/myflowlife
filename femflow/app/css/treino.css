@@ -108,7 +108,7 @@ body {
   min-height: calc(100dvh - 240px);
   background: white;
   border-radius: 22px;
-  padding: 20px;
+  padding: 14px 14px !important;
   padding-bottom: 150px !important;
   scroll-snap-align: center;
   overflow-y: auto;
@@ -207,14 +207,15 @@ body {
 
 /* peso */
 .ff-ex-peso {
-  width: 70px;
-  height: 40px;
-  text-align: center;
+  width: 70px !important;
+  height: 40px !important;
+  padding: 4px 6px;
+  font-size: 0.9rem;
   border-radius: 10px;
-  border: 1px solid #d2ccc5;
-  background: white;
-  font-size: .85rem;
+  border: 1.5px solid #e3d6cf;
+  background: #fff;
 }
+
 
 /* ============================================================
    6) TIMER
