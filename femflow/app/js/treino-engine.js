@@ -407,45 +407,49 @@ FEMFLOW.engineTreino.converterParaFront = function (blocos) {
     }
 
     /* ===============================================
-       🔥 TREINO PRINCIPAL
-    =============================================== */
-    if (b.tipo === "treino") {
+   🔥 TREINO PRINCIPAL
+=============================================== */
+if (b.tipo === "treino") {
 
-      saida.push({
-        tipo: "treino",
-        box: b.boxNum,
-        serieEspecial: b.serieEspecial || null,
+  saida.push({
+    tipo: "treino",
+    box: b.boxNum,
+    serieEspecial: b.serieEspecial || null,
 
-        titulo: b.titulo || "",
-        link: b.link || "",
+    titulo: b.titulo || "",
+    link: b.link || "",
 
-        series: b.series || "",
-        reps: b.reps || "",
+    series: b.series || "",
+    reps: b.reps || "",
 
-        intervalo: Number(b.intervalo) || 0
-      });
+    intervalo:
+      b.intervalo === "" || b.intervalo === undefined || b.intervalo === null
+        ? 0
+        : Number(b.intervalo)
+  });
 
-      continue;
-    }
+  continue;
+}
 
-    /* ===============================================
-       🔥 HIIT PREMIUM
-    =============================================== */
-    if (b.tipo === "hiit") {
+/* ===============================================
+   🔥 HIIT PREMIUM
+=============================================== */
+if (b.tipo === "hiit") {
 
-      saida.push({
-        tipo: "hiitPremium",
-        box: b.boxNum,   // para intercalar no bloco correto
-        titulo: b.titulo || "🔥 HIIT",
+  saida.push({
+    tipo: "hiitPremium",
+    box: b.boxNum,
 
-       forte: Number(b.forte) || 0,
-      leve: Number(b.leve) || 0,
-      ciclos: Number(b.ciclos) || 1
+    titulo: b.titulo || "🔥 HIIT",
 
-      });
+    forte:   b.forte   ? Number(b.forte)   : 40,
+    leve:    b.leve    ? Number(b.leve)    : 20,
+    ciclos:  b.ciclos  ? Number(b.ciclos)  : 6
+  });
 
-      continue;
-    }
+  continue;
+}
+
 
     /* ===============================================
        🔥 CARDIO FINAL (v4)
