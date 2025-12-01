@@ -230,11 +230,17 @@ if (tipoDominante === "resfriamentoPremium") {
   /* ======================================================
      HIIT PREMIUM
   ====================================================== */
-  if (tipoDominante === "hiitPremium") {
+if (tipoDominante === "hiitPremium") {
     const h = bloco[0];
 
     html += `
       <h2 class="ff-ex-titulo">${h.titulo}</h2>
+
+      <p class="ff-sugestao-hiit">
+        🔥 <b>Escolha a sua forma de HIIT:</b><br>
+        • <b>Na academia:</b> esteira, bike, escada, remo ou air Bike<br>
+        • <b>Em casa:</b> polichinelo, corrida parada, burpee, corda, salto no lugar
+      </p>
 
       <div class="hiit-bubble">
         <div class="hiit-circle"
@@ -246,9 +252,7 @@ if (tipoDominante === "resfriamentoPremium") {
         <div class="hiit-phase">Toque para iniciar</div>
       </div>
     `;
-    html += `</div>`;
-    return html;
-  }
+
 
   /* ======================================================
      TREINO (1 box com vários exercícios)
