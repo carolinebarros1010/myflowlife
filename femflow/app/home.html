@@ -49,6 +49,10 @@
     <h1>Treinos em Casa</h1>
     <section class="rail" id="railCasa"></section>
 
+    <!-- FILEIRA 4 — TREINO PERSONAL (só aparece para quem tem o produto) -->
+    <h1 id="tituloPersonal" style="display:none;">Treino Personal</h1>
+    <section class="rail" id="railPersonal" style="display:none;"></section>
+
     <!-- CTAs -->
     <button id="btnFlow" class="cta">Ir para o Flow Center</button>
     <button id="btnCad"  class="cta" style="background:#fff;color:#335953;border:1px solid #e6d8d2">
@@ -59,7 +63,7 @@
 
   <footer>FemFlow • escolha seu foco e comece hoje</footer>
 
-    <!-- CORE -->
+  <!-- CORE -->
   <script src="femflow-core.js"></script>
 
 <script>
@@ -92,11 +96,22 @@ const LISTA_CASA = [
   { titulo:"Casa Halter", enfase:"casa_halter", color:"#c6b4a4", desc:"Halter em casa" }
 ];
 
+/* ============================================================
+   LISTA PERSONAL — visível somente para produto=treino_personal
+=========================================================== */
+const LISTA_PERSONAL = [
+  { 
+    titulo:"Treino Personal",
+    enfase:"personal",
+    color:"#335953",
+    desc:"Seu treino exclusivo criado pelo coach"
+  }
+];
+
 
 /* ============================================================
    RENDERIZAÇÃO DE CARDS
 =========================================================== */
-
 function cardHTML(p){
   return `
     <article class="card" data-enfase="${p.enfase}">
@@ -114,13 +129,24 @@ function renderRail(el, lista){
   el.innerHTML = lista.map(cardHTML).join("");
 
   el.querySelectorAll(".card").forEach(c=>{
-    c.onclick = () => selecionarEnfase(c.dataset.enfase);
+    c.onclick = () => {
+
+      const enfase = c.dataset.enfase;
+
+      // 🔥 Caso especial: treino personal
+      if (enfase === "personal") {
+        location.href = "treino.html?personal=1";
+        return;
+      }
+
+      selecionarEnfase(enfase);
+    };
   });
 }
 
 
 /* ============================================================
-   SALVAR ÊNFASE (agora 100% alinhado ao CORE v4.1)
+   SALVAR ÊNFASE (CORE)
 =========================================================== */
 async function selecionarEnfase(enfase){
 
@@ -129,44 +155,51 @@ async function selecionarEnfase(enfase){
   const id = localStorage.getItem("femflow_id");
   console.log("🆔 femflow_id:", id);
 
-  // 1) Salva local
   localStorage.setItem("femflow_enfase", enfase);
-  console.log("💾 localStorage.femflow_enfase =", localStorage.getItem("femflow_enfase"));
 
-  // 2) Envia para backend (se logada)
   if (id) {
     try {
       const resp = await fetch(FEMFLOW.SCRIPT_URL, {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
-          action:"setenfase",   // 🔥 igual ao doPost
+          action:"setenfase",
           id,
-          enfase               // ex: "gluteo", "corrida"
+          enfase
         })
       });
 
       const raw = await resp.text();
       console.log("📦 RESPOSTA RAW setenfase:", raw);
-
-      let json;
-      try {
-        json = JSON.parse(raw);
-        console.log("🔍 RESPOSTA JSON setenfase:", json);
-      } catch(e) {
-        console.warn("⚠ setenfase → JSON inválido:", e);
-      }
+      try { console.log("🔍 JSON:", JSON.parse(raw)); } catch(e){}
 
     } catch(e){
-      console.warn("❌ Falha ao enviar ênfase ao backend:", e);
+      console.warn("❌ Falha ao enviar ênfase:", e);
     }
-  } else {
-    console.warn("⚠ Sem femflow_id, só atualizei localStorage (nada na planilha).");
   }
 
-  // 3) Vai para FlowCenter
   FEMFLOW.router("flowcenter");
 }
+
+
+/* ============================================================
+   ATIVAR OU OCULTAR CARD PERSONAL
+=========================================================== */
+function ativarCardPersonal() {
+  const produto = localStorage.getItem("femflow_produto");
+  const ativa   = localStorage.getItem("femflow_ativa");
+
+  if (produto === "treino_personal" && ativa === "true") {
+
+    document.getElementById("tituloPersonal").style.display = "block";
+
+    const rail = document.getElementById("railPersonal");
+    rail.style.display = "block";
+
+    renderRail(rail, LISTA_PERSONAL);
+  }
+}
+
 
 /* ============================================================
    INIT HOME
@@ -179,10 +212,12 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   document.getElementById("btnFlow").onclick = () => FEMFLOW.router("flowcenter");
   document.getElementById("btnCad").onclick  = () => FEMFLOW.router("index");
+
+  // 🔥 ativa o card personal caso a aluna tenha esse produto
+  ativarCardPersonal();
 });
 
 </script>
 
 </body>
 </html>
-
