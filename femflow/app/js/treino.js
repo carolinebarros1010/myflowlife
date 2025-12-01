@@ -372,128 +372,150 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ============================================================
-     4. HIIT — BOLHA COM PLAY/PAUSE NO CÍRCULO
-  ============================================================ */
-  function initHIIT() {
-    // Mostrar / ocultar menu de opções
-    document.querySelectorAll(".hiit-opcoes-btn").forEach(btn => {
-      btn.onclick = () => {
-        const card = btn.closest(".carousel-item");
-        const box  = card?.querySelector(".hiit-opcoes");
-        if (box) box.classList.toggle("hidden");
-      };
-    });
+/* ============================================================
+   4. HIIT — BOLHA COM PLAY/PAUSE NO CÍRCULO
+============================================================ */
+function initHIIT() {
 
-    // Círculo principal (play/pause)
-    document.querySelectorAll(".hiit-circle").forEach(circle => {
-      const card  = circle.closest(".carousel-item");
-      const phase = card?.querySelector(".hiit-phase");
-      if (!phase) return;
+  /* ---------------------------------------------
+     BOTÃO: Opções de exercício (Academia / Casa)
+  --------------------------------------------- */
+  document.querySelectorAll(".hiit-opcoes-btn").forEach(btn => {
+    btn.onclick = () => {
+      const card = btn.closest(".carousel-item");
+      const box  = card?.querySelector(".hiit-opcoes");
+      if (box) box.classList.toggle("hidden");
+    };
+  });
 
-      const forteBase = Number(circle.dataset.estimulo) || 40;
-      const leveBase  = Number(circle.dataset.descanso) || 20;
-      const ciclosMax = Number(circle.dataset.ciclos)   || 6;
+  /* ---------------------------------------------
+     CÍRCULO: Play / Pause com alternância inteligente
+  --------------------------------------------- */
+  document.querySelectorAll(".hiit-circle").forEach(circle => {
+    const card  = circle.closest(".carousel-item");
+    const phase = card?.querySelector(".hiit-phase");
+    if (!phase) return;
 
-      let forte   = forteBase;
-      let leve    = leveBase;
-      let tempo   = forte;
-      let modo    = "forte";       // "forte" ou "leve"
-      let ciclo   = 1;
-      let rodando = false;
-      let intv    = null;
+    const forteBase = Number(circle.dataset.estimulo) || 40;
+    const leveBase  = Number(circle.dataset.descanso) || 20;
+    const ciclosMax = Number(circle.dataset.ciclos)   || 6;
 
-      circle.textContent = "▶";
-      phase.textContent  = "Toque para iniciar";
+    let forte   = forteBase;
+    let leve    = leveBase;
+    let tempo   = forte;
+    let modo    = "forte";       // forte → leve
+    let ciclo   = 1;
+    let rodando = false;
+    let intv    = null;
 
-      function atualizarLabel() {
-        if (modo === "forte") {
-          phase.textContent = `Força (${ciclo}/${ciclosMax})`;
-        } else {
-          phase.textContent = `Recuperar (${ciclo}/${ciclosMax})`;
-        }
+    // Estado inicial
+    circle.textContent = "▶";
+    phase.textContent  = "Toque para iniciar";
+
+    /* ------------------ Funções internas ------------------ */
+
+    function atualizarLabel() {
+      if (modo === "forte") {
+        phase.textContent = `Força (${ciclo}/${ciclosMax})`;
+      } else {
+        phase.textContent = `Recuperar (${ciclo}/${ciclosMax})`;
       }
+    }
 
-      function pararIntervalo() {
-        if (intv) clearInterval(intv);
-        intv = null;
-      }
+    function pararIntervalo() {
+      if (intv) clearInterval(intv);
+      intv = null;
+    }
 
-      function iniciar() {
-        if (rodando) return;
+    function iniciar() {
+      if (rodando) return;
 
-        rodando = true;
-        circle.classList.remove("paused");
-        if (tempo <= 0) tempo = modo === "forte" ? forte : leve;
+      rodando = true;
+      circle.classList.remove("paused");
 
-        atualizarLabel();
+      if (tempo <= 0) tempo = modo === "forte" ? forte : leve;
+
+      atualizarLabel();
+      circle.textContent = tempo;
+
+      pararIntervalo();
+
+      intv = setInterval(() => {
+        if (!rodando) return;
+
+        tempo--;
         circle.textContent = tempo;
 
-        pararIntervalo();
-        intv = setInterval(() => {
-          if (!rodando) return;
+        if (tempo <= 0) {
 
-          tempo--;
-          circle.textContent = tempo;
-
-          if (tempo <= 0) {
-            if (modo === "forte") {
-              modo  = "leve";
-              tempo = leve;
-              atualizarLabel();
-            } else {
-              // terminou o leve → próximo ciclo
-              ciclo++;
-              if (ciclo > ciclosMax) {
-                // terminou tudo
-                pararIntervalo();
-                rodando = false;
-                circle.textContent = "✔";
-                phase.textContent  = "HIIT concluído";
-                circle.classList.add("paused");
-                return;
-              }
-              modo  = "forte";
-              tempo = forte;
-              atualizarLabel();
-            }
+          /* ---- Alternância forte → leve ---- */
+          if (modo === "forte") {
+            modo  = "leve";
+            tempo = leve;
+            atualizarLabel();
+            return;
           }
-        }, 1000);
-      }
 
-      function pausar() {
-        rodando = false;
-        circle.classList.add("paused");
-        phase.textContent = "Pausado — toque para retomar";
-        pararIntervalo();
-      }
+          /* ---- Leve → início do próximo ciclo ---- */
+          ciclo++;
 
-      circle.onclick = () => {
-        // Se acabou tudo e a usuária tocar de novo → reinicia HIIT
-        if (!rodando && ciclo > ciclosMax) {
-          ciclo = 1;
+          // FINALIZOU TODOS CICLOS
+          if (ciclo > ciclosMax) {
+            pararIntervalo();
+            rodando = false;
+            circle.textContent = "✔";
+            phase.textContent  = "HIIT concluído";
+            circle.classList.add("paused");
+            return;
+          }
+
+          // reinicia novo ciclo
           modo  = "forte";
-          tempo = forteBase;
-          circle.textContent = "▶";
-          phase.textContent  = "Toque para iniciar";
-          circle.classList.remove("paused");
-          return;
+          tempo = forte;
+          atualizarLabel();
         }
 
-        if (!rodando && tempo === forteBase && ciclo === 1 && modo === "forte") {
-          // Início pela primeira vez
-          iniciar();
-          return;
-        }
+      }, 1000);
+    }
 
-        if (rodando) {
-          pausar();
-        } else {
-          iniciar();
-        }
-      };
-    });
-  }
+    function pausar() {
+      rodando = false;
+      circle.classList.add("paused");
+      phase.textContent = "Pausado — toque para retomar";
+      pararIntervalo();
+    }
+
+    /* ---------------------------------------------
+       Clicar no círculo → play / pause / restart
+    --------------------------------------------- */
+    circle.onclick = () => {
+
+      // Reiniciar HIIT quando já terminou tudo
+      if (!rodando && ciclo > ciclosMax) {
+        ciclo = 1;
+        modo  = "forte";
+        tempo = forteBase;
+        circle.textContent = "▶";
+        phase.textContent  = "Toque para iniciar";
+        circle.classList.remove("paused");
+        return;
+      }
+
+      // Primeira vez iniciando
+      if (!rodando && tempo === forteBase && ciclo === 1 && modo === "forte") {
+        iniciar();
+        return;
+      }
+
+      // Pause / retomar
+      if (rodando) {
+        pausar();
+      } else {
+        iniciar();
+      }
+    };
+  });
+}
 
   /* ============================================================
      5. RESPIRAÇÃO — MODAL SHEET iOS
