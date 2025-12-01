@@ -402,4 +402,16 @@ body {
   background: #f5d4c7;
   transform: translateY(-1px);
 }
+.ff-sugestao-hiit {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  background: #fff7f2;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #f4e3d9;
+  color: #4d3f3a;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
 
