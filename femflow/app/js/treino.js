@@ -123,11 +123,11 @@ document.addEventListener("DOMContentLoaded", () => {
                   .join("")
               }
             </ul>
-            <button class="ff-btn-protocolo"
-                    data-proto="${box.protocolo}"
-                    data-origem="aquecimento">
-              💨 Respiração Wake
-            </button>
+            <button class="ff-btn-protocolo ff-resp-btn"
+        data-proto="wake" data-origem="aquecimento">
+  <span class="icon">💨</span>
+  <span>Respiração Wake</span>
+</button>
           `;
         break;
 
@@ -269,11 +269,12 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             </ul>
 
-            <button class="ff-btn-protocolo"
-                    data-proto="${box.protocolo}"
-                    data-origem="resfriamento">
-              🌬️ Respiração Release
-            </button>
+           <button class="ff-btn-protocolo ff-resp-btn"
+        data-proto="release" data-origem="resfriamento">
+  <span class="icon">🌬️</span>
+  <span>Respiração Release</span>
+</button>
+
           `;
         break;
       }
