@@ -253,7 +253,7 @@ FEMFLOW.engineTreino.organizarBlocosSimples = function (brutos) {
 // PRIORIDADES FIXAS:
 if (b.tipo === "aquecimento") boxNum = -100;       // sempre no início
 else if (b.tipo === "treino" && isNaN(boxNum)) boxNum = 1; // treino sem box → box 1
-else if (b.tipo === "hiit" && isNaN(boxNum)) boxNum = 0;   // hiit genérico
+else if (b.tipo === "hiit" && isNaN(boxNum)) boxNum = 850;  // hiit genérico
 else if (b.tipo === "cardio_final") boxNum = 900;  // antes do resfriamento
 else if (b.tipo === "resfriamento") boxNum = 999;  // sempre no final
 
@@ -436,19 +436,21 @@ if (b.tipo === "treino") {
 =============================================== */
 if (b.tipo === "hiit") {
 
+  // garantir que HIIT sempre fique fora do bloco de exercícios
+  const boxHiit = (b.boxNum >= 1) ? b.boxNum + 100 : 850;
+
   saida.push({
     tipo: "hiitPremium",
-    box: b.boxNum,
-
-    titulo: b.titulo || "🔥 HIIT",
-
-    forte:   b.forte   ? Number(b.forte)   : 40,
-    leve:    b.leve    ? Number(b.leve)    : 20,
-    ciclos:  b.ciclos  ? Number(b.ciclos)  : 6
+    box: boxHiit,
+    titulo: b.titulo || "🔥 HIIT Premium",
+    forte: Number(b.forte) || 30,
+    leve: Number(b.leve) || 30,
+    ciclos: Number(b.ciclos) || 6
   });
 
   continue;
 }
+
 
 
     /* ===============================================
