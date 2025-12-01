@@ -55,6 +55,49 @@ FEMFLOW.inserirHeaderApp = function () {
     document.querySelector(".ff-menu-modal")?.classList.add("active");
 };
 /* ===========================================================
+   2.1. atualização do perfil e fase
+=========================================================== */
+
+FEMFLOW.carregarCicloBackend = async function () {
+  FEMFLOW.log("🔄 Sincronizando ciclo com backend…");
+
+  const id = localStorage.getItem("femflow_id");
+  if (!id) return FEMFLOW.error("❌ Sem ID no localStorage!");
+
+  try {
+    const resp = await fetch(FEMFLOW.SCRIPT_URL + "?action=sync&id=" + id)
+      .then(r => r.json());
+
+    FEMFLOW.log("📌 SYNC:", resp);
+
+    if (!resp || !resp.fase) {
+      FEMFLOW.toast("Erro ao sincronizar fase hormonal.");
+      return null;
+    }
+
+    // Atualizar localStorage com dados “frescos”
+    localStorage.setItem("femflow_fase", resp.fase);
+    localStorage.setItem("femflow_diaCiclo", resp.diaCiclo);
+    localStorage.setItem("femflow_perfilHormonal", resp.perfilHormonal);
+    localStorage.setItem("femflow_nivel", resp.nivel);
+    localStorage.setItem("femflow_enfase", resp.enfase);
+
+    // Disparar evento geral FEMFLOW
+    window.dispatchEvent(new CustomEvent("femflow:ready", {
+      detail: resp
+    }));
+
+    return resp;
+
+  } catch (err) {
+    FEMFLOW.error("❌ Falha no sync:", err);
+    FEMFLOW.toast("Falha ao sincronizar ciclo.");
+    return null;
+  }
+};
+
+
+/* ===========================================================
    3 Menu
 =========================================================== */
 FEMFLOW.inserirMenuLateral = function () {
