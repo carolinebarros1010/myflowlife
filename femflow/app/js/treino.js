@@ -161,37 +161,50 @@ function renderBox(bloco) {
 
   let html = `<div class="carousel-item">`;
 
-  /* ======================================================
-     AQUECIMENTO PREMIUM
-  ====================================================== */
-  if (tipoDominante === "aquecimentoPremium") {
-    html += `
-      <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
-      <ul class="ff-passos">
-        ${bloco[0].passos.map(p => `<li>${p.nome}</li>`).join("")}
-      </ul>
-      <p class="ff-sugestao-resp">💨 Sugestão: faça respiração Wake antes do treino.<br>
-      <a class="ff-link-resp" href="respiracao.html?ret=treino">Abrir técnicas</a></p>
-    `;
-    html += `</div>`;
-    return html;
-  }
+ /* ======================================================
+   AQUECIMENTO PREMIUM
+====================================================== */
+if (tipoDominante === "aquecimentoPremium") {
+  html += `
+    <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
+    <ul class="ff-passos">
+      ${bloco[0].passos.map(p => `<li>${p.nome}</li>`).join("")}
+    </ul>
+    <p class="ff-sugestao-resp">
+      💨 Sugestão: prepare seu corpo com uma respiração consciente antes de começar.
+    </p>
+    <button class="ff-btn-resp-sugerida"
+            type="button"
+            onclick="location.href='respiracao.html?ret=treino'">
+      🌬️ Abrir protocolos de respiração
+    </button>
+  `;
+  html += `</div>`;
+  return html;
+}
 
-  /* ======================================================
-     RESFRIAMENTO PREMIUM
-  ====================================================== */
-  if (tipoDominante === "resfriamentoPremium") {
-    html += `
-      <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
-      <ul class="ff-passos">
-        ${bloco[0].passos.map(p => `<li>${p.nome}</li>`).join("")}
-      </ul>
-      <p class="ff-sugestao-resp">🌬️ Sugestão: finalize com respiração Release.<br>
-      <a class="ff-link-resp" href="respiracao.html?ret=treino">Abrir técnicas</a></p>
-    `;
-    html += `</div>`;
-    return html;
-  }
+/* ======================================================
+   RESFRIAMENTO PREMIUM
+====================================================== */
+if (tipoDominante === "resfriamentoPremium") {
+  html += `
+    <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
+    <ul class="ff-passos">
+      ${bloco[0].passos.map(p => `<li>${p.nome}</li>`).join("")}
+    </ul>
+    <p class="ff-sugestao-resp">
+      🌬️ Sugestão: finalize seu treino desacelerando com respiração suave.
+    </p>
+    <button class="ff-btn-resp-sugerida"
+            type="button"
+            onclick="location.href='respiracao.html?ret=treino'">
+      💗 Fazer respiração de fechamento
+    </button>
+  `;
+  html += `</div>`;
+  return html;
+}
+
 
   /* ======================================================
      CARDIO FINAL
