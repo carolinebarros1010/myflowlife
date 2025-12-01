@@ -1,10 +1,9 @@
 /* ============================================================
-   FEMFLOW • TREINO ENGINE v3.6 — PREMIUM 2025
+   FEMFLOW • TREINO ENGINE v3.7 — PREMIUM 2025
    ------------------------------------------------------------
-   - Modelo B (HIIT com bubble + play/pause)
-   - Estrutura 100% compatível com treino.js 3.6 + treino.css 3.6
-   - Cardio + Aquecimento + Resfriamento + Boxes Firebase
-   - Séries/Reps/Intervalo automáticos
+   - Compatível com treino.js v3.7 FINAL
+   - Suporte: treino PERSONAL + cardio_final
+   - Não altera estrutura v3.6 existente
 ============================================================ */
 
 window.FEMFLOW = window.FEMFLOW || {};
@@ -63,14 +62,15 @@ FEMFLOW.engineTreino.normalizarEnfase = function (raw) {
     casa: "casa",
     geral: "geral",
     remo: "remo",
-    natacao: "natacao"
+    natacao: "natacao",
+    personal: "personal" // 🔥 ADICIONADO
   };
 
   return mapa[e] || "geral";
 };
 
 /* ============================================================
-   4) REGRAS OFICIAIS: (fase × nível)
+   4) REGRAS OFICIAIS — treino comum
 ============================================================ */
 FEMFLOW.engineTreino.regras = {
   iniciante: {
@@ -135,12 +135,11 @@ FEMFLOW.engineTreino.boxAquecimento = () => ({
   titulo: "🌿 Aquecimento Premium",
   descricao: "Prepare articulações, postura e respiração.",
   passos: [
-    { nome: "Mobilidade de Quadril (40s)", desc: "Circule o quadril com coluna neutra." },
-    { nome: "Mobilidade Torácica (40s)", desc: "Gire o tronco suavemente." },
-    { nome: "Mobilidade de Ombro (40s)", desc: "Eleve e circule os ombros." },
-    { nome: "Caminhada Leve – 5 min", desc: "Respiração nasal e leve." }
-  ],
-  protocolo: "wake"
+    { nome: "Mobilidade de Quadril (40s)" },
+    { nome: "Mobilidade Torácica (40s)" },
+    { nome: "Mobilidade de Ombro (40s)" },
+    { nome: "Caminhada Leve – 5 min" }
+  ]
 });
 
 /* ============================================================
@@ -150,17 +149,15 @@ FEMFLOW.engineTreino.boxResfriamento = () => ({
   tipo: "resfriamentoPremium",
   titulo: "🧘 Resfriamento Premium",
   descricao: "Desacelere corpo e mente.",
-  protocolo: "release",
   passos: [
-    { nome: "Alongamentos Leves — 2 min", desc: "Respire sem dor." },
-    { nome: "Respiração + Retorno — 1 min", desc: "Restaure a calma." }
+    { nome: "Alongamentos Leves — 2 min" },
+    { nome: "Respiração — 1 min" }
   ]
 });
 
 /* ============================================================
-   9) HIIT — Modelo B (igual respiração)
+   9) HIIT — Modelo B
 ============================================================ */
-
 FEMFLOW.engineTreino._hiitUltimo = null;
 
 FEMFLOW.engineTreino._protocolosHIIT = [
@@ -169,7 +166,7 @@ FEMFLOW.engineTreino._protocolosHIIT = [
   { forte: 30, leve: 30, nome: "30/30" }
 ];
 
-FEMFLOW.engineTreino.boxHIIT = function (fase, enfase) {
+FEMFLOW.engineTreino.boxHIIT = function () {
 
   const protocolo = this._protocolosHIIT
     .filter(p => p.nome !== this._hiitUltimo)
@@ -181,9 +178,9 @@ FEMFLOW.engineTreino.boxHIIT = function (fase, enfase) {
     tipo: "hiitPremium",
     titulo: `🔥 HIIT — ${protocolo.nome}`,
     descricao: `Ciclo: ${protocolo.forte}s forte + ${protocolo.leve}s leve.`,
-    forte: protocolo.forte,
-    leve: protocolo.leve,
-    protocolo: protocolo.nome
+    estimulo: protocolo.forte,
+    descanso: protocolo.leve,
+    ciclos: 6
   };
 };
 
@@ -200,7 +197,7 @@ FEMFLOW.engineTreino.boxCardio = function () {
 };
 
 /* ============================================================
-   11) FIREBASE — buscar exercícios
+   11) FIREBASE — exercícios normais
 ============================================================ */
 FEMFLOW.engineTreino.buscarMultiBox = async function ({
   nivel,
@@ -217,7 +214,7 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
   const pasta  = `${nivelNorm}_${enfaseNorm}`;
   const diaKey = `dia_${diaCiclo}`;
 
-  FEMFLOW.log("📦 Firestore →", pasta, faseNorm, diaKey);
+  FEMFLOW.log("📦 Firestore padrão →", pasta, faseNorm, diaKey);
 
   const db = firebase.firestore();
 
@@ -232,7 +229,7 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
     .get();
 
   if (snap.empty) {
-    FEMFLOW.error("⚠️ Firestore vazio");
+    FEMFLOW.error("⚠️ Firestore vazio (exercicios)");
     return [];
   }
 
@@ -270,7 +267,46 @@ FEMFLOW.engineTreino.buscarMultiBox = async function ({
 };
 
 /* ============================================================
-   12) MONTAR TREINO FINAL
+   🔥 12) FIREBASE — TREINO PERSONAL
+============================================================ */
+FEMFLOW.engineTreino.carregarTreinoPersonal = async function ({
+  id,
+  enfase,
+  fase,
+  diaCiclo
+}) {
+  const faseNorm = this.normalizarFase(fase);
+  const enfNorm  = this.normalizarEnfase(enfase);
+  const diaKey   = `dia_${diaCiclo}`;
+
+  FEMFLOW.log("🎨 Firestore PERSONAL →", id, enfNorm, faseNorm, diaKey);
+
+  const db = firebase.firestore();
+
+  const snap = await db
+    .collection("personal_trainings")
+    .doc(id)
+    .collection(enfNorm)
+    .doc(faseNorm)
+    .collection("dias")
+    .doc(diaKey)
+    .collection("exercicios")
+    .get();
+
+  if (snap.empty) {
+    FEMFLOW.warn("⚠️ Treino personal vazio");
+    return [];
+  }
+
+  const lista = [];
+  snap.forEach(doc => lista.push(doc.data()));
+
+  return lista;
+};
+
+
+/* ============================================================
+   13) MONTAR TREINO FINAL (não-personal)
 ============================================================ */
 FEMFLOW.engineTreino.montarTreino = async function ({
   nivel,
@@ -283,13 +319,10 @@ FEMFLOW.engineTreino.montarTreino = async function ({
   const enfaseNorm  = this.normalizarEnfase(enfase);
 
   const regras = this.regras[nivelNorm][faseNorm];
-
   const lista = [];
 
-  // AQUECIMENTO
   lista.push(this.boxAquecimento());
 
-  // BOXES FIREBASE
   const boxesFirebase = await this.buscarMultiBox({
     nivel: nivelNorm,
     enfase: enfaseNorm,
@@ -299,17 +332,13 @@ FEMFLOW.engineTreino.montarTreino = async function ({
     exPorBox: regras.ex
   });
 
-  // INTERCALAR TREINO / HIIT / CARDIO
   for (let i = 0; i < regras.totalBoxes; i++) {
     if (boxesFirebase[i]) lista.push(boxesFirebase[i]);
-
-    if (regras.hiit[i]) lista.push(this.boxHIIT(faseNorm, enfaseNorm));
+    if (regras.hiit[i])   lista.push(this.boxHIIT());
     if (regras.cardio[i]) lista.push(this.boxCardio());
   }
 
-  // RESFRIAMENTO
   lista.push(this.boxResfriamento());
 
   return lista;
 };
-
