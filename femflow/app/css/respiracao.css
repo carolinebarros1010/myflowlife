@@ -265,3 +265,11 @@
   color: #A87E72;
   font-size: 0.9em;
 }
+.ff-voltar-treino {
+  margin: 10px;
+  background: transparent;
+  border: none;
+  color: #335953;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
