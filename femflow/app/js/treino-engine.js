@@ -166,7 +166,15 @@ FEMFLOW.engineTreino.organizarBlocosSimples = function (brutos) {
       const boxLabel = String(b.box || "").trim();
 
       // número do box (default = 0)
-      const boxNum = parseInt(boxLabel.replace(/\D/g, "")) || 0;
+     let boxNum = parseInt(boxLabel.replace(/\D/g, ""));
+
+// PRIORIDADES FIXAS:
+if (b.tipo === "aquecimento") boxNum = -100;       // sempre no início
+else if (b.tipo === "treino" && isNaN(boxNum)) boxNum = 1; // treino sem box → box 1
+else if (b.tipo === "hiit" && isNaN(boxNum)) boxNum = 0;   // hiit genérico
+else if (b.tipo === "cardio_final") boxNum = 900;  // antes do resfriamento
+else if (b.tipo === "resfriamento") boxNum = 999;  // sempre no final
+
 
       // detectar série especial: 2E, 3S, 3T, 2Ae...
       const serieEspecial = FEMFLOW.engineTreino.detectarSerieEspecial(boxLabel);
@@ -249,10 +257,10 @@ FEMFLOW.engineTreino.intercalarHIIT = function (blocos) {
     /* --------------------------------------------------------
        5) HIIT GENÉRICO (boxNum = 0) → vai para o final
     -------------------------------------------------------- */
-    if (b.tipo === "hiit" && b.boxNum === 0) {
-      resultado.push({ ...b, boxNum: 9997 });
-      continue;
-    }
+   if (b.tipo === "hiit" && b.boxNum === 0) {
+  resultado.push({ ...b, boxNum: 500 }); // antes de cardio/resfriamento
+  continue;
+}
 
     /* --------------------------------------------------------
        6) BOX NORMAL — juntando exercícios
@@ -332,7 +340,7 @@ FEMFLOW.engineTreino.converterParaFront = function (blocos) {
         series: b.series || "",
         reps: b.reps || "",
 
-        intervalo: b.serieEspecial ? 0 : (Number(b.intervalo) || 60)
+        intervalo: Number(b.intervalo) || 0
       });
 
       continue;
@@ -348,9 +356,10 @@ FEMFLOW.engineTreino.converterParaFront = function (blocos) {
         box: b.boxNum,   // para intercalar no bloco correto
         titulo: b.titulo || "🔥 HIIT",
 
-        forte: Number(b.forte) || 40,
-        leve: Number(b.leve) || 20,
-        ciclos: Number(b.ciclos) || 6
+       forte: Number(b.forte) || 0,
+      leve: Number(b.leve) || 0,
+      ciclos: Number(b.ciclos) || 1
+
       });
 
       continue;
