@@ -54,7 +54,9 @@ FEMFLOW.inserirHeaderApp = function () {
   h.querySelector("#ffMenuBtn").onclick = () =>
     document.querySelector(".ff-menu-modal")?.classList.add("active");
 };
-
+/* ===========================================================
+   3 Menu
+=========================================================== */
 FEMFLOW.inserirMenuLateral = function () {
   if (document.querySelector(".ff-menu-modal")) return;
 
@@ -132,6 +134,14 @@ FEMFLOW._acaoMenu = function (op) {
 };
 
 /* ===========================================================
+   3.1. Nome da aluna — função oficial
+=========================================================== */
+FEMFLOW.getNome = function () {
+  return localStorage.getItem("femflow_nome") || "Aluna";
+};
+
+
+/* ===========================================================
    4. ALTERAR NÍVEL — FULL BACKEND (coluna I)
 =========================================================== */
 
@@ -205,7 +215,7 @@ FEMFLOW.carregarPerfil = async function () {
     if (j.status !== "ok") return null;
 
     /* BACKEND É SEMPRE A VERDADE */
-    localStorage.setItem("femflow_nome",  j.nome);
+    localStorage.setItem("femflow_nome", j.nome || "Aluna");
     localStorage.setItem("femflow_fase",  j.fase);
     localStorage.setItem("femflow_enfase", j.enfase);
     localStorage.setItem("femflow_diaCiclo", j.diaCiclo);
