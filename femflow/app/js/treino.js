@@ -1,18 +1,20 @@
 /* ============================================================
-   FEMFLOW — treino.js v3.6 (Modelo B FINAL)
+   FEMFLOW — treino.js v3.7 FINAL
    ------------------------------------------------------------
-   - Render cards compactos (Box B)
-   - Séries / Reps / Descanso em linha (ff-info-line)
-   - Botão "Iniciar descanso" / "Iniciar cardio"
-   - HIIT em bolha estilo respiração (play/pause no círculo)
-   - Menu HIIT: Academia / Casa (toggle)
-   - Modal Respiração sheet iOS, com play/pause
-   - Footer fixo sem cobrir o card (usa padding-bottom no CSS)
+   • Mantém estrutura v3.6 COMPLETA
+   • Acrescenta:
+      - Suporte a treino PERSONAL
+      - Carregamento Firebase personalizado
+      - Flag para remover HIIT se existir CARDIO_FINAL
+      - Render card: cardio_final
+   ------------------------------------------------------------
 ============================================================ */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  FEMFLOW.log("🚀 treino.js v3.6 iniciado!");
+  FEMFLOW.log("🚀 treino.js v3.7 iniciado!");
+
+  const isPersonal = location.search.includes("personal=1");
 
   const id = localStorage.getItem("femflow_id");
   if (!id) {
@@ -72,6 +74,44 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    /* ============================================================
+       🔥 1.1 MODO PERSONAL — CARREGAR DO FIREBASE
+    ============================================================ */
+    if (isPersonal) {
+      FEMFLOW.log("🎨 Treino PERSONAL detectado. Carregando Firebase…");
+
+      try {
+        const treinoPersonal = await FEMFLOW.engineTreino.carregarTreinoPersonal({
+          id,
+          enfase,
+          fase,
+          diaCiclo
+        });
+
+        if (!treinoPersonal || treinoPersonal.length === 0) {
+          track.innerHTML = `
+            <div class="carousel-item">
+              <p>Seu treino personal será enviado pelo coach.</p>
+            </div>
+          `;
+          return;
+        }
+
+        FEMFLOW.log("📦 Treino personal carregado:", treinoPersonal);
+
+        renderTreino(treinoPersonal);
+        return;
+
+      } catch (e) {
+        FEMFLOW.error("❌ Erro ao carregar treino personal:", e);
+        FEMFLOW.toast("Erro ao carregar treino personal.", true);
+        return;
+      }
+    }
+
+    /* ============================================================
+       🔥 1.2 FLUXO NORMAL (não personal)
+    ============================================================ */
     const lista = await FEMFLOW.engineTreino.montarTreino({
       nivel,
       enfase,
@@ -82,8 +122,10 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTreino(lista);
   });
 
+
+
   /* ============================================================
-     2. RENDERIZAÇÃO COMPLETA DOS BOXES
+     2. RENDER COMPLETO DOS BOXES
   ============================================================ */
 
   function fmtTime(seg) {
@@ -92,230 +134,266 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }
 
- function renderTreino(lista) {
-  track.innerHTML = "";
+  function renderTreino(lista) {
 
-  if (!lista || !lista.length) {
-    track.innerHTML = `
-      <div class="carousel-item">
-        <p>Nenhum treino disponível para hoje.</p>
-      </div>
-    `;
-    return;
-  }
+    /* 🔥 VERIFICAR SE EXISTE CARDIO FINAL */
+    const hasCardioFinal = lista.some(b => b.tipo === "cardio_final");
+    window.FEMFLOW.desativarHIIT = hasCardioFinal;
 
-  lista.forEach((box) => {
-    let html = `<div class="carousel-item">`;
+    track.innerHTML = "";
 
-    switch (box.tipo) {
+    if (!lista || !lista.length) {
+      track.innerHTML = `
+        <div class="carousel-item">
+          <p>Nenhum treino disponível para hoje.</p>
+        </div>
+      `;
+      return;
+    }
 
-      /* =======================================================
-         AQUECIMENTO PREMIUM
-      ======================================================= */
-      case "aquecimentoPremium":
-        html += `
-          <h2 class="ff-ex-titulo">${box.titulo}</h2>
-          <p class="ff-ex-sub">${box.descricao}</p>
+    lista.forEach((box) => {
+      let html = `<div class="carousel-item">`;
 
-          <ul class="ff-passos">
-            ${
-              box.passos
-                .map(p => `
-                  <li data-desc="${p.desc || ""}">
-                    ${p.nome}
-                  </li>
-                `)
-                .join("")
-            }
-          </ul>
+      switch (box.tipo) {
 
-          <button class="ff-btn-protocolo ff-resp-btn"
-                  data-proto="wake" data-origem="aquecimento">
-            💨 Respiração Wake
-          </button>
-        `;
-      break;
+        /* =======================================================
+           AQUECIMENTO PREMIUM
+        ======================================================= */
+        case "aquecimentoPremium":
+          html += `
+            <h2 class="ff-ex-titulo">${box.titulo}</h2>
+            <p class="ff-ex-sub">${box.descricao}</p>
 
-      /* =======================================================
-         TREINO (FIREBASE)
-      ======================================================= */
-      case "treino":
-        html += `<h2 class="ff-ex-titulo">Box ${box.box}</h2>`;
+            <ul class="ff-passos">
+              ${
+                box.passos
+                  .map(p => `
+                    <li data-desc="${p.desc || ""}">
+                      ${p.nome}
+                    </li>
+                  `)
+                  .join("")
+              }
+            </ul>
 
-        box.exercicios.forEach(ex => {
-          const titulo = ex.titulo || ex.nome || "Exercício";
-          const youtube = ex.youtube || ex.link || "#";
-          const intervalSeg = Number(ex.intervalo) || 60;
+            <button class="ff-btn-protocolo ff-resp-btn"
+                    data-proto="wake" data-origem="aquecimento">
+              💨 Respiração Wake
+            </button>
+          `;
+        break;
+
+        /* =======================================================
+           TREINO PRINCIPAL
+        ======================================================= */
+        case "treino":
+          html += `<h2 class="ff-ex-titulo">Box ${box.box}</h2>`;
+
+          box.exercicios.forEach(ex => {
+            const titulo = ex.titulo || ex.nome || "Exercício";
+            const youtube = ex.youtube || ex.link || "#";
+            const intervalSeg = Number(ex.intervalo) || 60;
+
+            html += `
+              <div class="ff-ex-item">
+
+                <div class="ff-ex-top">
+                  <div class="ff-ex-nome">
+                    <a href="${youtube}"
+                       ${youtube !== "#" ? 'target="_blank" rel="noopener"' : ""}>
+                      ${titulo}
+                    </a>
+                  </div>
+
+                  <input class="ff-ex-peso"
+                         type="number"
+                         placeholder="kg"
+                         data-ex="${titulo}">
+                </div>
+
+                <div class="ff-info-line">
+                  <span>🌀 <b>${ex.series}</b>x</span>
+                  <span>🔁 <b>${ex.reps}</b></span>
+                  <span>⏱️ <b>${intervalSeg}s</b></span>
+                </div>
+
+                <div class="ff-descanso-wrap">
+                  <button class="ff-descanso-btn btnStartTimer">
+                    ▶️ Iniciar descanso
+                  </button>
+
+                  <span class="ff-timer-count">${fmtTime(intervalSeg)}</span>
+
+                  <div class="ff-timer-bar" data-timer="${intervalSeg}">
+                    <div class="ff-timer-fill"></div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+        break;
+
+        /* =======================================================
+           HIIT PREMIUM (removido se houver cardio_final)
+        ======================================================= */
+        case "hiitPremium":
+
+          if (window.FEMFLOW.desativarHIIT) {
+            html += `<p>HIIT removido devido ao cardio final do dia.</p>`;
+            break;
+          }
+
+          const est = Number(box.estimulo) || 40;
+          const rec = Number(box.descanso) || 20;
+          const ciclos = Number(box.ciclos) || 6;
 
           html += `
-            <div class="ff-ex-item">
+            <h2 class="ff-ex-titulo">${box.titulo}</h2>
+            <p class="ff-ex-sub">${box.descricao}</p>
 
-              <!-- TOPO -->
-              <div class="ff-ex-top">
-                <div class="ff-ex-nome">
-                  <a href="${youtube}"
-                     ${youtube !== "#" ? 'target="_blank" rel="noopener"' : ""}>
-                    ${titulo}
-                  </a>
-                </div>
+            <div class="hiit-bubble">
 
-                <input class="ff-ex-peso"
-                       type="number"
-                       placeholder="kg"
-                       data-ex="${titulo}">
+              <div class="breath-circle hiit-circle"
+                   data-estimulo="${est}"
+                   data-descanso="${rec}"
+                   data-ciclos="${ciclos}">
+                ▶
               </div>
 
-              <!-- INFO -->
-              <div class="ff-info-line">
-                <span>🌀 <b>${ex.series}</b>x</span>
-                <span>🔁 <b>${ex.reps}</b></span>
-                <span>⏱️ <b>${intervalSeg}s</b></span>
+              <div class="breath-phase hiit-phase">
+                Toque no círculo para iniciar
               </div>
+            </div>
 
-              <!-- TIMER DESCANSO -->
-              <div class="ff-descanso-wrap">
-                <button class="ff-descanso-btn btnStartTimer">
-                  ▶️ Iniciar descanso
-                </button>
+            <button class="ff-descanso-btn hiit-opcoes-btn">
+              ⚙️ Opções de exercício
+            </button>
 
-                <span class="ff-timer-count">${fmtTime(intervalSeg)}</span>
+            <div class="hiit-opcoes hidden">
 
-                <div class="ff-timer-bar" data-timer="${intervalSeg}">
-                  <div class="ff-timer-fill"></div>
-                </div>
+              <p><b>Academia</b></p>
+              ${
+                (box.cardsAcademia || [])
+                  .map(c => `
+                    <div class="hiit-card">
+                      <span class="hiit-card-icon">${c.icon || "🏃‍♀️"}</span>
+                      <span>${c.nome}</span>
+                    </div>
+                  `)
+                  .join("")
+              }
+
+              <p style="margin-top:12px;"><b>Casa</b></p>
+              ${
+                (box.cardsCasa || [])
+                  .map(c => `
+                    <div class="hiit-card">
+                      <span class="hiit-card-icon">${c.icon || "⭐"}</span>
+                      <span>${c.nome}</span>
+                    </div>
+                  `)
+                  .join("")
+              }
+
+            </div>
+          `;
+        break;
+
+        /* =======================================================
+           CARDIO INTRA
+        ======================================================= */
+        case "cardio": {
+          const total = Number(box.tempo_total) || 600;
+
+          html += `
+            <h2 class="ff-ex-titulo">${box.titulo}</h2>
+            <p class="ff-ex-sub">${box.descricao}</p>
+
+            <div class="ff-descanso-wrap">
+              <button class="ff-descanso-btn btnStartTimer">
+                ▶️ Iniciar cardio
+              </button>
+
+              <span class="ff-timer-count">${fmtTime(total)}</span>
+
+              <div class="ff-timer-bar" data-timer="${total}">
+                <div class="ff-timer-fill"></div>
               </div>
             </div>
           `;
-        });
-      break;
+        }
+        break;
 
-      /* =======================================================
-         HIIT PREMIUM — MODELO B
-      ======================================================= */
-      case "hiitPremium": {
-        const est = Number(box.estimulo) || 40;
-        const rec = Number(box.descanso) || 20;
-        const ciclos = Number(box.ciclos) || 6;
+        /* =======================================================
+           CARDIO FINAL — NOVO
+        ======================================================= */
+        case "cardio_final": {
 
-        html += `
-          <h2 class="ff-ex-titulo">${box.titulo}</h2>
-          <p class="ff-ex-sub">${box.descricao}</p>
+          const total = Number(box.duracao) * 60 || 1800;
+          const intensidade = box.intensidade || "leve";
+          const desc = box.descricao || "";
 
-          <div class="hiit-bubble">
+          html += `
+            <h2 class="ff-ex-titulo">Cardio Final (${intensidade})</h2>
+            <p class="ff-ex-sub">${desc}</p>
 
-            <div class="breath-circle hiit-circle"
-                 data-estimulo="${est}"
-                 data-descanso="${rec}"
-                 data-ciclos="${ciclos}">
-              ▶
+            <div class="ff-descanso-wrap">
+              <button class="ff-descanso-btn btnStartTimer">
+                ▶️ Iniciar cardio final
+              </button>
+
+              <span class="ff-timer-count">${fmtTime(total)}</span>
+
+              <div class="ff-timer-bar" data-timer="${total}">
+                <div class="ff-timer-fill"></div>
+              </div>
             </div>
+          `;
+        }
+        break;
 
-            <div class="breath-phase hiit-phase">
-              Toque no círculo para iniciar
-            </div>
-          </div>
+        /* =======================================================
+           RESFRIAMENTO PREMIUM
+        ======================================================= */
+        case "resfriamentoPremium":
+          html += `
+            <h2 class="ff-ex-titulo">${box.titulo}</h2>
+            <p class="ff-ex-sub">${box.descricao}</p>
 
-          <button class="ff-descanso-btn hiit-opcoes-btn">
-            ⚙️ Opções de exercício
-          </button>
+            <ul class="ff-passos">
+              ${
+                box.passos
+                  .map(p => `
+                    <li data-desc="${p.desc || ""}">
+                      ${p.nome}
+                    </li>
+                  `)
+                  .join("")
+              }
+            </ul>
 
-          <div class="hiit-opcoes hidden">
-
-            <p><b>Academia</b></p>
-            ${
-              (box.cardsAcademia || [])
-                .map(c => `
-                  <div class="hiit-card">
-                    <span class="hiit-card-icon">${c.icon || "🏃‍♀️"}</span>
-                    <span>${c.nome}</span>
-                  </div>
-                `)
-                .join("")
-            }
-
-            <p style="margin-top:12px;"><b>Casa</b></p>
-            ${
-              (box.cardsCasa || [])
-                .map(c => `
-                  <div class="hiit-card">
-                    <span class="hiit-card-icon">${c.icon || "⭐"}</span>
-                    <span>${c.nome}</span>
-                  </div>
-                `)
-                .join("")
-            }
-          </div>
-        `;
-      }
-      break;
-
-      /* =======================================================
-         CARDIO
-      ======================================================= */
-      case "cardio": {
-        const total = Number(box.tempo_total) || 600;
-
-        html += `
-          <h2 class="ff-ex-titulo">${box.titulo}</h2>
-          <p class="ff-ex-sub">${box.descricao}</p>
-
-          <div class="ff-descanso-wrap">
-            <button class="ff-descanso-btn btnStartTimer">
-              ▶️ Iniciar cardio
+            <button class="ff-btn-protocolo ff-resp-btn"
+                    data-proto="release"
+                    data-origem="resfriamento">
+              🌬️ Respiração Release
             </button>
-
-            <span class="ff-timer-count">${fmtTime(total)}</span>
-
-            <div class="ff-timer-bar" data-timer="${total}">
-              <div class="ff-timer-fill"></div>
-            </div>
-          </div>
-        `;
+          `;
+        break;
       }
-      break;
 
-      /* =======================================================
-         RESFRIAMENTO PREMIUM
-      ======================================================= */
-      case "resfriamentoPremium":
-        html += `
-          <h2 class="ff-ex-titulo">${box.titulo}</h2>
-          <p class="ff-ex-sub">${box.descricao}</p>
+      html += `</div>`;
+      track.insertAdjacentHTML("beforeend", html);
+    });
 
-          <ul class="ff-passos">
-            ${
-              box.passos
-                .map(p => `
-                  <li data-desc="${p.desc || ""}">
-                    ${p.nome}
-                  </li>
-                `)
-                .join("")
-            }
-          </ul>
+    initTimers();
+    initHIIT();
+    initBreathing();
+    initPeso();
+  }
 
-          <button class="ff-btn-protocolo ff-resp-btn"
-                  data-proto="release"
-                  data-origem="resfriamento">
-            🌬️ Respiração Release
-          </button>
-        `;
-      break;
-    }
-
-    html += `</div>`;
-    track.insertAdjacentHTML("beforeend", html);
-  });
-
-  // === Inicializa funções ===
-  initTimers();
-  initHIIT();
-  initBreathing();
-  initPeso();
-}
 
   /* ============================================================
-     3. TIMERS — DESCANSO / CARDIO
+     3. TIMERS — igual ao v3.6
   ============================================================ */
   function initTimers() {
     document.querySelectorAll(".ff-descanso-wrap").forEach(wrap => {
@@ -336,21 +414,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       btn.onclick = () => {
         if (rodando) {
-          // pausa
           rodando = false;
           btn.textContent = "▶️ Retomar";
           clearInterval(intv);
           return;
         }
 
-        // iniciar / retomar
         rodando = true;
         btn.textContent = "⏸️ Pausar";
 
-        if (restante <= 0) {
-          // se já terminou antes, reinicia
-          restante = total;
-        }
+        if (restante <= 0) restante = total;
 
         clearInterval(intv);
         intv = setInterval(() => {
@@ -372,156 +445,127 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-/* ============================================================
-   4. HIIT — BOLHA COM PLAY/PAUSE NO CÍRCULO
-============================================================ */
-function initHIIT() {
-
-  /* ---------------------------------------------
-     BOTÃO: Opções de exercício (Academia / Casa)
-  --------------------------------------------- */
-  document.querySelectorAll(".hiit-opcoes-btn").forEach(btn => {
-    btn.onclick = () => {
-      const card = btn.closest(".carousel-item");
-      const box  = card?.querySelector(".hiit-opcoes");
-      if (box) box.classList.toggle("hidden");
-    };
-  });
-
-  /* ---------------------------------------------
-     CÍRCULO: Play / Pause com alternância inteligente
-  --------------------------------------------- */
-  document.querySelectorAll(".hiit-circle").forEach(circle => {
-    const card  = circle.closest(".carousel-item");
-    const phase = card?.querySelector(".hiit-phase");
-    if (!phase) return;
-
-    const forteBase = Number(circle.dataset.estimulo) || 40;
-    const leveBase  = Number(circle.dataset.descanso) || 20;
-    const ciclosMax = Number(circle.dataset.ciclos)   || 6;
-
-    let forte   = forteBase;
-    let leve    = leveBase;
-    let tempo   = forte;
-    let modo    = "forte";       // forte → leve
-    let ciclo   = 1;
-    let rodando = false;
-    let intv    = null;
-
-    // Estado inicial
-    circle.textContent = "▶";
-    phase.textContent  = "Toque para iniciar";
-
-    /* ------------------ Funções internas ------------------ */
-
-    function atualizarLabel() {
-      if (modo === "forte") {
-        phase.textContent = `Força (${ciclo}/${ciclosMax})`;
-      } else {
-        phase.textContent = `Recuperar (${ciclo}/${ciclosMax})`;
-      }
-    }
-
-    function pararIntervalo() {
-      if (intv) clearInterval(intv);
-      intv = null;
-    }
-
-    function iniciar() {
-      if (rodando) return;
-
-      rodando = true;
-      circle.classList.remove("paused");
-
-      if (tempo <= 0) tempo = modo === "forte" ? forte : leve;
-
-      atualizarLabel();
-      circle.textContent = tempo;
-
-      pararIntervalo();
-
-      intv = setInterval(() => {
-        if (!rodando) return;
-
-        tempo--;
-        circle.textContent = tempo;
-
-        if (tempo <= 0) {
-
-          /* ---- Alternância forte → leve ---- */
-          if (modo === "forte") {
-            modo  = "leve";
-            tempo = leve;
-            atualizarLabel();
-            return;
-          }
-
-          /* ---- Leve → início do próximo ciclo ---- */
-          ciclo++;
-
-          // FINALIZOU TODOS CICLOS
-          if (ciclo > ciclosMax) {
-            pararIntervalo();
-            rodando = false;
-            circle.textContent = "✔";
-            phase.textContent  = "HIIT concluído";
-            circle.classList.add("paused");
-            return;
-          }
-
-          // reinicia novo ciclo
-          modo  = "forte";
-          tempo = forte;
-          atualizarLabel();
-        }
-
-      }, 1000);
-    }
-
-    function pausar() {
-      rodando = false;
-      circle.classList.add("paused");
-      phase.textContent = "Pausado — toque para retomar";
-      pararIntervalo();
-    }
-
-    /* ---------------------------------------------
-       Clicar no círculo → play / pause / restart
-    --------------------------------------------- */
-    circle.onclick = () => {
-
-      // Reiniciar HIIT quando já terminou tudo
-      if (!rodando && ciclo > ciclosMax) {
-        ciclo = 1;
-        modo  = "forte";
-        tempo = forteBase;
-        circle.textContent = "▶";
-        phase.textContent  = "Toque para iniciar";
-        circle.classList.remove("paused");
-        return;
-      }
-
-      // Primeira vez iniciando
-      if (!rodando && tempo === forteBase && ciclo === 1 && modo === "forte") {
-        iniciar();
-        return;
-      }
-
-      // Pause / retomar
-      if (rodando) {
-        pausar();
-      } else {
-        iniciar();
-      }
-    };
-  });
-}
 
   /* ============================================================
-     5. RESPIRAÇÃO — MODAL SHEET iOS
+     4. HIIT — igual ao v3.6 (só removido quando cardio_final existe)
+  ============================================================ */
+  function initHIIT() {
+    document.querySelectorAll(".hiit-opcoes-btn").forEach(btn => {
+      btn.onclick = () => {
+        const card = btn.closest(".carousel-item");
+        const box  = card?.querySelector(".hiit-opcoes");
+        if (box) box.classList.toggle("hidden");
+      };
+    });
+
+    if (window.FEMFLOW.desativarHIIT) return; // 🔥 chave do upgrade
+
+    document.querySelectorAll(".hiit-circle").forEach(circle => {
+      const card  = circle.closest(".carousel-item");
+      const phase = card?.querySelector(".hiit-phase");
+      if (!phase) return;
+
+      const forteBase = Number(circle.dataset.estimulo) || 40;
+      const leveBase  = Number(circle.dataset.descanso) || 20;
+      const ciclosMax = Number(circle.dataset.ciclos)   || 6;
+
+      let forte   = forteBase;
+      let leve    = leveBase;
+      let tempo   = forte;
+      let modo    = "forte";
+      let ciclo   = 1;
+      let rodando = false;
+      let intv    = null;
+
+      circle.textContent = "▶";
+      phase.textContent  = "Toque para iniciar";
+
+      function atualizarLabel() {
+        if (modo === "forte") phase.textContent = `Força (${ciclo}/${ciclosMax})`;
+        else phase.textContent = `Recuperar (${ciclo}/${ciclosMax})`;
+      }
+
+      function pararIntervalo() {
+        if (intv) clearInterval(intv);
+        intv = null;
+      }
+
+      function iniciar() {
+        if (rodando) return;
+        rodando = true;
+        circle.classList.remove("paused");
+
+        if (tempo <= 0) tempo = modo === "forte" ? forte : leve;
+
+        atualizarLabel();
+        circle.textContent = tempo;
+
+        pararIntervalo();
+
+        intv = setInterval(() => {
+          if (!rodando) return;
+
+          tempo--;
+          circle.textContent = tempo;
+
+          if (tempo <= 0) {
+
+            if (modo === "forte") {
+              modo  = "leve";
+              tempo = leve;
+              atualizarLabel();
+              return;
+            }
+
+            ciclo++;
+
+            if (ciclo > ciclosMax) {
+              pararIntervalo();
+              rodando = false;
+              circle.textContent = "✔";
+              phase.textContent  = "HIIT concluído";
+              circle.classList.add("paused");
+              return;
+            }
+
+            modo  = "forte";
+            tempo = forte;
+            atualizarLabel();
+          }
+        }, 1000);
+      }
+
+      function pausar() {
+        rodando = false;
+        circle.classList.add("paused");
+        phase.textContent = "Pausado — toque para retomar";
+        pararIntervalo();
+      }
+
+      circle.onclick = () => {
+        if (!rodando && ciclo > ciclosMax) {
+          ciclo = 1;
+          modo  = "forte";
+          tempo = forteBase;
+          circle.textContent = "▶";
+          phase.textContent  = "Toque para iniciar";
+          circle.classList.remove("paused");
+          return;
+        }
+
+        if (!rodando) iniciar();
+        else pausar();
+      };
+    });
+  }
+
+
+
+  /* ============================================================
+     5. RESPIRAÇÃO — igual v3.6
   ============================================================ */
   function initBreathing() {
-    // Botões dentro dos cards (aquecimento / resfriamento)
+    // igual ao v3.6...
     document.querySelectorAll("[data-proto]").forEach(btn => {
       btn.onclick = () => abrirBreathing(btn.dataset.proto || "wake");
     });
@@ -533,7 +577,7 @@ function initHIIT() {
     }
 
     let intv  = null;
-    let state = "stopped"; // "stopped" | "running" | "paused"
+    let state = "stopped";
     let tempo = 0;
 
     function abrirBreathing(proto) {
@@ -613,20 +657,23 @@ function initHIIT() {
     };
   }
 
+
+
   /* ============================================================
-     6. SALVAR PESO POR EXERCÍCIO (stub)
+     6. SALVAR PESO — igual
   ============================================================ */
   function initPeso() {
     document.querySelectorAll(".ff-ex-peso").forEach(inp => {
       inp.addEventListener("change", () => {
         FEMFLOW.log("Peso alterado:", inp.dataset.ex, inp.value);
-        // futuro: mandar pro Firestore / backend
       });
     });
   }
 
- /* ============================================================
-     7. SALVAR TREINO — integração com GAS salvarTreino_
+
+
+  /* ============================================================
+     7. SALVAR TREINO — igual v3.6
   ============================================================ */
   if (btnSalvar && modalPSE) {
     btnSalvar.onclick = () => {
@@ -722,4 +769,4 @@ function initHIIT() {
     };
   }
 
-}); // ← FECHAMENTO DO DOMContentLoaded
+}); // FIM DO DOMContentLoaded
