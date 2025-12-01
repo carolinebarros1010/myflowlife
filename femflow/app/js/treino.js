@@ -41,13 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnConfirmarPSE = document.getElementById("btnConfirmarPSE");
   const btnCancelarPSE  = document.getElementById("btnCancelarPSE");
 
-  const breathBackdrop  = document.getElementById("breathBackdrop");
-  const breathSheet     = document.getElementById("breathModal");
-  const breathStartBtn  = document.getElementById("btnStart");
-  const breathCloseBtn  = document.getElementById("btnRespClose");
-  const breathCircle    = document.getElementById("breathCircle");
-  const breathPhaseLbl  = document.getElementById("faseLabel");
-
   if (!track) {
     FEMFLOW.error("❌ #carouselTrack não encontrado!");
     return;
