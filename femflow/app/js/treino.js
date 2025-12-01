@@ -577,56 +577,70 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ============================================================
-     7. FOOTER: SALVAR / DESCANSO / CANCELAR
-  ============================================================ */
-  if (btnSalvar && modalPSE) {
-    btnSalvar.onclick = () => {
-      modalPSE.classList.remove("hidden");
-    };
-  }
+ /* ============================================================
+   7. SALVAR TREINO — integração com GAS salvarTreino_
+============================================================ */
+if (btnSalvar && modalPSE) {
+  btnSalvar.onclick = () => {
+    modalPSE.classList.remove("hidden");
+  };
+}
 
-  if (btnCancelar && FEMFLOW.router) {
-    btnCancelar.onclick = () => FEMFLOW.router("flowcenter.html");
-  }
+if (btnCancelarPSE && modalPSE) {
+  btnCancelarPSE.onclick = () => modalPSE.classList.add("hidden");
+}
 
-  if (btnCancelarPSE && modalPSE) {
-    btnCancelarPSE.onclick = () => modalPSE.classList.add("hidden");
-  }
+if (btnConfirmarPSE && modalPSE && pseInput) {
+  btnConfirmarPSE.onclick = async () => {
 
-  if (btnConfirmarPSE && modalPSE && pseInput) {
-    btnConfirmarPSE.onclick = async () => {
-      const pse  = Number(pseInput.value || 0);
-      const fase = localStorage.getItem("femflow_fase");
-      const dia  = localStorage.getItem("femflow_diaPrograma");
+    const id   = localStorage.getItem("femflow_id");
+    const fase = localStorage.getItem("femflow_fase");
+    const diaFirebase = Number(localStorage.getItem("femflow_diaCiclo") || 1);
+    const pse  = Number(pseInput.value || 0);
 
-      try {
-        await firebase.firestore()
-          .collection("historico")
-          .add({
-            id,
-            fase,
-            dia,
-            pse,
-            data: new Date().toISOString()
-          });
+    if (!id) {
+      FEMFLOW.toast("Erro: sem ID.", true);
+      return;
+    }
 
-        FEMFLOW.toast("Treino salvo!");
-      } catch (e) {
-        FEMFLOW.error("Erro salvar treino:", e);
-        FEMFLOW.toast("Erro ao salvar treino", true);
+    try {
+      const resposta = await fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "salvarTreino",
+          id,
+          fase,
+          diaFirebase,
+          pse,
+          treino: "",
+          obs: ""
+        })
+      }).then(r => r.json());
+
+      FEMFLOW.log("📌 Resposta salvarTreino:", resposta);
+
+      if (resposta.status === "ok") {
+
+        /* Atualiza fase e ciclo localmente */
+        if (resposta.novaFase) {
+          localStorage.setItem("femflow_fase", resposta.novaFase);
+        }
+
+        if (resposta.novoDiaCiclo) {
+          localStorage.setItem("femflow_diaCiclo", resposta.novoDiaCiclo);
+        }
+
+        FEMFLOW.toast("Treino salvo com sucesso!");
+      } else {
+        FEMFLOW.toast("Erro ao salvar treino.", true);
       }
 
-      modalPSE.classList.add("hidden");
-    };
-  }
+    } catch (e) {
+      FEMFLOW.error("Erro salvar treino:", e);
+      FEMFLOW.toast("Erro de conexão.", true);
+    }
 
-  if (btnDescanso) {
-    btnDescanso.onclick = () => {
-      FEMFLOW.toast("Dia registrado como descanso 🌿");
-      // futuro: enviar para backend / histórico
-    };
-  }
-
-});
-
+    modalPSE.classList.add("hidden");
+  };
+}
