@@ -5,26 +5,30 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>FemFlow • Home</title>
 
-  <!-- Favicon -->
   <link rel="icon" href="favicon.ico">
-
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json"/>
 
-  <!-- CSS Base -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
   <link rel="stylesheet" href="css/home.css">
-
 </head>
 
 <body>
 
   <main class="wrap">
 
-    <!-- VÍDEO TOPO -->
+    <!-- ======================================================
+         SAUDAÇÃO PERSONALIZADA
+    ======================================================= -->
+    <section id="boasVindas" class="boas-vindas">
+      <h1 id="bvTexto">Bem-vinda!</h1>
+    </section>
+
+    <!-- ======================================================
+         VÍDEO DE BOAS-VINDAS
+    ======================================================= -->
     <section class="video">
       <div class="video-wrapper">
         <iframe 
@@ -36,6 +40,19 @@
         </iframe>
       </div>
     </section>
+
+    <!-- ======================================================
+         CTA IMEDIATA → FLOW CENTER
+    ======================================================= -->
+    <div class="home-cta">
+      <button id="btnFlow" class="btn-flow">✨ Ir para o Flow Center</button>
+    </div>
+
+    <!-- ======================================================
+         FILEIRA PERSONAL COMO PRIMEIRA OPÇÃO
+    ======================================================= -->
+    <h1 id="tituloPersonalTopo" style="display:none;">Treino Personal</h1>
+    <section id="railPersonalTopo" class="rail" style="display:none;"></section>
 
     <!-- FILEIRA 1 -->
     <h1>Ênfases Musculares</h1>
@@ -49,13 +66,8 @@
     <h1>Treinos em Casa</h1>
     <section class="rail" id="railCasa"></section>
 
-    <!-- FILEIRA 4 — TREINO PERSONAL (só aparece para quem tem o produto) -->
-    <h1 id="tituloPersonal" style="display:none;">Treino Personal</h1>
-    <section class="rail" id="railPersonal" style="display:none;"></section>
-
-    <!-- CTAs -->
-    <button id="btnFlow" class="cta">Ir para o Flow Center</button>
-    <button id="btnCad"  class="cta" style="background:#fff;color:#335953;border:1px solid #e6d8d2">
+    <!-- CTA Cad -->
+    <button id="btnCad" class="cta" style="background:#fff;color:#335953;border:1px solid #e6d8d2">
       Cadastro
     </button>
 
@@ -63,14 +75,23 @@
 
   <footer>FemFlow • escolha seu foco e comece hoje</footer>
 
-  <!-- CORE -->
   <script src="femflow-core.js"></script>
 
 <script>
 /* ============================================================
-   LISTAS DAS FILEIRAS
+   0. BOAS-VINDAS PERSONALIZADA
 =========================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  const nome = localStorage.getItem("femflow_nome");
+  if (nome) {
+    const bv = document.getElementById("bvTexto");
+    bv.textContent = `Bem-vinda, ${nome}!`;
+  }
+});
 
+/* ============================================================
+   LISTAS
+=========================================================== */
 const LISTA_MUSCULAR = [
   { titulo:"Glúteo", enfase:"gluteo", color:"#d98f80", desc:"Foco total no glúteo" },
   { titulo:"Costas", enfase:"costas", color:"#a6b8c8", desc:"Remadas e postura" },
@@ -96,9 +117,6 @@ const LISTA_CASA = [
   { titulo:"Casa Halter", enfase:"casa_halter", color:"#c6b4a4", desc:"Halter em casa" }
 ];
 
-/* ============================================================
-   LISTA PERSONAL — visível somente para produto=treino_personal
-=========================================================== */
 const LISTA_PERSONAL = [
   { 
     titulo:"Treino Personal",
@@ -108,9 +126,8 @@ const LISTA_PERSONAL = [
   }
 ];
 
-
 /* ============================================================
-   RENDERIZAÇÃO DE CARDS
+   CARDS
 =========================================================== */
 function cardHTML(p){
   return `
@@ -127,84 +144,61 @@ function cardHTML(p){
 
 function renderRail(el, lista){
   el.innerHTML = lista.map(cardHTML).join("");
-
   el.querySelectorAll(".card").forEach(c=>{
     c.onclick = () => {
-
       const enfase = c.dataset.enfase;
-
-      // 🔥 Caso especial: treino personal
       if (enfase === "personal") {
         location.href = "treino.html?personal=1";
         return;
       }
-
       selecionarEnfase(enfase);
     };
   });
 }
 
-
 /* ============================================================
-   SALVAR ÊNFASE (CORE)
+   SALVAR ÊNFASE → BACKEND
 =========================================================== */
 async function selecionarEnfase(enfase){
-
-  console.log("🎯 selecionarEnfase() → clicou na ênfase:", enfase);
-
   const id = localStorage.getItem("femflow_id");
-  console.log("🆔 femflow_id:", id);
-
   localStorage.setItem("femflow_enfase", enfase);
 
   if (id) {
     try {
-      const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+      await fetch(FEMFLOW.SCRIPT_URL, {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-          action:"setenfase",
-          id,
-          enfase
-        })
+        body:JSON.stringify({ action:"setenfase", id, enfase })
       });
-
-      const raw = await resp.text();
-      console.log("📦 RESPOSTA RAW setenfase:", raw);
-      try { console.log("🔍 JSON:", JSON.parse(raw)); } catch(e){}
-
-    } catch(e){
-      console.warn("❌ Falha ao enviar ênfase:", e);
-    }
+    } catch {}
   }
 
   FEMFLOW.router("flowcenter");
 }
 
-
 /* ============================================================
-   ATIVAR OU OCULTAR CARD PERSONAL
+   VERIFICAR SE TEM PRODUTO PERSONAL — COLAR NO TOPO
 =========================================================== */
-function ativarCardPersonal() {
+function ativarCardPersonalTopo() {
   const produto = localStorage.getItem("femflow_produto");
   const ativa   = localStorage.getItem("femflow_ativa");
 
   if (produto === "treino_personal" && ativa === "true") {
 
-    document.getElementById("tituloPersonal").style.display = "block";
+    document.getElementById("tituloPersonalTopo").style.display = "block";
 
-    const rail = document.getElementById("railPersonal");
-    rail.style.display = "block";
+    const rail = document.getElementById("railPersonalTopo");
+    rail.style.display = "flex";
 
     renderRail(rail, LISTA_PERSONAL);
   }
 }
 
-
 /* ============================================================
    INIT HOME
 =========================================================== */
 document.addEventListener("DOMContentLoaded", ()=>{
+  ativarCardPersonalTopo();
 
   renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
   renderRail(document.getElementById("railEsportes"),  LISTA_ESPORTES);
@@ -212,11 +206,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   document.getElementById("btnFlow").onclick = () => FEMFLOW.router("flowcenter");
   document.getElementById("btnCad").onclick  = () => FEMFLOW.router("index");
-
-  // 🔥 ativa o card personal caso a aluna tenha esse produto
-  ativarCardPersonal();
 });
-
 </script>
 
 </body>
