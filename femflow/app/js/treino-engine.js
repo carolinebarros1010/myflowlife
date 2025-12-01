@@ -150,6 +150,88 @@ FEMFLOW.engineTreino.intercalarHIIT = function (ordenados) {
 
   return final;
 };
+
+/* ============================================================
+   Firebase: carregar blocos NORMAL (exercicios/)
+============================================================ */
+FEMFLOW.engineTreino.carregarBlocosNormais = async function({
+  nivel,
+  enfase,
+  fase,
+  diaCiclo
+}) {
+  const faseNorm = this.normalizarFase(fase);
+  const nivelNorm = this.normalizarNivel(nivel);
+  const enfNorm = this.normalizarEnfase(enfase);
+  const diaKey = `dia_${diaCiclo}`;
+
+  FEMFLOW.log("📦 [NORMAL] carregando blocos →", nivelNorm, enfNorm, faseNorm, diaKey);
+
+  const db = firebase.firestore();
+
+  const col = db
+    .collection("exercicios")
+    .doc(`${nivelNorm}_${enfNorm}`)
+    .collection("fases")
+    .doc(faseNorm)
+    .collection("dias")
+    .doc(diaKey)
+    .collection("blocos");
+
+  const snap = await col.get();
+
+  if (snap.empty) {
+    FEMFLOW.warn("⚠️ Nenhum BLOCO encontrado (NORMAL)");
+    return [];
+  }
+
+  const blocos = [];
+  snap.forEach(doc => blocos.push(doc.data()));
+
+  FEMFLOW.log("🔍 Blocos recebidos:", blocos.length);
+  return blocos;
+};
+
+/* ============================================================
+   Firebase: carregar blocos PERSONAL (personal_trainings/)
+============================================================ */
+FEMFLOW.engineTreino.carregarBlocosPersonal = async function({
+  id,
+  enfase,
+  fase,
+  diaCiclo
+}) {
+  const faseNorm = this.normalizarFase(fase);
+  const enfNorm = this.normalizarEnfase(enfase);
+  const diaKey = `dia_${diaCiclo}`;
+
+  FEMFLOW.log("🎨 [PERSONAL] carregando blocos →", id, enfNorm, faseNorm, diaKey);
+
+  const db = firebase.firestore();
+
+  const snap = await db
+    .collection("personal_trainings")
+    .doc(id)
+    .collection(enfNorm)
+    .doc(faseNorm)
+    .collection("dias")
+    .doc(diaKey)
+    .collection("blocos")
+    .get();
+
+  if (snap.empty) {
+    FEMFLOW.warn("⚠️ Nenhum BLOCO encontrado (PERSONAL)");
+    return [];
+  }
+
+  const blocos = [];
+  snap.forEach(doc => blocos.push(doc.data()));
+
+  FEMFLOW.log("🔍 Blocos PERSONAL:", blocos.length);
+  return blocos;
+};
+
+
 /* ============================================================
    BLOCO B — ORGANIZAÇÃO + HIIT INTERCALADO
 ============================================================ */
