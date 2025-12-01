@@ -9,28 +9,33 @@
   <link rel="icon" href="favicon.ico">
   <link rel="manifest" href="manifest.json">
 
-  <!-- CSS FemFlow base -->
+  <!-- CSS base FemFlow -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
 
-  <!-- treino.css v3.5 -->
-  <link rel="stylesheet" href="css/treino.css">
+  <!-- treino.css v3.6 (modelo B final) -->
+  <link rel="stylesheet" href="css/treino.css?v3.6">
 
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-  <!-- Barra de progresso -->
+  <!-- Progress Bar -->
   <div class="progress-bar" id="progressBar"></div>
 
   <!-- Header -->
   <header class="treino-header">
     <h1>Treino Diário</h1>
+
     <h2 id="tituloDiaTreino"
-        style="text-align:center;color:#335953;margin:10px 0;font-family:'Playfair Display',serif;font-weight:700;">
+        style="text-align:center;
+               color:#335953;
+               margin:10px 0;
+               font-family:'Playfair Display',serif;
+               font-weight:700;">
       Dia do Programa
     </h2>
   </header>
@@ -42,7 +47,7 @@
     </div>
   </div>
 
-  <!-- Rodapé fixo -->
+  <!-- Rodapé -->
   <div class="fix-footer">
     <button id="salvarTreinoBtn" class="btn-primary-clean">💾 Salvar treino</button>
     <button id="descansoBtn" class="btn-secondary-clean">🌿 Descanso</button>
@@ -67,20 +72,17 @@
   </div>
 
   <!-- ====================================================== -->
-  <!-- MODAL RESPIRAÇÃO — Sheet iOS -->
+  <!-- MODAL RESPIRAÇÃO (Sheet iOS) — oculto até clicar -->
   <!-- ====================================================== -->
-
-  <!-- Backdrop -->
   <div id="breathBackdrop" class="breath-backdrop hidden"></div>
 
-  <!-- Sheet -->
   <div id="breathModal" class="breath-sheet hidden">
     <div class="breath-sheet-handle"></div>
 
     <div class="breath-sheet-content">
       <h3 id="breathTitle" class="breath-title">Respiração</h3>
 
-      <div id="breathCircle" class="breath-circle">–</div>
+      <div id="breathCircle" class="breath-circle">—</div>
       <div id="faseLabel" class="breath-phase"></div>
 
       <div class="breath-actions">
@@ -107,10 +109,10 @@
 
   <!-- Scripts FemFlow -->
   <script src="./femflow-core.js"></script>
-  <script src="./js/treino-engine.js"></script>
-  <script src="./js/treino.js"></script>
+  <script src="./js/treino-engine.js?v3.6"></script>
+  <script src="./js/treino.js?v3.6"></script>
 
-  <!-- Boot FemFlow -->
+  <!-- Boot -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
@@ -118,7 +120,7 @@
       }
     });
 
-    cancelarTreinoBtn.onclick = () => FEMFLOW.router("flowcenter");
+    cancelarTreinoBtn.onclick = () => FEMFLOW.router("flowcenter.html");
   </script>
 
 </body>
