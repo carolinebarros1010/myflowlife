@@ -578,69 +578,100 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
  /* ============================================================
-   7. SALVAR TREINO — integração com GAS salvarTreino_
-============================================================ */
-if (btnSalvar && modalPSE) {
-  btnSalvar.onclick = () => {
-    modalPSE.classList.remove("hidden");
-  };
-}
+     7. SALVAR TREINO — integração com GAS salvarTreino_
+  ============================================================ */
+  if (btnSalvar && modalPSE) {
+    btnSalvar.onclick = () => {
+      modalPSE.classList.remove("hidden");
+    };
+  }
 
-if (btnCancelarPSE && modalPSE) {
-  btnCancelarPSE.onclick = () => modalPSE.classList.add("hidden");
-}
+  if (btnCancelarPSE && modalPSE) {
+    btnCancelarPSE.onclick = () => modalPSE.classList.add("hidden");
+  }
 
-if (btnConfirmarPSE && modalPSE && pseInput) {
-  btnConfirmarPSE.onclick = async () => {
+  if (btnConfirmarPSE && modalPSE && pseInput) {
+    btnConfirmarPSE.onclick = async () => {
 
-    const id   = localStorage.getItem("femflow_id");
-    const fase = localStorage.getItem("femflow_fase");
-    const diaFirebase = Number(localStorage.getItem("femflow_diaCiclo") || 1);
-    const pse  = Number(pseInput.value || 0);
+      const id   = localStorage.getItem("femflow_id");
+      const fase = localStorage.getItem("femflow_fase");
+      const diaFirebase = Number(localStorage.getItem("femflow_diaCiclo") || 1);
+      const pse  = Number(pseInput.value || 0);
 
-    if (!id) {
-      FEMFLOW.toast("Erro: sem ID.", true);
-      return;
-    }
-
-    try {
-      const resposta = await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "salvarTreino",
-          id,
-          fase,
-          diaFirebase,
-          pse,
-          treino: "",
-          obs: ""
-        })
-      }).then(r => r.json());
-
-      FEMFLOW.log("📌 Resposta salvarTreino:", resposta);
-
-      if (resposta.status === "ok") {
-
-        /* Atualiza fase e ciclo localmente */
-        if (resposta.novaFase) {
-          localStorage.setItem("femflow_fase", resposta.novaFase);
-        }
-
-        if (resposta.novoDiaCiclo) {
-          localStorage.setItem("femflow_diaCiclo", resposta.novoDiaCiclo);
-        }
-
-        FEMFLOW.toast("Treino salvo com sucesso!");
-      } else {
-        FEMFLOW.toast("Erro ao salvar treino.", true);
+      if (!id) {
+        FEMFLOW.toast("Erro: sem ID.", true);
+        return;
       }
 
-    } catch (e) {
-      FEMFLOW.error("Erro salvar treino:", e);
-      FEMFLOW.toast("Erro de conexão.", true);
-    }
+      try {
+        const resposta = await fetch(FEMFLOW.SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "salvarTreino",
+            id,
+            fase,
+            diaFirebase,
+            pse,
+            treino: "",
+            obs: ""
+          })
+        }).then(r => r.json());
 
-    modalPSE.classList.add("hidden");
-  };
-}
+        FEMFLOW.log("📌 Resposta salvarTreino:", resposta);
+
+        if (resposta.status === "ok") {
+
+          if (resposta.novaFase) {
+            localStorage.setItem("femflow_fase", resposta.novaFase);
+          }
+
+          if (resposta.novoDiaCiclo) {
+            localStorage.setItem("femflow_diaCiclo", resposta.novoDiaCiclo);
+          }
+
+          FEMFLOW.toast("Treino salvo com sucesso!");
+        } else {
+          FEMFLOW.toast("Erro ao salvar treino.", true);
+        }
+
+      } catch (e) {
+        FEMFLOW.error("Erro salvar treino:", e);
+        FEMFLOW.toast("Erro de conexão.", true);
+      }
+
+      modalPSE.classList.add("hidden");
+    };
+  }
+
+  if (btnDescanso) {
+    btnDescanso.onclick = async () => {
+
+      const id = localStorage.getItem("femflow_id");
+
+      if (!id) {
+        FEMFLOW.toast("Erro: sem ID.", true);
+        return;
+      }
+
+      try {
+        const resposta = await fetch(FEMFLOW.SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "salvarDescanso",
+            id
+          })
+        }).then(r => r.json());
+
+        FEMFLOW.log("📌 Resposta descanso:", resposta);
+        FEMFLOW.toast("Descanso registrado!");
+
+      } catch (e) {
+        FEMFLOW.error("Erro descanso:", e);
+        FEMFLOW.toast("Erro ao salvar descanso.", true);
+      }
+    };
+  }
+
+}); // ← FECHAMENTO DO DOMContentLoaded
