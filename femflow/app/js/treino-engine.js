@@ -187,78 +187,93 @@ FEMFLOW.engineTreino.organizarBlocos = function (blocos) {
    8) Converter blocos → estrutura final do front
 ============================================================ */
 FEMFLOW.engineTreino.converterParaFront = function (blocos) {
-  FEMFLOW.log("🧩 Convertendo blocos…");
+  FEMFLOW.log("🧩 Convertendo blocos (v4)…");
 
-  const lista = [];
+  const mapa = {}; // agrupador por boxNum
 
   for (const b of blocos) {
+
+    /* ------- AGRUPAR TREINO ------- */
     if (b.tipo === "treino") {
-      lista.push({
-        tipo: "treino",
-        box: b.boxNum,
-        serieEspecial: b.serieEspecial,
+
+      if (!mapa[b.boxNum]) {
+        mapa[b.boxNum] = {
+          tipo: "treino",
+          box: b.boxNum,
+          serieEspecial: b.serieEspecial,
+          exercicios: []
+        };
+      }
+
+      mapa[b.boxNum].exercicios.push({
+        ordem: Number(b.ordem) || 0,
         titulo: b.titulo || "",
         link: b.link || "",
+        youtube: b.youtube || "",
         series: b.series || "",
         reps: b.reps || "",
         intervalo: b.serieEspecial ? 0 : (b.intervalo || 60)
       });
     }
 
+    /* ------- HIIT, CARDIO, AQUECIMENTO, RESFRIAMENTO (igual antes) ------- */
     if (b.tipo === "hiit") {
-      lista.push({
+      mapa[`hiit_${b.boxNum}`] = {
         tipo: "hiitPremium",
         titulo: b.titulo || "🔥 HIIT",
         forte: Number(b.forte) || 30,
         leve: Number(b.leve) || 30,
         ciclos: Number(b.ciclos) || 6
-      });
+      };
     }
 
     if (b.tipo === "cardio_final") {
-      lista.push({
-        tipo: "cardio",
-        titulo: b.titulo || "💗 Cardio Final",
-        tempo_total: Number(b.tempo) || 600
-      });
-    }
-
-    if (b.tipo === "prancha") {
-      lista.push({
-        tipo: "prancha",
-        titulo: b.titulo || "Prancha",
-        tempo: Number(b.tempo) || 40,
-        series: b.series || 3
-      });
+      mapa[`cardio_${b.boxNum}`] = {
+        tipo: "cardio_final",
+        titulo: b.titulo || "Cardio Final",
+        descricao: b.descricao || "",
+        duracao: Number(b.tempo) || 10,
+        intensidade: b.intensidade || "leve"
+      };
     }
 
     if (b.tipo === "aquecimento") {
-      lista.unshift({
+      mapa[`aq_${b.boxNum}`] = {
         tipo: "aquecimentoPremium",
-        titulo: "🌿 Aquecimento Premium",
         passos: [
-          { nome: "Mobilidade de Quadril (40s)" },
-          { nome: "Mobilidade Torácica (40s)" },
-          { nome: "Mobilidade de Ombro (40s)" },
-          { nome: "Caminhada Leve – 5 min" }
+          { nome: "Mobilidade Geral — 2 min" },
+          { nome: "Ativação Leve — 1 min" }
         ]
-      });
+      };
     }
 
     if (b.tipo === "resfriamento") {
-      lista.push({
+      mapa[`rf_${b.boxNum}`] = {
         tipo: "resfriamentoPremium",
-        titulo: "🧘 Resfriamento Premium",
         passos: [
-          { nome: "Alongamentos Leves — 2 min" },
+          { nome: "Alongamento Leve — 2 min" },
           { nome: "Respiração — 1 min" }
         ]
-      });
+      };
     }
   }
 
-  FEMFLOW.log("📦 Lista final convertida:", lista);
-  return lista;
+  /* ---- 🔥 ORDENAR EXERCÍCIOS DENTRO DE CADA BOX POR "ordem" ---- */
+  Object.values(mapa).forEach(box => {
+    if (box.exercicios) {
+      box.exercicios.sort((a, b) => a.ordem - b.ordem);
+    }
+  });
+
+  /* ---- 🔥 Ordenar boxes pelo número ---- */
+  const final = Object.values(mapa).sort((a, b) => {
+    const A = a.box || 999;
+    const B = b.box || 999;
+    return A - B;
+  });
+
+  FEMFLOW.log("📦 Lista final por BOX:", final);
+  return final;
 };
 
 /* ============================================================
