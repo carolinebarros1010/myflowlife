@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
 
-  <!-- treino.css v3.6 (modelo B final) -->
+  <!-- treino.css -->
   <link rel="stylesheet" href="css/treino.css">
 
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -23,7 +23,7 @@
 
 <body>
 
-  <!-- Progress Bar -->
+  <!-- Barra de Progresso -->
   <div class="progress-bar" id="progressBar"></div>
 
   <!-- Header -->
@@ -43,7 +43,9 @@
   <!-- Carrossel -->
   <div class="carousel-container">
     <div class="carousel-track" id="carouselTrack">
-      <div class="carousel-item"><p>Carregando treino...</p></div>
+      <div class="carousel-item">
+        <p>Carregando treino...</p>
+      </div>
     </div>
   </div>
 
@@ -72,7 +74,7 @@
   </div>
 
   <!-- ====================================================== -->
-  <!-- MODAL RESPIRAÇÃO (Sheet iOS) — oculto até clicar -->
+  <!-- MODAL RESPIRAÇÃO (Sheet iOS) -->
   <!-- ====================================================== -->
   <div id="breathBackdrop" class="breath-backdrop hidden"></div>
 
@@ -92,7 +94,9 @@
     </div>
   </div>
 
-  <!-- Firebase -->
+  <!-- ====================================================== -->
+  <!-- FIREBASE -->
+  <!-- ====================================================== -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
@@ -107,12 +111,13 @@
     });
   </script>
 
-  <!-- Scripts FemFlow -->
+  <!-- ====================================================== -->
+  <!-- SCRIPTS FEMFLOW -->
+  <!-- ====================================================== -->
   <script src="./femflow-core.js"></script>
   <script src="./js/treino-engine.js"></script>
   <script src="./js/treino.js"></script>
 
-  <!-- Boot -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
@@ -120,8 +125,12 @@
       }
     });
 
-    cancelarTreinoBtn.onclick = () => FEMFLOW.router("flowcenter.html");
+    // Botão cancelar — voltar ao FlowCenter
+    document.getElementById("cancelarTreinoBtn").onclick = () => {
+      FEMFLOW.router("flowcenter.html");
+    };
   </script>
 
 </body>
 </html>
+
