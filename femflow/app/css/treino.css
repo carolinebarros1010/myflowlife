@@ -1,12 +1,14 @@
 /* ============================================================
-   FemFlow — TREINO.CSS PREMIUM v3.5 (2025)
+   FemFlow — TREINO.CSS PREMIUM v3.6 (2025)
    ------------------------------------------------------------
-   - Cards compactos estilo B
-   - Séries/Reps/Desc em linha com ícones
-   - Botão iniciar descanso
-   - Footer fixo sem cobrir card
-   - Modal Respiração (sheet iOS)
-   - HIIT com menu Academia / Casa
+   - Modelo B compacto final
+   - Séries / Reps / Desc em linha
+   - Input peso 70x40
+   - Botão INICIAR descanso/cardio
+   - HIIT com bubble + play/pause no círculo
+   - Modal Respiração (iOS Sheet)
+   - Footer fixo sem sobrepor card
+   - Toast premium com terracota/teal
 ============================================================ */
 
 /* -------------------- PALETA FEMFLOW -------------------- */
@@ -22,7 +24,7 @@
   --shadow: rgba(0,0,0,0.06);
 }
 
-/* -------------------- RESET -------------------- */
+/* ---------- RESET ---------- */
 * { box-sizing: border-box; }
 
 body {
@@ -35,7 +37,7 @@ body {
 }
 
 /* ============================================================
-   FEMFLOW — TOAST PREMIUM (debug + mensagens gerais)
+   1) TOAST FEMFLOW — premium (terracota + teal)
 ============================================================ */
 .toast-box {
   position: fixed;
@@ -44,7 +46,7 @@ body {
   transform: translateX(-50%) translateY(20px);
 
   background: linear-gradient(135deg, var(--terracota-light), var(--teal));
-  color: #ffffff;
+  color: white;
 
   padding: 12px 22px;
   border-radius: 18px;
@@ -52,14 +54,13 @@ body {
   font-size: 0.95rem;
   font-weight: 600;
   text-align: center;
-  letter-spacing: 0.2px;
 
   box-shadow: 0 6px 22px rgba(0,0,0,0.18);
 
   opacity: 0;
   transition: opacity .35s ease, transform .35s ease;
 
-  z-index: 999999; /* acima de tudo */
+  z-index: 999999;
 }
 
 .toast-box.visible {
@@ -67,26 +68,29 @@ body {
   transform: translateX(-50%) translateY(0);
 }
 
-
-/* -------------------- HEADER -------------------- */
+/* ============================================================
+   2) HEADER E TÍTULOS
+============================================================ */
 .treino-header {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 .treino-header h1 {
   margin: 0;
   font-size: 1.8rem;
   color: var(--teal);
   font-family: "Playfair Display", serif;
 }
+
 #tituloDiaTreino {
   margin-top: 8px;
   color: var(--terracota);
   font-size: 1.15rem;
 }
 
-/* -------------------- PROGRESS BAR -------------------- */
+/* PROGRESS BAR */
 .progress-bar {
   position: fixed;
   top: 0; left: 0;
@@ -97,7 +101,9 @@ body {
   z-index: 9999;
 }
 
-/* -------------------- CARROSSEL -------------------- */
+/* ============================================================
+   3) CARROSSEL
+============================================================ */
 .carousel-container {
   width: 100%;
   height: calc(100dvh - 120px) !important;
@@ -117,9 +123,8 @@ body {
 .carousel-item {
   flex: 0 0 calc(100vw - 28px);
   max-width: calc(100vw - 28px);
-  height: auto !important;
   min-height: calc(100dvh - 240px);
-  background: #ffffff;
+  background: white;
   border-radius: 22px;
   padding: 20px;
   padding-bottom: 150px !important;
@@ -128,37 +133,36 @@ body {
   box-shadow: 0 4px 14px var(--shadow);
 }
 
-/* Scroll refinado */
+/* scroll suave */
 .carousel-item::-webkit-scrollbar { width: 4px; }
 .carousel-item::-webkit-scrollbar-thumb {
   background: #dcd2c7;
   border-radius: 4px;
 }
 
-/* -------------------- FOOTER -------------------- */
+/* ============================================================
+   4) FOOTER
+============================================================ */
 .fix-footer {
   position: fixed;
   bottom: 0;
-  left: 0;
   width: 100%;
-  padding: 14px 0 calc(env(safe-area-inset-bottom, 12px));
-  background: transparent;
+  padding: 14px 0 calc(env(safe-area-inset-bottom,12px));
   display: flex;
   justify-content: center;
   gap: 14px;
+  background: transparent;
   z-index: 99999;
 }
 
 .btn-primary-clean {
   background: var(--teal);
-  color: #fff;
+  color: white;
   border: none;
   padding: 12px 24px;
   border-radius: 20px;
   font-weight: 700;
-  font-size: 1rem;
 }
-
 .btn-secondary-clean {
   background: var(--pessego);
   color: var(--teal);
@@ -167,17 +171,18 @@ body {
   border-radius: 20px;
   font-weight: 600;
 }
-
 .btn-tertiary-clean {
+  background: white;
   border: 1px solid #d28878;
   color: #d28878;
-  background: #fff;
   padding: 12px 24px;
   border-radius: 20px;
   font-weight: 600;
 }
 
-/* -------------------- BOX EXERCÍCIOS -------------------- */
+/* ============================================================
+   5) BOX DE EXERCÍCIO (MODELO B)
+============================================================ */
 .ff-ex-item {
   background: #fafafa;
   padding: 14px;
@@ -199,7 +204,7 @@ body {
   text-decoration: none;
 }
 
-/* -------------------- INFO: SÉRIES / REPS / DESC -------------------- */
+/* ----------- INFO EM LINHA ----------- */
 .ff-info-line {
   margin-top: 6px;
   margin-bottom: 12px;
@@ -216,24 +221,26 @@ body {
   gap: 4px;
 }
 
-/* -------------------- INPUT PESO -------------------- */
+/* ----------- INPUT PESO ----------- */
 .ff-ex-peso {
-  width: 70px !important;
-  height: 40px !important;
+  width: 70px;
+  height: 40px;
   border-radius: 10px;
   border: 1px solid #d2ccc5;
   text-align: center;
   font-size: .85rem;
-  background: #fff;
+  background: white;
 }
 
-/* -------------------- DESCANSO TIMER -------------------- */
+/* ============================================================
+   6) TIMER DE DESCANSO
+============================================================ */
 .ff-descanso-wrap {
   margin-top: 6px;
 }
 
 .ff-descanso-btn {
-  background: #fff;
+  background: white;
   border: 1px solid var(--teal);
   color: var(--teal);
   padding: 8px 18px;
@@ -241,7 +248,6 @@ body {
   font-weight: 700;
   font-size: .9rem;
   cursor: pointer;
-  transition: .25s;
 }
 .ff-descanso-btn:hover { background: var(--pessego); }
 
@@ -259,7 +265,6 @@ body {
   background: #e6e6e6;
   border-radius: 12px;
   margin-top: 6px;
-  overflow: hidden;
 }
 .ff-timer-fill {
   height: 100%;
@@ -268,19 +273,102 @@ body {
   transition: width 1s linear;
 }
 
-/* -------------------- MODAL RESPIRAÇÃO — SHEET iOS -------------------- */
+/* ============================================================
+   7) HIIT — Modelo B (igual respiração)
+============================================================ */
+.hiit-bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.hiit-circle {
+  width: 170px;
+  height: 170px;
+  background: linear-gradient(135deg, var(--teal), var(--terracota));
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 700;
+
+  transition: .3s;
+}
+
+.hiit-circle.paused {
+  opacity: 0.6;
+}
+
+.hiit-phase {
+  font-size: 1rem;
+  opacity: .75;
+}
+
+/* botão iniciar */
+.hiit-start-btn {
+  width: 100%;
+  background: var(--teal);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 16px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+/* menu Academia / Casa */
+.hiit-opcoes-btn {
+  width: 100%;
+  background: #fff5ef;
+  border: 1px solid var(--terracota-light);
+  color: var(--teal);
+  padding: 10px 12px;
+  border-radius: 16px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.hiit-opcoes {
+  margin-top: 12px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hiit-opcoes.visible { display: flex; }
+
+.hiit-card {
+  background: #fff7f4;
+  border: 1px solid #f0d3ca;
+  padding: 12px;
+  border-radius: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: .9rem;
+}
+.hiit-card-icon { font-size: 1.3rem; }
+
+/* ============================================================
+   8) MODAL RESPIRAÇÃO — SHEET iOS
+============================================================ */
 .breath-backdrop {
-  position: fixed; inset: 0;
+  position: fixed;
+  inset: 0;
   background: rgba(0,0,0,0.25);
   backdrop-filter: blur(8px);
   z-index: 200000;
 }
-.breath-backdrop.hidden { display:none; }
+.breath-backdrop.hidden { display: none; }
 
 .breath-sheet {
   position: fixed;
   left: 0; right: 0; bottom: 0;
-  background: #ffffff;
+  background: white;
   border-radius: 22px 22px 0 0;
   padding: 22px;
   transform: translateY(100%);
@@ -289,131 +377,142 @@ body {
   z-index: 200001;
 }
 .breath-sheet.visible { transform: translateY(0); }
-.hidden { display:none; }
 
 .breath-sheet-handle {
-  width: 50px; height: 6px;
+  width: 60px;
+  height: 6px;
   background: #d9d9d9;
   border-radius: 3px;
   margin: 0 auto 14px;
 }
 
 .breath-title {
-  text-align:center;
-  font-size: 1.3rem;
-  font-family: "Playfair Display", serif;
+  text-align: center;
   color: var(--teal);
-  margin-bottom: 18px;
+  font-family: "Playfair Display", serif;
+  font-size: 1.3rem;
 }
 
 .breath-circle {
-  width:160px;
-  height:160px;
-  border-radius:50%;
-  margin:0 auto;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
   background: linear-gradient(135deg, var(--terracota-light), var(--teal));
-  color:white;
-  font-size:2.4rem;
-  font-weight:700;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.6rem;
+  color: white;
+  margin: 20px auto;
 }
 
 .breath-phase {
-  margin-top: 12px;
-  text-align:center;
-  opacity: .75;
+  text-align: center;
   font-size: 1rem;
+  opacity: .75;
+  margin-bottom: 14px;
 }
 
 .breath-actions {
-  margin-top: 18px;
-  display:flex;
-  justify-content:center;
+  display: flex;
+  justify-content: center;
   gap: 12px;
 }
 
 .breath-start-btn {
   padding: 12px 20px;
-  border-radius: 16px;
   background: var(--teal);
-  border:none;
-  color:white;
-  font-weight:700;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-weight: 700;
 }
 
 .breath-close-btn {
-  padding:12px 20px;
-  border-radius:16px;
-  background:#fff5f0;
-  color:var(--terracota);
-  border:1px solid var(--terracota-light);
-  font-weight:700;
+  padding: 12px 20px;
+  background: #fff5f0;
+  color: var(--terracota);
+  border: 1px solid var(--terracota-light);
+  border-radius: 16px;
+  font-weight: 700;
 }
 
-/* -------------------- MODAL PSE -------------------- */
+/* ============================================================
+   9) MODAL PSE
+============================================================ */
 .modal-pse-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.25);
   backdrop-filter: blur(4px);
   display: flex;
-  justify-content:center;
-  align-items:center;
+  justify-content: center;
+  align-items: center;
   z-index: 999999;
 }
-.modal-pse-overlay.hidden { display:none; }
+.modal-pse-overlay.hidden { display: none; }
 
 .modal-pse-card {
   width: 90%;
   max-width: 360px;
-  background:#fff;
-  padding:22px;
-  border-radius:22px;
-  box-shadow:0 6px 24px rgba(0,0,0,0.15);
-  text-align:center;
+  background: white;
+  padding: 22px;
+  border-radius: 22px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+  text-align: center;
 }
 
 .modal-title {
-  font-size:1.2rem;
-  font-family:"Playfair Display", serif;
+  font-size: 1.2rem;
+  font-family: "Playfair Display", serif;
 }
 
-.modal-label { font-size: .9rem; }
-
 .modal-slider {
-  width:100%;
-  margin-top:12px;
+  width: 100%;
+  margin-top: 12px;
 }
 
 .modal-actions {
-  display:flex;
-  gap:10px;
-  margin-top:16px;
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .modal-btn-ok {
-  flex:1;
-  background:var(--teal);
-  color:white;
-  padding:12px;
-  border:none;
-  border-radius:16px;
-  font-weight:700;
+  flex: 1;
+  background: var(--teal);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 16px;
+  font-weight: 700;
 }
 
 .modal-btn-cancel {
-  flex:1;
-  background:#fff5f0;
-  color:var(--terracota);
-  border:1px solid var(--terracota-light);
-  border-radius:16px;
-  padding:12px;
-  font-weight:700;
+  flex: 1;
+  background: #fff5f0;
+  color: var(--terracota);
+  border: 1px solid var(--terracota-light);
+  border-radius: 16px;
+  padding: 12px;
+  font-weight: 700;
 }
 
-/* -------------------- RESPONSIVO -------------------- */
+/* ============================================================
+   10) RESPONSIVO
+============================================================ */
 @media (max-width: 430px) {
   .ff-info-line { gap: 10px; font-size: .85rem; }
+
+  .hiit-circle {
+    width: 150px;
+    height: 150px;
+    font-size: 2.2rem;
+  }
+
+  .breath-circle {
+    width: 150px;
+    height: 150px;
+    font-size: 2.2rem;
+  }
 }
