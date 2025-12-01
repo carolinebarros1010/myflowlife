@@ -18,7 +18,9 @@
 
 <body>
 
-  <h1>FemFlow</h1>
+  <h1 id="tituloApp">FemFlow</h1>
+
+  <!-- 🔥 Agora personalizado -->
   <h3 id="tituloFlow">Fase Hormonal</h3>
   <p class="subtitle" id="subFlow">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
 
@@ -68,38 +70,34 @@
 
   <script src="femflow-core.js"></script>
 
- <script>
+  <script>
   document.addEventListener("DOMContentLoaded", async () => {
-    // 0) Header + menu
+
     FEMFLOW.inserirHeaderApp();
     FEMFLOW.inserirMenuLateral();
 
-    /* ================================
-       1) SYNC BACKEND → LOCAL
-       (usa carregarCicloBackend)
-    ================================= */
+    /* 1 — Sincroniza com backend */
     await FEMFLOW.carregarCicloBackend();
 
-    /* ================================
-       2) FASE REAL
-       (lida do localStorage, setado pelo core)
-    ================================= */
+    /* 2 — Nome da aluna (via CORE atualizado) */
+    const nome = FEMFLOW.getNome();
+    const first = nome.split(" ")[0];
+
+    /* 3 — Fase atual */
     const fase = localStorage.getItem("femflow_fase") || "follicular";
 
-    /* ================================
-       3) Idioma
-    ================================= */
+    /* 4 — Textos customizados */
+    document.getElementById("tituloFlow").textContent =
+      `${first}, sua fase hormonal`;
+
+    document.getElementById("subFlow").textContent =
+      "Seu corpo tem um ritmo único. Vamos acompanhar juntas.";
+
+    /* 5 — Idioma (mantido) */
     const lang = localStorage.getItem("femflow_lang") || "pt";
     const T = {
       pt: {
-        titulo: "Fase Hormonal",
-        frase: "Seu corpo tem um ritmo. Vamos acompanhar juntas.",
         faseAtual: "Fase atual:",
-        botoes: {
-          breath: "💨 Respiração",
-          train: "🏃 Treino",
-          evo: "📈 Evolução"
-        },
         fases: {
           menstrual: "Menstrual",
           follicular: "Folicular",
@@ -110,42 +108,26 @@
     };
     const L = T[lang];
 
-    document.getElementById("tituloFlow").textContent = L.titulo;
-    document.getElementById("subFlow").textContent    = L.frase;
-
-    /* ================================
-       4) UI
-    ================================= */
+    /* 6 — Texto no centro do círculo */
     document.getElementById("centerPhase").textContent = L.fases[fase];
-    document.getElementById("t_current").textContent   =
+
+    /* 7 — Texto abaixo do círculo */
+    document.getElementById("t_current").textContent =
       `${L.faseAtual} ${L.fases[fase]}`;
 
-    /* ================================
-       5) Pintar fase ativa
-    ================================= */
-    ["menstrual","follicular","ovulatory","luteal"].forEach(s => {
+    /* 8 — Pintar fase ativa */
+    ["menstrual", "follicular", "ovulatory", "luteal"].forEach(s => {
       document.getElementById(`seg-${s}`).classList.toggle("path-active", s === fase);
       document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === fase);
     });
 
-    /* ================================
-       6) Navegação
-    ================================= */
-    document.getElementById("toBreath").onclick    = () => FEMFLOW.router("respiracao.html");
-    document.getElementById("toTrain").onclick     = () => FEMFLOW.router("treino.html");
-    document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
+    /* 9 — Navegação */
+    toBreath.onclick    = () => FEMFLOW.router("respiracao.html");
+    toTrain.onclick     = () => FEMFLOW.router("treino.html");
+    toEvolution.onclick = () => FEMFLOW.router("evolucao.html");
 
-    /* ================================
-       7) diaPrograma
-       (se você já criou FEMFLOW.calcularDiaPrograma no core)
-    ================================= */
-    if (typeof FEMFLOW.calcularDiaPrograma === "function") {
-      const diaProg = FEMFLOW.calcularDiaPrograma();
-      localStorage.setItem("femflow_diaPrograma", diaProg);
-    }
   });
-</script>
+  </script>
 
 </body>
 </html>
-
