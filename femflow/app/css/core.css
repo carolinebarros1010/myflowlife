@@ -158,27 +158,35 @@ input, select {
 .ff-close:active {
   background: #ddd;
 }
-/* ====== TOAST FEMFLOW — Correção de contraste ====== */
-.ff-toast {
-  background: #cc6a5a !important;      /* Terracota FemFlow */
-  color: #ffffff !important;           /* Branco puro – máximo contraste */
-  font-weight: 600;
+/* ============================================================
+   TOAST FEMFLOW — VISIBILIDADE 2025
+============================================================ */
+.toast-box {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 22px;
+  color: #ffffff !important; /* TEXTO BRANCO FORTE */
+  font-weight: 700;
+  font-size: 1rem;
   border-radius: 14px;
-  padding: 12px 18px;
-  border: none !important;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.25);
-  z-index: 999999 !important;          /* sempre visível */
+  background: #335953; /* padrão sucesso */
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+  z-index: 9999;
 }
 
-/* Corrigir textos internos caso o HTML seja composto */
-.ff-toast * {
-  color: #ffffff !important;
+.toast-box.visible {
+  opacity: 1;
 }
-@media (prefers-color-scheme: dark) {
-  .ff-toast {
-    background: #cc6a5a !important;
-    color: #fff !important;
-  }
+
+/* Toast de erro */
+.toast-box.error {
+  background: #cc6a5a !important; /* terracota */
+  color: #ffffff !important;      /* texto branco */
 }
 
 
