@@ -34,3 +34,48 @@ body.page-treino {
 body.page-evolucao {
   background: linear-gradient(180deg, #FCE3D5 0%, #F4E1D7 100%);
 }
+.ff-lang-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.ff-lang-modal.hidden {
+  display: none !important;
+}
+
+.ff-lang-box {
+  background: #fff;
+  width: 85%;
+  max-width: 350px;
+  padding: 22px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+}
+
+.ff-lang-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  border: none;
+  background: var(--teal);
+  color: #fff;
+  border-radius: 14px;
+  font-size: 1.1rem;
+}
+
+.ff-lang-close {
+  border: none;
+  padding: 10px;
+  width: 100%;
+  margin-top: 12px;
+  border-radius: 10px;
+  background: #ddd;
+}
+
