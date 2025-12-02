@@ -69,66 +69,69 @@
   </div>
 
   <script src="femflow-core.js"></script>
-  <script>
-  document.addEventListener("DOMContentLoaded", async () => {
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
 
-    FEMFLOW.inserirHeaderApp();
-    FEMFLOW.inserirMenuLateral();
+  FEMFLOW.inserirHeaderApp();
+  FEMFLOW.inserirMenuLateral();
 
-    /* 1 — Sincroniza com backend */
-   const perfil = await FEMFLOW.carregarCicloBackend();
-   const fase = perfil.fase;
+  /* 1 — Sincroniza com backend usando o método NOVO */
+  const perfil = await FEMFLOW.carregarPerfil();   // <— esse é o certo!
+  if (!perfil) {
+    FEMFLOW.toast("Erro ao carregar perfil.");
+    return;
+  }
 
-   /* 2 – Nome da aluna (via CORE atualizado) */
-const nome = localStorage.getItem("femflow_nome") || "Aluna";
-const first = nome.split(" ")[0];  // pega apenas o primeiro nome
+  /* 2 — Nome */
+  const nome = localStorage.getItem("femflow_nome") || "Aluna";
+  const first = nome.split(" ")[0];
 
+  /* 3 — Fase atual (AGORA CORRETA) */
+  const fase = perfil.fase;  // usa backend, não localStorage antigo
 
-    /* 3 — Fase atual */
-    const fase = localStorage.getItem("femflow_fase") || "follicular";
+  /* 4 — Textos */
+  document.getElementById("tituloFlow").textContent =
+    `${first}, sua fase hormonal`;
 
-    /* 4 — Textos customizados */
-    document.getElementById("tituloFlow").textContent =
-      `${first}, sua fase hormonal`;
+  document.getElementById("subFlow").textContent =
+    "Seu corpo tem um ritmo único. Vamos acompanhar juntas.";
 
-    document.getElementById("subFlow").textContent =
-      "Seu corpo tem um ritmo único. Vamos acompanhar juntas.";
-
-    /* 5 — Idioma (mantido) */
-    const lang = localStorage.getItem("femflow_lang") || "pt";
-    const T = {
-      pt: {
-        faseAtual: "Fase atual:",
-        fases: {
-          menstrual: "Menstrual",
-          follicular: "Folicular",
-          ovulatory: "Ovulatória",
-          luteal: "Lútea"
-        }
+  /* 5 — Idioma */
+  const lang = localStorage.getItem("femflow_lang") || "pt";
+  const T = {
+    pt: {
+      faseAtual: "Fase atual:",
+      fases: {
+        menstrual: "Menstrual",
+        follicular: "Folicular",
+        ovulatory: "Ovulatória",
+        luteal: "Lútea"
       }
-    };
-    const L = T[lang];
+    }
+  };
+  const L = T[lang];
 
-    /* 6 — Texto no centro do círculo */
-    document.getElementById("centerPhase").textContent = L.fases[fase];
+  /* 6 — Centro */
+  document.getElementById("centerPhase").textContent = L.fases[fase];
 
-    /* 7 — Texto abaixo do círculo */
-    document.getElementById("t_current").textContent =
-      `${L.faseAtual} ${L.fases[fase]}`;
+  /* 7 — Texto abaixo */
+  document.getElementById("t_current").textContent =
+    `${L.faseAtual} ${L.fases[fase]}`;
 
-    /* 8 — Pintar fase ativa */
-    ["menstrual", "follicular", "ovulatory", "luteal"].forEach(s => {
-      document.getElementById(`seg-${s}`).classList.toggle("path-active", s === fase);
-      document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === fase);
-    });
-
-    /* 9 — Navegação */
-    toBreath.onclick    = () => FEMFLOW.router("respiracao.html");
-    toTrain.onclick     = () => FEMFLOW.router("treino.html");
-    toEvolution.onclick = () => FEMFLOW.router("evolucao.html");
-
+  /* 8 — Pintar segmento */
+  ["menstrual", "follicular", "ovulatory", "luteal"].forEach(s => {
+    document.getElementById(`seg-${s}`).classList.toggle("path-active", s === fase);
+    document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === fase);
   });
-  </script>
+
+  /* 9 — Navegação */
+  toBreath.onclick    = () => FEMFLOW.router("respiracao.html");
+  toTrain.onclick     = () => FEMFLOW.router("treino.html");
+  toEvolution.onclick = () => FEMFLOW.router("evolucao.html");
+
+});
+</script>
+
 
 </body>
 </html>
