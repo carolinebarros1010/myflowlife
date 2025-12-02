@@ -133,6 +133,82 @@ FEMFLOW.langs = {
       descansoSalvo: "Descanso registrado!"
     }
   },
+
+   anamneseQuiz: [
+  {
+    gif: "profile_form.webp",
+    texto: "Há quanto tempo você treina com regularidade?",
+    opcoes: [
+      { texto: "Nunca ou menos de 3 meses 😅", v: 1 },
+      { texto: "Entre 3 meses e 1 ano 🧘‍♀️", v: 2 },
+      { texto: "Mais de 1 ano 💪", v: 3 }
+    ]
+  },
+  {
+    gif: "routine_cycle.webp",
+    texto: "Quantos dias por semana você costuma treinar?",
+    opcoes: [
+      { texto: "1 a 2 dias 💤", v: 1 },
+      { texto: "3 a 4 dias 🍑", v: 2 },
+      { texto: "5 dias ou mais 🔥", v: 3 }
+    ]
+  },
+  {
+    gif: "strength_training.webp",
+    texto: "Com que frequência você cumpre o treino planejado?",
+    opcoes: [
+      { texto: "Quando dá tempo 😬", v: 1 },
+      { texto: "Na maioria das vezes ✅", v: 2 },
+      { texto: "Sou muito disciplinada 🧠", v: 3 }
+    ]
+  },
+  {
+    gif: "mobility_flow.webp",
+    texto: "Como avalia sua consciência corporal durante o treino?",
+    opcoes: [
+      { texto: "Ainda me perco nos movimentos 😅", v: 1 },
+      { texto: "Consigo corrigir às vezes 👀", v: 2 },
+      { texto: "Domino bem os exercícios ✨", v: 3 }
+    ]
+  },
+  {
+    gif: "strength_training.webp",
+    texto: "Como descreveria sua força e resistência hoje?",
+    opcoes: [
+      { texto: "Canso fácil ou fico dolorida 🥴", v: 1 },
+      { texto: "Aguento treinos moderados 🌿", v: 2 },
+      { texto: "Treinos longos e intensos são tranquilos 💪", v: 3 }
+    ]
+  },
+  {
+    gif: "hormonal_balance.webp",
+    texto: "Como é sua recuperação e qualidade de sono?",
+    opcoes: [
+      { texto: "Durmo mal e demoro pra recuperar 😴", v: 1 },
+      { texto: "Oscila conforme a semana ⚖️", v: 2 },
+      { texto: "Durmo bem e me recupero rápido 🌙", v: 3 }
+    ]
+  },
+  {
+    gif: "menstrual_flow.webp",
+    texto: "Você percebe variações de energia ao longo do ciclo?",
+    opcoes: [
+      { texto: "Nunca percebi 🤔", v: 1 },
+      { texto: "Algumas fases me afetam 🔄", v: 2 },
+      { texto: "Ajusto meu treino conforme o ciclo 🌸", v: 3 }
+    ]
+  },
+  {
+    gif: "breath_cycle.webp",
+    texto: "Como está seu nível de estresse no dia a dia?",
+    opcoes: [
+      { texto: "Ando sobrecarregada 😩", v: 1 },
+      { texto: "Oscila conforme o período 🌤️", v: 2 },
+      { texto: "Equilibrado e sob controle 🧘‍♀️", v: 3 }
+    ]
+  }
+]
+
   /* ============================================================
      🇺🇸 ENGLISH
   ============================================================ */
@@ -250,6 +326,80 @@ FEMFLOW.langs = {
       erroDescanso: "Error registering rest day."
     }
   }
+anamneseQuiz: [
+  {
+    gif: "profile_form.webp",
+    texto: "How long have you been training consistently?",
+    opcoes: [
+      { texto: "Never or less than 3 months 😅", v: 1 },
+      { texto: "Between 3 months and 1 year 🧘‍♀️", v: 2 },
+      { texto: "More than 1 year 💪", v: 3 }
+    ]
+  },
+  {
+    gif: "routine_cycle.webp",
+    texto: "How many days per week do you usually train?",
+    opcoes: [
+      { texto: "1 to 2 days 💤", v: 1 },
+      { texto: "3 to 4 days 🍑", v: 2 },
+      { texto: "5 days or more 🔥", v: 3 }
+    ]
+  },
+  {
+    gif: "strength_training.webp",
+    texto: "How often do you complete the planned workout?",
+    opcoes: [
+      { texto: "When I can 😬", v: 1 },
+      { texto: "Most of the time ✅", v: 2 },
+      { texto: "I’m very disciplined 🧠", v: 3 }
+    ]
+  },
+  {
+    gif: "mobility_flow.webp",
+    texto: "How do you evaluate your body awareness during training?",
+    opcoes: [
+      { texto: "Still get lost in movements 😅", v: 1 },
+      { texto: "I correct myself sometimes 👀", v: 2 },
+      { texto: "I master exercises well ✨", v: 3 }
+    ]
+  },
+  {
+    gif: "strength_training.webp",
+    texto: "How would you describe your strength and endurance today?",
+    opcoes: [
+      { texto: "I get tired easily 🥴", v: 1 },
+      { texto: "Handle moderate training 🌿", v: 2 },
+      { texto: "Long/intense sessions are fine 💪", v: 3 }
+    ]
+  },
+  {
+    gif: "hormonal_balance.webp",
+    texto: "How is your recovery and sleep quality?",
+    opcoes: [
+      { texto: "Poor sleep, slow recovery 😴", v: 1 },
+      { texto: "Varies through the week ⚖️", v: 2 },
+      { texto: "Sleep well, recover fast 🌙", v: 3 }
+    ]
+  },
+  {
+    gif: "menstrual_flow.webp",
+    texto: "Do you notice energy variations throughout your cycle?",
+    opcoes: [
+      { texto: "Never noticed 🤔", v: 1 },
+      { texto: "Some phases affect me 🔄", v: 2 },
+      { texto: "Adjust my training by cycle 🌸", v: 3 }
+    ]
+  },
+  {
+    gif: "breath_cycle.webp",
+    texto: "How is your stress level daily?",
+    opcoes: [
+      { texto: "Feeling overwhelmed 😩", v: 1 },
+      { texto: "Varies with the week 🌤️", v: 2 },
+      { texto: "Balanced and under control 🧘‍♀️", v: 3 }
+    ]
+  }
+]
 
 
   /* ============================================================
@@ -368,6 +518,80 @@ FEMFLOW.langs = {
     }
   }
 };
+anamneseQuiz: [
+  {
+    gif: "profile_form.webp",
+    texto: "Depuis combien de temps t’entraînes-tu régulièrement ?",
+    opcoes: [
+      { texto: "Jamais ou moins de 3 mois 😅", v: 1 },
+      { texto: "Entre 3 mois et 1 an 🧘‍♀️", v: 2 },
+      { texto: "Plus d’un an 💪", v: 3 }
+    ]
+  },
+  {
+    gif: "routine_cycle.webp",
+    texto: "Combien de jours par semaine t’entraînes-tu en général ?",
+    opcoes: [
+      { texto: "1 à 2 jours 💤", v: 1 },
+      { texto: "3 à 4 jours 🍑", v: 2 },
+      { texto: "5 jours ou plus 🔥", v: 3 }
+    ]
+  },
+  {
+    gif: "strength_training.webp",
+    texto: "À quelle fréquence suis-tu ton entraînement prévu ?",
+    opcoes: [
+      { texto: "Quand j’ai le temps 😬", v: 1 },
+      { texto: "La plupart du temps ✅", v: 2 },
+      { texto: "Très disciplinée 🧠", v: 3 }
+    ]
+  },
+  {
+    gif: "mobility_flow.webp",
+    texto: "Comment évalues-tu ta conscience corporelle pendant l’entraînement ?",
+    opcoes: [
+      { texto: "Je me perds encore dans les mouvements 😅", v: 1 },
+      { texto: "Je corrige parfois 👀", v: 2 },
+      { texto: "Je maîtrise bien les exercices ✨", v: 3 }
+    ]
+  },
+  {
+    gif: "strength_training.webp",
+    texto: "Comment décrirais-tu ta force et ton endurance aujourd’hui ?",
+    opcoes: [
+      { texto: "Je fatigue facilement 🥴", v: 1 },
+      { texto: "Je gère les séances modérées 🌿", v: 2 },
+      { texto: "Les séances longues/intenses sont ok 💪", v: 3 }
+    ]
+  },
+  {
+    gif: "hormonal_balance.webp",
+    texto: "Comment sont ta récupération et ton sommeil ?",
+    opcoes: [
+      { texto: "Je dors mal et récupère lentement 😴", v: 1 },
+      { texto: "Ça varie selon les jours ⚖️", v: 2 },
+      { texto: "Je dors bien et récupère vite 🌙", v: 3 }
+    ]
+  },
+  {
+    gif: "menstrual_flow.webp",
+    texto: "Ressens-tu des variations d’énergie selon ton cycle ?",
+    opcoes: [
+      { texto: "Jamais remarqué 🤔", v: 1 },
+      { texto: "Certaines phases m’affectent 🔄", v: 2 },
+      { texto: "J’adapte mon entraînement au cycle 🌸", v: 3 }
+    ]
+  },
+  {
+    gif: "breath_cycle.webp",
+    texto: "Comment est ton niveau de stress au quotidien ?",
+    opcoes: [
+      { texto: "Je me sens débordée 😩", v: 1 },
+      { texto: "Ça fluctue selon la période 🌤️", v: 2 },
+      { texto: "Équilibré et sous contrôle 🧘‍♀️", v: 3 }
+    ]
+  }
+]
 
 /* ============================================================
    🔄 ALTERAR IDIOMA
