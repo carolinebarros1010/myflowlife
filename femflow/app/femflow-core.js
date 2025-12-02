@@ -193,7 +193,10 @@ FEMFLOW._acaoMenu = function (op) {
   document.querySelector(".ff-menu-modal")?.classList.remove("active");
 
   switch (op) {
-    case "idioma": FEMFLOW.toast("🌐 Em desenvolvimento"); break;
+    case "idioma":
+  document.getElementById("ff-lang-modal")?.classList.remove("hidden");
+  break;
+
     case "ciclo": FEMFLOW.router("ciclo.html"); break;
     case "respiracao": FEMFLOW.router("respiracao.html"); break;
     case "treinos": FEMFLOW.router("evolucao.html"); break;
@@ -370,11 +373,13 @@ FEMFLOW.init = async function () {
 
     this.inserirHeaderApp();
     this.inserirMenuLateral();
+    this.inserirModalIdioma();  // 🔥 AQUI!
     this.initNivelSelector();
 
     await FEMFLOW.sincronizarECdisparar();
   }
 };
+
 
 /* ===========================================================
    9. INSPECTOR
