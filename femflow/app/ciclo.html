@@ -77,6 +77,18 @@
 <script src="./femflow-core.js"> </script>
 
 <script>
+  
+function ffShowLoading(msg = "Processando…") {
+  const box = document.getElementById("ff-loading");
+  const text = document.getElementById("ff-loading-text");
+  if (text) text.textContent = msg;
+  if (box) box.classList.remove("hidden");
+}
+
+function ffHideLoading() {
+  const box = document.getElementById("ff-loading");
+  if (box) box.classList.add("hidden");
+}
 
 /* ============================================================
    0. MENSAGEM DE AJUSTE
@@ -140,6 +152,7 @@ const perguntasDiuHormonal = [
    SALVAR CICLO (LOCAL + BACKEND) — VERSÃO CORRIGIDA 2025
 ============================================================ */
 async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
+ffShowLoading("Configurando seu ciclo…");
 
   console.log("💾 SALVAR.CICLO.DEBUG =====================================");
   console.log("perfil:", perfil);
@@ -266,13 +279,16 @@ try {
   console.error("❌ ERRO AO ENVIAR PARA O BACKEND:", e);
 }
 
-
+ffHideLoading();
 /* ============================================================
    4) FINALIZAR
 ============================================================ */
-FEMFLOW.toast("✨ Ciclo configurado!");
-setTimeout(() => location.href = "flowcenter.html", 800);
-}
+
+  FEMFLOW.toast("✨ Ciclo configurado!");
+setTimeout(() => {
+  ffShowLoading("Carregando seu painel…");
+  location.href = "flowcenter.html";
+}, 400);
 
 /* ============================================================
    PERFIS E QUIZ
@@ -499,6 +515,13 @@ bindTap(document.getElementById("btnConfirmarRegular"), ()=>{
 });
 
 </script>
+  
+<div id="ff-loading" class="ff-loading hidden">
+  <div class="ff-loading-box">
+    <div class="ff-spinner"></div>
+    <p id="ff-loading-text">Configurando…</p>
+  </div>
+</div>
 
 </body>
 </html>
