@@ -71,6 +71,12 @@
  
 <script src="femflow-core.js"></script>
 <script>
+  
+  function ffHideLoading() {
+  const box = document.getElementById("ff-loading");
+  if (box) box.classList.add("hidden");
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
 
   FEMFLOW.inserirHeaderApp();
@@ -83,6 +89,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!perfil) {
     FEMFLOW.toast("Erro ao carregar ciclo.");
+    ffHideLoading();
     return;
   }
 
@@ -150,6 +157,8 @@ const faseNorm = mapaFase[fase?.toLowerCase()] || "follicular";
     document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === faseNorm
 );
   });
+  // 🔥 Somente agora esconde o loading
+  ffHideLoading();
 
   /* =========================================================
      5) NAV
@@ -164,7 +173,6 @@ const faseNorm = mapaFase[fase?.toLowerCase()] || "follicular";
 
 });
 </script>
-
 
 <div id="ff-loading" class="ff-loading">
   <div class="ff-loading-box">
