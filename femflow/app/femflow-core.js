@@ -23,10 +23,21 @@ FEMFLOW.toast = (msg, error = false, offline = false) => {
     box.className = "toast-box";
     document.body.appendChild(box);
   }
+
   box.textContent = msg;
-  box.style.background = error ? "#cc6a5a" : "#335953";
+
+  // remover estados antigos
+  box.classList.remove("error");
+
+  if (error) {
+    box.classList.add("error");
+  }
+
   box.classList.add("visible");
-  if (!offline) setTimeout(() => box.classList.remove("visible"), 2400);
+
+  if (!offline) {
+    setTimeout(() => box.classList.remove("visible"), 2400);
+  }
 };
 
 /* ===========================================================
