@@ -105,8 +105,11 @@
         FEMFLOW.init();
       }
     });
+    
+document.addEventListener("femflow:langChange", aplicarIdioma);
+aplicarIdioma();
 
-    // Botão cancelar — voltar ao FlowCenter
+        // Botão cancelar — voltar ao FlowCenter
     document.getElementById("cancelarTreinoBtn").onclick = () => {
       FEMFLOW.router("flowcenter.html");
     };
