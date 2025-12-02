@@ -18,6 +18,7 @@
   <!-- treino.css -->
   <link rel="stylesheet" href="css/treino.css">
 
+  <!-- Fonte -->
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
 
@@ -97,12 +98,15 @@
      1) DOM READY + FEMFLOW INIT
   ============================================================ */
   document.addEventListener("DOMContentLoaded", () => {
-    
+
     if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
       FEMFLOW.init();
     }
 
-    aplicarIdioma(); // aplica no carregamento
+    // idioma no carregamento
+    aplicarIdioma();
+
+    // se idioma mudar → atualizar
     document.addEventListener("femflow:langChange", aplicarIdioma);
   });
 
@@ -114,18 +118,18 @@
 
     // Títulos
     document.getElementById("tituloTreinoTopo").textContent = L.treino.tituloTopo;
-    document.getElementById("tituloDiaTreino").textContent = L.treino.diaPrograma;
+    document.getElementById("tituloDiaTreino").textContent   = L.treino.diaPrograma;
 
     // Rodapé
-    document.getElementById("salvarTreinoBtn").textContent = L.treino.btnSalvar;
-    document.getElementById("descansoBtn").textContent     = L.treino.btnDescanso;
+    document.getElementById("salvarTreinoBtn").textContent   = L.treino.btnSalvar;
+    document.getElementById("descansoBtn").textContent       = L.treino.btnDescanso;
     document.getElementById("cancelarTreinoBtn").textContent = L.treino.btnCancelar;
 
     // Modal PSE
-    document.getElementById("pseTitulo").textContent = L.treino.pseTitulo;
-    document.getElementById("pseLabel").textContent  = L.treino.pseLabel;
-    document.getElementById("btnConfirmarPSE").textContent = L.treino.pseSalvar;
-    document.getElementById("btnCancelarPSE").textContent  = L.treino.pseCancelar;
+    document.getElementById("pseTitulo").textContent         = L.treino.pseTitulo;
+    document.getElementById("pseLabel").textContent          = L.treino.pseLabel;
+    document.getElementById("btnConfirmarPSE").textContent   = L.treino.pseSalvar;
+    document.getElementById("btnCancelarPSE").textContent    = L.treino.pseCancelar;
   }
 
   /* ============================================================
@@ -138,5 +142,6 @@
 
 </body>
 </html>
+
 
 
