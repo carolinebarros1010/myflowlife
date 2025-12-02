@@ -160,7 +160,8 @@ const perguntasDiuHormonal = [
 ============================================================ */
 async function salvarCiclo({ perfil, start, length, faseCalc, faseAlta, dia }) {
 ffShowLoading("Configurando seu ciclo…");
-
+// 🔥 força o navegador a exibir o loading IMEDIATAMENTE
+await new Promise(requestAnimationFrame);
   console.log("💾 SALVAR.CICLO.DEBUG =====================================");
   console.log("perfil:", perfil);
   console.log("faseCalc:", faseCalc);
