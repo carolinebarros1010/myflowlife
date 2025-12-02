@@ -88,6 +88,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   /* backend → localStorage já está atualizado */
   const fase     = perfil.fase;
+  const mapaFase = {
+  lutea: "luteal",
+  lútea: "luteal",
+  luteal: "luteal",
+
+  folicular: "follicular",
+  follicular: "follicular",
+
+  ovulatoria: "ovulatory",
+  ovulatório: "ovulatory",
+  ovulatory: "ovulatory",
+
+  menstrual: "menstrual"
+};
+
+// Fase normalizada
+const faseNorm = mapaFase[fase?.toLowerCase()] || "follicular";
+
   const diaCiclo = perfil.diaCiclo;
   const nome     = perfil.nome || "Aluna";
   const first    = nome.split(" ")[0];
@@ -121,13 +139,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* =========================================================
      4) PINTAR CÍRCULO
   ========================================================= */
-  document.getElementById("centerPhase").textContent = L.fases[fase];
+  document.getElementById("centerPhase").textContent = L.fases[faseNorm]
+
   document.getElementById("t_current").textContent =
-    `${L.faseAtual} ${L.fases[fase]}`;
+    `${L.faseAtual} ${L.fases[faseNorm]}`;
 
   ["menstrual", "follicular", "ovulatory", "luteal"].forEach(s => {
-    document.getElementById(`seg-${s}`).classList.toggle("path-active", s === fase);
-    document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === fase);
+    document.getElementById(`seg-${s}`).classList.toggle("path-active", s === faseNorm
+);
+    document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === faseNorm
+);
   });
 
   /* =========================================================
