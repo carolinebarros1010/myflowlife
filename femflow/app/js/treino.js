@@ -253,7 +253,6 @@ if (tipoDominante === "hiitPremium") {
       </div>
     `;
 
-
   /* ======================================================
      TREINO (1 box com vários exercícios)
   ====================================================== */
@@ -542,4 +541,4 @@ function renderExercicio(ex) {
       }
     };
   }
-
+}); // ← fecha o DOMContentLoaded
