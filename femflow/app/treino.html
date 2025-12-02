@@ -28,7 +28,7 @@
 
   <!-- Header -->
   <header class="treino-header">
-    <h1>Treino Diário</h1>
+    <h1 id="tituloTreinoTopo">Treino Diário</h1>
 
     <h2 id="tituloDiaTreino"
         style="text-align:center;
@@ -56,14 +56,12 @@
     <button id="cancelarTreinoBtn" class="btn-tertiary-clean">Cancelar</button>
   </div>
 
-  <!-- ====================================================== -->
   <!-- MODAL PSE -->
-  <!-- ====================================================== -->
   <div id="modalPSE" class="modal-pse-overlay hidden">
     <div class="modal-pse-card">
-      <h3 class="modal-title">Como foi o treino?</h3>
+      <h3 class="modal-title" id="pseTitulo">Como foi o treino?</h3>
 
-      <label class="modal-label">PSE (0 a 10)</label>
+      <label class="modal-label" id="pseLabel">PSE (0 a 10)</label>
       <input type="range" min="0" max="10" value="0" id="pseInput" class="modal-slider"/>
 
       <div class="modal-actions">
@@ -73,48 +71,72 @@
     </div>
   </div>
 
- 
-  <!-- ====================================================== -->
   <!-- FIREBASE -->
-  <!-- ====================================================== -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <script>
-    firebase.initializeApp({
-      apiKey: "AIzaSyCNDL55caHcFqLpCPgxq5QK2Yt9YkXAvkE",
-      authDomain: "femflow-ebec2.firebaseapp.com",
-      projectId: "femflow-ebec2",
-      storageBucket: "femflow-ebec2.appspot.com",
-      messagingSenderId: "929402947409",
-      appId: "1:929402947409:web:b65b7775ac44edeb4283ae"
-    });
+  firebase.initializeApp({
+    apiKey: "AIzaSyCNDL55caHcFqLpCPgxq5QK2Yt9YkXAvkE",
+    authDomain: "femflow-ebec2.firebaseapp.com",
+    projectId: "femflow-ebec2",
+    storageBucket: "femflow-ebec2.appspot.com",
+    messagingSenderId: "929402947409",
+    appId: "1:929402947409:web:b65b7775ac44edeb4283ae"
+  });
   </script>
 
-  <!-- ====================================================== -->
   <!-- SCRIPTS FEMFLOW -->
-  <!-- ====================================================== -->
- <script src="js/lang.js"></script>
-<script src="femflow-core.js"></script>
+  <script src="js/lang.js"></script>
+  <script src="femflow-core.js"></script>
   <script src="./js/treino-engine.js"></script>
   <script src="./js/treino.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
-        FEMFLOW.init();
-      }
-    });
+  /* ============================================================
+     1) DOM READY + FEMFLOW INIT
+  ============================================================ */
+  document.addEventListener("DOMContentLoaded", () => {
     
-document.addEventListener("femflow:langChange", aplicarIdioma);
-aplicarIdioma();
+    if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
+      FEMFLOW.init();
+    }
 
-        // Botão cancelar — voltar ao FlowCenter
-    document.getElementById("cancelarTreinoBtn").onclick = () => {
-      FEMFLOW.router("flowcenter.html");
-    };
+    aplicarIdioma(); // aplica no carregamento
+    document.addEventListener("femflow:langChange", aplicarIdioma);
+  });
+
+  /* ============================================================
+     2) FUNÇÃO DE IDIOMA — Treino Diário
+  ============================================================ */
+  function aplicarIdioma() {
+    const L = FEMFLOW?.langs?.[FEMFLOW.lang] || FEMFLOW.langs.pt;
+
+    // Títulos
+    document.getElementById("tituloTreinoTopo").textContent = L.treino.tituloTopo;
+    document.getElementById("tituloDiaTreino").textContent = L.treino.diaPrograma;
+
+    // Rodapé
+    document.getElementById("salvarTreinoBtn").textContent = L.treino.btnSalvar;
+    document.getElementById("descansoBtn").textContent     = L.treino.btnDescanso;
+    document.getElementById("cancelarTreinoBtn").textContent = L.treino.btnCancelar;
+
+    // Modal PSE
+    document.getElementById("pseTitulo").textContent = L.treino.pseTitulo;
+    document.getElementById("pseLabel").textContent  = L.treino.pseLabel;
+    document.getElementById("btnConfirmarPSE").textContent = L.treino.pseSalvar;
+    document.getElementById("btnCancelarPSE").textContent  = L.treino.pseCancelar;
+  }
+
+  /* ============================================================
+     3) BOTÃO CANCELAR — SAIR PARA FLOWCENTER
+  ============================================================ */
+  document.getElementById("cancelarTreinoBtn").onclick = () => {
+    FEMFLOW.router("flowcenter.html");
+  };
   </script>
 
 </body>
 </html>
+
 
