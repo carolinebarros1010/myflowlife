@@ -1,8 +1,8 @@
-/* ============================================================
-   FemFlow — Sistema de Idiomas (Multilingual v1)
-============================================================ */
+// js/lang.js
 
-window.FEMFLOW_LANG = {
+window.FEMFLOW = window.FEMFLOW || {};
+
+FEMFLOW.langs = {
   pt: {
     menu: {
       title: "Menu",
@@ -15,10 +15,39 @@ window.FEMFLOW_LANG = {
       voltar: "Voltar",
       sair: "Sair"
     },
-    flow: {
+    fases: {
+      menstrual: "Menstrual",
+      follicular: "Folicular",
+      ovulatory: "Ovulatória",
+      luteal: "Lútea"
+    },
+    geral: {
+      carregando: "Carregando…",
       faseAtual: "Fase atual",
-      ritmo: "Seu corpo tem um ritmo único. Vamos acompanhar juntas.",
-      loading: "Carregando sua fase hormonal…"
+    }
+  },
+
+  fr: {
+    menu: {
+      title: "Menu",
+      idioma: "Langue",
+      ciclo: "Ajuster le cycle",
+      respiracao: "Respiration",
+      treinos: "Mes entraînements",
+      nivel: "Changer le niveau",
+      tema: "Thème",
+      voltar: "Retour",
+      sair: "Quitter"
+    },
+    fases: {
+      menstrual: "Menstruelle",
+      follicular: "Folliculaire",
+      ovulatory: "Ovulatoire",
+      luteal: "Lutéale"
+    },
+    geral: {
+      carregando: "Chargement…",
+      faseAtual: "Phase actuelle",
     }
   },
 
@@ -34,29 +63,26 @@ window.FEMFLOW_LANG = {
       voltar: "Back",
       sair: "Logout"
     },
-    flow: {
-      faseAtual: "Current phase",
-      ritmo: "Your body has a unique rhythm. Let's follow it together.",
-      loading: "Loading your hormonal phase…"
-    }
-  },
-
-  fr: {
-    menu: {
-      title: "Menu",
-      idioma: "Langue",
-      ciclo: "Ajuster le cycle",
-      respiracao: "Respiration",
-      treinos: "Mes entraînements",
-      nivel: "Changer le niveau",
-      tema: "Thème",
-      voltar: "Retour",
-      sair: "Déconnexion"
+    fases: {
+      menstrual: "Menstrual",
+      follicular: "Follicular",
+      ovulatory: "Ovulatory",
+      luteal: "Luteal"
     },
-    flow: {
-      faseAtual: "Phase actuelle",
-      ritmo: "Votre corps a un rythme unique. Suivons-le ensemble.",
-      loading: "Chargement de votre phase hormonale…"
+    geral: {
+      carregando: "Loading…",
+      faseAtual: "Current phase",
     }
   }
+};
+
+// Define idioma atual
+FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+
+FEMFLOW.setLang = function(code) {
+  FEMFLOW.lang = code;
+  localStorage.setItem("femflow_lang", code);
+
+  // Dispara evento para páginas atualizarem textos
+  document.dispatchEvent(new CustomEvent("femflow:langChange"));
 };
