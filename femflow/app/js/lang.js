@@ -133,6 +133,123 @@ FEMFLOW.langs = {
       descansoSalvo: "Descanso registrado!"
     }
   },
+  /* ============================================================
+     🇺🇸 ENGLISH
+  ============================================================ */
+  en: {
+    nome: "English",
+
+    geral: {
+      loading: "Loading…",
+      salvar: "Save",
+      cancelar: "Cancel",
+      voltar: "Back",
+      faseAtual: "Current phase",
+      faseHormonal: "your hormonal phase",
+    },
+
+    menu: {
+      fechar: "Close",
+      idioma: "Language",
+      ciclo: "Adjust cycle",
+      respiracao: "Breathing",
+      treinos: "My Workouts",
+      nivel: "Change level",
+      tema: "Theme",
+      voltar: "Back",
+      sair: "Logout"
+    },
+
+    flowcenter: {
+      titulo: "Your hormonal phase",
+      sub: "Your body has its own rhythm. Let’s follow it together.",
+      menstrual: "Menstrual",
+      follicular: "Follicular",
+      ovulatory: "Ovulatory",
+      luteal: "Luteal",
+      atual: "Current phase:"
+    },
+
+    ciclo: {
+      titulo: "Identify your moment",
+      sub: "Let’s align your training with your current cycle 🌸",
+
+      regular: "Regular",
+      irregular: "Irregular",
+      diu: "IUD",
+      menopausa: "Menopause",
+
+      qualDiu: "Which IUD type?",
+      diuCobre: "Copper IUD",
+      diuHormonal: "Hormonal IUD",
+
+      ultimaMenstruacao: "Last menstruation date",
+      duracaoMedia: "Average length (days)",
+      confirmar: "Confirm",
+
+      quizInicio: "Ready?",
+      sim: "Yes",
+      nao: "No",
+
+      footer: "These inputs are used only to adapt your workouts. 💫"
+    },
+
+    treino: {
+      tituloTopo: "Daily Workout",
+      diaPrograma: "Program Day",
+
+      btnSalvar: "💾 Save workout",
+      btnDescanso: "🌿 Rest",
+      btnCancelar: "Cancel",
+
+      pseTitulo: "How was the workout?",
+      pseLabel: "RPE (0 to 10)",
+      pseSalvar: "Save",
+      pseCancelar: "Cancel"
+    },
+
+    respiracao: {
+      titulo: "Breathing",
+      sub: "Choose the protocol based on your moment 🌿",
+
+      iniciar: "Start breathing",
+      voltarTreino: "← back to workout",
+
+      prepare: "Prepare...",
+      inspire: "Inhale",
+      expire: "Exhale",
+      segure: "Hold",
+      finalizado: "Finished 🌸"
+    },
+
+    evolucao: {
+      titulo: "My Evolution",
+      subtitulo: "Track how your body responds to training",
+
+      progressoTitulo: "🌿 Your program progress",
+      progressoTexto: p => `You have completed ${p}% of the program`,
+
+      pseTitulo: "📈 Perceived Effort Evolution (RPE)",
+      legenda: "🩵 Easy • 🍑 Moderate • ❤️ Intense",
+
+      mensagemFinal:
+        "✨ Congratulations! You completed your 30-day FemFlow cycle.<br>Breathe, celebrate and rest.",
+      novoCiclo: "🔄 Start new cycle",
+      voltar: "← Back to Flow Center",
+
+      semDados: "No workouts recorded yet."
+    },
+
+    sistema: {
+      cicloConfigurado: "✨ Cycle configured!",
+      erroCiclo: "Error loading cycle.",
+      sincronizando: "Synchronizing…",
+      treinoSalvo: "Workout saved!",
+      descansoSalvo: "Rest day registered!",
+      erroSalvar: "Error saving data.",
+      erroDescanso: "Error registering rest day."
+    }
+  }
 
 
   /* ============================================================
