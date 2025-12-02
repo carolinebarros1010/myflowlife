@@ -76,7 +76,8 @@
     FEMFLOW.inserirMenuLateral();
 
     /* 1 — Sincroniza com backend */
-    await FEMFLOW.carregarCicloBackend();
+   const perfil = await FEMFLOW.carregarCicloBackend();
+   const fase = perfil.fase;
 
    /* 2 – Nome da aluna (via CORE atualizado) */
 const nome = localStorage.getItem("femflow_nome") || "Aluna";
