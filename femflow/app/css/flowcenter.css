@@ -215,3 +215,51 @@ h3 {
     flex: 1 1 45%;
   }
 }
+/* ===== LOADING FEMFLOW ===== */
+
+.ff-loading {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 247, 242, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+
+.ff-loading.hidden {
+  display: none;
+}
+
+.ff-loading-box {
+  text-align: center;
+  padding: 30px 40px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  border: 2px solid #fceae3;
+}
+
+.ff-loading-box p {
+  font-family: "Lato";
+  font-size: 1.1rem;
+  margin-top: 14px;
+  color: #cc6a5a;
+  font-weight: 600;
+}
+
+.ff-spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #fceae3;
+  border-top-color: #cc6a5a;
+  border-radius: 50%;
+  animation: ffspin 0.9s linear infinite;
+}
+
+@keyframes ffspin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
