@@ -286,16 +286,18 @@ try {
   console.error("❌ ERRO AO ENVIAR PARA O BACKEND:", e);
 }
 
-ffHideLoading();
+
 /* ============================================================
    4) FINALIZAR
 ============================================================ */
 
-  FEMFLOW.toast("✨ Ciclo configurado!");
-setTimeout(() => {
+// Não esconder o loading aqui!
+// O loading DEVE ficar ativo até o redirecionamento
+
+FEMFLOW.toast("✨ Ciclo configurado!");
   ffShowLoading("Carregando seu painel…");
   location.href = "flowcenter.html";
-}, 400);
+
 }
 
 /* ============================================================
