@@ -249,7 +249,24 @@ try {
     return j;
   }));
 
-  const respostas = await Promise.all([reqPerfil, reqFase, reqDia, reqManual]);
+  console.group("📡 DEBUG: ENVIOS EM ORDEM CORRETA");
+
+console.log("⏳ 1) Enviando perfil…");
+await reqPerfil;
+
+console.log("⏳ 2) Enviando fase…");
+await reqFase;
+
+console.log("⏳ 3) Enviando dia ciclo…");
+await reqDia;
+
+console.log("⏳ 4) Enviando cicloStart…");
+await reqManual;
+
+console.groupEnd();
+
+console.log("✔ BACKEND.POST → todos enviados na ordem correta");
+
 
   console.log("📌 RESPOSTAS COMPLETAS:", respostas);
   console.groupEnd();
