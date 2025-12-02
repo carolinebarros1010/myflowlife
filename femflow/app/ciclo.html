@@ -187,95 +187,85 @@ console.log({
 });
 
 /* ============================================================
-   3) ENVIAR AO BACKEND — POST PARA 4 FUNÇÕES
-   DEBUG COMPLETO INSTALADO
+   3) ENVIAR AO BACKEND — ORDEM CORRETA (SEM Promise.all)
 ============================================================ */
 try {
 
-  console.group("📡 DEBUG: ENVIOS AO BACKEND");
+  console.group("📡 DEBUG: ENVIOS AO BACKEND (Sequência Correta)");
 
   const idUser = localStorage.getItem("femflow_id");
 
-  // Montamos cada chamada com log
-  const reqPerfil = fetch(FEMFLOW.SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "setperfilhormonal",
-      id: idUser,
-      perfil
-    })
-  }).then(r => r.json().then(j => {
-    console.log("🔶 RESPOSTA setperfilhormonal:", j);
-    return j;
-  }));
-
-  const reqFase = fetch(FEMFLOW.SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "setfase",
-      id: idUser,
-      fase: faseCalc.toLowerCase()
-    })
-  }).then(r => r.json().then(j => {
-    console.log("🔶 RESPOSTA setfase:", j);
-    return j;
-  }));
-
-  const reqDia = fetch(FEMFLOW.SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "setdiaciclo",
-      id: idUser,
-      dia
-    })
-  }).then(r => r.json().then(j => {
-    console.log("🔶 RESPOSTA setdiaciclo:", j);
-    return j;
-  }));
-
-  const reqManual = fetch(FEMFLOW.SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "setmanualstart",
-      id: idUser,
-      startDate: start.toISOString()
-    })
-  }).then(r => r.json().then(j => {
-    console.log("🔶 RESPOSTA setmanualstart:", j);
-    return j;
-  }));
-
-  console.group("📡 DEBUG: ENVIOS EM ORDEM CORRETA");
-
-console.log("⏳ 1) Enviando perfil…");
-await reqPerfil;
-
-console.log("⏳ 2) Enviando fase…");
-await reqFase;
-
-console.log("⏳ 3) Enviando dia ciclo…");
-await reqDia;
-
-console.log("⏳ 4) Enviando cicloStart…");
-await reqManual;
-
-console.groupEnd();
-
-console.log("✔ BACKEND.POST → todos enviados na ordem correta");
+  // ---------------------------------------------------------
+  // 1) PERFIL HORMONAL — PRECISA SER O PRIMEIRO
+  // ---------------------------------------------------------
+  console.log("⏳ 1) Enviando perfil hormonal…");
+  const rPerfil = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setperfilhormonal",
+        id: idUser,
+        perfil
+      })
+  }).then(r => r.json());
+  console.log("🔶 RESPOSTA setperfilhormonal:", rPerfil);
 
 
-  console.log("📌 RESPOSTAS COMPLETAS:", respostas);
+  // ---------------------------------------------------------
+  // 2) FASE
+  // ---------------------------------------------------------
+  console.log("⏳ 2) Enviando fase…");
+  const rFase = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setfase",
+        id: idUser,
+        fase: faseCalc.toLowerCase()
+      })
+  }).then(r => r.json());
+  console.log("🔶 RESPOSTA setfase:", rFase);
+
+
+  // ---------------------------------------------------------
+  // 3) DIA DO CICLO
+  // ---------------------------------------------------------
+  console.log("⏳ 3) Enviando dia ciclo…");
+  const rDia = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setdiaciclo",
+        id: idUser,
+        dia
+      })
+  }).then(r => r.json());
+  console.log("🔶 RESPOSTA setdiaciclo:", rDia);
+
+
+  // ---------------------------------------------------------
+  // 4) CICLO START DATE (MANUAL)
+  // ---------------------------------------------------------
+  console.log("⏳ 4) Enviando cicloStart (startDate manual)…");
+  const rManual = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setmanualstart",
+        id: idUser,
+        startDate: start.toISOString()
+      })
+  }).then(r => r.json());
+  console.log("🔶 RESPOSTA setmanualstart:", rManual);
+
+
+  console.log("✔ BACKEND.POST → todos enviados na ordem correta");
   console.groupEnd();
-
-  console.log("✔ BACKEND.POST → todos enviados com sucesso");
 
 } catch (e) {
   console.error("❌ ERRO AO ENVIAR PARA O BACKEND:", e);
 }
+
 
 /* ============================================================
    4) FINALIZAR
