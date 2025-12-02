@@ -70,6 +70,7 @@
 
   <script src="femflow-core.js"></script>
 <script src="femflow-core.js"></script>
+<script src="femflow-core.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -77,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   FEMFLOW.inserirMenuLateral();
 
   /* =========================================================
-     1) SINCRONIZAR COM BACKEND *ANTES DE QUALQUER COISA*
+     1) SINCRONIZAR COM BACKEND
   ========================================================= */
   const perfil = await FEMFLOW.carregarCicloBackend();
 
@@ -86,16 +87,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  /* 🔥 Agora o localStorage já está atualizado
-     exatamente com os valores do backend */
-
-  const fase = perfil.fase;
+  /* backend → localStorage já está atualizado */
+  const fase     = perfil.fase;
   const diaCiclo = perfil.diaCiclo;
-  const nome = perfil.nome || "Aluna";
-  const first = nome.split(" ")[0];
+  const nome     = perfil.nome || "Aluna";
+  const first    = nome.split(" ")[0];
 
   /* =========================================================
-     2) TEXTOS DO FLOWCENTER
+     2) TEXTOS
   ========================================================= */
   document.getElementById("tituloFlow").textContent =
     `${first}, sua fase hormonal`;
@@ -103,9 +102,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("subFlow").textContent =
     "Seu corpo tem um ritmo único. Vamos acompanhar juntas.";
 
-
   /* =========================================================
-     3) LÍNGUA → Labels
+     3) LABELS
   ========================================================= */
   const lang = localStorage.getItem("femflow_lang") || "pt";
   const T = {
@@ -122,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const L = T[lang];
 
   /* =========================================================
-     4) PINTAR CÍRCULO NA FASE CORRETA
+     4) PINTAR CÍRCULO
   ========================================================= */
   document.getElementById("centerPhase").textContent = L.fases[fase];
   document.getElementById("t_current").textContent =
@@ -134,14 +132,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   /* =========================================================
-     5) NAVEGAÇÃO
+     5) NAV
   ========================================================= */
+  const toBreath    = document.getElementById("toBreath");
+  const toTrain     = document.getElementById("toTrain");
+  const toEvolution = document.getElementById("toEvolution");
+
   toBreath.onclick    = () => FEMFLOW.router("respiracao.html");
   toTrain.onclick     = () => FEMFLOW.router("treino.html");
   toEvolution.onclick = () => FEMFLOW.router("evolucao.html");
 
 });
 </script>
+
 
 
 </body>
