@@ -80,6 +80,7 @@
     <p id="ff-loading-text">Configurando…</p>
   </div>
 </div>
+  
 <script src="js/lang.js"></script>
 <script src="femflow-core.js"></script>
 
@@ -131,30 +132,12 @@ function faseAltaPorNivel(){
   return "ovulatoria";
 }
 
-/* ============================================================
-   PERGUNTAS ENERGÉTICAS
-============================================================ */
-const perguntasIrregular = [
-  "Você sentiu mudanças de energia ao longo da semana?",
-  "Percebeu sensibilidade nos seios, inchaço ou retenção?",
-  "Você teve oscilações emocionais sem motivo claro?",
-  "Sentiu cólicas, peso abdominal ou desconforto pélvico?",
-  "Você se sentiu sem vontade de treinar nos últimos dias?"
-];
-const perguntasMenopausa = [
-  "Nos últimos dias, você sentiu sua energia mais instável do que o normal?",
-  "Você teve ondas de calor ou suor noturno?",
-  "Seu humor variou muito?",
-  "Seu sono ficou mais leve ou interrompido?",
-  "Você tem sentido baixa disposição?"
-];
-const perguntasDiuHormonal = [
-  "Sua motivação para treinar caiu?",
-  "Você sentiu cansaço constante?",
-  "Irritabilidade ou sensibilidade emocional aumentou?",
-  "Inchaço ou peso no ventre?",
-  "Seu corpo parece lento ou travado?"
-];
+
+function getPerguntas(tipo) {
+  const L = FEMFLOW.langs[FEMFLOW.lang];
+  return L.quizCiclo[tipo];
+}
+
   
 /* ============================================================
    SALVAR CICLO (LOCAL + BACKEND) — VERSÃO CORRIGIDA 2025
@@ -366,27 +349,37 @@ document.querySelectorAll("[data-diu]").forEach(btn=>{
 ============================================================ */
 function iniciarQuizIrregular(){
   perfilInterno="irregular_quiz";
-  perguntasAtuais=perguntasIrregular;
+  perguntasAtuais = getPerguntas("irregular");
   abrirQuiz();
 }
+
 function iniciarQuizMenopausa(){
   perfilInterno="menopausa_quiz";
-  perguntasAtuais=perguntasMenopausa;
+  perguntasAtuais = getPerguntas("menopausa");
   abrirQuiz();
 }
+
 function iniciarQuizDiuHormonal(){
-  perfilInterno="diu_hormonal_quiz";
-  perguntasAtuais=perguntasDiuHormonal;
+  perfilInterno="diuHormonal_quiz";
+  perguntasAtuais = getPerguntas("diuHormonal");
   abrirQuiz();
 }
 
 function abrirQuiz(){
-  quizIdx=0;
-  quizScore=0;
-  quizPerg.textContent=perguntasAtuais[0];
-  quizStep.textContent=`Pergunta 1 de ${perguntasAtuais.length}`;
-  quizBox.style.display="block";
+  quizIdx = 0;
+  quizScore = 0;
+
+  // pergunta inicial
+  quizPerg.textContent = perguntasAtuais[0];
+
+  // etiqueta traduzida
+  const L = FEMFLOW.langs[FEMFLOW.lang].ciclo;
+quizStep.textContent = `${L.quizPergunta} ${quizIdx+1} ${L.de} ${perguntasAtuais.length}`;
+
+
+  quizBox.style.display = "block";
 }
+
 
 bindTap(document.getElementById("btnQuizSim"), ()=>responderQuiz(true));
 bindTap(document.getElementById("btnQuizNao"), ()=>responderQuiz(false));
@@ -524,6 +517,68 @@ bindTap(document.getElementById("btnConfirmarRegular"), ()=>{
     faseCalc:fase,
     dia
   });
+});
+/* ============================================================
+   🔤 TRADUÇÃO — APLICAR IDIOMA NA PÁGINA DE CICLO
+============================================================ */
+function aplicarIdioma() {
+  const L = FEMFLOW.langs[FEMFLOW.lang].ciclo;
+
+  // Topo
+  document.querySelector("h1").textContent = L.titulo;
+  document.querySelector(".sub").textContent = L.sub;
+
+  // Botões de perfil hormonal
+  document.querySelector("[data-perfil='regular']").textContent = L.regular;
+  document.querySelector("[data-perfil='irregular']").textContent = L.irregular;
+  document.querySelector("[data-perfil='diu']").textContent = L.diu;
+  document.querySelector("[data-perfil='menopausa']").textContent = L.menopausa;
+
+  // Submenu DIU
+  document.querySelector("#diuSubmenu h3").textContent = L.qualDiu;
+  document.querySelector("[data-diu='cobre']").textContent = L.diuCobre;
+  document.querySelector("[data-diu='hormonal']").textContent = L.diuHormonal;
+
+  // Regular
+  document.querySelector("#regularBox label:nth-of-type(1)").textContent = L.ultimaMenstruacao;
+  document.querySelector("#regularBox label:nth-of-type(2)").textContent = L.duracaoMedia;
+  document.getElementById("btnConfirmarRegular").textContent = L.confirmar;
+
+  // Quiz energético
+  document.getElementById("quizPergunta").textContent = L.quizInicio;
+  document.getElementById("btnQuizSim").textContent = L.sim;
+  document.getElementById("btnQuizNao").textContent = L.nao;
+
+  // Rodapé
+  document.querySelector("p[style*='essas informações']").textContent = L.footer;
+}
+
+/* ============================================================
+   🔧 ATIVAR MENU + TRADUÇÃO NA CICLO
+============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  FEMFLOW.inserirHeaderApp();
+  FEMFLOW.inserirMenuLateral();
+  FEMFLOW.inserirModalIdioma();
+
+  aplicarIdioma();
+  document.addEventListener("femflow:langChange", aplicarIdioma);
+});
+/* ============================================================
+   🔄 Atualização do quiz ao trocar idioma (se estiver aberto)
+============================================================ */
+document.addEventListener("femflow:langChange", () => {
+
+  if (!quizBox.style.display || quizBox.style.display === "none") return;
+
+  // Recarregar perguntas
+  const tipo = perfilInterno.replace("_quiz", "");
+  perguntasAtuais = getPerguntas(tipo);
+
+  quizPerg.textContent = perguntasAtuais[quizIdx];
+
+  const L = FEMFLOW.langs[FEMFLOW.lang].ciclo;
+  quizStep.textContent = `${L.quizPergunta} ${quizIdx+1} ${L.de} ${perguntasAtuais.length}`;
 });
 
 </script>
