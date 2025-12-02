@@ -1,11 +1,39 @@
-// js/lang.js
+/* ============================================================
+   🌐 FEMFLOW — Sistema de Idiomas (PT + FR)
+   Arquivo oficial: lang.js
+   ------------------------------------------------------------
+   • FEMFLOW.lang    → idioma atual
+   • FEMFLOW.langs   → dicionário
+   • FEMFLOW.setLang → alterar idioma
+   • Dispara evento: femflow:langChange
+============================================================ */
 
 window.FEMFLOW = window.FEMFLOW || {};
 
+/* idioma inicial */
+FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+
+/* ============================================================
+   🔤 DICIONÁRIO MULTILINGUE
+============================================================ */
 FEMFLOW.langs = {
+
+  /* ============================================================
+     🇧🇷 PORTUGUÊS
+  ============================================================ */
   pt: {
+    nome: "Português",
+
+    geral: {
+      loading: "Carregando…",
+      salvar: "Salvar",
+      cancelar: "Cancelar",
+      voltar: "Voltar",
+      faseAtual: "sua fase hormonal",
+    },
+
     menu: {
-      title: "Menu",
+      fechar: "Fechar",
       idioma: "Idioma",
       ciclo: "Ajustar ciclo",
       respiracao: "Respiração",
@@ -15,74 +43,223 @@ FEMFLOW.langs = {
       voltar: "Voltar",
       sair: "Sair"
     },
-    fases: {
+
+    flowcenter: {
+      titulo: "Sua fase hormonal",
+      sub: "Seu corpo tem um ritmo único. Vamos acompanhar juntas.",
       menstrual: "Menstrual",
       follicular: "Folicular",
       ovulatory: "Ovulatória",
       luteal: "Lútea"
     },
-    geral: {
-      carregando: "Carregando…",
+
+    ciclo: {
+      titulo: "Identifique seu momento",
+      sub: "Vamos ajustar seus treinos ao seu ciclo atual 🌸",
+
+      regular: "Regular",
+      irregular: "Irregular",
+      diu: "Uso DIU",
+      menopausa: "Menopausa",
+
+      qualDiu: "Qual tipo de DIU?",
+      diuCobre: "DIU de Cobre",
+      diuHormonal: "DIU Hormonal",
+
+      ultimaMenstruacao: "Data da última menstruação",
+      duracaoMedia: "Duração média (dias)",
+      confirmar: "Confirmar",
+
+      quizInicio: "Pronta?",
+      sim: "Sim",
+      nao: "Não",
+
+      footer: "Essas informações servem apenas para adaptar seus treinos. 💫"
+    },
+
+    treino: {
+      tituloTopo: "Treino Diário",
+      diaPrograma: "Dia do Programa",
+
+      btnSalvar: "💾 Salvar treino",
+      btnDescanso: "🌿 Descanso",
+      btnCancelar: "Cancelar",
+
+      pseTitulo: "Como foi o treino?",
+      pseLabel: "PSE (0 a 10)",
+      pseSalvar: "Salvar",
+      pseCancelar: "Cancelar"
+    },
+
+    respiracao: {
+      titulo: "Respiração",
+      sub: "Protocolos para foco, relaxamento e performance",
+
+      voltarTreino: "Voltar ao treino",
+      iniciar: "Iniciar",
+      parar: "Parar"
+    },
+
+    evolucao: {
+      titulo: "Evolução",
+      sub: "Veja sua jornada de progresso",
+
+      treino: "Treinos",
+      descanso: "Dias de descanso",
+      pseMedia: "PSE média",
       faseAtual: "Fase atual",
+      nenhumDado: "Nenhum dado registrado ainda."
+    },
+
+    home: {
+      titulo: "Bem-vinda ao FemFlow",
+      iniciar: "Começar",
+      meusTreinos: "Meus Treinos",
+      minhaEvolucao: "Minha Evolução"
+    },
+
+    index: {
+      titulo: "Entrar no FemFlow",
+      placeholderID: "Seu ID FemFlow",
+      entrar: "Entrar",
+      lembrete: "Seu ID é enviado por e-mail após a compra."
+    },
+
+    sistema: {
+      cicloConfigurado: "✨ Ciclo configurado!",
+      erroCiclo: "Erro ao carregar ciclo.",
+      sincronizando: "Sincronizando…",
+      treinoSalvo: "Treino salvo!",
+      descansoSalvo: "Descanso registrado!"
     }
   },
 
+
+  /* ============================================================
+     🇫🇷 FRANCÊS
+  ============================================================ */
   fr: {
+    nome: "Français",
+
+    geral: {
+      loading: "Chargement…",
+      salvar: "Enregistrer",
+      cancelar: "Annuler",
+      voltar: "Retour",
+      faseAtual: "votre phase hormonale",
+    },
+
     menu: {
-      title: "Menu",
+      fechar: "Fermer",
       idioma: "Langue",
       ciclo: "Ajuster le cycle",
       respiracao: "Respiration",
-      treinos: "Mes entraînements",
-      nivel: "Changer le niveau",
+      treinos: "Mes Entraînements",
+      nivel: "Changer de niveau",
       tema: "Thème",
       voltar: "Retour",
-      sair: "Quitter"
+      sair: "Déconnexion"
     },
-    fases: {
+
+    flowcenter: {
+      titulo: "Votre phase hormonale",
+      sub: "Votre corps a son propre rythme. Suivons-le ensemble.",
       menstrual: "Menstruelle",
       follicular: "Folliculaire",
       ovulatory: "Ovulatoire",
       luteal: "Lutéale"
     },
-    geral: {
-      carregando: "Chargement…",
-      faseAtual: "Phase actuelle",
-    }
-  },
 
-  en: {
-    menu: {
-      title: "Menu",
-      idioma: "Language",
-      ciclo: "Adjust cycle",
-      respiracao: "Breathing",
-      treinos: "My Workouts",
-      nivel: "Change level",
-      tema: "Theme",
-      voltar: "Back",
-      sair: "Logout"
+    ciclo: {
+      titulo: "Identifiez votre moment",
+      sub: "Ajustons vos entraînements à votre cycle 🌸",
+
+      regular: "Régulier",
+      irregular: "Irrégulier",
+      diu: "DIU",
+      menopausa: "Ménopause",
+
+      qualDiu: "Quel type de DIU ?",
+      diuCobre: "DIU au cuivre",
+      diuHormonal: "DIU hormonal",
+
+      ultimaMenstruacao: "Date des dernières règles",
+      duracaoMedia: "Durée moyenne (jours)",
+      confirmar: "Confirmer",
+
+      quizInicio: "Prête ?",
+      sim: "Oui",
+      nao: "Non",
+
+      footer: "Ces informations servent uniquement à adapter vos entraînements. 💫"
     },
-    fases: {
-      menstrual: "Menstrual",
-      follicular: "Follicular",
-      ovulatory: "Ovulatory",
-      luteal: "Luteal"
+
+    treino: {
+      tituloTopo: "Entraînement du jour",
+      diaPrograma: "Jour du programme",
+
+      btnSalvar: "💾 Enregistrer l’entraînement",
+      btnDescanso: "🌿 Repos",
+      btnCancelar: "Annuler",
+
+      pseTitulo: "Comment était l'entraînement ?",
+      pseLabel: "PSE (0 à 10)",
+      pseSalvar: "Enregistrer",
+      pseCancelar: "Annuler"
     },
-    geral: {
-      carregando: "Loading…",
-      faseAtual: "Current phase",
+
+    respiracao: {
+      titulo: "Respiration",
+      sub: "Protocoles pour le focus, la relaxation et la performance",
+
+      voltarTreino: "Retour à l'entraînement",
+      iniciar: "Démarrer",
+      parar: "Arrêter"
+    },
+
+    evolucao: {
+      titulo: "Évolution",
+      sub: "Suivez votre progression",
+
+      treino: "Entraînements",
+      descanso: "Jours de repos",
+      pseMedia: "PSE moyen",
+      faseAtual: "Phase actuelle",
+      nenhumDado: "Aucune donnée enregistrée."
+    },
+
+    home: {
+      titulo: "Bienvenue sur FemFlow",
+      iniciar: "Commencer",
+      meusTreinos: "Mes Entraînements",
+      minhaEvolucao: "Mon Évolution"
+    },
+
+    index: {
+      titulo: "Connexion à FemFlow",
+      placeholderID: "Votre ID FemFlow",
+      entrar: "Entrer",
+      lembrete: "Votre ID est envoyé par e-mail après l’achat."
+    },
+
+    sistema: {
+      cicloConfigurado: "✨ Cycle configuré !",
+      erroCiclo: "Erreur lors du chargement du cycle.",
+      sincronizando: "Synchronisation…",
+      treinoSalvo: "Entraînement enregistré !",
+      descansoSalvo: "Repos enregistré !"
     }
   }
 };
 
-// Define idioma atual
-FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+/* ============================================================
+   🔄 ALTERAR IDIOMA
+============================================================ */
+FEMFLOW.setLang = function (code) {
+  if (!FEMFLOW.langs[code]) return;
 
-FEMFLOW.setLang = function(code) {
   FEMFLOW.lang = code;
   localStorage.setItem("femflow_lang", code);
 
-  // Dispara evento para páginas atualizarem textos
   document.dispatchEvent(new CustomEvent("femflow:langChange"));
 };
