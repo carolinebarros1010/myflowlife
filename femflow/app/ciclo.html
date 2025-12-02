@@ -75,7 +75,14 @@
 </p>
 
 <script src="./femflow-core.js"> </script>
-
+  
+<div id="ff-loading" class="ff-loading hidden">
+  <div class="ff-loading-box">
+    <div class="ff-spinner"></div>
+    <p id="ff-loading-text">Configurando…</p>
+  </div>
+</div>
+  
 <script>
   
 function ffShowLoading(msg = "Processando…") {
@@ -517,12 +524,7 @@ bindTap(document.getElementById("btnConfirmarRegular"), ()=>{
 
 </script>
   
-<div id="ff-loading" class="ff-loading hidden">
-  <div class="ff-loading-box">
-    <div class="ff-spinner"></div>
-    <p id="ff-loading-text">Configurando…</p>
-  </div>
-</div>
+
 
 </body>
 </html>
