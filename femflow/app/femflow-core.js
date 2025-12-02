@@ -278,7 +278,6 @@ FEMFLOW.carregarPerfil = async function () {
   }
 };
 
-FEMFLOW.carregarCicloBackend = FEMFLOW.carregarPerfil;
 
 /* ===========================================================
    6. DIA PROGRAMA — 1→30 automático
