@@ -69,34 +69,44 @@
   </div>
 
   <script src="femflow-core.js"></script>
+<script src="femflow-core.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
   FEMFLOW.inserirHeaderApp();
   FEMFLOW.inserirMenuLateral();
 
-  /* 1 — Sincroniza com backend usando o método NOVO */
-  const perfil = await FEMFLOW.carregarPerfil();   // <— esse é o certo!
+  /* =========================================================
+     1) SINCRONIZAR COM BACKEND *ANTES DE QUALQUER COISA*
+  ========================================================= */
+  const perfil = await FEMFLOW.carregarCicloBackend();
+
   if (!perfil) {
-    FEMFLOW.toast("Erro ao carregar perfil.");
+    FEMFLOW.toast("Erro ao carregar ciclo.");
     return;
   }
 
-  /* 2 — Nome */
-  const nome = localStorage.getItem("femflow_nome") || "Aluna";
+  /* 🔥 Agora o localStorage já está atualizado
+     exatamente com os valores do backend */
+
+  const fase = perfil.fase;
+  const diaCiclo = perfil.diaCiclo;
+  const nome = perfil.nome || "Aluna";
   const first = nome.split(" ")[0];
 
-  /* 3 — Fase atual (AGORA CORRETA) */
-  const fase = perfil.fase;  // usa backend, não localStorage antigo
-
-  /* 4 — Textos */
+  /* =========================================================
+     2) TEXTOS DO FLOWCENTER
+  ========================================================= */
   document.getElementById("tituloFlow").textContent =
     `${first}, sua fase hormonal`;
 
   document.getElementById("subFlow").textContent =
     "Seu corpo tem um ritmo único. Vamos acompanhar juntas.";
 
-  /* 5 — Idioma */
+
+  /* =========================================================
+     3) LÍNGUA → Labels
+  ========================================================= */
   const lang = localStorage.getItem("femflow_lang") || "pt";
   const T = {
     pt: {
@@ -111,20 +121,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
   const L = T[lang];
 
-  /* 6 — Centro */
+  /* =========================================================
+     4) PINTAR CÍRCULO NA FASE CORRETA
+  ========================================================= */
   document.getElementById("centerPhase").textContent = L.fases[fase];
-
-  /* 7 — Texto abaixo */
   document.getElementById("t_current").textContent =
     `${L.faseAtual} ${L.fases[fase]}`;
 
-  /* 8 — Pintar segmento */
   ["menstrual", "follicular", "ovulatory", "luteal"].forEach(s => {
     document.getElementById(`seg-${s}`).classList.toggle("path-active", s === fase);
     document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === fase);
   });
 
-  /* 9 — Navegação */
+  /* =========================================================
+     5) NAVEGAÇÃO
+  ========================================================= */
   toBreath.onclick    = () => FEMFLOW.router("respiracao.html");
   toTrain.onclick     = () => FEMFLOW.router("treino.html");
   toEvolution.onclick = () => FEMFLOW.router("evolucao.html");
