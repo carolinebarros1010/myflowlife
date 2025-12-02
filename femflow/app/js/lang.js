@@ -208,6 +208,30 @@ FEMFLOW.langs = {
     ]
   }
 ]
+// Dentro de FEMFLOW.langs.pt
+quizCiclo: {
+  irregular: [
+    "Você sentiu mudanças de energia ao longo da semana?",
+    "Percebeu sensibilidade nos seios, inchaço ou retenção?",
+    "Você teve oscilações emocionais sem motivo claro?",
+    "Sentiu cólicas, peso abdominal ou desconforto pélvico?",
+    "Você se sentiu sem vontade de treinar nos últimos dias?"
+  ],
+  menopausa: [
+    "Nos últimos dias, você sentiu sua energia mais instável do que o normal?",
+    "Você teve ondas de calor ou suor noturno?",
+    "Seu humor variou muito?",
+    "Seu sono ficou mais leve ou interrompido?",
+    "Você tem sentido baixa disposição?"
+  ],
+  diuHormonal: [
+    "Sua motivação para treinar caiu?",
+    "Você sentiu cansaço constante?",
+    "Irritabilidade ou sensibilidade emocional aumentou?",
+    "Inchaço ou peso no ventre?",
+    "Seu corpo parece lento ou travado?"
+  ]
+}
 
   /* ============================================================
      🇺🇸 ENGLISH
@@ -401,6 +425,29 @@ anamneseQuiz: [
   }
 ]
 
+quizCiclo: {
+  irregular: [
+    "Did you feel energy changes throughout the week?",
+    "Did you notice breast sensitivity, bloating, or water retention?",
+    "Did your emotions fluctuate without a clear reason?",
+    "Did you feel cramps, abdominal heaviness, or pelvic discomfort?",
+    "Did you feel unmotivated to train in recent days?"
+  ],
+  menopausa: [
+    "In recent days, has your energy been more unstable than usual?",
+    "Have you experienced hot flashes or night sweats?",
+    "Has your mood varied a lot?",
+    "Has your sleep been lighter or interrupted?",
+    "Have you been feeling low energy?"
+  ],
+  diuHormonal: [
+    "Has your motivation to train dropped?",
+    "Have you felt persistent fatigue?",
+    "Has irritability or emotional sensitivity increased?",
+    "Have you felt bloating or abdominal heaviness?",
+    "Does your body feel slow or sluggish?"
+  ]
+}
 
   /* ============================================================
      🇫🇷 FRANCÊS
@@ -592,6 +639,29 @@ anamneseQuiz: [
     ]
   }
 ]
+quizCiclo: {
+  irregular: [
+    "Avez-vous ressenti des variations d'énergie cette semaine ?",
+    "Avez-vous remarqué une sensibilité des seins, un gonflement ou une rétention d'eau ?",
+    "Vos émotions ont-elles fluctué sans raison claire ?",
+    "Avez-vous ressenti des crampes ou un poids abdominal ou pelvien ?",
+    "Vous êtes-vous sentie sans motivation pour vous entraîner ces derniers jours ?"
+  ],
+  menopausa: [
+    "Ces derniers jours, votre énergie a-t-elle été plus instable que d'habitude ?",
+    "Avez-vous eu des bouffées de chaleur ou des sueurs nocturnes ?",
+    "Votre humeur a-t-elle beaucoup varié ?",
+    "Votre sommeil a-t-il été léger ou interrompu ?",
+    "Avez-vous ressenti une faible disposition ?"
+  ],
+  diuHormonal: [
+    "Votre motivation à vous entraîner a-t-elle diminué ?",
+    "Avez-vous ressenti une fatigue constante ?",
+    "L'irritabilité ou la sensibilité émotionnelle a-t-elle augmenté ?",
+    "Avez-vous ressenti un gonflement ou un poids abdominal ?",
+    "Votre corps semble-t-il lent ou bloqué ?"
+  ]
+}
 
 /* ============================================================
    🔄 ALTERAR IDIOMA
