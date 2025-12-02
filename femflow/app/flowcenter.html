@@ -20,9 +20,9 @@
 
   <h1 id="tituloApp">FemFlow</h1>
 
-  <!-- 🔥 Agora personalizado -->
-  <h3 id="tituloFlow">Fase Hormonal</h3>
-  <p class="subtitle" id="subFlow">Seu corpo tem um ritmo. Vamos acompanhar juntas.</p>
+  <!-- Títulos dinâmicos -->
+  <h3 id="tituloFlow">—</h3>
+  <p class="subtitle" id="subFlow">—</p>
 
   <!-- ================================
        CÍRCULO HORMONAL
@@ -33,20 +33,20 @@
         <circle cx="150" cy="150" r="120" fill="#fff5ef"></circle>
 
         <g stroke="#fff5ef" stroke-width="3">
-          <path id="seg-menstrual"  d="M150,150 L150,30 A120,120 0 0,1 270,150 Z" fill="#f9e0d8"></path>
+          <path id="seg-menstrual"  d="M150,150 L150,30 A120,120 0 0,1 270,150 Z"  fill="#f9e0d8"></path>
           <path id="seg-follicular" d="M150,150 L270,150 A120,120 0 0,1 150,270 Z" fill="#f9e0d8"></path>
-          <path id="seg-ovulatory"  d="M150,150 L150,270 A120,120 0 0,1 30,150 Z" fill="#f9e0d8"></path>
-          <path id="seg-luteal"     d="M150,150 L30,150 A120,120 0 0,1 150,30 Z" fill="#f9e0d8"></path>
+          <path id="seg-ovulatory"  d="M150,150 L150,270 A120,120 0 0,1 30,150 Z"  fill="#f9e0d8"></path>
+          <path id="seg-luteal"     d="M150,150 L30,150 A120,120 0 0,1 150,30 Z"  fill="#f9e0d8"></path>
         </g>
 
         <circle cx="150" cy="150" r="65" fill="none" stroke="#fff5ef" stroke-width="2"></circle>
         <circle cx="150" cy="150" r="63" fill="#cc6a5a"></circle>
 
         <!-- Labels -->
-        <text id="lbl-menstrual"  x="215" y="95"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(45,215,95)">Menstrual</text>
-        <text id="lbl-follicular" x="215" y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(135,215,215)">Folicular</text>
-        <text id="lbl-ovulatory"  x="85"  y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(225,85,215)">Ovulatória</text>
-        <text id="lbl-luteal"     x="85"  y="85"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(315,85,85)">Lútea</text>
+        <text id="lbl-menstrual"  x="215" y="95"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle">—</text>
+        <text id="lbl-follicular" x="215" y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle">—</text>
+        <text id="lbl-ovulatory"  x="85"  y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle">—</text>
+        <text id="lbl-luteal"     x="85"  y="85"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle">—</text>
 
         <text id="centerPhase"
               x="150" y="155"
@@ -59,24 +59,24 @@
     </div>
   </div>
 
-  <div class="current-phase" id="t_current">Fase atual: —</div>
+  <div class="current-phase" id="t_current">—</div>
 
   <!-- NAV -->
   <div class="toolbar">
-    <button class="tool" id="toBreath">💨 Respiração</button>
-    <button class="tool" id="toTrain">🏃 Treino</button>
-    <button class="tool" id="toEvolution">📈 Evolução</button>
+    <button class="tool" id="toBreath">💨 —</button>
+    <button class="tool" id="toTrain">🏃 —</button>
+    <button class="tool" id="toEvolution">📈 —</button>
   </div>
 
- 
+
+<!-- SCRIPTS -->
 <script src="js/lang.js"></script>
 <script src="femflow-core.js"></script>
 
 <script>
-  
-  function ffHideLoading() {
-  const box = document.getElementById("ff-loading");
-  if (box) box.classList.add("hidden");
+
+function ffHideLoading() {
+  document.getElementById("ff-loading")?.classList.add("hidden");
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -84,94 +84,82 @@ document.addEventListener("DOMContentLoaded", async () => {
   FEMFLOW.inserirHeaderApp();
   FEMFLOW.inserirMenuLateral();
 
-  /* =========================================================
+  /* ============================================================
      1) SINCRONIZAR COM BACKEND
-  ========================================================= */
+  ============================================================ */
   const perfil = await FEMFLOW.carregarCicloBackend();
 
   if (!perfil) {
-    FEMFLOW.toast("Erro ao carregar ciclo.");
+    FEMFLOW.toast(FEMFLOW.langs[FEMFLOW.lang].sistema.erroCiclo, true);
     ffHideLoading();
     return;
   }
 
-  /* backend → localStorage já está atualizado */
-  const fase     = perfil.fase;
-  const mapaFase = {
-  lutea: "luteal",
-  lútea: "luteal",
-  luteal: "luteal",
+  const faseRaw = perfil.fase?.toLowerCase() || "follicular";
 
-  folicular: "follicular",
-  follicular: "follicular",
-
-  ovulatoria: "ovulatory",
-  ovulatório: "ovulatory",
-  ovulatory: "ovulatory",
-
-  menstrual: "menstrual"
-};
-
-// Fase normalizada
-const faseNorm = mapaFase[fase?.toLowerCase()] || "follicular";
-
-  const diaCiclo = perfil.diaCiclo;
-  const nome     = perfil.nome || "Aluna";
-  const first    = nome.split(" ")[0];
-
-  /* =========================================================
-     2) TEXTOS
-  ========================================================= */
-  document.getElementById("tituloFlow").textContent =
-    `${first}, sua fase hormonal`;
-
-  document.getElementById("subFlow").textContent =
-    "Seu corpo tem um ritmo único. Vamos acompanhar juntas.";
-
-  /* =========================================================
-     3) LABELS
-  ========================================================= */
-  const lang = localStorage.getItem("femflow_lang") || "pt";
-  const T = {
-    pt: {
-      faseAtual: "Fase atual:",
-      fases: {
-        menstrual: "Menstrual",
-        follicular: "Folicular",
-        ovulatory: "Ovulatória",
-        luteal: "Lútea"
-      }
-    }
+  const map = {
+    "lutea": "luteal", "lútea": "luteal", "luteal": "luteal",
+    "folicular": "follicular", "follicular": "follicular",
+    "ovulatoria": "ovulatory", "ovulatório": "ovulatory", "ovulatory": "ovulatory",
+    "menstrual": "menstrual"
   };
-  const L = T[lang];
 
-  /* =========================================================
+  const faseNorm = map[faseRaw] || "follicular";
+
+  /* ============================================================
+     2) DEFINIR FUNÇÃO DE IDIOMA
+  ============================================================ */
+  function aplicarIdioma() {
+    const L = FEMFLOW.langs[FEMFLOW.lang].flowcenter;
+
+    const nome = perfil.nome || "";
+    const first = nome.split(" ")[0] || L.titulo;
+
+    // Títulos
+    document.getElementById("tituloFlow").textContent = `${first}, ${L.titulo}`;
+    document.getElementById("subFlow").textContent = L.sub;
+
+    // Labels do círculo
+    document.getElementById("lbl-menstrual").textContent  = L.menstrual;
+    document.getElementById("lbl-follicular").textContent = L.follicular;
+    document.getElementById("lbl-ovulatory").textContent  = L.ovulatory;
+    document.getElementById("lbl-luteal").textContent     = L.luteal;
+
+    // Label da fase central
+    document.getElementById("centerPhase").textContent = L[faseNorm];
+
+    // Texto abaixo do círculo
+    document.getElementById("t_current").textContent =
+      `${FEMFLOW.langs[FEMFLOW.lang].geral.faseAtual}: ${L[faseNorm]}`;
+
+    // Botões NAV
+    document.getElementById("toBreath").textContent    = "💨 " + FEMFLOW.langs[FEMFLOW.lang].menu.respiracao;
+    document.getElementById("toTrain").textContent     = "🏃 " + FEMFLOW.langs[FEMFLOW.lang].treino.tituloTopo;
+    document.getElementById("toEvolution").textContent = "📈 " + FEMFLOW.langs[FEMFLOW.lang].evolucao.titulo;
+  }
+
+  /* ============================================================
+     3) APLICAR IDIOMA + LISTENER
+  ============================================================ */
+  aplicarIdioma();
+  document.addEventListener("femflow:langChange", aplicarIdioma);
+
+  /* ============================================================
      4) PINTAR CÍRCULO
-  ========================================================= */
-  document.getElementById("centerPhase").textContent = L.fases[faseNorm]
-
-  document.getElementById("t_current").textContent =
-    `${L.faseAtual} ${L.fases[faseNorm]}`;
-
+  ============================================================ */
   ["menstrual", "follicular", "ovulatory", "luteal"].forEach(s => {
-    document.getElementById(`seg-${s}`).classList.toggle("path-active", s === faseNorm
-);
-    document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === faseNorm
-);
+    document.getElementById(`seg-${s}`).classList.toggle("path-active", s === faseNorm);
+    document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === faseNorm);
   });
-  // 🔥 Somente agora esconde o loading
+
   ffHideLoading();
 
-  /* =========================================================
+  /* ============================================================
      5) NAV
-  ========================================================= */
-  const toBreath    = document.getElementById("toBreath");
-  const toTrain     = document.getElementById("toTrain");
-  const toEvolution = document.getElementById("toEvolution");
-
-  toBreath.onclick    = () => FEMFLOW.router("respiracao.html");
-  toTrain.onclick     = () => FEMFLOW.router("treino.html");
-  toEvolution.onclick = () => FEMFLOW.router("evolucao.html");
+  ============================================================ */
+  document.getElementById("toBreath").onclick    = () => FEMFLOW.router("respiracao.html");
+  document.getElementById("toTrain").onclick     = () => FEMFLOW.router("treino.html");
+  document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
 
 });
 </script>
@@ -179,9 +167,10 @@ const faseNorm = mapaFase[fase?.toLowerCase()] || "follicular";
 <div id="ff-loading" class="ff-loading">
   <div class="ff-loading-box">
     <div class="ff-spinner"></div>
-    <p>Carregando sua fase hormonal…</p>
+    <p>Carregando…</p>
   </div>
 </div>
 
 </body>
 </html>
+
