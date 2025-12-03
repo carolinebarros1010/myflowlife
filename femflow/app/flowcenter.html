@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   /* ============================================================
      2) DEFINIR FUNÇÃO DE IDIOMA
   ============================================================ */
- function aplicarIdioma() {
+function aplicarIdioma() {
   const langObj = FEMFLOW.langs[FEMFLOW.lang];
 
   if (!langObj || !langObj.flowcenter) {
@@ -119,10 +119,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     return;
   }
 
-  const L = langObj.flowcenter;   // ✔️ única e correta
+  const L = langObj.flowcenter;
 
   const nome = perfil.nome || "";
-  const first = nome.split(" ")[0] || L.titulo;
+  const first = (nome.split(" ")[0] || L.titulo);
 
   // Títulos
   document.getElementById("tituloFlow")?.textContent = `${first}, ${L.titulo}`;
@@ -134,10 +134,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("lbl-ovulatory")?.textContent  = L.ovulatory;
   document.getElementById("lbl-luteal")?.textContent     = L.luteal;
 
-  // Fase central
+  // Centro
   document.getElementById("centerPhase")?.textContent = L[faseNorm] || L.follicular;
 
-  // Texto abaixo do círculo
+  // Texto abaixo
   document.getElementById("t_current")?.textContent =
     `${langObj.geral.faseAtual}: ${L[faseNorm] || L.follicular}`;
 
@@ -146,6 +146,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("toTrain")?.textContent     = "🏃 " + langObj.treino.tituloTopo;
   document.getElementById("toEvolution")?.textContent = "📈 " + langObj.evolucao.titulo;
 }
+
 
 
   /* ============================================================
