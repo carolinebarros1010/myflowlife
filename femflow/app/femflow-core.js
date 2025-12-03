@@ -77,7 +77,10 @@ FEMFLOW.carregarCicloBackend = async function () {
   FEMFLOW.log("🔄 Sincronizando ciclo com backend…");
 
   const id = localStorage.getItem("femflow_id");
-  if (!id) return FEMFLOW.error("❌ Sem ID no localStorage!");
+  if (!id) {
+  FEMFLOW.error("❌ Sem ID no localStorage!");
+  return null; // ← obrigatório!
+}
 
   try {
     const resp = await fetch(FEMFLOW.SCRIPT_URL + "?action=sync&id=" + id)
