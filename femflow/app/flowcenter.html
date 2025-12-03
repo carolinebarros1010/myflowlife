@@ -74,20 +74,22 @@
 <script src="femflow-core.js"></script>
 
 <script>
-
 function ffHideLoading() {
-  document.getElementById("ff-loading")?.classList.add("hidden");
+  var box = document.getElementById("ff-loading");
+  if (box) box.classList.add("hidden");
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async function () {
 
+  // Header + menu lateral + modal de idioma (core já tem, mas é idempotente)
   FEMFLOW.inserirHeaderApp();
   FEMFLOW.inserirMenuLateral();
+  FEMFLOW.inserirModalIdioma && FEMFLOW.inserirModalIdioma();
 
   /* ============================================================
      1) SINCRONIZAR COM BACKEND
   ============================================================ */
-  const perfil = await FEMFLOW.carregarCicloBackend();
+  var perfil = await FEMFLOW.carregarCicloBackend();
 
   if (!perfil) {
     FEMFLOW.toast(FEMFLOW.langs[FEMFLOW.lang].sistema.erroCiclo, true);
@@ -95,74 +97,87 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const faseRaw = (perfil.fase ? String(perfil.fase).toLowerCase() : "follicular");
+  var faseRaw = (perfil.fase ? String(perfil.fase).toLowerCase() : "follicular");
 
-  const map = {
+  var map = {
     "lutea": "luteal", "lútea": "luteal", "luteal": "luteal",
     "folicular": "follicular", "follicular": "follicular",
     "ovulatoria": "ovulatory", "ovulatório": "ovulatory", "ovulatory": "ovulatory",
     "menstrual": "menstrual"
   };
 
-  const faseNorm = map[faseRaw] || "follicular";
+  var faseNorm = map[faseRaw] || "follicular";
 
- /* ============================================================
-   2) DEFINIR FUNÇÃO DE IDIOMA
-============================================================ */
-function aplicarIdioma() {
-  const langObj = FEMFLOW.langs[FEMFLOW.lang];
+  /* ============================================================
+     2) DEFINIR FUNÇÃO DE IDIOMA
+  ============================================================ */
+  function aplicarIdioma() {
+    var langObj = FEMFLOW.langs[FEMFLOW.lang] || FEMFLOW.langs.pt;
+    if (!langObj || !langObj.flowcenter) {
+      console.warn("⚠️ flowcenter não encontrado:", FEMFLOW.lang);
+      return;
+    }
 
-  if (!langObj || !langObj.flowcenter) {
-    console.warn("⚠️ flowcenter não encontrado:", FEMFLOW.lang);
-    return;
+    var L = langObj.flowcenter;
+
+    var nome  = perfil.nome || "";
+    var first = nome.split(" ")[0] || L.titulo;
+
+    // Títulos
+    var elTituloFlow = document.getElementById("tituloFlow");
+    if (elTituloFlow) elTituloFlow.textContent = first + ", " + L.titulo;
+
+    var elSubFlow = document.getElementById("subFlow");
+    if (elSubFlow) elSubFlow.textContent = L.sub;
+
+    // Labels do círculo
+    var lblMen = document.getElementById("lbl-menstrual");
+    if (lblMen) lblMen.textContent = L.menstrual;
+
+    var lblFol = document.getElementById("lbl-follicular");
+    if (lblFol) lblFol.textContent = L.follicular;
+
+    var lblOvu = document.getElementById("lbl-ovulatory");
+    if (lblOvu) lblOvu.textContent = L.ovulatory;
+
+    var lblLut = document.getElementById("lbl-luteal");
+    if (lblLut) lblLut.textContent = L.luteal;
+
+    // Fase central
+    var center = document.getElementById("centerPhase");
+    var faseTexto = L[faseNorm] || L.follicular;
+    if (center) center.textContent = faseTexto;
+
+    // Texto abaixo do círculo
+    var tCurrent = document.getElementById("t_current");
+    if (tCurrent) tCurrent.textContent = langObj.geral.faseAtual + ": " + faseTexto;
+
+    // Botões NAV
+    var btBreath = document.getElementById("toBreath");
+    if (btBreath) btBreath.textContent = "💨 " + langObj.menu.respiracao;
+
+    var btTrain = document.getElementById("toTrain");
+    if (btTrain) btTrain.textContent = "🏃 " + langObj.treino.tituloTopo;
+
+    var btEvo = document.getElementById("toEvolution");
+    if (btEvo) btEvo.textContent = "📈 " + langObj.evolucao.titulo;
   }
 
-  const L = langObj.flowcenter; // ✔️ ESTA É A CORRETA
-
-  const nome = perfil.nome || "";
-  const first = nome.split(" ")[0] || L.titulo;
-
-  document.getElementById("tituloFlow")?.textContent = `${first}, ${L.titulo}`;
-  document.getElementById("subFlow")?.textContent = L.sub;
-
-  document.getElementById("lbl-menstrual")?.textContent  = L.menstrual;
-  document.getElementById("lbl-follicular")?.textContent = L.follicular;
-  document.getElementById("lbl-ovulatory")?.textContent  = L.ovulatory;
-  document.getElementById("lbl-luteal")?.textContent     = L.luteal;
-
-  document.getElementById("centerPhase")?.textContent = L[faseNorm] || L.follicular;
-
-  document.getElementById("t_current")?.textContent =
-    `${langObj.geral.faseAtual}: ${L[faseNorm] || L.follicular}`;
-
-  document.getElementById("toBreath")?.textContent    = "💨 " + langObj.menu.respiracao;
-  document.getElementById("toTrain")?.textContent     = "🏃 " + langObj.treino.tituloTopo;
-  document.getElementById("toEvolution")?.textContent = "📈 " + langObj.evolucao.titulo;
-}
-
-
-
-/* ============================================================
-   3) APLICAR IDIOMA + LISTENER
-============================================================ */
-
-// Chamamos uma vez aqui — porque faseNorm JÁ EXISTE.
-aplicarIdioma();
-
-// Só ouvir mudanças de idioma (troca pelo modal).
-document.addEventListener("femflow:langChange", aplicarIdioma);
-
-// ❌ NUNCA chamar aplicarIdioma em femflow:ready no FlowCenter
-// ❌ NUNCA chamar aplicarIdioma em femflow:langReady — não existe
-
-
+  /* ============================================================
+     3) APLICAR IDIOMA + LISTENER
+  ============================================================ */
+  aplicarIdioma();
+  document.addEventListener("femflow:langChange", aplicarIdioma);
 
   /* ============================================================
      4) PINTAR CÍRCULO
   ============================================================ */
-  ["menstrual", "follicular", "ovulatory", "luteal"].forEach(s => {
-    document.getElementById(`seg-${s}`).classList.toggle("path-active", s === faseNorm);
-    document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === faseNorm);
+  ["menstrual", "follicular", "ovulatory", "luteal"].forEach(function (s) {
+    var seg = document.getElementById("seg-" + s);
+    var lbl = document.getElementById("lbl-" + s);
+
+    if (seg) seg.classList.toggle("path-active", s === faseNorm);
+    if (lbl) lbl.classList.toggle("label-active", s === faseNorm);
   });
 
   ffHideLoading();
@@ -170,13 +185,23 @@ document.addEventListener("femflow:langChange", aplicarIdioma);
   /* ============================================================
      5) NAV
   ============================================================ */
-  document.getElementById("toBreath").onclick    = () => FEMFLOW.router("respiracao.html");
-  document.getElementById("toTrain").onclick     = () => FEMFLOW.router("treino.html");
-  document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
+  var btnBreath = document.getElementById("toBreath");
+  if (btnBreath) btnBreath.onclick = function () {
+    FEMFLOW.router("respiracao.html");
+  };
 
-});  
+  var btnTrain = document.getElementById("toTrain");
+  if (btnTrain) btnTrain.onclick = function () {
+    FEMFLOW.router("treino.html");
+  };
 
+  var btnEvo = document.getElementById("toEvolution");
+  if (btnEvo) btnEvo.onclick = function () {
+    FEMFLOW.router("evolucao.html");
+  };
+});
 </script>
+
 
 
 <div id="ff-loading" class="ff-loading">
