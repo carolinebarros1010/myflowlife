@@ -124,98 +124,132 @@
     }
   </script>
 
-  <!-- ========================================= -->
-  <!--   🔥 MOTOR FEMFLOW + INTERNACIONALIZAÇÃO   -->
-  <!-- ========================================= -->
-  <script>
+<!-- ========================================= -->
+<!--   🔥 MOTOR FEMFLOW + INTERNACIONALIZAÇÃO   -->
+<!-- ========================================= -->
 
+<script>
 document.addEventListener("DOMContentLoaded", () => {
 
-  FEMFLOW.inserirHeaderApp?.();
-
   /* ============================================================
-     1) FUNÇÃO DE IDIOMA
+     HEADER
   ============================================================ */
-  function aplicarIdioma() {
-    const L = FEMFLOW.langs[FEMFLOW.lang].resp;
-
-    document.getElementById("respTitulo1").textContent = L.titulo1;
-    document.getElementById("respTitulo2").textContent = L.titulo2;
-    document.getElementById("respSub").textContent    = L.sub;
-
-    document.getElementById("grupoCiclo").textContent     = L.grupoCiclo;
-    document.getElementById("grupoTreino").textContent    = L.grupoTreino;
-    document.getElementById("grupoUniversal").textContent = L.grupoUniversal;
-
-    document.getElementById("btnRaiz").textContent         = L.raiz;
-    document.getElementById("btnClareza").textContent      = L.clareza;
-    document.getElementById("btnBrilho").textContent       = L.brilho;
-    document.getElementById("btnSereno").textContent       = L.sereno;
-
-    document.getElementById("btnWake").textContent         = L.wake;
-    document.getElementById("btnCharge").textContent       = L.charge;
-    document.getElementById("btnRelease").textContent      = L.release;
-    document.getElementById("btnRestore").textContent      = L.restore;
-
-    document.getElementById("btnEquilibrio").textContent   = L.equilibrio;
-    document.getElementById("btnTransparencia").textContent= L.transparencia;
-
-    document.getElementById("btnVoltarTreino").textContent = L.voltarTreino;
-
-    document.getElementById("faseLabel").textContent = L.preparar;
-    document.getElementById("btnStart").textContent  = L.iniciar;
-    document.getElementById("respFooter").textContent= L.footer;
+  if (typeof FEMFLOW?.inserirHeaderApp === "function") {
+    FEMFLOW.inserirHeaderApp();
   }
 
+  /* ============================================================
+     1) FUNÇÃO DE IDIOMA (CORRIGIDA E À PROVA DE ERRO)
+  ============================================================ */
+  function aplicarIdioma() {
+
+    const langSet = FEMFLOW?.langs?.[FEMFLOW?.lang];
+    if (!langSet || !langSet.resp) {
+      console.warn("🚨 ERRO: Idioma de respiração não encontrado:", FEMFLOW.lang);
+      return;
+    }
+
+    const L = langSet.resp;
+
+    const map = {
+      respTitulo1:  L.titulo1,
+      respTitulo2:  L.titulo2,
+      respSub:      L.sub,
+
+      grupoCiclo:     L.grupoCiclo,
+      grupoTreino:    L.grupoTreino,
+      grupoUniversal: L.grupoUniversal,
+
+      btnRaiz:         L.raiz,
+      btnClareza:      L.clareza,
+      btnBrilho:       L.brilho,
+      btnSereno:       L.sereno,
+
+      btnWake:         L.wake,
+      btnCharge:       L.charge,
+      btnRelease:      L.release,
+      btnRestore:      L.restore,
+
+      btnEquilibrio:   L.equilibrio,
+      btnTransparencia:L.transparencia,
+
+      btnVoltarTreino: L.voltarTreino,
+
+      faseLabel: L.preparar,
+      btnStart:  L.iniciar,
+      respFooter:L.footer
+    };
+
+    // Atribuição segura aos elementos
+    for (let id in map) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = map[id];
+    }
+  }
+
+  // Listener + Execução
   document.addEventListener("femflow:langChange", aplicarIdioma);
   aplicarIdioma();
 
 
+
   /* ============================================================
-     2) MOTOR DE RESPIRAÇÃO (IGUAL AO SEU, SÓ ORGANIZADO)
+     2) MOTOR RESPIRAÇÃO — CORRIGIDO + SEGURO
   ============================================================ */
 
   let cicloAtivo = false;
-  let timerTotal;
 
   const circle    = document.getElementById('breathCircle');
   const label     = document.getElementById('faseLabel');
   const modal     = document.getElementById('breathModal');
-  const countdown = document.getElementById('countdown');
   const btnStart  = document.getElementById('btnStart');
 
+  // Todos os protocolos padronizados
   const protocolos = {
     raiz:        { fases:[4,4,4,4], cor:"#CC6A5A" },
     clareza:     { fases:[5,7,8,0], cor:"#E2B5A5" },
     brilho:      { fases:[3,2,3,2], cor:"#FFB26B" },
     sereno:      { fases:[6,2,6,2], cor:"#A4C3B2" },
+
     wake:        { fases:[3,3,3,0], cor:"#88C1A7" },
     charge:      { fases:[2,1,4,1], cor:"#B44C3B" },
     release:     { fases:[4,2,6,0], cor:"#CBD6D6" },
     restore:     { fases:[6,2,6,2], cor:"#8BAAAD" },
+
     equilibrio:  { fases:[4,4,4,4], cor:"#6E8A9F" },
     transparencia:{fases:[5,5,5,5], cor:"#D0C7E2" }
   };
 
-  /* ABRE PROTOCOLO */
+
+  /* ============================================================
+     3) ABRIR PROTOCOLO
+  ============================================================ */
   window.iniciarProtocolo = function(tipo){
 
     const p = protocolos[tipo];
-    if (!p) return;
+    if (!p) {
+      console.warn("⚠ Protocolo não encontrado:", tipo);
+      return;
+    }
 
+    // Esconder botões e descrições
     document.querySelectorAll(".btn-protocolo").forEach(b => b.style.display="none");
     document.querySelectorAll(".desc").forEach(d => d.style.display="none");
 
+    // Mostrar modal
     modal.style.display = "flex";
     modal.style.background = p.cor + "20";
     circle.style.background = p.cor;
 
+    cicloAtivo = false;
     btnStart.style.display = "block";
     btnStart.onclick = () => startProtocolo(p);
   };
 
 
-  /* CONTAGEM 5 → 1 */
+  /* ============================================================
+     4) CONTAGEM INICIAL (5 → 1)
+  ============================================================ */
   async function contagemInicial(){
     for (let i = 5; i >= 1; i--) {
       circle.textContent = i;
@@ -223,12 +257,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* ANIMAÇÃO DAS FASES */
+
+  /* ============================================================
+     5) ANIMAÇÃO DAS FASES
+  ============================================================ */
   async function animarContagem(segundos, faseIndex, cor){
 
-    const nomes = ["Inspire","Segure","Expire","Segure"];
-    label.textContent = nomes[faseIndex];
+    // Textos traduzidos
+    const textos = {
+      pt: ["Inspire","Segure","Expire","Segure"],
+      en: ["Inhale","Hold","Exhale","Hold"],
+      fr: ["Inspirez","Retenez","Expirez","Retenez"]
+    };
 
+    const lang = FEMFLOW.lang || "pt";
+    const nomes = textos[lang] || textos["pt"];
+
+    label.textContent = nomes[faseIndex];
     circle.style.background = cor;
 
     for (let s = segundos; s >= 1; s--) {
@@ -237,8 +282,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* EXECUÇÃO DO PROTOCOLO */
+
+  /* ============================================================
+     6) EXECUÇÃO DO PROTOCOLO COMPLETO
+  ============================================================ */
   async function startProtocolo(p) {
+
     cicloAtivo = true;
     btnStart.style.display = "none";
 
@@ -246,20 +295,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let fase = 0;
 
-    async function ciclo(){
+    async function cicloResp() {
       const dur = p.fases[fase];
       await animarContagem(dur, fase, p.cor);
-      fase = (fase+1) % 4;
-      if (cicloAtivo) ciclo();
+
+      fase = (fase + 1) % 4;
+
+      if (cicloAtivo) cicloResp();
     }
 
-    ciclo();
+    cicloResp();
   }
 
+
+  /* Utilitário: pausa */
   function esperar(ms){ return new Promise(res => setTimeout(res, ms)); }
 
 });
-  </script>
+</script>
+
 
 </body>
 </html>
