@@ -323,4 +323,25 @@ button:hover {
   color: #cc6a5a;
   font-weight: 600;
 }
+/* ================================
+   FEMFLOW • CICLO — ESPAÇO HEADER
+==================================*/
+.pagina-ciclo {
+  background: #fff5ef;
+  color: #5b4f49;
+  font-family: "Lato", sans-serif;
+  margin: 0;
+  text-align: center;
+
+  /* evita que o header fique por cima do título */
+  padding-top: calc(85px + env(safe-area-inset-top, 0px));
+  box-sizing: border-box;
+}
+
+/* garante que o título não grude no header */
+.pagina-ciclo h1 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-family: "Playfair Display", serif;
+}
 
