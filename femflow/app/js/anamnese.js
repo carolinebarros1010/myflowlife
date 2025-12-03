@@ -15,7 +15,7 @@
 // ============================================================
 function getPerguntasTraduzidas() {
   const lang = FEMFLOW?.lang || "pt";
-  const L = FEMFLOW?.langs?.[lang]?.anamneseQuiz || FEMFLOW.langs.pt.anamneseQuiz;
+  const L = FEMFLOW.anamneseLang[lang].perguntas;
   return JSON.parse(JSON.stringify(L)); // clone seguro
 }
 
@@ -93,84 +93,115 @@ function getPerguntasTraduzidas() {
   // ============================================================
   async function finalizar() {
 
-    const lang = FEMFLOW?.lang || "pt";
-    const T = FEMFLOW.langs[lang].anamnese;
-    const Tsys = FEMFLOW.langs[lang].sistema;
+  const lang = FEMFLOW?.lang || "pt";
 
-    cardQuiz.classList.add("hidden");
-    cardFinal.classList.remove("hidden");
+  // Textos do sistema (vem do lang.js)
+  const Tsys = FEMFLOW.langs[lang].sistema;
 
-    finalMsgEl.textContent = T.analisando; // traduzido
+  // Textos da etapa final da Anamnese
+  const T = {
+    analisando: {
+      pt: "Analisando seu perfil…",
+      en: "Analyzing your profile…",
+      fr: "Analyse de ton profil…"
+    }[lang],
 
-    // classificação
-    let perfil = "iniciante";
-    if (score >= 20) perfil = "avançada";
-    else if (score >= 14) perfil = "intermediária";
+    perfilFinal: {
+      pt: "Seu nível é:",
+      en: "Your level is:",
+      fr: "Ton niveau est :"
+    }[lang],
 
-    const respostas = perguntas.map((p, i) => ({
-      ordem: i + 1,
-      pergunta: p.texto
-    }));
+    erroFinal: {
+      pt: "Não foi possível concluir a anamnese.",
+      en: "Could not complete the questionnaire.",
+      fr: "Impossible de terminer le questionnaire."
+    }[lang],
 
-    const { nome, email, telefone, senha } = pegarDadosLead();
+    erroConexao: {
+      pt: "Erro de conexão.",
+      en: "Connection error.",
+      fr: "Erreur de connexion."
+    }[lang]
+  };
 
-    if (!nome || !email || !senha) {
-      FEMFLOW.toast(Tsys.erroCiclo, true);
-      return;
-    }
+  // Telas
+  cardQuiz.classList.add("hidden");
+  cardFinal.classList.remove("hidden");
 
-    FEMFLOW.toast(Tsys.sincronizando);
+  finalMsgEl.textContent = T.analisando;
 
-    try {
-      let r;
+  // Classificação
+  let perfil = "iniciante";
+  if (score >= 20) perfil = "avançada";
+  else if (score >= 14) perfil = "intermediária";
 
-      if (typeof FEMFLOW.enviarCadastro === "function") {
-        r = await FEMFLOW.enviarCadastro({
-          nome, email, telefone, senha, perfil,
+  const respostas = perguntas.map((p, i) => ({
+    ordem: i + 1,
+    pergunta: p.texto
+  }));
+
+  // Dados
+  const { nome, email, telefone, senha } = pegarDadosLead();
+
+  if (!nome || !email || !senha) {
+    FEMFLOW.toast(Tsys.erroCiclo, true);
+    return;
+  }
+
+  FEMFLOW.toast(Tsys.sincronizando);
+
+  try {
+    let r;
+
+    if (typeof FEMFLOW.enviarCadastro === "function") {
+      r = await FEMFLOW.enviarCadastro({
+        nome, email, telefone, senha, perfil,
+        pontuacao: score,
+        anamnese: JSON.stringify(respostas)
+      });
+    } else {
+      const resp = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "enviarcadastro",
+          nome, email, telefone, senha,
+          perfil,
           pontuacao: score,
           anamnese: JSON.stringify(respostas)
-        });
-      } else {
-        const resp = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "enviarcadastro",
-            nome, email, telefone, senha,
-            perfil,
-            pontuacao: score,
-            anamnese: JSON.stringify(respostas)
-          })
-        });
-        r = await resp.json();
-      }
-
-      if (r && (r.status === "ok" || r.status === "created")) {
-
-        if (r.id) localStorage.setItem("femflow_id", r.id);
-        if (r.email) localStorage.setItem("femflow_email", r.email);
-
-        localStorage.removeItem("lead_nome");
-        localStorage.removeItem("lead_email");
-        localStorage.removeItem("lead_telefone");
-
-        FEMFLOW.toast(Tsys.cicloConfigurado);
-
-        finalMsgEl.textContent = `${T.perfilFinal} ${perfil.toUpperCase()}!`;
-
-        setTimeout(() => location.href = "home.html", 3500);
-
-      } else {
-        FEMFLOW.toast(Tsys.erroCiclo, true);
-        finalMsgEl.textContent = T.erroFinal;
-      }
-
-    } catch (err) {
-      console.error("Erro enviarCadastro:", err);
-      FEMFLOW.toast(Tsys.erroCiclo, true);
-      finalMsgEl.textContent = T.erroConexao;
+        })
+      });
+      r = await resp.json();
     }
+
+    if (r && (r.status === "ok" || r.status === "created")) {
+
+      if (r.id) localStorage.setItem("femflow_id", r.id);
+      if (r.email) localStorage.setItem("femflow_email", r.email);
+
+      localStorage.removeItem("lead_nome");
+      localStorage.removeItem("lead_email");
+      localStorage.removeItem("lead_telefone");
+
+      FEMFLOW.toast(Tsys.cicloConfigurado);
+
+      finalMsgEl.textContent = `${T.perfilFinal} ${perfil.toUpperCase()}!`;
+
+      setTimeout(() => location.href = "home.html", 3500);
+
+    } else {
+      FEMFLOW.toast(Tsys.erroCiclo, true);
+      finalMsgEl.textContent = T.erroFinal;
+    }
+
+  } catch (err) {
+    console.error("Erro enviarCadastro:", err);
+    FEMFLOW.toast(Tsys.erroCiclo, true);
+    finalMsgEl.textContent = T.erroConexao;
   }
+}
+
 
   // ============================================================
   //      INICIALIZAR QUIZ
