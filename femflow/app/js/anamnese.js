@@ -15,9 +15,14 @@
 // ============================================================
 function getPerguntasTraduzidas() {
   const lang = FEMFLOW?.lang || "pt";
-  const L = FEMFLOW.anamneseLang[lang].perguntas;
+
+  const L =
+    FEMFLOW?.anamneseLang?.[lang]?.perguntas ||
+    FEMFLOW.anamneseLang.pt.perguntas;
+
   return JSON.parse(JSON.stringify(L)); // clone seguro
 }
+
 
 (function () {
 
