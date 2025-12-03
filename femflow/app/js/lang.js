@@ -108,6 +108,42 @@ pt: {
     pseSalvar: "Salvar",
     pseCancelar: "Cancelar"
   },
+resp: {
+  /* Títulos */
+  titulo1: "Respiração",
+  titulo2: "Protocolos para foco, relaxamento e energia",
+  sub: "Respire com intenção. Modifique seu estado interno.",
+
+  /* Grupos */
+  grupoCiclo: "Do Ciclo",
+  grupoTreino: "Durante o Treino",
+  grupoUniversal: "Protocolos Universais",
+
+  /* Protocolos — Grupo Ciclo */
+  raiz: "Respiração Raiz",
+  clareza: "Clareza Mental",
+  brilho: "Brilho Interno",
+  sereno: "Serenidade",
+
+  /* Protocolos — Grupo Treino */
+  wake: "Acordar",
+  charge: "Carregar Energia",
+  release: "Descarregar",
+  restore: "Restaurar",
+
+  /* Protocolos — Universais */
+  equilibrio: "Equilíbrio",
+  transparencia: "Transparência",
+
+  /* Controles */
+  preparar: "Prepare-se",
+  iniciar: "Iniciar",
+  parar: "Parar",
+  voltarTreino: "Voltar ao treino",
+
+  /* Footer */
+  footer: "FemFlow • Respiração Consciente"
+},
 
   respiracao: {
     titulo: "Respiração",
@@ -244,6 +280,42 @@ en: {
     pseSalvar: "Save",
     pseCancelar: "Cancel"
   },
+resp: {
+  /* Titles */
+  titulo1: "Breathing",
+  titulo2: "Choose your protocol",
+  sub: "Regulate your internal state through intentional breathing.",
+
+  /* Groups */
+  grupoCiclo: "Cycle-Based",
+  grupoTreino: "Training-Based",
+  grupoUniversal: "Universal Protocols",
+
+  /* Cycle Protocols */
+  raiz: "Root Breath",
+  clareza: "Mental Clarity",
+  brilho: "Inner Shine",
+  sereno: "Serenity",
+
+  /* Training Protocols */
+  wake: "Wake Up",
+  charge: "Charge",
+  release: "Release",
+  restore: "Restore",
+
+  /* Universal */
+  equilibrio: "Balance",
+  transparencia: "Transparency",
+
+  /* Controls */
+  preparar: "Get Ready",
+  iniciar: "Start",
+  parar: "Stop",
+  voltarTreino: "Back to Workout",
+
+  /* Footer */
+  footer: "FemFlow • Conscious Breathing"
+},
 
   respiracao: {
     titulo: "Breathing",
@@ -380,6 +452,42 @@ fr: {
     pseSalvar: "Enregistrer",
     pseCancelar: "Annuler"
   },
+resp: {
+  /* Titres */
+  titulo1: "Respiration",
+  titulo2: "Choisissez votre protocole",
+  sub: "Régulez votre état interne grâce à la respiration consciente.",
+
+  /* Groupes */
+  grupoCiclo: "Selon le cycle",
+  grupoTreino: "Pour l'entraînement",
+  grupoUniversal: "Protocoles universels",
+
+  /* Protocoles – Cycle */
+  raiz: "Respiration Racine",
+  clareza: "Clarté Mentale",
+  brilho: "Éclat Intérieur",
+  sereno: "Sérénité",
+
+  /* Protocoles – Entraînement */
+  wake: "Réveil",
+  charge: "Charger l'énergie",
+  release: "Relâcher",
+  restore: "Restaurer",
+
+  /* Protocoles universels */
+  equilibrio: "Équilibre",
+  transparencia: "Transparence",
+
+  /* Contrôles */
+  preparar: "Préparez-vous",
+  iniciar: "Démarrer",
+  parar: "Arrêter",
+  voltarTreino: "Retour à l'entraînement",
+
+  /* Footer */
+  footer: "FemFlow • Respiration Consciente"
+},
 
   respiracao: {
     titulo: "Respiration",
