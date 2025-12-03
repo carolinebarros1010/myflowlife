@@ -344,4 +344,41 @@ button:hover {
   margin-bottom: 10px;
   font-family: "Playfair Display", serif;
 }
+/* ============================================================
+   🌸 FemFlow – Rodapé informativo do Ciclo (cycleFooter)
+   ------------------------------------------------------------
+   • Estilo elegante, limpo e consistente com o visual FemFlow
+   • Mantém identidade mesmo com troca de idioma
+============================================================ */
 
+/* container geral */
+.cycleFooter {
+  margin-top: 22px;
+  padding: 14px 18px;
+  text-align: center;
+  font-size: 0.92rem;
+  font-family: 'Lato', sans-serif;
+  color: #A87E72;
+  line-height: 1.45;
+  background: #FFF7F2;
+  border-radius: 14px;
+  width: calc(100% - 40px);
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.06);
+}
+
+/* Emojis ficam suaves e alinhados */
+.cycleFooter .emoji {
+  font-size: 1rem;
+  margin-left: 4px;
+  opacity: 0.8;
+}
+
+/* Modo escuro */
+body.dark .cycleFooter {
+  background: #2b2b2b;
+  color: #d8cfc7;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
