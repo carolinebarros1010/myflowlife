@@ -26,13 +26,17 @@
 }
 
 /* ============================================================
-   🔥 FEMFLOW — BOTÃO DO MENU (VERSÃO FINAL BLINDADA)
+   🔥 FEMFLOW — BOTÃO DO MENU (VERSÃO FINAL ALINHADO NO HEADER)
 ============================================================ */
 
 .ff-menu-btn,
 #ffMenuBtn {
   position: absolute !important;
-  top: 18px !important;
+
+  /* ⬇⬇ Alinhamento vertical perfeito no header */
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+
   right: 18px !important;
 
   background: none !important;
@@ -40,8 +44,6 @@
 
   width: auto !important;
   height: auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
 
   padding: 6px 10px !important;
   margin: 0 !important;
@@ -61,7 +63,7 @@
   z-index: 99999 !important;
 }
 
-/* Hover / Active suaves no padrão FemFlow */
+/* Hover / Active */
 .ff-menu-btn:hover,
 #ffMenuBtn:hover {
   background: rgba(0,0,0,0.03) !important;
@@ -70,21 +72,23 @@
 .ff-menu-btn:active,
 #ffMenuBtn:active {
   background: rgba(0,0,0,0.08) !important;
-  transform: scale(0.97) !important;
+  transform: translateY(-50%) scale(0.97) !important;
 }
 
-/* Hard shield contra resets estranhos */
+/* Hard shield contra resets */
 .ff-menu-btn *,
 #ffMenuBtn * {
   width: auto !important;
-  display: inline !important;
   max-width: none !important;
+  display: inline !important;
 }
 
+/* Tema escuro */
 body.dark #ffMenuBtn,
 body.dark .ff-menu-btn {
   color: var(--bege) !important;
 }
+
 
 
 /* ----------------------------------------
