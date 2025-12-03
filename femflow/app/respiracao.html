@@ -142,6 +142,10 @@ document.addEventListener("DOMContentLoaded", () => {
      1) FUNÇÃO DE IDIOMA (CORRIGIDA E À PROVA DE ERRO)
   ============================================================ */
   function aplicarIdioma() {
+// GARANTIA: idioma sempre definido
+if (!FEMFLOW.lang) {
+  FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+}
 
     const langSet = FEMFLOW?.langs?.[FEMFLOW?.lang];
     if (!langSet || !langSet.resp) {
