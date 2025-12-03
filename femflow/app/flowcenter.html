@@ -149,8 +149,14 @@ function aplicarIdioma() {
 /* ============================================================
    3) APLICAR IDIOMA + LISTENER
 ============================================================ */
-aplicarIdioma();
+// 🚀 Só aplicar idioma quando TUDO estiver pronto:
+// 1) idioma carregado (lang.js)
+// 2) sincronização com backend concluída (faseNorm definida)
+// 3) elementos do DOM já inseridos
+document.addEventListener("femflow:langReady", aplicarIdioma);
 document.addEventListener("femflow:langChange", aplicarIdioma);
+document.addEventListener("femflow:ready", aplicarIdioma);
+
 
 
   /* ============================================================
