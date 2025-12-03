@@ -1,142 +1,16 @@
+/* ------------------------------------------------------------
+   PALETA FEMFLOW (use apenas se não estiver em core.css)
+------------------------------------------------------------ */
+:root {
+  --terracota: #CC6A5A;
+  --bege: #FFF5EF;
+  --verde: #335953;
+  --texto: #5B4F49;
+}
 
-    :root {
-      --terracota: #CC6A5A;
-      --bege: #FFF5EF;
-      --verde: #335953;
-      --texto: #5B4F49;
-    }
-
-    body {
-      background-color: var(--bege);
-      color: var(--texto);
-      font-family: "Lato", sans-serif;
-      text-align: center;
-      margin: 0;
-      padding-top: calc(85px + env(safe-area-inset-top, 0px));
-      box-sizing: border-box;
-    }
-
-    h1 {
-      font-family: 'Playfair Display', serif;
-      color: var(--terracota);
-      font-size: 2.2rem;
-      line-height: 1.2;
-      margin: 0;
-    }
-
-    h1 span:first-child {
-      display: block;
-      color: var(--texto);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-
-    h1 span:last-child {
-      display: block;
-      color: var(--terracota);
-      font-size: 2.2rem;
-      font-weight: 700;
-    }
-
-    p.sub {
-      margin-top: 10px;
-      margin-bottom: 35px;
-      font-size: 1rem;
-      color: var(--texto);
-    }
-
-    .btn-protocolo {
-      width: 90%;
-      max-width: 340px;
-      border: none;
-      border-radius: 25px;
-      padding: 14px 18px;
-      font-size: 1.05em;
-      font-weight: 600;
-      cursor: pointer;
-      margin: 8px auto;
-      display: block;
-      transition: all 0.3s ease;
-    }
-
-    .btn-protocolo:hover {
-      transform: scale(1.03);
-      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .box { background: #CC6A5A; color: #fff; }
-    .moon { background: #E2B5A5; color: #5A4032; }
-    .energy { background: #335953; color: #fff; }
-    .calm { background: #EAD5C8; color: #5A4032; }
-    .fire { background: #B44C3B; color: #fff; }
-
-    #breathModal {
-      display: none;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: center;
-      min-height: calc(100vh - 100px);
-      background: var(--bege);
-      transition: background 0.6s ease;
-      padding-top: 60px;
-    }
-
-    #breathCircle {
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      background: var(--terracota);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      font-size: 3em;
-      font-weight: 700;
-      box-shadow: 0 0 25px rgba(204, 106, 90, 0.25);
-      margin-bottom: 20px;
-    }
-
-    #faseLabel {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3em;
-      color: var(--texto);
-      font-style: italic;
-      transition: opacity 0.5s;
-    }
-
-    #countdown {
-      font-size: 1.2em;
-      margin-top: 8px;
-      color: var(--verde);
-      display: none;
-    }
-
-    #btnStart {
-      margin-top: 30px;
-      background: var(--verde);
-      color: #fff;
-      border: none;
-      border-radius: 25px;
-      padding: 12px 24px;
-      font-size: 1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    #btnStart:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-
-    footer {
-      margin-top: 40px;
-      color: #A87E72;
-      font-size: 0.9em;
-    }
- 
-
-/* ======== ESCOPADO ======== */
+/* ------------------------------------------------------------
+   LAYOUT GERAL DA PÁGINA DE RESPIRAÇÃO
+------------------------------------------------------------ */
 .pagina-respiracao {
   background-color: var(--bege);
   color: var(--texto);
@@ -147,10 +21,11 @@
   box-sizing: border-box;
 }
 
+/* TÍTULO PRINCIPAL */
 .pagina-respiracao h1 {
   font-family: 'Playfair Display', serif;
   color: var(--terracota);
-  font-size: 2.2rem;
+  font-size: 1.9rem;
   line-height: 1.2;
   margin: 0;
 }
@@ -158,49 +33,69 @@
 .pagina-respiracao h1 span:first-child {
   display: block;
   color: var(--texto);
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
 .pagina-respiracao h1 span:last-child {
   display: block;
   color: var(--terracota);
-  font-size: 2.2rem;
+  font-size: 1.7rem;
   font-weight: 700;
 }
 
+/* SUBTÍTULO */
 .pagina-respiracao p.sub {
   margin-top: 10px;
-  margin-bottom: 35px;
-  font-size: 1rem;
+  margin-bottom: 28px;
+  font-size: 0.95rem;
   color: var(--texto);
 }
 
+/* GRUPOS (títulos das seções) */
+.pagina-respiracao .grupo-titulo {
+  font-family: "Playfair Display", serif;
+  font-size: 0.95rem;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  color: var(--verde);
+  letter-spacing: 0.04em;
+}
+
+/* BOTÕES DOS PROTOCOLOS */
 .pagina-respiracao .btn-protocolo {
   width: 90%;
   max-width: 340px;
   border: none;
   border-radius: 25px;
-  padding: 14px 18px;
-  font-size: 1.05em;
+  padding: 12px 16px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   margin: 8px auto;
   display: block;
-  transition: all 0.3s ease;
+  background: #F3F1EF;
+  color: var(--texto);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  transition: all 0.25s ease;
 }
 
 .pagina-respiracao .btn-protocolo:hover {
-  transform: scale(1.03);
-  box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  background: #ffffff;
 }
 
-.pagina-respiracao .box { background: #CC6A5A; color: #fff; }
-.pagina-respiracao .moon { background: #E2B5A5; color: #5A4032; }
-.pagina-respiracao .energy { background: #335953; color: #fff; }
-.pagina-respiracao .calm { background: #EAD5C8; color: #5A4032; }
-.pagina-respiracao .fire { background: #B44C3B; color: #fff; }
+/* CLASSES DE COR (se ainda estiver usando) */
+.pagina-respiracao .box   { background: #CC6A5A; color: #fff; }
+.pagina-respiracao .moon  { background: #E2B5A5; color: #5A4032; }
+.pagina-respiracao .energy{ background: #335953; color: #fff; }
+.pagina-respiracao .calm  { background: #EAD5C8; color: #5A4032; }
+.pagina-respiracao .fire  { background: #B44C3B; color: #fff; }
 
+/* ------------------------------------------------------------
+   MODAL / CÍRCULO DE RESPIRAÇÃO
+------------------------------------------------------------ */
 .pagina-respiracao #breathModal {
   display: none;
   flex-direction: column;
@@ -221,7 +116,7 @@
   justify-content: center;
   align-items: center;
   color: #fff;
-  font-size: 3em;
+  font-size: 3rem;
   font-weight: 700;
   box-shadow: 0 0 25px rgba(204, 106, 90, 0.25);
   margin-bottom: 20px;
@@ -229,19 +124,20 @@
 
 .pagina-respiracao #faseLabel {
   font-family: 'Playfair Display', serif;
-  font-size: 1.3em;
+  font-size: 1.2rem;
   color: var(--texto);
   font-style: italic;
   transition: opacity 0.5s;
 }
 
 .pagina-respiracao #countdown {
-  font-size: 1.2em;
+  font-size: 1.1rem;
   margin-top: 8px;
   color: var(--verde);
   display: none;
 }
 
+/* BOTÃO START */
 .pagina-respiracao #btnStart {
   margin-top: 30px;
   background: var(--verde);
@@ -249,7 +145,7 @@
   border: none;
   border-radius: 25px;
   padding: 12px 24px;
-  font-size: 1em;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -260,11 +156,14 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
+/* FOOTER */
 .pagina-respiracao footer {
-  margin-top: 40px;
+  margin-top: 32px;
   color: #A87E72;
-  font-size: 0.9em;
+  font-size: 0.9rem;
 }
+
+/* BOTÃO VOLTAR AO TREINO */
 .ff-voltar-treino {
   margin: 10px;
   background: transparent;
@@ -272,4 +171,23 @@
   color: #335953;
   font-size: 0.95rem;
   font-weight: 700;
+}
+
+/* ------------------------------------------------------------
+   AJUSTE FINO MOBILE
+------------------------------------------------------------ */
+@media (max-width: 420px) {
+  .pagina-respiracao h1 {
+    font-size: 1.7rem;
+  }
+  .pagina-respiracao h1 span:first-child {
+    font-size: 1.15rem;
+  }
+  .pagina-respiracao h1 span:last-child {
+    font-size: 1.55rem;
+  }
+  .pagina-respiracao .btn-protocolo {
+    font-size: 0.9rem;
+    padding: 11px 14px;
+  }
 }
