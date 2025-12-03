@@ -411,6 +411,7 @@ FEMFLOW.inspect = function () {
 /* ===========================================================
    10. AUTO-START
 =========================================================== */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("femflow:langReady", () => {
   FEMFLOW.init();
 });
+
