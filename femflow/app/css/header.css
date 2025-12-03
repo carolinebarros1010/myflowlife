@@ -25,18 +25,67 @@
   height: 28px;
 }
 
-.ff-menu-btn {
-  background: none;
-  border: none;
-  font-size: 28px;
-  color: var(--teal);
-  padding: 6px 10px;
-  border-radius: 10px;
+/* ============================================================
+   🔥 FEMFLOW — BOTÃO DO MENU (VERSÃO FINAL BLINDADA)
+============================================================ */
+
+.ff-menu-btn,
+#ffMenuBtn {
+  position: absolute !important;
+  top: 18px !important;
+  right: 18px !important;
+
+  background: none !important;
+  border: none !important;
+
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+
+  padding: 6px 10px !important;
+  margin: 0 !important;
+
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  color: var(--teal) !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 12px !important;
+
+  cursor: pointer !important;
+  z-index: 99999 !important;
 }
 
-.ff-menu-btn:active {
-  background: rgba(0,0,0,0.08);
+/* Hover / Active suaves no padrão FemFlow */
+.ff-menu-btn:hover,
+#ffMenuBtn:hover {
+  background: rgba(0,0,0,0.03) !important;
 }
+
+.ff-menu-btn:active,
+#ffMenuBtn:active {
+  background: rgba(0,0,0,0.08) !important;
+  transform: scale(0.97) !important;
+}
+
+/* Hard shield contra resets estranhos */
+.ff-menu-btn *,
+#ffMenuBtn * {
+  width: auto !important;
+  display: inline !important;
+  max-width: none !important;
+}
+
+body.dark #ffMenuBtn,
+body.dark .ff-menu-btn {
+  color: var(--bege) !important;
+}
+
 
 /* ----------------------------------------
    MENU LATERAL
