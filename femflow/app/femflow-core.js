@@ -10,6 +10,10 @@ window.FEMFLOW = {};
 =========================================================== */
 
 FEMFLOW.SCRIPT_URL = "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+// Alias universal para manter compatibilidade com versões antigas
+FEMFLOW.ENDPOINT_BACKEND = FEMFLOW.SCRIPT_URL;
+FEMFLOW.API_URL = FEMFLOW.SCRIPT_URL;
+FEMFLOW.BACKEND = FEMFLOW.SCRIPT_URL;
 
 FEMFLOW.dev = () => localStorage.getItem("femflow_dev") === "on";
 FEMFLOW.log   = (...a) => { if (FEMFLOW.dev()) console.log("%c[FEMFLOW]", "color:#cc6a5a", ...a); };
