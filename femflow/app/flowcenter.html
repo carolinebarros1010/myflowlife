@@ -109,59 +109,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ============================================================
      2) DEFINIR FUNÇÃO DE IDIOMA
   ============================================================ */
-  function aplicarIdioma() {
-    const L = FEMFLOW.langs[FEMFLOW.lang].flowcenter;
+ function aplicarIdioma() {
+  const langObj = FEMFLOW.langs[FEMFLOW.lang];
 
-    const nome = perfil.nome || "";
-    const first = nome.split(" ")[0] || L.titulo;
-
-    // Títulos
-    document.getElementById("tituloFlow").textContent = `${first}, ${L.titulo}`;
-    document.getElementById("subFlow").textContent = L.sub;
-
-    // Labels do círculo
-    document.getElementById("lbl-menstrual").textContent  = L.menstrual;
-    document.getElementById("lbl-follicular").textContent = L.follicular;
-    document.getElementById("lbl-ovulatory").textContent  = L.ovulatory;
-    document.getElementById("lbl-luteal").textContent     = L.luteal;
-
-    // Label da fase central
-    document.getElementById("centerPhase").textContent = L[faseNorm];
-
-    // Texto abaixo do círculo
-    document.getElementById("t_current").textContent =
-      `${FEMFLOW.langs[FEMFLOW.lang].geral.faseAtual}: ${L[faseNorm]}`;
-
-    // Botões NAV
-    document.getElementById("toBreath").textContent    = "💨 " + FEMFLOW.langs[FEMFLOW.lang].menu.respiracao;
-    document.getElementById("toTrain").textContent     = "🏃 " + FEMFLOW.langs[FEMFLOW.lang].treino.tituloTopo;
-    document.getElementById("toEvolution").textContent = "📈 " + FEMFLOW.langs[FEMFLOW.lang].evolucao.titulo;
+  if (!langObj || !langObj.flowcenter) {
+    console.warn("⚠️ flowcenter não encontrado no idioma:", FEMFLOW.lang);
+    return;
   }
 
-  /* ============================================================
-     3) APLICAR IDIOMA + LISTENER
-  ============================================================ */
-  aplicarIdioma();
-  document.addEventListener("femflow:langChange", aplicarIdioma);
+  const L = langObj.flowcenter;
 
-  /* ============================================================
-     4) PINTAR CÍRCULO
-  ============================================================ */
-  ["menstrual", "follicular", "ovulatory", "luteal"].forEach(s => {
-    document.getElementById(`seg-${s}`).classList.toggle("path-active", s === faseNorm);
-    document.getElementById(`lbl-${s}`).classList.toggle("label-active", s === faseNorm);
-  });
+  const nome = perfil.nome || "";
+  const first = nome.split(" ")[0] || L.titulo;
 
-  ffHideLoading();
+  // Títulos
+  document.getElementById("tituloFlow").textContent = `${first}, ${L.titulo}`;
+  document.getElementById("subFlow").textContent = L.sub;
 
-  /* ============================================================
-     5) NAV
-  ============================================================ */
-  document.getElementById("toBreath").onclick    = () => FEMFLOW.router("respiracao.html");
-  document.getElementById("toTrain").onclick     = () => FEMFLOW.router("treino.html");
-  document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
+  // Labels do círculo
+  document.getElementById("lbl-menstrual").textContent  = L.menstrual;
+  document.getElementById("lbl-follicular").textContent = L.follicular;
+  document.getElementById("lbl-ovulatory").textContent  = L.ovulatory;
+  document.getElementById("lbl-luteal").textContent     = L.luteal;
 
-});
+  // Fase central
+  document.getElementById("centerPhase").textContent = L[faseNorm];
+
+  // Texto abaixo do círculo
+  document.getElementById("t_current").textContent =
+    `${langObj.geral.faseAtual}: ${L[faseNorm]}`;
+
+  // Botões NAV
+  document.getElementById("toBreath").textContent    = "💨 " + langObj.menu.respiracao;
+  document.getElementById("toTrain").textContent     = "🏃 " + langObj.treino.tituloTopo;
+  document.getElementById("toEvolution").textContent = "📈 " + langObj.evolucao.titulo;
+}
+
 </script>
 
 <div id="ff-loading" class="ff-loading">
