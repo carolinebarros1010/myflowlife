@@ -111,57 +111,42 @@ document.addEventListener("DOMContentLoaded", async function () {
   /* ============================================================
      2) DEFINIR FUNÇÃO DE IDIOMA
   ============================================================ */
-  function aplicarIdioma() {
-    var langObj = FEMFLOW.langs[FEMFLOW.lang] || FEMFLOW.langs.pt;
-    if (!langObj || !langObj.flowcenter) {
-      console.warn("⚠️ flowcenter não encontrado:", FEMFLOW.lang);
-      return;
-    }
+ function aplicarIdioma() {
+  const langObj = FEMFLOW.langs[FEMFLOW.lang];
 
-    var L = langObj.flowcenter;
-
-    var nome  = perfil.nome || "";
-    var first = nome.split(" ")[0] || L.titulo;
-
-    // Títulos
-    var elTituloFlow = document.getElementById("tituloFlow");
-    if (elTituloFlow) elTituloFlow.textContent = first + ", " + L.titulo;
-
-    var elSubFlow = document.getElementById("subFlow");
-    if (elSubFlow) elSubFlow.textContent = L.sub;
-
-    // Labels do círculo
-    var lblMen = document.getElementById("lbl-menstrual");
-    if (lblMen) lblMen.textContent = L.menstrual;
-
-    var lblFol = document.getElementById("lbl-follicular");
-    if (lblFol) lblFol.textContent = L.follicular;
-
-    var lblOvu = document.getElementById("lbl-ovulatory");
-    if (lblOvu) lblOvu.textContent = L.ovulatory;
-
-    var lblLut = document.getElementById("lbl-luteal");
-    if (lblLut) lblLut.textContent = L.luteal;
-
-    // Fase central
-    var center = document.getElementById("centerPhase");
-    var faseTexto = L[faseNorm] || L.follicular;
-    if (center) center.textContent = faseTexto;
-
-    // Texto abaixo do círculo
-    var tCurrent = document.getElementById("t_current");
-    if (tCurrent) tCurrent.textContent = langObj.geral.faseAtual + ": " + faseTexto;
-
-    // Botões NAV
-    var btBreath = document.getElementById("toBreath");
-    if (btBreath) btBreath.textContent = "💨 " + langObj.menu.respiracao;
-
-    var btTrain = document.getElementById("toTrain");
-    if (btTrain) btTrain.textContent = "🏃 " + langObj.treino.tituloTopo;
-
-    var btEvo = document.getElementById("toEvolution");
-    if (btEvo) btEvo.textContent = "📈 " + langObj.evolucao.titulo;
+  if (!langObj || !langObj.flowcenter) {
+    console.warn("⚠️ flowcenter não encontrado:", FEMFLOW.lang);
+    return;
   }
+
+  const L = langObj.flowcenter;   // ✔️ única e correta
+
+  const nome = perfil.nome || "";
+  const first = nome.split(" ")[0] || L.titulo;
+
+  // Títulos
+  document.getElementById("tituloFlow")?.textContent = `${first}, ${L.titulo}`;
+  document.getElementById("subFlow")?.textContent = L.sub;
+
+  // Labels do círculo
+  document.getElementById("lbl-menstrual")?.textContent  = L.menstrual;
+  document.getElementById("lbl-follicular")?.textContent = L.follicular;
+  document.getElementById("lbl-ovulatory")?.textContent  = L.ovulatory;
+  document.getElementById("lbl-luteal")?.textContent     = L.luteal;
+
+  // Fase central
+  document.getElementById("centerPhase")?.textContent = L[faseNorm] || L.follicular;
+
+  // Texto abaixo do círculo
+  document.getElementById("t_current")?.textContent =
+    `${langObj.geral.faseAtual}: ${L[faseNorm] || L.follicular}`;
+
+  // NAV
+  document.getElementById("toBreath")?.textContent    = "💨 " + langObj.menu.respiracao;
+  document.getElementById("toTrain")?.textContent     = "🏃 " + langObj.treino.tituloTopo;
+  document.getElementById("toEvolution")?.textContent = "📈 " + langObj.evolucao.titulo;
+}
+
 
   /* ============================================================
      3) APLICAR IDIOMA + LISTENER
