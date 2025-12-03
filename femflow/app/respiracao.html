@@ -100,15 +100,18 @@
 
   <button class="ff-voltar-treino" id="btnVoltarTreino">← voltar ao treino</button>
 
-  <!-- ============================= -->
-  <!--      Modal e Timer            -->
-  <!-- ============================= -->
-  <div id="breathModal">
-    <div id="breathCircle">5</div>
-    <div id="faseLabel">Preparar...</div>
-    <div id="countdown"></div>
-    <button id="btnStart">Iniciar Respiração</button>
-  </div>
+<!-- ============================= -->
+<!--      Modal e Timer            -->
+<!-- ============================= -->
+<div id="breathModal">
+  <div id="breathCircle">5</div>
+  <div id="faseLabel">Preparar...</div>
+  <div id="countdown"></div>
+  <button id="btnStart">Iniciar Respiração</button>
+  <!-- novo botão para voltar à lista de protocolos -->
+  <button id="btnCloseModal" class="ff-voltar-treino">← voltar às respirações</button>
+</div>
+
 
   <footer id="respFooter"> Inspire equilíbrio. Expire leveza.</footer>
 
@@ -208,16 +211,18 @@ function aplicarIdioma() {
 document.addEventListener("femflow:langChange", aplicarIdioma);
 aplicarIdioma();
 
-  /* ============================================================
+   /* ============================================================
      2) MOTOR RESPIRAÇÃO — CORRIGIDO + SEGURO
   ============================================================ */
 
   let cicloAtivo = false;
+  let protocoloAtual = null;
 
   const circle    = document.getElementById('breathCircle');
   const label     = document.getElementById('faseLabel');
   const modal     = document.getElementById('breathModal');
   const btnStart  = document.getElementById('btnStart');
+  const btnClose  = document.getElementById('btnCloseModal');
 
   // Todos os protocolos padronizados
   const protocolos = {
@@ -236,8 +241,8 @@ aplicarIdioma();
   };
 
 
-  /* ============================================================
-     3) ABRIR PROTOCOLO
+    /* ============================================================
+     3) SELECIONAR PROTOCOLO (NÃO COMEÇA AUTOMÁTICO)
   ============================================================ */
   window.iniciarProtocolo = function(tipo){
 
@@ -247,20 +252,29 @@ aplicarIdioma();
       return;
     }
 
-    // Esconder botões e descrições
-    document.querySelectorAll(".btn-protocolo").forEach(b => b.style.display="none");
-    document.querySelectorAll(".desc").forEach(d => d.style.display="none");
+    protocoloAtual = p;          // salva o protocolo escolhido
+    cicloAtivo = false;          // garante parada
+    circle.textContent = "5";    // volta contador inicial
 
-    // Mostrar modal
-    modal.style.display = "flex";
+    // Mostra modal, mas só prepara
+    modal.style.display   = "flex";
     modal.style.background = p.cor + "20";
     circle.style.background = p.cor;
 
-    cicloAtivo = false;
+    // Botão de iniciar visível e configurado
     btnStart.style.display = "block";
-    btnStart.onclick = () => startProtocolo(p);
+    btnStart.onclick = () => startProtocolo(protocoloAtual);
   };
 
+  /* ============================================================
+     3.1) FECHAR MODAL E VOLTAR ÀS RESPIRAÇÕES
+  ============================================================ */
+  if (btnClose) {
+    btnClose.onclick = () => {
+      cicloAtivo = false;          // interrompe o loop da respiração
+      modal.style.display = "none";
+    };
+  }
 
   /* ============================================================
      4) CONTAGEM INICIAL (5 → 1)
