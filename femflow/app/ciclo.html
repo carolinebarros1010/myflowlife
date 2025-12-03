@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="css/ciclo.css">
 </head>
 
-<body>
+<body class="pagina-ciclo">
 
 <h1>Identifique seu momento</h1>
 <p id="cycleMessage" class="cycle-info"></p>
@@ -70,9 +70,10 @@
 
 </div>
 
-<p style="font-size:.9rem;color:#9a8077;margin-top:12px;">
+<p id="cycleFooter" style="font-size:.9rem;color:#9a8077;margin-top:12px;">
   Essas informações servem apenas para adaptar seus treinos. 💫
 </p>
+
   
 <div id="ff-loading" class="ff-loading hidden">
   <div class="ff-loading-box">
@@ -134,9 +135,11 @@ function faseAltaPorNivel(){
 
 
 function getPerguntas(tipo) {
-  const L = FEMFLOW.langs[FEMFLOW.lang];
-  return L.quizCiclo[tipo];
+  const langCode = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
+  const ciclo = FEMFLOW.langs[langCode]?.ciclo || FEMFLOW.langs.pt.ciclo;
+  return ciclo.quizCiclo?.[tipo] || [];
 }
+
 
   
 /* ============================================================
@@ -372,9 +375,12 @@ function abrirQuiz(){
   // pergunta inicial
   quizPerg.textContent = perguntasAtuais[0];
 
-  // etiqueta traduzida
-  const L = FEMFLOW.langs[FEMFLOW.lang].ciclo;
-quizStep.textContent = `${L.quizPergunta} ${quizIdx+1} ${L.de} ${perguntasAtuais.length}`;
+   // etiqueta traduzida (sem mexer no lang.js)
+  const langCode = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
+  const txtPerg = { pt: "Pergunta", en: "Question", fr: "Question" }[langCode] || "Pergunta";
+  const txtDe   = { pt: "de",        en: "of",       fr: "sur"      }[langCode] || "de";
+
+  quizStep.textContent = `${txtPerg} ${quizIdx + 1} ${txtDe} ${perguntasAtuais.length}`;
 
 
   quizBox.style.display = "block";
@@ -522,48 +528,67 @@ bindTap(document.getElementById("btnConfirmarRegular"), ()=>{
    🔤 TRADUÇÃO — APLICAR IDIOMA NA PÁGINA DE CICLO
 ============================================================ */
 function aplicarIdioma() {
-  const L = FEMFLOW.langs[FEMFLOW.lang].ciclo;
+  const langCode = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
+  const L = FEMFLOW.langs[langCode]?.ciclo || FEMFLOW.langs.pt.ciclo;
+
+  if (!L) {
+    console.warn("⚠ Idioma ciclo ausente:", langCode);
+    return;
+  }
 
   // Topo
   document.querySelector("h1").textContent = L.titulo;
   document.querySelector(".sub").textContent = L.sub;
 
   // Botões de perfil hormonal
-  document.querySelector("[data-perfil='regular']").textContent = L.regular;
+  document.querySelector("[data-perfil='regular']").textContent   = L.regular;
   document.querySelector("[data-perfil='irregular']").textContent = L.irregular;
-  document.querySelector("[data-perfil='diu']").textContent = L.diu;
+  document.querySelector("[data-perfil='diu']").textContent       = L.diu;
   document.querySelector("[data-perfil='menopausa']").textContent = L.menopausa;
 
   // Submenu DIU
-  document.querySelector("#diuSubmenu h3").textContent = L.qualDiu;
-  document.querySelector("[data-diu='cobre']").textContent = L.diuCobre;
+  document.querySelector("#diuSubmenu h3").textContent      = L.qualDiu;
+  document.querySelector("[data-diu='cobre']").textContent  = L.diuCobre;
   document.querySelector("[data-diu='hormonal']").textContent = L.diuHormonal;
 
   // Regular
-  document.querySelector("#regularBox label:nth-of-type(1)").textContent = L.ultimaMenstruacao;
-  document.querySelector("#regularBox label:nth-of-type(2)").textContent = L.duracaoMedia;
-  document.getElementById("btnConfirmarRegular").textContent = L.confirmar;
+  const lab1 = document.querySelector("#regularBox label:nth-of-type(1)");
+  const lab2 = document.querySelector("#regularBox label:nth-of-type(2)");
+  if (lab1) lab1.textContent = L.ultimaMenstruacao;
+  if (lab2) lab2.textContent = L.duracaoMedia;
+
+  const btnReg = document.getElementById("btnConfirmarRegular");
+  if (btnReg) btnReg.textContent = L.confirmar;
 
   // Quiz energético
   document.getElementById("quizPergunta").textContent = L.quizInicio;
-  document.getElementById("btnQuizSim").textContent = L.sim;
-  document.getElementById("btnQuizNao").textContent = L.nao;
+  document.getElementById("btnQuizSim").textContent   = L.sim;
+  document.getElementById("btnQuizNao").textContent   = L.nao;
 
   // Rodapé
-  document.querySelector("p[style*='essas informações']").textContent = L.footer;
+  const foot = document.getElementById("cycleFooter");
+  if (foot) foot.textContent = L.footer;
 }
+
 
 /* ============================================================
    🔧 ATIVAR MENU + TRADUÇÃO NA CICLO
 ============================================================ */
-document.addEventListener("DOMContentLoaded", () => {
-  FEMFLOW.inserirHeaderApp();
-  FEMFLOW.inserirMenuLateral();
-  FEMFLOW.inserirModalIdioma();
+document.addEventListener("femflow:langChange", () => {
+  if (!quizBox.style.display || quizBox.style.display === "none") return;
 
-  aplicarIdioma();
-  document.addEventListener("femflow:langChange", aplicarIdioma);
+  const tipo = perfilInterno.replace("_quiz", "");
+  perguntasAtuais = getPerguntas(tipo);
+
+  quizPerg.textContent = perguntasAtuais[quizIdx] || "";
+
+  const langCode = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
+  const txtPerg = { pt: "Pergunta", en: "Question", fr: "Question" }[langCode] || "Pergunta";
+  const txtDe   = { pt: "de",        en: "of",       fr: "sur"      }[langCode] || "de";
+
+  quizStep.textContent = `${txtPerg} ${quizIdx + 1} ${txtDe} ${perguntasAtuais.length}`;
 });
+
 /* ============================================================
    🔄 Atualização do quiz ao trocar idioma (se estiver aberto)
 ============================================================ */
