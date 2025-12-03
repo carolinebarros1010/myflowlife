@@ -117,33 +117,29 @@ function aplicarIdioma() {
     return;
   }
 
-  const L = langObj.flowcenter;
+  const L = langObj.flowcenter; // ✔️ ESTA É A CORRETA
 
   const nome = perfil.nome || "";
   const first = nome.split(" ")[0] || L.titulo;
 
-  // Títulos
   document.getElementById("tituloFlow")?.textContent = `${first}, ${L.titulo}`;
   document.getElementById("subFlow")?.textContent = L.sub;
 
-  // Labels do círculo
   document.getElementById("lbl-menstrual")?.textContent  = L.menstrual;
   document.getElementById("lbl-follicular")?.textContent = L.follicular;
   document.getElementById("lbl-ovulatory")?.textContent  = L.ovulatory;
   document.getElementById("lbl-luteal")?.textContent     = L.luteal;
 
-  // Fase central
   document.getElementById("centerPhase")?.textContent = L[faseNorm] || L.follicular;
 
-  // Texto abaixo
   document.getElementById("t_current")?.textContent =
     `${langObj.geral.faseAtual}: ${L[faseNorm] || L.follicular}`;
 
-  // NAV
   document.getElementById("toBreath")?.textContent    = "💨 " + langObj.menu.respiracao;
   document.getElementById("toTrain")?.textContent     = "🏃 " + langObj.treino.tituloTopo;
   document.getElementById("toEvolution")?.textContent = "📈 " + langObj.evolucao.titulo;
 }
+
 
 
 /* ============================================================
