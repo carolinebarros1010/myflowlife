@@ -145,13 +145,15 @@ function aplicarIdioma() {
 /* ============================================================
    3) APLICAR IDIOMA + LISTENER
 ============================================================ */
-// 🚀 Só aplicar idioma quando TUDO estiver pronto:
-// 1) idioma carregado (lang.js)
-// 2) sincronização com backend concluída (faseNorm definida)
-// 3) elementos do DOM já inseridos
-document.addEventListener("femflow:langReady", aplicarIdioma);
+
+// Chamamos uma vez aqui — porque faseNorm JÁ EXISTE.
+aplicarIdioma();
+
+// Só ouvir mudanças de idioma (troca pelo modal).
 document.addEventListener("femflow:langChange", aplicarIdioma);
-document.addEventListener("femflow:ready", aplicarIdioma);
+
+// ❌ NUNCA chamar aplicarIdioma em femflow:ready no FlowCenter
+// ❌ NUNCA chamar aplicarIdioma em femflow:langReady — não existe
 
 
 
