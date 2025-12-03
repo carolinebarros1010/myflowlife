@@ -145,15 +145,7 @@ resp: {
   footer: "FemFlow • Respiração Consciente"
 },
 
-  respiracao: {
-    titulo: "Respiração",
-    sub: "Protocolos para foco, relaxamento e performance",
-    voltarTreino: "Voltar ao treino",
-    iniciar: "Iniciar",
-    parar: "Parar"
-  },
-
-  evolucao: {
+   evolucao: {
     titulo: "Evolução",
     sub: "Veja sua jornada de progresso",
     treino: "Treinos",
@@ -317,15 +309,7 @@ resp: {
   footer: "FemFlow • Conscious Breathing"
 },
 
-  respiracao: {
-    titulo: "Breathing",
-    sub: "Choose the protocol based on your moment 🌿",
-    voltarTreino: "← back to workout",
-    iniciar: "Start breathing",
-    parar: "Stop",
-  },
-
-  evolucao: {
+   evolucao: {
     titulo: "My Evolution",
     sub: "Track how your body responds to training",
     treino: "Workouts",
@@ -488,14 +472,6 @@ resp: {
   /* Footer */
   footer: "FemFlow • Respiration Consciente"
 },
-
-  respiracao: {
-    titulo: "Respiration",
-    sub: "Protocoles pour le focus, la relaxation et la performance",
-    voltarTreino: "Retour à l'entraînement",
-    iniciar: "Démarrer",
-    parar: "Arrêter"
-  },
 
   evolucao: {
     titulo: "Évolution",
