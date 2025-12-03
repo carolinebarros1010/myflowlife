@@ -3,7 +3,8 @@
    Arquitetura Stargate — 100% sincronizado com Backend (Apps Script)
 ======================================================================= */
 
-window.FEMFLOW = {};
+window.FEMFLOW = window.FEMFLOW || {};
+
 
 /* ===========================================================
    1. CONFIG GLOBAL
