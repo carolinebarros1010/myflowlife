@@ -122,23 +122,29 @@ function aplicarIdioma() {
   const nome = perfil.nome || "";
   const first = nome.split(" ")[0] || L.titulo;
 
-  document.getElementById("tituloFlow").textContent = `${first}, ${L.titulo}`;
-  document.getElementById("subFlow").textContent = L.sub;
+  // Títulos
+  document.getElementById("tituloFlow")?.textContent = `${first}, ${L.titulo}`;
+  document.getElementById("subFlow")?.textContent = L.sub;
 
-  document.getElementById("lbl-menstrual").textContent  = L.menstrual;
-  document.getElementById("lbl-follicular").textContent = L.follicular;
-  document.getElementById("lbl-ovulatory").textContent  = L.ovulatory;
-  document.getElementById("lbl-luteal").textContent     = L.luteal;
+  // Labels do círculo
+  document.getElementById("lbl-menstrual")?.textContent  = L.menstrual;
+  document.getElementById("lbl-follicular")?.textContent = L.follicular;
+  document.getElementById("lbl-ovulatory")?.textContent  = L.ovulatory;
+  document.getElementById("lbl-luteal")?.textContent     = L.luteal;
 
-  document.getElementById("centerPhase").textContent = L[faseNorm] || L.follicular;
+  // Fase central
+  document.getElementById("centerPhase")?.textContent = L[faseNorm] || L.follicular;
 
-  document.getElementById("t_current").textContent =
+  // Texto abaixo
+  document.getElementById("t_current")?.textContent =
     `${langObj.geral.faseAtual}: ${L[faseNorm] || L.follicular}`;
 
-  document.getElementById("toBreath").textContent    = "💨 " + langObj.menu.respiracao;
-  document.getElementById("toTrain").textContent     = "🏃 " + langObj.treino.tituloTopo;
-  document.getElementById("toEvolution").textContent = "📈 " + langObj.evolucao.titulo;
+  // NAV
+  document.getElementById("toBreath")?.textContent    = "💨 " + langObj.menu.respiracao;
+  document.getElementById("toTrain")?.textContent     = "🏃 " + langObj.treino.tituloTopo;
+  document.getElementById("toEvolution")?.textContent = "📈 " + langObj.evolucao.titulo;
 }
+
 
 /* ============================================================
    3) APLICAR IDIOMA + LISTENER
