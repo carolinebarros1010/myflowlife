@@ -146,14 +146,15 @@ resp: {
 },
 
    evolucao: {
-    titulo: "Evolução",
-    sub: "Veja sua jornada de progresso",
-    treino: "Treinos",
-    descanso: "Dias de descanso",
-    pseMedia: "PSE média",
-    faseAtual: "Fase atual",
-    nenhumDado: "Nenhum dado registrado ainda."
-  },
+  titulo: "Evolução",
+  sub: "Veja sua jornada de progresso",
+  treino: "Treinos",
+  descanso: "Dias de descanso",
+  pseMedia: "PSE média",
+  faseAtual: "Fase atual",
+  nenhumDado: "Nenhum dado registrado ainda."
+},
+
 
   home: {
     titulo: "Bem-vinda ao FemFlow",
@@ -310,14 +311,15 @@ resp: {
 },
 
    evolucao: {
-    titulo: "My Evolution",
-    sub: "Track how your body responds to training",
-    treino: "Workouts",
-    descanso: "Rest days",
-    pseMedia: "Average RPE",
-    faseAtual: "Current phase",
-    nenhumDado: "No workouts recorded yet."
-  },
+  titulo: "Evolution",
+  sub: "Track your progress journey",
+  treino: "Workouts",
+  descanso: "Rest days",
+  pseMedia: "Average RPE",
+  faseAtual: "Current phase",
+  nenhumDado: "No data recorded yet."
+},
+
 
   home: {
     titulo: "Welcome to FemFlow",
@@ -473,15 +475,15 @@ resp: {
   footer: "FemFlow • Respiration Consciente"
 },
 
-  evolucao: {
-    titulo: "Évolution",
-    sub: "Suivez votre progression",
-    treino: "Entraînements",
-    descanso: "Repos",
-    pseMedia: "PSE moyen",
-    faseAtual: "Phase actuelle",
-    nenhumDado: "Aucune donnée enregistrée."
-  },
+ evolucao: {
+  titulo: "Évolution",
+  sub: "Suivez votre parcours de progression",
+  treino: "Entraînements",
+  descanso: "Jours de repos",
+  pseMedia: "PSE moyen",
+  faseAtual: "Phase actuelle",
+  nenhumDado: "Aucune donnée enregistrée."
+},
 
   home: {
     titulo: "Bienvenue sur FemFlow",
