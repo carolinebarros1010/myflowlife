@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const faseRaw = perfil.fase?.toLowerCase() || "follicular";
+  const faseRaw = (perfil.fase ? String(perfil.fase).toLowerCase() : "follicular");
 
   const map = {
     "lutea": "luteal", "lútea": "luteal", "luteal": "luteal",
