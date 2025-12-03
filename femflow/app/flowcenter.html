@@ -131,6 +131,12 @@ document.addEventListener("DOMContentLoaded", async function () {
      3) APLICAR IDIOMA (FUNÇÃO NOVA E SEGURA)
   ============================================================ */
   function aplicarIdioma() {
+
+    // GARANTIA: idioma sempre definido
+if (!FEMFLOW.lang) {
+  FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+}
+
     const langObj = FEMFLOW.langs[FEMFLOW.lang];
 
     if (!langObj || !langObj.flowcenter) {
