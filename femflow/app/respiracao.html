@@ -139,23 +139,36 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================================================
-     1) FUNÇÃO DE IDIOMA (CORRIGIDA E À PROVA DE ERRO)
-  ============================================================ */
-  function aplicarIdioma() {
-// GARANTIA: idioma sempre definido
-if (!FEMFLOW.lang) {
-  FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
-}
+   1) FUNÇÃO DE IDIOMA (VERSÃO FEMFLOW 💗)
+============================================================ */
+function aplicarIdioma() {
+  // Garantia: idioma sempre definido
+  if (!FEMFLOW.lang) {
+    FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+  }
 
-    const langSet = FEMFLOW?.langs?.[FEMFLOW?.lang];
-    if (!langSet || !langSet.resp) {
-      console.warn("🚨 ERRO: Idioma de respiração não encontrado:", FEMFLOW.lang);
-      return;
-    }
+  const langCode = FEMFLOW.lang;
+  const langSet  = FEMFLOW?.langs?.[langCode] || FEMFLOW.langs.pt;
 
-    const L = langSet.resp;
+  if (!langSet || !langSet.resp) {
+    console.warn("🚨 ERRO: Idioma de respiração não encontrado:", FEMFLOW.lang);
+    return;
+  }
 
-    const map = {
+  const L = langSet.resp;
+
+  // 🔹 Em PT: preserva o texto original do HTML (identidade FemFlow)
+  //     e só ajusta controles e rodapé.
+  let map = {
+    btnVoltarTreino: L.voltarTreino,
+    faseLabel:       L.preparar,
+    btnStart:        L.iniciar,
+    respFooter:      L.footer
+  };
+
+  // 🔹 Em EN / FR: troca tudo via dicionário
+  if (langCode !== "pt") {
+    map = {
       respTitulo1:  L.titulo1,
       respTitulo2:  L.titulo2,
       respSub:      L.sub,
@@ -178,24 +191,22 @@ if (!FEMFLOW.lang) {
       btnTransparencia:L.transparencia,
 
       btnVoltarTreino: L.voltarTreino,
-
-      faseLabel: L.preparar,
-      btnStart:  L.iniciar,
-      respFooter:L.footer
+      faseLabel:       L.preparar,
+      btnStart:        L.iniciar,
+      respFooter:      L.footer
     };
-
-    // Atribuição segura aos elementos
-    for (let id in map) {
-      const el = document.getElementById(id);
-      if (el) el.textContent = map[id];
-    }
   }
 
-  // Listener + Execução
-  document.addEventListener("femflow:langChange", aplicarIdioma);
-  aplicarIdioma();
+  // Atribuição segura aos elementos
+  for (let id in map) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = map[id];
+  }
+}
 
-
+// Listener + Execução
+document.addEventListener("femflow:langChange", aplicarIdioma);
+aplicarIdioma();
 
   /* ============================================================
      2) MOTOR RESPIRAÇÃO — CORRIGIDO + SEGURO
