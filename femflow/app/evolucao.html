@@ -66,27 +66,43 @@
 <script src="femflow-core.js"></script>
 
 <script>
-
 /* ====================================================================
    1) APLICAR IDIOMA
 ==================================================================== */
 function aplicarIdioma() {
-  const L = FEMFLOW.langs[FEMFLOW.lang].evolucao;
-  const LG = FEMFLOW.langs[FEMFLOW.lang].geral;
+  // garante que o idioma esteja definido
+  if (!FEMFLOW.lang) {
+    FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+  }
 
-  document.getElementById("tituloPagina").innerHTML   = L.titulo;
-  document.getElementById("subtituloPagina").innerHTML = L.subtitulo;
+  const langSet = FEMFLOW.langs[FEMFLOW.lang] || FEMFLOW.langs.pt;
+  const L  = langSet.evolucao;
 
-  document.getElementById("tituloProgresso").innerHTML = L.tituloProgresso;
-  document.getElementById("tituloPSE").innerHTML       = L.tituloPSE;
+  if (!L) {
+    console.warn("⚠️ Dicionário 'evolucao' não encontrado para:", FEMFLOW.lang);
+    return;
+  }
 
-  document.getElementById("textoMensagemFinal").innerHTML = L.finalMensagem;
-  document.getElementById("novoCicloBtn").innerHTML       = L.btnNovoCiclo;
-  document.getElementById("voltarFlow").innerHTML         = L.btnVoltar;
+  // mapeia só os campos que EXISTEM no lang.js
+  const map = {
+    tituloPagina:       L.titulo,      // título principal da página
+    subtituloPagina:    L.sub,         // subtítulo
+    tituloProgresso:    L.treino,      // usamos 'Treinos' como título do bloco de progresso
+    tituloPSE:          L.pseMedia,    // título do gráfico de PSE
+    textoMensagemFinal: L.faseAtual,   // texto de apoio (pode ajustar depois no lang.js)
+    novoCicloBtn:       L.descanso,    // texto do botão (usa "Dias de descanso" como rótulo)
+    voltarFlow:         (langSet.menu && langSet.menu.voltar) || "Voltar"
+  };
 
-  // Progresso dinâmico
+  for (const id in map) {
+    const el = document.getElementById(id);
+    if (el && map[id]) el.innerHTML = map[id];
+  }
+
+  // Progresso dinâmico – aqui não usamos texto do dicionário, só o número %
   if (window.__prog !== undefined) {
-    document.getElementById("progressoTexto").innerText = L.progressoTexto(window.__prog);
+    const elProg = document.getElementById("progressoTexto");
+    if (elProg) elProg.innerText = window.__prog + "%";
   }
 }
 
@@ -108,21 +124,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* -------------------------
      PROGRESSO DO CICLO — 30 dias
   ------------------------- */
-  const dia = Number(localStorage.getItem("femflow_dia_treino") || 1);
+  const dia  = Number(localStorage.getItem("femflow_dia_treino") || 1);
   const prog = Math.min(100, Math.round(((dia - 1) / 30) * 100));
   window.__prog = prog;
 
-  aplicarIdioma(); // atualiza porcentagem no texto
+  aplicarIdioma(); // atualiza textos + porcentagem
 
-  document.getElementById("progressoBarra").style.width = prog + "%";
+  const barra = document.getElementById("progressoBarra");
+  if (barra) barra.style.width = prog + "%";
 
   if (prog >= 100) {
-    document.getElementById("mensagemFinal").style.display = "block";
+    const boxFinal = document.getElementById("mensagemFinal");
+    if (boxFinal) boxFinal.style.display = "block";
 
-    document.getElementById("novoCicloBtn").onclick = () => {
-      localStorage.setItem("femflow_dia_treino","1");
-      FEMFLOW.router("ciclo.html");
-    };
+    const novoBtn = document.getElementById("novoCicloBtn");
+    if (novoBtn) {
+      novoBtn.onclick = () => {
+        localStorage.setItem("femflow_dia_treino", "1");
+        FEMFLOW.router("ciclo.html");
+      };
+    }
   }
 
   /* -------------------------
@@ -137,8 +158,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hist = hist.slice(-40);
 
-  if (!hist.length) {
-    FEMFLOW.toast(FEMFLOW.langs[FEMFLOW.lang].evolucao.semPSE);
+  const L = (FEMFLOW.langs[FEMFLOW.lang] || FEMFLOW.langs.pt).evolucao;
+
+  if (!hist.length && L && L.nenhumDado) {
+    FEMFLOW.toast(L.nenhumDado);
   }
 
   /* -------------------------
@@ -147,9 +170,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   new Chart(document.getElementById("graficoPSE"), {
     type: "line",
     data: {
-      labels: hist.map((t,i)=> i+1),
+      labels: hist.map((t, i) => i + 1),
       datasets: [{
-        data: hist.map(t=>Number(t.pse)||0),
+        data: hist.map(t => Number(t.pse) || 0),
         borderColor: "#CC6A5A",
         backgroundColor: "rgba(239,189,166,0.35)",
         borderWidth: 2,
@@ -157,20 +180,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         fill: true
       }]
     },
-    options:{
-      plugins:{ legend:{ display:false }},
+    options: {
+      plugins: { legend: { display: false } },
       responsive: true,
-      maintainAspectRatio:false
+      maintainAspectRatio: false
     }
   });
 
   /* -------------------------
      BOTÃO VOLTAR
   ------------------------- */
-  document.getElementById("voltarFlow").onclick = () =>
-    FEMFLOW.router("flowcenter.html");
+  const voltar = document.getElementById("voltarFlow");
+  if (voltar) voltar.onclick = () => FEMFLOW.router("flowcenter.html");
 });
 </script>
+
 
 </body>
 </html>
