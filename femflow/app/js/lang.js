@@ -669,3 +669,8 @@ FEMFLOW.setLang = function (code) {
   document.dispatchEvent(new CustomEvent("femflow:langChange"));
 };
 
+/* ============================================================
+   🔔 SINALIZAR QUE OS IDIOMAS ESTÃO PRONTOS
+   (isso impede o erro 'undefined' no flowcenter)
+============================================================ */
+document.dispatchEvent(new CustomEvent("femflow:langReady"));
