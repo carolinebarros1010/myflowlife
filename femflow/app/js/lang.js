@@ -523,5 +523,9 @@ FEMFLOW.setLang = function (code) {
 /* ============================================================
    🔔 SINALIZAR QUE OS IDIOMAS ESTÃO PRONTOS
 ============================================================ */
-document.dispatchEvent(new CustomEvent("femflow:langReady"));
+// Disparar após garantir carregamento completo
+window.addEventListener("DOMContentLoaded", () => {
+    document.dispatchEvent(new CustomEvent("femflow:langReady"));
+});
+
 
