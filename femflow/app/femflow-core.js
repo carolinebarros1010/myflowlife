@@ -14,6 +14,13 @@ FEMFLOW.SCRIPT_URL = "https://api-myflowlife.falling-wildflower-a8c0.workers.dev
 FEMFLOW.ENDPOINT_BACKEND = FEMFLOW.SCRIPT_URL;
 FEMFLOW.API_URL = FEMFLOW.SCRIPT_URL;
 FEMFLOW.BACKEND = FEMFLOW.SCRIPT_URL;
+// Idioma padrão global
+FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+FEMFLOW.setLang = function(lang) {
+  FEMFLOW.lang = lang;
+  localStorage.setItem("femflow_lang", lang);
+  document.dispatchEvent(new Event("femflow:langChange"));
+};
 
 FEMFLOW.dev = () => localStorage.getItem("femflow_dev") === "on";
 FEMFLOW.log   = (...a) => { if (FEMFLOW.dev()) console.log("%c[FEMFLOW]", "color:#cc6a5a", ...a); };
