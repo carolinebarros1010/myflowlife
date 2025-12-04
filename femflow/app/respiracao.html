@@ -14,6 +14,32 @@
   <link rel="stylesheet" href="css/respiracao.css">
 
   <style>
+    /* ------------------------------------------------------------
+       FEMFLOW — ESTILOS DA PÁGINA
+    ------------------------------------------------------------ */
+    body {
+      background-color: var(--bege);
+      color: var(--texto);
+      font-family: "Lato", sans-serif;
+      text-align: center;
+      margin: 0;
+      padding-top: calc(85px + env(safe-area-inset-top,0px));
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      margin-top: 10px;
+      line-height: 1.2;
+      color: var(--terracota);
+    }
+
+    .sub {
+      margin-top: 6px;
+      margin-bottom: 25px;
+      color: var(--texto);
+    }
+
     .grupo-titulo {
       font-family: "Playfair Display", serif;
       font-size: 20px;
@@ -22,301 +48,348 @@
       color: #335953;
     }
 
+    .btn-protocolo {
+      width: 90%;
+      max-width: 340px;
+      border: none;
+      border-radius: 25px;
+      padding: 14px 18px;
+      font-size: 1.05em;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 8px auto;
+      display: block;
+      transition: all 0.3s;
+      background: #fff;
+      color: var(--texto);
+      border: 2px solid #e4c4bb;
+    }
+
+    .btn-protocolo:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
     .desc {
       display: none;
-      padding: 10px 14px;
+      padding: 8px 14px;
       margin-top: -6px;
       margin-bottom: 10px;
-      border-left: 3px solid #cc6a5a;
+      border-left: 3px solid var(--terracota);
       background: #fdf4ef;
       border-radius: 6px;
       font-size: 14px;
-      color: #4d3f3a;
-      font-family: "Lato", sans-serif;
-      line-height: 1.4;
+      color: var(--texto);
+      line-height: 1.3;
       animation: fade .3s ease;
+      max-width: 340px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     @keyframes fade {
       from { opacity: 0; transform: translateY(-3px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+
+    /* ------------------------------------------------------------
+       DRAWER (LATERAL)
+    ------------------------------------------------------------ */
+    .breath-drawer {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 88%;
+      max-width: 380px;
+      height: 100vh;
+      background: var(--bege);
+      box-shadow: -4px 0 22px rgba(0,0,0,0.18);
+      transition: right .35s ease;
+      padding-top: calc(80px + env(safe-area-inset-top));
+      z-index: 9999;
+      overflow-y: auto;
+    }
+
+    .breath-drawer.active {
+      right: 0;
+    }
+
+    .drawer-close-btn {
+      position: absolute;
+      top: 25px;
+      right: 20px;
+      font-size: 22px;
+      background: transparent;
+      border: none;
+      color: var(--terracota);
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .drawer-header {
+      font-family: "Playfair Display", serif;
+      font-size: 22px;
+      text-align: center;
+      margin-bottom: 15px;
+      color: var(--terracota);
+    }
+
+    /* ------------------------------------------------------------
+       MODAL DENTRO DO DRAWER
+    ------------------------------------------------------------ */
+    #breathModal {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #breathCircle {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: var(--terracota);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3em;
+      font-weight: bold;
+      margin-bottom: 18px;
+    }
+
+    #faseLabel {
+      font-size: 1.3rem;
+      font-family: 'Playfair Display';
+      font-style: italic;
+      color: var(--texto);
+      margin-bottom: 15px;
+    }
+
+    #btnStart {
+      margin-top: 18px;
+      background: var(--verde);
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    #btnCloseModal {
+      margin-top: 22px;
+      border: none;
+      background: transparent;
+      color: var(--verde);
+      font-weight: bold;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 
 <body>
 
-  <!-- Títulos -->
-  <h1 id="respTituloTopo">
-    <span id="respTitulo1">Respirações</span>
-    <span id="respTitulo2">FemFlow</span>
-  </h1>
-  <p class="sub" id="respSub">Escolha o protocolo conforme seu momento 🌿</p>
-
-  <!-- ============================= -->
-  <!--     GRUPO 1 — Ciclo Hormonal  -->
-  <!-- ============================= -->
-  <h2 class="grupo-titulo" id="grupoCiclo">Respirações do Ciclo</h2>
-
-  <button class="btn-protocolo" onclick="toggleDesc('d-raiz'); iniciarProtocolo('raiz')"    id="btnRaiz">Respiração Raiz</button>
-  <div id="d-raiz" class="desc">Acalma o corpo, reduz tensões e te ajuda a se recolher com aconchego.</div>
-
-  <button class="btn-protocolo" onclick="toggleDesc('d-clareza'); iniciarProtocolo('clareza')" id="btnClareza">Respiração Clareza</button>
-  <div id="d-clareza" class="desc">Traz leveza mental, foco fresco e sensação de recomeço interno.</div>
-
-  <button class="btn-protocolo" onclick="toggleDesc('d-brilho'); iniciarProtocolo('brilho')" id="btnBrilho">Respiração Brilho</button>
-  <div id="d-brilho" class="desc">Expande sua presença e energiza durante a fase mais forte do ciclo.</div>
-
-  <button class="btn-protocolo" onclick="toggleDesc('d-sereno'); iniciarProtocolo('sereno')" id="btnSereno">Respiração Sereno</button>
-  <div id="d-sereno" class="desc">Suaviza irritabilidade, oscilação emocional e tensão pré-menstrual.</div>
-
-  <!-- ============================= -->
-  <!--     GRUPO 2 — Para Treinos    -->
-  <!-- ============================= -->
-  <h2 class="grupo-titulo" id="grupoTreino">Respirações para Treinar</h2>
-
-  <button class="btn-protocolo" onclick="toggleDesc('d-wake'); iniciarProtocolo('wake')" id="btnWake">Wake Flow</button>
-  <div id="d-wake" class="desc">Desperta o corpo sem pressa, ativando o ritmo ideal para treinar.</div>
-
-  <button class="btn-protocolo" onclick="toggleDesc('d-charge'); iniciarProtocolo('charge')" id="btnCharge">Charge Flow</button>
-  <div id="d-charge" class="desc">Eleva energia e foco rapidamente antes do treino forte.</div>
-
-  <button class="btn-protocolo" onclick="toggleDesc('d-release'); iniciarProtocolo('release')" id="btnRelease">Release Flow</button>
-  <div id="d-release" class="desc">Relaxa o corpo após o treino, liberando tensões.</div>
-
-  <button class="btn-protocolo" onclick="toggleDesc('d-restore'); iniciarProtocolo('restore')" id="btnRestore">Restore Flow</button>
-  <div id="d-restore" class="desc">Acalma o sistema nervoso e ajuda na reparação muscular.</div>
-
-  <!-- ============================= -->
-  <!--     GRUPO 3 — Universais      -->
-  <!-- ============================= -->
-  <h2 class="grupo-titulo" id="grupoUniversal">Respirações Universais</h2>
-
-  <button class="btn-protocolo" onclick="toggleDesc('d-equilibrio'); iniciarProtocolo('equilibrio')" id="btnEquilibrio">Respiração Equilíbrio</button>
-  <div id="d-equilibrio" class="desc">Centraliza sua mente e estabiliza emoções rapidamente.</div>
-
-  <button class="btn-protocolo" onclick="toggleDesc('d-transparencia'); iniciarProtocolo('transparencia')" id="btnTransparencia">Respiração Transparência</button>
-  <div id="d-transparencia" class="desc">Clareia emoções e libera bloqueios internos.</div>
-
-  <button class="ff-voltar-treino" id="btnVoltarTreino">← voltar ao treino</button>
+<h1 id="respTituloTopo">
+  <span id="respTitulo1">Respirações</span>
+  <span id="respTitulo2">FemFlow</span>
+</h1>
+<p class="sub" id="respSub">Escolha o protocolo conforme seu momento 🌿</p>
 
 <!-- ============================= -->
-<!--      Modal e Timer            -->
+<!--     GRUPOS DE PROTOCOLOS      -->
+<!-- ============================= -->
+<h2 class="grupo-titulo" id="grupoCiclo">Respirações do Ciclo</h2>
+
+<button class="btn-protocolo" onclick="toggleDesc('d-raiz'); abrirRespiracao('raiz')" id="btnRaiz">Respiração Raiz</button>
+<div id="d-raiz" class="desc">Acalma o corpo, reduz tensões e te ajuda a se recolher com aconchego.</div>
+
+<button class="btn-protocolo" onclick="toggleDesc('d-clareza'); abrirRespiracao('clareza')" id="btnClareza">Respiração Clareza</button>
+<div id="d-clareza" class="desc">Traz leveza mental, foco fresco e sensação de recomeço interno.</div>
+
+<button class="btn-protocolo" onclick="toggleDesc('d-brilho'); abrirRespiracao('brilho')" id="btnBrilho">Respiração Brilho</button>
+<div id="d-brilho" class="desc">Expande sua presença e energiza durante a fase mais forte do ciclo.</div>
+
+<button class="btn-protocolo" onclick="toggleDesc('d-sereno'); abrirRespiracao('sereno')" id="btnSereno">Respiração Sereno</button>
+<div id="d-sereno" class="desc">Suaviza irritabilidade, oscilação emocional e TPM.</div>
+
+<h2 class="grupo-titulo" id="grupoTreino">Respirações para Treinar</h2>
+
+<button class="btn-protocolo" onclick="toggleDesc('d-wake'); abrirRespiracao('wake')" id="btnWake">Wake Flow</button>
+<div id="d-wake" class="desc">Aquece e ativa sem acelerar demais.</div>
+
+<button class="btn-protocolo" onclick="toggleDesc('d-charge'); abrirRespiracao('charge')" id="btnCharge">Charge Flow</button>
+<div id="d-charge" class="desc">Energia instantânea antes do treino forte.</div>
+
+<button class="btn-protocolo" onclick="toggleDesc('d-release'); abrirRespiracao('release')" id="btnRelease">Release Flow</button>
+<div id="d-release" class="desc">Dissolve tensão após o treino.</div>
+
+<button class="btn-protocolo" onclick="toggleDesc('d-restore'); abrirRespiracao('restore')" id="btnRestore">Restore Flow</button>
+<div id="d-restore" class="desc">Acalma e recupera o sistema nervoso.</div>
+
+<h2 class="grupo-titulo" id="grupoUniversal">Respirações Universais</h2>
+
+<button class="btn-protocolo" onclick="toggleDesc('d-equilibrio'); abrirRespiracao('equilibrio')" id="btnEquilibrio">Respiração Equilíbrio</button>
+<div id="d-equilibrio" class="desc">Centraliza mente e emoções.</div>
+
+<button class="btn-protocolo" onclick="toggleDesc('d-transparencia'); abrirRespiracao('transparencia')" id="btnTransparencia">Respiração Transparência</button>
+<div id="d-transparencia" class="desc">Clareza emocional imediata.</div>
+
+<button class="ff-voltar-treino" id="btnVoltarTreino">← voltar ao treino</button>
+
+<!-- ============================= -->
+<!--      DRAWER LATERAL           -->
+<!-- ============================= -->
+<div class="breath-drawer" id="breathDrawer">
+  <button class="drawer-close-btn" id="closeDrawer">✖</button>
+  <div class="drawer-header" id="drawerTitle">Respiração</div>
+
+  <div id="breathDrawerContent"></div>
+</div>
+
+<!-- ============================= -->
+<!--      MODAL DE RESPIRO         -->
 <!-- ============================= -->
 <div id="breathModal">
   <div id="breathCircle">5</div>
   <div id="faseLabel">Preparar...</div>
   <div id="countdown"></div>
   <button id="btnStart">Iniciar Respiração</button>
-  <!-- novo botão para voltar à lista de protocolos -->
-  <button id="btnCloseModal" class="ff-voltar-treino">← voltar às respirações</button>
+  <button id="btnCloseModal">← voltar às respirações</button>
 </div>
 
+<footer id="respFooter">Inspire equilíbrio. Expire leveza.</footer>
 
-  <footer id="respFooter"> Inspire equilíbrio. Expire leveza.</footer>
-
-  <!-- Core -->
-  <script src="js/lang.js"></script>
-  <script src="femflow-core.js"></script>
-
-  <!-- Show/Hide descrição -->
-  <script>
-    function toggleDesc(id){
-      const el = document.getElementById(id);
-      el.style.display = (el.style.display === "block") ? "none" : "block";
-    }
-  </script>
-
-<!-- ========================================= -->
-<!--   🔥 MOTOR FEMFLOW + INTERNACIONALIZAÇÃO   -->
-<!-- ========================================= -->
+<!-- ===================================== -->
+<!-- SCRIPTS FEMFLOW -->
+<!-- ===================================== -->
+<script src="js/lang.js"></script>
+<script src="femflow-core.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-
-  /* ============================================================
-     HEADER
-  ============================================================ */
-  if (typeof FEMFLOW?.inserirHeaderApp === "function") {
-    FEMFLOW.inserirHeaderApp();
-  }
-
-  /* ============================================================
-   1) FUNÇÃO DE IDIOMA (VERSÃO FEMFLOW 💗)
-============================================================ */
-function aplicarIdioma() {
-  // Garantia: idioma sempre definido
-  if (!FEMFLOW.lang) {
-    FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
-  }
-
-  const langCode = FEMFLOW.lang;
-  const langSet  = FEMFLOW?.langs?.[langCode] || FEMFLOW.langs.pt;
-
-  if (!langSet || !langSet.resp) {
-    console.warn("🚨 ERRO: Idioma de respiração não encontrado:", FEMFLOW.lang);
-    return;
-  }
-
-  const L = langSet.resp;
-
-  // 🔹 Em PT: preserva o texto original do HTML (identidade FemFlow)
-  //     e só ajusta controles e rodapé.
-  let map = {
-    btnVoltarTreino: L.voltarTreino,
-    faseLabel:       L.preparar,
-    btnStart:        L.iniciar,
-    respFooter:      L.footer
-  };
-
-  // 🔹 Em EN / FR: troca tudo via dicionário
-  if (langCode !== "pt") {
-    map = {
-      respTitulo1:  L.titulo1,
-      respTitulo2:  L.titulo2,
-      respSub:      L.sub,
-
-      grupoCiclo:     L.grupoCiclo,
-      grupoTreino:    L.grupoTreino,
-      grupoUniversal: L.grupoUniversal,
-
-      btnRaiz:         L.raiz,
-      btnClareza:      L.clareza,
-      btnBrilho:       L.brilho,
-      btnSereno:       L.sereno,
-
-      btnWake:         L.wake,
-      btnCharge:       L.charge,
-      btnRelease:      L.release,
-      btnRestore:      L.restore,
-
-      btnEquilibrio:   L.equilibrio,
-      btnTransparencia:L.transparencia,
-
-      btnVoltarTreino: L.voltarTreino,
-      faseLabel:       L.preparar,
-      btnStart:        L.iniciar,
-      respFooter:      L.footer
-    };
-  }
-
-  // Atribuição segura aos elementos
-  for (let id in map) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = map[id];
-  }
+/* ------------------------------------------------------------
+   SHOW/HIDE DESCRIÇÃO
+------------------------------------------------------------ */
+function toggleDesc(id){
+  const el = document.getElementById(id);
+  el.style.display = (el.style.display === "block") ? "none" : "block";
 }
 
-// Listener + Execução
-document.addEventListener("femflow:langChange", aplicarIdioma);
-aplicarIdioma();
+/* ------------------------------------------------------------
+   ENGINE + DRAWER + MODAL INTEGRADOS
+------------------------------------------------------------ */
+document.addEventListener("DOMContentLoaded", () => {
 
-   /* ============================================================
-     2) MOTOR RESPIRAÇÃO — CORRIGIDO + SEGURO
-  ============================================================ */
+  FEMFLOW?.inserirHeaderApp?.();
+  FEMFLOW?.inserirMenuLateral?.();
+  FEMFLOW?.inserirModalIdioma?.();
 
   let cicloAtivo = false;
   let protocoloAtual = null;
 
-  const circle    = document.getElementById('breathCircle');
-  const label     = document.getElementById('faseLabel');
-  const modal     = document.getElementById('breathModal');
-  const btnStart  = document.getElementById('btnStart');
-  const btnClose  = document.getElementById('btnCloseModal');
+  const drawer     = document.getElementById("breathDrawer");
+  const drawerClose= document.getElementById("closeDrawer");
+  const modal      = document.getElementById("breathModal");
+  const drawerCt   = document.getElementById("breathDrawerContent");
 
-  // Todos os protocolos padronizados
+  const circle     = document.getElementById("breathCircle");
+  const label      = document.getElementById("faseLabel");
+  const btnStart   = document.getElementById("btnStart");
+  const btnClose   = document.getElementById("btnCloseModal");
+
+  /* PROTOCOLOS */
   const protocolos = {
     raiz:        { fases:[4,4,4,4], cor:"#CC6A5A" },
     clareza:     { fases:[5,7,8,0], cor:"#E2B5A5" },
     brilho:      { fases:[3,2,3,2], cor:"#FFB26B" },
     sereno:      { fases:[6,2,6,2], cor:"#A4C3B2" },
-
     wake:        { fases:[3,3,3,0], cor:"#88C1A7" },
     charge:      { fases:[2,1,4,1], cor:"#B44C3B" },
     release:     { fases:[4,2,6,0], cor:"#CBD6D6" },
     restore:     { fases:[6,2,6,2], cor:"#8BAAAD" },
-
     equilibrio:  { fases:[4,4,4,4], cor:"#6E8A9F" },
     transparencia:{fases:[5,5,5,5], cor:"#D0C7E2" }
   };
 
-
-    /* ============================================================
-     3) SELECIONAR PROTOCOLO (NÃO COMEÇA AUTOMÁTICO)
-  ============================================================ */
-  window.iniciarProtocolo = function(tipo){
-
+  /* ------------------------------------------------------------
+     ABRIR PROTOCOLO (SEMPRE NO DRAWER)
+  ------------------------------------------------------------ */
+  window.abrirRespiracao = function(tipo){
     const p = protocolos[tipo];
-    if (!p) {
-      console.warn("⚠ Protocolo não encontrado:", tipo);
-      return;
-    }
+    if (!p) return;
 
-    protocoloAtual = p;          // salva o protocolo escolhido
-    cicloAtivo = false;          // garante parada
-    circle.textContent = "5";    // volta contador inicial
+    protocoloAtual = p;
+    cicloAtivo = false;
 
-    // Mostra modal, mas só prepara
-    modal.style.display   = "flex";
-    modal.style.background = p.cor + "20";
-    circle.style.background = p.cor;
+    // limpar
+    circle.textContent = "5";
+    label.textContent = "Preparar...";
 
-    // Botão de iniciar visível e configurado
+    // mover modal para dentro do drawer
+    if (!drawerCt.contains(modal)) drawerCt.appendChild(modal);
+    modal.style.display = "flex";
+
+    // abrir drawer
+    drawer.classList.add("active");
+
+    // botão iniciar
     btnStart.style.display = "block";
     btnStart.onclick = () => startProtocolo(protocoloAtual);
+
+    // cor personalizada
+    modal.style.background = p.cor + "22";
+    circle.style.background = p.cor;
   };
 
-  /* ============================================================
-     3.1) FECHAR MODAL E VOLTAR ÀS RESPIRAÇÕES
-  ============================================================ */
-  if (btnClose) {
-    btnClose.onclick = () => {
-      cicloAtivo = false;          // interrompe o loop da respiração
-      modal.style.display = "none";
-    };
+  /* ------------------------------------------------------------
+     FECHAR DRAWER + PARAR CICLO
+  ------------------------------------------------------------ */
+  function fecharDrawer() {
+    cicloAtivo = false;
+    drawer.classList.remove("active");
   }
 
-  /* ============================================================
-     4) CONTAGEM INICIAL (5 → 1)
-  ============================================================ */
+  drawerClose.onclick = fecharDrawer;
+  btnClose.onclick = fecharDrawer;
+
+  /* ------------------------------------------------------------
+     CONTAGEM INICIAL
+  ------------------------------------------------------------ */
   async function contagemInicial(){
-    for (let i = 5; i >= 1; i--) {
+    for (let i=5;i>=1;i--){
       circle.textContent = i;
-      await esperar(800);
+      await esperar(850);
     }
   }
 
-
-  /* ============================================================
-     5) ANIMAÇÃO DAS FASES
-  ============================================================ */
+  /* ------------------------------------------------------------
+     FASES (inspire / segure / expire / segure)
+  ------------------------------------------------------------ */
   async function animarContagem(segundos, faseIndex, cor){
 
-    // Textos traduzidos
     const textos = {
-      pt: ["Inspire","Segure","Expire","Segure"],
-      en: ["Inhale","Hold","Exhale","Hold"],
-      fr: ["Inspirez","Retenez","Expirez","Retenez"]
+      pt:["Inspire","Segure","Expire","Segure"],
+      en:["Inhale","Hold","Exhale","Hold"],
+      fr:["Inspirez","Retenez","Expirez","Retenez"]
     };
 
-    const lang = FEMFLOW.lang || "pt";
-    const nomes = textos[lang] || textos["pt"];
+    const idioma = FEMFLOW.lang || "pt";
+    const nomeFase = textos[idioma] || textos.pt;
 
-    label.textContent = nomes[faseIndex];
+    label.textContent = nomeFase[faseIndex];
     circle.style.background = cor;
 
-    for (let s = segundos; s >= 1; s--) {
+    for (let s=segundos; s>=1; s--){
       circle.textContent = s;
       await esperar(1000);
     }
   }
 
-
-  /* ============================================================
-     6) EXECUÇÃO DO PROTOCOLO COMPLETO
-  ============================================================ */
-  async function startProtocolo(p) {
-
+  /* ------------------------------------------------------------
+     INICIAR PROTOCOLO COMPLETO
+  ------------------------------------------------------------ */
+  async function startProtocolo(p){
     cicloAtivo = true;
     btnStart.style.display = "none";
 
@@ -324,25 +397,25 @@ aplicarIdioma();
 
     let fase = 0;
 
-    async function cicloResp() {
+    async function cicloResp(){
       const dur = p.fases[fase];
-      await animarContagem(dur, fase, p.cor);
-
-      fase = (fase + 1) % 4;
-
+      await animarContagem(dur,fase,p.cor);
+      fase = (fase+1)%4;
       if (cicloAtivo) cicloResp();
     }
 
     cicloResp();
   }
 
-
-  /* Utilitário: pausa */
-  function esperar(ms){ return new Promise(res => setTimeout(res, ms)); }
+  function esperar(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 });
 </script>
-<!-- MODAL DE NÍVEL (RESPIRAÇÃO) -->
+
+
+<!-- ========================= -->
+<!--       MODAL NÍVEL        -->
+<!-- ========================= -->
 <div id="modal-nivel" class="modal-nivel oculto">
   <div class="modal-nivel-box">
     <h2>📊 Selecione seu nível</h2>
@@ -355,6 +428,6 @@ aplicarIdioma();
   </div>
 </div>
 
-
 </body>
 </html>
+
