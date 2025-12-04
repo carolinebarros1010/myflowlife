@@ -200,7 +200,7 @@ perguntas.forEach((p, i) => {
 
       finalMsgEl.textContent = `${T.perfilFinal} ${perfil.toUpperCase()}!`;
 
-      setTimeout(() => location.href = "home.html", 3500);
+      setTimeout(() => location.href = "ciclo.html", 3000);
 
     } else {
       FEMFLOW.toast(Tsys.erroCiclo, true);
