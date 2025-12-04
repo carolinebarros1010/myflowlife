@@ -58,6 +58,7 @@ h1, h2, h3 {
   color: var(--teal);
 }
 
+
 .subtitle {
   color: var(--terracota);
   font-size: 1rem;
@@ -188,5 +189,76 @@ input, select {
   background: #cc6a5a !important; /* terracota */
   color: #ffffff !important;      /* texto branco */
 }
+/* ============================================================
+   MODAL NÍVEL — FemFlow Style
+============================================================ */
+
+.modal-nivel {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.modal-nivel.oculto {
+  display: none;
+}
+
+.modal-nivel-box {
+  background: #fff7f2;
+  padding: 28px;
+  border-radius: 22px;
+  width: 85%;
+  max-width: 360px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.15);
+  text-align: center;
+  animation: fadeIn .15s ease-out;
+}
+
+.modal-nivel-box h2 {
+  margin-top: 0;
+  font-family: "Playfair Display";
+  font-weight: 700;
+  color: #335953;
+  font-size: 1.4rem;
+}
+
+.nivel-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: #fff;
+  border: 2px solid #335953;
+  border-radius: 14px;
+  color: #335953;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: .25s;
+}
+
+.nivel-btn:hover {
+  background: #335953;
+  color: #fff;
+}
+
+.nivel-fechar {
+  margin-top: 18px;
+  border: none;
+  background: transparent;
+  color: #b56a57;
+  font-size: .9rem;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 
 
