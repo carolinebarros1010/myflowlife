@@ -166,19 +166,19 @@
       if (e.key === "Enter") entrar();
     });
 
-    // --------- OLHO iOS ----------
-    const senhaInput = $("#loginSenha");
-    const toggleEye  = $("#toggleSenha");
-   const fill = document.getElementById("strengthFill");
+  const senhaInput = document.getElementById("loginSenha");
+const toggleEye  = document.getElementById("toggleSenha");
+const fill       = document.getElementById("strengthFill");
 
-    toggleEye.addEventListener("click", () => {
-      const isPass = senhaInput.type === "password";
-      senhaInput.type = isPass ? "text" : "password";
-      toggleEye.classList.toggle("active", isPass);
-    });
+// Alternar visibilidade da senha
+toggleEye.addEventListener("click", () => {
+  const isPass = senhaInput.type === "password";
+  senhaInput.type = isPass ? "text" : "password";
+  toggleEye.classList.toggle("active", isPass);
+});
 
-    // Força da senha
-    senhaInput.addEventListener("input", () => {
+// Barra de força da senha
+senhaInput.addEventListener("input", () => {
   const v = senhaInput.value;
   let score = 0;
 
@@ -193,9 +193,12 @@
   if (score === 2) { width = 66; color = "#e4a85f"; }
   if (score >= 3) { width = 100; color = "#2e7d32"; }
 
-  fill.style.width = width + "%";
-  fill.style.background = color;
+  if (fill) {
+    fill.style.width = width + "%";
+    fill.style.background = color;
+  }
 });
+
 
     // --------- GOOGLE LOGIN ----------
     $("#googleSignIn").onclick = () => google.accounts.id.prompt();
