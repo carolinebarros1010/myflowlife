@@ -390,7 +390,13 @@ FEMFLOW.init = async function () {
     this.inserirMenuLateral();
     this.inserirModalIdioma();  // 🔥 AQUI!
     this.initNivelSelector();
-
+     
+   // 🚨 BLOQUEAR ACESSO SEM CICLO CONFIGURADO
+    if (!localStorage.getItem("femflow_cycle_configured")) {
+        console.warn("⚠️ Ciclo não configurado — redirecionando.");
+        location.href = "ciclo.html";
+        return;
+    }
     await FEMFLOW.sincronizarECdisparar();
   }
 };
