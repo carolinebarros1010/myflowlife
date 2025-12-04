@@ -82,12 +82,12 @@ function getPerguntasTraduzidas() {
       b.textContent = opt.texto;
       b.className = "btn-opcao";
 
-      b.onclick = () => {
-        score += opt.v;
-        idx++;
-        mostrarPergunta();
-        navigator.vibrate?.(25);
-      };
+     b.onclick = () => {
+  p.escolha = opt.v;
+  score += opt.v;
+  idx++;
+  mostrarPergunta();
+};
 
       optionsEl.appendChild(b);
     });
@@ -148,10 +148,10 @@ function getPerguntasTraduzidas() {
   if (score >= 20) perfil = "avançada";
   else if (score >= 14) perfil = "intermediária";
 
-  const respostas = perguntas.map((p, i) => ({
-    ordem: i + 1,
-    pergunta: p.texto
-  }));
+const respostas = {};
+perguntas.forEach((p, i) => {
+  respostas["q" + (i + 1)] = p.escolha || 0;
+});
 
   // Dados
   const { nome, email, telefone, senha } = pegarDadosLead();
