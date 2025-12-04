@@ -214,18 +214,20 @@ body.login-page {
   to   { opacity: 1; transform: translateY(0); }
 }
 .login-lang-btn {
-  background: none;
-  border: none;
-  padding: 6px 10px;
+  background: #ffffff;
+  border: 1px solid #d8ccc8;
+  padding: 6px 14px;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--verde, #335953);
+  color: #335953;
+  border-radius: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 4px;
-  margin-bottom: 12px;
+  margin: 6px auto 16px auto;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
 
   /* Anti-reset */
   appearance: none;
