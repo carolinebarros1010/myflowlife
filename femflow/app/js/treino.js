@@ -227,31 +227,36 @@ if (tipoDominante === "resfriamentoPremium") {
     return html;
   }
 
-  /* ======================================================
-     HIIT PREMIUM
-  ====================================================== */
+/* ======================================================
+   HIIT PREMIUM
+====================================================== */
 if (tipoDominante === "hiitPremium") {
-    const h = bloco[0];
+  const h = bloco[0];
 
-    html += `
-      <h2 class="ff-ex-titulo">${h.titulo}</h2>
+  html += `
+    <h2 class="ff-ex-titulo">${h.titulo}</h2>
 
-      <p class="ff-sugestao-hiit">
-        🔥 <b>Escolha a sua forma de HIIT:</b><br>
-        • <b>Na academia:</b> esteira, bike, escada, remo ou air Bike<br>
-        • <b>Em casa:</b> polichinelo, corrida parada, burpee, corda, salto no lugar
-      </p>
+    <p class="ff-sugestao-hiit">
+      🔥 <b>Escolha a sua forma de HIIT:</b><br>
+      • <b>Na academia:</b> esteira, bike, escada, remo ou air Bike<br>
+      • <b>Em casa:</b> polichinelo, corrida parada, burpee, corda, salto no lugar
+    </p>
 
-      <div class="hiit-bubble">
-        <div class="hiit-circle"
-             data-estimulo="${h.forte}"
-             data-descanso="${h.leve}"
-             data-ciclos="${h.ciclos}">
-             ▶
-        </div>
-        <div class="hiit-phase">Toque para iniciar</div>
+    <div class="hiit-bubble">
+      <div class="hiit-circle"
+           data-estimulo="${h.forte}"
+           data-descanso="${h.leve}"
+           data-ciclos="${h.ciclos}">
+           ▶
       </div>
-    `;
+      <div class="hiit-phase">Toque para iniciar</div>
+    </div>
+  `;
+
+  html += `</div>`;
+  return html;
+}
+
 
   /* ======================================================
      TREINO (1 box com vários exercícios)
