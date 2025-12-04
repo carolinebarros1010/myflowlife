@@ -264,7 +264,7 @@ h3 {
 }
 #tituloApp {
   font-family: 'Playfair Display', serif;
-  font-size: 1.8rem !important;   /* antes era ~2.4rem */
+  font-size: 0.9rem !important;   /* antes era ~2.4rem */
   margin-top: 10px;
   margin-bottom: 0;
   font-weight: 700;
@@ -274,7 +274,7 @@ h3 {
 
 #tituloApp #nivelTag {
   color: var(--teal);   /* verde femflow */
- font-size: 0.9rem !important;   /* antes herdava tamanho maior */
+ font-size: 0.5rem !important;   /* antes herdava tamanho maior */
   font-weight: 600;
   opacity: .85;
   margin-left: 6px;
