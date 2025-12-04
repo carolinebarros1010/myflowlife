@@ -70,7 +70,7 @@
   <link rel="preload" href="./assets/logofemflowterracota.png" as="image" />
 
   <script>window.FEMFLOW_DISABLE_UI = true;</script>
-  <script defer src="./femflow-core.js"></script>
+  <script defer src="femflow-core.js"></script>
 </head>
 
 <body>
@@ -176,89 +176,99 @@
 
     document.addEventListener("femflow:langReady", aplicarIdiomaCadastro);
     document.addEventListener("femflow:langChange", aplicarIdiomaCadastro);
-    document.addEventListener("DOMContentLoaded", aplicarIdiomaCadastro);
-
+    
     document.getElementById("btnLang").onclick = () => {
       document.getElementById("ff-lang-modal")?.classList.remove("hidden");
     };
   </script>
 
   <!-- Validação + Início do fluxo -->
-  <script>
-    (function(){
-      const $=(s)=>document.querySelector(s);
+ <script>
+(function(){
 
-      const nome=$("#nome"), email=$("#email"), tel=$("#telefone"),
-            senha=$("#senha"), conf=$("#confirma"), btn=$("#btnIniciar");
-      const eNome=$("#eNome"), eEmail=$("#eEmail"),
-            eSenha=$("#eSenha"), eConf=$("#eConf");
+  const $ = (s) => document.querySelector(s);
 
-      const SCRIPT_URL = FEMFLOW?.SCRIPT_URL || 
-                         localStorage.getItem("femflow_script") ||
-                         "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+  const nome=$("#nome"), email=$("#email"), tel=$("#telefone"),
+        senha=$("#senha"), conf=$("#confirma"), btn=$("#btnIniciar");
 
-      const reEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const eNome=$("#eNome"), eEmail=$("#eEmail"),
+        eSenha=$("#eSenha"), eConf=$("#eConf");
 
-      function mark(input, elErr, ok, msg=""){
-        input.setAttribute("aria-invalid", ok?"false":"true");
-        elErr.textContent = ok?"":msg;
-      }
+  /* ============================================================
+     SCRIPT_URL — seguro mesmo se FEMFLOW não estiver carregado
+  ============================================================ */
+  const SCRIPT_URL =
+    (window.FEMFLOW && FEMFLOW.SCRIPT_URL) ||
+    localStorage.getItem("femflow_script") ||
+    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-      function validate(){
-        const vNome=(nome.value||"").trim().length>=2;
-        const vEmail=reEmail.test((email.value||"").trim());
-        const vSenha=(senha.value||"").trim().length>=6;
-        const vConf=(conf.value||"").trim()===(senha.value||"").trim() && vSenha;
+  const reEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        mark(nome,eNome,vNome,"Informe seu nome.");
-        mark(email,eEmail,vEmail,"Digite um e-mail válido.");
-        mark(senha,eSenha,vSenha,"Mínimo de 6 caracteres.");
-        mark(conf,eConf,vConf,"As senhas não coincidem.");
+  function mark(input, elErr, ok, msg=""){
+    input.setAttribute("aria-invalid", ok?"false":"true");
+    elErr.textContent = ok ? "" : msg;
+  }
 
-        btn.disabled = !(vNome && vEmail && vSenha && vConf);
-        return !btn.disabled;
-      }
+  function validate(){
+    const vNome = (nome.value||"").trim().length >= 2;
+    const vEmail = reEmail.test((email.value||"").trim());
+    const vSenha = (senha.value||"").trim().length >= 6;
+    const vConf  = (conf.value||"").trim() === (senha.value||"").trim();
 
-      ["input","blur"].forEach(evt=>{
-        [nome,email,tel,senha,conf].forEach(el=> el.addEventListener(evt, validate));
-      });
+    mark(nome,  eNome,  vNome,  "Informe seu nome.");
+    mark(email, eEmail, vEmail, "Digite um e-mail válido.");
+    mark(senha, eSenha, vSenha, "Mínimo de 6 caracteres.");
+    mark(conf,  eConf,  vConf,  "As senhas não coincidem.");
 
-      async function leadParcial(nome,email,telefone){
-        try{
-          const qs=new URLSearchParams({
-            action:"leadparcial", nome,email,telefone,
-            origem:"Anamnese Deluxe FemFlow"
-          }).toString();
-          await fetch(SCRIPT_URL+"?"+qs);
-        }catch(_){}
-      }
+    btn.disabled = !(vNome && vEmail && vSenha && vConf);
+    return !btn.disabled;
+  }
 
-      btn.addEventListener("click", async ()=>{
-        if(!validate()) return;
+  ["input","blur"].forEach(evt => {
+    [nome,email,tel,senha,conf].forEach(el => el.addEventListener(evt, validate));
+  });
 
-        const nomeV=nome.value.trim();
-        const emailV=email.value.trim();
-        const telV=(tel.value||"").trim();
+  async function leadParcial(nome,email,telefone){
+    try{
+      const qs=new URLSearchParams({
+        action:"leadparcial", nome,email,telefone,
+        origem:"Anamnese Deluxe FemFlow"
+      }).toString();
+      await fetch(SCRIPT_URL+"?"+qs);
+    }catch(_){}
+  }
 
-        localStorage.setItem("lead_nome",nomeV);
-        localStorage.setItem("lead_email",emailV);
-        if(telV) localStorage.setItem("lead_telefone",telV);
+  /* ============================================================
+     BOTÃO INICIAR ANAMNESE — agora funciona
+  ============================================================ */
+  btn.addEventListener("click", async ()=>{
+    if(!validate()) return;
 
-        leadParcial(nomeV,emailV,telV);
+    const nomeV = nome.value.trim();
+    const emailV = email.value.trim();
+    const telV = (tel.value||"").trim();
 
-        FEMFLOW.toast?.("✨ Anamnese iniciada!");
+    localStorage.setItem("lead_nome", nomeV);
+    localStorage.setItem("lead_email", emailV);
+    if(telV) localStorage.setItem("lead_telefone", telV);
 
-        document.getElementById("cadastro").classList.add("hidden");
-        document.getElementById("quiz").classList.remove("hidden");
+    leadParcial(nomeV,emailV,telV);
 
-        requestAnimationFrame(()=>{
-          if(window.iniciarQuizFemFlow) iniciarQuizFemFlow();
-        });
+    FEMFLOW.toast?.("✨ Anamnese iniciada!");
 
-        FEMFLOW._leadCadastro = { nome:nomeV, email:emailV, telefone:telV||"" };
-      });
-    })();
-  </script>
+    document.getElementById("cadastro").classList.add("hidden");
+    document.getElementById("quiz").classList.remove("hidden");
+
+    document.addEventListener("femflow:ready", () => {
+      if (window.iniciarQuizFemFlow) iniciarQuizFemFlow();
+    });
+
+    FEMFLOW._leadCadastro = { nome:nomeV, email:emailV, telefone:telV||"" };
+  });
+
+})();
+</script>
+
 
  <script src="js/anamnese_lang.js" defer></script>
 <script src="js/anamnese.js" defer></script>
