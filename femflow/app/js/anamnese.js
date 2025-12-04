@@ -170,9 +170,11 @@ perguntas.forEach((p, i) => {
       r = await FEMFLOW.enviarCadastro({
         nome, email, telefone, senha, perfil,
         pontuacao: score,
-        anamnese: JSON.stringify(respostas)
-      });
-    } else {
+        anamnese: JSON.stringify(respostas),
+        cicloDuracao: 28,             // padrão inicial
+    dataInicio: new Date().toISOString()
+});
+      } else {
       const resp = await fetch(SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
