@@ -154,7 +154,7 @@ async function salvarCiclo({ perfil, start, length, faseCalc, dia }) {
   await new Promise(requestAnimationFrame); // força render imediato do loading
 
   /* ============================================================
-     1) DEBUG (não remover — essencial)
+     0) DEBUG (não remover — essencial)
   ============================================================ */
   console.log("💾 SALVAR.CICLO.DEBUG =====================================");
   console.log({ perfil, start, length, faseCalc, dia });
@@ -168,34 +168,33 @@ async function salvarCiclo({ perfil, start, length, faseCalc, dia }) {
   });
 
   /* ============================================================
-     2) SALVAR LOCALMENTE
+     1) SALVAR LOCALMENTE
   ============================================================ */
   localStorage.setItem("femflow_perfilHormonal", perfil);
   localStorage.setItem("femflow_cycle_configured", "yes");
+
   localStorage.setItem("femflow_startDate", start.toISOString());
   localStorage.setItem("femflow_cycleLength", String(length));
-  localStorage.setItem("femflow_diaCiclo", String(dia));
+
   localStorage.setItem("femflow_fase", faseCalc.toLowerCase());
+  localStorage.setItem("femflow_diaCiclo", String(dia));
 
-  console.log("LOCALSTORAGE depois:", {
-    perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-    faseAtual: localStorage.getItem("femflow_fase"),
-    diaCiclo: localStorage.getItem("femflow_diaCiclo"),
-    cicloLength: localStorage.getItem("femflow_cycleLength"),
-    cicloStart: localStorage.getItem("femflow_startDate")
-  });
+  if (faseAlta) {
+    localStorage.setItem("femflow_faseAlta", faseAlta);
+  }
 
-  /* ============================================================
-     3) ENVIAR AO BACKEND (SEQUÊNCIA OFICIAL)
-  ============================================================ */
   const idUser = localStorage.getItem("femflow_id");
 
-  console.group("📡 BACKEND: setCiclo");
-
+  /* ============================================================
+     2) ENVIO SEQUENCIAL AO BACKEND
+     (NUNCA USAR Promise.all AQUI!)
+  ============================================================ */
   try {
-    // 1️⃣ PERFIL HORMONAL
-    console.log("⏳ Enviando perfil hormonal…");
-    const rPerfil = await fetch(FEMFLOW.SCRIPT_URL, {
+    console.group("📡 Backend Sync Sequencial");
+
+    // 1) PERFIL HORMONAL
+    console.log("1) setperfilhormonal");
+    const r1 = await fetch(FEMFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -204,11 +203,11 @@ async function salvarCiclo({ perfil, start, length, faseCalc, dia }) {
         perfil
       })
     }).then(r => r.json());
-    console.log("🔶 RESP setperfilhormonal:", rPerfil);
+    console.log("Resposta:", r1);
 
-    // 2️⃣ FASE
-    console.log("⏳ Enviando fase…");
-    const rFase = await fetch(FEMFLOW.SCRIPT_URL, {
+    // 2) FASE ATUAL
+    console.log("2) setfase");
+    const r2 = await fetch(FEMFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -217,11 +216,11 @@ async function salvarCiclo({ perfil, start, length, faseCalc, dia }) {
         fase: faseCalc.toLowerCase()
       })
     }).then(r => r.json());
-    console.log("🔶 RESP setfase:", rFase);
+    console.log("Resposta:", r2);
 
-    // 3️⃣ DIA DO CICLO
-    console.log("⏳ Enviando dia do ciclo…");
-    const rDia = await fetch(FEMFLOW.SCRIPT_URL, {
+    // 3) DIA DO CICLO
+    console.log("3) setdiaciclo");
+    const r3 = await fetch(FEMFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -230,11 +229,11 @@ async function salvarCiclo({ perfil, start, length, faseCalc, dia }) {
         dia
       })
     }).then(r => r.json());
-    console.log("🔶 RESP setdiaciclo:", rDia);
+    console.log("Resposta:", r3);
 
-    // 4️⃣ DATA MANUAL DO CICLO
-    console.log("⏳ Enviando cicloStartDate manual…");
-    const rManual = await fetch(FEMFLOW.SCRIPT_URL, {
+    // 4) CICLO START DATE MANUAL
+    console.log("4) setmanualstart");
+    const r4 = await fetch(FEMFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -243,28 +242,25 @@ async function salvarCiclo({ perfil, start, length, faseCalc, dia }) {
         startDate: start.toISOString()
       })
     }).then(r => r.json());
-    console.log("🔶 RESP setmanualstart:", rManual);
+    console.log("Resposta:", r4);
 
-    console.log("✔ BACKEND: Todos enviados com sucesso.");
+    console.groupEnd();
 
-  } catch (err) {
-    console.error("❌ ERRO AO ENVIAR CICLO:", err);
+  } catch (e) {
+    console.error("❌ ERRO no backend:", e);
     FEMFLOW.toast("Erro ao salvar ciclo.", true);
     return;
   }
 
-  console.groupEnd();
-
   /* ============================================================
-     4) FINALIZAÇÃO
+     3) FINALIZAÇÃO
   ============================================================ */
   FEMFLOW.toast("✨ Ciclo configurado!");
   ffShowLoading("Carregando seu painel…");
 
-  // 🔥 IMPORTANTE: loading fica ativo até redirecionamento!
+  // Redirecionamento final
   location.href = "flowcenter.html";
 }
-
 
 /* ============================================================
    PERFIS E QUIZ
