@@ -273,6 +273,39 @@
  <script src="js/anamnese_lang.js" defer></script>
 <script src="js/anamnese.js" defer></script>
 
+<!-- 🌐 Modal de Idioma -->
+<div id="ff-lang-modal" class="hidden" style="
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  display:flex; align-items:center; justify-content:center;
+  z-index:9999;
+">
+  <div style="
+    background:#fff; padding:22px; border-radius:18px;
+    width:90%; max-width:330px; text-align:center;
+  ">
+    <h3 style="margin:0 0 12px;color:#335953;">Selecione o idioma</h3>
+
+    <button onclick="FEMFLOW.setLang('pt'); this.closest('#ff-lang-modal').classList.add('hidden');"
+      style="margin:6px 0; padding:12px; width:100%; border-radius:12px; background:#335953; color:#fff; border:none;">
+      Português
+    </button>
+
+    <button onclick="FEMFLOW.setLang('en'); this.closest('#ff-lang-modal').classList.add('hidden');"
+      style="margin:6px 0; padding:12px; width:100%; border-radius:12px; background:#cc6a5a; color:#fff; border:none;">
+      English
+    </button>
+
+    <button onclick="FEMFLOW.setLang('fr'); this.closest('#ff-lang-modal').classList.add('hidden');"
+      style="margin:6px 0; padding:12px; width:100%; border-radius:12px; background:#e2b5a5; color:#573b2e; border:none;">
+      Français
+    </button>
+
+    <button onclick="this.closest('#ff-lang-modal').classList.add('hidden');"
+      style="margin-top:14px; padding:10px; width:100%; border-radius:12px; background:#ddd; border:none;">
+      Fechar
+    </button>
+  </div>
+</div>
 
 </body>
 </html>
