@@ -45,6 +45,7 @@
 
   <h2>Bem-vinda</h2>
   <p class="subtitle">Acesse ou crie sua conta para iniciar seu ciclo</p>
+<button id="btnLoginLang" class="login-lang-btn">🌐 Idioma</button>
 
   <input id="loginEmail" type="email" placeholder="Seu e-mail"/>
 
@@ -299,6 +300,100 @@ $("#goRecuperar").onclick = async () => {
 
 
 </script>
+    <script>
+// Botão abre o modal
+document.getElementById("btnLoginLang").onclick = () => {
+  document.getElementById("ff-lang-modal").classList.remove("hidden");
+};
+
+// Função para trocar idioma no login e persistir no app todo
+function setLoginLang(lang){
+  try { 
+    FEMFLOW.setLang(lang); 
+  } catch(e){}
+
+  localStorage.setItem("femflow_lang", lang);
+
+  document.getElementById("ff-lang-modal").classList.add("hidden");
+
+  // Atualiza textos do login imediatamente
+  aplicarIdiomaLogin(lang);
+}
+
+// Atualiza placeholders, textos e botões do login
+function aplicarIdiomaLogin(lang){
+  const T = {
+    pt: {
+      bemvinda: "Bem-vinda",
+      subtitulo: "Acesse ou crie sua conta para iniciar seu ciclo",
+      email: "Seu e-mail",
+      senha: "Sua senha",
+      entrar: "Entrar",
+      cadastrar: "Ainda não tem conta? Cadastre-se",
+      esquecer: "Esqueci minha senha"
+    },
+    en: {
+      bemvinda: "Welcome",
+      subtitulo: "Access or create your account to start your cycle",
+      email: "Your email",
+      senha: "Your password",
+      entrar: "Login",
+      cadastrar: "Don't have an account? Sign up",
+      esquecer: "Forgot my password"
+    },
+    fr: {
+      bemvinda: "Bienvenue",
+      subtitulo: "Accédez ou créez votre compte pour commencer votre cycle",
+      email: "Votre e-mail",
+      senha: "Votre mot de passe",
+      entrar: "Entrer",
+      cadastrar: "Pas de compte ? S'inscrire",
+      oublier: "J'ai oublié mon mot de passe"
+    }
+  }[lang];
+
+  document.querySelector("h2").textContent = T.bemvinda;
+  document.querySelector(".subtitle").textContent = T.subtitulo;
+  document.getElementById("loginEmail").placeholder = T.email;
+  document.getElementById("loginSenha").placeholder = T.senha;
+  document.getElementById("btnEntrar").textContent = T.entrar;
+  document.querySelector("a.toggle").textContent = T.cadastrar;
+  document.getElementById("goRecuperar").textContent = T.esquecer || T.oublier;
+}
+
+// Ao entrar na página, já carregar o idioma salvo
+const langSalvo = localStorage.getItem("femflow_lang") || "pt";
+aplicarIdiomaLogin(langSalvo);
+</script>
+
+    <!-- 🌐 Modal de Idioma -->
+<div id="ff-lang-modal" class="hidden" style="
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  display:flex; align-items:center; justify-content:center;
+  z-index:9999;">
+  
+  <div style="
+    background:#fff; padding:22px; border-radius:18px;
+    width:90%; max-width:330px; text-align:center;">
+    
+    <h3 style="margin:0 0 14px; color:#335953;">Selecione o idioma</h3>
+
+    <button onclick="setLoginLang('pt')" style="margin:6px 0; padding:12px; width:100%;
+      border-radius:12px; background:#335953; color:#fff; border:none;">Português</button>
+
+    <button onclick="setLoginLang('en')" style="margin:6px 0; padding:12px; width:100%;
+      border-radius:12px; background:#cc6a5a; color:#fff; border:none;">English</button>
+
+    <button onclick="setLoginLang('fr')" style="margin:6px 0; padding:12px; width:100%;
+      border-radius:12px; background:#e2b5a5; color:#573b2e; border:none;">Français</button>
+
+    <button onclick="document.getElementById('ff-lang-modal').classList.add('hidden')"
+      style="margin-top:16px; padding:10px; width:100%;
+      border-radius:12px; background:#ddd; border:none;">Fechar</button>
+
+  </div>
+</div>
+
 </body>
 </html>
 
