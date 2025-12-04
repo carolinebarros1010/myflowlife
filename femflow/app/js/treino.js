@@ -13,6 +13,12 @@
 ============================================================ */
 
 document.addEventListener("DOMContentLoaded", () => {
+const cicloOK = localStorage.getItem("femflow_cycle_configured");
+
+if (!cicloOK) {
+    FEMFLOW.toast("⚠️ Configure seu ciclo antes de treinar.");
+    return location.href = "ciclo.html";
+}
 
   FEMFLOW.log("🚀 treino.js v4.0 iniciado!");
 
