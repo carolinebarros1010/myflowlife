@@ -1,31 +1,28 @@
 /* ============================================================
    🌸 FemFlow — Login Page Styles (2025)
    Arquivo exclusivo do index.html
-   Usa as variáveis e resets já definidos em themes.css & core.css
+   Usa variáveis e resets de themes.css & core.css
 ============================================================ */
-/* Remove o padding do header no login */
+
+/* Remove padding do header no login */
 body.login-page {
-   margin-top: 0 !important;
+  margin-top: 0 !important;
   padding-top: 0 !important;
-   height: auto;
+  height: auto;
 }
-/* --- WRAPPER GLOBAL DO LOGIN (RESPONSIVO) --- */
+
+/* ------------------- WRAPPER GLOBAL ------------------- */
 .login-wrapper {
   width: 100%;
-  min-height: calc(100vh - 2rem);
-
+  min-height: 100svh;
   display: flex;
   justify-content: center;
   align-items: center;
-
-  padding: 20px;          /* ← garante o espaço lateral no iPhone/Samsung */
-  box-sizing: border-box;  
-   /* força centralização real */
-  min-height: 100svh; /* usa viewport real do iPhone / Android */
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-
-/* ---- CONTAINER PRINCIPAL ---- */
+/* ------------------- CARD PRINCIPAL ------------------- */
 .login-card {
   width: 100%;
   max-width: 400px;
@@ -37,19 +34,16 @@ body.login-page {
   text-align: center;
   border: 1px solid rgba(255,255,255,0.55);
   animation: fadeIn 0.5s ease;
-  box-sizing: border-box; /* ← evita expansão inesperada */ 
-  margin: 0 auto;
-   margin-top: 0 !important;
-    margin-bottom: 1rem;
- }
+  box-sizing: border-box;
+  margin: 0 auto 1rem auto;
+}
 
-/* LOGO */
 .login-card .logo {
   width: 130px;
   margin-bottom: 1rem;
 }
 
-/* TÍTULOS */
+/* ------------------- TÍTULOS ------------------- */
 .login-card h2 {
   font-family: "Playfair Display", serif;
   color: var(--terracota);
@@ -63,8 +57,7 @@ body.login-page {
   margin: 0.5rem 0 1.6rem;
 }
 
-/* ---- INPUTs & CAMPOS ---- */
-/* Campos normais já são estilizados em core.css — apenas ajustes para o login */
+/* ------------------- CAMPOS ------------------- */
 .login-card input {
   width: 78%;
   max-width: 290px;
@@ -81,13 +74,15 @@ body.login-page {
   align-items: center;
 }
 
-/* INPUT com espaço para o olho */
 .password-wrapper input {
   width: 100%;
   padding-right: 48px !important;
+  height: 48px;             /* ★ Ajuste para igualar ao e-mail */
+  line-height: 48px;
+  box-sizing: border-box;
 }
 
-/* OLHO — NÃO EMPURRA O INPUT */
+/* ÍCONE OLHO */
 .toggle-eye {
   position: absolute;
   right: 14px;
@@ -108,14 +103,14 @@ body.login-page {
   opacity: 0.9;
 }
 
-/* ---- MENSAGEM DE LOGIN ---- */
+/* ------------------- MENSAGEM DE LOGIN ------------------- */
 .message {
   min-height: 1.4rem;
   margin: 0.8rem 0;
   font-size: 0.95rem;
 }
 
-/* ---- BOTÃO ENTRAR ---- */
+/* ------------------- BOTÃO ENTRAR ------------------- */
 #btnEntrar {
   width: 64%;
   max-width: 240px;
@@ -127,6 +122,7 @@ body.login-page {
   font-weight: 600;
   font-size: 0.95rem;
   transition: 0.25s ease;
+  cursor: pointer;
 }
 
 #btnEntrar:hover {
@@ -134,7 +130,7 @@ body.login-page {
   background: linear-gradient(135deg, #2b4b45, var(--terracota));
 }
 
-/* ---- LINKS ---- */
+/* ------------------- LINKS ------------------- */
 .toggle {
   color: var(--terracota);
   text-decoration: underline;
@@ -143,44 +139,40 @@ body.login-page {
   display: block;
 }
 
-/* ---- MEDIDOR DE FORÇA DA SENHA ---- */
-.strength-meter {
-  width: 78%;
-  max-width: 290px;
-  margin: -4px auto 14px auto;
-  display: flex;
-  gap: 6px;
-  justify-content: center;
+/* ============================================================
+   REMOÇÃO DEFINITIVA DO MEDIDOR ANTIGO (3 BARRAS)
+============================================================ */
+.strength-meter,
+.strength-bar,
+#strengthMeter {
+  display: none !important;
 }
 
-.strength-bar {
-  flex: 1;
-  height: 6px;
+/* ============================================================
+      NOVO MEDIDOR DE SENHA — BARRA ÚNICA INTERNA
+============================================================ */
+.password-strength {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -2px;
+  height: 4px;
   background: #e6ddd8;
-  border-radius: 6px;
-  opacity: 0.4;
-  transition: 0.35s ease;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.strength-1 #bar1 {
+.password-strength-fill {
+  width: 0%;
+  height: 100%;
   background: var(--terracota);
-  opacity: 1;
+  transition: width 0.25s ease, background 0.25s ease;
+  border-radius: 4px;
 }
 
-.strength-2 #bar1,
-.strength-2 #bar2 {
-  background: var(--pessego);
-  opacity: 1;
-}
-
-.strength-3 #bar1,
-.strength-3 #bar2,
-.strength-3 #bar3 {
-  background: var(--teal);
-  opacity: 1;
-}
-
-/* ---- BOTÕES SOCIAIS (GOOGLE / APPLE / BIO) ---- */
+/* ============================================================
+   BOTÕES SOCIAIS
+============================================================ */
 .social-row.boho {
   display: flex;
   justify-content: center;
@@ -208,11 +200,9 @@ body.login-page {
   transform: scale(1.07);
 }
 
-/* ---- ANIMAÇÃO ---- */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* ============================================================
+   BOTÃO DE IDIOMA (CORRIGIDO)
+============================================================ */
 .login-lang-btn {
   background: #ffffff;
   border: 1px solid #d8ccc8;
@@ -227,16 +217,9 @@ body.login-page {
   gap: 6px;
   margin: 6px auto 16px auto;
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-}
 
-  /* Anti-reset */
   appearance: none;
   -webkit-appearance: none;
-  box-shadow: none;
-  outline: none;
-}
-
-.login-lang-btn:focus {
   outline: none;
 }
 
@@ -245,30 +228,9 @@ body.login-page {
   width: 16px;
   height: 16px;
 }
-/* ==========================================
-   NOVO MEDIDOR DE SENHA — BARRA ÚNICA INTERNA
-   (não interfere no medidor antigo)
-==========================================*/
-.password-wrapper {
-  position: relative;
-}
 
-.password-strength {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: -2px;
-  height: 4px;
-  background: #e6ddd8;
-  border-radius: 4px;
-  overflow: hidden;
+/* ------------------- ANIMAÇÃO ------------------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-.password-strength-fill {
-  width: 0%;
-  height: 100%;
-  background: var(--terracota);
-  transition: width 0.25s ease, background 0.25s ease;
-  border-radius: 4px;
-}
-
