@@ -18,7 +18,10 @@
 
 <body>
 
-  <h1 id="tituloApp">FemFlow</h1>
+ <h1 id="tituloApp">
+  FemFlow <span id="nivelTag"></span>
+</h1>
+
 
   <!-- Títulos dinâmicos -->
   <h3 id="tituloFlow">—</h3>
@@ -109,12 +112,22 @@
 <script src="femflow-core.js"></script>
 
 <script>
+  
+ 
+
 function ffHideLoading() {
   const box = document.getElementById("ff-loading");
   if (box) box.classList.add("hidden");
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
+  
+const nivel = (localStorage.getItem("femflow_nivel") || "").trim();
+
+  const tag = document.getElementById("nivelTag");
+  if (tag && nivel) {
+    tag.textContent = `— ${nivel.charAt(0).toUpperCase() + nivel.slice(1)}`;
+  }
 
   /* ============================================================
      0) HEADER + MENU + IDIOMA
