@@ -78,12 +78,3 @@ body.page-evolucao {
   border-radius: 10px;
   background: #ddd;
 }
-.login-lang-btn {
-  background:none;
-  border:none;
-  color:#335953;
-  font-size:.9rem;
-  font-weight:600;
-  cursor:pointer;
-  margin-bottom:10px;
-}
