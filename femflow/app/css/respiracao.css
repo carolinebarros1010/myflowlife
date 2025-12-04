@@ -368,8 +368,10 @@ footer {
   }
 }
 /* ============================================================
-   FEMFLOW — Drawer lateral da Respiração
+   FEMFLOW — Drawer Lateral da Respiração
+   Arquivo: respiracao.css
 ============================================================ */
+
 .breath-drawer {
   position: fixed;
   top: 0;
@@ -407,3 +409,56 @@ footer {
   margin-bottom: 18px;
 }
 
+/* Ajuste do modal interno */
+#breathModal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px;
+}
+
+#breathCircle {
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+#faseLabel {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: var(--texto);
+  margin-bottom: 12px;
+}
+
+#btnStart {
+  background: var(--verde);
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 22px;
+  font-size: 1rem;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#btnStart:hover {
+  transform: scale(1.05);
+}
+
+#btnCloseModal {
+  background: none;
+  border: none;
+  margin-top: 22px;
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--verde);
+  cursor: pointer;
+}
