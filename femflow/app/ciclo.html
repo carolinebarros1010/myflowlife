@@ -197,6 +197,21 @@ async function salvarCiclo({ perfil, start, length, faseCalc, dia, faseAlta = nu
         perfil
       })
     });
+// ---------------------------------------------------------
+// 1B) CICLO DURAÇÃO  (novo)
+// ---------------------------------------------------------
+console.log("⏳ 1B) Enviando ciclo duração…");
+await fetch(FEMFLOW.SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        action: "setciclo",
+        id: idUser,
+        cicloDuracao: length,
+        dataInicio: start.toISOString(),
+        perfilHormonal: perfil
+    })
+});
 
     // 2) fase
     console.log("⏳ 2) Enviando fase…");
