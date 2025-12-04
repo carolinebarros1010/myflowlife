@@ -262,4 +262,18 @@ h3 {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+#tituloApp {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: var(--terracota);
+  text-align: center;
+}
+
+#tituloApp #nivelTag {
+  color: var(--teal);   /* verde femflow */
+  font-size: 0.9em;     /* levemente menor para elegância */
+  font-weight: 700;
+  margin-left: 6px;
+}
 
