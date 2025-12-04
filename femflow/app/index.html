@@ -48,15 +48,15 @@
       <input id="loginEmail" type="email" placeholder="Seu e-mail"/>
 
       <!-- Campo de senha -->
-      <div class="password-wrapper">
-        <input id="loginSenha" type="password" placeholder="Sua senha">
-        <span id="toggleSenha" class="toggle-eye"></span>
+<div class="password-wrapper">
+  <input id="loginSenha" type="password" placeholder="Sua senha">
+  <span id="toggleSenha" class="toggle-eye"></span>
 
-        <!-- NOVA barra única -->
-        <div class="password-strength">
-          <div id="strengthFill" class="password-strength-fill"></div>
-        </div>
-      </div>
+  <!-- Barra interna correta -->
+  <div class="password-strength">
+    <div id="strengthFill" class="password-strength-fill"></div>
+  </div>
+</div>
 
       <!-- Botão Entrar -->
       <button id="btnEntrar" type="button">Entrar</button>
@@ -153,34 +153,35 @@
     /* -------------------------
          BARRA DE FORÇA
     ------------------------- */
-    const senhaInput = document.getElementById("loginSenha");
-    const toggleEye  = document.getElementById("toggleSenha");
-    const fill       = document.getElementById("strengthFill");
+   const senhaInput = document.getElementById("loginSenha");
+const toggleEye  = document.getElementById("toggleSenha");
+const fill       = document.getElementById("strengthFill");
 
-    toggleEye.addEventListener("click", () => {
-      const isPass = senhaInput.type === "password";
-      senhaInput.type = isPass ? "text" : "password";
-      toggleEye.classList.toggle("active", isPass);
-    });
+toggleEye.addEventListener("click", () => {
+  const isPass = senhaInput.type === "password";
+  senhaInput.type = isPass ? "text" : "password";
+  toggleEye.classList.toggle("active", isPass);
+});
 
-    senhaInput.addEventListener("input", () => {
-      const v = senhaInput.value;
-      let score = 0;
+senhaInput.addEventListener("input", () => {
+  const v = senhaInput.value;
+  let score = 0;
 
-      if (v.length >= 6) score++;
-      if (/[A-Z]/.test(v) || /[0-9]/.test(v)) score++;
-      if (/[^A-Za-z0-9]/.test(v) || v.length >= 10) score++;
+  if (v.length >= 6) score++;
+  if (/[A-Z]/.test(v) || /[0-9]/.test(v)) score++;
+  if (/[^A-Za-z0-9]/.test(v) || v.length >= 10) score++;
 
-      let width = 0;
-      let color = "#d8d0cb";
+  let width = 0;
+  let color = "#d8d0cb";
 
-      if (score === 1) { width = 33; color = "#cc6a5a"; }
-      if (score === 2) { width = 66; color = "#e4a85f"; }
-      if (score >= 3) { width = 100; color = "#2e7d32"; }
+  if (score === 1) { width = 33; color = "#cc6a5a"; }
+  if (score === 2) { width = 66; color = "#e4a85f"; }
+  if (score >= 3) { width = 100; color = "#2e7d32"; }
 
-      fill.style.width = width + "%";
-      fill.style.background = color;
-    });
+  fill.style.width = width + "%";
+  fill.style.background = color;
+});
+
 
     /* -------------------------
          LOGIN GOOGLE
