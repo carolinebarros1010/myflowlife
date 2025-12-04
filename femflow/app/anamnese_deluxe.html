@@ -238,34 +238,56 @@
     }catch(_){}
   }
 
-  /* ============================================================
-     BOTÃO INICIAR ANAMNESE — agora funciona
-  ============================================================ */
-  btn.addEventListener("click", async ()=>{
-    if(!validate()) return;
+ /* ============================================================
+   BOTÃO INICIAR ANAMNESE — versão final corrigida
+============================================================ */
+btn.addEventListener("click", async () => {
+  if (!validate()) return;
 
-    const nomeV = nome.value.trim();
-    const emailV = email.value.trim();
-    const telV = (tel.value||"").trim();
+  const nomeV  = nome.value.trim();
+  const emailV = email.value.trim();
+  const telV   = (tel.value || "").trim();
 
-    localStorage.setItem("lead_nome", nomeV);
-    localStorage.setItem("lead_email", emailV);
-    if(telV) localStorage.setItem("lead_telefone", telV);
+  // Salvar lead local
+  localStorage.setItem("lead_nome", nomeV);
+  localStorage.setItem("lead_email", emailV);
+  if (telV) localStorage.setItem("lead_telefone", telV);
 
-    leadParcial(nomeV,emailV,telV);
+  // Registrar lead parcial
+  leadParcial(nomeV, emailV, telV);
 
-    FEMFLOW.toast?.("✨ Anamnese iniciada!");
+  // Toast protegido
+  try { FEMFLOW.toast?.("✨ Anamnese iniciada!"); } catch(e){}
 
-    document.getElementById("cadastro").classList.add("hidden");
-    document.getElementById("quiz").classList.remove("hidden");
+  // Mostrar tela do quiz
+  document.getElementById("cadastro").classList.add("hidden");
+  document.getElementById("quiz").classList.remove("hidden");
 
-    document.addEventListener("femflow:ready", () => {
-      if (window.iniciarQuizFemFlow) iniciarQuizFemFlow();
-    });
+  // Prevenir múltiplas execuções
+  let quizInicializado = false;
 
-    FEMFLOW._leadCadastro = { nome:nomeV, email:emailV, telefone:telV||"" };
-  });
+  function iniciarQuizSeguro() {
+    if (quizInicializado) return;
+    quizInicializado = true;
 
+    if (window.iniciarQuizFemFlow) {
+      iniciarQuizFemFlow();
+    }
+  }
+
+  // Caso o FEMFLOW core dispare o evento normalmente
+  document.addEventListener("femflow:ready", iniciarQuizSeguro);
+
+  // Fallback caso femflow:ready não seja disparado
+  setTimeout(iniciarQuizSeguro, 700);
+
+  // Registrar lead no namespace FEMFLOW
+  FEMFLOW._leadCadastro = {
+    nome: nomeV,
+    email: emailV,
+    telefone: telV || ""
+  };
+});
 })();
 </script>
 
