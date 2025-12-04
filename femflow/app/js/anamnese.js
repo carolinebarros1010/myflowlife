@@ -101,7 +101,14 @@ function getPerguntasTraduzidas() {
   const lang = FEMFLOW?.lang || "pt";
 
   // Textos do sistema (vem do lang.js)
-  const Tsys = FEMFLOW.langs[lang].sistema;
+ const Tsys =
+  FEMFLOW?.langs?.[lang]?.sistema ||
+  FEMFLOW?.langs?.pt?.sistema ||
+  {
+    erroCiclo: "Erro ao finalizar.",
+    sincronizando: "Sincronizando…",
+    cicloConfigurado: "Perfil configurado!"
+  };
 
   // Textos da etapa final da Anamnese
   const T = {
