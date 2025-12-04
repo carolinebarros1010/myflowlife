@@ -213,3 +213,12 @@ body.login-page {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+.login-lang-btn {
+  background:none;
+  border:none;
+  font-size:.9rem;
+  font-weight:600;
+  color:#335953;
+  margin:-4px 0 12px 0;
+  cursor:pointer;
+}
