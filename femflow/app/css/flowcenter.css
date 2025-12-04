@@ -49,20 +49,20 @@ body::before {
 h1 {
   font-family: "Playfair Display", serif;
   color: var(--terracota);
-  font-size: 1rem;
+  font-size: 0.8rem;
   margin: 0;
 }
 
 h3 {
   font-family: "Playfair Display", serif;
-  font-size: 0.8rem;
+  font-size: 0.6rem;
   color: var(--verde);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .subtitle {
   color: #7b6e68;
-  margin-top: 6px;
+  margin-top: 4px;
   font-size: 0.8rem;
   font-style: italic;
 }
@@ -264,7 +264,7 @@ h3 {
 }
 #tituloApp {
   font-family: 'Playfair Display', serif;
-  font-size: 1.2rem !important;   /* antes era ~2.4rem */
+  font-size: 1.5rem !important;   /* antes era ~2.4rem */
   margin-top: 10px;
   margin-bottom: 0;
   font-weight: 700;
@@ -274,7 +274,7 @@ h3 {
 
 #tituloApp #nivelTag {
   color: var(--teal);   /* verde femflow */
- font-size: 0.9rem !important;   /* antes herdava tamanho maior */
+ font-size: 1.1rem !important;   /* antes herdava tamanho maior */
   font-weight: 600;
   opacity: .85;
   margin-left: 6px;
