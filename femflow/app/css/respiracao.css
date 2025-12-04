@@ -367,3 +367,43 @@ footer {
     padding: 11px 14px;
   }
 }
+/* ============================================================
+   FEMFLOW — Drawer lateral da Respiração
+============================================================ */
+.breath-drawer {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 88%;
+  max-width: 360px;
+  height: 100vh;
+  background: var(--bege);
+  box-shadow: -6px 0 22px rgba(0,0,0,0.18);
+  padding: 28px 18px;
+  overflow-y: auto;
+  transition: right .45s cubic-bezier(.25,.8,.25,1);
+  z-index: 2000;
+}
+
+.breath-drawer.active {
+  right: 0;
+}
+
+.drawer-close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: var(--terracota);
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.drawer-header {
+  font-family: "Playfair Display", serif;
+  font-size: 1.7rem;
+  color: var(--terracota);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
