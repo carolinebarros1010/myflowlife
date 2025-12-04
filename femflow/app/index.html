@@ -4,369 +4,174 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Entrar no FemFlow</title>
+
   <!-- Favicon FemFlow -->
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" href="favicon.ico">
-<meta name="msapplication-TileImage" content="favicon.ico">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="favicon.ico">
+  <meta name="msapplication-TileImage" content="favicon.ico">
+  <link rel="icon" href="favicon.ico">
 
-<!-- Fallback absoluto -->
-<link rel="icon" href="favicon.ico">
-
-    <script>window.FEMFLOW_DISABLE_UI = true;</script>
+  <!-- Core -->
+  <script>window.FEMFLOW_DISABLE_UI = true;</script>
   <script defer src="./femflow-core.js"></script>
 
-  <!-- GOOGLE SIGN-IN (PRONTO E CONFIGURADO) -->
+  <!-- Google Login -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-  <!-- Google Callback -->
-  <div id="g_id_onload"
-       data-client_id="457716839153-mot8gjc4j50cfug9em1t1niahhferll6.apps.googleusercontent.com"
-       data-callback="preencherComGoogle"
-       data-auto_select="false"
-       data-login_uri="https://myflowlife.com.br/femflow/app/index.html">
-  </div>
-
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
 
- <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/core.css">
-<link rel="stylesheet" href="css/header.css">
-<link rel="stylesheet" href="css/themes.css">
-<link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/core.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/login.css">
 
+  <style>
+    .login-lang-btn{
+      background:none;
+      border:none;
+      font-size:.9rem;
+      font-weight:600;
+      color:#335953;
+      margin:-4px 0 12px 0;
+      cursor:pointer;
+    }
+  </style>
 </head>
 
-  <body class="login-page">
+<body class="login-page">
   <div class="login-wrapper">
-   <div class="login-card">
+    <div class="login-card">
 
-  <img src="assets/logofemflowterracotasf.png" class="logo"/>
+      <img src="assets/logofemflowterracotasf.png" class="logo"/>
 
-  <h2>Bem-vinda</h2>
-  <p class="subtitle">Acesse ou crie sua conta para iniciar seu ciclo</p>
-<button id="btnLoginLang" class="login-lang-btn">🌐 Idioma</button>
+      <h2>Bem-vinda</h2>
+      <p class="subtitle">Acesse ou crie sua conta para iniciar seu ciclo</p>
 
-  <input id="loginEmail" type="email" placeholder="Seu e-mail"/>
+      <button id="btnLoginLang" class="login-lang-btn">🌐 Idioma</button>
 
-  <!-- SENHA -->
-  <div class="password-wrapper">
-    <input id="loginSenha" type="password" placeholder="Sua senha">
-    <span id="toggleSenha" class="toggle-eye"></span>
-  </div>
+      <input id="loginEmail" type="email" placeholder="Seu e-mail"/>
 
-  <!-- METER -->
-  <div class="strength-meter" id="strengthMeter">
-    <div class="strength-bar" id="bar1"></div>
-    <div class="strength-bar" id="bar2"></div>
-    <div class="strength-bar" id="bar3"></div>
-  </div>
+      <!-- SENHA -->
+      <div class="password-wrapper">
+        <input id="loginSenha" type="password" placeholder="Sua senha">
+        <span id="toggleSenha" class="toggle-eye"></span>
+      </div>
 
-  <button id="btnEntrar" type="button">Entrar</button>
-  <p id="mensagem" class="message"></p>
+      <!-- METER -->
+      <div class="strength-meter" id="strengthMeter">
+        <div class="strength-bar" id="bar1"></div>
+        <div class="strength-bar" id="bar2"></div>
+        <div class="strength-bar" id="bar3"></div>
+      </div>
 
-  <a class="toggle" href="anamnese_deluxe.html">Ainda não tem conta? Cadastre-se</a>
-  <p class="toggle" id="goRecuperar">Esqueci minha senha</p>
+      <button id="btnEntrar" type="button">Entrar</button>
+      <p id="mensagem" class="message"></p>
 
-  <div class="social-row boho">
-    <div class="social-icon boho google" id="googleSignIn">
-      <img src="assets/icons/google-g.svg">
+      <a class="toggle" href="anamnese_deluxe.html">Ainda não tem conta? Cadastre-se</a>
+      <p class="toggle" id="goRecuperar">Esqueci minha senha</p>
+
+      <div class="social-row boho">
+        <div class="social-icon boho google" id="googleSignIn">
+          <img src="assets/icons/google-g.svg">
+        </div>
+
+        <div class="social-icon boho apple" id="appleSignIn">
+          <img src="assets/icons/apple.svg">
+        </div>
+
+        <div class="social-icon boho bio" id="bioSignIn">🔒</div>
+      </div>
+
     </div>
-
-    <div class="social-icon boho apple" id="appleSignIn">
-      <img src="assets/icons/apple.svg">
-    </div>
-
-    <div class="social-icon boho bio" id="bioSignIn">🔒</div>
   </div>
 
-</div>
+
+<!-- ============================================================
+   LOGIN SCRIPT + MULTILINGUE
+============================================================ -->
 <script>
-document.getElementById("btnEsqueci")?.addEventListener("click", () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  FEMFLOW.solicitarResetSenha(email);
-});
-</script>
-<script>
-/* === HELPERS === */
-window.FEMFLOW = window.FEMFLOW || {};
 
-const scriptURL =
-  FEMFLOW.SCRIPT_URL ||
-  localStorage.getItem("femflow_script") ||
-  "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
+document.addEventListener("DOMContentLoaded", () => {
 
-const $ = s => document.querySelector(s);
-const msg = $("#mensagem");
+  const modal = document.getElementById("ff-lang-modal");
+  const btnLang = document.getElementById("btnLoginLang");
 
-function setErr(t){ msg.textContent=t; msg.style.color="#cc6a5a"; }
-function setMsg(t,ok=false){ msg.textContent=t; msg.style.color=ok?"#2e7d32":"#335953"; }
-
-async function postGAS(p){
-  const r = await fetch(scriptURL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(p)
+  /* ---------------------------
+       Abrir modal de idioma
+  ---------------------------- */
+  btnLang.addEventListener("click", () => {
+    modal.classList.remove("hidden");
   });
-  if(!r.ok) throw new Error();
-  return r.json();
-}
 
-/* === LOGIN PADRÃO === */
-async function entrar(){
-  const email=$("#loginEmail").value.trim();
-  const senha=$("#loginSenha").value.trim();
+  /* ---------------------------
+        Função mudar idioma
+  ---------------------------- */
+  window.setLoginLang = function(lang){
 
-  if(!email || !senha){ setErr("Digite e-mail e senha."); return; }
+    try { FEMFLOW.setLang(lang); } catch(e){}
 
-  setMsg("Verificando...");
+    localStorage.setItem("femflow_lang", lang);
+    modal.classList.add("hidden");
+    aplicarIdiomaLogin(lang);
+  };
 
-  try{
-    const d=await postGAS({action:"login",email,senha});
-    if(d.status==="ok"){
-      setMsg(`Bem-vinda, ${d.nome||"aluna"}!`,true);
-      localStorage.setItem("femflow_id",d.id);
-      localStorage.setItem("femflow_email",d.email||email);
-      localStorage.setItem("femflow_auth","yes");
-      setTimeout(()=>location.href="home.html",700);
-    } else setErr(d.msg||"E-mail ou senha incorretos.");
-  } catch(e){ setErr("Erro de rede."); }
-}
-
-$("#btnEntrar").onclick = entrar;
-$("#loginSenha").addEventListener("keydown",e=>{ if(e.key==="Enter") entrar(); });
-
-/* === OLHO iOS === */
-const senhaInput = document.querySelector("#loginSenha");
-const toggle = document.querySelector("#toggleSenha");
-
-toggle.addEventListener("click", () => {
-  const isPass = senhaInput.type === "password";
-
-  // troca tipo
-  senhaInput.type = isPass ? "text" : "password";
-
-  // ativa o olho
-  if (isPass) {
-    toggle.classList.add("active");
-  } else {
-    toggle.classList.remove("active");
-  }
-});
-
-/* === FORÇA DA SENHA === */
-const meter = $("#strengthMeter");
-
-senhaInput.addEventListener("input", ()=>{
-  const v = senhaInput.value;
-  let score = 0;
-  if(v.length >= 6) score++;
-  if(/[A-Z]/.test(v) || /[0-9]/.test(v)) score++;
-  if(/[^A-Za-z0-9]/.test(v) || v.length >= 10) score++;
-
-  meter.classList.remove("strength-1","strength-2","strength-3");
-  if(score===1) meter.classList.add("strength-1");
-  if(score===2) meter.classList.add("strength-2");
-  if(score>=3) meter.classList.add("strength-3");
-});
-
-/* ==================================================
-   GOOGLE LOGIN — VERSÃO FINAL COM CALLBACK
-   ================================================== */
-$("#googleSignIn").onclick = ()=> google.accounts.id.prompt();
-
-async function preencherComGoogle(response){
-  try{
-    const data = jwt_decode(response.credential);
-    if(!data || !data.email) return;
-
-    $("#loginEmail").value = data.email;
-
-    const res = await postGAS({action:"login",email:data.email,senha:""});
-
-    if(res.status==="ok"){
-      localStorage.setItem("femflow_id",res.id);
-      localStorage.setItem("femflow_email",res.email);
-      localStorage.setItem("femflow_auth","yes");
-      FEMFLOW.toast?.("✨ Login automático realizado!");
-      setTimeout(()=>location.href="home.html",800);
-    } else {
-      FEMFLOW.toast?.("💡 Complete seu cadastro para continuar.");
-    }
-
-  } catch(e){
-    console.warn("Erro Google:",e);
-  }
-}
-
-window.preencherComGoogle = preencherComGoogle;
-
-/* ==================================================
-   BIOMETRIA — AGORA FUNCIONANDO (ES256 + RS256)
-   ================================================== */
-const bio=$("#bioSignIn");
-
-(async()=>{
-  if(window.PublicKeyCredential &&
-     await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()){
-    bio.style.display="flex";
-  }
-})();
-
-bio.onclick = async ()=>{
-  try{
-    const email=$("#loginEmail").value.trim();
-    if(!email){ setErr("Digite seu e-mail."); return; }
-
-    const chal = crypto.getRandomValues(new Uint8Array(32));
-
-    await navigator.credentials.create({
-      publicKey:{
-        challenge: chal,
-        rp:{ name:"FemFlow" },
-        user:{
-          id:new TextEncoder().encode(email),
-          name: email,
-          displayName: email
-        },
-        pubKeyCredParams:[
-          { type:"public-key", alg:-7 },
-          { type:"public-key", alg:-257 }
-        ],
-        authenticatorSelection:{
-          authenticatorAttachment:"platform",
-          userVerification:"required"
-        }
+  /* ---------------------------
+         Traduções do Login
+  ---------------------------- */
+  function aplicarIdiomaLogin(lang){
+    const T = {
+      pt: {
+        bemvinda: "Bem-vinda",
+        subtitulo: "Acesse ou crie sua conta para iniciar seu ciclo",
+        email: "Seu e-mail",
+        senha: "Sua senha",
+        entrar: "Entrar",
+        cadastrar: "Ainda não tem conta? Cadastre-se",
+        esquecer: "Esqueci minha senha"
+      },
+      en: {
+        bemvinda: "Welcome",
+        subtitulo: "Access or create your account to start your cycle",
+        email: "Your email",
+        senha: "Your password",
+        entrar: "Login",
+        cadastrar: "Don’t have an account? Sign up",
+        esquecer: "Forgot my password"
+      },
+      fr: {
+        bemvinda: "Bienvenue",
+        subtitulo: "Accédez ou créez votre compte pour commencer votre cycle",
+        email: "Votre e-mail",
+        senha: "Votre mot de passe",
+        entrar: "Entrer",
+        cadastrar: "Pas de compte ? S'inscrire",
+        esquecer: "J’ai oublié mon mot de passe"
       }
-    });
+    }[lang];
 
-    const res = await postGAS({action:"login",email,senha:""});
-    if(res.status==="ok"){
-      localStorage.setItem("femflow_id",res.id);
-      localStorage.setItem("femflow_email",res.email||email);
-      localStorage.setItem("femflow_auth","yes");
-      setMsg("Acesso liberado ✨",true);
-      setTimeout(()=>location.href="home.html",700);
-    }
-  } catch(e){
-    console.warn(e);
-    setErr("Falha ao usar biometria.");
-  }
-};
+    document.querySelector("h2").textContent = T.bemvinda;
+    document.querySelector(".subtitle").textContent = T.subtitulo;
 
-/* APPLE LOGIN FUTURO */
-$("#appleSignIn").onclick = ()=> FEMFLOW.toast?.("🍎 Entrar com Apple em breve.");
-  
-/* ==================================================
-   🔐 RECUPERAÇÃO DE SENHA (FLUXO SIMPLIFICADO)
-================================================== */
-$("#goRecuperar").onclick = async () => {
-  const email = $("#loginEmail").value.trim().toLowerCase();
+    document.getElementById("loginEmail").placeholder = T.email;
+    document.getElementById("loginSenha").placeholder = T.senha;
+    document.getElementById("btnEntrar").textContent = T.entrar;
 
-  if (!email) {
-    setErr("Digite seu e-mail para recuperar a senha.");
-    return;
+    document.querySelector("a.toggle").textContent = T.cadastrar;
+    document.getElementById("goRecuperar").textContent = T.esquecer;
   }
 
-  setMsg("Enviando instruções...", false);
+  /* ---------------------------
+        Aplicar idioma salvo
+  ---------------------------- */
+  const langSalvo = localStorage.getItem("femflow_lang") || "pt";
+  aplicarIdiomaLogin(langSalvo);
 
-  try {
-    const r = await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({
-        action: "solicitarreset",
-        email
-      })
-    });
-
-    const data = await r.json();
-
-    if (data.status === "ok") {
-      setMsg("📬 Verifique seu e-mail!", true);
-    }
-    else if (data.status === "notfound") {
-      setErr("E-mail não encontrado.");
-    }
-    else {
-      setErr("Erro ao solicitar redefinição.");
-    }
-
-  } catch (e) {
-    console.error(e);
-    setErr("Erro ao enviar solicitação.");
-  }
-};
-
-
-</script>
-    <script>
-// Botão abre o modal
-document.getElementById("btnLoginLang").onclick = () => {
-  document.getElementById("ff-lang-modal").classList.remove("hidden");
-};
-
-// Função para trocar idioma no login e persistir no app todo
-function setLoginLang(lang){
-  try { 
-    FEMFLOW.setLang(lang); 
-  } catch(e){}
-
-  localStorage.setItem("femflow_lang", lang);
-
-  document.getElementById("ff-lang-modal").classList.add("hidden");
-
-  // Atualiza textos do login imediatamente
-  aplicarIdiomaLogin(lang);
-}
-
-// Atualiza placeholders, textos e botões do login
-function aplicarIdiomaLogin(lang){
-  const T = {
-    pt: {
-      bemvinda: "Bem-vinda",
-      subtitulo: "Acesse ou crie sua conta para iniciar seu ciclo",
-      email: "Seu e-mail",
-      senha: "Sua senha",
-      entrar: "Entrar",
-      cadastrar: "Ainda não tem conta? Cadastre-se",
-      esquecer: "Esqueci minha senha"
-    },
-    en: {
-      bemvinda: "Welcome",
-      subtitulo: "Access or create your account to start your cycle",
-      email: "Your email",
-      senha: "Your password",
-      entrar: "Login",
-      cadastrar: "Don't have an account? Sign up",
-      esquecer: "Forgot my password"
-    },
-    fr: {
-      bemvinda: "Bienvenue",
-      subtitulo: "Accédez ou créez votre compte pour commencer votre cycle",
-      email: "Votre e-mail",
-      senha: "Votre mot de passe",
-      entrar: "Entrer",
-      cadastrar: "Pas de compte ? S'inscrire",
-      oublier: "J'ai oublié mon mot de passe"
-    }
-  }[lang];
-
-  document.querySelector("h2").textContent = T.bemvinda;
-  document.querySelector(".subtitle").textContent = T.subtitulo;
-  document.getElementById("loginEmail").placeholder = T.email;
-  document.getElementById("loginSenha").placeholder = T.senha;
-  document.getElementById("btnEntrar").textContent = T.entrar;
-  document.querySelector("a.toggle").textContent = T.cadastrar;
-  document.getElementById("goRecuperar").textContent = T.esquecer || T.oublier;
-}
-
-// Ao entrar na página, já carregar o idioma salvo
-const langSalvo = localStorage.getItem("femflow_lang") || "pt";
-aplicarIdiomaLogin(langSalvo);
+});
 </script>
 
-    <!-- 🌐 Modal de Idioma -->
+
+<!-- 🌐 Modal de Idioma -->
 <div id="ff-lang-modal" class="hidden" style="
   position:fixed; inset:0; background:rgba(0,0,0,.55);
   display:flex; align-items:center; justify-content:center;
@@ -396,6 +201,3 @@ aplicarIdiomaLogin(langSalvo);
 
 </body>
 </html>
-
-
-
