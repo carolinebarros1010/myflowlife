@@ -245,4 +245,30 @@ body.login-page {
   width: 16px;
   height: 16px;
 }
+/* ==========================================
+   NOVO MEDIDOR DE SENHA — BARRA ÚNICA INTERNA
+   (não interfere no medidor antigo)
+==========================================*/
+.password-wrapper {
+  position: relative;
+}
+
+.password-strength {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -2px;
+  height: 4px;
+  background: #e6ddd8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.password-strength-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--terracota);
+  transition: width 0.25s ease, background 0.25s ease;
+  border-radius: 4px;
+}
 
