@@ -214,11 +214,33 @@ body.login-page {
   to   { opacity: 1; transform: translateY(0); }
 }
 .login-lang-btn {
-  background:none;
-  border:none;
-  font-size:.9rem;
-  font-weight:600;
-  color:#335953;
-  margin:-4px 0 12px 0;
-  cursor:pointer;
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--verde, #335953);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+
+  /* Anti-reset */
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: none;
+  outline: none;
 }
+
+.login-lang-btn:focus {
+  outline: none;
+}
+
+.login-lang-btn img,
+.login-lang-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
