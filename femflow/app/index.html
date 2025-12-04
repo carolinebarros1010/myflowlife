@@ -63,14 +63,18 @@
       <div class="password-wrapper">
         <input id="loginSenha" type="password" placeholder="Sua senha">
         <span id="toggleSenha" class="toggle-eye"></span>
-      </div>
+        <div class="strength-meter">
+        <div class="strength-fill" id="strengthFill"></div>
+        </div>
+       </div>
 
       <!-- METER -->
-      <div class="strength-meter" id="strengthMeter">
-        <div class="strength-bar"></div>
-        <div class="strength-bar"></div>
-        <div class="strength-bar"></div>
-      </div>
+     <div class="strength-meter" id="strengthMeter">
+  <div class="strength-bar" id="bar1"></div>
+  <div class="strength-bar" id="bar2"></div>
+  <div class="strength-bar" id="bar3"></div>
+</div>
+
 
       <button id="btnEntrar" type="button">Entrar</button>
       <p id="mensagem" class="message"></p>
@@ -165,7 +169,7 @@
     // --------- OLHO iOS ----------
     const senhaInput = $("#loginSenha");
     const toggleEye  = $("#toggleSenha");
-    const meter      = $("#strengthMeter");
+   const fill = document.getElementById("strengthFill");
 
     toggleEye.addEventListener("click", () => {
       const isPass = senhaInput.type === "password";
@@ -175,17 +179,23 @@
 
     // Força da senha
     senhaInput.addEventListener("input", () => {
-      const v = senhaInput.value;
-      let score = 0;
-      if (v.length >= 6) score++;
-      if (/[A-Z]/.test(v) || /[0-9]/.test(v)) score++;
-      if (/[^A-Za-z0-9]/.test(v) || v.length >= 10) score++;
+  const v = senhaInput.value;
+  let score = 0;
 
-      meter.classList.remove("strength-1","strength-2","strength-3");
-      if (score === 1) meter.classList.add("strength-1");
-      if (score === 2) meter.classList.add("strength-2");
-      if (score >= 3) meter.classList.add("strength-3");
-    });
+  if (v.length >= 6) score++;
+  if (/[A-Z]/.test(v) || /[0-9]/.test(v)) score++;
+  if (/[^A-Za-z0-9]/.test(v) || v.length >= 10) score++;
+
+  let width = 0;
+  let color = "#d8d0cb";
+
+  if (score === 1) { width = 33; color = "#cc6a5a"; }
+  if (score === 2) { width = 66; color = "#e4a85f"; }
+  if (score >= 3) { width = 100; color = "#2e7d32"; }
+
+  fill.style.width = width + "%";
+  fill.style.background = color;
+});
 
     // --------- GOOGLE LOGIN ----------
     $("#googleSignIn").onclick = () => google.accounts.id.prompt();
