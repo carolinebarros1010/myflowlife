@@ -124,9 +124,16 @@ document.addEventListener("DOMContentLoaded", async function () {
      NIVEL NO HEADER — MULTILÍNGUE + BLINDADO
   ============================================================ */
   function aplicarNivelH1() {
-    const nivelLS = (localStorage.getItem("femflow_nivel") || "")
-      .toLowerCase()
-      .trim();
+    let nivelLS = (localStorage.getItem("femflow_nivel") || "")
+  .toLowerCase()
+  .trim()
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // remove acentos
+
+// Normalizar todos possíveis formatos
+if (nivelLS.includes("inicia")) nivelLS = "iniciante";
+else if (nivelLS.includes("inter")) nivelLS = "intermediaria";
+else if (nivelLS.includes("avanc")) nivelLS = "avancada";
+
 
     const tag = document.getElementById("nivelTag");
     if (!tag || !nivelLS) return;
