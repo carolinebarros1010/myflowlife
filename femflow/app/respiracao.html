@@ -76,8 +76,8 @@
 <!--      DRAWER LATERAL           -->
 <!-- ============================= -->
 <div class="breath-drawer" id="breathDrawer">
-  <button class="drawer-close-btn" id="closeDrawer">✖</button>
   <div class="drawer-header" id="drawerTitle">Respiração</div>
+
 
   <div id="breathDrawerContent"></div>
 </div>
@@ -155,14 +155,33 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* ABRIR RESPIRAÇÃO */
-  window.abrirRespiracao = function(tipo){
+window.abrirRespiracao = function(tipo){
     const p = protocolos[tipo];
     if (!p) return;
 
     protocoloAtual = p;
     cicloAtivo = false;
 
+    // mapa de nomes bonitos
+    const nomes = {
+      raiz: "Respiração Raiz",
+      clareza: "Respiração Clareza",
+      brilho: "Respiração Brilho",
+      sereno: "Respiração Sereno",
+      wake: "Wake Flow",
+      charge: "Charge Flow",
+      release: "Release Flow",
+      restore: "Restore Flow",
+      equilibrio: "Respiração Equilíbrio",
+      transparencia: "Respiração Transparência"
+    };
+
+    // coloca o nome da respiração no topo do drawer
+    document.getElementById("drawerTitle").textContent = nomes[tipo] || "Respiração";
+
+    // descrição no modal
     descModal.textContent = descricoes[tipo] || "";
+
     circle.textContent = "5";
     label.textContent = "Preparar...";
 
@@ -176,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modal.style.background = p.cor + "22";
     circle.style.background = p.cor;
-  };
+};
 
   /* FECHAR */
   function fecharDrawer(){
