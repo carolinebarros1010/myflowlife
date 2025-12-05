@@ -128,16 +128,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
 
-  /* ============================================================
+    /* ============================================================
      1) BUSCAR BACKEND (ciclo, nome, nível)
   ============================================================ */
   let perfil = await FEMFLOW.carregarCicloBackend();
-
-  // SALVAR NÍVEL RETORNADO DO BACKEND
-  if (perfil?.nivel) {
-    localStorage.setItem("femflow_nivel", perfil.nivel);
-    aplicarNivelH1();
-  }
 
   if (!perfil) {
     FEMFLOW.toast(FEMFLOW.langs[FEMFLOW.lang].sistema.erroCiclo, true);
@@ -145,11 +139,31 @@ document.addEventListener("DOMContentLoaded", async function () {
       nome: localStorage.getItem("femflow_nome") || "",
       fase: localStorage.getItem("femflow_fase") || "follicular",
       diaCiclo: Number(localStorage.getItem("femflow_diaCiclo") || 1),
-      nivel: localStorage.getItem("femflow_nivel") || "iniciante"
+      nivel: localStorage.getItem("femflow_nivel") || "iniciante",
+      produto: localStorage.getItem("femflow_produto") || ""
     };
   }
 
+  // SALVAR NÍVEL RETORNADO DO BACKEND
+  if (perfil?.nivel) {
+    localStorage.setItem("femflow_nivel", perfil.nivel);
+    aplicarNivelH1();
+  }
 
+  /* ============================================================
+     1.1 DETECTAR PERSONAL E MARCAR NO BODY
+  ============================================================ */
+  const produtoRaw = (perfil?.produto || "").toLowerCase().trim();
+  const isPersonal = produtoRaw === "treino_personal";
+
+  if (isPersonal) {
+    FEMFLOW.log("🎨 FlowCenter em modo PERSONAL (produto=treino_personal)");
+    document.body.classList.add("personal-mode");
+    localStorage.setItem("femflow_personal", "true");
+  } else {
+    document.body.classList.remove("personal-mode");
+    localStorage.removeItem("femflow_personal");
+  }
 
   /* ============================================================
      2) NORMALIZAR FASE
@@ -221,12 +235,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
 
-  /* ============================================================
+   /* ============================================================
      5) NAVEGAÇÃO
   ============================================================ */
   document.getElementById("toBreath").onclick = () => FEMFLOW.router("respiracao.html");
-  document.getElementById("toTrain").onclick  = () => FEMFLOW.router("treino.html");
+
+  document.getElementById("toTrain").onclick  = () => {
+    const isPersonal =
+      document.body.classList.contains("personal-mode") ||
+      localStorage.getItem("femflow_personal") === "true";
+
+    const url = isPersonal ? "treino.html?personal=1" : "treino.html";
+    FEMFLOW.router(url);
+  };
+
   document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
+
 
   ffHideLoading();
 });
