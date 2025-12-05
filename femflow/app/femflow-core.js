@@ -226,18 +226,30 @@ FEMFLOW._acaoMenu = function (op) {
   document.querySelector(".ff-menu-modal")?.classList.remove("active");
 
   switch (op) {
+
     case "idioma":
       document.getElementById("ff-lang-modal")?.classList.remove("hidden");
       break;
 
-    case "ciclo": FEMFLOW.router("ciclo"); break;
-    case "respiracao": FEMFLOW.router("respiracao"); break;
-    case "treinos": FEMFLOW.router("evolucao"); break;
+    case "ciclo": {
+      const atual = location.pathname.split("/").pop();
+      FEMFLOW.router(`ciclo?ret=${atual}`);
+      break;
+    }
 
-    case "nivel":
+    case "respiracao":
+      FEMFLOW.router("respiracao");
+      break;
+
+    case "treinos":
+      FEMFLOW.router("evolucao");
+      break;
+
+    case "nivel": {
       const m = document.querySelector("#modal-nivel");
       if (m) m.classList.remove("oculto");
       break;
+    }
 
     case "tema":
       document.body.classList.toggle("dark");
@@ -252,7 +264,7 @@ FEMFLOW._acaoMenu = function (op) {
       FEMFLOW.router("index");
       break;
 
-    case "voltar":
+    case "voltar": {
       const p = location.pathname.split("/").pop();
       const rota = {
         "treino.html": "flowcenter.html",
@@ -263,6 +275,7 @@ FEMFLOW._acaoMenu = function (op) {
       };
       FEMFLOW.router(rota[p] || "home.html");
       break;
+    }
   }
 };
 
