@@ -299,6 +299,9 @@ FEMFLOW.initNivelSelector = function () {
 
         if (r.status === "ok") {
           FEMFLOW.toast("Nível atualizado: " + nivel);
+           // 🔥 Disparar evento global avisando que o nível mudou
+           window.dispatchEvent(new Event("femflow:nivelChange"));
+
         } else {
           FEMFLOW.toast("Erro ao salvar no servidor", true);
         }
