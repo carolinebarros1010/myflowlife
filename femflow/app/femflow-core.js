@@ -431,4 +431,11 @@ FEMFLOW.inspect = function () {
 document.addEventListener("femflow:langReady", () => {
   FEMFLOW.init();
 });
+/* ===========================================================
+   10.1. GLOBAL — Atualização imediata ao mudar nível
+=========================================================== */
+window.addEventListener("femflow:nivelChange", () => {
+  const nivel = localStorage.getItem("femflow_nivel");
+  FEMFLOW.log("🔥 NivelChange capturado no CORE:", nivel);
+});
 
