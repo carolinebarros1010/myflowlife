@@ -260,7 +260,15 @@ await fetch(FEMFLOW.SCRIPT_URL, {
   ============================================================ */
   FEMFLOW.toast("✨ Ciclo configurado!");
   ffShowLoading("Carregando seu painel…");
-  location.href = "home.html";
+  const params = new URLSearchParams(location.search);
+const ret = params.get("ret");
+
+// se estiver vindo do menu → volta para a página original
+if (ret) {
+    location.href = ret;
+} else {
+    // se veio da primeira configuração, pós-login
+    location.href = "home.html";
 }
 
 /* ============================================================
