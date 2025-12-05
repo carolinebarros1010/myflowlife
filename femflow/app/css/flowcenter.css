@@ -279,4 +279,19 @@ h3 {
   opacity: .85;
   margin-left: 6px;
 }
+body.personal-mode #tituloApp {
+  position: relative;
+}
+
+body.personal-mode #tituloApp::after {
+  content: " • Personal";
+  font-size: 0.75rem;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #335953;
+  color: #fff5ef;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 
