@@ -51,6 +51,24 @@ if (!cicloOK) {
     FEMFLOW.error("❌ #carouselTrack não encontrado!");
     return;
   }
+/* ============================================================
+   PERSONAL MODE — detectar pelo backend e salvar localmente
+============================================================ */
+function detectarPersonalDoBackend(perfil) {
+  // Produto armazenado na planilha (coluna F)
+  const produto = (perfil.produto || "").toLowerCase().trim();
+
+  // Se for PERSONAL, salvar no localStorage
+  if (produto === "treino_personal") {
+    FEMFLOW.log("🔥 Personal habilitado via backend");
+    localStorage.setItem("femflow_personal", "true");
+    return true;
+  }
+
+  // Se não for personal, limpar eventual flag antiga
+  localStorage.removeItem("femflow_personal");
+  return false;
+}
 
   /* ============================================================
      1. AGUARDAR SINAL DO BACKEND (perfil carregado)
@@ -58,6 +76,9 @@ if (!cicloOK) {
   window.addEventListener("femflow:ready", async (ev) => {
 
     const perfil = ev.detail;
+     const personalBackend = detectarPersonalDoBackend(perfil);
+const personalFinal = isPersonal || personalBackend;
+
 
     if (!perfil) {
       FEMFLOW.toast("Erro ao carregar perfil.", true);
@@ -74,23 +95,37 @@ if (!cicloOK) {
 
     FEMFLOW.log("📌 Perfil recebido:", perfil);
 
-    /* ============================================================
-       🔥 1.1 PERSONAL
-    ============================================================ */
-    if (isPersonal) {
-      FEMFLOW.log("🎨 Modo PERSONAL: carregando blocos do Firebase…");
+   /* ============================================================
+   🔥 1.1 PERSONAL — modo completo
+============================================================ */
+if (personalFinal) {
+  FEMFLOW.log("🎨 Modo PERSONAL ativado");
 
-      const lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-        id,
-        enfase,
-        fase,
-        diaCiclo,
-        personal: true
-      });
+  let lista = await FEMFLOW.engineTreino.montarTreinoFinal({
+    id,
+    enfase,
+    fase,
+    diaCiclo,
+    personal: true
+  });
 
-      renderTreino(lista);
-      return;
-    }
+  // fallback: se não existir treino personal no Firebase
+  if (!lista || lista.length === 0) {
+    FEMFLOW.warn("⚠️ Nenhum treino PERSONAL encontrado. Voltando ao modo NORMAL.");
+    lista = await FEMFLOW.engineTreino.montarTreinoFinal({
+      id,
+      nivel,
+      enfase,
+      fase,
+      diaCiclo,
+      personal: false
+    });
+  }
+
+  renderTreino(lista);
+  return;
+}
+
 
     /* ============================================================
        🔥 1.2 NORMAL
