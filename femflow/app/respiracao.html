@@ -14,9 +14,15 @@
   <link rel="stylesheet" href="css/respiracao.css">
 
   <style>
-    /* Garantir que o modal não fique escondido atrás do header */
+    :root {
+      --header-height: 78px;
+    }
+
+    /* Ajuste real: modal respeita header */
     #breathModal {
-      margin-top: 60px !important;
+      padding-top: calc(var(--header-height) + 10px) !important;
+      min-height: calc(100vh - var(--header-height));
+      box-sizing: border-box;
     }
 
     /* Texto de descrição dentro do modal */
@@ -25,8 +31,10 @@
       color: #6a4f47;
       text-align: center;
       max-width: 90%;
-      margin: 10px auto 18px auto;
+      margin: 12px auto 20px auto;
       line-height: 1.45;
+      opacity: 0.95;
+      font-style: italic;
     }
   </style>
 
@@ -46,27 +54,20 @@
 <h2 class="grupo-titulo" id="grupoCiclo">Respirações do Ciclo</h2>
 
 <button class="btn-protocolo" onclick="abrirRespiracao('raiz')" id="btnRaiz">Respiração Raiz</button>
-
 <button class="btn-protocolo" onclick="abrirRespiracao('clareza')" id="btnClareza">Respiração Clareza</button>
-
 <button class="btn-protocolo" onclick="abrirRespiracao('brilho')" id="btnBrilho">Respiração Brilho</button>
-
 <button class="btn-protocolo" onclick="abrirRespiracao('sereno')" id="btnSereno">Respiração Sereno</button>
 
 <h2 class="grupo-titulo" id="grupoTreino">Respirações para Treinar</h2>
 
 <button class="btn-protocolo" onclick="abrirRespiracao('wake')" id="btnWake">Wake Flow</button>
-
 <button class="btn-protocolo" onclick="abrirRespiracao('charge')" id="btnCharge">Charge Flow</button>
-
 <button class="btn-protocolo" onclick="abrirRespiracao('release')" id="btnRelease">Release Flow</button>
-
 <button class="btn-protocolo" onclick="abrirRespiracao('restore')" id="btnRestore">Restore Flow</button>
 
 <h2 class="grupo-titulo" id="grupoUniversal">Respirações Universais</h2>
 
 <button class="btn-protocolo" onclick="abrirRespiracao('equilibrio')" id="btnEquilibrio">Respiração Equilíbrio</button>
-
 <button class="btn-protocolo" onclick="abrirRespiracao('transparencia')" id="btnTransparencia">Respiração Transparência</button>
 
 <button class="ff-voltar-treino" id="btnVoltarTreino">← voltar ao treino</button>
@@ -88,7 +89,7 @@
   <div id="breathCircle">5</div>
   <div id="faseLabel">Preparar...</div>
 
-  <!-- DESCRIÇÃO DINÂMICA AQUI -->
+  <!-- DESCRIÇÃO DINÂMICA -->
   <p id="descricaoRespModal"></p>
 
   <div id="countdown"></div>
@@ -125,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnStart   = document.getElementById("btnStart");
   const btnClose   = document.getElementById("btnCloseModal");
 
-  /* DESCRIÇÕES OFICIAIS NO MODAL */
+  /* DESCRIÇÕES */
   const descricoes = {
     raiz: "Acalma o corpo, reduz tensões e ajuda você a retornar ao eixo interno.",
     clareza: "Traz foco, leveza mental e sensação de reorganização.",
@@ -153,9 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
     transparencia:{fases:[5,5,5,5], cor:"#D0C7E2" }
   };
 
-  /* ------------------------------
-     ABRIR RESPIRAÇÃO
-  --------------------------------*/
+  /* ABRIR RESPIRAÇÃO */
   window.abrirRespiracao = function(tipo){
     const p = protocolos[tipo];
     if (!p) return;
@@ -163,9 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     protocoloAtual = p;
     cicloAtivo = false;
 
-    // texto explicativo dentro do modal
     descModal.textContent = descricoes[tipo] || "";
-
     circle.textContent = "5";
     label.textContent = "Preparar...";
 
@@ -181,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
     circle.style.background = p.cor;
   };
 
-  /* ------------------------------ */
+  /* FECHAR */
   function fecharDrawer(){
     cicloAtivo = false;
     drawer.classList.remove("active");
@@ -190,9 +187,8 @@ document.addEventListener("DOMContentLoaded", () => {
   drawerClose.onclick = fecharDrawer;
   btnClose.onclick = fecharDrawer;
 
-  async function esperar(ms){
-    return new Promise(r => setTimeout(r, ms));
-  }
+  /* FUNÇÕES */
+  async function esperar(ms){ return new Promise(r => setTimeout(r, ms)); }
 
   async function contagemInicial(){
     for (let i = 5; i >= 1; i--){
@@ -227,7 +223,6 @@ document.addEventListener("DOMContentLoaded", () => {
     await contagemInicial();
 
     let fase = 0;
-
     async function cicloResp(){
       const dur = p.fases[fase];
       await animarContagem(dur, fase, p.cor);
