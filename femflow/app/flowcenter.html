@@ -164,12 +164,11 @@ else if (nivelLS.includes("avanc")) nivelLS = "avancada";
       nivelLS.charAt(0).toUpperCase() + nivelLS.slice(1);
 
     tag.textContent = `— ${txt}`;
-  }
-// 🔥 Atualizar nível quando mudar no modal
-document.addEventListener("femflow:nivelChange", aplicarNivelH1);
-
-  // executa agora
+  }]
+  
+document.addEventListener("femflow:ready", () => {
   aplicarNivelH1();
+});
   // executa ao trocar idioma
   document.addEventListener("femflow:langChange", aplicarNivelH1);
 
@@ -196,6 +195,7 @@ document.addEventListener("femflow:nivelChange", aplicarNivelH1);
       nome: localStorage.getItem("femflow_nome") || "",
       fase: localStorage.getItem("femflow_fase") || "follicular",
       diaCiclo: Number(localStorage.getItem("femflow_diaCiclo") || 1)
+      nivel: localStorage.getItem("femflow_nivel") || "iniciante"
     };
   }
 
