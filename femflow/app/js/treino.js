@@ -25,7 +25,21 @@ if (!cicloOK) {
   /* ============================================================
      0. VARIÁVEIS DA TELA
   ============================================================ */
-  const isPersonal = location.search.includes("personal=1");
+  /* ============================================================
+   PERSONAL MODE — 3 fontes:
+   1) query string (?personal=1)
+   2) backend (perfil.personal = true)
+   3) localStorage (persistência)
+============================================================ */
+let isPersonalQuery   = location.search.includes("personal=1");
+let isPersonalStorage = localStorage.getItem("femflow_personal") === "true";
+
+let isPersonal = isPersonalQuery || isPersonalStorage;
+if (isPersonal) {
+  document.body.classList.add("personal-mode");
+  FEMFLOW.log("🎨 Layout PERSONAL aplicado");
+}
+
 
   const id = localStorage.getItem("femflow_id");
   if (!id) {
@@ -77,7 +91,15 @@ function detectarPersonalDoBackend(perfil) {
 
     const perfil = ev.detail;
      const personalBackend = detectarPersonalDoBackend(perfil);
-const personalFinal = isPersonal || personalBackend;
+
+// prioridade do backend sobre query
+if (personalBackend) {
+  isPersonal = true;
+  localStorage.setItem("femflow_personal", "true");
+} 
+
+const personalFinal = isPersonal;
+
 
 
     if (!perfil) {
@@ -95,7 +117,7 @@ const personalFinal = isPersonal || personalBackend;
 
     FEMFLOW.log("📌 Perfil recebido:", perfil);
 
-   /* ============================================================
+ /* ============================================================
    🔥 1.1 PERSONAL — modo completo
 ============================================================ */
 if (personalFinal) {
@@ -106,12 +128,14 @@ if (personalFinal) {
     enfase,
     fase,
     diaCiclo,
+    nivel,
     personal: true
   });
 
-  // fallback: se não existir treino personal no Firebase
+  // fallback se não existir treino personal
   if (!lista || lista.length === 0) {
     FEMFLOW.warn("⚠️ Nenhum treino PERSONAL encontrado. Voltando ao modo NORMAL.");
+
     lista = await FEMFLOW.engineTreino.montarTreinoFinal({
       id,
       nivel,
@@ -140,6 +164,9 @@ if (personalFinal) {
     });
 
     renderTreino(lista);
+     localStorage.setItem("femflow_fase", fase);
+localStorage.setItem("femflow_diaCiclo", diaCiclo);
+
   });
 
   /* ============================================================
