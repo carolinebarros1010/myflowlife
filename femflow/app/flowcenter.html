@@ -61,6 +61,8 @@
   <button class="tool" id="toBreath">💨 —</button>
   <button class="tool" id="toTrain">🏃 —</button>
   <button class="tool" id="toEvolution">📈 —</button>
+  <!-- NOVO BOTÃO ENDURANCE -->
+<button class="tool" id="toEndurance">🏃‍♂️ Endurance</button>
 </div>
 
 
@@ -250,6 +252,19 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
 
   document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
+
+  document.getElementById("toEndurance").onclick = () => {
+  const id = localStorage.getItem("femflow_id");
+
+  if (id && id.trim() !== "") {
+    // 🔥 Leva para o treino endurance específico da aluna
+    FEMFLOW.router(`app/treinoendurance/${id}`);
+  } else {
+    // ❌ Sem ID → mostrar página de contratação
+    FEMFLOW.router("contrate_endurance.html");
+  }
+};
+
 
 
   ffHideLoading();
