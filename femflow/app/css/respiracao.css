@@ -462,3 +462,97 @@ footer {
   color: var(--verde);
   cursor: pointer;
 }
+/* ============================================================
+   AJUSTES FINAIS — MODAL + DRAWER  (VERSÃO AJUSTADA 2025)
+============================================================ */
+
+/* Altura real do header FemFlow */
+:root {
+  --header-height: 78px;
+}
+
+/* Modal dentro do drawer — agora respeita o header */
+#breathModal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  /* impede sobrepor header */
+  padding-top: calc(var(--header-height) + 20px);
+
+  /* altura completa considerando safe area */
+  min-height: calc(100vh - var(--header-height));
+  width: 100%;
+
+  background: var(--bege);
+  overflow-y: auto;
+
+  box-sizing: border-box;
+}
+
+/* Círculo ajustado para caber no drawer sem cortar */
+#breathCircle {
+  width: 165px;
+  height: 165px;
+  font-size: 2.8rem;
+  margin-top: 10px;
+}
+
+/* Descrição dentro do modal (novo bloco) */
+#breathDesc {
+  font-size: 0.95rem;
+  color: var(--texto);
+  text-align: center;
+  max-width: 280px;
+  margin-bottom: 18px;
+  line-height: 1.45;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+/* Label das fases */
+#faseLabel {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+/* Botão iniciar */
+#btnStart {
+  margin-top: 18px;
+}
+
+/* Botão voltar */
+#btnCloseModal {
+  margin-top: 25px;
+  margin-bottom: 20px;
+}
+
+/* Drawer refinado para não cortar modal */
+.breath-drawer {
+  padding-top: calc(var(--header-height) + 12px);
+}
+
+/* Título do drawer ajustado */
+.drawer-header {
+  margin-top: 0;
+  margin-bottom: 22px;
+}
+
+/* Modal interno mais compacto em telas pequenas */
+@media (max-width: 420px) {
+  #breathCircle {
+    width: 150px;
+    height: 150px;
+    font-size: 2.5rem;
+  }
+
+  #faseLabel {
+    font-size: 1.1rem;
+  }
+
+  #breathDesc {
+    font-size: 0.9rem;
+    max-width: 260px;
+  }
+}
