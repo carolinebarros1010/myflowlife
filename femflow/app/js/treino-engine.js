@@ -122,40 +122,48 @@ FEMFLOW.engineTreino.organizarBlocosSimples = function (brutos) {
 ============================================================ */
 FEMFLOW.engineTreino.intercalarHIIT = function (ordenados) {
 
-  const final = [];
+  FEMFLOW.log("🔥 intercalarHIIT() — Entrada:", ordenados);
 
-  let ultimoBox = 0;
+  const final = [];
+  let ultimoBoxTreino = 0;
+
+  // 1) Encontrar último box de treino real
   ordenados.forEach(b => {
-    if (b.tipo === "treino") ultimoBox = Math.max(ultimoBox, b.boxNum);
+    if (b.tipo === "treino") {
+      ultimoBoxTreino = Math.max(ultimoBoxTreino, b.boxNum);
+    }
   });
 
-  ordenados.forEach(b => {
+  ordenados.forEach((b, idx) => {
 
-    // Copia sempre o item no fluxo
+    // sempre adicionar o item
     final.push(b);
 
     if (b.tipo !== "treino") return;
 
-    // Procurar HIIT cujo box = box atual
+    const boxAtual = b.boxNum;
+
+    // 2) pegar HIIT com box igual (ex: box=2 → HIIT 2)
     const hiitsMesmoBox = ordenados.filter(h =>
       h.tipo === "hiit" &&
-      parseInt(h.boxRaw.replace(/\D/g, "")) === b.boxNum
+      h.boxNum === boxAtual
     );
 
     hiitsMesmoBox.forEach(h => final.push(h));
 
-    // HIIT box=0 será inserido após o último box REAL
-    if (b.boxNum === ultimoBox) {
+    // 3) HIIT de box 0 → só após o último box real
+    if (boxAtual === ultimoBoxTreino) {
       const hiitZero = ordenados.filter(h =>
-        h.tipo === "hiit" &&
-        (parseInt(h.boxRaw.replace(/\D/g, "")) || 0) === 0
+        h.tipo === "hiit" && h.boxNum === 0
       );
       hiitZero.forEach(h => final.push(h));
     }
   });
 
+  FEMFLOW.log("🎯 intercalarHIIT — Resultado final:", final);
   return final;
 };
+
 
 /* ============================================================
    Firebase: carregar blocos NORMAL (exercicios/)
