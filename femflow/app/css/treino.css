@@ -420,5 +420,29 @@ body {
   margin-bottom: 6px;
   line-height: 1.15;
 }
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+  position: relative;
+}
+.carousel-item,
+.hiit-container,
+.hiit-box,
+.treino-card {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+.carousel-item {
+    width: 100% !important;
+    min-width: 100% !important;
+}
+* {
+  outline: 1px solid transparent;
+}
+
+body.debug * {
+  outline: 1px dashed red;
+}
 
 
