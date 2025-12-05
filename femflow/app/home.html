@@ -81,15 +81,6 @@
 
 
 <script>
-  // Sincronizar dados do backend antes de montar Home
-document.addEventListener("DOMContentLoaded", async () => {
-  const perfil = await FEMFLOW.carregarPerfil();
-  if (perfil) {
-    localStorage.setItem("femflow_produto", perfil.produto);
-    localStorage.setItem("femflow_ativa", perfil.ativa ? "true" : "false");
-  }
-});
-
 /* ============================================================
    0. BOAS-VINDAS PERSONALIZADA
 =========================================================== */
