@@ -13,7 +13,24 @@
   <link rel="stylesheet" href="css/themes.css">
   <link rel="stylesheet" href="css/respiracao.css">
 
- </head>
+  <style>
+    /* Garantir que o modal não fique escondido atrás do header */
+    #breathModal {
+      margin-top: 60px !important;
+    }
+
+    /* Texto de descrição dentro do modal */
+    #descricaoRespModal {
+      font-size: 15px;
+      color: #6a4f47;
+      text-align: center;
+      max-width: 90%;
+      margin: 10px auto 18px auto;
+      line-height: 1.45;
+    }
+  </style>
+
+</head>
 
 <body>
 
@@ -28,39 +45,29 @@
 <!-- ============================= -->
 <h2 class="grupo-titulo" id="grupoCiclo">Respirações do Ciclo</h2>
 
-<button class="btn-protocolo" onclick="toggleDesc('d-raiz'); abrirRespiracao('raiz')" id="btnRaiz">Respiração Raiz</button>
-<div id="d-raiz" class="desc">Acalma o corpo, reduz tensões e te ajuda a se recolher com aconchego.</div>
+<button class="btn-protocolo" onclick="abrirRespiracao('raiz')" id="btnRaiz">Respiração Raiz</button>
 
-<button class="btn-protocolo" onclick="toggleDesc('d-clareza'); abrirRespiracao('clareza')" id="btnClareza">Respiração Clareza</button>
-<div id="d-clareza" class="desc">Traz leveza mental, foco fresco e sensação de recomeço interno.</div>
+<button class="btn-protocolo" onclick="abrirRespiracao('clareza')" id="btnClareza">Respiração Clareza</button>
 
-<button class="btn-protocolo" onclick="toggleDesc('d-brilho'); abrirRespiracao('brilho')" id="btnBrilho">Respiração Brilho</button>
-<div id="d-brilho" class="desc">Expande sua presença e energiza durante a fase mais forte do ciclo.</div>
+<button class="btn-protocolo" onclick="abrirRespiracao('brilho')" id="btnBrilho">Respiração Brilho</button>
 
-<button class="btn-protocolo" onclick="toggleDesc('d-sereno'); abrirRespiracao('sereno')" id="btnSereno">Respiração Sereno</button>
-<div id="d-sereno" class="desc">Suaviza irritabilidade, oscilação emocional e TPM.</div>
+<button class="btn-protocolo" onclick="abrirRespiracao('sereno')" id="btnSereno">Respiração Sereno</button>
 
 <h2 class="grupo-titulo" id="grupoTreino">Respirações para Treinar</h2>
 
-<button class="btn-protocolo" onclick="toggleDesc('d-wake'); abrirRespiracao('wake')" id="btnWake">Wake Flow</button>
-<div id="d-wake" class="desc">Aquece e ativa sem acelerar demais.</div>
+<button class="btn-protocolo" onclick="abrirRespiracao('wake')" id="btnWake">Wake Flow</button>
 
-<button class="btn-protocolo" onclick="toggleDesc('d-charge'); abrirRespiracao('charge')" id="btnCharge">Charge Flow</button>
-<div id="d-charge" class="desc">Energia instantânea antes do treino forte.</div>
+<button class="btn-protocolo" onclick="abrirRespiracao('charge')" id="btnCharge">Charge Flow</button>
 
-<button class="btn-protocolo" onclick="toggleDesc('d-release'); abrirRespiracao('release')" id="btnRelease">Release Flow</button>
-<div id="d-release" class="desc">Dissolve tensão após o treino.</div>
+<button class="btn-protocolo" onclick="abrirRespiracao('release')" id="btnRelease">Release Flow</button>
 
-<button class="btn-protocolo" onclick="toggleDesc('d-restore'); abrirRespiracao('restore')" id="btnRestore">Restore Flow</button>
-<div id="d-restore" class="desc">Acalma e recupera o sistema nervoso.</div>
+<button class="btn-protocolo" onclick="abrirRespiracao('restore')" id="btnRestore">Restore Flow</button>
 
 <h2 class="grupo-titulo" id="grupoUniversal">Respirações Universais</h2>
 
-<button class="btn-protocolo" onclick="toggleDesc('d-equilibrio'); abrirRespiracao('equilibrio')" id="btnEquilibrio">Respiração Equilíbrio</button>
-<div id="d-equilibrio" class="desc">Centraliza mente e emoções.</div>
+<button class="btn-protocolo" onclick="abrirRespiracao('equilibrio')" id="btnEquilibrio">Respiração Equilíbrio</button>
 
-<button class="btn-protocolo" onclick="toggleDesc('d-transparencia'); abrirRespiracao('transparencia')" id="btnTransparencia">Respiração Transparência</button>
-<div id="d-transparencia" class="desc">Clareza emocional imediata.</div>
+<button class="btn-protocolo" onclick="abrirRespiracao('transparencia')" id="btnTransparencia">Respiração Transparência</button>
 
 <button class="ff-voltar-treino" id="btnVoltarTreino">← voltar ao treino</button>
 
@@ -75,11 +82,15 @@
 </div>
 
 <!-- ============================= -->
-<!--      MODAL DE RESPIRO         -->
+<!--      MODAL DE RESPIRAÇÃO      -->
 <!-- ============================= -->
 <div id="breathModal">
   <div id="breathCircle">5</div>
   <div id="faseLabel">Preparar...</div>
+
+  <!-- DESCRIÇÃO DINÂMICA AQUI -->
+  <p id="descricaoRespModal"></p>
+
   <div id="countdown"></div>
   <button id="btnStart">Iniciar Respiração</button>
   <button id="btnCloseModal">← voltar às respirações</button>
@@ -94,22 +105,11 @@
 <script src="femflow-core.js"></script>
 
 <script>
-/* ------------------------------------------------------------
-   SHOW/HIDE DESCRIÇÃO
------------------------------------------------------------- */
-function toggleDesc(id){
-  const el = document.getElementById(id);
-  el.style.display = (el.style.display === "block") ? "none" : "block";
-}
-
-/* ------------------------------------------------------------
-   ENGINE + DRAWER + MODAL INTEGRADOS
------------------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
 
-  FEMFLOW?.inserirHeaderApp?.();
-  FEMFLOW?.inserirMenuLateral?.();
-  FEMFLOW?.inserirModalIdioma?.();
+  FEMFLOW.inserirHeaderApp?.();
+  FEMFLOW.inserirMenuLateral?.();
+  FEMFLOW.inserirModalIdioma?.();
 
   let cicloAtivo = false;
   let protocoloAtual = null;
@@ -121,8 +121,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const circle     = document.getElementById("breathCircle");
   const label      = document.getElementById("faseLabel");
+  const descModal  = document.getElementById("descricaoRespModal");
   const btnStart   = document.getElementById("btnStart");
   const btnClose   = document.getElementById("btnCloseModal");
+
+  /* DESCRIÇÕES OFICIAIS NO MODAL */
+  const descricoes = {
+    raiz: "Acalma o corpo, reduz tensões e ajuda você a retornar ao eixo interno.",
+    clareza: "Traz foco, leveza mental e sensação de reorganização.",
+    brilho: "Eleva sua energia e presença durante fases mais fortes do ciclo.",
+    sereno: "Suaviza irritabilidade, oscilações emocionais e TPM.",
+    wake: "Ativa o corpo sem acelerar demais.",
+    charge: "Energia imediata para treinos fortes.",
+    release: "Dissolve tensões e acalma pós-treino.",
+    restore: "Recupera o sistema nervoso profundamente.",
+    equilibrio: "Centraliza sua mente e emoções.",
+    transparencia: "Traz clareza emocional instantânea."
+  };
 
   /* PROTOCOLOS */
   const protocolos = {
@@ -138,9 +153,9 @@ document.addEventListener("DOMContentLoaded", () => {
     transparencia:{fases:[5,5,5,5], cor:"#D0C7E2" }
   };
 
-  /* ------------------------------------------------------------
-     ABRIR PROTOCOLO (SEMPRE NO DRAWER)
-  ------------------------------------------------------------ */
+  /* ------------------------------
+     ABRIR RESPIRAÇÃO
+  --------------------------------*/
   window.abrirRespiracao = function(tipo){
     const p = protocolos[tipo];
     if (!p) return;
@@ -148,30 +163,26 @@ document.addEventListener("DOMContentLoaded", () => {
     protocoloAtual = p;
     cicloAtivo = false;
 
-    // limpar
+    // texto explicativo dentro do modal
+    descModal.textContent = descricoes[tipo] || "";
+
     circle.textContent = "5";
     label.textContent = "Preparar...";
 
-    // mover modal para dentro do drawer
     if (!drawerCt.contains(modal)) drawerCt.appendChild(modal);
-    modal.style.display = "flex";
 
-    // abrir drawer
+    modal.style.display = "flex";
     drawer.classList.add("active");
 
-    // botão iniciar
     btnStart.style.display = "block";
     btnStart.onclick = () => startProtocolo(protocoloAtual);
 
-    // cor personalizada
     modal.style.background = p.cor + "22";
     circle.style.background = p.cor;
   };
 
-  /* ------------------------------------------------------------
-     FECHAR DRAWER + PARAR CICLO
-  ------------------------------------------------------------ */
-  function fecharDrawer() {
+  /* ------------------------------ */
+  function fecharDrawer(){
     cicloAtivo = false;
     drawer.classList.remove("active");
   }
@@ -179,21 +190,18 @@ document.addEventListener("DOMContentLoaded", () => {
   drawerClose.onclick = fecharDrawer;
   btnClose.onclick = fecharDrawer;
 
-  /* ------------------------------------------------------------
-     CONTAGEM INICIAL
-  ------------------------------------------------------------ */
+  async function esperar(ms){
+    return new Promise(r => setTimeout(r, ms));
+  }
+
   async function contagemInicial(){
-    for (let i=5;i>=1;i--){
+    for (let i = 5; i >= 1; i--){
       circle.textContent = i;
-      await esperar(850);
+      await esperar(900);
     }
   }
 
-  /* ------------------------------------------------------------
-     FASES (inspire / segure / expire / segure)
-  ------------------------------------------------------------ */
   async function animarContagem(segundos, faseIndex, cor){
-
     const textos = {
       pt:["Inspire","Segure","Expire","Segure"],
       en:["Inhale","Hold","Exhale","Hold"],
@@ -206,15 +214,12 @@ document.addEventListener("DOMContentLoaded", () => {
     label.textContent = nomeFase[faseIndex];
     circle.style.background = cor;
 
-    for (let s=segundos; s>=1; s--){
+    for (let s = segundos; s >= 1; s--){
       circle.textContent = s;
       await esperar(1000);
     }
   }
 
-  /* ------------------------------------------------------------
-     INICIAR PROTOCOLO COMPLETO
-  ------------------------------------------------------------ */
   async function startProtocolo(p){
     cicloAtivo = true;
     btnStart.style.display = "none";
@@ -225,19 +230,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function cicloResp(){
       const dur = p.fases[fase];
-      await animarContagem(dur,fase,p.cor);
-      fase = (fase+1)%4;
+      await animarContagem(dur, fase, p.cor);
+      fase = (fase + 1) % 4;
+
       if (cicloAtivo) cicloResp();
     }
 
     cicloResp();
   }
 
-  function esperar(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
 });
 </script>
-
 
 <!-- ========================= -->
 <!--       MODAL NÍVEL        -->
@@ -256,4 +259,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-
