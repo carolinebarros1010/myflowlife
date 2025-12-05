@@ -256,12 +256,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("toEndurance").onclick = () => {
   const id = localStorage.getItem("femflow_id");
 
-  if (id && id.trim() !== "") {
-    // 🔥 Leva para o treino endurance específico da aluna
-    FEMFLOW.router(`app/treinoendurance/${id}`);
+  // 🔥 regra:
+  // Se ID existir → manda para o treino endurance ID.html
+  // Se não existir → manda para página de ofertas
+  if (id) {
+    FEMFLOW.router(`treinoendurance/${id}.html`);
   } else {
-    // ❌ Sem ID → mostrar página de contratação
-    FEMFLOW.router("contrate_endurance.html");
+    window.location.href = "https://www.myflowlife.com.br/#ofertas";
   }
 };
 
