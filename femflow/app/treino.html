@@ -119,8 +119,15 @@ document.addEventListener("femflow:ready", (ev) => {
     localStorage.setItem("femflow_nivel", resp.nivel);
   }
 });
-
-    
+/* ============================================================
+   ATUALIZAR NÍVEL IMEDIATAMENTE APÓS MUDAR NO MODAL
+============================================================ */
+document.addEventListener("femflow:nivelAtualizado", (ev) => {
+  const nivel = ev.detail;
+  if (nivel) {
+    localStorage.setItem("femflow_nivel", nivel);
+  }
+   
   });
 
   /* ============================================================
