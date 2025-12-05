@@ -131,13 +131,31 @@
       try {
         const d = await postGAS({ action:"login", email, senha });
 
-        if (d.status === "ok"){
-          setMsg(`Bem-vinda, ${d.nome || "aluna"}!`, true);
-          localStorage.setItem("femflow_id", d.id);
-          localStorage.setItem("femflow_email", d.email || email);
-          localStorage.setItem("femflow_auth", "yes");
-          setTimeout(() => location.href = "home.html", 700);
-        } else {
+        if (d.status === "ok") {
+  setMsg(`Bem-vinda, ${d.nome || "aluna"}!`, true);
+
+  // DADOS BÁSICOS
+  localStorage.setItem("femflow_id", d.id);
+  localStorage.setItem("femflow_email", d.email || email);
+  localStorage.setItem("femflow_auth", "yes");
+
+  // SALVAR PRODUTO
+  if (d.produto) {
+    localStorage.setItem("femflow_produto", d.produto);
+  }
+
+  // MODO PERSONAL → ATIVA SE O BACKEND INDICAR
+  if (d.personal === true || d.produto === "treino_personal") {
+    localStorage.setItem("femflow_personal", "true");
+  } else {
+    localStorage.removeItem("femflow_personal");
+  }
+
+  // CONTINUAÇÃO
+  setTimeout(() => location.href = "home.html", 700);
+}
+ 
+        else {
           setErr(d.msg || "E-mail ou senha incorretos.");
         }
 
