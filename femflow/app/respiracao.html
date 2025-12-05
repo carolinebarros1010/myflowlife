@@ -205,6 +205,11 @@ window.abrirRespiracao = function(tipo){
 
   drawerClose.onclick = fecharDrawer;
   btnClose.onclick = fecharDrawer;
+// 🔙 Voltar ao Flow Center
+const btnVoltar = document.getElementById("btnVoltarTreino");
+if (btnVoltar) {
+    btnVoltar.onclick = () => FEMFLOW.router("flowcenter.html");
+}
 
   /* FUNÇÕES */
   async function esperar(ms){ return new Promise(r => setTimeout(r, ms)); }
