@@ -108,6 +108,19 @@
 
     // se idioma mudar → atualizar
     document.addEventListener("femflow:langChange", aplicarIdioma);
+    /* ============================================================
+   ATUALIZAR NÍVEL AUTOMATICAMENTE NO TREINO
+============================================================ */
+document.addEventListener("femflow:ready", (ev) => {
+  const resp = ev.detail;
+  if (!resp) return;
+
+  if (resp.nivel) {
+    localStorage.setItem("femflow_nivel", resp.nivel);
+  }
+});
+
+    
   });
 
   /* ============================================================
