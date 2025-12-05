@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   /* ============================================================
      NIVEL NO HEADER — MULTILÍNGUE + BLINDADO
   ============================================================ */
-  function aplicarNivelH1() {
+  function aplicarNivelH1() {    
     let nivelLS = (localStorage.getItem("femflow_nivel") || "")
   .toLowerCase()
   .trim()
@@ -165,6 +165,8 @@ else if (nivelLS.includes("avanc")) nivelLS = "avancada";
 
     tag.textContent = `— ${txt}`;
   }
+// 🔥 Atualizar nível quando mudar no modal
+document.addEventListener("femflow:nivelChange", aplicarNivelH1);
 
   // executa agora
   aplicarNivelH1();
