@@ -130,7 +130,7 @@ function bindTap(el, handler){
    FASE ALTA POR NÍVEL (ENERGÉTICO)
 ============================================================ */
 function faseAltaPorNivel(){
-  const nivel=(localStorage.getItem("nivel_atual")||"iniciante").toLowerCase();
+  const nivel=(localStorage.getItem("femflow_nivel")||"iniciante").toLowerCase();
   if(nivel==="iniciante") return "lutea";
   if(nivel==="intermediaria") return "folicular";
   return "ovulatoria";
@@ -390,7 +390,7 @@ function responderQuiz(v){
 ============================================================ */
 function finalizarQuiz(){
 
-  const nivel = (localStorage.getItem("nivel_atual") || "iniciante").toLowerCase();
+  const nivel = (localStorage.getItem("femflow_nivel") || "iniciante").toLowerCase();
   const entraAlta = quizScore <= 3;   // true = alta energia
 
   /* ============================================================
