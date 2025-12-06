@@ -108,7 +108,9 @@ FEMFLOW.carregarCicloBackend = async function () {
       return null;
     }
 
-    /* Atualizar localStorage */
+    // -----------------------------
+    // CAMPOS DO CICLO
+    // -----------------------------
     localStorage.setItem("femflow_fase", resp.fase);
     localStorage.setItem("femflow_diaCiclo", resp.diaCiclo);
     localStorage.setItem("femflow_perfilHormonal", resp.perfilHormonal);
@@ -117,8 +119,24 @@ FEMFLOW.carregarCicloBackend = async function () {
     localStorage.setItem("femflow_cycleLength", resp.ciclo_duracao);
     localStorage.setItem("femflow_startDate", resp.data_inicio);
 
-    /* 🔥 PERSONAL GLOBAL */
-    if (resp.personal === true || String(resp.produto).toLowerCase() === "treino_personal") {
+    // -----------------------------
+    // CAMPOS DE PRODUTO (NOVO)
+    // -----------------------------
+    const produtoRaw = (resp.produto || "").toString().toLowerCase().trim();
+    const ativaRaw   = resp.ativa === true || resp.ativa === "true";
+
+    localStorage.setItem("femflow_produto", produtoRaw);
+    localStorage.setItem("femflow_ativa", ativaRaw ? "true" : "false");
+
+    // -----------------------------
+    // PERSONAL (FLAG GLOBAL)
+    // -----------------------------
+    const isPersonal =
+      resp.personal === true ||
+      produtoRaw === "treino_personal" ||
+      produtoRaw.includes("personal");
+
+    if (isPersonal) {
       localStorage.setItem("femflow_personal", "true");
     } else {
       localStorage.removeItem("femflow_personal");
@@ -132,6 +150,7 @@ FEMFLOW.carregarCicloBackend = async function () {
     return null;
   }
 };
+
 
 
 /* ===========================================================
