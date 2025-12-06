@@ -23,14 +23,13 @@
 </h1>
 
 <h3 id="tituloFlow">—</h3>
-<p class="subtitle"id="subFlow">—</p>
+<p class="subtitle" id="subFlow">—</p>
 
 <!-- ================================
      CÍRCULO HORMONAL
 ================================= -->
 <div class="phase-wrapper">
   <div class="phase-svg">
-      <!-- SVG ORIGINAL -->
       <svg viewBox="0 0 300 300" width="260" height="260">
         <circle cx="150" cy="150" r="120" fill="#fff5ef"></circle>
 
@@ -61,188 +60,8 @@
   <button class="tool" id="toBreath">💨 —</button>
   <button class="tool" id="toTrain">🏃 —</button>
   <button class="tool" id="toEvolution">📈 —</button>
-  <!-- NOVO BOTÃO ENDURANCE -->
-<button class="tool" id="toEndurance">🏃‍♂️ Endurance</button>
+  <button class="tool" id="toEndurance">🏃‍♂️ Endurance</button>
 </div>
-
-
-<script src="js/lang.js"></script>
-<script src="femflow-core.js"></script>
-
-<script>
-/* ============================================================
-   🔥 REGRA MESTRA DE ACESSO AO FLOWCENTER
-   Se não tiver produto → volta para HOME
-============================================================ */
-function validarAcessoFlowCenter(perfil) {
-  const produto = (perfil?.produto || localStorage.getItem("femflow_produto") || "").trim().toLowerCase();
-  const ativa   = perfil?.ativa ?? (localStorage.getItem("femflow_ativa") === "true");
-
-  // ⚠️ Se não tem produto → volta para a Home
-  if (!produto || !ativa) {
-    console.warn("🚫 FlowCenter bloqueado → sem produto ativo");
-    FEMFLOW.toast("Assine um programa para acessar o FlowCenter!");
-    setTimeout(() => FEMFLOW.router("home"), 800);
-    return false;
-  }
-
-  return true;
-}
-
-/* ============================================================
-   ESCONDER LOADING
-============================================================ */
-function ffHideLoading() {
-  const box = document.getElementById("ff-loading");
-  if (box) box.classList.add("hidden");
-}
-
-/* ============================================================
-   FLOWCENTER — ONLOAD
-============================================================ */
-document.addEventListener("DOMContentLoaded", async function () {
-
-  /* ============================================================
-     1) CARREGAR BACKEND (ciclo, produto, nome, nível)
-  ============================================================= */
-  let perfil = await FEMFLOW.carregarCicloBackend();
-
-  // fallback se erro
-  if (!perfil) {
-    perfil = {
-      nome: localStorage.getItem("femflow_nome") || "",
-      fase: localStorage.getItem("femflow_fase") || "follicular",
-      diaCiclo: Number(localStorage.getItem("femflow_diaCiclo") || 1),
-      nivel: localStorage.getItem("femflow_nivel") || "iniciante",
-      produto: localStorage.getItem("femflow_produto") || "",
-      ativa: localStorage.getItem("femflow_ativa") === "true"
-    };
-  }
-
-  /* ============================================================
-     2) VALIDAÇÃO DE ACESSO FLOWCENTER
-============================================================ */
-  if (!validarAcessoFlowCenter(perfil)) return;
-
-
-  /* ============================================================
-     3) SALVAR NÍVEL RETORNADO DO BACKEND
-============================================================ */
-  if (perfil?.nivel) {
-    localStorage.setItem("femflow_nivel", perfil.nivel);
-  }
-
-  /* ============================================================
-     4) MARCAR MODO PERSONAL
-============================================================ */
-  const produtoRaw = (perfil.produto || "").toLowerCase().trim();
-  const isPersonal = produtoRaw === "treino_personal";
-
-  if (isPersonal) {
-    document.body.classList.add("personal-mode");
-    localStorage.setItem("femflow_personal", "true");
-  } else {
-    document.body.classList.remove("personal-mode");
-    localStorage.removeItem("femflow_personal");
-  }
-
-  /* ============================================================
-     5) NORMALIZAR FASE
-============================================================ */
-  const faseRaw = (perfil.fase || "follicular").toLowerCase();
-
-  const mapaFase = {
-    lutea:"luteal", "lútea":"luteal", luteal:"luteal",
-    folicular:"follicular", follicular:"follicular",
-    ovulatoria:"ovulatory","ovulatório":"ovulatory", ovulatory:"ovulatory",
-    menstrual:"menstrual"
-  };
-
-  const faseNorm = mapaFase[faseRaw] || "follicular";
-
-  /* ============================================================
-     6) HEADER / MENU / IDIOMA
-============================================================ */
-  FEMFLOW.inserirHeaderApp();
-  FEMFLOW.inserirMenuLateral();
-  FEMFLOW.inserirModalIdioma?.();
-
-  /* ============================================================
-     7) APLICAR IDIOMA
-============================================================ */
-  function aplicarIdioma() {
-    if (!FEMFLOW.lang)
-      FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
-
-    const langObj = FEMFLOW.langs[FEMFLOW.lang];
-    if (!langObj?.flowcenter) return;
-
-    const L = langObj.flowcenter;
-
-    const nome = perfil.nome || localStorage.getItem("femflow_nome") || "";
-    const first = nome ? nome.split(" ")[0] : L.titulo;
-
-    document.getElementById("tituloFlow").textContent = `${first}, ${L.titulo}`;
-    document.getElementById("subFlow").textContent = L.sub;
-
-    const MAP = {
-      menstrual:"lbl-menstrual",
-      follicular:"lbl-follicular",
-      ovulatory:"lbl-ovulatory",
-      luteal:"lbl-luteal"
-    };
-
-    for (let key in MAP) {
-      document.getElementById(MAP[key]).textContent = L[key];
-    }
-
-    document.getElementById("centerPhase").textContent = L[faseNorm];
-    document.getElementById("t_current").textContent =
-      `${langObj.geral.faseAtual}: ${L[faseNorm]}`;
-
-    document.getElementById("toBreath").textContent    = `💨 ${langObj.menu.respiracao}`;
-    document.getElementById("toTrain").textContent     = `🏃 ${langObj.treino.tituloTopo}`;
-    document.getElementById("toEvolution").textContent = `📈 ${langObj.evolucao.titulo}`;
-  }
-
-  aplicarIdioma();
-  document.addEventListener("femflow:langChange", aplicarIdioma);
-
-  /* ============================================================
-     8) COLORIR FASE NO CÍRCULO
-============================================================ */
-  ["menstrual","follicular","ovulatory","luteal"].forEach(f=>{
-    document.getElementById("seg-"+f)?.classList.toggle("path-active", f===faseNorm);
-    document.getElementById("lbl-"+f)?.classList.toggle("label-active", f===faseNorm);
-  });
-
-  /* ============================================================
-     9) NAV
-============================================================ */
-  document.getElementById("toBreath").onclick    = () => FEMFLOW.router("respiracao.html");
-  document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
-
-  document.getElementById("toTrain").onclick  = () => {
-    const isPersonal =
-      document.body.classList.contains("personal-mode") ||
-      localStorage.getItem("femflow_personal") === "true";
-
-    const url = isPersonal ? "treino.html?personal=1" : "treino.html";
-    FEMFLOW.router(url);
-  };
-
-  document.getElementById("toEndurance").onclick = () => {
-    const id = localStorage.getItem("femflow_id");
-
-    if (id) FEMFLOW.router(`treinoendurance/${id}.html`);
-    else window.location.href = "https://www.myflowlife.com.br/#ofertas";
-  };
-
-  ffHideLoading();
-});
-</script>
-
-
 
 <!-- MODAL DE NÍVEL -->
 <div id="modal-nivel" class="modal-nivel oculto">
@@ -263,6 +82,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     <p>Carregando…</p>
   </div>
 </div>
+
+<script src="js/lang.js"></script>
+<script src="femflow-core.js"></script>
+<script src="js/flowcenter.js"></script>
 
 </body>
 </html>
