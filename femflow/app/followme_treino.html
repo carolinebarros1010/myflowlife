@@ -3,54 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-  <title>FollowMe • Treinar Agora</title>
+  <title>FollowMe • Treino do Dia</title>
 
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/followme_treino.css">
+
 </head>
 
 <body>
 
-  <!-- HEADER -->
   <header class="fm-header">
-    <h1 id="fmTitulo">FollowMe — Treino do Dia</h1>
-    <h2 id="fmCoach" class="coach-nome">Coach</h2>
-    <h3 id="fmFaseDia" class="fase-dia">—</h3>
+    <h1 id="fmTitulo">FollowMe • Treino do Dia</h1>
   </header>
 
-  <!-- PLAYER -->
-  <section class="fm-video-box">
-    <video id="fmVideo" controls playsinline>
-      <source id="fmSource" src="" type="video/mp4" />
+  <main class="fm-container">
+    <video id="followmeVideo" controls playsinline class="fm-video">
+      Seu navegador não suporta vídeo.
     </video>
-  </section>
+  </main>
 
-  <!-- RODAPÉ -->
-  <div class="fm-footer">
-    <button id="fmSalvar" class="btn-primary-clean">
-      💾 Salvar Treino (PSE)
-    </button>
-
-    <button id="fmVoltar" class="btn-secondary-clean">
-      ⬅️ Voltar
-    </button>
-  </div>
-
-  <!-- MODAL PSE -->
-  <div id="fmModalPSE" class="fm-modal hidden">
-    <div class="fm-modal-card">
-      <h3>Como foi o treino?</h3>
-
-      <label>PSE (0 a 10)</label>
-      <input type="range" id="fmPSE" min="0" max="10" value="5">
-
-      <button id="fmConfirmar" class="btn-primary-clean">Salvar</button>
-      <button id="fmCancelar" class="btn-secondary-clean">Cancelar</button>
-    </div>
-  </div>
-
+  <script src="js/lang.js"></script>
   <script src="femflow-core.js"></script>
   <script src="js/followme_treino.js"></script>
 
