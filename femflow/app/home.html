@@ -197,25 +197,94 @@ function renderRail(el, lista){
     c.onclick = () => {
 
       const enfase = c.dataset.enfase;
-      const linkVenda = getLinkDeVenda(enfase);
+      const produto   = localStorage.getItem("femflow_produto");
+      const ativa     = localStorage.getItem("femflow_ativa") === "true";
 
-      if (linkVenda) {
-        location.href = linkVenda;
+      const acessoPersonal = (produto === "treino_personal" && ativa);
+      const acessoApp      = (produto === "acesso_app" && ativa);
+      const acessoFollow   = (produto === "followme" && ativa);
+
+      /* ============================================
+         🔥 1) Treino Personal (premium)
+      ============================================ */
+      if (acessoPersonal) {
+
+        if (enfase === "personal") {
+          localStorage.setItem("femflow_personal", "true");
+          localStorage.setItem("femflow_enfase", "personal");
+          FEMFLOW.router("flowcenter");
+          return;
+        }
+
+        if (enfase === "followme") {
+          location.href = "https://pay.hotmart.com/Q102567067C"; 
+          return;
+        }
+
+        // acessa normal
+        selecionarEnfase(enfase);
         return;
       }
 
-      // Liberado → PERSONAL
+      /* ============================================
+         🔥 2) Acesso App (mensal)
+      ============================================ */
+      if (acessoApp) {
+
+        if (["gluteo","costas","peito","braco","posterior","quadriceps","corrida","natacao","remo","bike","beach","casa","casa_gluteo","casa_core","casa_elastico","casa_halter"].includes(enfase)) {
+          selecionarEnfase(enfase);
+          return;
+        }
+
+        // bloqueados → personal ou followme
+        if (enfase === "personal") {
+          location.href = "https://pay.hotmart.com/E102962105N";
+          return;
+        }
+
+        if (enfase === "followme") {
+          location.href = "https://pay.hotmart.com/Q102567067C";
+          return;
+        }
+      }
+
+      /* ============================================
+         🔥 3) FollowMe
+      ============================================ */
+      if (acessoFollow) {
+
+        if (enfase === "followme") {
+          // abre o painel followme (quando existir)
+          location.href = "followme.html";
+          return;
+        }
+
+        // todos os outros → contratar acesso_app
+        location.href = "https://pay.hotmart.com/E102962105N";
+        return;
+      }
+
+      /* ============================================
+         🔥 4) Sem produto (app store, nova aluna, etc)
+         → sempre redireciona para o Hotmart certo
+      ============================================ */
+
       if (enfase === "personal") {
-        localStorage.setItem("femflow_personal", "true");
-        localStorage.setItem("femflow_enfase", "personal");
-        FEMFLOW.router("flowcenter");
+        location.href = "https://pay.hotmart.com/#OFERTAS_PERSONAL";
         return;
       }
 
-      selecionarEnfase(enfase);
+      if (enfase === "followme") {
+        location.href = "https://pay.hotmart.com/Q102567067C";
+        return;
+      }
+
+      // demais = acesso_app
+      location.href = "https://pay.hotmart.com/E102962105N";
     };
   });
 }
+
 
 /* ============================================================
    SALVAR ÊNFASE → BACKEND
