@@ -9,7 +9,7 @@ const FOLLOWME_LINKS = {
 };
 
 /* ============================================================
-   BEM-VINDA NO TOPO
+   BEM-VINDAS NO TOPO
 =========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   const nome = localStorage.getItem("femflow_nome");
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ============================================================
-   LISTAS DE CARDS
+   LISTAS DE CARDS — TREINOS NORMAIS
 =========================================================== */
 const LISTA_MUSCULAR = [
   { titulo:"Glúteo", enfase:"gluteo", color:"#d98f80", desc:"Foco total no glúteo" },
@@ -49,7 +49,7 @@ const LISTA_PERSONAL = [
 ];
 
 /* ============================================================
-   FOLLOW ME — TREINE JUNTO POR 30 DIAS
+   FOLLOWME — TREINE JUNTO POR 30 DIAS
 =========================================================== */
 const LISTA_FOLLOWME = [
   {
@@ -101,7 +101,7 @@ function renderRail(el, lista){
 }
 
 /* ============================================================
-   LÓGICA DE ACESSO DOS CARDS
+   LÓGICA DE ACESSO DOS CARDS POR PRODUTO
 =========================================================== */
 function handleCardClick(enfase){
 
@@ -113,7 +113,7 @@ function handleCardClick(enfase){
   const acessoFollow   = (produto === "followme" && ativa);
 
   /* ===========================
-     1) PERSONAL — pode tudo menos FollowMe
+     1) PERSONAL — tudo exceto FollowMe
   =========================== */
   if (acessoPersonal){
     if (enfase.startsWith("followme_")){
@@ -121,15 +121,13 @@ function handleCardClick(enfase){
       return;
     }
     if (enfase === "personal"){
-      localStorage.setItem("femflow_enfase", "personal");
-      FEMFLOW.router("flowcenter");
-      return;
+      return selecionarEnfase("personal");
     }
     return selecionarEnfase(enfase);
   }
 
   /* ===========================
-     2) ACESSO_APP — pode apenas ENFASES
+     2) ACESSO_APP — somente ENFASES
   =========================== */
   if (acessoApp){
     if (enfase.startsWith("followme_")){
@@ -137,39 +135,31 @@ function handleCardClick(enfase){
       return;
     }
     if (enfase === "personal"){
-      FEMFLOW.toast("Personal é um produto adicional.");
+      FEMFLOW.toast("O Treino Personal é um produto adicional.");
       return;
     }
     return selecionarEnfase(enfase);
   }
 
   /* ===========================
-     3) FOLLOWME — pode apenas FOLLOWME
+     3) FOLLOWME — somente FollowMe
   =========================== */
   if (acessoFollow){
     if (enfase.startsWith("followme_")){
-      FEMFLOW.toast("✨ Em breve painel completo do FollowMe!");
-      return;
+      return selecionarCoach(enfase); // segue para flowcenter + treino da coach
     }
     FEMFLOW.toast("Seu plano dá acesso apenas ao Treino Junto por 30 dias.");
     return;
   }
 
   /* ===========================
-     4) SEM PRODUTO — tudo direciona para compra
+     4) SEM PRODUTO — tudo vai para compra
   =========================== */
-  if (enfase.startsWith("followme_")){
-    FEMFLOW.toast("✨ Em breve!");
-    // window.location.href = FOLLOWME_LINKS.prof1; 
-    return;
-  }
-
   FEMFLOW.toast("Adquira acesso para liberar seus treinos.");
-  // window.location.href = LINK_ACESSO_APP;
 }
 
 /* ============================================================
-   SALVAR ENFASE NO BACKEND
+   SALVAR ENFASE NORMAL
 =========================================================== */
 async function selecionarEnfase(enfase){
   const id = localStorage.getItem("femflow_id");
@@ -180,10 +170,7 @@ async function selecionarEnfase(enfase){
       await fetch(FEMFLOW.SCRIPT_URL, {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({
-          action:"setenfase",
-          id, enfase
-        })
+        body: JSON.stringify({ action:"setenfase", id, enfase })
       });
     }catch{}
   }
@@ -192,7 +179,25 @@ async function selecionarEnfase(enfase){
 }
 
 /* ============================================================
-   CARD PERSONAL VISÍVEL AUTOMATICAMENTE
+   SELEÇÃO DE COACH FOLLOWME (salva no backend)
+=========================================================== */
+async function selecionarCoach(coach){
+  const id = localStorage.getItem("femflow_id");
+  localStorage.setItem("femflow_enfase", coach);
+
+  if (id){
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ action:"setenfase", id, enfase: coach })
+    });
+  }
+
+  FEMFLOW.router("flowcenter");
+}
+
+/* ============================================================
+   CARD PERSONAL SEMPRE VISÍVEL PARA PERSONAL
 =========================================================== */
 function ativarCardPersonalTopo(){
   const produto = localStorage.getItem("femflow_produto");
