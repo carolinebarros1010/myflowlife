@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+
   <title>FemFlow • Home</title>
 
   <link rel="icon" href="favicon.ico">
-  <link rel="manifest" href="manifest.json"/>
+  <link rel="manifest" href="manifest.json">
 
-  <link rel="stylesheet" href="css/style.css">
+  <!-- Fontes -->
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <!-- CSS Base -->
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
@@ -17,320 +21,38 @@
 
 <body>
 
-  <main class="wrap">
+  <!-- BEM-VINDA -->
+  <h1 id="bvTexto" class="bemvinda">Bem-vinda!</h1>
 
-    <!-- ======================================================
-         SAUDAÇÃO PERSONALIZADA
-    ======================================================= -->
-    <section id="boasVindas" class="boas-vindas">
-      <h1 id="bvTexto">Bem-vinda!</h1>
-    </section>
+  <!-- BOTÕES TOPO -->
+  <div class="home-top-buttons">
+    <button id="btnFlow" class="home-btn">Flow Center</button>
+    <button id="btnCad" class="home-btn">Configurações</button>
+  </div>
 
-    <!-- ======================================================
-         VÍDEO DE BOAS-VINDAS
-    ======================================================= -->
-    <section class="video">
-      <div class="video-wrapper">
-        <iframe 
-          src="https://www.youtube-nocookie.com/embed/DyX8F1ChSDw"
-          title="FemFlow boas-vindas"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
-        </iframe>
-      </div>
-    </section>
+  <!-- ============= MUSCULAR ============= -->
+  <h2 class="home-section-title" id="tituloMuscular">Treinos por Enfase</h2>
+  <div class="rail" id="railMuscular"></div>
 
-    <!-- ======================================================
-         CTA IMEDIATA → FLOW CENTER
-    ======================================================= -->
-    <div class="home-cta">
-      <button id="btnFlow" class="btn-flow">✨ Ir para o Flow Center</button>
-    </div>
+  <!-- ============= ESPORTES ============= -->
+  <h2 class="home-section-title" id="tituloEsportes">Esportes</h2>
+  <div class="rail" id="railEsportes"></div>
 
-    <!-- ======================================================
-         FILEIRA PERSONAL COMO PRIMEIRA OPÇÃO
-    ======================================================= -->
-    <h1 id="tituloPersonalTopo" style="display:none;">Treino Personal</h1>
-    <section id="railPersonalTopo" class="rail" style="display:none;"></section>
+  <!-- ============= TREINE EM CASA ============= -->
+  <h2 class="home-section-title" id="tituloCasa">Treinar em Casa</h2>
+  <div class="rail" id="railCasa"></div>
 
-    <!-- FILEIRA 1 -->
-    <h1>Ênfases Musculares</h1>
-    <section class="rail" id="railMuscular"></section>
+  <!-- ============= FOLLOW ME (NOVA SEÇÃO) ============= -->
+  <h2 class="home-section-title" id="tituloFollowMe">Treine junto por 30 dias</h2>
+  <div class="rail" id="railFollowMe"></div>
 
-    <!-- FILEIRA 2 -->
-    <h1>Esportes</h1>
-    <section class="rail" id="railEsportes"></section>
+  <!-- ============= PERSONAL (se tiver produto) ============= -->
+  <h2 class="home-section-title" id="tituloPersonalTopo" style="display:none;">Personal</h2>
+  <div class="rail" id="railPersonalTopo" style="display:none;"></div>
 
-    <!-- FILEIRA 3 -->
-    <h1>Treinos em Casa</h1>
-    <section class="rail" id="railCasa"></section>
-
-    <!-- CTA Cad -->
-    <button id="btnCad" class="cta" style="background:#fff;color:#335953;border:1px solid #e6d8d2">
-      Cadastro
-    </button>
-
-  </main>
-
-  <footer>FemFlow • escolha seu foco e comece hoje</footer>
-
+  <script src="js/lang.js"></script>
   <script src="femflow-core.js"></script>
-  <script src="./js/treino-engine.js"></script>
-  <script src="./js/treino.js"></script>
-
-
-<script>
-
-/* ============================================================
-   🔗 LINKS DE PRODUTOS HOTMART
-=========================================================== */
-const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
-
-const FOLLOWME_LINKS = {
-  prof1: "https://pay.hotmart.com/Q102567067C",
-};
-
-const LINK_PERSONAL = "https://myflowlife.com.br/#ofertas";
-
-/* ============================================================
-   🔥 MASTER SYNC – ATUALIZA LOCALSTORAGE PELO BACKEND
-=========================================================== */
-async function femflowMasterSync() {
-  const id = localStorage.getItem("femflow_id");
-  if (!id) return;
-
-  try {
-    const perfil = await FEMFLOW.carregarCicloBackend();
-
-    if (!perfil) return;
-
-    // produto e status da assinatura
-    if (perfil.produto) localStorage.setItem("femflow_produto", perfil.produto);
-    if (perfil.ativa !== undefined) localStorage.setItem("femflow_ativa", String(perfil.ativa));
-
-    // nível
-    if (perfil.nivel) localStorage.setItem("femflow_nivel", perfil.nivel.toLowerCase());
-
-    // nome
-    if (perfil.nome) localStorage.setItem("femflow_nome", perfil.nome);
-
-    // fase/dia ciclo
-    if (perfil.fase) localStorage.setItem("femflow_fase", perfil.fase.toLowerCase());
-    if (perfil.diaCiclo) localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo));
-
-    // perfil hormonal
-    if (perfil.perfilHormonal)
-      localStorage.setItem("femflow_perfilHormonal", perfil.perfilHormonal);
-
-    console.log("MASTER SYNC atualizado:", perfil);
-
-  } catch (e) {
-    console.warn("Erro no MASTER SYNC:", e);
-  }
-}
-
-/* ============================================================
-   0. BOAS-VINDAS
-=========================================================== */
-document.addEventListener("DOMContentLoaded", async () => {
-  
-  // 🔥 executa Master Sync antes de tudo
-  await femflowMasterSync();
-
-  const nome = localStorage.getItem("femflow_nome");
-  if (nome) document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
-});
-
-/* ============================================================
-   LISTAS DE TREINO
-=========================================================== */
-const LISTA_MUSCULAR = [
-  { titulo:"Glúteo", enfase:"gluteo", color:"#d98f80" },
-  { titulo:"Costas", enfase:"costas", color:"#a6b8c8" },
-  { titulo:"Peito", enfase:"peito", color:"#e6a09b" },
-  { titulo:"Braço", enfase:"braco", color:"#d38b6e" },
-  { titulo:"Posterior", enfase:"posterior", color:"#b58fb5" },
-  { titulo:"Quadríceps", enfase:"quadriceps", color:"#9fb7ac" }
-];
-
-const LISTA_ESPORTES = [
-  { titulo:"Corrida", enfase:"corrida", color:"#b8a59c" },
-  { titulo:"Natação", enfase:"natacao", color:"#80a8b3" },
-  { titulo:"Remo", enfase:"remo", color:"#7f9d94" },
-  { titulo:"Bike", enfase:"bike", color:"#9cc2c1" },
-  { titulo:"Beach", enfase:"beach", color:"#e3a689" }
-];
-
-const LISTA_CASA = [
-  { titulo:"Em Casa", enfase:"casa", color:"#d1a697" },
-  { titulo:"Casa Glúteo", enfase:"casa_gluteo", color:"#dc9d8c" },
-  { titulo:"Casa Core", enfase:"casa_core", color:"#cababa" },
-  { titulo:"Casa Elástico", enfase:"casa_elastico", color:"#d8c4b0" },
-  { titulo:"Casa Halter", enfase:"casa_halter", color:"#c6b4a4" }
-];
-
-const LISTA_PERSONAL = [
-  { titulo:"Treino Personal", enfase:"personal", color:"#335953" }
-];
-
-/* ============================================================
-   RENDER DOS CARDS
-=========================================================== */
-function cardHTML(p){
-  return `
-    <article class="card" data-enfase="${p.enfase}">
-      <div class="thumb" style="background:${p.color}">
-        <span class="badge">${p.titulo}</span>
-      </div>
-    </article>`;
-}
-
-function renderRail(el, lista){
-  el.innerHTML = lista.map(cardHTML).join("");
-
-  el.querySelectorAll(".card").forEach(c => {
-    c.onclick = () => {
-
-      const enfase = c.dataset.enfase;
-      const produto = (localStorage.getItem("femflow_produto") || "").toLowerCase();
-      const ativa   = localStorage.getItem("femflow_ativa") === "true";
-
-      const acessoPersonal = produto === "treino_personal" && ativa;
-      const acessoApp      = produto === "acesso_app"       && ativa;
-      const acessoFollow   = produto === "followme"         && ativa;
-
-      /* ============================================================
-         🔥 1) PERSONAL — tudo liberado + followme pago
-      ============================================================ */
-      if (acessoPersonal) {
-
-        if (enfase === "personal") {
-          selecionarEnfase(enfase);
-          return;
-        }
-
-        if (enfase.startsWith("followme")) {
-          location.href = FOLLOWME_LINKS.prof1;
-          return;
-        }
-
-        selecionarEnfase(enfase);
-        return;
-      }
-
-      /* ============================================================
-         🔥 2) ACESSO_APP — treinos base liberados
-      ============================================================ */
-      if (acessoApp) {
-
-        const liberados = [
-          "gluteo","costas","peito","braco","posterior","quadriceps",
-          "corrida","natacao","remo","bike","beach",
-          "casa","casa_gluteo","casa_core","casa_elastico","casa_halter"
-        ];
-
-        if (liberados.includes(enfase)) {
-          selecionarEnfase(enfase);
-          return;
-        }
-
-        if (enfase === "personal") {
-          location.href = LINK_ACESSO_APP;
-          return;
-        }
-
-        if (enfase.startsWith("followme")) {
-          location.href = FOLLOWME_LINKS.prof1;
-          return;
-        }
-      }
-
-      /* ============================================================
-         🔥 3) FOLLOWME — apenas followme liberado
-      ============================================================ */
-      if (acessoFollow) {
-
-        if (enfase.startsWith("followme")) {
-          location.href = "followme.html";
-          return;
-        }
-
-        location.href = LINK_ACESSO_APP;
-        return;
-      }
-
-      /* ============================================================
-         🔥 4) SEM PRODUTO — todos levam ao Hotmart
-      ============================================================ */
-      if (enfase === "personal") {
-        location.href = LINK_PERSONAL;
-        return;
-      }
-
-      if (enfase.startsWith("followme")) {
-        location.href = FOLLOWME_LINKS.prof1;
-        return;
-      }
-
-      location.href = LINK_ACESSO_APP;
-    };
-  });
-}
-
-/* ============================================================
-   ENVIAR ÊNFASE AO BACKEND
-=========================================================== */
-async function selecionarEnfase(enfase){
-  const id = localStorage.getItem("femflow_id");
-  localStorage.setItem("femflow_enfase", enfase);
-
-  if (id) {
-    try {
-      await fetch(FEMFLOW.SCRIPT_URL, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ action:"setenfase", id, enfase })
-      });
-    } catch {}
-  }
-
-  FEMFLOW.router("flowcenter");
-}
-
-/* ============================================================
-   CARD PERSONAL TOPO
-=========================================================== */
-function ativarCardPersonalTopo() {
-  const produto = localStorage.getItem("femflow_produto");
-  const ativa   = localStorage.getItem("femflow_ativa") === "true";
-
-  if (produto === "treino_personal" && ativa) {
-    document.getElementById("tituloPersonalTopo").style.display = "block";
-
-    const rail = document.getElementById("railPersonalTopo");
-    rail.style.display = "flex";
-    renderRail(rail, LISTA_PERSONAL);
-  }
-}
-
-/* ============================================================
-   INIT HOME
-=========================================================== */
-document.addEventListener("DOMContentLoaded", ()=>{
-
-  ativarCardPersonalTopo();
-
-  renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
-  renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
-  renderRail(document.getElementById("railCasa"), LISTA_CASA);
-
-  document.getElementById("btnFlow").onclick = () => FEMFLOW.router("flowcenter");
-  document.getElementById("btnCad").onclick  = () => FEMFLOW.router("index");
-});
-
-</script>
-
+  <script src="./js/home.js"></script>
 
 </body>
 </html>
