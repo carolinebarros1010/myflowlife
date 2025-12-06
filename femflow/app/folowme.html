@@ -1,210 +1,45 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FemFlow - Flow Diário</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>FemFlow • Treine Junto</title>
 
-  <link rel="manifest" href="./manifest.json" />
-  <link rel="stylesheet" href="./css/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.ico">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="css/core.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/themes.css">
+
+  <!-- FollowMe CSS -->
+  <link rel="stylesheet" href="css/followme.css">
 </head>
 
 <body>
-  <header>
-    <h1>Treino Diário</h1>
-    <p class="subtitle">Seu corpo, seu ritmo 🌿</p>
-    <p id="faseInfo"></p>
-  </header>
 
-  <div class="container">
-    <!-- 🎥 Treino -->
-    <div class="section treino-inicial">
-      <h3 id="tituloTreino">Carregando treino...</h3>
-      <video id="videoTreino" width="100%" height="auto" controls playsinline>
-        <source src="" type="video/mp4" />
-        Seu navegador não suporta vídeos HTML5.
-      </video>
-    </div>
+<!-- HEADER -->
+<script src="js/lang.js"></script>
+<script src="femflow-core.js"></script>
 
-    <!-- 💪 PSE -->
-    <div class="section pse-inicial">
-      <label for="pseInput">Avalie o esforço (PSE de 0 a 10)</label>
-      <input type="range" id="pseInput" min="0" max="10" step="1" value="5" />
-      <p id="pseValor">PSE: 5</p>
-    </div>
+<h1 id="followTitulo">—</h1>
+<p id="followSub">—</p>
 
-    <!-- Botões -->
-    <div class="botoes-treino">
-      <button id="btnSalvar">💾 Registrar Treino</button>
-      <button id="btnDescanso" class="secundario">🌿 Dia de Descanso</button>
-    </div>
+<!-- ===========================
+     GRID DE COACHES
+============================== -->
+<div class="coach-grid" id="coachGrid">
+  <!-- JS preenche aqui -->
+</div>
 
-    <button id="btnInicio" onclick="location.href='ciclo.html'">🔁 Voltar ao ciclo</button>
-  </div>
+<!-- ===========================
+     SCRIPT FOLLOWME
+============================== -->
+<script src="js/followme.js"></script>
 
-  <!-- 🌸 CORE DO FEMFLOW -->
-  <script src="scripts/femflow-core.js"></script>
-
-  <!-- ⚙️ LÓGICA PRINCIPAL -->
-  <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    const id = localStorage.getItem("femflow_id");
-    if (!id) return (window.location.href = "ciclo.html");
-
-    const fase = localStorage.getItem("fase_sugerida") || "Folicular";
-    const diaCiclo = parseInt(localStorage.getItem("dia_ciclo") || 1);
-    const diaPrograma = diaCiclo > 30 ? 1 : diaCiclo;
-
-    // 🌿 Exibe fase
-    const faseInfo = document.getElementById("faseInfo");
-    faseInfo.textContent = `🌸 Fase atual: ${fase}`;
-    faseInfo.style.cssText = "color:#335953;font-weight:600;margin-top:0.3rem;";
-
-    // 🎥 Carrega vídeo
-    const video = document.getElementById("videoTreino");
-    const videoPath = `videos/${fase.toLowerCase()}/video_${fase.toLowerCase()}_${diaPrograma}.mp4`;
-    video.querySelector("source").src = videoPath;
-    video.load();
-
-    const tituloTreino = document.getElementById("tituloTreino");
-    tituloTreino.innerText = `Treino do Dia ${diaPrograma} – Fase ${fase}`;
-
-    // 🎚️ Controle de PSE
-    const range = document.getElementById("pseInput");
-    const valor = document.getElementById("pseValor");
-    range.addEventListener("input", () => valor.innerText = `PSE: ${range.value}`);
-
-    // 💾 SALVAR TREINO
-    document.getElementById("btnSalvar").addEventListener("click", async () => {
-      FEMFLOW.abrirPSE(async (pseSelecionado) => {
-        await FEMFLOW.salvarTreino({
-          id,
-          fase,
-          treino: `Dia ${diaPrograma}`,
-          tipo_dia: "treino",
-          pse: pseSelecionado,
-        });
-
-        FEMFLOW.toast(`✅ Treino ${diaPrograma} salvo!`);
-        localStorage.setItem("dia_ciclo", diaPrograma + 1);
-
-        if (diaPrograma >= 30) {
-          FEMFLOW.toast("🌕 Ciclo concluído! Reiniciando...");
-          localStorage.setItem("dia_ciclo", 1);
-          setTimeout(() => (window.location.href = "index.html"), 3000);
-        } else {
-          setTimeout(() => location.reload(), 1500);
-        }
-      });
-    });
-
-    // 🌿 DESCANSO
-    document.getElementById("btnDescanso").addEventListener("click", async () => {
-      await FEMFLOW.salvarDescanso(fase);
-      FEMFLOW.toast("🌿 Descanso ativo registrado!");
-      localStorage.setItem("dia_ciclo", diaPrograma + 1);
-      setTimeout(() => location.reload(), 2000);
-    });
-  });
-  </script>
-
-  <!-- 💅 ESTILO LOCAL -->
-  <style>
-    .botoes-treino {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .secundario {
-      background: var(--teal);
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.3s ease;
-    }
-
-    .secundario:hover {
-      background: var(--terracota);
-      transform: scale(1.05);
-    }
-
-    #pseInput {
-      width: 100%;
-      accent-color: var(--terracota);
-    }
-
-    #pseValor {
-      font-weight: 600;
-      color: var(--teal);
-      margin-top: 0.4rem;
-    }
-  </style>
-
-  <!-- 📲 Instalação PWA -->
-  <script>
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-
-    const btn = document.createElement('button');
-    btn.textContent = '📲 Instalar FemFlow';
-    btn.className = 'btn';
-    btn.style.cssText = `
-      position:fixed; bottom:1.2rem; left:50%; transform:translateX(-50%);
-      background:var(--teal); color:white; font-weight:600; border:none;
-      border-radius:12px; padding:0.8rem 1.4rem; z-index:9999;
-      box-shadow:0 2px 6px rgba(0,0,0,0.2);
-    `;
-    btn.onclick = async () => {
-      btn.disabled = true;
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        btn.textContent = '✅ Instalado!';
-        setTimeout(() => btn.remove(), 2500);
-      } else {
-        btn.textContent = '⚠️ Cancelado';
-        btn.disabled = false;
-      }
-    };
-    document.body.appendChild(btn);
-  });
-
-  // 📱 Banner iOS
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isInStandalone = ('standalone' in window.navigator) && window.navigator.standalone;
-  if (isIOS && !isInStandalone) {
-    const aviso = document.createElement('div');
-    aviso.innerHTML = `
-      <div style="
-        position:fixed; bottom:10px; left:10px; right:10px;
-        background:var(--pessego); color:white; text-align:center;
-        padding:1rem; border-radius:12px; font-weight:600;
-        box-shadow:0 2px 8px rgba(0,0,0,0.3); z-index:9999;
-      ">
-        📲 Para instalar o FemFlow:<br>
-        Toque em <strong>Compartilhar ▢</strong> → <strong>“Adicionar à Tela de Início”</strong>
-      </div>`;
-    document.body.appendChild(aviso);
-  }
-
-  // 🔁 Atualização automática do SW
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        for (const reg of regs) reg.update();
-      });
-    });
-  }
-  </script>
 </body>
 </html>
