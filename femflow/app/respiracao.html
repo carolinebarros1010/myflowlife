@@ -18,14 +18,12 @@
       --header-height: 78px;
     }
 
-    /* Ajuste real: modal respeita header */
     #breathModal {
       padding-top: calc(var(--header-height) + 10px) !important;
       min-height: calc(100vh - var(--header-height));
       box-sizing: border-box;
     }
 
-    /* Texto de descrição dentro do modal */
     #descricaoRespModal {
       font-size: 15px;
       color: #6a4f47;
@@ -37,7 +35,6 @@
       font-style: italic;
     }
   </style>
-
 </head>
 
 <body>
@@ -77,8 +74,6 @@
 <!-- ============================= -->
 <div class="breath-drawer" id="breathDrawer">
   <div class="drawer-header" id="drawerTitle">Respiração</div>
-
-
   <div id="breathDrawerContent"></div>
 </div>
 
@@ -88,8 +83,6 @@
 <div id="breathModal">
   <div id="breathCircle">5</div>
   <div id="faseLabel">Preparar...</div>
-
-  <!-- DESCRIÇÃO DINÂMICA -->
   <p id="descricaoRespModal"></p>
 
   <div id="countdown"></div>
@@ -99,15 +92,29 @@
 
 <footer id="respFooter">Inspire equilíbrio. Expire leveza.</footer>
 
-<!-- ===================================== -->
-<!-- SCRIPTS FEMFLOW -->
-<!-- ===================================== -->
+<!-- ============================= -->
+<!-- SCRIPTS FEMFLOW
+<!-- ============================= -->
 <script src="js/lang.js"></script>
 <script src="femflow-core.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
+  /* ============================================================
+     🔥 PROTEÇÃO DE ACESSO → Se não tiver login ou produto, volta para HOME
+  ============================================================ */
+  const produto = localStorage.getItem("femflow_produto");
+  const ativa   = localStorage.getItem("femflow_ativa") === "true";
+
+  if (!produto || !ativa) {
+    FEMFLOW.toast("Acesse a Home para continuar 🌸");
+    return FEMFLOW.router("home");
+  }
+
+  /* ============================================================
+     HEADER / MENU / IDIOMA
+  ============================================================ */
   FEMFLOW.inserirHeaderApp?.();
   FEMFLOW.inserirMenuLateral?.();
   FEMFLOW.inserirModalIdioma?.();
@@ -116,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let protocoloAtual = null;
 
   const drawer     = document.getElementById("breathDrawer");
-  const drawerClose= document.getElementById("closeDrawer");
   const modal      = document.getElementById("breathModal");
   const drawerCt   = document.getElementById("breathDrawerContent");
 
@@ -126,7 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnStart   = document.getElementById("btnStart");
   const btnClose   = document.getElementById("btnCloseModal");
 
-  /* DESCRIÇÕES */
+  /* ============================================================
+     DESCRIÇÕES E PROTOCOLOS
+  ============================================================ */
   const descricoes = {
     raiz: "Acalma o corpo, reduz tensões e ajuda você a retornar ao eixo interno.",
     clareza: "Traz foco, leveza mental e sensação de reorganização.",
@@ -140,7 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
     transparencia: "Traz clareza emocional instantânea."
   };
 
-  /* PROTOCOLOS */
   const protocolos = {
     raiz:        { fases:[4,4,4,4], cor:"#CC6A5A" },
     clareza:     { fases:[5,7,8,0], cor:"#E2B5A5" },
@@ -154,15 +161,16 @@ document.addEventListener("DOMContentLoaded", () => {
     transparencia:{fases:[5,5,5,5], cor:"#D0C7E2" }
   };
 
-  /* ABRIR RESPIRAÇÃO */
-window.abrirRespiracao = function(tipo){
+  /* ============================================================
+     ABRIR PROTOCOLO
+  ============================================================ */
+  window.abrirRespiracao = function(tipo){
     const p = protocolos[tipo];
     if (!p) return;
 
     protocoloAtual = p;
     cicloAtivo = false;
 
-    // mapa de nomes bonitos
     const nomes = {
       raiz: "Respiração Raiz",
       clareza: "Respiração Clareza",
@@ -176,10 +184,7 @@ window.abrirRespiracao = function(tipo){
       transparencia: "Respiração Transparência"
     };
 
-    // coloca o nome da respiração no topo do drawer
     document.getElementById("drawerTitle").textContent = nomes[tipo] || "Respiração";
-
-    // descrição no modal
     descModal.textContent = descricoes[tipo] || "";
 
     circle.textContent = "5";
@@ -195,23 +200,27 @@ window.abrirRespiracao = function(tipo){
 
     modal.style.background = p.cor + "22";
     circle.style.background = p.cor;
-};
+  };
 
-  /* FECHAR */
+  /* ============================================================
+     FECHAR MODAL / DRAWER
+  ============================================================ */
   function fecharDrawer(){
     cicloAtivo = false;
     drawer.classList.remove("active");
   }
 
-  drawerClose.onclick = fecharDrawer;
   btnClose.onclick = fecharDrawer;
-// 🔙 Voltar ao Flow Center
-const btnVoltar = document.getElementById("btnVoltarTreino");
-if (btnVoltar) {
-    btnVoltar.onclick = () => FEMFLOW.router("flowcenter.html");
-}
 
-  /* FUNÇÕES */
+  /* ============================================================
+     🔙 VOLTAR AO FLOWCENTER
+  ============================================================ */
+  document.getElementById("btnVoltarTreino").onclick =
+    () => FEMFLOW.router("flowcenter");
+
+  /* ============================================================
+     CONTAGEM E CICLOS
+  ============================================================ */
   async function esperar(ms){ return new Promise(r => setTimeout(r, ms)); }
 
   async function contagemInicial(){
