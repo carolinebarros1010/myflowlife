@@ -93,41 +93,71 @@
   <script src="./js/treino-engine.js"></script>
   <script src="./js/treino.js"></script>
 
-  <script>
-  /* ============================================================
-     1) DOM READY + FEMFLOW INIT
-  ============================================================ */
-  document.addEventListener("DOMContentLoaded", () => {
+ <script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyCNDL55caHcFqLpCPgxq5QK2Yt9YkXAvkE",
+    authDomain: "femflow-ebec2.firebaseapp.com",
+    projectId: "femflow-ebec2",
+    storageBucket: "femflow-ebec2.appspot.com",
+    messagingSenderId: "929402947409",
+    appId: "1:929402947409:web:b65b7775ac44edeb4283ae"
+  });
+</script>
 
-    if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
-      FEMFLOW.init();
-    }
+<!-- SCRIPTS FEMFLOW -->
+<script src="js/lang.js"></script>
+<script src="femflow-core.js"></script>
+<script src="./js/treino-engine.js"></script>
+<script src="./js/treino.js"></script>
 
-    // idioma no carregamento
-    aplicarIdioma();
-
-    // se idioma mudar → atualizar
-    document.addEventListener("femflow:langChange", aplicarIdioma);
-    /* ============================================================
-   ATUALIZAR NÍVEL AUTOMATICAMENTE NO TREINO
-============================================================ */
-document.addEventListener("femflow:ready", (ev) => {
-  const resp = ev.detail;
-  if (!resp) return;
-
-  if (resp.nivel) {
-    localStorage.setItem("femflow_nivel", resp.nivel);
-  }
-});
+<script>
 /* ============================================================
-   ATUALIZAR NÍVEL IMEDIATAMENTE APÓS MUDAR NO MODAL
+   1) DOM READY + FEMFLOW INIT + MIDDLEWARE DE ACESSO
 ============================================================ */
-document.addEventListener("femflow:nivelAtualizado", (ev) => {
-  const nivel = ev.detail;
-  if (nivel) {
-    localStorage.setItem("femflow_nivel", nivel);
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* ------------------------------------------------------------
+     🔐 MIDDLEWARE — Impede acesso direto por URL
+  ------------------------------------------------------------ */
+  const id       = localStorage.getItem("femflow_id");
+  const produto  = localStorage.getItem("femflow_produto");
+  const cicloOK  = localStorage.getItem("femflow_cycle_configured") === "yes";
+  const enfase   = localStorage.getItem("femflow_enfase");
+
+  if (!id || !produto || !cicloOK || !enfase) {
+    FEMFLOW.toast("Acesse o treino pelo painel do FemFlow.");
+    FEMFLOW.router("home.html");
+    return;
   }
-   
+
+  /* ------------------------------------------------------------
+     Inicialização do núcleo
+  ------------------------------------------------------------ */
+  if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
+    FEMFLOW.init();
+  }
+
+  aplicarIdioma();
+
+  document.addEventListener("femflow:langChange", aplicarIdioma);
+
+  /* ============================================================
+     ATUALIZAR NÍVEL AUTOMATICAMENTE
+  ============================================================ */
+  document.addEventListener("femflow:ready", (ev) => {
+    const resp = ev.detail;
+    if (!resp) return;
+
+    if (resp.nivel) {
+      localStorage.setItem("femflow_nivel", resp.nivel);
+    }
+  });
+
+  document.addEventListener("femflow:nivelAtualizado", (ev) => {
+    const nivel = ev.detail;
+    if (nivel) {
+      localStorage.setItem("femflow_nivel", nivel);
+    }
   });
 
   /* ============================================================
@@ -136,16 +166,13 @@ document.addEventListener("femflow:nivelAtualizado", (ev) => {
   function aplicarIdioma() {
     const L = FEMFLOW?.langs?.[FEMFLOW.lang] || FEMFLOW.langs.pt;
 
-    // Títulos
     document.getElementById("tituloTreinoTopo").textContent = L.treino.tituloTopo;
     document.getElementById("tituloDiaTreino").textContent   = L.treino.diaPrograma;
 
-    // Rodapé
     document.getElementById("salvarTreinoBtn").textContent   = L.treino.btnSalvar;
     document.getElementById("descansoBtn").textContent       = L.treino.btnDescanso;
     document.getElementById("cancelarTreinoBtn").textContent = L.treino.btnCancelar;
 
-    // Modal PSE
     document.getElementById("pseTitulo").textContent         = L.treino.pseTitulo;
     document.getElementById("pseLabel").textContent          = L.treino.pseLabel;
     document.getElementById("btnConfirmarPSE").textContent   = L.treino.pseSalvar;
@@ -153,12 +180,15 @@ document.addEventListener("femflow:nivelAtualizado", (ev) => {
   }
 
   /* ============================================================
-     3) BOTÃO CANCELAR — SAIR PARA FLOWCENTER
+     3) BOTÃO CANCELAR — volta para FlowCenter
   ============================================================ */
   document.getElementById("cancelarTreinoBtn").onclick = () => {
     FEMFLOW.router("flowcenter.html");
   };
-  </script>
+
+});
+</script>
+
 <!-- MODAL DE NÍVEL (TREINO) -->
 <div id="modal-nivel" class="modal-nivel oculto">
   <div class="modal-nivel-box">
