@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>FollowMe • Treino do Dia</title>
+
+  <link rel="icon" href="favicon.ico">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- FONTS -->
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <!-- CSS BASE -->
+  <link rel="stylesheet" href="css/core.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/themes.css">
+
+  <!-- CSS FollowMe -->
+  <link rel="stylesheet" href="css/followme_treino.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<script src="js/lang.js"></script>
+<script src="femflow-core.js"></script>
+
+<header class="follow-header">
+  <h1 id="coachNome">FollowMe</h1>
+  <p id="coachSub">—</p>
+</header>
+
+<!-- ===========================
+       PLAYER DO VÍDEO
+============================== -->
+<div class="video-wrapper">
+  <video id="videoFollow" controls playsinline>
+    <source id="videoSrc" src="" type="video/mp4">
+    Seu navegador não suporta vídeos.
+  </video>
+</div>
+
+<!-- ===========================
+        INFO DO TREINO
+============================== -->
+<section class="treino-info">
+  <h2 id="tituloTreinoDia">Treino do Dia</h2>
+
+  <p id="faseHormonal"></p>
+  <p id="diaPrograma"></p>
+</section>
+
+<!-- ===========================
+        BOTÕES DE AÇÃO
+============================== -->
+<div class="acoes-container">
+  <button id="btnRegistrarPSE" class="btn-primary-clean">Registrar PSE</button>
+  <button id="btnVoltarFollow" class="btn-secondary-clean">← Voltar</button>
+</div>
+
+<!-- ===========================
+        MODAL PSE
+============================== -->
+<div id="modalPSE" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3 id="tituloPSE">Como foi o treino?</h3>
+
+    <label id="labelPSE">PSE (0 a 10)</label>
+    <input type="range" min="0" max="10" value="0" id="inputPSE">
+
+    <button id="btnSalvarPSE" class="modal-btn-ok">Salvar</button>
+    <button id="btnFecharPSE" class="modal-btn-cancel">Cancelar</button>
+  </div>
+</div>
+
+<!-- ===========================
+        SCRIPTS
+============================== -->
+<script src="js/followme_treino.js"></script>
+
+</body>
+</html>
