@@ -82,14 +82,24 @@
 
 <script>
 /* ============================================================
-   0. BOAS-VINDAS PERSONALIZADA
+   🔗 LINKS DE PRODUTOS HOTMART
+=========================================================== */
+const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
+
+const FOLLOWME_LINKS = {
+  prof1: "https://pay.hotmart.com/Q102567067C",
+  // prof2: "",
+  // prof3: "",
+};
+
+const LINK_PERSONAL = "https://myflowlife.com.br/#ofertas";
+
+/* ============================================================
+   0. BOAS-VINDAS
 =========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   const nome = localStorage.getItem("femflow_nome");
-  if (nome) {
-    const bv = document.getElementById("bvTexto");
-    bv.textContent = `Bem-vinda, ${nome}!`;
-  }
+  if (nome) document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
 });
 
 /* ============================================================
@@ -130,7 +140,42 @@ const LISTA_PERSONAL = [
 ];
 
 /* ============================================================
-   CARDS
+   DEFINIR LINK DE VENDA COM BASE NO PRODUTO
+=========================================================== */
+function getLinkDeVenda(enfase) {
+
+  const produto = (localStorage.getItem("femflow_produto") || "").toLowerCase();
+  const ativa   = localStorage.getItem("femflow_ativa") === "true";
+
+  // ========== PRODUTO ACESSO_APP ==========
+  if (produto === "acesso_app" && ativa) {
+    if (enfase === "personal") return LINK_PERSONAL;
+    if (enfase.startsWith("followme")) return FOLLOWME_LINKS.prof1;
+    return null;
+  }
+
+  // ========== PRODUTO FOLLOWME ==========
+  if (produto === "followme" && ativa) {
+    if (enfase.startsWith("followme")) return null;
+    if (enfase === "personal") return LINK_PERSONAL;
+    return LINK_ACESSO_APP;
+  }
+
+  // ========== PRODUTO PERSONAL ==========
+  if (produto === "treino_personal" && ativa) {
+    if (enfase === "personal") return null;
+    return LINK_PERSONAL;
+  }
+
+  // ========== SEM PRODUTO (APP STORE) ==========
+  if (enfase.startsWith("followme")) return FOLLOWME_LINKS.prof1;
+  if (enfase === "personal") return LINK_PERSONAL;
+
+  return LINK_ACESSO_APP;
+}
+
+/* ============================================================
+   RENDERIZAÇÃO DOS CARDS
 =========================================================== */
 function cardHTML(p){
   return `
@@ -147,22 +192,27 @@ function cardHTML(p){
 
 function renderRail(el, lista){
   el.innerHTML = lista.map(cardHTML).join("");
-  el.querySelectorAll(".card").forEach(c=>{
+
+  el.querySelectorAll(".card").forEach(c => {
     c.onclick = () => {
+
       const enfase = c.dataset.enfase;
+      const linkVenda = getLinkDeVenda(enfase);
+
+      if (linkVenda) {
+        location.href = linkVenda;
+        return;
+      }
+
+      // Liberado → PERSONAL
       if (enfase === "personal") {
+        localStorage.setItem("femflow_personal", "true");
+        localStorage.setItem("femflow_enfase", "personal");
+        FEMFLOW.router("flowcenter");
+        return;
+      }
 
-    // Marca modo personal globalmente
-    localStorage.setItem("femflow_personal", "true");
-    localStorage.setItem("femflow_enfase", "personal");
-
-    // Vai para o FlowCenter (que já detecta modo personal)
-    FEMFLOW.router("flowcenter");
-    return;
-}
-
-selecionarEnfase(enfase);
-
+      selecionarEnfase(enfase);
     };
   });
 }
@@ -188,25 +238,22 @@ async function selecionarEnfase(enfase){
 }
 
 /* ============================================================
-   VERIFICAR SE TEM PRODUTO PERSONAL — COLAR NO TOPO
+   CARD PERSONAL NO TOPO
 =========================================================== */
 function ativarCardPersonalTopo() {
   const produto = localStorage.getItem("femflow_produto");
   const ativa   = localStorage.getItem("femflow_ativa");
 
   if (produto === "treino_personal" && ativa === "true") {
-
     document.getElementById("tituloPersonalTopo").style.display = "block";
-
     const rail = document.getElementById("railPersonalTopo");
     rail.style.display = "flex";
-
     renderRail(rail, LISTA_PERSONAL);
   }
 }
 
 /* ============================================================
-   INIT HOME
+   INIT
 =========================================================== */
 document.addEventListener("DOMContentLoaded", ()=>{
   ativarCardPersonalTopo();
