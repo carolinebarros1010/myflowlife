@@ -1,104 +1,121 @@
 /* ============================================================
-   FOLLOWME • TREINO DIÁRIO COM VÍDEO (2025)
-   Lógica oficial FemFlow — opção A (auto-salvar)
-============================================================ */
+   FOLLOWME TREINO — VERSÃO FINAL 2025
+   ============================================================ */
 
-/* ------------------------------------------------------------
-   1) Obter Coach, Fase Hormonal e Dia do Programa
------------------------------------------------------------- */
-function getCoachSlug() {
-  const enfase = localStorage.getItem("femflow_enfase") || "";
-  return enfase.replace("followme_", "");   // ex.: followme_livia → livia
-}
+document.addEventListener("DOMContentLoaded", async () => {
 
-function getVideoPath() {
-  const coach = getCoachSlug();
-  const fase  = (localStorage.getItem("femflow_fase") || "follicular").toLowerCase();
-  const dia   = Number(localStorage.getItem("femflow_dia_treino") || 1);
-
-  return `videos/${coach}/${fase}/${dia}.mp4`;
-}
-
-/* ------------------------------------------------------------
-   2) SALVAR TREINO NO BACKEND
------------------------------------------------------------- */
-async function salvarFollowMe() {
   const id = localStorage.getItem("femflow_id");
-  const fase = localStorage.getItem("femflow_fase") || "follicular";
-  const diaFirebase = Number(localStorage.getItem("femflow_dia_treino") || 1);
+  const coach = localStorage.getItem("followme_coach");
+  let dia = Number(localStorage.getItem("followme_diaAtual") || 1);
 
-  if (!id) return;
+  const fase = localStorage.getItem("femflow_fase_atual") || "follicular";
 
-  try {
-    await fetch(FEMFLOW.SCRIPT_URL, {
+  if (!id || !coach) {
+    alert("Erro: dados ausentes.");
+    return (location.href = "flowcenter.html");
+  }
+
+  // ELEMENTOS
+  const tituloCoach = document.getElementById("fmCoachNome");
+  const progressTxt = document.getElementById("fmProgress");
+  const videoEl = document.getElementById("fmVideo");
+  const modalPSE = document.getElementById("fmModalPSE");
+
+  tituloCoach.textContent = `Treinando com ${coach}`;
+
+  /* ============================================================
+     1) PROGRESSO (1/30)
+  ============================================================ */
+  function atualizarProgresso() {
+    progressTxt.textContent = `Dia ${dia} de 30 — Fase: ${fase}`;
+  }
+
+  atualizarProgresso();
+
+  if (dia > 30) {
+    alert("Parabéns! Você concluiu os 30 dias do FollowMe.");
+    return location.href = "flowcenter.html";
+  }
+
+  /* ============================================================
+     2) DEFINIR VIDEO DO DIA (coach + fase)
+  ============================================================ */
+  function obterURLVideo() {
+    const map = {
+      "livia": {
+        menstrual: ["videos/livia/menstrual1.mp4","videos/livia/menstrual2.mp4","videos/livia/menstrual3.mp4","videos/livia/menstrual4.mp4","videos/livia/menstrual5.mp4"],
+        follicular: ["videos/livia/follicular1.mp4","videos/livia/follicular2.mp4","videos/livia/follicular3.mp4","videos/livia/follicular4.mp4","videos/livia/follicular5.mp4","videos/livia/follicular6.mp4","videos/livia/follicular7.mp4"],
+        ovulatoria: ["videos/livia/ov1.mp4","videos/livia/ov2.mp4","videos/livia/ov3.mp4","videos/livia/ov4.mp4"],
+        luteal: ["videos/livia/lut1.mp4","videos/livia/lut2.mp4","videos/livia/lut3.mp4","videos/livia/lut4.mp4","videos/livia/lut5.mp4","videos/livia/lut6.mp4","videos/livia/lut7.mp4","videos/livia/lut8.mp4","videos/livia/lut9.mp4","videos/livia/lut10.mp4","videos/livia/lut11.mp4","videos/livia/lut12.mp4","videos/livia/lut13.mp4","videos/livia/lut14.mp4"]
+      }
+      // adicionar Karoline / Thalita aqui
+    };
+
+    const diasFase = map[coach][fase];
+    const idx = (dia - 1) % diasFase.length;
+    return diasFase[idx];
+  }
+
+  const urlVideo = obterURLVideo();
+  videoEl.src = urlVideo;
+
+
+  /* ============================================================
+     3) QUANDO O VIDEO TERMINA → ABRE MODAL PSE
+  ============================================================ */
+  videoEl.onended = () => {
+    modalPSE.classList.remove("hidden");
+  };
+
+
+  /* ============================================================
+     4) SALVAR PSE + AVANÇAR DIA
+  ============================================================ */
+  function salvarTreino(pse) {
+    fetch(FEMFLOW.ENDPOINT_BACKEND, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "salvarTreino",
         id,
         fase,
-        diaFirebase,
-        pse: 0,             // FollowMe não usa PSE ainda
-        treino: "followme", // marca o registro
-        obs: ""
+        diaFirebase: dia,
+        pse,
+        treino: `followme_${coach}_${fase}_${dia}`
       })
     });
-  } catch (err) {
-    console.warn("Erro ao salvar treino FollowMe:", err);
-  }
-}
 
-/* ------------------------------------------------------------
-   3) AVANÇAR DIA DO PROGRAMA
------------------------------------------------------------- */
-function avancarDia() {
-  let dia = Number(localStorage.getItem("femflow_dia_treino") || 1);
-  dia++;
+    dia++;
+    localStorage.setItem("followme_diaAtual", String(dia));
 
-  // se passar de 30 → finalizado
-  if (dia > 30) {
-    localStorage.setItem("followme_finalizado", "true");
-    return false; // indica fim do ciclo
+    alert("Treino salvo! Parabéns 🙌");
+    location.href = "flowcenter.html";
   }
 
-  localStorage.setItem("femflow_dia_treino", String(dia));
-  return true;
-}
-
-/* ------------------------------------------------------------
-   4) Fluxo principal
------------------------------------------------------------- */
-document.addEventListener("DOMContentLoaded", () => {
-
-  // Se finalizado, bloquear
-  if (localStorage.getItem("followme_finalizado") === "true") {
-    alert("✨ Você concluiu os 30 dias do FollowMe! Parabéns!");
-    FEMFLOW.router("flowcenter");
-    return;
-  }
-
-  const video = document.getElementById("followmeVideo");
-  if (!video) return;
-
-  // carregar vídeo correto
-  video.src = getVideoPath();
-
-  // quando o vídeo terminar → auto salvar + avançar dia
-  video.addEventListener("ended", async () => {
-    FEMFLOW.toast("Treino concluído! Salvando progresso…");
-
-    await salvarFollowMe();
-
-    const continua = avancarDia();
-
-    if (!continua) {
-      FEMFLOW.toast("✨ Programa FollowMe finalizado.");
-      FEMFLOW.router("flowcenter");
-      return;
-    }
-
-    FEMFLOW.toast("Dia concluído! Seu próximo treino estará disponível ✨");
-
-    setTimeout(() => FEMFLOW.router("flowcenter"), 1500);
+  document.querySelectorAll(".pse-val").forEach(btn => {
+    btn.onclick = () => {
+      const val = Number(btn.textContent);
+      salvarTreino(val);
+    };
   });
+
+  document.getElementById("fmCancelarPSE").onclick = () => {
+    modalPSE.classList.add("hidden");
+  };
+
+  /* ============================================================
+     5) REPLAY PERMITIDO
+  ============================================================ */
+  document.getElementById("fmReplayBtn").onclick = () => {
+    videoEl.currentTime = 0;
+    videoEl.play();
+  };
+
+  /* ============================================================
+     6) VOLTAR SEM SALVAR
+  ============================================================ */
+  document.getElementById("fmVoltarBtn").onclick = () => {
+    location.href = "followme.html";
+  };
+
 });
