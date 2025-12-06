@@ -151,10 +151,18 @@ function renderRail(el, lista){
     c.onclick = () => {
       const enfase = c.dataset.enfase;
       if (enfase === "personal") {
-        location.href = "treino.html?personal=1";
-        return;
-      }
-      selecionarEnfase(enfase);
+
+    // Marca modo personal globalmente
+    localStorage.setItem("femflow_personal", "true");
+    localStorage.setItem("femflow_enfase", "personal");
+
+    // Vai para o FlowCenter (que já detecta modo personal)
+    FEMFLOW.router("flowcenter");
+    return;
+}
+
+selecionarEnfase(enfase);
+
     };
   });
 }
