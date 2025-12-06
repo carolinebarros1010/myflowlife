@@ -358,17 +358,38 @@ FEMFLOW.carregarPerfil = async function () {
 
     if (j.status !== "ok") return null;
 
+    // --------------------------------------------------------
+    // CAMPOS BÁSICOS DO CICLO / PERFIL
+    // --------------------------------------------------------
     localStorage.setItem("femflow_nome", j.nome || "Aluna");
-    localStorage.setItem("femflow_fase", j.fase);
-    localStorage.setItem("femflow_enfase", j.enfase);
-    localStorage.setItem("femflow_diaCiclo", j.diaCiclo);
-    localStorage.setItem("femflow_nivel", j.nivel);
+    if (j.fase)          localStorage.setItem("femflow_fase", j.fase);
+    if (j.enfase)        localStorage.setItem("femflow_enfase", j.enfase);
+    if (j.diaCiclo != null) localStorage.setItem("femflow_diaCiclo", j.diaCiclo);
+    if (j.nivel)         localStorage.setItem("femflow_nivel", j.nivel);
     localStorage.setItem("femflow_perfilHormonal", j.perfilHormonal || "regular");
-    localStorage.setItem("femflow_startDate", j.data_inicio);
-    localStorage.setItem("femflow_cycleLength", j.ciclo_duracao);
+    if (j.data_inicio)   localStorage.setItem("femflow_startDate", j.data_inicio);
+    if (j.ciclo_duracao) localStorage.setItem("femflow_cycleLength", j.ciclo_duracao);
 
-    /* PERSONAL */
-    if (j.personal === true || String(j.produto).toLowerCase() === "treino_personal") {
+    // --------------------------------------------------------
+    // PRODUTO + STATUS ATIVA → PARA HOME / CARDS
+    // --------------------------------------------------------
+    const produtoRaw = (j.produto || "").toString().toLowerCase().trim();
+    const ativaRaw   = j.ativa === true || j.ativa === "true";
+
+    localStorage.setItem("femflow_produto", produtoRaw);
+    localStorage.setItem("femflow_ativa", ativaRaw ? "true" : "false");
+
+    // --------------------------------------------------------
+    // PERSONAL GLOBAL (FLAG)
+    // - Se backend mandar personal = true
+    // - OU se o nome do produto contiver "personal"
+    // --------------------------------------------------------
+    const isPersonal =
+      j.personal === true ||
+      produtoRaw === "treino_personal" ||
+      produtoRaw.includes("personal");
+
+    if (isPersonal) {
       localStorage.setItem("femflow_personal", "true");
     } else {
       localStorage.removeItem("femflow_personal");
