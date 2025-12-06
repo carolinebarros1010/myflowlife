@@ -71,6 +71,25 @@
 
 <script>
 /* ============================================================
+   🔥 REGRA MESTRA DE ACESSO AO FLOWCENTER
+   Se não tiver produto → volta para HOME
+============================================================ */
+function validarAcessoFlowCenter(perfil) {
+  const produto = (perfil?.produto || localStorage.getItem("femflow_produto") || "").trim().toLowerCase();
+  const ativa   = perfil?.ativa ?? (localStorage.getItem("femflow_ativa") === "true");
+
+  // ⚠️ Se não tem produto → volta para a Home
+  if (!produto || !ativa) {
+    console.warn("🚫 FlowCenter bloqueado → sem produto ativo");
+    FEMFLOW.toast("Assine um programa para acessar o FlowCenter!");
+    setTimeout(() => FEMFLOW.router("home"), 800);
+    return false;
+  }
+
+  return true;
+}
+
+/* ============================================================
    ESCONDER LOADING
 ============================================================ */
 function ffHideLoading() {
@@ -79,87 +98,47 @@ function ffHideLoading() {
 }
 
 /* ============================================================
-   AO CARREGAR A PÁGINA
+   FLOWCENTER — ONLOAD
 ============================================================ */
 document.addEventListener("DOMContentLoaded", async function () {
 
   /* ============================================================
-     NIVEL NO HEADER — COM NORMALIZAÇÃO
-  ============================================================ */
-  function aplicarNivelH1() {
-
-    let nivelLS = (localStorage.getItem("femflow_nivel") || "")
-      .toLowerCase()
-      .trim()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
-
-    if (nivelLS.includes("inicia")) nivelLS = "iniciante";
-    else if (nivelLS.includes("inter")) nivelLS = "intermediaria";
-    else if (nivelLS.includes("avanc")) nivelLS = "avancada";
-
-    const tag = document.getElementById("nivelTag");
-    if (!tag || !nivelLS) return;
-
-    const lang = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
-
-    const mapaNivel = {
-      iniciante: { pt:"Iniciante", en:"Beginner", fr:"Débutante" },
-      intermediaria:{ pt:"Intermediária", en:"Intermediate", fr:"Intermédiaire" },
-      avancada:{ pt:"Avançada", en:"Advanced", fr:"Avancée" }
-    };
-
-    const txt =
-      mapaNivel[nivelLS]?.[lang] ||
-      mapaNivel[nivelLS]?.pt ||
-      nivelLS.charAt(0).toUpperCase() + nivelLS.slice(1);
-
-    tag.textContent = `— ${txt}`;
-  }
-
-  document.addEventListener("femflow:ready", aplicarNivelH1);
-  document.addEventListener("femflow:langChange", aplicarNivelH1);
-
-
-
-  /* ============================================================
-     HEADER / MENU / IDIOMA
-  ============================================================ */
-  FEMFLOW.inserirHeaderApp();
-  FEMFLOW.inserirMenuLateral();
-  FEMFLOW.inserirModalIdioma?.();
-
-
-
-    /* ============================================================
-     1) BUSCAR BACKEND (ciclo, nome, nível)
-  ============================================================ */
+     1) CARREGAR BACKEND (ciclo, produto, nome, nível)
+  ============================================================= */
   let perfil = await FEMFLOW.carregarCicloBackend();
 
+  // fallback se erro
   if (!perfil) {
-    FEMFLOW.toast(FEMFLOW.langs[FEMFLOW.lang].sistema.erroCiclo, true);
     perfil = {
       nome: localStorage.getItem("femflow_nome") || "",
       fase: localStorage.getItem("femflow_fase") || "follicular",
       diaCiclo: Number(localStorage.getItem("femflow_diaCiclo") || 1),
       nivel: localStorage.getItem("femflow_nivel") || "iniciante",
-      produto: localStorage.getItem("femflow_produto") || ""
+      produto: localStorage.getItem("femflow_produto") || "",
+      ativa: localStorage.getItem("femflow_ativa") === "true"
     };
   }
 
-  // SALVAR NÍVEL RETORNADO DO BACKEND
+  /* ============================================================
+     2) VALIDAÇÃO DE ACESSO FLOWCENTER
+============================================================ */
+  if (!validarAcessoFlowCenter(perfil)) return;
+
+
+  /* ============================================================
+     3) SALVAR NÍVEL RETORNADO DO BACKEND
+============================================================ */
   if (perfil?.nivel) {
     localStorage.setItem("femflow_nivel", perfil.nivel);
-    aplicarNivelH1();
   }
 
   /* ============================================================
-     1.1 DETECTAR PERSONAL E MARCAR NO BODY
-  ============================================================ */
-  const produtoRaw = (perfil?.produto || "").toLowerCase().trim();
+     4) MARCAR MODO PERSONAL
+============================================================ */
+  const produtoRaw = (perfil.produto || "").toLowerCase().trim();
   const isPersonal = produtoRaw === "treino_personal";
 
   if (isPersonal) {
-    FEMFLOW.log("🎨 FlowCenter em modo PERSONAL (produto=treino_personal)");
     document.body.classList.add("personal-mode");
     localStorage.setItem("femflow_personal", "true");
   } else {
@@ -168,12 +147,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   /* ============================================================
-     2) NORMALIZAR FASE
-  ============================================================ */
+     5) NORMALIZAR FASE
+============================================================ */
   const faseRaw = (perfil.fase || "follicular").toLowerCase();
 
   const mapaFase = {
-    lutea:"luteal","lútea":"luteal", luteal:"luteal",
+    lutea:"luteal", "lútea":"luteal", luteal:"luteal",
     folicular:"follicular", follicular:"follicular",
     ovulatoria:"ovulatory","ovulatório":"ovulatory", ovulatory:"ovulatory",
     menstrual:"menstrual"
@@ -181,11 +160,16 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const faseNorm = mapaFase[faseRaw] || "follicular";
 
-
+  /* ============================================================
+     6) HEADER / MENU / IDIOMA
+============================================================ */
+  FEMFLOW.inserirHeaderApp();
+  FEMFLOW.inserirMenuLateral();
+  FEMFLOW.inserirModalIdioma?.();
 
   /* ============================================================
-     3) APLICAR IDIOMA
-  ============================================================ */
+     7) APLICAR IDIOMA
+============================================================ */
   function aplicarIdioma() {
     if (!FEMFLOW.lang)
       FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
@@ -209,38 +193,34 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     for (let key in MAP) {
-      const el = document.getElementById(MAP[key]);
-      if (el) el.textContent = L[key];
+      document.getElementById(MAP[key]).textContent = L[key];
     }
 
     document.getElementById("centerPhase").textContent = L[faseNorm];
-    document.getElementById("t_current").textContent = 
+    document.getElementById("t_current").textContent =
       `${langObj.geral.faseAtual}: ${L[faseNorm]}`;
 
-    document.getElementById("toBreath").textContent = `💨 ${langObj.menu.respiracao}`;
-    document.getElementById("toTrain").textContent  = `🏃 ${langObj.treino.tituloTopo}`;
+    document.getElementById("toBreath").textContent    = `💨 ${langObj.menu.respiracao}`;
+    document.getElementById("toTrain").textContent     = `🏃 ${langObj.treino.tituloTopo}`;
     document.getElementById("toEvolution").textContent = `📈 ${langObj.evolucao.titulo}`;
   }
 
   aplicarIdioma();
   document.addEventListener("femflow:langChange", aplicarIdioma);
 
-
-
   /* ============================================================
-     4) COLORIR CÍRCULO
-  ============================================================ */
+     8) COLORIR FASE NO CÍRCULO
+============================================================ */
   ["menstrual","follicular","ovulatory","luteal"].forEach(f=>{
     document.getElementById("seg-"+f)?.classList.toggle("path-active", f===faseNorm);
     document.getElementById("lbl-"+f)?.classList.toggle("label-active", f===faseNorm);
   });
 
-
-
-   /* ============================================================
-     5) NAVEGAÇÃO
-  ============================================================ */
-  document.getElementById("toBreath").onclick = () => FEMFLOW.router("respiracao.html");
+  /* ============================================================
+     9) NAV
+============================================================ */
+  document.getElementById("toBreath").onclick    = () => FEMFLOW.router("respiracao.html");
+  document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
 
   document.getElementById("toTrain").onclick  = () => {
     const isPersonal =
@@ -251,26 +231,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     FEMFLOW.router(url);
   };
 
-  document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
-
   document.getElementById("toEndurance").onclick = () => {
-  const id = localStorage.getItem("femflow_id");
+    const id = localStorage.getItem("femflow_id");
 
-  // 🔥 regra:
-  // Se ID existir → manda para o treino endurance ID.html
-  // Se não existir → manda para página de ofertas
-  if (id) {
-    FEMFLOW.router(`treinoendurance/${id}.html`);
-  } else {
-    window.location.href = "https://www.myflowlife.com.br/#ofertas";
-  }
-};
-
-
+    if (id) FEMFLOW.router(`treinoendurance/${id}.html`);
+    else window.location.href = "https://www.myflowlife.com.br/#ofertas";
+  };
 
   ffHideLoading();
 });
 </script>
+
 
 
 <!-- MODAL DE NÍVEL -->
