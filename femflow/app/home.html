@@ -81,6 +81,7 @@
 
 
 <script>
+
 /* ============================================================
    🔗 LINKS DE PRODUTOS HOTMART
 =========================================================== */
@@ -88,104 +89,99 @@ const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
 
 const FOLLOWME_LINKS = {
   prof1: "https://pay.hotmart.com/Q102567067C",
-  // prof2: "",
-  // prof3: "",
 };
 
 const LINK_PERSONAL = "https://myflowlife.com.br/#ofertas";
 
 /* ============================================================
+   🔥 MASTER SYNC – ATUALIZA LOCALSTORAGE PELO BACKEND
+=========================================================== */
+async function femflowMasterSync() {
+  const id = localStorage.getItem("femflow_id");
+  if (!id) return;
+
+  try {
+    const perfil = await FEMFLOW.carregarCicloBackend();
+
+    if (!perfil) return;
+
+    // produto e status da assinatura
+    if (perfil.produto) localStorage.setItem("femflow_produto", perfil.produto);
+    if (perfil.ativa !== undefined) localStorage.setItem("femflow_ativa", String(perfil.ativa));
+
+    // nível
+    if (perfil.nivel) localStorage.setItem("femflow_nivel", perfil.nivel.toLowerCase());
+
+    // nome
+    if (perfil.nome) localStorage.setItem("femflow_nome", perfil.nome);
+
+    // fase/dia ciclo
+    if (perfil.fase) localStorage.setItem("femflow_fase", perfil.fase.toLowerCase());
+    if (perfil.diaCiclo) localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo));
+
+    // perfil hormonal
+    if (perfil.perfilHormonal)
+      localStorage.setItem("femflow_perfilHormonal", perfil.perfilHormonal);
+
+    console.log("MASTER SYNC atualizado:", perfil);
+
+  } catch (e) {
+    console.warn("Erro no MASTER SYNC:", e);
+  }
+}
+
+/* ============================================================
    0. BOAS-VINDAS
 =========================================================== */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  
+  // 🔥 executa Master Sync antes de tudo
+  await femflowMasterSync();
+
   const nome = localStorage.getItem("femflow_nome");
   if (nome) document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
 });
 
 /* ============================================================
-   LISTAS
+   LISTAS DE TREINO
 =========================================================== */
 const LISTA_MUSCULAR = [
-  { titulo:"Glúteo", enfase:"gluteo", color:"#d98f80", desc:"Foco total no glúteo" },
-  { titulo:"Costas", enfase:"costas", color:"#a6b8c8", desc:"Remadas e postura" },
-  { titulo:"Peito", enfase:"peito", color:"#e6a09b", desc:"Força de empurrar" },
-  { titulo:"Braço", enfase:"braco", color:"#d38b6e", desc:"Bíceps + tríceps" },
-  { titulo:"Posterior", enfase:"posterior", color:"#b58fb5", desc:"Cadeia posterior" },
-  { titulo:"Quadríceps", enfase:"quadriceps", color:"#9fb7ac", desc:"Pernas fortes" }
+  { titulo:"Glúteo", enfase:"gluteo", color:"#d98f80" },
+  { titulo:"Costas", enfase:"costas", color:"#a6b8c8" },
+  { titulo:"Peito", enfase:"peito", color:"#e6a09b" },
+  { titulo:"Braço", enfase:"braco", color:"#d38b6e" },
+  { titulo:"Posterior", enfase:"posterior", color:"#b58fb5" },
+  { titulo:"Quadríceps", enfase:"quadriceps", color:"#9fb7ac" }
 ];
 
 const LISTA_ESPORTES = [
-  { titulo:"Corrida", enfase:"corrida", color:"#b8a59c", desc:"Base aeróbica" },
-  { titulo:"Natação", enfase:"natacao", color:"#80a8b3", desc:"Propulsão aquática" },
-  { titulo:"Remo", enfase:"remo", color:"#7f9d94", desc:"Tração e core" },
-  { titulo:"Bike", enfase:"bike", color:"#9cc2c1", desc:"Cardio leve/moderado" },
-  { titulo:"Beach", enfase:"beach", color:"#e3a689", desc:"Areia e potência" }
+  { titulo:"Corrida", enfase:"corrida", color:"#b8a59c" },
+  { titulo:"Natação", enfase:"natacao", color:"#80a8b3" },
+  { titulo:"Remo", enfase:"remo", color:"#7f9d94" },
+  { titulo:"Bike", enfase:"bike", color:"#9cc2c1" },
+  { titulo:"Beach", enfase:"beach", color:"#e3a689" }
 ];
 
 const LISTA_CASA = [
-  { titulo:"Em Casa", enfase:"casa", color:"#d1a697", desc:"Sem equipamentos" },
-  { titulo:"Casa Glúteo", enfase:"casa_gluteo", color:"#dc9d8c", desc:"Glúteos em casa" },
-  { titulo:"Casa Core", enfase:"casa_core", color:"#cababa", desc:"Abdômen e lombar" },
-  { titulo:"Casa Elástico", enfase:"casa_elastico", color:"#d8c4b0", desc:"Elástico" },
-  { titulo:"Casa Halter", enfase:"casa_halter", color:"#c6b4a4", desc:"Halter em casa" }
+  { titulo:"Em Casa", enfase:"casa", color:"#d1a697" },
+  { titulo:"Casa Glúteo", enfase:"casa_gluteo", color:"#dc9d8c" },
+  { titulo:"Casa Core", enfase:"casa_core", color:"#cababa" },
+  { titulo:"Casa Elástico", enfase:"casa_elastico", color:"#d8c4b0" },
+  { titulo:"Casa Halter", enfase:"casa_halter", color:"#c6b4a4" }
 ];
 
 const LISTA_PERSONAL = [
-  { 
-    titulo:"Treino Personal",
-    enfase:"personal",
-    color:"#335953",
-    desc:"Seu treino exclusivo criado pelo coach"
-  }
+  { titulo:"Treino Personal", enfase:"personal", color:"#335953" }
 ];
 
 /* ============================================================
-   DEFINIR LINK DE VENDA COM BASE NO PRODUTO
-=========================================================== */
-function getLinkDeVenda(enfase) {
-
-  const produto = (localStorage.getItem("femflow_produto") || "").toLowerCase();
-  const ativa   = localStorage.getItem("femflow_ativa") === "true";
-
-  // ========== PRODUTO ACESSO_APP ==========
-  if (produto === "acesso_app" && ativa) {
-    if (enfase === "personal") return LINK_PERSONAL;
-    if (enfase.startsWith("followme")) return FOLLOWME_LINKS.prof1;
-    return null;
-  }
-
-  // ========== PRODUTO FOLLOWME ==========
-  if (produto === "followme" && ativa) {
-    if (enfase.startsWith("followme")) return null;
-    if (enfase === "personal") return LINK_PERSONAL;
-    return LINK_ACESSO_APP;
-  }
-
-  // ========== PRODUTO PERSONAL ==========
-  if (produto === "treino_personal" && ativa) {
-    if (enfase === "personal") return null;
-    return LINK_PERSONAL;
-  }
-
-  // ========== SEM PRODUTO (APP STORE) ==========
-  if (enfase.startsWith("followme")) return FOLLOWME_LINKS.prof1;
-  if (enfase === "personal") return LINK_PERSONAL;
-
-  return LINK_ACESSO_APP;
-}
-
-/* ============================================================
-   RENDERIZAÇÃO DOS CARDS
+   RENDER DOS CARDS
 =========================================================== */
 function cardHTML(p){
   return `
     <article class="card" data-enfase="${p.enfase}">
       <div class="thumb" style="background:${p.color}">
         <span class="badge">${p.titulo}</span>
-      </div>
-      <div class="info">
-        <h3 class="ttl">${p.titulo}</h3>
-        <p class="desc">${p.desc||''}</p>
       </div>
     </article>`;
 }
@@ -197,97 +193,93 @@ function renderRail(el, lista){
     c.onclick = () => {
 
       const enfase = c.dataset.enfase;
-      const produto   = localStorage.getItem("femflow_produto");
-      const ativa     = localStorage.getItem("femflow_ativa") === "true";
+      const produto = (localStorage.getItem("femflow_produto") || "").toLowerCase();
+      const ativa   = localStorage.getItem("femflow_ativa") === "true";
 
-      const acessoPersonal = (produto === "treino_personal" && ativa);
-      const acessoApp      = (produto === "acesso_app" && ativa);
-      const acessoFollow   = (produto === "followme" && ativa);
+      const acessoPersonal = produto === "treino_personal" && ativa;
+      const acessoApp      = produto === "acesso_app"       && ativa;
+      const acessoFollow   = produto === "followme"         && ativa;
 
-      /* ============================================
-         🔥 1) Treino Personal (premium)
-      ============================================ */
+      /* ============================================================
+         🔥 1) PERSONAL — tudo liberado + followme pago
+      ============================================================ */
       if (acessoPersonal) {
 
         if (enfase === "personal") {
-          localStorage.setItem("femflow_personal", "true");
-          localStorage.setItem("femflow_enfase", "personal");
-          FEMFLOW.router("flowcenter");
-          return;
-        }
-
-        if (enfase === "followme") {
-          location.href = "https://pay.hotmart.com/Q102567067C"; 
-          return;
-        }
-
-        // acessa normal
-        selecionarEnfase(enfase);
-        return;
-      }
-
-      /* ============================================
-         🔥 2) Acesso App (mensal)
-      ============================================ */
-      if (acessoApp) {
-
-        if (["gluteo","costas","peito","braco","posterior","quadriceps","corrida","natacao","remo","bike","beach","casa","casa_gluteo","casa_core","casa_elastico","casa_halter"].includes(enfase)) {
           selecionarEnfase(enfase);
           return;
         }
 
-        // bloqueados → personal ou followme
-        if (enfase === "personal") {
-          location.href = "https://pay.hotmart.com/E102962105N";
+        if (enfase.startsWith("followme")) {
+          location.href = FOLLOWME_LINKS.prof1;
           return;
         }
 
-        if (enfase === "followme") {
-          location.href = "https://pay.hotmart.com/Q102567067C";
+        selecionarEnfase(enfase);
+        return;
+      }
+
+      /* ============================================================
+         🔥 2) ACESSO_APP — treinos base liberados
+      ============================================================ */
+      if (acessoApp) {
+
+        const liberados = [
+          "gluteo","costas","peito","braco","posterior","quadriceps",
+          "corrida","natacao","remo","bike","beach",
+          "casa","casa_gluteo","casa_core","casa_elastico","casa_halter"
+        ];
+
+        if (liberados.includes(enfase)) {
+          selecionarEnfase(enfase);
+          return;
+        }
+
+        if (enfase === "personal") {
+          location.href = LINK_ACESSO_APP;
+          return;
+        }
+
+        if (enfase.startsWith("followme")) {
+          location.href = FOLLOWME_LINKS.prof1;
           return;
         }
       }
 
-      /* ============================================
-         🔥 3) FollowMe
-      ============================================ */
+      /* ============================================================
+         🔥 3) FOLLOWME — apenas followme liberado
+      ============================================================ */
       if (acessoFollow) {
 
-        if (enfase === "followme") {
-          // abre o painel followme (quando existir)
+        if (enfase.startsWith("followme")) {
           location.href = "followme.html";
           return;
         }
 
-        // todos os outros → contratar acesso_app
-        location.href = "https://pay.hotmart.com/E102962105N";
+        location.href = LINK_ACESSO_APP;
         return;
       }
 
-      /* ============================================
-         🔥 4) Sem produto (app store, nova aluna, etc)
-         → sempre redireciona para o Hotmart certo
-      ============================================ */
-
+      /* ============================================================
+         🔥 4) SEM PRODUTO — todos levam ao Hotmart
+      ============================================================ */
       if (enfase === "personal") {
-        location.href = "https://pay.hotmart.com/#OFERTAS_PERSONAL";
+        location.href = LINK_PERSONAL;
         return;
       }
 
-      if (enfase === "followme") {
-        location.href = "https://pay.hotmart.com/Q102567067C";
+      if (enfase.startsWith("followme")) {
+        location.href = FOLLOWME_LINKS.prof1;
         return;
       }
 
-      // demais = acesso_app
-      location.href = "https://pay.hotmart.com/E102962105N";
+      location.href = LINK_ACESSO_APP;
     };
   });
 }
 
-
 /* ============================================================
-   SALVAR ÊNFASE → BACKEND
+   ENVIAR ÊNFASE AO BACKEND
 =========================================================== */
 async function selecionarEnfase(enfase){
   const id = localStorage.getItem("femflow_id");
@@ -307,14 +299,15 @@ async function selecionarEnfase(enfase){
 }
 
 /* ============================================================
-   CARD PERSONAL NO TOPO
+   CARD PERSONAL TOPO
 =========================================================== */
 function ativarCardPersonalTopo() {
   const produto = localStorage.getItem("femflow_produto");
-  const ativa   = localStorage.getItem("femflow_ativa");
+  const ativa   = localStorage.getItem("femflow_ativa") === "true";
 
-  if (produto === "treino_personal" && ativa === "true") {
+  if (produto === "treino_personal" && ativa) {
     document.getElementById("tituloPersonalTopo").style.display = "block";
+
     const rail = document.getElementById("railPersonalTopo");
     rail.style.display = "flex";
     renderRail(rail, LISTA_PERSONAL);
@@ -322,19 +315,22 @@ function ativarCardPersonalTopo() {
 }
 
 /* ============================================================
-   INIT
+   INIT HOME
 =========================================================== */
 document.addEventListener("DOMContentLoaded", ()=>{
+
   ativarCardPersonalTopo();
 
   renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
-  renderRail(document.getElementById("railEsportes"),  LISTA_ESPORTES);
-  renderRail(document.getElementById("railCasa"),      LISTA_CASA);
+  renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
+  renderRail(document.getElementById("railCasa"), LISTA_CASA);
 
   document.getElementById("btnFlow").onclick = () => FEMFLOW.router("flowcenter");
   document.getElementById("btnCad").onclick  = () => FEMFLOW.router("index");
 });
+
 </script>
+
 
 </body>
 </html>
