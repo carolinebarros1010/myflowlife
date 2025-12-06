@@ -1,6 +1,11 @@
-// js/anamnese.js — FemFlow Anamnese Deluxe (versão multilíngue 2025)
+// ============================================================
+//  FEMFLOW • ANAMNESE DELUXE 2025
+//  Arquivo JS total — substitui TODO JS inline do HTML
+// ============================================================
 
-// ============ PRÉ-CARREGAR GIFS ============
+// ------------------------------------------------------------
+//  1) PRÉ-CARREGAR GIFS
+// ------------------------------------------------------------
 [
  "profile_form.webp", "routine_cycle.webp", "strength_training.webp",
  "mobility_flow.webp", "hormonal_balance.webp",
@@ -10,37 +15,180 @@
   img.src = "./assets/gifs/" + g;
 });
 
+// ------------------------------------------------------------
+//  2) TEXTOS DA ETAPA 1 (Cadastro) — multilíngue
+// ------------------------------------------------------------
+const Tcad = {
+  pt: {
+    titulo: "Anamnese",
+    hint: "🌸 Preencha seus dados para começar:",
+    nome: "Nome completo",
+    email: "E-mail",
+    telefone: "Telefone (opcional)",
+    senha: "Crie uma senha (mín. 6)",
+    confirma: "Confirme a senha",
+    iniciar: "Iniciar Anamnese",
+    idioma: "🌐 Idioma"
+  },
+  en: {
+    titulo: "Assessment",
+    hint: "🌸 Fill your details to begin:",
+    nome: "Full name",
+    email: "Email",
+    telefone: "Phone (optional)",
+    senha: "Create password (min. 6)",
+    confirma: "Confirm password",
+    iniciar: "Start Assessment",
+    idioma: "🌐 Language"
+  },
+  fr: {
+    titulo: "Anamnèse",
+    hint: "🌸 Remplis tes informations pour commencer :",
+    nome: "Nom complet",
+    email: "E-mail",
+    telefone: "Téléphone (optionnel)",
+    senha: "Créer un mot de passe (min. 6)",
+    confirma: "Confirmer le mot de passe",
+    iniciar: "Commencer l’anamnèse",
+    idioma: "🌐 Langue"
+  }
+};
+
+// ------------------------------------------------------------
+//  Aplicar idioma ao cadastro
+// ------------------------------------------------------------
+function aplicarIdiomaCadastro() {
+  const lang = FEMFLOW.lang || "pt";
+  const T = Tcad[lang];
+
+  document.getElementById("tituloAnamnese").textContent = T.titulo;
+  document.getElementById("btnLang").textContent = T.idioma;
+  document.getElementById("cadHint").textContent = T.hint;
+
+  document.getElementById("nome").placeholder = T.nome;
+  document.getElementById("email").placeholder = T.email;
+  document.getElementById("telefone").placeholder = T.telefone;
+  document.getElementById("senha").placeholder = T.senha;
+  document.getElementById("confirma").placeholder = T.confirma;
+
+  document.getElementById("btnIniciar").textContent = T.iniciar;
+}
+
+document.addEventListener("femflow:langReady", aplicarIdiomaCadastro);
+document.addEventListener("femflow:langChange", aplicarIdiomaCadastro);
+
+document.getElementById("btnLang").onclick = () => {
+  document.getElementById("ff-lang-modal")?.classList.remove("hidden");
+};
+
 // ============================================================
-//      SISTEMA DE PERGUNTAS TRADUZÍVEIS
+//  3) PERGUNTAS (multilíngue)
 // ============================================================
 function getPerguntasTraduzidas() {
   const lang = FEMFLOW?.lang || "pt";
-
-  const L =
+  return JSON.parse(JSON.stringify(
     FEMFLOW?.anamneseLang?.[lang]?.perguntas ||
-    FEMFLOW.anamneseLang.pt.perguntas;
-
-  return JSON.parse(JSON.stringify(L)); // clone seguro
+    FEMFLOW.anamneseLang.pt.perguntas
+  ));
 }
 
-
+// ============================================================
+//  4) LÓGICA DA ANAMNESE COMPLETA
+// ============================================================
 (function () {
 
-  // Prevenção de submit no mobile
-  document.addEventListener("click", e => {
-    const el = e.target.closest("button");
-    if (el && !el.getAttribute("type")) el.setAttribute("type", "button");
-  }, { capture: true, passive: true });
+  const $ = (s) => document.querySelector(s);
 
-  const $ = sel => document.querySelector(sel);
+  const nome = $("#nome"), email = $("#email"), tel = $("#telefone"),
+        senha = $("#senha"), conf = $("#confirma"), btn = $("#btnIniciar");
+
+  const eNome = $("#eNome"), eEmail = $("#eEmail"),
+        eSenha = $("#eSenha"), eConf = $("#eConf");
+
+  const reEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const SCRIPT_URL =
     FEMFLOW?.SCRIPT_URL ||
     localStorage.getItem("femflow_script") ||
     "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-  // ========== ELEMENTOS ==========
-  const cardCadastro = $("#cadastro");
+  // ------------------------------------------------------------
+  //  VALIDAÇÃO
+  // ------------------------------------------------------------
+  function mark(input, elErr, ok, msg="") {
+    input.setAttribute("aria-invalid", ok ? "false" : "true");
+    elErr.textContent = ok ? "" : msg;
+  }
+
+  function validate() {
+    const vNome = (nome.value || "").trim().length >= 2;
+    const vEmail = reEmail.test((email.value||"").trim());
+    const vSenha = (senha.value||"").trim().length >= 6;
+    const vConf  = conf.value.trim() === senha.value.trim();
+
+    mark(nome,  eNome,  vNome,  "Informe seu nome.");
+    mark(email, eEmail, vEmail, "Digite um e-mail válido.");
+    mark(senha, eSenha, vSenha, "Mínimo 6 caracteres.");
+    mark(conf,  eConf,  vConf,  "As senhas não coincidem.");
+
+    btn.disabled = !(vNome && vEmail && vSenha && vConf);
+    return !btn.disabled;
+  }
+
+  ["input","blur"].forEach(evt => {
+    [nome,email,tel,senha,conf].forEach(el => el.addEventListener(evt, validate));
+  });
+
+  // ------------------------------------------------------------
+  // Registrar lead parcial
+  // ------------------------------------------------------------
+  async function leadParcial(nome,email,telefone){
+    try{
+      const qs = new URLSearchParams({
+        action:"leadparcial", nome,email,telefone,
+        origem:"Anamnese Deluxe FemFlow"
+      }).toString();
+      await fetch(SCRIPT_URL+"?"+qs);
+    }catch(_){}
+  }
+
+  // ------------------------------------------------------------
+  // INÍCIO DA ANAMNESE (show quiz)
+  // ------------------------------------------------------------
+  btn.addEventListener("click", async () => {
+
+    if (!validate()) return;
+
+    const nomeV  = nome.value.trim();
+    const emailV = email.value.trim();
+    const telV   = tel.value.trim();
+
+    localStorage.setItem("lead_nome", nomeV);
+    localStorage.setItem("lead_email", emailV);
+    if (telV) localStorage.setItem("lead_telefone", telV);
+
+    leadParcial(nomeV, emailV, telV);
+
+    try { FEMFLOW.toast?.("✨ Anamnese iniciada!"); } catch {}
+
+    $("#cadastro").classList.add("hidden");
+    $("#quiz").classList.remove("hidden");
+
+    FEMFLOW._leadCadastro = { nome:nomeV, email:emailV, telefone:telV };
+
+    // iniciar quiz
+    setTimeout(() => { window.iniciarQuizFemFlow?.(); }, 400);
+  });
+
+})();
+
+// ============================================================
+//  5) SISTEMA DE QUIZ + FINALIZAÇÃO (CADASTRO + CICLO + NÍVEL)
+// ============================================================
+(function () {
+
+  const $ = s => document.querySelector(s);
+
   const cardQuiz = $("#quiz");
   const cardFinal = $("#final");
   const gifEl = $("#gif");
@@ -48,27 +196,27 @@ function getPerguntasTraduzidas() {
   const optionsEl = $("#options");
   const finalMsgEl = $("#final-msg");
 
-  // ========== ESTADO ==========
-  let perguntas = getPerguntasTraduzidas(); // ← TRADUZIDAS
-  let idx = 0;
-  let score = 0;
+  let perguntas = getPerguntasTraduzidas();
+  let idx = 0, score = 0;
 
-  // ========== DADOS DO LEAD ==========
+  // ------------------------------------------------------------
+  //  Pegar dados da etapa 1
+  // ------------------------------------------------------------
   function pegarDadosLead() {
     const lead = FEMFLOW?._leadCadastro || {};
     return {
-      nome:     lead.nome     || localStorage.getItem("lead_nome")     || $("#nome")?.value || "",
-      email:    lead.email    || localStorage.getItem("lead_email")    || $("#email")?.value || "",
-      telefone: lead.telefone || localStorage.getItem("lead_telefone") || $("#telefone")?.value || "",
+      nome:     lead.nome     || localStorage.getItem("lead_nome") || "",
+      email:    lead.email    || localStorage.getItem("lead_email") || "",
+      telefone: lead.telefone || localStorage.getItem("lead_telefone") || "",
       senha:    $("#senha")?.value || ""
     };
   }
 
-  // ============================================================
-  //      MOSTRAR PERGUNTA (TRADUZIDA)
-  // ============================================================
+  // ------------------------------------------------------------
+  // Mostrar Pergunta
+  // ------------------------------------------------------------
   function mostrarPergunta() {
-    if (idx >= perguntas.length) return finalizar();
+    if (idx >= perguntas.length) return finalizarAnamnese();
 
     const p = perguntas[idx];
 
@@ -78,165 +226,155 @@ function getPerguntasTraduzidas() {
 
     p.opcoes.forEach(opt => {
       const b = document.createElement("button");
-      b.type = "button";
       b.textContent = opt.texto;
-      b.className = "btn-opcao";
 
-     b.onclick = () => {
-  p.escolha = opt.v;
-  score += opt.v;
-  idx++;
-  mostrarPergunta();
-};
+      b.onclick = () => {
+        p.escolha = opt.v;
+        score += opt.v;
+        idx++;
+        mostrarPergunta();
+      };
 
       optionsEl.appendChild(b);
     });
   }
 
-  // ============================================================
-  //      FINALIZAR ANAMNESE (TRADUÇÃO INTEGRADA)
-  // ============================================================
-  async function finalizar() {
+  // ------------------------------------------------------------
+  // FINALIZAÇÃO DA ANAMNESE
+  // ------------------------------------------------------------
+  async function finalizarAnamnese() {
 
-  const lang = FEMFLOW?.lang || "pt";
+    cardQuiz.classList.add("hidden");
+    cardFinal.classList.remove("hidden");
 
-  // Textos do sistema (vem do lang.js)
- const Tsys =
-  FEMFLOW?.langs?.[lang]?.sistema ||
-  FEMFLOW?.langs?.pt?.sistema ||
-  {
-    erroCiclo: "Erro ao finalizar.",
-    sincronizando: "Sincronizando…",
-    cicloConfigurado: "Perfil configurado!"
-  };
+    const lang = FEMFLOW?.lang || "pt";
 
-  // Textos da etapa final da Anamnese
-  const T = {
-    analisando: {
+    finalMsgEl.textContent = {
       pt: "Analisando seu perfil…",
       en: "Analyzing your profile…",
-      fr: "Analyse de ton profil…"
-    }[lang],
+      fr: "Analyse du profil…"
+    }[lang];
 
-    perfilFinal: {
-      pt: "Seu nível é:",
-      en: "Your level is:",
-      fr: "Ton niveau est :"
-    }[lang],
+    // Definir nível
+    let nivel = "iniciante";
+    if (score >= 20) nivel = "avançada";
+    else if (score >= 14) nivel = "intermediária";
 
-    erroFinal: {
-      pt: "Não foi possível concluir a anamnese.",
-      en: "Could not complete the questionnaire.",
-      fr: "Impossible de terminer le questionnaire."
-    }[lang],
+    // Coletar respostas
+    const respostas = {};
+    perguntas.forEach((p, i) => respostas["q"+(i+1)] = p.escolha || 0);
 
-    erroConexao: {
-      pt: "Erro de conexão.",
-      en: "Connection error.",
-      fr: "Erreur de connexion."
-    }[lang]
-  };
+    const { nome, email, telefone, senha } = pegarDadosLead();
 
-  // Telas
-  cardQuiz.classList.add("hidden");
-  cardFinal.classList.remove("hidden");
+    if (!nome || !email || !senha) {
+      FEMFLOW.toast("Erro ao finalizar", true);
+      return;
+    }
 
-  finalMsgEl.textContent = T.analisando;
+    FEMFLOW.toast("Sincronizando…");
 
-  // Classificação
-  let perfil = "iniciante";
-  if (score >= 20) perfil = "avançada";
-  else if (score >= 14) perfil = "intermediária";
+    // --------------------------------------------------------
+    // 1) VERIFICAR SE E-MAIL JÁ EXISTE NO BACKEND
+    // --------------------------------------------------------
+    const check = await fetch(FEMFLOW.SCRIPT_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ action:"verificarEmail", email })
+    }).then(r => r.json());
 
-const respostas = {};
-perguntas.forEach((p, i) => {
-  respostas["q" + (i + 1)] = p.escolha || 0;
-});
-
-  // Dados
-  const { nome, email, telefone, senha } = pegarDadosLead();
-
-  if (!nome || !email || !senha) {
-    FEMFLOW.toast(Tsys.erroCiclo, true);
-    return;
-  }
-
-  FEMFLOW.toast(Tsys.sincronizando);
-
-  try {
     let r;
 
-    if (typeof FEMFLOW.enviarCadastro === "function") {
-      r = await FEMFLOW.enviarCadastro({
-        nome, email, telefone, senha, perfil,
-        pontuacao: score,
-        anamnese: JSON.stringify(respostas),
-        cicloDuracao: 28,             // padrão inicial
-    dataInicio: new Date().toISOString()
-});
-      } else {
-      const resp = await fetch(SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    if (check.status === "existe") {
+      // --------------------------------------------------------
+      // 2A) ATUALIZAR CADASTRO EXISTENTE
+      // --------------------------------------------------------
+      r = await fetch(FEMFLOW.SCRIPT_URL, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
         body: JSON.stringify({
-          action: "enviarcadastro",
+          action:"atualizarCadastroExistente",
+          id: check.id,
           nome, email, telefone, senha,
-          perfil,
+          nivel,
           pontuacao: score,
           anamnese: JSON.stringify(respostas)
         })
-      });
-      r = await resp.json();
-    }
-
-    if (r && (r.status === "ok" || r.status === "created")) {
-
-      if (r.id) localStorage.setItem("femflow_id", r.id);
-      if (r.email) localStorage.setItem("femflow_email", r.email);
-
-      localStorage.removeItem("lead_nome");
-      localStorage.removeItem("lead_email");
-      localStorage.removeItem("lead_telefone");
-
-      FEMFLOW.toast(Tsys.cicloConfigurado);
-
-      finalMsgEl.textContent = `${T.perfilFinal} ${perfil.toUpperCase()}!`;
-
-      setTimeout(() => location.href = "ciclo.html", 3000);
+      }).then(r => r.json());
 
     } else {
-      FEMFLOW.toast(Tsys.erroCiclo, true);
-      finalMsgEl.textContent = T.erroFinal;
+      // --------------------------------------------------------
+      // 2B) CRIAR CADASTRO NOVO
+      // --------------------------------------------------------
+      r = await fetch(FEMFLOW.SCRIPT_URL, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          action:"enviarcadastro",
+          nome,email,telefone,senha,
+          nivel,
+          pontuacao: score,
+          anamnese: JSON.stringify(respostas)
+        })
+      }).then(r => r.json());
     }
 
-  } catch (err) {
-    console.error("Erro enviarCadastro:", err);
-    FEMFLOW.toast(Tsys.erroCiclo, true);
-    finalMsgEl.textContent = T.erroConexao;
+    if (!r || !(r.status === "ok" || r.status === "created")) {
+      FEMFLOW.toast("Erro ao finalizar", true);
+      finalMsgEl.textContent = "Erro ao concluir.";
+      return;
+    }
+
+    // --------------------------------------------------------
+    // 3) SALVAR ID NO LOCALSTORAGE
+    // --------------------------------------------------------
+    if (r.id) localStorage.setItem("femflow_id", r.id);
+    localStorage.setItem("femflow_email", email);
+    localStorage.setItem("femflow_nivel", nivel);
+
+    // --------------------------------------------------------
+    // 4) CRIAR CICLO INICIAL AUTOMATICAMENTE
+    // --------------------------------------------------------
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        action:"setciclo",
+        id: localStorage.getItem("femflow_id"),
+        cicloDuracao: 28,
+        dataInicio: new Date().toISOString(),
+        perfilHormonal: "regular"
+      })
+    });
+
+    // --------------------------------------------------------
+    // 5) EXIBIR NÍVEL NA TELA FINAL
+    // --------------------------------------------------------
+    finalMsgEl.textContent =
+      (lang==="pt" ? "Seu nível é: " :
+       lang==="en" ? "Your level is: " :
+       "Ton niveau est : ") + nivel.toUpperCase();
+
+    // --------------------------------------------------------
+    // 6) IR PARA A PÁGINA DE CICLO
+    // --------------------------------------------------------
+    setTimeout(() => location.href = "ciclo.html", 2800);
   }
-}
 
-
-  // ============================================================
-  //      INICIALIZAR QUIZ
-  // ============================================================
+  // ------------------------------------------------------------
+  // Inicializar Quiz
+  // ------------------------------------------------------------
   document.addEventListener("DOMContentLoaded", () => {
-
-    // carregar perguntas traduzidas quando entrar
     perguntas = getPerguntasTraduzidas();
 
-    window.iniciarQuizFemFlow = function () {
-      idx = 0;
-      score = 0;
-      perguntas = getPerguntasTraduzidas(); // ← troca idioma no meio
+    window.iniciarQuizFemFlow = function(){
+      idx=0;
+      score=0;
+      perguntas = getPerguntasTraduzidas();
       mostrarPergunta();
     };
 
-    if (!cardQuiz.classList.contains("hidden")) {
-      mostrarPergunta();
-    }
+    if (!cardQuiz.classList.contains("hidden")) mostrarPergunta();
 
-    // Atualizar perguntas ao mudar idioma
     document.addEventListener("femflow:langChange", () => {
       perguntas = getPerguntasTraduzidas();
       if (!cardQuiz.classList.contains("hidden")) mostrarPergunta();
