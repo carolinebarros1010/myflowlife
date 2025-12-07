@@ -1,13 +1,13 @@
 /* ============================================================
-   FemFlow • HOME.JS — VERSÃO FINAL 2025
-   Compatível com CORE 5.2
+   FemFlow • HOME.JS — VERSÃO FINAL 2025 CORRIGIDA
+   Agora sincroniza ANTES de exibir cards
 =========================================================== */
 
-/* LINKS DE COMPRA */
+/* LINKS */
 const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
 const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
 
-/* FOLLOWME STUB */
+/* FOLLOWME */
 const FOLLOWME_LINKS = {
   livia: "#",
   karoline: "#",
@@ -15,60 +15,61 @@ const FOLLOWME_LINKS = {
 };
 
 /* ============================================================
-   0. LOADING
+   LOADING
 =========================================================== */
-
-function showHomeLoader() {
+function mostrarLoading() {
   const box = document.createElement("div");
-  box.id = "homeLoader";
+  box.id = "homeLoading";
+  box.className = "home-loading";
   box.innerHTML = `
-    <div class="loader-box">
+    <div class="loader-card">
       <div class="loader-circle"></div>
-      <p>Carregando...</p>
+      <p>Carregando…</p>
     </div>
   `;
   document.body.appendChild(box);
 }
 
-function hideHomeLoader() {
-  document.getElementById("homeLoader")?.remove();
+function esconderLoading() {
+  document.getElementById("homeLoading")?.remove();
 }
 
 /* ============================================================
-   1. INICIALIZAÇÃO COMPLETA (com backend)
+   INÍCIO DA HOME — SINCRONIZAÇÃO AUTOMÁTICA
 =========================================================== */
-
 document.addEventListener("DOMContentLoaded", async () => {
 
-  showHomeLoader();
+  mostrarLoading();
 
-  // 1) Carregar perfil rápido
-  await FEMFLOW.carregarPerfil();
+  // ---------------------------
+  // 1) EXECUTA SYNC DO CORE
+  // ---------------------------
+  const perfil = await FEMFLOW.carregarPerfil();
 
-  // 2) Sincronizar ciclo, produto, ativa, enfase
-  await FEMFLOW.carregarCicloBackend();
+  if (!perfil) {
+    FEMFLOW.toast("Erro ao carregar dados.");
+    esconderLoading();
+    return;
+  }
 
-  // 3) Agora sim libera a Home
-  window.dispatchEvent(new Event("femflow:ready"));
+  // Agora o localStorage DEVE possuir:
+  // femflow_produto / femflow_ativa / femflow_personal
 
-  hideHomeLoader();
-});
-
-/* ============================================================
-   2. SAUDAÇÃO E RENDERIZAÇÃO
-=========================================================== */
-window.addEventListener("femflow:ready", () => {
-
+  // ---------------------------
+  // 2) Atualiza saudação
+  // ---------------------------
   const nome = localStorage.getItem("femflow_nome");
+  if (nome) document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
 
-  if (nome)
-    document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
-
+  // ---------------------------
+  // 3) Renderiza cards
+  // ---------------------------
   ativarCardPersonalTopo();
-
   renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
   renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
   renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
   renderRail(document.getElementById("railCasa"), LISTA_CASA);
   renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
+
+  esconderLoading();
 });
