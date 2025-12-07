@@ -1,5 +1,5 @@
 /* =======================================================================
-   🌸 FEMFLOW CORE — VERSÃO FINAL 5.3 — 2025
+   🌸 FEMFLOW CORE — VERSÃO FINAL 5.3 AJUSTADA — 2025
    Arquitetura Stargate — Estável • Seguro • Sem sobrescrever produto
 ======================================================================= */
 
@@ -20,8 +20,8 @@ FEMFLOW.setLang = function (lang) {
 };
 
 FEMFLOW.dev = () => localStorage.getItem("femflow_dev") === "on";
-FEMFLOW.log = (...a) => FEMFLOW.dev() && console.log("%c[FEMFLOW]", "color:#cc6a5a", ...a);
-FEMFLOW.warn = (...a) => FEMFLOW.dev() && console.warn("%c[FEMFLOW ⚠]", "color:#e07f67", ...a);
+FEMFLOW.log   = (...a) => FEMFLOW.dev() && console.log("%c[FEMFLOW]", "color:#cc6a5a", ...a);
+FEMFLOW.warn  = (...a) => FEMFLOW.dev() && console.warn("%c[FEMFLOW ⚠]", "color:#e07f67", ...a);
 FEMFLOW.error = (...a) => FEMFLOW.dev() && console.error("%c[FEMFLOW ❌]", "color:#b74333", ...a);
 
 FEMFLOW.toast = (msg, error = false) => {
@@ -66,12 +66,13 @@ FEMFLOW.inserirHeaderApp = function () {
   `;
 
   document.body.prepend(h);
+
   h.querySelector("#ffMenuBtn").onclick = () =>
     document.querySelector(".ff-menu-modal")?.classList.add("active");
 };
 
 /* ===========================================================
-   4. SYNC — CUIDADO: NÃO ALTERA PRODUTO MAIS!
+   4. SYNC (NÃO altera produto)
 =========================================================== */
 
 FEMFLOW.carregarCicloBackend = async function () {
@@ -81,14 +82,12 @@ FEMFLOW.carregarCicloBackend = async function () {
   if (!id) return null;
 
   try {
-    const resp = await fetch(FEMFLOW.SCRIPT_URL + "?action=sync&id=" + id)
-      .then(r => r.json());
-
+    const resp = await fetch(`${FEMFLOW.SCRIPT_URL}?action=sync&id=${id}`).then(r => r.json());
     FEMFLOW.log("📌 SYNC:", resp);
 
     if (!resp || !resp.fase) return null;
 
-    // Apenas dados hormonais — NÃO tocar produto/ativa/personal
+    // Dados hormonais — sem alterar produto/ativa/personal
     localStorage.setItem("femflow_fase", resp.fase);
     localStorage.setItem("femflow_diaCiclo", resp.diaCiclo);
     localStorage.setItem("femflow_perfilHormonal", resp.perfilHormonal);
@@ -132,6 +131,7 @@ FEMFLOW.inserirMenuLateral = function () {
   `;
 
   document.body.appendChild(modal);
+
   modal.onclick = e => {
     if (e.target.classList.contains("ff-menu-modal"))
       modal.classList.remove("active");
@@ -141,12 +141,13 @@ FEMFLOW.inserirMenuLateral = function () {
     btn.onclick = () => FEMFLOW._acaoMenu(btn.dataset.go)
   );
 };
+
 /* ===========================================================
-   6. MODAL IDIOMA — Restaurado para CORE 5.3
+   6. MODAL DE IDIOMA
 =========================================================== */
+
 FEMFLOW.inserirModalIdioma = function () {
 
-  // Evita criar duas vezes
   if (document.querySelector("#ff-lang-modal")) return;
 
   const modal = document.createElement("div");
@@ -167,12 +168,10 @@ FEMFLOW.inserirModalIdioma = function () {
 
   document.body.appendChild(modal);
 
-  // Fecha clicando no fundo
   modal.addEventListener("click", e => {
     if (e.target.id === "ff-lang-modal") modal.classList.add("hidden");
   });
 
-  // Botões de idioma
   modal.querySelectorAll(".ff-lang-btn").forEach(btn => {
     btn.onclick = () => {
       const lang = btn.dataset.lang;
@@ -187,13 +186,14 @@ FEMFLOW.inserirModalIdioma = function () {
 };
 
 /* ===========================================================
-   6. AÇÕES DO MENU
+   7. AÇÕES DO MENU
 =========================================================== */
 
 FEMFLOW._acaoMenu = function (op) {
   document.querySelector(".ff-menu-modal")?.classList.remove("active");
 
   switch (op) {
+
     case "idioma":
       document.getElementById("ff-lang-modal")?.classList.remove("hidden");
       break;
@@ -241,7 +241,7 @@ FEMFLOW._acaoMenu = function (op) {
 };
 
 /* ===========================================================
-   7. PERFIL — ESTE SIM ATUALIZA PRODUTO!
+   8. CARREGAR PERFIL (VALIDAR)
 =========================================================== */
 
 FEMFLOW.carregarPerfil = async function () {
@@ -252,7 +252,6 @@ FEMFLOW.carregarPerfil = async function () {
     const r = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`).then(r => r.json());
     if (r.status !== "ok") return null;
 
-    // Dados de perfil completo
     localStorage.setItem("femflow_nome", r.nome || "Aluna");
     localStorage.setItem("femflow_fase", r.fase);
     localStorage.setItem("femflow_enfase", r.enfase);
@@ -262,9 +261,8 @@ FEMFLOW.carregarPerfil = async function () {
     localStorage.setItem("femflow_cycleLength", r.ciclo_duracao);
     localStorage.setItem("femflow_perfilHormonal", r.perfilHormonal);
 
-    // ✔ AQUI SIM: produto / ativa / personal
     const produtoRaw = (r.produto || "").toLowerCase().trim();
-    const ativaRaw = r.ativa === true || r.ativa === "true";
+    const ativaRaw   = r.ativa === true || r.ativa === "true";
 
     localStorage.setItem("femflow_produto", produtoRaw);
     localStorage.setItem("femflow_ativa", ativaRaw ? "true" : "false");
@@ -283,7 +281,7 @@ FEMFLOW.carregarPerfil = async function () {
 };
 
 /* ===========================================================
-   8. SINCRONIZAR → DISPARAR READY
+   9. SYNC + EVENTO READY
 =========================================================== */
 
 FEMFLOW.sincronizarECdisparar = async function () {
@@ -295,21 +293,21 @@ FEMFLOW.sincronizarECdisparar = async function () {
 };
 
 /* ===========================================================
-   9. INIT — NUNCA RODA SYNC NA HOME
+   10. INIT — FLUXO PRINCIPAL
 =========================================================== */
 
 FEMFLOW.init = async function () {
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
 
-  // HOME NÃO USA SYNC — APENAS INSERIR HEADER / MENU
+  // HOME → sem SYNC
   if (p === "home.html") {
     this.inserirHeaderApp();
     this.inserirMenuLateral();
     this.inserirModalIdioma();
-    return; // NÃO RODA SYNC
+    return;
   }
 
-  // OUTRAS PÁGINAS SIM
+  // Demais páginas
   if ([
     "flowcenter.html",
     "treino.html",
@@ -322,7 +320,8 @@ FEMFLOW.init = async function () {
     this.inserirHeaderApp();
     this.inserirMenuLateral();
     this.inserirModalIdioma();
-    this.initNivelSelector();
+
+    // ❌ Removido: initNivelSelector()
 
     if (!localStorage.getItem("femflow_cycle_configured")) {
       location.href = "ciclo.html";
@@ -333,9 +332,8 @@ FEMFLOW.init = async function () {
   }
 };
 
-
 /* ===========================================================
-   10. AUTO START
+   11. AUTO START
 =========================================================== */
 
 document.addEventListener("DOMContentLoaded", () => FEMFLOW.init());
