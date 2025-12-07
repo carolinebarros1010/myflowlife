@@ -218,7 +218,7 @@ function aplicarIdiomaHome() {
     bv.textContent = `${L.bemvinda}, ${primeiroNome}!`;
   }
 
-  // Títulos das seções
+   // Títulos das seções
   document.getElementById("tituloPersonalTopo")?.textContent = L.tituloPersonal;
   document.getElementById("tituloFollowMe")?.textContent     = L.tituloFollowMe;
   document.getElementById("tituloMuscular")?.textContent     = L.tituloMuscular;
