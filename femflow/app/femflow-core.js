@@ -467,7 +467,6 @@ FEMFLOW.init = async function () {
     "treino.html",
     "respiracao.html",
     "evolucao.html",
-    "home.html",
     "followme.html",
     "followme_treino.html"
 ].includes(p)) {
