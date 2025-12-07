@@ -80,7 +80,7 @@ body {
 .video-wrapper::before {
   content: "";
   display: block;
-  padding-top: 56.25%; /* 16:9 */
+  padding-top: 56.25%; /* 16:9 padrão */
 }
 
 .video-wrapper iframe {
@@ -92,10 +92,31 @@ body {
   border-radius: 20px;
 }
 
-/* Mobile */
+/* ============================================================
+   MOBILE — Fixar tamanho em 345×194
+============================================================ */
 @media (max-width: 480px) {
+  
+  /* força o container a 345px */
   .video {
-    max-width: 100%;
+    max-width: 345px;
+  }
+
+  /* força a proporção exata, desabilitando o padding responsivo */
+  .video-wrapper {
+    width: 345px;
+    height: 194px; /* 16:9 */
+  }
+
+  /* remove o hack de padding-top para este caso */
+  .video-wrapper::before {
+    padding-top: 0 !important;
+  }
+
+  /* iframe fixo no tamanho desejado */
+  .video-wrapper iframe {
+    width: 345px !important;
+    height: 194px !important;
   }
 }
 
@@ -105,6 +126,8 @@ body {
     max-width: 960px;
   }
 }
+
+
 
 /* iOS notch safe-area */
 @supports(padding: env(safe-area-inset-top)) {
