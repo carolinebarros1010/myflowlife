@@ -1,13 +1,13 @@
 /* ============================================================
    FemFlow • HOME.JS — VERSÃO FINAL 2025
-   Compatível com CORE 5.2 — Sincroniza ANTES de exibir cards
+   Compatível com CORE 5.2 — (sincroniza corretamente)
 =========================================================== */
 
 /* LINKS */
 const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
 const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
 
-/* FOLLOWME (placeholders até ativar) */
+/* FOLLOWME (placeholders) */
 const FOLLOWME_LINKS = {
   livia: "#",
   karoline: "#",
@@ -15,7 +15,7 @@ const FOLLOWME_LINKS = {
 };
 
 /* ============================================================
-   LOADING (versão compacta)
+   LOADING
 =========================================================== */
 function mostrarLoading() {
   if (document.getElementById("homeLoading")) return;
@@ -64,28 +64,26 @@ const LISTA_CASA = [
   { titulo:"Casa Halter",   enfase:"casa_halter",   color:"#c6b4a4", desc:"Halter" }
 ];
 
-/* CARD PERSONAL — SEMPRE VISÍVEL */
 const LISTA_PERSONAL = [
   { titulo:"Treino Personal", enfase:"personal", color:"#335953", desc:"Treino exclusivo criado pelo Coach" }
 ];
 
-/* FOLLOWME */
 const LISTA_FOLLOWME = [
   {
-    titulo:{pt:"Treine com Lívia Rapaci", en:"Train with Lívia Rapaci", fr:"Entraînez-vous avec Lívia Rapaci"},
-    desc:{pt:"30 dias com a coach Lívia", en:"30 days with Lívia", fr:"30 jours avec Lívia"},
+    titulo:{pt:"Treine com Lívia Rapaci",en:"Train with Lívia Rapaci",fr:"Entraînez-vous avec Lívia Rapaci"},
+    desc:{pt:"30 dias com a coach Lívia",en:"30 days with Lívia",fr:"30 jours avec Lívia"},
     enfase:"followme_livia",
     color:"#f3c1c1"
   },
   {
-    titulo:{pt:"Treine com Karoline Bombeira", en:"Train with Karoline", fr:"Entraînez-vous avec Karoline"},
-    desc:{pt:"30 dias com Karoline", en:"30 days with Karoline", fr:"30 jours avec Karoline"},
+    titulo:{pt:"Treine com Karoline Bombeira",en:"Train with Karoline",fr:"Entraînez-vous avec Karoline"},
+    desc:{pt:"30 dias com Karoline",en:"30 days with Karoline",fr:"30 jours avec Karoline"},
     enfase:"followme_karoline",
     color:"#ff9f7f"
   },
   {
-    titulo:{pt:"Treine com Thalita Prates", en:"Train with Thalita", fr:"Entraînez-vous avec Thalita"},
-    desc:{pt:"30 dias com Thalita", en:"30 days with Thalita", fr:"30 jours avec Thalita"},
+    titulo:{pt:"Treine com Thalita Prates",en:"Train with Thalita",fr:"Entraînez-vous avec Thalita"},
+    desc:{pt:"30 dias com Thalita",en:"30 days with Thalita",fr:"30 jours avec Thalita"},
     enfase:"followme_thalita",
     color:"#cbb1e6"
   }
@@ -125,13 +123,10 @@ function handleCardClick(enfase){
 
   const produto = (localStorage.getItem("femflow_produto") || "").toLowerCase();
   const ativa   = localStorage.getItem("femflow_ativa") === "true";
+  const isPersonal = localStorage.getItem("femflow_personal") === "true";
 
-  const acessoPersonal = produto === "treino_personal" && ativa;
-  const acessoApp      = produto === "acesso_app" && ativa;
-  const acessoFollow   = produto === "followme" && ativa;
-
-  /* PERSONAL */
-  if (acessoPersonal){
+  /* PERSONAL — acesso total exceto FollowMe */
+  if (isPersonal){
     if (enfase.startsWith("followme_")){
       FEMFLOW.toast("FollowMe não faz parte do seu plano.");
       return;
@@ -139,26 +134,26 @@ function handleCardClick(enfase){
     return selecionarEnfase(enfase);
   }
 
-  /* ACESSO_APP */
-  if (acessoApp){
-    if (enfase.startsWith("followme_")){
-      FEMFLOW.toast("✨ Em breve! Treine junto por 30 dias.");
-      return;
-    }
-    if (enfase === "personal"){
-      FEMFLOW.toast("Treino Personal é vendido separadamente.");
-      return;
-    }
-    return selecionarEnfase(enfase);
-  }
-
   /* FOLLOWME */
-  if (acessoFollow){
+  if (produto === "followme" && ativa){
     if (!enfase.startsWith("followme_")){
-      FEMFLOW.toast("Seu plano dá acesso somente ao FollowMe.");
+      FEMFLOW.toast("Seu plano dá acesso apenas ao FollowMe.");
       return;
     }
     return selecionarCoach(enfase);
+  }
+
+  /* ACESSO_APP */
+  if (produto === "acesso_app" && ativa){
+    if (enfase.startsWith("followme_")){
+      FEMFLOW.toast("✨ Em breve!");
+      return;
+    }
+    if (enfase === "personal"){
+      FEMFLOW.toast("Treino Personal é um produto adicional.");
+      return;
+    }
+    return selecionarEnfase(enfase);
   }
 
   /* SEM PRODUTO */
@@ -166,7 +161,7 @@ function handleCardClick(enfase){
 }
 
 /* ============================================================
-   SALVAR ENFASE NORMAL
+   SALVAR ENFASE E IR PARA FLOWCENTER
 =========================================================== */
 async function selecionarEnfase(enfase){
   const id = localStorage.getItem("femflow_id");
@@ -184,7 +179,6 @@ async function selecionarEnfase(enfase){
   FEMFLOW.router("flowcenter");
 }
 
-/* FOLLOWME */
 async function selecionarCoach(coach){
   const id = localStorage.getItem("femflow_id");
 
@@ -202,31 +196,33 @@ async function selecionarCoach(coach){
 }
 
 /* ============================================================
-   INÍCIO DA HOME — SINCRONIZAÇÃO
+   INÍCIO — SINCRONIZAÇÃO CORRETA (CORE 5.2)
 =========================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
 
   mostrarLoading();
 
-  // 1) Sincroniza ciclo e produto
-  const perfil = await FEMFLOW.carregarPerfil();
+  // 🔥 CORRETO: sincroniza TUDO, não apenas o perfil
+  await FEMFLOW.sincronizarECdisparar();
 
-  if (!perfil) {
-    FEMFLOW.toast("Erro ao carregar dados.");
-    esconderLoading();
-    return;
+  esconderLoading();
+});
+
+/* ============================================================
+   QUANDO O CORE TERMINA → RENDERIZAR HOME
+=========================================================== */
+window.addEventListener("femflow:ready", () => {
+
+  // Saudação
+  const nome = localStorage.getItem("femflow_nome");
+  if (nome){
+    document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
   }
 
-  // 2) Saudação
-  const nome = localStorage.getItem("femflow_nome");
-  if (nome) document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
-
-  // 3) Renderiza rails
+  // Renderizar cards
   renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
   renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
   renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
   renderRail(document.getElementById("railCasa"), LISTA_CASA);
   renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
-
-  esconderLoading();
 });
