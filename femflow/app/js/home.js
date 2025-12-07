@@ -268,3 +268,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   esconderLoading();
 });
 
+/* ============================================================
+   🔥 Quando o idioma mudar → traduz de novo a home
+=========================================================== */
+document.addEventListener("femflow:langChange", aplicarIdiomaHome);
