@@ -165,29 +165,13 @@ resp: {
   faseAtual: "Fase atual",
   nenhumDado: "Nenhum dado registrado ainda."
 },
-
-
-  home: {
-    titulo: "Bem-vinda ao FemFlow",
-    iniciar: "Começar",
-    meusTreinos: "Meus Treinos",
-    minhaEvolucao: "Minha Evolução"
-  },
-
-  index: {
-    titulo: "Entrar no FemFlow",
-    placeholderID: "Seu ID FemFlow",
-    entrar: "Entrar",
-    lembrete: "Seu ID é enviado por e-mail após a compra."
-  },
-
-  sistema: {
+   sistema: {
     cicloConfigurado: "✨ Ciclo configurado!",
-    erroCiclo: "Erro ao carregar ciclo.",
+    erroCiclo: "Erro ao carregar o ciclo.",
     sincronizando: "Sincronizando…",
     treinoSalvo: "Treino salvo!",
     descansoSalvo: "Descanso registrado!"
-  }
+}
 },
 
 /* ============================================================
@@ -342,32 +326,6 @@ resp: {
   nenhumDado: "No data recorded yet."
 },
 
-
-  home: {
-    titulo: "Welcome to FemFlow",
-    iniciar: "Start",
-    meusTreinos: "My Workouts",
-    minhaEvolucao: "My Evolution"
-  },
-
-  index: {
-    titulo: "Login to FemFlow",
-    placeholderID: "Your FemFlow ID",
-    entrar: "Enter",
-    lembrete: "Your ID is sent by email after purchase."
-  },
- home: {
-      bemvinda: "Bienvenue",
-      videoTitulo: "Comment fonctionne FemFlow",
-      videoSub:   "Regardez cette vidéo avant de commencer.",
-      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_FR",
-
-      tituloPersonal:  "Personal",
-      tituloFollowMe:  "Entraînez-vous pendant 30 jours",
-      tituloMuscular:  "Entraînements par groupe musculaire",
-      tituloEsportes:  "Sports",
-      tituloCasa:      "S'entraîner à la maison"
-    }
   sistema: {
     cicloConfigurado: "✨ Cycle configured!",
     erroCiclo: "Error loading cycle.",
@@ -402,7 +360,18 @@ fr: {
     voltar: "Retour",
     sair: "Déconnexion"
   },
+ home: {
+      bemvinda: "Bienvenue",
+      videoTitulo: "Comment fonctionne FemFlow",
+      videoSub:   "Regardez cette vidéo avant de commencer.",
+      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_FR",
 
+      tituloPersonal:  "Personal",
+      tituloFollowMe:  "Entraînez-vous pendant 30 jours",
+      tituloMuscular:  "Entraînements par groupe musculaire",
+      tituloEsportes:  "Sports",
+      tituloCasa:      "S'entraîner à la maison"
+    },
   flowcenter: {
     titulo: "Votre phase hormonale",
     sub: "Votre corps a son propre rythme. Suivons-le ensemble.",
@@ -517,21 +486,6 @@ resp: {
   faseAtual: "Phase actuelle",
   nenhumDado: "Aucune donnée enregistrée."
 },
-
-  home: {
-    titulo: "Bienvenue sur FemFlow",
-    iniciar: "Commencer",
-    meusTreinos: "Mes Entraînements",
-    minhaEvolucao: "Mon Évolution"
-  },
-
-  index: {
-    titulo: "Connexion à FemFlow",
-    placeholderID: "Votre ID FemFlow",
-    entrar: "Entrer",
-    lembrete: "Votre ID est envoyé par e-mail après l'achat."
-  },
-
   sistema: {
     cicloConfigurado: "✨ Cycle configuré !",
     erroCiclo: "Erreur lors du chargement du cycle.",
