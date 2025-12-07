@@ -21,49 +21,34 @@
 
 <body>
 
-  <div class="wrap">
-    <!-- BEM-VINDA -->
-    <h1 id="bvTexto" class="bemvinda">Bem-vinda!</h1>
+  <!-- BEM-VINDA -->
+  <h1 id="bvTexto" class="bemvinda">Bem-vinda!</h1>
 
-    <!-- VÍDEO DO YOUTUBE (SHORTS) -->
-    <div class="video">
-      <div class="video-wrapper">
-        <iframe
-          src="https://www.youtube.com/embed/2BjCV-JQiOo"
-          title="FemFlow"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen>
-        </iframe>
-      </div>
-    </div>
-
-    <!-- BOTÕES TOPO -->
-    <div class="home-top-buttons">
-      <button id="btnFlow" class="home-btn">Flow Center</button>
-      <button id="btnCad" class="home-btn">Configurações</button>
-    </div>
-
-    <!-- ============= PERSONAL (se tiver produto) ============= -->
-    <h2 class="home-section-title" id="tituloPersonalTopo" style="display:none">Personal</h2>
-    <div class="rail" id="railPersonalTopo" style="display:none"></div>
-
-    <!-- ============= FOLLOW ME (NOVA SEÇÃO) ============= -->
-    <h2 class="home-section-title" id="tituloFollowMe">Treine junto por 30 dias</h2>
-    <div class="rail" id="railFollowMe"></div>
-
-    <!-- ============= MUSCULAR ============= -->
-    <h2 class="home-section-title" id="tituloMuscular">Treinos por Enfase</h2>
-    <div class="rail" id="railMuscular"></div>
-
-    <!-- ============= ESPORTES ============= -->
-    <h2 class="home-section-title" id="tituloEsportes">Esportes</h2>
-    <div class="rail" id="railEsportes"></div>
-
-    <!-- ============= TREINE EM CASA ============= -->
-    <h2 class="home-section-title" id="tituloCasa">Treinar em Casa</h2>
-    <div class="rail" id="railCasa"></div>
+  <!-- BOTÕES TOPO -->
+  <div class="home-top-buttons">
+    <button id="btnFlow" class="home-btn">Flow Center</button>
+    <button id="btnCad" class="home-btn">Configurações</button>
   </div>
+
+  <!-- PERSONAL — SEMPRE VISÍVEL -->
+  <h2 class="home-section-title" id="tituloPersonalTopo">Personal</h2>
+  <div class="rail" id="railPersonal"></div>
+
+  <!-- FOLLOW ME -->
+  <h2 class="home-section-title" id="tituloFollowMe">Treine junto por 30 dias</h2>
+  <div class="rail" id="railFollowMe"></div>
+
+  <!-- MUSCULAR -->
+  <h2 class="home-section-title" id="tituloMuscular">Treinos por Enfase</h2>
+  <div class="rail" id="railMuscular"></div>
+
+  <!-- ESPORTES -->
+  <h2 class="home-section-title" id="tituloEsportes">Esportes</h2>
+  <div class="rail" id="railEsportes"></div>
+
+  <!-- CASA -->
+  <h2 class="home-section-title" id="tituloCasa">Treinar em Casa</h2>
+  <div class="rail" id="railCasa"></div>
 
   <script src="js/lang.js"></script>
   <script src="femflow-core.js"></script>
