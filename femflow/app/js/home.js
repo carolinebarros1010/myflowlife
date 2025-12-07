@@ -1,13 +1,13 @@
 /* ============================================================
-   FemFlow • HOME.JS — VERSÃO FINAL 2025
-   Compatível com CORE 5.2 — (sincroniza corretamente)
+   FemFlow • HOME.JS — VERSÃO FINAL 2025 2(CORRIGIDA)
+   Home usa VALIDAR — NUNCA usa SYNC
 =========================================================== */
 
 /* LINKS */
 const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
 const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
 
-/* FOLLOWME (placeholders) */
+/* FOLLOWME */
 const FOLLOWME_LINKS = {
   livia: "#",
   karoline: "#",
@@ -65,12 +65,12 @@ const LISTA_CASA = [
 ];
 
 const LISTA_PERSONAL = [
-  { titulo:"Treino Personal", enfase:"personal", color:"#335953", desc:"Treino exclusivo criado pelo Coach" }
+  { titulo:"Treino Personal", enfase:"personal", color:"#335953", desc:"Treino criado pelo Coach" }
 ];
 
 const LISTA_FOLLOWME = [
   {
-    titulo:{pt:"Treine com Lívia Rapaci",en:"Train with Lívia Rapaci",fr:"Entraînez-vous avec Lívia Rapaci"},
+    titulo:{pt:"Treine com Lívia Rapaci",en:"Train with Lívia Rapaci",fr:"Entraînez-vous avec Lívia"},
     desc:{pt:"30 dias com a coach Lívia",en:"30 days with Lívia",fr:"30 jours avec Lívia"},
     enfase:"followme_livia",
     color:"#f3c1c1"
@@ -90,7 +90,7 @@ const LISTA_FOLLOWME = [
 ];
 
 /* ============================================================
-   HTML DOS CARDS
+   RENDERIZAÇÃO DOS CARDS
 =========================================================== */
 function cardHTML(p){
   const lang = FEMFLOW.lang || "pt";
@@ -121,12 +121,12 @@ function renderRail(el, lista){
 =========================================================== */
 function handleCardClick(enfase){
 
-  const produto = (localStorage.getItem("femflow_produto") || "").toLowerCase();
-  const ativa   = localStorage.getItem("femflow_ativa") === "true";
-  const isPersonal = localStorage.getItem("femflow_personal") === "true";
+  const produto  = (localStorage.getItem("femflow_produto") || "").toLowerCase();
+  const ativa    = localStorage.getItem("femflow_ativa") === "true";
+  const personal = localStorage.getItem("femflow_personal") === "true";
 
-  /* PERSONAL — acesso total exceto FollowMe */
-  if (isPersonal){
+  /* PERSONAL TEM ACESSO TOTAL (menos FollowMe) */
+  if (personal){
     if (enfase.startsWith("followme_")){
       FEMFLOW.toast("FollowMe não faz parte do seu plano.");
       return;
@@ -143,10 +143,10 @@ function handleCardClick(enfase){
     return selecionarCoach(enfase);
   }
 
-  /* ACESSO_APP */
+  /* ACESSO APP */
   if (produto === "acesso_app" && ativa){
     if (enfase.startsWith("followme_")){
-      FEMFLOW.toast("✨ Em breve!");
+      FEMFLOW.toast("✨ Em breve! Treine junto.");
       return;
     }
     if (enfase === "personal"){
@@ -156,39 +156,37 @@ function handleCardClick(enfase){
     return selecionarEnfase(enfase);
   }
 
-  /* SEM PRODUTO */
   FEMFLOW.toast("Adquira acesso para liberar seus treinos.");
 }
 
 /* ============================================================
-   SALVAR ENFASE E IR PARA FLOWCENTER
+   SALVAR ENFASE NORMAL
 =========================================================== */
 async function selecionarEnfase(enfase){
   const id = localStorage.getItem("femflow_id");
-
   localStorage.setItem("femflow_enfase", enfase);
 
   if (id){
-    await fetch(FEMFLOW.SCRIPT_URL, {
+    await fetch(FEMFLOW.SCRIPT_URL,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ action:"setenfase", id, enfase })
+      body:JSON.stringify({ action:"setenfase", id, enfase })
     });
   }
 
   FEMFLOW.router("flowcenter");
 }
 
+/* FOLLOWME */
 async function selecionarCoach(coach){
   const id = localStorage.getItem("femflow_id");
-
   localStorage.setItem("femflow_enfase", coach);
 
   if (id){
-    await fetch(FEMFLOW.SCRIPT_URL, {
+    await fetch(FEMFLOW.SCRIPT_URL,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ action:"setenfase", id, enfase: coach })
+      body:JSON.stringify({ action:"setenfase", id, enfase:coach })
     });
   }
 
@@ -196,22 +194,20 @@ async function selecionarCoach(coach){
 }
 
 /* ============================================================
-   INÍCIO — SINCRONIZAÇÃO CORRETA (CORE 5.2)
+   HOME — AGORA USANDO SOMENTE VALIDAR (SEM SYNC)
 =========================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
 
   mostrarLoading();
 
-  // 🔥 CORRETO: sincroniza TUDO, não apenas o perfil
-  await FEMFLOW.sincronizarECdisparar();
+  // 🔥 HOME usa VALIDAR, NÃO usa SYNC
+  const perfil = await FEMFLOW.carregarPerfil();
 
-  esconderLoading();
-});
-
-/* ============================================================
-   QUANDO O CORE TERMINA → RENDERIZAR HOME
-=========================================================== */
-window.addEventListener("femflow:ready", () => {
+  if (!perfil){
+    FEMFLOW.toast("Erro ao carregar seus dados.");
+    esconderLoading();
+    return;
+  }
 
   // Saudação
   const nome = localStorage.getItem("femflow_nome");
@@ -219,10 +215,13 @@ window.addEventListener("femflow:ready", () => {
     document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
   }
 
-  // Renderizar cards
+  // Rails
   renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
   renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
   renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
   renderRail(document.getElementById("railCasa"), LISTA_CASA);
   renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
+
+  esconderLoading();
 });
+
