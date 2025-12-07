@@ -303,5 +303,48 @@ footer {
   transform: scale(0.96);
   box-shadow: 0 2px 3px rgba(0,0,0,0.20);
 }
+/* ============================================================
+   LOADING — Igual FlowCenter
+============================================================ */
+
+.ff-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(180,170,170,0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.ff-loading-box {
+  background: #d7d5d5;
+  padding: 32px;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+.ff-loading-box p {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #7d2c26;
+  font-size: 16px;
+}
+
+/* Spinner */
+.ff-spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #e7d7d5;
+  border-top-color: #7d2c26;
+  border-radius: 50%;
+  animation: ff-spin 1s linear infinite;
+}
+
+@keyframes ff-spin {
+  to { transform: rotate(360deg); }
+}
 
 
