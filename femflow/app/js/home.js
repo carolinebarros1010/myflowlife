@@ -128,6 +128,12 @@ function renderRail(el, lista){
    LÓGICA DE ACESSO POR PRODUTO
 =========================================================== */
 function handleCardClick(enfase){
+   
+if (!localStorage.getItem("femflow_cycle_configured")) {
+    localStorage.setItem("femflow_enfase", enfase);
+    FEMFLOW.router("ciclo?ret=flowcenter");
+    return;
+}
 
   const produto  = (localStorage.getItem("femflow_produto") || "").toLowerCase();
   const ativa    = localStorage.getItem("femflow_ativa") === "true";
