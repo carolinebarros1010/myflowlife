@@ -59,40 +59,44 @@ async function initFlowCenter() {
   aplicarNivelH1();
   document.addEventListener("femflow:langChange", aplicarNivelH1);
 
-   /* ============================================================
-     4) IDIOMA
-  ============================================================ */
-  function aplicarIdioma() {
-    const lang = FEMFLOW.lang || "pt";
+function aplicarIdioma() {
+  const lang = FEMFLOW.lang || "pt";
+  const L = FEMFLOW.langs[lang]?.flowcenter;
+  if (!L) return;
 
-    const Lflow   = FEMFLOW.langs[lang]?.flowcenter;
-    const Lgeral  = FEMFLOW.langs[lang]?.geral;
+  const nome = perfil.nome?.split(" ")[0] || "";
 
-    if (!Lflow) return;
+  // Título e subtítulo
+  document.getElementById("tituloFlow").textContent = `${nome}, ${L.titulo}`;
+  document.getElementById("subFlow").textContent = L.sub;
 
-    const nome = perfil.nome?.split(" ")[0] || "";
+  // Fase central + texto "sua fase hormonal"
+  const faseKey = ciclo.fase;
+  const faseLabel = L[faseKey] || faseKey;
 
-    // Título + subtítulo
-    document.getElementById("tituloFlow").textContent = `${nome}, ${Lflow.titulo}`;
-    document.getElementById("subFlow").textContent    = Lflow.sub;
+  const center = document.getElementById("centerPhase");
+  if (center) center.textContent = faseLabel;
 
-    // Label da fase atual vem de GERAL, não de flowcenter
-    const labelFaseAtual = Lgeral?.faseAtual || "sua fase hormonal";
-
-    // Nome da fase (Menstrual, Folicular, etc.)
-    const faseTraduzida = Lflow[ciclo.fase] || ciclo.fase;
-
-    // Centro do círculo
-    document.getElementById("centerPhase").textContent = faseTraduzida;
-
-    // Texto abaixo do círculo: "sua fase hormonal: Menstrual"
-    document.getElementById("t_current").textContent =
-      `${labelFaseAtual}: ${faseTraduzida}`;
+  const tCurrent = document.getElementById("t_current");
+  if (tCurrent && L.faseAtual) {
+    tCurrent.textContent = `${L.faseAtual}: ${faseLabel}`;
   }
 
+  // Botões inferiores
+  const btnBreath    = document.getElementById("toBreath");
+  const btnTrain     = document.getElementById("toTrain");
+  const btnEvolution = document.getElementById("toEvolution");
+  const btnEndurance = document.getElementById("toEndurance");
 
-  aplicarIdioma();
-  document.addEventListener("femflow:langChange", aplicarIdioma);
+  if (btnBreath && L.respiracao) btnBreath.textContent = `💨 ${L.respiracao}`;
+  if (btnTrain && L.treino) btnTrain.textContent = `🏃 ${L.treino}`;
+  if (btnEvolution && L.evolucao) btnEvolution.textContent = `📈 ${L.evolucao}`;
+  if (btnEndurance && L.endurance) btnEndurance.textContent = `🏃‍♂️ ${L.endurance}`;
+}
+
+aplicarIdioma();
+document.addEventListener("femflow:langChange", aplicarIdioma);
+
 
   /* ============================================================
      5) CÍRCULO HORMONAL
