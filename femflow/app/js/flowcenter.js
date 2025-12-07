@@ -112,6 +112,22 @@ document.addEventListener("femflow:langChange", aplicarIdioma);
   /* ============================================================
      5) CÍRCULO HORMONAL
   ============================================================ */
+   // Normaliza nomes vindos do backend para IDs do SVG
+const faseMap = {
+  "menstrual": "menstrual",
+  "menstruacao": "menstrual",
+  "follicular": "follicular",
+  "folicular": "follicular",
+  "ovulatoria": "ovulatory",
+  "ovulacao": "ovulatory",
+  "ovulatory": "ovulatory",
+  "lutea": "luteal",
+  "luteal": "luteal"
+};
+
+// aplica a normalização
+ciclo.fase = faseMap[ciclo.fase?.toLowerCase()] || ciclo.fase;
+
   ["menstrual","follicular","ovulatory","luteal"].forEach(f => {
     document.getElementById("seg-"+f)?.classList.toggle("path-active", f===ciclo.fase);
     document.getElementById("lbl-"+f)?.classList.toggle("label-active", f===ciclo.fase);
