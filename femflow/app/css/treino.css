@@ -105,13 +105,21 @@ body {
 .carousel-item {
   flex: 0 0 calc(100vw - 28px);
   max-width: calc(100vw - 28px);
-  min-height: calc(100dvh - 240px);
+
+  /* Altura mínima para manter estrutura sem sobrar espaço */
+  min-height: calc(100dvh - 180px);
+
   background: white;
   border-radius: 22px;
-  padding: 14px 14px !important;
-  padding-bottom: 150px !important;
+
+  padding: 14px !important;
+
+  /* 🔥 Espaço dinâmico: só o suficiente p/ não encostar no footer */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+
   scroll-snap-align: center;
   overflow-y: auto;
+   
   box-shadow: 0 4px 14px var(--shadow);
 }
 
