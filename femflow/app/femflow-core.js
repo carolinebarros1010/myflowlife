@@ -257,8 +257,17 @@ FEMFLOW.sincronizarECdisparar = async function () {
 FEMFLOW.init = async function () {
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
 
+  // HOME NÃO USA SYNC — APENAS INSERIR HEADER / MENU
+  if (p === "home.html") {
+    this.inserirHeaderApp();
+    this.inserirMenuLateral();
+    this.inserirModalIdioma();
+    return; // NÃO RODA SYNC
+  }
+
+  // OUTRAS PÁGINAS SIM
   if ([
-        "flowcenter.html",
+    "flowcenter.html",
     "treino.html",
     "respiracao.html",
     "evolucao.html",
@@ -279,6 +288,7 @@ FEMFLOW.init = async function () {
     await FEMFLOW.sincronizarECdisparar();
   }
 };
+
 
 /* ===========================================================
    10. AUTO START
