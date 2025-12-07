@@ -200,6 +200,40 @@ async function selecionarCoach(coach){
 
   FEMFLOW.router("flowcenter");
 }
+/* ============================================================
+   APLICAR IDIOMA NA HOME (inclui VÍDEO)
+=========================================================== */
+function aplicarIdiomaHome() {
+  const lang = FEMFLOW.lang || "pt";
+  const L = FEMFLOW.langs?.[lang]?.home;
+  if (!L) return;
+
+  const nomeRaw = localStorage.getItem("femflow_nome") || "Aluna";
+  const primeiroNome = nomeRaw.split(" ")[0];
+
+  // Saudação
+  const bv = document.getElementById("bvTexto");
+  if (bv) {
+    // usa o texto do lang + primeiro nome
+    bv.textContent = `${L.bemvinda}, ${primeiroNome}!`;
+  }
+
+  // Títulos das seções
+  document.getElementById("tituloPersonalTopo")?.textContent = L.tituloPersonal;
+  document.getElementById("tituloFollowMe")?.textContent     = L.tituloFollowMe;
+  document.getElementById("tituloMuscular")?.textContent     = L.tituloMuscular;
+  document.getElementById("tituloEsportes")?.textContent     = L.tituloEsportes;
+  document.getElementById("tituloCasa")?.textContent         = L.tituloCasa;
+
+  // 🔥 VÍDEO
+  const vTitle = document.getElementById("homeVideoTitle");
+  const vSub   = document.getElementById("homeVideoSub");
+  const vFrame = document.getElementById("homeVideoFrame");
+
+  if (vTitle && L.videoTitulo) vTitle.textContent = L.videoTitulo;
+  if (vSub   && L.videoSub)   vSub.textContent   = L.videoSub;
+  if (vFrame && L.videoUrl)   vFrame.src         = L.videoUrl;
+}
 
 /* ============================================================
    HOME — AGORA USANDO SOMENTE VALIDAR (SEM SYNC)
@@ -229,7 +263,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
   renderRail(document.getElementById("railCasa"), LISTA_CASA);
   renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
-
+ // 👇 AQUI:
+  aplicarIdiomaHome();
   esconderLoading();
 });
 
