@@ -186,6 +186,7 @@ async function selecionarEnfase(enfase){
       headers:{ "Content-Type":"application/json" },
       body:JSON.stringify({ action:"setenfase", id, enfase })
     });
+     await FEMFLOW.reiniciarDiaPrograma();
   }
 
   FEMFLOW.router("flowcenter");
@@ -202,6 +203,7 @@ async function selecionarCoach(coach){
       headers:{ "Content-Type":"application/json" },
       body:JSON.stringify({ action:"setenfase", id, enfase:coach })
     });
+   await FEMFLOW.reiniciarDiaPrograma();
   }
 
   FEMFLOW.router("flowcenter");
