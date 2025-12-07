@@ -64,8 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ---------------------------
   // 3) Renderiza cards
   // ---------------------------
-  ativarCardPersonalTopo();
-  renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
+   renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
   renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
   renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
   renderRail(document.getElementById("railCasa"), LISTA_CASA);
