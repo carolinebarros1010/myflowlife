@@ -1,19 +1,16 @@
 /* =======================================================================
-   🌸 FEMFLOW CORE — VERSÃO FINAL 5.2 — 2025
-   Arquitetura Stargate — 100% sincronizado com Backend (Apps Script)
+   🌸 FEMFLOW CORE — VERSÃO FINAL 5.3 — 2025
+   Arquitetura Stargate — Estável • Seguro • Sem sobrescrever produto
 ======================================================================= */
 
 window.FEMFLOW = window.FEMFLOW || {};
-
 
 /* ===========================================================
    1. CONFIG GLOBAL
 =========================================================== */
 
 FEMFLOW.SCRIPT_URL = "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
-FEMFLOW.ENDPOINT_BACKEND = FEMFLOW.SCRIPT_URL;
 FEMFLOW.API_URL = FEMFLOW.SCRIPT_URL;
-FEMFLOW.BACKEND = FEMFLOW.SCRIPT_URL;
 
 FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
 FEMFLOW.setLang = function (lang) {
@@ -23,32 +20,25 @@ FEMFLOW.setLang = function (lang) {
 };
 
 FEMFLOW.dev = () => localStorage.getItem("femflow_dev") === "on";
-FEMFLOW.log   = (...a) => { if (FEMFLOW.dev()) console.log("%c[FEMFLOW]", "color:#cc6a5a", ...a); };
-FEMFLOW.warn  = (...a) => { if (FEMFLOW.dev()) console.warn("%c[FEMFLOW ⚠]", "color:#e07f67", ...a); };
-FEMFLOW.error = (...a) => { if (FEMFLOW.dev()) console.error("%c[FEMFLOW ❌]", "color:#b74333", ...a); };
+FEMFLOW.log = (...a) => FEMFLOW.dev() && console.log("%c[FEMFLOW]", "color:#cc6a5a", ...a);
+FEMFLOW.warn = (...a) => FEMFLOW.dev() && console.warn("%c[FEMFLOW ⚠]", "color:#e07f67", ...a);
+FEMFLOW.error = (...a) => FEMFLOW.dev() && console.error("%c[FEMFLOW ❌]", "color:#b74333", ...a);
 
-FEMFLOW.toast = (msg, error = false, offline = false) => {
+FEMFLOW.toast = (msg, error = false) => {
   let box = document.querySelector(".toast-box");
   if (!box) {
     box = document.createElement("div");
     box.className = "toast-box";
     document.body.appendChild(box);
   }
-
   box.textContent = msg;
-  box.classList.remove("error");
-  if (error) box.classList.add("error");
-
+  box.classList.toggle("error", error);
   box.classList.add("visible");
-
-  if (!offline) {
-    setTimeout(() => box.classList.remove("visible"), 2400);
-  }
+  setTimeout(() => box.classList.remove("visible"), 2400);
 };
 
-
 /* ===========================================================
-   2. ROUTER (PRESERVA PERSONAL AUTOMATICAMENTE)
+   2. ROUTER
 =========================================================== */
 
 FEMFLOW.router = pag => {
@@ -61,7 +51,6 @@ FEMFLOW.router = pag => {
   }
 };
 
-
 /* ===========================================================
    3. HEADER
 =========================================================== */
@@ -71,31 +60,25 @@ FEMFLOW.inserirHeaderApp = function () {
 
   const h = document.createElement("header");
   h.id = "femflowHeader";
-
   h.innerHTML = `
     <img src="./assets/logofemflowterracotasf.png" class="ff-logo">
     <button id="ffMenuBtn" class="ff-menu-btn">&#9776;</button>
   `;
 
   document.body.prepend(h);
-
-  h.querySelector("#ffMenuBtn").onclick =
-    () => document.querySelector(".ff-menu-modal")?.classList.add("active");
+  h.querySelector("#ffMenuBtn").onclick = () =>
+    document.querySelector(".ff-menu-modal")?.classList.add("active");
 };
 
-
 /* ===========================================================
-   4. SINCRONIZAR CICLO COM BACKEND (SEM DISPARAR READY)
+   4. SYNC — CUIDADO: NÃO ALTERA PRODUTO MAIS!
 =========================================================== */
 
 FEMFLOW.carregarCicloBackend = async function () {
-  FEMFLOW.log("🔄 Sincronizando ciclo com backend…");
+  FEMFLOW.log("🔄 SYNC ciclo…");
 
   const id = localStorage.getItem("femflow_id");
-  if (!id) {
-    FEMFLOW.error("❌ Sem ID no localStorage!");
-    return null;
-  }
+  if (!id) return null;
 
   try {
     const resp = await fetch(FEMFLOW.SCRIPT_URL + "?action=sync&id=" + id)
@@ -103,14 +86,9 @@ FEMFLOW.carregarCicloBackend = async function () {
 
     FEMFLOW.log("📌 SYNC:", resp);
 
-    if (!resp || !resp.fase) {
-      FEMFLOW.toast("Erro ao sincronizar fase hormonal.");
-      return null;
-    }
+    if (!resp || !resp.fase) return null;
 
-    // -----------------------------
-    // CAMPOS DO CICLO
-    // -----------------------------
+    // Apenas dados hormonais — NÃO tocar produto/ativa/personal
     localStorage.setItem("femflow_fase", resp.fase);
     localStorage.setItem("femflow_diaCiclo", resp.diaCiclo);
     localStorage.setItem("femflow_perfilHormonal", resp.perfilHormonal);
@@ -119,39 +97,13 @@ FEMFLOW.carregarCicloBackend = async function () {
     localStorage.setItem("femflow_cycleLength", resp.ciclo_duracao);
     localStorage.setItem("femflow_startDate", resp.data_inicio);
 
-    // -----------------------------
-    // CAMPOS DE PRODUTO (NOVO)
-    // -----------------------------
-    const produtoRaw = (resp.produto || "").toString().toLowerCase().trim();
-    const ativaRaw   = resp.ativa === true || resp.ativa === "true";
-
-    localStorage.setItem("femflow_produto", produtoRaw);
-    localStorage.setItem("femflow_ativa", ativaRaw ? "true" : "false");
-
-    // -----------------------------
-    // PERSONAL (FLAG GLOBAL)
-    // -----------------------------
-    const isPersonal =
-      resp.personal === true ||
-      produtoRaw === "treino_personal" ||
-      produtoRaw.includes("personal");
-
-    if (isPersonal) {
-      localStorage.setItem("femflow_personal", "true");
-    } else {
-      localStorage.removeItem("femflow_personal");
-    }
-
     return resp;
 
   } catch (err) {
-    FEMFLOW.error("❌ Falha no sync:", err);
-    FEMFLOW.toast("Falha ao sincronizar ciclo.");
+    FEMFLOW.error("❌ SYNC falhou:", err);
     return null;
   }
 };
-
-
 
 /* ===========================================================
    5. MENU LATERAL
@@ -162,7 +114,6 @@ FEMFLOW.inserirMenuLateral = function () {
 
   const modal = document.createElement("div");
   modal.className = "ff-menu-modal";
-
   modal.innerHTML = `
     <div class="ff-menu-box">
       <h2 class="ff-menu-title">Menu</h2>
@@ -181,80 +132,31 @@ FEMFLOW.inserirMenuLateral = function () {
   `;
 
   document.body.appendChild(modal);
-
   modal.onclick = e => {
     if (e.target.classList.contains("ff-menu-modal"))
       modal.classList.remove("active");
   };
 
-  modal.querySelectorAll(".ff-menu-op, .ff-logout").forEach(btn => {
-    btn.onclick = () => FEMFLOW._acaoMenu(btn.dataset.go);
-  });
+  modal.querySelectorAll(".ff-menu-op, .ff-logout").forEach(btn =>
+    btn.onclick = () => FEMFLOW._acaoMenu(btn.dataset.go)
+  );
 };
 
-
 /* ===========================================================
-   6. MODAL IDIOMA
-=========================================================== */
-
-FEMFLOW.inserirModalIdioma = function () {
-
-  if (document.querySelector("#ff-lang-modal")) return;
-
-  const modal = document.createElement("div");
-  modal.id = "ff-lang-modal";
-  modal.className = "ff-lang-modal hidden";
-
-  modal.innerHTML = `
-    <div class="ff-lang-box">
-      <h2>🌐 Idioma / Language / Langue</h2>
-
-      <button class="ff-lang-btn" data-lang="pt">🇧🇷 Português</button>
-      <button class="ff-lang-btn" data-lang="en">🇺🇸 English</button>
-      <button class="ff-lang-btn" data-lang="fr">🇫🇷 Français</button>
-
-      <button class="ff-lang-close">✖ Fechar</button>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  modal.addEventListener("click", e => {
-    if (e.target.id === "ff-lang-modal") modal.classList.add("hidden");
-  });
-
-  modal.querySelectorAll(".ff-lang-btn").forEach(btn => {
-    btn.onclick = () => {
-      const lang = btn.dataset.lang;
-      localStorage.setItem("femflow_lang", lang);
-      FEMFLOW.toast("Idioma atualizado!");
-      setTimeout(() => location.reload(), 600);
-    };
-  });
-
-  modal.querySelector(".ff-lang-close").onclick =
-    () => modal.classList.add("hidden");
-};
-
-
-/* ===========================================================
-   7. AÇÕES DO MENU
+   6. AÇÕES DO MENU
 =========================================================== */
 
 FEMFLOW._acaoMenu = function (op) {
   document.querySelector(".ff-menu-modal")?.classList.remove("active");
 
   switch (op) {
-
     case "idioma":
       document.getElementById("ff-lang-modal")?.classList.remove("hidden");
       break;
 
-    case "ciclo": {
-      const atual = location.pathname.split("/").pop();
-      FEMFLOW.router(`ciclo?ret=${atual}`);
+    case "ciclo":
+      FEMFLOW.router(`ciclo?ret=${location.pathname.split("/").pop()}`);
       break;
-    }
 
     case "respiracao":
       FEMFLOW.router("respiracao");
@@ -264,16 +166,13 @@ FEMFLOW._acaoMenu = function (op) {
       FEMFLOW.router("evolucao");
       break;
 
-    case "nivel": {
-      const m = document.querySelector("#modal-nivel");
-      if (m) m.classList.remove("oculto");
+    case "nivel":
+      document.querySelector("#modal-nivel")?.classList.remove("oculto");
       break;
-    }
 
     case "tema":
       document.body.classList.toggle("dark");
-      localStorage.setItem(
-        "femflow_theme",
+      localStorage.setItem("femflow_theme",
         document.body.classList.contains("dark") ? "dark" : "light"
       );
       break;
@@ -283,7 +182,7 @@ FEMFLOW._acaoMenu = function (op) {
       FEMFLOW.router("index");
       break;
 
-    case "voltar": {
+    case "voltar":
       const p = location.pathname.split("/").pop();
       const rota = {
         "treino.html": "flowcenter.html",
@@ -294,77 +193,11 @@ FEMFLOW._acaoMenu = function (op) {
       };
       FEMFLOW.router(rota[p] || "home.html");
       break;
-    }
   }
 };
 
-
 /* ===========================================================
-   8. NOME DA ALUNA
-=========================================================== */
-FEMFLOW.getNome = () => localStorage.getItem("femflow_nome") || "Aluna";
-
-
-/* ===========================================================
-   9. ALTERAR NÍVEL (Backend + Local)
-=========================================================== */
-
-FEMFLOW.initNivelSelector = function () {
-  const modal = document.querySelector("#modal-nivel");
-  if (!modal) return;
-
-  const fechar = document.querySelector("#fecharNivel");
-  fechar.onclick = () => modal.classList.add("oculto");
-
-  document.querySelectorAll(".nivel-btn").forEach(btn => {
-    btn.onclick = async () => {
-
-      const nivel = btn.dataset.nivel;
-      const id = localStorage.getItem("femflow_id");
-
-      if (!id) {
-        FEMFLOW.toast("Faça login novamente.", true);
-        return;
-      }
-
-      FEMFLOW.log("📈 SetNivel →", nivel);
-
-      localStorage.setItem("femflow_nivel", nivel);
-
-      try {
-        const r = await fetch(FEMFLOW.SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "setnivel",
-            id: id,
-            nivel: nivel
-          })
-        }).then(r => r.json());
-
-        FEMFLOW.log("Resposta backend setnivel:", r);
-
-        if (r.status === "ok") {
-          FEMFLOW.toast("Nível atualizado: " + nivel);
-          window.dispatchEvent(new Event("femflow:nivelChange"));
-        } else {
-          FEMFLOW.toast("Erro ao salvar no servidor", true);
-        }
-      } catch (e) {
-        FEMFLOW.error("Erro setnivel:", e);
-        FEMFLOW.toast("Erro de conexão", true);
-      }
-
-      modal.classList.add("oculto");
-
-      await FEMFLOW.carregarCicloBackend();
-    };
-  });
-};
-
-
-/* ===========================================================
-   10. CARREGAR PERFIL (VALIDAÇÃO RÁPIDA)
+   7. PERFIL — ESTE SIM ATUALIZA PRODUTO!
 =========================================================== */
 
 FEMFLOW.carregarPerfil = async function () {
@@ -372,51 +205,32 @@ FEMFLOW.carregarPerfil = async function () {
   if (!id) return null;
 
   try {
-    const r = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`);
-    const j = await r.json();
+    const r = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`).then(r => r.json());
+    if (r.status !== "ok") return null;
 
-    if (j.status !== "ok") return null;
+    // Dados de perfil completo
+    localStorage.setItem("femflow_nome", r.nome || "Aluna");
+    localStorage.setItem("femflow_fase", r.fase);
+    localStorage.setItem("femflow_enfase", r.enfase);
+    localStorage.setItem("femflow_diaCiclo", r.diaCiclo);
+    localStorage.setItem("femflow_nivel", r.nivel);
+    localStorage.setItem("femflow_startDate", r.data_inicio);
+    localStorage.setItem("femflow_cycleLength", r.ciclo_duracao);
+    localStorage.setItem("femflow_perfilHormonal", r.perfilHormonal);
 
-    // --------------------------------------------------------
-    // CAMPOS BÁSICOS DO CICLO / PERFIL
-    // --------------------------------------------------------
-    localStorage.setItem("femflow_nome", j.nome || "Aluna");
-    if (j.fase)          localStorage.setItem("femflow_fase", j.fase);
-    if (j.enfase)        localStorage.setItem("femflow_enfase", j.enfase);
-    if (j.diaCiclo != null) localStorage.setItem("femflow_diaCiclo", j.diaCiclo);
-    if (j.nivel)         localStorage.setItem("femflow_nivel", j.nivel);
-    localStorage.setItem("femflow_perfilHormonal", j.perfilHormonal || "regular");
-    if (j.data_inicio)   localStorage.setItem("femflow_startDate", j.data_inicio);
-    if (j.ciclo_duracao) localStorage.setItem("femflow_cycleLength", j.ciclo_duracao);
-
-    // --------------------------------------------------------
-    // PRODUTO + STATUS ATIVA → PARA HOME / CARDS
-    // --------------------------------------------------------
-    const produtoRaw = (j.produto || "").toString().toLowerCase().trim();
-    const ativaRaw   = j.ativa === true || j.ativa === "true";
+    // ✔ AQUI SIM: produto / ativa / personal
+    const produtoRaw = (r.produto || "").toLowerCase().trim();
+    const ativaRaw = r.ativa === true || r.ativa === "true";
 
     localStorage.setItem("femflow_produto", produtoRaw);
     localStorage.setItem("femflow_ativa", ativaRaw ? "true" : "false");
 
-    // --------------------------------------------------------
-    // PERSONAL GLOBAL (FLAG)
-    // - Se backend mandar personal = true
-    // - OU se o nome do produto contiver "personal"
-    // --------------------------------------------------------
-    const isPersonal =
-      j.personal === true ||
-      produtoRaw === "treino_personal" ||
-      produtoRaw.includes("personal");
-
-    if (isPersonal) {
+    if (produtoRaw.includes("personal"))
       localStorage.setItem("femflow_personal", "true");
-    } else {
+    else
       localStorage.removeItem("femflow_personal");
-    }
 
-    FEMFLOW.log("🌙 CICLO STARGATE SYNC →", j);
-
-    return j;
+    return r;
 
   } catch (e) {
     FEMFLOW.error("Erro carregarPerfil:", e);
@@ -424,26 +238,8 @@ FEMFLOW.carregarPerfil = async function () {
   }
 };
 
-
 /* ===========================================================
-   11. DIA PROGRAMA — 1→30 automático
-=========================================================== */
-
-FEMFLOW.calcularDiaPrograma = function () {
-  const start = new Date(localStorage.getItem("femflow_startDate") || new Date());
-  const hoje = new Date();
-
-  const diff = Math.floor((hoje - start) / 86400000) + 1;
-  const diaPrograma = diff > 30 ? ((diff - 1) % 30) + 1 : diff;
-
-  localStorage.setItem("femflow_diaPrograma", diaPrograma);
-
-  return diaPrograma;
-};
-
-
-/* ===========================================================
-   12. SINCRONIZAR E DISPARAR READY (PONTO CENTRAL)
+   8. SINCRONIZAR → DISPARAR READY
 =========================================================== */
 
 FEMFLOW.sincronizarECdisparar = async function () {
@@ -454,22 +250,21 @@ FEMFLOW.sincronizarECdisparar = async function () {
   }));
 };
 
-
 /* ===========================================================
-   13. INIT CORE (AUTO)
+   9. INIT — NUNCA RODA SYNC NA HOME
 =========================================================== */
 
 FEMFLOW.init = async function () {
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
 
- if ([
+  if ([
     "flowcenter.html",
     "treino.html",
     "respiracao.html",
     "evolucao.html",
     "followme.html",
     "followme_treino.html"
-].includes(p)) {
+  ].includes(p)) {
 
     this.inserirHeaderApp();
     this.inserirMenuLateral();
@@ -477,50 +272,16 @@ FEMFLOW.init = async function () {
     this.initNivelSelector();
 
     if (!localStorage.getItem("femflow_cycle_configured")) {
-      console.warn("⚠️ Ciclo não configurado — redirecionando.");
       location.href = "ciclo.html";
       return;
     }
 
     await FEMFLOW.sincronizarECdisparar();
-}
+  }
 };
 
-
 /* ===========================================================
-   14. INSPECTOR
+   10. AUTO START
 =========================================================== */
 
-FEMFLOW.inspect = function () {
-  console.clear();
-  console.log("%c🔍 FEMFLOW INSPECTOR — 2025",
-              "font-size:18px;font-weight:bold;color:#cc6a5a;");
-
-  const keys = [
-    "femflow_id","femflow_email","femflow_nome",
-    "femflow_fase","femflow_diaCiclo",
-    "femflow_perfilHormonal","femflow_enfase","femflow_nivel",
-    "femflow_cycleLength","femflow_startDate",
-    "femflow_dia_treino","femflow_dev","femflow_personal"
-  ];
-
-  keys.forEach(k => console.log(k, "→", localStorage.getItem(k)));
-};
-
-
-/* ===========================================================
-   15. AUTO-START COM DOMContentLoaded
-=========================================================== */
-
-document.addEventListener("DOMContentLoaded", () => {
-  FEMFLOW.init();
-});
-
-/* ===========================================================
-   16. EVENTO GLOBAL — Nível atualizado
-=========================================================== */
-window.addEventListener("femflow:nivelChange", () => {
-  const nivel = localStorage.getItem("femflow_nivel");
-  FEMFLOW.log("🔥 NivelChange capturado no CORE:", nivel);
-});
-
+document.addEventListener("DOMContentLoaded", () => FEMFLOW.init());
