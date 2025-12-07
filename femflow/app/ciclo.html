@@ -261,15 +261,16 @@ await fetch(FEMFLOW.SCRIPT_URL, {
   FEMFLOW.toast("✨ Ciclo configurado!");
   ffShowLoading("Carregando seu painel…");
   const params = new URLSearchParams(location.search);
-const ret = params.get("ret");
+const ret = new URLSearchParams(location.search).get("ret");
 
-// se estiver vindo do menu → volta para a página original
+// 🔥 Se recebeu "ret", SEMPRE vai para lá
 if (ret) {
-    location.href = ret;
-} else {
-    // se veio da primeira configuração, pós-login
-    location.href = "home.html";
+    FEMFLOW.router(ret);
+    return;
 }
+
+// 🔥 Caso contrário (pós-login), vai para o FlowCenter
+FEMFLOW.router("flowcenter");
 }
 /* ============================================================
    PERFIS E QUIZ
