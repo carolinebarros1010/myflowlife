@@ -51,20 +51,24 @@ home: {
       tituloCasa:      "Treinar em casa"
     },
   flowcenter: {
-    titulo: "Sua fase hormonal",
-    sub: "Seu corpo tem um ritmo único. Vamos acompanhar juntas.",
-    menstrual: "Menstrual",
-    follicular: "Folicular",
-    ovulatory: "Ovulatória",
-    luteal: "Lútea",
-     faseAtual: "Sua fase hormonal",
+  // TÍTULOS
+  titulo: "Sua fase hormonal",
+  faseAtual: "Sua fase hormonal",
+  sub: "Seu corpo tem um ritmo único. Vamos acompanhar juntas.",
 
-menstrual: "Menstrual",
-follicular: "Folicular",
-ovulatory: "Ovulatória",
-luteal: "Lútea"
+  // FASES
+  menstrual: "Menstrual",
+  folicular: "Folicular",
+  ovulatory: "Ovulatória",
+  luteal: "Lútea",
 
-  },
+  // BOTÕES
+  treino: "Treino",
+  evolucao: "Evolução",
+  respiracao: "Respiração",
+  endurance: "Endurance"
+}
+,
 
   ciclo: {
     titulo: "Identifique seu momento",
@@ -218,20 +222,21 @@ home: {
       tituloEsportes:  "Sports",
       tituloCasa:      "Home training"
     },
-  flowcenter: {
-    titulo: "Your hormonal phase",
-    sub: "Your body has its own rhythm. Let’s follow it together.",
-    menstrual: "Menstrual",
-    follicular: "Follicular",
-    ovulatory: "Ovulatory",
-    luteal: "Luteal",
-     faseAtual: "Your hormonal phase",
-menstrual: "Menstrual",
-follicular: "Follicular",
-ovulatory: "Ovulatory",
-luteal: "Luteal"
+ flowcenter: {
+  titulo: "Your hormonal phase",
+  faseAtual: "Your hormonal phase",
+  sub: "Your body has its own rhythm. Let's follow it together.",
 
-  },
+  menstrual: "Menstrual",
+  folicular: "Follicular",
+  ovulatory: "Ovulatory",
+  luteal: "Luteal",
+
+  treino: "Training",
+  evolucao: "Progress",
+  respiracao: "Breathing",
+  endurance: "Endurance"
+},
 
   ciclo: {
     titulo: "Identify your moment",
@@ -386,18 +391,20 @@ fr: {
       tituloCasa:      "S'entraîner à la maison"
     },
   flowcenter: {
-    titulo: "Votre phase hormonale",
-    sub: "Votre corps a son propre rythme. Suivons-le ensemble.",
-    menstrual: "Menstruelle",
-    follicular: "Folliculaire",
-    ovulatory: "Ovulatoire",
-    luteal: "Lutéale",
-     faseAtual: "Votre phase hormonale",
-menstrual: "Menstruelle",
-follicular: "Folliculaire",
-ovulatory: "Ovulatoire",
-luteal: "Lutéale"
-  },
+  titulo: "Votre phase hormonale",
+  faseAtual: "Votre phase hormonale",
+  sub: "Votre corps a son propre rythme. Suivons-le ensemble.",
+
+  menstrual: "Menstruelle",
+  folicular: "Folliculaire",
+  ovulatory: "Ovulatoire",
+  luteal: "Lutéale",
+
+  treino: "Entraînement",
+  evolucao: "Évolution",
+  respiracao: "Respiration",
+  endurance: "Endurance"
+},
 
   ciclo: {
     titulo: "Identifiez votre moment",
