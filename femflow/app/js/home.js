@@ -40,6 +40,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   // dispara evento para iniciar renderização
   document.dispatchEvent(new Event("femflow:homeReady"));
 });
+/* ============================================================
+   HOME READY — Agora pode renderizar tudo
+=========================================================== */
+document.addEventListener("femflow:homeReady", () => {
+
+  console.log("🏡 Home ready → aplicando UI");
+
+  // Nome no topo
+  const nome = localStorage.getItem("femflow_nome");
+  if (nome) document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
+
+  // Mostrar personal se tiver
+  ativarCardPersonalTopo();
+
+  // Renderizar todos os rails
+  renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
+  renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
+  renderRail(document.getElementById("railCasa"), LISTA_CASA);
+  renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
+
+  // Botões do topo
+  document.getElementById("btnFlow").onclick = () => FEMFLOW.router("flowcenter");
+  document.getElementById("btnCad").onclick  = () => FEMFLOW.router("index");
+});
 
 /* ============================================================
    LISTAS DE CARDS
