@@ -141,6 +141,50 @@ FEMFLOW.inserirMenuLateral = function () {
     btn.onclick = () => FEMFLOW._acaoMenu(btn.dataset.go)
   );
 };
+/* ===========================================================
+   6. MODAL IDIOMA — Restaurado para CORE 5.3
+=========================================================== */
+FEMFLOW.inserirModalIdioma = function () {
+
+  // Evita criar duas vezes
+  if (document.querySelector("#ff-lang-modal")) return;
+
+  const modal = document.createElement("div");
+  modal.id = "ff-lang-modal";
+  modal.className = "ff-lang-modal hidden";
+
+  modal.innerHTML = `
+    <div class="ff-lang-box">
+      <h2>🌐 Idioma / Language / Langue</h2>
+
+      <button class="ff-lang-btn" data-lang="pt">🇧🇷 Português</button>
+      <button class="ff-lang-btn" data-lang="en">🇺🇸 English</button>
+      <button class="ff-lang-btn" data-lang="fr">🇫🇷 Français</button>
+
+      <button class="ff-lang-close">✖ Fechar</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Fecha clicando no fundo
+  modal.addEventListener("click", e => {
+    if (e.target.id === "ff-lang-modal") modal.classList.add("hidden");
+  });
+
+  // Botões de idioma
+  modal.querySelectorAll(".ff-lang-btn").forEach(btn => {
+    btn.onclick = () => {
+      const lang = btn.dataset.lang;
+      localStorage.setItem("femflow_lang", lang);
+      FEMFLOW.toast("Idioma atualizado!");
+      setTimeout(() => location.reload(), 500);
+    };
+  });
+
+  modal.querySelector(".ff-lang-close").onclick =
+    () => modal.classList.add("hidden");
+};
 
 /* ===========================================================
    6. AÇÕES DO MENU
