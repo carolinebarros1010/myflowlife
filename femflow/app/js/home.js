@@ -18,28 +18,30 @@ const FOLLOWME_LINKS = {
    LOADING
 =========================================================== */
 function mostrarLoading() {
-  if (document.getElementById("homeLoading")) return;
+  if (document.getElementById("ff-loading")) return;
 
   const box = document.createElement("div");
-  box.id = "homeLoading";
-  box.className = "ff-loading";  // 🔥 CLASSE CORRETA
+  box.id = "ff-loading";
+  box.className = "ff-loading";
+
   box.innerHTML = `
     <div class="ff-loading-box">
       <div class="ff-spinner"></div>
       <p>Carregando…</p>
     </div>
   `;
+
   document.body.appendChild(box);
 }
 
+
 function esconderLoading() {
-  const box = document.getElementById("homeLoading");
-  if (!box) return;
+  const el = document.getElementById("ff-loading");
+  if (!el) return;
 
-  box.classList.add("hidden");
+  el.classList.add("hidden");
 
-  // Remove do DOM depois da animação
-  setTimeout(() => box.remove(), 350);
+  setTimeout(() => el.remove(), 400);
 }
 
 /* ============================================================
