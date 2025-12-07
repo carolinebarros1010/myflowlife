@@ -161,9 +161,9 @@ body {
 ============================================================ */
 .ff-ex-item {
   background: #fafafa;
-  padding: 14px;
-  border-radius: 16px;
-  margin-bottom: 18px;
+  padding: 10px;
+  border-radius: 14px;
+  margin-bottom: 12px;
   box-shadow: 0 2px 8px var(--shadow);
 }
 
@@ -176,7 +176,8 @@ body {
 .ff-ex-nome a {
   color: var(--teal);
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 0.95rem !important;
+  line-height: 1.2 !important;
   font-family: "Playfair Display", serif;
 }
 
@@ -194,10 +195,10 @@ body {
 /* info linha */
 .ff-info-line {
   display: flex;
-  gap: 18px;
-  margin: 8px 0 12px;
+  gap: 10px;
+  margin: 6px 0 8px;
   color: var(--teal);
-  font-size: .9rem;
+  font-size: .82rem;
 }
 .ff-info-line span {
   display: flex;
@@ -207,10 +208,10 @@ body {
 
 /* peso */
 .ff-ex-peso {
-  width: 70px !important;
-  height: 40px !important;
+  width: 60px !important;
+  height: 32px !important;
   padding: 4px 6px;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   border-radius: 10px;
   border: 1.5px solid #e3d6cf;
   background: #fff;
@@ -226,21 +227,21 @@ body {
   background: white;
   border: 1px solid var(--teal);
   color: var(--teal);
-  padding: 9px 20px;
-  border-radius: 16px;
-  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 0.82rem !important;
 }
 
 .ff-timer-count {
   float: right;
   color: var(--teal);
-  font-weight: 700;
+font-size: 0.9rem !important;
   margin-top: 6px;
 }
 
 .ff-timer-bar {
   width: 100%;
-  height: 14px;
+  height: 8px !important;
   border-radius: 12px;
   background: #eaeaea;
   margin-top: 6px;
@@ -415,8 +416,8 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 .ff-ex-titulo {
-  font-size: 1.05rem;
-  margin-top: 6px;
+  font-size: 0.92rem !important;
+  margin-bottom: 4px !important;
   margin-bottom: 6px;
   line-height: 1.15;
 }
