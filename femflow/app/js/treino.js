@@ -112,7 +112,8 @@ const personalFinal = isPersonal;
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
 
-    const diaPrograma = FEMFLOW.calcularDiaPrograma();
+    // 1) Carregar DiaPrograma (LS → backend → fallback)
+      const diaPrograma = await FEMFLOW.getDiaPrograma();
     if (tituloDia) tituloDia.textContent = `Dia ${diaPrograma}`;
 
     FEMFLOW.log("📌 Perfil recebido:", perfil);
@@ -552,7 +553,7 @@ function renderExercicio(ex) {
 
       if (!id) {
         FEMFLOW.toast("Erro: sem ID.", true);
-        return;
+                 return;
       }
 
       try {
@@ -576,6 +577,8 @@ function renderExercicio(ex) {
           if (resp.novaFase) localStorage.setItem("femflow_fase", resp.novaFase);
           if (resp.novoDiaCiclo) localStorage.setItem("femflow_diaCiclo", resp.novoDiaCiclo);
           FEMFLOW.toast("Treino salvo!");
+         await FEMFLOW.incrementarDiaPrograma();
+  
         } else {
           FEMFLOW.toast("Erro ao salvar.", true);
         }
@@ -607,7 +610,7 @@ function renderExercicio(ex) {
 
         FEMFLOW.log("📌 descanso:", resp);
         FEMFLOW.toast("Descanso registrado!");
-
+      await FEMFLOW.incrementarDiaPrograma();
       } catch (e) {
         FEMFLOW.error("Erro descanso:", e);
         FEMFLOW.toast("Erro ao salvar descanso.", true);
