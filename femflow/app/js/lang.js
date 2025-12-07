@@ -56,7 +56,14 @@ home: {
     menstrual: "Menstrual",
     follicular: "Folicular",
     ovulatory: "Ovulatória",
-    luteal: "Lútea"
+    luteal: "Lútea",
+     faseAtual: "Sua fase hormonal",
+
+menstrual: "Menstrual",
+follicular: "Folicular",
+ovulatory: "Ovulatória",
+luteal: "Lútea"
+
   },
 
   ciclo: {
@@ -217,7 +224,13 @@ home: {
     menstrual: "Menstrual",
     follicular: "Follicular",
     ovulatory: "Ovulatory",
-    luteal: "Luteal"
+    luteal: "Luteal",
+     faseAtual: "Your hormonal phase",
+menstrual: "Menstrual",
+follicular: "Follicular",
+ovulatory: "Ovulatory",
+luteal: "Luteal"
+
   },
 
   ciclo: {
@@ -378,7 +391,12 @@ fr: {
     menstrual: "Menstruelle",
     follicular: "Folliculaire",
     ovulatory: "Ovulatoire",
-    luteal: "Lutéale"
+    luteal: "Lutéale",
+     faseAtual: "Votre phase hormonale",
+menstrual: "Menstruelle",
+follicular: "Folliculaire",
+ovulatory: "Ovulatoire",
+luteal: "Lutéale"
   },
 
   ciclo: {
