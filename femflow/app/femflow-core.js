@@ -37,6 +37,95 @@ FEMFLOW.toast = (msg, error = false) => {
   setTimeout(() => box.classList.remove("visible"), 2400);
 };
 
+
+/* ===========================================================
+   1.1 CONFIG GLOBAL
+=========================================================== */
+FEMFLOW.SCRIPT_URL = "...";
+FEMFLOW.lang = ...
+
+/* ===========================================================
+   DIA PROGRAMA — CONTADOR CONTÍNUO (GLOBAL)
+=========================================================== */
+FEMFLOW.getDiaPrograma = async function () {
+
+  // 1) tentar ler do localStorage
+  let d = Number(localStorage.getItem("femflow_diaPrograma"));
+
+  if (d && !isNaN(d) && d > 0) {
+    return d; // retorno imediato
+  }
+
+  // 2) fallback → buscar no backend
+  const id = localStorage.getItem("femflow_id");
+  if (!id) return 1;
+
+  try {
+    const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "getDiaPrograma",
+        id
+      })
+    }).then(r => r.json());
+
+    if (resp?.diaPrograma > 0) {
+      localStorage.setItem("femflow_diaPrograma", resp.diaPrograma);
+      return resp.diaPrograma;
+    }
+  } catch (e) {
+    console.warn("⚠️ Erro ao buscar DiaPrograma do backend:", e);
+  }
+
+  // fallback final
+  localStorage.setItem("femflow_diaPrograma", "1");
+  return 1;
+};
+
+
+FEMFLOW.setDiaPrograma = async function (novoValor) {
+  novoValor = Number(novoValor) || 1;
+
+  // Local
+  localStorage.setItem("femflow_diaPrograma", String(novoValor));
+
+  // Backend
+  const id = localStorage.getItem("femflow_id");
+  if (!id) return;
+
+  try {
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setDiaPrograma",
+        id,
+        diaPrograma: novoValor
+      })
+    });
+  } catch (e) {
+    console.warn("⚠️ Falhou envio DiaPrograma para backend:", e);
+  }
+};
+
+
+FEMFLOW.incrementarDiaPrograma = async function () {
+  let d = Number(localStorage.getItem("femflow_diaPrograma")) || 1;
+  d++;
+
+  await FEMFLOW.setDiaPrograma(d);
+
+  return d;
+};
+
+
+FEMFLOW.reiniciarDiaPrograma = async function () {
+  await FEMFLOW.setDiaPrograma(1);
+  return 1;
+};
+
+
 /* ===========================================================
    2. ROUTER
 =========================================================== */
