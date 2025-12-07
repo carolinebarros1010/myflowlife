@@ -59,23 +59,37 @@ async function initFlowCenter() {
   aplicarNivelH1();
   document.addEventListener("femflow:langChange", aplicarNivelH1);
 
-  /* ============================================================
+   /* ============================================================
      4) IDIOMA
   ============================================================ */
   function aplicarIdioma() {
     const lang = FEMFLOW.lang || "pt";
-    const L = FEMFLOW.langs[lang]?.flowcenter;
-    if (!L) return;
+
+    const Lflow   = FEMFLOW.langs[lang]?.flowcenter;
+    const Lgeral  = FEMFLOW.langs[lang]?.geral;
+
+    if (!Lflow) return;
 
     const nome = perfil.nome?.split(" ")[0] || "";
 
-    document.getElementById("tituloFlow").textContent = `${nome}, ${L.titulo}`;
-    document.getElementById("subFlow").textContent = L.sub;
+    // Título + subtítulo
+    document.getElementById("tituloFlow").textContent = `${nome}, ${Lflow.titulo}`;
+    document.getElementById("subFlow").textContent    = Lflow.sub;
 
-    document.getElementById("centerPhase").textContent = L[ciclo.fase];
+    // Label da fase atual vem de GERAL, não de flowcenter
+    const labelFaseAtual = Lgeral?.faseAtual || "sua fase hormonal";
+
+    // Nome da fase (Menstrual, Folicular, etc.)
+    const faseTraduzida = Lflow[ciclo.fase] || ciclo.fase;
+
+    // Centro do círculo
+    document.getElementById("centerPhase").textContent = faseTraduzida;
+
+    // Texto abaixo do círculo: "sua fase hormonal: Menstrual"
     document.getElementById("t_current").textContent =
-      `${L.faseAtual}: ${L[ciclo.fase]}`;
+      `${labelFaseAtual}: ${faseTraduzida}`;
   }
+
 
   aplicarIdioma();
   document.addEventListener("femflow:langChange", aplicarIdioma);
