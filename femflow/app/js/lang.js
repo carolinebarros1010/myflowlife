@@ -38,7 +38,18 @@ pt: {
     voltar: "Voltar",
     sair: "Sair"
   },
+home: {
+      bemvinda: "Bem-vinda",
+      videoTitulo: "Como funciona o FemFlow",
+      videoSub:   "Assista ao vídeo rápido antes de começar.",
+      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_PT",
 
+      tituloPersonal:  "Personal",
+      tituloFollowMe:  "Treine junto por 30 dias",
+      tituloMuscular:  "Treinos por ênfase",
+      tituloEsportes:  "Esportes",
+      tituloCasa:      "Treinar em casa"
+    },
   flowcenter: {
     titulo: "Sua fase hormonal",
     sub: "Seu corpo tem um ritmo único. Vamos acompanhar juntas.",
@@ -204,7 +215,18 @@ en: {
     voltar: "Back",
     sair: "Logout"
   },
+home: {
+      bemvinda: "Welcome",
+      videoTitulo: "How FemFlow works",
+      videoSub:   "Watch this quick video before you start.",
+      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_EN",
 
+      tituloPersonal:  "Personal Training",
+      tituloFollowMe:  "Train together for 30 days",
+      tituloMuscular:  "Muscle focus training",
+      tituloEsportes:  "Sports",
+      tituloCasa:      "Home training"
+    },
   flowcenter: {
     titulo: "Your hormonal phase",
     sub: "Your body has its own rhythm. Let’s follow it together.",
@@ -334,7 +356,18 @@ resp: {
     entrar: "Enter",
     lembrete: "Your ID is sent by email after purchase."
   },
+ home: {
+      bemvinda: "Bienvenue",
+      videoTitulo: "Comment fonctionne FemFlow",
+      videoSub:   "Regardez cette vidéo avant de commencer.",
+      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_FR",
 
+      tituloPersonal:  "Personal",
+      tituloFollowMe:  "Entraînez-vous pendant 30 jours",
+      tituloMuscular:  "Entraînements par groupe musculaire",
+      tituloEsportes:  "Sports",
+      tituloCasa:      "S'entraîner à la maison"
+    }
   sistema: {
     cicloConfigurado: "✨ Cycle configured!",
     erroCiclo: "Error loading cycle.",
