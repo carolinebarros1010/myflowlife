@@ -462,8 +462,15 @@ FEMFLOW.sincronizarECdisparar = async function () {
 FEMFLOW.init = async function () {
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
 
-  if (["flowcenter.html","treino.html","respiracao.html","evolucao.html"]
-      .includes(p)) {
+ if ([
+    "flowcenter.html",
+    "treino.html",
+    "respiracao.html",
+    "evolucao.html",
+    "home.html",
+    "followme.html",
+    "followme_treino.html"
+].includes(p)) {
 
     this.inserirHeaderApp();
     this.inserirMenuLateral();
@@ -477,7 +484,7 @@ FEMFLOW.init = async function () {
     }
 
     await FEMFLOW.sincronizarECdisparar();
-  }
+}
 };
 
 
