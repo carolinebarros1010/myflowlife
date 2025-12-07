@@ -68,7 +68,7 @@ body {
 }
 .treino-header h1 {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 1.2rem;
   color: var(--teal);
   font-family: "Playfair Display", serif;
 }
@@ -77,7 +77,7 @@ body {
 .progress-bar {
   position: fixed;
   top: 0; left: 0;
-  height: 4px;
+  height: 3px;
   background: var(--terracota);
   width: 0%;
   transition: width .35s;
@@ -161,9 +161,9 @@ body {
 ============================================================ */
 .ff-ex-item {
   background: #fafafa;
-  padding: 10px;
+  padding: 8px;
   border-radius: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   box-shadow: 0 2px 8px var(--shadow);
 }
 
