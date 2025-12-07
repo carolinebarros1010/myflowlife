@@ -22,10 +22,10 @@ function mostrarLoading() {
 
   const box = document.createElement("div");
   box.id = "homeLoading";
-  box.className = "home-loading";
+  box.className = "ff-loading";  // 🔥 CLASSE CORRETA
   box.innerHTML = `
-    <div class="loader-card">
-      <div class="loader-circle"></div>
+    <div class="ff-loading-box">
+      <div class="ff-spinner"></div>
       <p>Carregando…</p>
     </div>
   `;
@@ -33,7 +33,13 @@ function mostrarLoading() {
 }
 
 function esconderLoading() {
-  document.getElementById("homeLoading")?.remove();
+  const box = document.getElementById("homeLoading");
+  if (!box) return;
+
+  box.classList.add("hidden");
+
+  // Remove do DOM depois da animação
+  setTimeout(() => box.remove(), 350);
 }
 
 /* ============================================================
