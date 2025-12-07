@@ -12,7 +12,7 @@
   <!-- Fontes -->
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
-  <!-- CSS Base -->
+  <!-- CSS -->
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/themes.css">
@@ -24,35 +24,38 @@
   <!-- BEM-VINDA -->
   <h1 id="bvTexto" class="bemvinda">Bem-vinda!</h1>
 
-  <!-- BOTÕES TOPO -->
+  <!-- BOTÃO FLOW CENTER -->
   <div class="home-top-buttons">
     <button id="btnFlow" class="home-btn">Flow Center</button>
-    <button id="btnCad" class="home-btn">Configurações</button>
   </div>
 
-  <!-- PERSONAL — SEMPRE VISÍVEL -->
+  <!-- PERSONAL -->
   <h2 class="home-section-title" id="tituloPersonalTopo">Personal</h2>
   <div class="rail" id="railPersonal"></div>
 
-  <!-- FOLLOW ME -->
-  <h2 class="home-section-title" id="tituloFollowMe">Treine junto por 30 dias</h2>
+  <!-- FOLLOWME -->
+  <h2 class="home-section-title">Treine junto por 30 dias</h2>
   <div class="rail" id="railFollowMe"></div>
 
   <!-- MUSCULAR -->
-  <h2 class="home-section-title" id="tituloMuscular">Treinos por Enfase</h2>
+  <h2 class="home-section-title">Treinos por Enfase</h2>
   <div class="rail" id="railMuscular"></div>
 
   <!-- ESPORTES -->
-  <h2 class="home-section-title" id="tituloEsportes">Esportes</h2>
+  <h2 class="home-section-title">Esportes</h2>
   <div class="rail" id="railEsportes"></div>
 
   <!-- CASA -->
-  <h2 class="home-section-title" id="tituloCasa">Treinar em Casa</h2>
+  <h2 class="home-section-title">Treinar em Casa</h2>
   <div class="rail" id="railCasa"></div>
 
   <script src="js/lang.js"></script>
   <script src="femflow-core.js"></script>
   <script src="js/home.js"></script>
+
+  <script>
+    document.getElementById("btnFlow").onclick = () => FEMFLOW.router("flowcenter");
+  </script>
 
 </body>
 </html>
