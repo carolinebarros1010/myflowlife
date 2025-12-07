@@ -9,25 +9,37 @@ const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
 
 /* FOLLOWME STUB */
 const FOLLOWME_LINKS = {
-  livia: "#", 
+  livia: "#",
   karoline: "#",
   thalita: "#"
 };
 
 /* ============================================================
-   SAUDAÇÃO (executa após sync)
+   EVENTO CENTRAL — Disparado pelo CORE (femflow:ready)
 =========================================================== */
 window.addEventListener("femflow:ready", () => {
-  const nome = localStorage.getItem("femflow_nome");
-  if (nome) document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
+   
+    const loader = document.getElementById("ff-loading");
+  if (loader) loader.style.display = "none";
 
+  const nome = localStorage.getItem("femflow_nome") || "Aluna";
+  document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
+
+  // PERSONAL SEMPRE ATIVO
   ativarCardPersonalTopo();
 
+  // RAILS
   renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
   renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
   renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
   renderRail(document.getElementById("railCasa"), LISTA_CASA);
   renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
+
+  // BOTÃO FLOW CENTER
+  const flowBtn = document.getElementById("btnFlow");
+  if (flowBtn) {
+    flowBtn.onclick = () => FEMFLOW.router("flowcenter");
+  }
 });
 
 
@@ -85,6 +97,7 @@ const LISTA_FOLLOWME = [
   }
 ];
 
+
 /* ============================================================
    RENDERIZAÇÃO DOS CARDS
 =========================================================== */
@@ -112,6 +125,7 @@ function renderRail(el, lista){
     c.onclick = () => handleCardClick(c.dataset.enfase)
   );
 }
+
 
 /* ============================================================
    LÓGICA DE ACESSO POR PRODUTO
@@ -163,6 +177,7 @@ function handleCardClick(enfase){
   FEMFLOW.toast("Adquira acesso para liberar seus treinos.");
 }
 
+
 /* ============================================================
    SALVAR ENFASE NORMAL
 =========================================================== */
@@ -197,10 +212,11 @@ async function selecionarCoach(coach){
   FEMFLOW.router("flowcenter");
 }
 
+
 /* ============================================================
    CARD PERSONAL SEMPRE ATIVADO
 =========================================================== */
 function ativarCardPersonalTopo(){
   const rail = document.getElementById("railPersonal");
-  renderRail(rail, LISTA_PERSONAL); // SEMPRE VISÍVEL
+  renderRail(rail, LISTA_PERSONAL);
 }
