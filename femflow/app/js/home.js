@@ -4,19 +4,41 @@
 const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
 const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
 
-/* FOLLOWME (quando ativar links) */
 const FOLLOWME_LINKS = {
-  livia:     "#", // em breve
-  karoline:  "#",
-  thalita:   "#"
+  livia: "#",
+  karoline: "#",
+  thalita: "#"
 };
 
 /* ============================================================
-   BEM-VINDA
+   INÍCIO — SYNC COM BACKEND
 =========================================================== */
-document.addEventListener("DOMContentLoaded", () => {
-  const nome = localStorage.getItem("femflow_nome");
-  if (nome) document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
+document.addEventListener("DOMContentLoaded", async () => {
+
+  if (FEMFLOW.syncUser) {
+    try {
+      console.log("🔄 Sincronizando com backend…");
+      const resp = await FEMFLOW.syncUser();
+      console.log("🔎 Dados carregados do backend:", resp);
+
+      if (resp) {
+        if (resp.id)        localStorage.setItem("femflow_id", resp.id);
+        if (resp.nome)      localStorage.setItem("femflow_nome", resp.nome);
+        if (resp.produto)   localStorage.setItem("femflow_produto", resp.produto);
+        if (resp.ativa)     localStorage.setItem("femflow_ativa", resp.ativa);
+        if (resp.enfase)    localStorage.setItem("femflow_enfase", resp.enfase);
+        if (resp.nivel)     localStorage.setItem("femflow_nivel", resp.nivel);
+        if (resp.fase)      localStorage.setItem("femflow_fase", resp.fase);
+        if (resp.diaCiclo)  localStorage.setItem("femflow_diaCiclo", resp.diaCiclo);
+      }
+
+    } catch (err) {
+      console.warn("⚠️ Erro ao sincronizar backend:", err);
+    }
+  }
+
+  // dispara evento para iniciar renderização
+  document.dispatchEvent(new Event("femflow:homeReady"));
 });
 
 /* ============================================================
