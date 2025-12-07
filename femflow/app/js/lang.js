@@ -58,7 +58,7 @@ home: {
 
   // FASES
   menstrual: "Menstrual",
-  folicular: "Folicular",
+  follicular: "Folicular",
   ovulatory: "Ovulatória",
   luteal: "Lútea",
 
@@ -228,7 +228,7 @@ home: {
   sub: "Your body has its own rhythm. Let's follow it together.",
 
   menstrual: "Menstrual",
-  folicular: "Follicular",
+  follicular: "Follicular",
   ovulatory: "Ovulatory",
   luteal: "Luteal",
 
@@ -396,7 +396,7 @@ fr: {
   sub: "Votre corps a son propre rythme. Suivons-le ensemble.",
 
   menstrual: "Menstruelle",
-  folicular: "Folliculaire",
+  follicular: "Folliculaire",
   ovulatory: "Ovulatoire",
   luteal: "Lutéale",
 
