@@ -82,6 +82,17 @@ function aplicarIdioma() {
     tCurrent.textContent = `${L.faseAtual}: ${faseLabel}`;
   }
 
+  // 🔥 TRADUZIR LABELS DO CÍRCULO (FALTAVA AQUI!)
+  const lblMen  = document.getElementById("lbl-menstrual");
+  const lblFol  = document.getElementById("lbl-follicular");
+  const lblOvu  = document.getElementById("lbl-ovulatory");
+  const lblLut  = document.getElementById("lbl-luteal");
+
+  if (lblMen) lblMen.textContent = L.menstrual;
+  if (lblFol) lblFol.textContent = L.follicular;
+  if (lblOvu) lblOvu.textContent = L.ovulatory;
+  if (lblLut) lblLut.textContent = L.luteal;
+
   // Botões inferiores
   const btnBreath    = document.getElementById("toBreath");
   const btnTrain     = document.getElementById("toTrain");
