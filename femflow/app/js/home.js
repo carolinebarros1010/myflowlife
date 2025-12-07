@@ -219,11 +219,18 @@ function aplicarIdiomaHome() {
   }
 
    // Títulos das seções
-  document.getElementById("tituloPersonalTopo")?.textContent = L.tituloPersonal;
-  document.getElementById("tituloFollowMe")?.textContent     = L.tituloFollowMe;
-  document.getElementById("tituloMuscular")?.textContent     = L.tituloMuscular;
-  document.getElementById("tituloEsportes")?.textContent     = L.tituloEsportes;
-  document.getElementById("tituloCasa")?.textContent         = L.tituloCasa;
+  const tPersonal  = document.getElementById("tituloPersonalTopo");
+  const tFollowMe  = document.getElementById("tituloFollowMe");
+  const tMuscular  = document.getElementById("tituloMuscular");
+  const tEsportes  = document.getElementById("tituloEsportes");
+  const tCasa      = document.getElementById("tituloCasa");
+
+  if (tPersonal)  tPersonal.textContent  = L.tituloPersonal;
+  if (tFollowMe)  tFollowMe.textContent  = L.tituloFollowMe;
+  if (tMuscular)  tMuscular.textContent  = L.tituloMuscular;
+  if (tEsportes)  tEsportes.textContent  = L.tituloEsportes;
+  if (tCasa)      tCasa.textContent      = L.tituloCasa;
+
 
   // 🔥 VÍDEO
   const vTitle = document.getElementById("homeVideoTitle");
