@@ -258,6 +258,7 @@ FEMFLOW.init = async function () {
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
 
   if ([
+     "home.html",
     "flowcenter.html",
     "treino.html",
     "respiracao.html",
