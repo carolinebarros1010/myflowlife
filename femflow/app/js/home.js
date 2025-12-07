@@ -1,13 +1,13 @@
 /* ============================================================
-   FemFlow • HOME.JS — VERSÃO FINAL 2025 CORRIGIDA
-   Agora sincroniza ANTES de exibir cards
+   FemFlow • HOME.JS — VERSÃO FINAL 2025
+   Compatível com CORE 5.2 — Sincroniza ANTES de exibir cards
 =========================================================== */
 
 /* LINKS */
 const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
 const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
 
-/* FOLLOWME */
+/* FOLLOWME (placeholders até ativar) */
 const FOLLOWME_LINKS = {
   livia: "#",
   karoline: "#",
@@ -15,9 +15,11 @@ const FOLLOWME_LINKS = {
 };
 
 /* ============================================================
-   LOADING
+   LOADING (versão compacta)
 =========================================================== */
 function mostrarLoading() {
+  if (document.getElementById("homeLoading")) return;
+
   const box = document.createElement("div");
   box.id = "homeLoading";
   box.className = "home-loading";
@@ -35,15 +37,178 @@ function esconderLoading() {
 }
 
 /* ============================================================
-   INÍCIO DA HOME — SINCRONIZAÇÃO AUTOMÁTICA
+   LISTAS DE CARDS
+=========================================================== */
+const LISTA_MUSCULAR = [
+  { titulo:"Glúteo", enfase:"gluteo", color:"#d98f80", desc:"Foco total no glúteo" },
+  { titulo:"Costas", enfase:"costas", color:"#a6b8c8", desc:"Remadas e postura" },
+  { titulo:"Peito",  enfase:"peito",  color:"#e6a09b", desc:"Força de empurrar" },
+  { titulo:"Braço",  enfase:"braco",  color:"#d38b6e", desc:"Bíceps + tríceps" },
+  { titulo:"Posterior", enfase:"posterior", color:"#b58fb5", desc:"Cadeia posterior" },
+  { titulo:"Quadríceps", enfase:"quadriceps", color:"#9fb7ac", desc:"Pernas fortes" }
+];
+
+const LISTA_ESPORTES = [
+  { titulo:"Corrida", enfase:"corrida", color:"#b8a59c", desc:"Base aeróbica" },
+  { titulo:"Natação", enfase:"natacao", color:"#80a8b3", desc:"Propulsão aquática" },
+  { titulo:"Remo",    enfase:"remo",    color:"#7f9d94", desc:"Tração e core" },
+  { titulo:"Bike",    enfase:"bike",    color:"#9cc2c1", desc:"Cardio leve/moderado" },
+  { titulo:"Beach",   enfase:"beach",   color:"#e3a689", desc:"Areia e potência" }
+];
+
+const LISTA_CASA = [
+  { titulo:"Em Casa", enfase:"casa", color:"#d1a697", desc:"Sem equipamentos" },
+  { titulo:"Casa Glúteo", enfase:"casa_gluteo", color:"#dc9d8c", desc:"Glúteos em casa" },
+  { titulo:"Casa Core",   enfase:"casa_core",   color:"#cababa", desc:"Abdômen e lombar" },
+  { titulo:"Casa Elástico", enfase:"casa_elastico", color:"#d8c4b0", desc:"Elástico" },
+  { titulo:"Casa Halter",   enfase:"casa_halter",   color:"#c6b4a4", desc:"Halter" }
+];
+
+/* CARD PERSONAL — SEMPRE VISÍVEL */
+const LISTA_PERSONAL = [
+  { titulo:"Treino Personal", enfase:"personal", color:"#335953", desc:"Treino exclusivo criado pelo Coach" }
+];
+
+/* FOLLOWME */
+const LISTA_FOLLOWME = [
+  {
+    titulo:{pt:"Treine com Lívia Rapaci", en:"Train with Lívia Rapaci", fr:"Entraînez-vous avec Lívia Rapaci"},
+    desc:{pt:"30 dias com a coach Lívia", en:"30 days with Lívia", fr:"30 jours avec Lívia"},
+    enfase:"followme_livia",
+    color:"#f3c1c1"
+  },
+  {
+    titulo:{pt:"Treine com Karoline Bombeira", en:"Train with Karoline", fr:"Entraînez-vous avec Karoline"},
+    desc:{pt:"30 dias com Karoline", en:"30 days with Karoline", fr:"30 jours avec Karoline"},
+    enfase:"followme_karoline",
+    color:"#ff9f7f"
+  },
+  {
+    titulo:{pt:"Treine com Thalita Prates", en:"Train with Thalita", fr:"Entraînez-vous avec Thalita"},
+    desc:{pt:"30 dias com Thalita", en:"30 days with Thalita", fr:"30 jours avec Thalita"},
+    enfase:"followme_thalita",
+    color:"#cbb1e6"
+  }
+];
+
+/* ============================================================
+   HTML DOS CARDS
+=========================================================== */
+function cardHTML(p){
+  const lang = FEMFLOW.lang || "pt";
+  const titulo = typeof p.titulo === "object" ? p.titulo[lang] : p.titulo;
+  const desc   = typeof p.desc   === "object" ? p.desc[lang]   : p.desc;
+
+  return `
+    <article class="card" data-enfase="${p.enfase}">
+      <div class="thumb" style="background:${p.color}">
+        <span class="badge">${titulo}</span>
+      </div>
+      <div class="info">
+        <h3 class="ttl">${titulo}</h3>
+        <p class="desc">${desc || ""}</p>
+      </div>
+    </article>`;
+}
+
+function renderRail(el, lista){
+  el.innerHTML = lista.map(cardHTML).join("");
+  el.querySelectorAll(".card").forEach(c =>
+    c.onclick = () => handleCardClick(c.dataset.enfase)
+  );
+}
+
+/* ============================================================
+   LÓGICA DE ACESSO POR PRODUTO
+=========================================================== */
+function handleCardClick(enfase){
+
+  const produto = (localStorage.getItem("femflow_produto") || "").toLowerCase();
+  const ativa   = localStorage.getItem("femflow_ativa") === "true";
+
+  const acessoPersonal = produto === "treino_personal" && ativa;
+  const acessoApp      = produto === "acesso_app" && ativa;
+  const acessoFollow   = produto === "followme" && ativa;
+
+  /* PERSONAL */
+  if (acessoPersonal){
+    if (enfase.startsWith("followme_")){
+      FEMFLOW.toast("FollowMe não faz parte do seu plano.");
+      return;
+    }
+    return selecionarEnfase(enfase);
+  }
+
+  /* ACESSO_APP */
+  if (acessoApp){
+    if (enfase.startsWith("followme_")){
+      FEMFLOW.toast("✨ Em breve! Treine junto por 30 dias.");
+      return;
+    }
+    if (enfase === "personal"){
+      FEMFLOW.toast("Treino Personal é vendido separadamente.");
+      return;
+    }
+    return selecionarEnfase(enfase);
+  }
+
+  /* FOLLOWME */
+  if (acessoFollow){
+    if (!enfase.startsWith("followme_")){
+      FEMFLOW.toast("Seu plano dá acesso somente ao FollowMe.");
+      return;
+    }
+    return selecionarCoach(enfase);
+  }
+
+  /* SEM PRODUTO */
+  FEMFLOW.toast("Adquira acesso para liberar seus treinos.");
+}
+
+/* ============================================================
+   SALVAR ENFASE NORMAL
+=========================================================== */
+async function selecionarEnfase(enfase){
+  const id = localStorage.getItem("femflow_id");
+
+  localStorage.setItem("femflow_enfase", enfase);
+
+  if (id){
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ action:"setenfase", id, enfase })
+    });
+  }
+
+  FEMFLOW.router("flowcenter");
+}
+
+/* FOLLOWME */
+async function selecionarCoach(coach){
+  const id = localStorage.getItem("femflow_id");
+
+  localStorage.setItem("femflow_enfase", coach);
+
+  if (id){
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ action:"setenfase", id, enfase: coach })
+    });
+  }
+
+  FEMFLOW.router("flowcenter");
+}
+
+/* ============================================================
+   INÍCIO DA HOME — SINCRONIZAÇÃO
 =========================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
 
   mostrarLoading();
 
-  // ---------------------------
-  // 1) EXECUTA SYNC DO CORE
-  // ---------------------------
+  // 1) Sincroniza ciclo e produto
   const perfil = await FEMFLOW.carregarPerfil();
 
   if (!perfil) {
@@ -52,19 +217,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Agora o localStorage DEVE possuir:
-  // femflow_produto / femflow_ativa / femflow_personal
-
-  // ---------------------------
-  // 2) Atualiza saudação
-  // ---------------------------
+  // 2) Saudação
   const nome = localStorage.getItem("femflow_nome");
   if (nome) document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
 
-  // ---------------------------
-  // 3) Renderiza cards
-  // ---------------------------
-   renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
+  // 3) Renderiza rails
+  renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
   renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
   renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
   renderRail(document.getElementById("railCasa"), LISTA_CASA);
