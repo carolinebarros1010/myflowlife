@@ -280,22 +280,28 @@ footer {
     font-size: 1.5rem;
   }
 }
-.home-top-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin: 10px 0 18px;
+/* BOTÃO FLOW CENTER — estilo premium */
+.home-top-buttons #btnFlow.home-btn {
+  width: 180px;
+  padding: 14px 0;
+  border-radius: 40px;
+  border: 1.5px solid rgba(0,0,0,0.35);
+  background: linear-gradient(135deg, #1d3b37, #8a4233);
+  color: #f2e8e8;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: block;
+  margin: 0 auto 20px auto; /* centraliza e ajusta o espaçamento */
 }
 
-.home-btn {
-  background: var(--teal);
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 12px;
-  font-size: .95rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+/* Efeito ao clicar */
+.home-top-buttons #btnFlow.home-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 3px rgba(0,0,0,0.20);
 }
+
 
