@@ -42,3 +42,26 @@ treino personal
 | FF-92817 | hiit         | 0   | 1     | costas | ovulatoria | 14  | HIIT Final 30/30    |                                              |        |      |       |           | 30    | 30   | 8      |
 | FF-92817 | cardio_final | 900 | 1     | costas | ovulatoria | 14  | Cardio Leve         |                                              |        |      | 600   |           |       |      |        |
 | FF-92817 | resfriamento | 999 | 1     | costas | ovulatoria | 14  | Resfriamento Final  |                                              |        |      |       |           |       |      |        |
+
+
+Aquecimento e Resfriamento:
+
+O FemFlow não utiliza os valores de séries, reps, intervalo ou tempo
+informados na planilha para blocos do tipo 'aquecimento' ou 'resfriamento'.
+
+Estes blocos são convertidos automaticamente em versões Premium fixas,
+definidas no treino-engine:
+
+Aquecimento Premium:
+- Mobilidade de Quadril (40s)
+- Mobilidade Torácica (40s)
+- Mobilidade de Ombro (40s)
+- Caminhada leve (5 minutos)
+
+Resfriamento Premium:
+- Alongamentos leves (2 minutos)
+- Respiração guiada (1 minuto)
+
+Portanto, somente as colunas:
+tipo, box, ordem, enfase, fase e dia
+são relevantes para estes blocos.
