@@ -390,6 +390,30 @@ FEMFLOW.engineTreino.intercalarHIIT = function (blocos) {
 /* ============================================================
    BLOCO C — Conversor + MONTAR TREINO FINAL
 ============================================================ */
+// Idioma atual do app
+FEMFLOW.getLang = function () {
+  return FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
+};
+
+// Função universal para obter texto multilíngue
+FEMFLOW.getTituloMultilingue = function (bloco) {
+  const lang = FEMFLOW.getLang(); // pt, en, fr...
+
+  // 1) tenta título no idioma atual
+  const t1 = bloco[`titulo_${lang}`];
+  if (t1 && String(t1).trim() !== "") return t1;
+
+  // 2) fallback → português
+  const t2 = bloco.titulo_pt;
+  if (t2 && String(t2).trim() !== "") return t2;
+
+  // 3) fallback → título original (antigo)
+  const t3 = bloco.titulo;
+  if (t3 && String(t3).trim() !== "") return t3;
+
+  // 4) fallback final
+  return "Exercício";
+};
 
 /* ============================================================
    7) Conversão → estrutura final do front
@@ -430,7 +454,7 @@ if (b.tipo === "treino") {
     box: b.boxNum,
     serieEspecial: b.serieEspecial || null,
 
-    titulo: b.titulo || "",
+    titulo: FEMFLOW.getTituloMultilingue(b),
     link: b.link || "",
 
     series: b.series || "",
