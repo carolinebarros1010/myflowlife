@@ -523,111 +523,149 @@ function renderExercicio(ex) {
   
 
   /* ============================================================
-     6. SALVAR PESO
-  ============================================================ */
-  function initPeso() {
-    document.querySelectorAll(".ff-ex-peso").forEach(inp => {
-      inp.addEventListener("change", () => {
-        FEMFLOW.log("Peso registrado:", inp.dataset.ex, inp.value);
-      });
-    });
-  }
+     6. SALVAR PESO AUTOMATICAMENTE
+============================================================ */
+function initPeso() {
+  document.querySelectorAll(".ff-ex-peso").forEach(inp => {
 
-  /* ============================================================
-     7. SALVAR TREINO
-  ============================================================ */
-  if (btnSalvar) {
-    btnSalvar.onclick = () => modalPSE.classList.remove("hidden");
-  }
+    inp.addEventListener("change", async () => {
 
-  if (btnCancelarPSE) {
-    btnCancelarPSE.onclick = () => modalPSE.classList.add("hidden");
-  }
+      const exercicio = inp.dataset.ex;  // Nome oficial do exercício
+      const peso      = inp.value.trim();
 
-  if (btnConfirmarPSE) {
-    btnConfirmarPSE.onclick = async () => {
+      const card = inp.closest(".ff-ex-item");
 
-      const fase = localStorage.getItem("femflow_fase");
-      const diaFirebase = Number(localStorage.getItem("femflow_diaCiclo") || 1);
-      const pse = Number(pseInput.value || 0);
+      // Capturar séries e reps reais do card (correto)
+      const reps   = card.querySelector(".ff-info-line span:nth-child(2) b")?.textContent || "";
+      const series = card.querySelector(".ff-info-line span:nth-child(1) b")?.textContent || "";
+
+      // DiaPrograma já carregado no início do treino.js
+      const diaPrograma = FEMFLOW.diaProgramaAtual || 1;
 
       if (!id) {
-        FEMFLOW.toast("Erro: sem ID.", true);
-                 return;
+        console.warn("⚠️ Sem ID no localStorage para salvar evolução");
+        return;
       }
 
       try {
-        const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+        const resp = await fetch(FEMFLOW.ENDPOINT_BACKEND, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            action: "salvarTreino",
-            id,
-            fase,
-            diaFirebase,
-            pse,
-            treino: "",
-            obs: ""
+            action: "salvarevolucao",
+            id: id,
+            exercicio: exercicio,
+            peso: peso,
+            reps: reps,
+            series: series,
+            pse: 0,          // salvamento automático não exige PSE
+            diaPrograma: diaPrograma
           })
-        }).then(r => r.json());
+        });
 
-        FEMFLOW.log("📌 salvarTreino:", resp);
+        const json = await resp.json();
+        console.log("📈 EVOLUÇÃO AUTOMÁTICA:", json);
 
-        if (resp.status === "ok") {
-          if (resp.novaFase) localStorage.setItem("femflow_fase", resp.novaFase);
-          if (resp.novoDiaCiclo) localStorage.setItem("femflow_diaCiclo", resp.novoDiaCiclo);
-          FEMFLOW.toast("Treino salvo!");
-         await FEMFLOW.incrementarDiaPrograma();
-  
-        } else {
-          FEMFLOW.toast("Erro ao salvar.", true);
-        }
+        FEMFLOW.toast("Peso registrado!");
 
       } catch (err) {
-        FEMFLOW.error("Erro salvar treino:", err);
-        FEMFLOW.toast("Erro de conexão.", true);
+        console.error("❌ Erro ao salvar evolução automática:", err);
+        FEMFLOW.toast("Erro ao salvar evolução", "error");
       }
 
-      modalPSE.classList.add("hidden");
-    };
-  }
+    }); // fim do change listener
 
-  /* ============================================================
-     8. BOTÃO DESCANSO
-  ============================================================ */
-  if (btnDescanso) {
-    btnDescanso.onclick = async () => {
-
-      try {
-        const resp = await fetch(FEMFLOW.SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "salvarDescanso",
-            id
-          })
-        }).then(r => r.json());
-
-        FEMFLOW.log("📌 descanso:", resp);
-        FEMFLOW.toast("Descanso registrado!");
-      await FEMFLOW.incrementarDiaPrograma();
-      } catch (e) {
-        FEMFLOW.error("Erro descanso:", e);
-        FEMFLOW.toast("Erro ao salvar descanso.", true);
-      }
-    };
-  }
-  /* ============================================================
-   🔥 PATCH EVOLUÇÃO – FRONT-END OFICIAL 2025
-   ------------------------------------------------------------
-   - Busca último peso
-   - Preenche campo automaticamente
-   - Envia evolução completa ao backend
-   - Atualiza interface sem reload
-============================================================ */
+  }); // fim do forEach
+}
 
 /* ============================================================
-   1) BUSCAR ÚLTIMO PESO DO BACKEND
+     7. SALVAR TREINO
+============================================================ */
+if (btnSalvar) {
+  btnSalvar.onclick = () => modalPSE.classList.remove("hidden");
+}
+
+if (btnCancelarPSE) {
+  btnCancelarPSE.onclick = () => modalPSE.classList.add("hidden");
+}
+
+if (btnConfirmarPSE) {
+  btnConfirmarPSE.onclick = async () => {
+
+    const fase = localStorage.getItem("femflow_fase");
+    const diaFirebase = Number(localStorage.getItem("femflow_diaCiclo") || 1);
+    const pse = Number(pseInput.value || 0);
+
+    if (!id) {
+      FEMFLOW.toast("Erro: sem ID.", true);
+      return;
+    }
+
+    try {
+      const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "salvarTreino",
+          id,
+          fase,
+          diaFirebase,
+          pse,
+          treino: "",
+          obs: ""
+        })
+      }).then(r => r.json());
+
+      FEMFLOW.log("📌 salvarTreino:", resp);
+
+      if (resp.status === "ok") {
+        if (resp.novaFase) localStorage.setItem("femflow_fase", resp.novaFase);
+        if (resp.novoDiaCiclo) localStorage.setItem("femflow_diaCiclo", resp.novoDiaCiclo);
+        FEMFLOW.toast("Treino salvo!");
+        await FEMFLOW.incrementarDiaPrograma();
+
+      } else {
+        FEMFLOW.toast("Erro ao salvar.", true);
+      }
+
+    } catch (err) {
+      FEMFLOW.error("Erro salvar treino:", err);
+      FEMFLOW.toast("Erro de conexão.", true);
+    }
+
+    modalPSE.classList.add("hidden");
+  };
+}
+
+/* ============================================================
+     8. BOTÃO DESCANSO
+============================================================ */
+if (btnDescanso) {
+  btnDescanso.onclick = async () => {
+
+    try {
+      const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "salvarDescanso",
+          id
+        })
+      }).then(r => r.json());
+
+      FEMFLOW.log("📌 descanso:", resp);
+      FEMFLOW.toast("Descanso registrado!");
+      await FEMFLOW.incrementarDiaPrograma();
+
+    } catch (e) {
+      FEMFLOW.error("Erro descanso:", e);
+      FEMFLOW.toast("Erro ao salvar descanso.", true);
+    }
+  };
+}
+
+/* ============================================================
+   🔥 PATCH EVOLUÇÃO – BUSCAR ÚLTIMO PESO
 ============================================================ */
 async function getUltimoPeso(id, exercicio) {
   try {
@@ -635,7 +673,7 @@ async function getUltimoPeso(id, exercicio) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        action: "getultimoPeso",
+        action: "getultimopeso",   // CORRETO (case em minúsculo)
         id: id,
         exercicio: exercicio
       })
@@ -650,24 +688,17 @@ async function getUltimoPeso(id, exercicio) {
   }
 }
 
-
 /* ============================================================
-   2) POPULAR INPUT DE PESO AO ABRIR EXERCÍCIO
-   ------------------------------------------------------------
-   - Chamada automática sempre que a aluna abre o card
+   Preencher automaticamente (modo futuro se abrir modal)
 ============================================================ */
 async function preencherUltimoPeso(exercicioSlug) {
+  const peso = await getUltimoPeso(id, exercicioSlug);
   const input = document.querySelector("#input-peso");
-
-  if (!input) return;
-
-  const peso = await getUltimoPeso(FEMFLOW.USER_ID, exercicioSlug);
-  if (peso) input.value = peso;
+  if (input && peso) input.value = peso;
 }
 
-
 /* ============================================================
-   3) SALVAR EVOLUÇÃO APÓS CONCLUIR O EXERCÍCIO
+   salvarEvolucaoFront (mantido para modais custom)
 ============================================================ */
 async function salvarEvolucaoFront(exercicioSlug) {
 
@@ -683,7 +714,7 @@ async function salvarEvolucaoFront(exercicioSlug) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "salvarEvolucao",
-        id: FEMFLOW.USER_ID,
+        id: id,
         exercicio: exercicioSlug,
         peso: peso,
         reps: reps,
