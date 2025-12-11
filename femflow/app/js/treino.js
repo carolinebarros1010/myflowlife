@@ -617,4 +617,91 @@ function renderExercicio(ex) {
       }
     };
   }
+  /* ============================================================
+   🔥 PATCH EVOLUÇÃO – FRONT-END OFICIAL 2025
+   ------------------------------------------------------------
+   - Busca último peso
+   - Preenche campo automaticamente
+   - Envia evolução completa ao backend
+   - Atualiza interface sem reload
+============================================================ */
+
+/* ============================================================
+   1) BUSCAR ÚLTIMO PESO DO BACKEND
+============================================================ */
+async function getUltimoPeso(id, exercicio) {
+  try {
+    const resp = await fetch(FEMFLOW.ENDPOINT_BACKEND, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "getUltimoPeso",
+        id: id,
+        exercicio: exercicio
+      })
+    });
+
+    const json = await resp.json();
+    return json.peso || "";
+
+  } catch (e) {
+    console.warn("Erro ao buscar último peso:", e);
+    return "";
+  }
+}
+
+
+/* ============================================================
+   2) POPULAR INPUT DE PESO AO ABRIR EXERCÍCIO
+   ------------------------------------------------------------
+   - Chamada automática sempre que a aluna abre o card
+============================================================ */
+async function preencherUltimoPeso(exercicioSlug) {
+  const input = document.querySelector("#input-peso");
+
+  if (!input) return;
+
+  const peso = await getUltimoPeso(FEMFLOW.USER_ID, exercicioSlug);
+  if (peso) input.value = peso;
+}
+
+
+/* ============================================================
+   3) SALVAR EVOLUÇÃO APÓS CONCLUIR O EXERCÍCIO
+============================================================ */
+async function salvarEvolucaoFront(exercicioSlug) {
+
+  const peso    = document.querySelector("#input-peso")?.value || "";
+  const reps    = document.querySelector("#input-reps")?.value || "";
+  const series  = document.querySelector("#input-series")?.value || "";
+  const pse     = FEMFLOW.estadoPSE || 0;
+  const diaProg = FEMFLOW.diaProgramaAtual || 1;
+
+  try {
+    const resp = await fetch(FEMFLOW.ENDPOINT_BACKEND, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "salvarEvolucao",
+        id: FEMFLOW.USER_ID,
+        exercicio: exercicioSlug,
+        peso: peso,
+        reps: reps,
+        series: series,
+        pse: pse,
+        diaPrograma: diaProg
+      })
+    });
+
+    const json = await resp.json();
+    console.log("📈 Evolução salva:", json);
+
+    FEMFLOW.toast("Evolução registrada!");
+
+  } catch (err) {
+    console.error("Erro ao salvar evolução:", err);
+    FEMFLOW.toast("Erro ao salvar evolução", "error");
+  }
+}
+ 
 }); // ← fecha o DOMContentLoaded
