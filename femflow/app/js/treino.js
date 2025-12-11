@@ -635,7 +635,7 @@ async function getUltimoPeso(id, exercicio) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        action: "getUltimoPeso",
+        action: "getultimoPeso",
         id: id,
         exercicio: exercicio
       })
