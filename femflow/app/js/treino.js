@@ -548,22 +548,17 @@ function initPeso() {
       }
 
       try {
-        const resp = await fetch(FEMFLOW.ENDPOINT_BACKEND, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "salvarevolucao",
-            id: id,
-            exercicio: exercicio,
-            peso: peso,
-            reps: reps,
-            series: series,
-            pse: 0,          // salvamento automático não exige PSE
-            diaPrograma: diaPrograma
-          })
-        });
+        const resp = await FEMFLOW.post({
+  action: "salvarevolucao",
+  id,
+  exercicio,
+  peso,
+  reps,
+  series,
+  pse: 0,
+  diaPrograma
+});
 
-        const json = await resp.json();
         console.log("📈 EVOLUÇÃO AUTOMÁTICA:", json);
 
         FEMFLOW.toast("Peso registrado!");
@@ -602,19 +597,16 @@ if (btnConfirmarPSE) {
     }
 
     try {
-      const resp = await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "salvarTreino",
-          id,
-          fase,
-          diaFirebase,
-          pse,
-          treino: "",
-          obs: ""
-        })
-      }).then(r => r.json());
+      const resp = await FEMFLOW.post({
+  action: "salvarTreino",
+  id,
+  fase,
+  diaFirebase,
+  pse,
+  treino: "",
+  obs: ""
+});
+
 
       FEMFLOW.log("📌 salvarTreino:", resp);
 
@@ -644,14 +636,10 @@ if (btnDescanso) {
   btnDescanso.onclick = async () => {
 
     try {
-      const resp = await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "salvarDescanso",
-          id
-        })
-      }).then(r => r.json());
+     const resp = await FEMFLOW.post({
+  action: "salvarDescanso",
+  id
+});
 
       FEMFLOW.log("📌 descanso:", resp);
       FEMFLOW.toast("Descanso registrado!");
@@ -669,17 +657,13 @@ if (btnDescanso) {
 ============================================================ */
 async function getUltimoPeso(id, exercicio) {
   try {
-    const resp = await fetch(FEMFLOW.ENDPOINT_BACKEND, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "getultimopeso",   // CORRETO (case em minúsculo)
-        id: id,
-        exercicio: exercicio
-      })
-    });
+   const resp = await FEMFLOW.post({
+  action: "getultimopeso",
+  id,
+  exercicio
+});
+return resp?.peso || "";
 
-    const json = await resp.json();
     return json.peso || "";
 
   } catch (e) {
@@ -709,20 +693,17 @@ async function salvarEvolucaoFront(exercicioSlug) {
   const diaProg = FEMFLOW.diaProgramaAtual || 1;
 
   try {
-    const resp = await fetch(FEMFLOW.ENDPOINT_BACKEND, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "salvarEvolucao",
-        id: id,
-        exercicio: exercicioSlug,
-        peso: peso,
-        reps: reps,
-        series: series,
-        pse: pse,
-        diaPrograma: diaProg
-      })
-    });
+  const resp = await FEMFLOW.post({
+  action: "salvarEvolucao",
+  id,
+  exercicio: exercicioSlug,
+  peso,
+  reps,
+  series,
+  pse,
+  diaPrograma: diaProg
+});
+
 
     const json = await resp.json();
     console.log("📈 Evolução salva:", json);
