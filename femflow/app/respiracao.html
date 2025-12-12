@@ -101,6 +101,40 @@
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
+  document.addEventListener("femflow:langChange", () => {
+  // Atualiza apenas textos estáticos do topo (opcional e seguro)
+  const textos = {
+    pt: {
+      titulo1: "Respirações",
+      titulo2: "FemFlow",
+      sub: "Escolha o protocolo conforme seu momento 🌿"
+    },
+    en: {
+      titulo1: "Breathing",
+      titulo2: "FemFlow",
+      sub: "Choose the protocol for your moment 🌿"
+    },
+    fr: {
+      titulo1: "Respirations",
+      titulo2: "FemFlow",
+      sub: "Choisissez le protocole selon votre moment 🌿"
+    }
+  };
+
+  const lang = FEMFLOW.lang || "pt";
+  const T = textos[lang] || textos.pt;
+
+  const t1 = document.getElementById("respTitulo1");
+  const t2 = document.getElementById("respTitulo2");
+  const sub = document.getElementById("respSub");
+
+  if (t1) t1.textContent = T.titulo1;
+  if (t2) t2.textContent = T.titulo2;
+  if (sub) sub.textContent = T.sub;
+});
+
+  
+
   /* ============================================================
      🔥 PROTEÇÃO DE ACESSO → Se não tiver login ou produto, volta para HOME
   ============================================================ */
