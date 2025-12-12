@@ -90,6 +90,15 @@
 
  
 <script>
+  const id = localStorage.getItem("femflow_id");
+const produto = localStorage.getItem("femflow_produto");
+const ativa = localStorage.getItem("femflow_ativa") === "true";
+
+if (!id || !produto || !ativa) {
+  FEMFLOW.toast("Acesse pela Home para continuar 🌸");
+  FEMFLOW.router("home");
+}
+
   
 function ffShowLoading(msg = "Processando…") {
   const box = document.getElementById("ff-loading");
@@ -188,66 +197,57 @@ async function salvarCiclo({ perfil, start, length, faseCalc, dia, faseAlta = nu
 
     // 1) perfil hormonal
     console.log("⏳ 1) Enviando perfil hormonal…");
-    await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "setperfilhormonal",
-        id: idUser,
-        perfil
-      })
-    });
+    await FEMFLOW.post({
+  action: "setperfilhormonal",
+  id: idUser,
+  perfil
+});
+
 // ---------------------------------------------------------
 // 1B) CICLO DURAÇÃO  (novo)
 // ---------------------------------------------------------
 console.log("⏳ 1B) Enviando ciclo duração…");
-await fetch(FEMFLOW.SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-        action: "setciclo",
-        id: idUser,
-        cicloDuracao: length,
-        dataInicio: start.toISOString(),
-        perfilHormonal: perfil
-    })
+await FEMFLOW.post({
+  action: "setciclo",
+  id: idUser,
+  cicloDuracao: length,
+  dataInicio: start.toISOString(),
+  perfilHormonal: perfil
 });
+
 
     // 2) fase
     console.log("⏳ 2) Enviando fase…");
-    await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "setfase",
-        id: idUser,
-        fase: faseCalc.toLowerCase()
-      })
-    });
+    await FEMFLOW.post({
+  action: "setfase",
+  id: idUser,
+  cicloDuracao: length,
+  dataInicio: start.toISOString(),
+  perfilHormonal: perfil
+});
+
 
     // 3) dia ciclo
     console.log("⏳ 3) Enviando dia ciclo…");
-    await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "setdiaciclo",
-        id: idUser,
-        dia
-      })
-    });
+    await FEMFLOW.post({
+  action: "setdiaciclo",
+  id: idUser,
+  cicloDuracao: length,
+  dataInicio: start.toISOString(),
+  perfilHormonal: perfil
+});
+
 
     // 4) data manual
     console.log("⏳ 4) Enviando cicloStart manual…");
-    await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "setmanualstart",
-        id: idUser,
-        startDate: start.toISOString()
-      })
-    });
+    await FEMFLOW.post({
+  action: "setmanualstart",
+  id: idUser,
+  cicloDuracao: length,
+  dataInicio: start.toISOString(),
+  perfilHormonal: perfil
+});
+
 
     console.groupEnd();
 
