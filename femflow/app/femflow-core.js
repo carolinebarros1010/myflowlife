@@ -65,6 +65,43 @@ FEMFLOW.toast = (msg, error = false) => {
   setTimeout(() => box.classList.remove("visible"), 2400);
 };
 
+FEMFLOW.getSession = function () {
+  return {
+    deviceId: FEMFLOW.getDeviceId(),
+    sessionToken: FEMFLOW.getSessionToken()
+  };
+};
+/* ============================================================
+   🌐 POST SEGURO — inclui sessão automaticamente
+============================================================ */
+
+FEMFLOW.post = async function (payload) {
+  const session = FEMFLOW.getSession();
+
+  const body = {
+    ...payload,
+    ...session
+  };
+
+  const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  }).then(r => r.json());
+
+  // Sessão inválida ou bloqueada
+  if (resp?.status === "blocked" || resp?.status === "denied") {
+    FEMFLOW.toast?.("Sessão inválida. Faça login novamente.", true);
+    FEMFLOW.clearSession();
+    localStorage.clear();
+    location.href = "index.html";
+    throw new Error("Sessão inválida");
+  }
+
+  return resp;
+};
+
+
 /* ===========================================================
    DIA PROGRAMA — CONTADOR CONTÍNUO (GLOBAL)
 =========================================================== */
@@ -82,14 +119,11 @@ FEMFLOW.getDiaPrograma = async function () {
   if (!id) return 1;
 
   try {
-    const resp = await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "getDiaPrograma",
-        id
-      })
-    }).then(r => r.json());
+   const resp = await FEMFLOW.post({
+  action: "getDiaPrograma",
+  id
+});
+
 
     if (resp?.diaPrograma > 0) {
       localStorage.setItem("femflow_diaPrograma", resp.diaPrograma);
@@ -116,16 +150,13 @@ FEMFLOW.setDiaPrograma = async function (novoValor) {
   if (!id) return;
 
   try {
-    await fetch(FEMFLOW.SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "setDiaPrograma",
-        id,
-        diaPrograma: novoValor
-      })
-    });
-  } catch (e) {
+    await FEMFLOW.post({
+  action: "setDiaPrograma",
+  id,
+  diaPrograma: novoValor
+});
+
+ } catch (e) {
     console.warn("⚠️ Falhou envio DiaPrograma para backend:", e);
   }
 };
@@ -332,9 +363,11 @@ FEMFLOW._acaoMenu = function (op) {
       break;
 
     case "logout":
-      localStorage.clear();
-      FEMFLOW.router("index");
-      break;
+  FEMFLOW.clearSession();
+  localStorage.clear();
+  location.href = "index.html";
+  break;
+
 
     case "voltar":
       const p = location.pathname.split("/").pop();
