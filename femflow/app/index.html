@@ -114,7 +114,13 @@ async function entrar(){
   let loginResp;
 
   try {
-    loginResp = await postGAS({ action:"login", email, senha });
+    loginResp = await postGAS({
+  action: "login",
+  email,
+  senha,
+  deviceId: FEMFLOW.getDeviceId()
+});
+
   } catch (e) {
     console.error(e);
     setErr("Erro de rede.");
@@ -125,6 +131,12 @@ async function entrar(){
      1) LOGIN FALHOU — POSSÍVEL ALUNA DO HOTMART SEM SENHA
   ============================================================ */
   if (loginResp.status !== "ok") {
+    if (loginResp.status === "blocked") {
+  setErr("Esta conta já está conectada em outro dispositivo.");
+  FEMFLOW.clearSession();
+  return;
+}
+
 
     if (loginResp.status === "senha_incorreta" ||
         loginResp.status === "not_registered") {
@@ -144,6 +156,10 @@ async function entrar(){
   localStorage.setItem("femflow_id", loginResp.id);
   localStorage.setItem("femflow_email", loginResp.email || email);
   localStorage.setItem("femflow_auth", "yes");
+  
+if (loginResp.sessionToken) {
+  FEMFLOW.setSessionToken(loginResp.sessionToken);
+}
 
   /* ============================================================
      3) CARREGAR PERFIL COMPLETO
@@ -237,13 +253,24 @@ async function preencherComGoogle(response){
 
     $("#loginEmail").value = data.email;
 
-    const res = await postGAS({ action:"login", email:data.email, senha:"" });
+    const res = await postGAS({
+  action: "login",
+  email: data.email,
+  senha: "",
+  deviceId: FEMFLOW.getDeviceId()
+});
+
 
     if (res.status === "ok") {
 
       localStorage.setItem("femflow_id", res.id);
       localStorage.setItem("femflow_email", res.email || data.email);
       localStorage.setItem("femflow_auth", "yes");
+      
+      if (res.sessionToken) {
+  FEMFLOW.setSessionToken(res.sessionToken);
+}
+
 
       const perfil = await FEMFLOW.carregarPerfil();
       const ciclo = await FEMFLOW.carregarCicloBackend();
@@ -305,12 +332,23 @@ bio.onclick = async () => {
       }
     });
 
-    const res = await postGAS({ action:"login", email, senha:"" });
+    const res = await postGAS({
+  action: "login",
+  email,
+  senha: "",
+  deviceId: FEMFLOW.getDeviceId()
+});
+
 
     if (res.status === "ok"){
       localStorage.setItem("femflow_id", res.id);
       localStorage.setItem("femflow_email", res.email || email);
       localStorage.setItem("femflow_auth","yes");
+
+      if (res.sessionToken) {
+  FEMFLOW.setSessionToken(res.sessionToken);
+}
+
 
       const perfil = await FEMFLOW.carregarPerfil();
       const ciclo = await FEMFLOW.carregarCicloBackend();
