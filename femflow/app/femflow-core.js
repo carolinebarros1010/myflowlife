@@ -18,6 +18,34 @@ FEMFLOW.setLang = function (lang) {
   localStorage.setItem("femflow_lang", lang);
   document.dispatchEvent(new Event("femflow:langChange"));
 };
+/* ============================================================
+   🔐 FEMFLOW — Device + Session helpers
+============================================================ */
+
+FEMFLOW.getDeviceId = function () {
+  let d = localStorage.getItem("femflow_device_id");
+  if (!d) {
+    d = (crypto?.randomUUID?.() ||
+         ("dev-" + Date.now() + "-" + Math.random().toString(36).slice(2)));
+    localStorage.setItem("femflow_device_id", d);
+  }
+  return d;
+};
+
+FEMFLOW.getSessionToken = function () {
+  return localStorage.getItem("femflow_session_token") || "";
+};
+
+FEMFLOW.setSessionToken = function (token) {
+  if (token) {
+    localStorage.setItem("femflow_session_token", token);
+  }
+};
+
+FEMFLOW.clearSession = function () {
+  localStorage.removeItem("femflow_session_token");
+};
+
 
 FEMFLOW.dev = () => localStorage.getItem("femflow_dev") === "on";
 FEMFLOW.log   = (...a) => FEMFLOW.dev() && console.log("%c[FEMFLOW]", "color:#cc6a5a", ...a);
