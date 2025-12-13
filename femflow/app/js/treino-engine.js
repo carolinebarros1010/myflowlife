@@ -84,85 +84,91 @@ FEMFLOW.engineTreino.detectarSerieEspecial = function (boxLabel) {
   return null;
 };
 
-/* ============================================================
-   5) Organizar blocos (ordem REAL)
-============================================================ */
 FEMFLOW.engineTreino.organizarBlocosSimples = function (brutos) {
-
-  FEMFLOW.log("📑 organizarBlocosSimples() → recebidos:", brutos);
-
   return brutos
     .map(b => {
       const raw = String(b.box || "").trim();
-
       let boxNum = parseInt(raw.replace(/\D/g, ""));
 
       // 🔥 PRIORIDADES FEMFLOW
-      if (b.tipo === "aquecimento") boxNum = -100;     // sempre antes de tudo
-      else if (b.tipo === "treino" && isNaN(boxNum)) boxNum = 1; 
-      else if (b.tipo === "hiit" && !isNaN(boxNum)) boxNum = boxNum; // HIIT segue o box
-      else if (b.tipo === "hiit" && isNaN(boxNum)) boxNum = 500;     // HIIT genérico → antes do cardio
-      else if (b.tipo === "cardio_final") boxNum = 900;  
-      else if (b.tipo === "resfriamento") boxNum = 999; 
+      if (b.tipo === "aquecimento") boxNum = -100;
+      else if (b.tipo === "treino" && isNaN(boxNum)) boxNum = 1;
+      else if (b.tipo === "hiit" && isNaN(boxNum)) boxNum = 500;
+      else if (b.tipo === "cardio_final") boxNum = 900;
+      else if (b.tipo === "resfriamento") boxNum = 999;
 
-      const serieEspecial = FEMFLOW.engineTreino.detectarSerieEspecial(raw);
-      const ordemNum = parseInt(b.ordem || 0) || 0;
-
-      return { ...b, boxNum, ordemNum, serieEspecial };
+      return {
+        ...b,
+        boxNum,
+        ordemNum: parseInt(b.ordem || 0) || 0,
+        serieEspecial: FEMFLOW.engineTreino.detectarSerieEspecial(raw)
+      };
     })
     .sort((a, b) => {
       if (a.boxNum !== b.boxNum) return a.boxNum - b.boxNum;
       return a.ordemNum - b.ordemNum;
     });
 };
-
-
-/* ============================================================
-   6) Intercalar HIIT entre boxes (Modo B)
-============================================================ */
 FEMFLOW.engineTreino.intercalarHIIT = function (ordenados) {
+  const resultado = [];
+  let bufferTreino = [];
+  let ultimoBox = null;
 
-  FEMFLOW.log("🔥 intercalarHIIT() — Entrada:", ordenados);
+  function flushBuffer() {
+    if (bufferTreino.length) {
+      resultado.push(...bufferTreino);
+      bufferTreino = [];
+    }
+  }
 
-  const final = [];
-  let ultimoBoxTreino = 0;
+  for (const b of ordenados) {
 
-  // 1) Encontrar último box de treino real
-  ordenados.forEach(b => {
+    // Aquecimento → sempre no início
+    if (b.tipo === "aquecimento") {
+      resultado.push(b);
+      continue;
+    }
+
+    // Resfriamento → sempre no final
+    if (b.tipo === "resfriamento") {
+      resultado.push({ ...b, boxNum: 9999 });
+      continue;
+    }
+
+    // Cardio final → antes do resfriamento
+    if (b.tipo === "cardio_final") {
+      resultado.push({ ...b, boxNum: 9000 });
+      continue;
+    }
+
+    // HIIT do próprio box → entra logo após o bloco
+    if (b.tipo === "hiit" && b.boxNum >= 1) {
+      flushBuffer();
+      resultado.push(b);
+      continue;
+    }
+
+    // HIIT genérico → vai para o final (antes do cardio)
+    if (b.tipo === "hiit" && b.boxNum === 500) {
+      resultado.push({ ...b, boxNum: 8000 });
+      continue;
+    }
+
+    // Treino normal → acumula por box
     if (b.tipo === "treino") {
-      ultimoBoxTreino = Math.max(ultimoBoxTreino, b.boxNum);
+      if (ultimoBox !== null && ultimoBox !== b.boxNum) {
+        flushBuffer();
+      }
+      bufferTreino.push(b);
+      ultimoBox = b.boxNum;
     }
-  });
+  }
 
-  ordenados.forEach((b, idx) => {
+  flushBuffer();
 
-    // sempre adicionar o item
-    final.push(b);
-
-    if (b.tipo !== "treino") return;
-
-    const boxAtual = b.boxNum;
-
-    // 2) pegar HIIT com box igual (ex: box=2 → HIIT 2)
-    const hiitsMesmoBox = ordenados.filter(h =>
-      h.tipo === "hiit" &&
-      h.boxNum === boxAtual
-    );
-
-    hiitsMesmoBox.forEach(h => final.push(h));
-
-    // 3) HIIT de box 0 → só após o último box real
-    if (boxAtual === ultimoBoxTreino) {
-      const hiitZero = ordenados.filter(h =>
-        h.tipo === "hiit" && h.boxNum === 0
-      );
-      hiitZero.forEach(h => final.push(h));
-    }
-  });
-
-  FEMFLOW.log("🎯 intercalarHIIT — Resultado final:", final);
-  return final;
+  return resultado.sort((a, b) => a.boxNum - b.boxNum);
 };
+
 
 
 /* ============================================================
