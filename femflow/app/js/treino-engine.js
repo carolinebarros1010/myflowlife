@@ -1,21 +1,20 @@
 /* ============================================================
-   FEMFLOW • TREINO ENGINE v4.1 — PREMIUM 2025
-   ------------------------------------------------------------
-   BLOCO A — Núcleo do Engine
+   FEMFLOW • TREINO ENGINE v4.2 — PREMIUM 2025
+   🔥 FONTE DA VERDADE: DIA DO CICLO HORMONAL
 ============================================================ */
 
 window.FEMFLOW = window.FEMFLOW || {};
 FEMFLOW.engineTreino = {};
 
 /* ============================================================
-   1) Normalização de fase
+   1) NORMALIZAÇÕES
 ============================================================ */
-FEMFLOW.engineTreino.normalizarFase = function (raw) {
+FEMFLOW.engineTreino.normalizarFase = raw => {
   if (!raw) return "follicular";
   const f = raw.toLowerCase().trim();
-  const mapa = {
+  return {
     ovulatory: "ovulatoria",
-    "ovulatório": "ovulatoria",
+    ovulatório: "ovulatoria",
     ovulatoria: "ovulatoria",
     ovulação: "ovulatoria",
     follicular: "follicular",
@@ -24,14 +23,10 @@ FEMFLOW.engineTreino.normalizarFase = function (raw) {
     lutea: "lutea",
     menstrual: "menstrual",
     menstruacao: "menstrual"
-  };
-  return mapa[f] || "follicular";
+  }[f] || "follicular";
 };
 
-/* ============================================================
-   2) Normalização de nível
-============================================================ */
-FEMFLOW.engineTreino.normalizarNivel = function (raw) {
+FEMFLOW.engineTreino.normalizarNivel = raw => {
   const n = (raw || "").toLowerCase();
   if (n.startsWith("inic")) return "iniciante";
   if (n.startsWith("inter")) return "intermediaria";
@@ -39,12 +34,9 @@ FEMFLOW.engineTreino.normalizarNivel = function (raw) {
   return "iniciante";
 };
 
-/* ============================================================
-   3) Normalização de ênfase
-============================================================ */
-FEMFLOW.engineTreino.normalizarEnfase = function (raw) {
+FEMFLOW.engineTreino.normalizarEnfase = raw => {
   const e = (raw || "").toLowerCase().trim();
-  const mapa = {
+  return {
     gluteo: "gluteo",
     quadriceps: "quadriceps",
     posteriores: "posteriores",
@@ -58,200 +50,159 @@ FEMFLOW.engineTreino.normalizarEnfase = function (raw) {
     remo: "remo",
     natacao: "natacao",
     personal: "personal"
-  };
-  return mapa[e] || "geral";
+  }[e] || "geral";
 };
 
 /* ============================================================
-   4) Detectar Série Especial
+   2) SÉRIE ESPECIAL
 ============================================================ */
-FEMFLOW.engineTreino.detectarSerieEspecial = function (boxLabel) {
-  if (!boxLabel) return null;
-  const s = boxLabel.toString().toLowerCase();
+FEMFLOW.engineTreino.detectarSerieEspecial = label => {
+  if (!label) return null;
+  const s = label.toLowerCase();
   if (s.endsWith("ae")) return "AE";
-  if (s.endsWith("e")) return "E";
-  if (s.endsWith("t")) return "T";
-  if (s.endsWith("s")) return "S";
+  if (s.endsWith("e"))  return "E";
+  if (s.endsWith("t"))  return "T";
+  if (s.endsWith("s"))  return "S";
   return null;
 };
 
 /* ============================================================
-   BLOCO B — ORGANIZAÇÃO + HIIT INTERCALADO
+   3) FIREBASE — BLOCO NORMAL
+   🔥 PRIORIDADE ABSOLUTA: diaCiclo
 ============================================================ */
-FEMFLOW.engineTreino.organizarBlocosSimples = function (brutos) {
-  return brutos
-    .map(b => {
-      const label = String(b.box || "").trim();
-      let boxNum = parseInt(label.replace(/\D/g, ""));
+FEMFLOW.engineTreino.carregarBlocosNormais = async ({
+  nivel, enfase, fase, diaCiclo
+}) => {
 
-      if (b.tipo === "aquecimento") boxNum = -100;
-      else if (b.tipo === "treino" && isNaN(boxNum)) boxNum = 1;
-      else if (b.tipo === "hiit" && isNaN(boxNum)) boxNum = 850;
-      else if (b.tipo === "cardio_final") boxNum = 900;
-      else if (b.tipo === "resfriamento") boxNum = 999;
+  const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
+  const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
+  const enfNorm   = FEMFLOW.engineTreino.normalizarEnfase(enfase);
+  const diaKey    = `dia_${Number(diaCiclo)}`;
 
-      return {
-        ...b,
-        boxNum,
-        ordemNum: parseInt(b.ordem || 0) || 0,
-        serieEspecial: FEMFLOW.engineTreino.detectarSerieEspecial(label)
-      };
-    })
-    .sort((a, b) => {
-      if (a.boxNum !== b.boxNum) return a.boxNum - b.boxNum;
-      return a.ordemNum - b.ordemNum;
-    });
+  FEMFLOW.log("🔥 [NORMAL] Firebase por diaCiclo:", diaKey);
+
+  const snap = await firebase.firestore()
+    .collection("exercicios")
+    .doc(`${nivelNorm}_${enfNorm}`)
+    .collection("fases")
+    .doc(faseNorm)
+    .collection("dias")
+    .doc(diaKey)
+    .collection("blocos")
+    .get();
+
+  if (snap.empty) {
+    FEMFLOW.warn("⚠️ Nenhum treino encontrado:", diaKey);
+    return [];
+  }
+
+  const blocos = [];
+  snap.forEach(d => blocos.push(d.data()));
+  return blocos;
 };
 
-FEMFLOW.engineTreino.intercalarHIIT = function (blocos) {
-  const resultado = [];
-  let buffer = [];
-  let ultimoBox = null;
+/* ============================================================
+   4) FIREBASE — BLOCO PERSONAL
+   🔥 PRIORIDADE ABSOLUTA: diaCiclo
+============================================================ */
+FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
+  id, enfase, fase, diaCiclo
+}) => {
 
-  function flush() {
-    if (buffer.length) {
-      resultado.push(...buffer);
-      buffer = [];
-    }
-  }
+  const faseNorm = FEMFLOW.engineTreino.normalizarFase(fase);
+  const enfNorm  = FEMFLOW.engineTreino.normalizarEnfase(enfase);
+  const diaKey   = `dia_${Number(diaCiclo)}`;
+
+  FEMFLOW.log("🔥 [PERSONAL] Firebase por diaCiclo:", diaKey);
+
+  const snap = await firebase.firestore()
+    .collection("personal_trainings")
+    .doc(id)
+    .collection(enfNorm)
+    .doc(faseNorm)
+    .collection("dias")
+    .doc(diaKey)
+    .collection("blocos")
+    .get();
+
+  if (snap.empty) return [];
+
+  const blocos = [];
+  snap.forEach(d => blocos.push(d.data()));
+  return blocos;
+};
+
+/* ============================================================
+   5) ORGANIZAÇÃO + HIIT
+============================================================ */
+FEMFLOW.engineTreino.organizarBlocosSimples = brutos =>
+  brutos.map(b => {
+    const label = String(b.box || "");
+    let boxNum = parseInt(label.replace(/\D/g, ""));
+    if (b.tipo === "aquecimento") boxNum = -100;
+    else if (b.tipo === "treino" && isNaN(boxNum)) boxNum = 1;
+    else if (b.tipo === "hiit" && isNaN(boxNum)) boxNum = 500;
+    else if (b.tipo === "cardio_final") boxNum = 900;
+    else if (b.tipo === "resfriamento") boxNum = 999;
+
+    return {
+      ...b,
+      boxNum,
+      ordemNum: Number(b.ordem) || 0,
+      serieEspecial: FEMFLOW.engineTreino.detectarSerieEspecial(label)
+    };
+  }).sort((a,b)=>a.boxNum-b.boxNum || a.ordemNum-b.ordemNum);
+
+FEMFLOW.engineTreino.intercalarHIIT = blocos => {
+  const out = [];
+  let buf = [], last = null;
+
+  const flush = () => { out.push(...buf); buf=[]; };
 
   for (const b of blocos) {
-
-    if (b.tipo === "aquecimento") {
-      resultado.push({ ...b, boxNum: 0 });
-      continue;
-    }
-
-    if (b.tipo === "resfriamento") {
-      resultado.push({ ...b, boxNum: 9998 });
-      continue;
-    }
-
-    if (b.tipo === "cardio_final") {
-      resultado.push({ ...b, boxNum: 9999 });
-      continue;
-    }
-
-    if (b.tipo === "hiit" && b.boxNum >= 1) {
-      flush();
-      resultado.push(b);
-      continue;
-    }
-
-    if (b.tipo === "hiit" && b.boxNum === 0) {
-      resultado.push({ ...b, boxNum: 500 });
-      continue;
-    }
-
     if (b.tipo === "treino") {
-      if (ultimoBox !== null && ultimoBox !== b.boxNum) flush();
-      buffer.push(b);
-      ultimoBox = b.boxNum;
+      if (last !== null && last !== b.boxNum) flush();
+      buf.push(b); last = b.boxNum;
+    } else {
+      flush(); out.push(b);
     }
   }
-
   flush();
-  return resultado.sort((a, b) => a.boxNum - b.boxNum);
+  return out.sort((a,b)=>a.boxNum-b.boxNum);
 };
 
 /* ============================================================
-   BLOCO C — CONVERSÃO PARA FRONT
+   6) CONVERSÃO PARA FRONT
 ============================================================ */
-FEMFLOW.getLang = () =>
-  FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
-
-FEMFLOW.getTituloMultilingue = function (b) {
-  const lang = FEMFLOW.getLang();
-  return b[`titulo_${lang}`] || b.titulo_pt || b.titulo || "Exercício";
-};
-
-FEMFLOW.engineTreino.converterParaFront = function (blocos) {
-  const saida = [];
-
-  for (const b of blocos) {
-
-    if (b.tipo === "aquecimento") {
-      saida.push({
-        tipo: "aquecimentoPremium",
-        box: 0,
-        titulo: "🌿 Aquecimento Premium",
-        passos: [
-          { nome: "Mobilidade de Quadril (40s)" },
-          { nome: "Mobilidade Torácica (40s)" },
-          { nome: "Mobilidade de Ombro (40s)" },
-          { nome: "Caminhada Leve – 5 min" }
-        ]
-      });
-      continue;
-    }
-
-    if (b.tipo === "treino") {
-      saida.push({
-        tipo: "treino",
-        box: b.boxNum,
-        serieEspecial: b.serieEspecial || null,
-        titulo: FEMFLOW.getTituloMultilingue(b),
-        link: b.link || "",
-        series: b.series || "",
-        reps: b.reps || "",
-        intervalo: Number(b.intervalo) || 0
-      });
-      continue;
-    }
-
-    if (b.tipo === "hiit") {
-      saida.push({
-        tipo: "hiitPremium",
-        box: b.boxNum, // 🔥 AJUSTE FINAL — NÃO REORDENA
-        titulo: b.titulo || "🔥 HIIT Premium",
-        forte: Number(b.forte) || 30,
-        leve: Number(b.leve) || 30,
-        ciclos: Number(b.ciclos) || 6
-      });
-      continue;
-    }
-
-    if (b.tipo === "cardio_final") {
-      saida.push({
-        tipo: "cardio_final",
-        box: b.boxNum,
-        titulo: b.titulo || "💗 Cardio Final",
-        duracao: Number(b.tempo) || 600
-      });
-      continue;
-    }
-
-    if (b.tipo === "resfriamento") {
-      saida.push({
-        tipo: "resfriamentoPremium",
-        box: b.boxNum,
-        titulo: "🧘 Resfriamento Premium",
-        passos: [
-          { nome: "Alongamentos Leves — 2 min" },
-          { nome: "Respiração — 1 min" }
-        ]
-      });
-    }
-  }
-
-  return saida;
-};
+FEMFLOW.engineTreino.converterParaFront = blocos =>
+  blocos.map(b => {
+    if (b.tipo === "treino") return {
+      tipo: "treino",
+      box: b.boxNum,
+      serieEspecial: b.serieEspecial,
+      titulo: b.titulo_pt || b.titulo,
+      link: b.link,
+      series: b.series,
+      reps: b.reps,
+      intervalo: Number(b.intervalo)||0
+    };
+    return b;
+  });
 
 /* ============================================================
-   8) MONTAR TREINO FINAL
+   7) MONTAR TREINO FINAL
 ============================================================ */
-FEMFLOW.engineTreino.montarTreinoFinal = async function ({
-  id, nivel, enfase, fase, diaPrograma, diaCiclo, personal = false
-}) {
+FEMFLOW.engineTreino.montarTreinoFinal = async ({
+  id, nivel, enfase, fase, diaCiclo, personal=false
+}) => {
 
-  let blocosRaw = personal
-    ? await this.carregarBlocosPersonal({ id, enfase, fase, diaPrograma, diaCiclo })
-    : await this.carregarBlocosNormais({ nivel, enfase, fase, diaPrograma, diaCiclo });
+  const blocosRaw = personal
+    ? await FEMFLOW.engineTreino.carregarBlocosPersonal({ id, enfase, fase, diaCiclo })
+    : await FEMFLOW.engineTreino.carregarBlocosNormais({ nivel, enfase, fase, diaCiclo });
 
-  if (!blocosRaw?.length) return [];
+  if (!blocosRaw.length) return [];
 
-  const ordenados = this.organizarBlocosSimples(blocosRaw);
-  const comHIIT   = this.intercalarHIIT(ordenados);
-  return this.converterParaFront(comHIIT);
+  const ordenados = FEMFLOW.engineTreino.organizarBlocosSimples(blocosRaw);
+  const comHIIT   = FEMFLOW.engineTreino.intercalarHIIT(ordenados);
+  return FEMFLOW.engineTreino.converterParaFront(comHIIT);
 };
-
