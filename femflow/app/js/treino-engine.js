@@ -293,3 +293,4 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
   const comHIIT   = FEMFLOW.engineTreino.intercalarHIIT(ordenados);
   return FEMFLOW.engineTreino.converterParaFront(comHIIT);
 };
+
