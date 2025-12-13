@@ -167,83 +167,136 @@ FEMFLOW.engineTreino.intercalarHIIT = function (ordenados) {
 
 /* ============================================================
    Firebase: carregar blocos NORMAL (exercicios/)
+   ✅ Prioridade: diaPrograma (treino) → fallback: diaCiclo (segurança)
 ============================================================ */
 FEMFLOW.engineTreino.carregarBlocosNormais = async function({
   nivel,
   enfase,
   fase,
+  diaPrograma,
   diaCiclo
 }) {
-  const faseNorm = this.normalizarFase(fase);
+  const faseNorm  = this.normalizarFase(fase);
   const nivelNorm = this.normalizarNivel(nivel);
-  const enfNorm = this.normalizarEnfase(enfase);
-  const diaKey = `dia_${diaCiclo}`;
+  const enfNorm   = this.normalizarEnfase(enfase);
 
-  FEMFLOW.log("📦 [NORMAL] carregando blocos →", nivelNorm, enfNorm, faseNorm, diaKey);
+  const dProg = Number(diaPrograma || 0);
+  const dCicl = Number(diaCiclo || 0);
+
+  const keyProg = dProg ? `dia_${dProg}` : null;
+  const keyCicl = dCicl ? `dia_${dCicl}` : null;
+
+  FEMFLOW.log("📦 [NORMAL] carregar blocos →", { nivelNorm, enfNorm, faseNorm, keyProg, keyCicl });
 
   const db = firebase.firestore();
 
-  const col = db
-    .collection("exercicios")
-    .doc(`${nivelNorm}_${enfNorm}`)
-    .collection("fases")
-    .doc(faseNorm)
-    .collection("dias")
-    .doc(diaKey)
-    .collection("blocos");
+  async function getByDiaKey(diaKey){
+    const col = db
+      .collection("exercicios")
+      .doc(`${nivelNorm}_${enfNorm}`)
+      .collection("fases")
+      .doc(faseNorm)
+      .collection("dias")
+      .doc(diaKey)
+      .collection("blocos");
 
-  const snap = await col.get();
+    const snap = await col.get();
+    if (snap.empty) return null;
 
-  if (snap.empty) {
-    FEMFLOW.warn("⚠️ Nenhum BLOCO encontrado (NORMAL)");
-    return [];
+    const blocos = [];
+    snap.forEach(doc => blocos.push(doc.data()));
+    return blocos;
   }
 
-  const blocos = [];
-  snap.forEach(doc => blocos.push(doc.data()));
+  // 1) tenta pelo diaPrograma
+  if (keyProg) {
+    const blocosProg = await getByDiaKey(keyProg);
+    if (blocosProg && blocosProg.length) {
+      FEMFLOW.log("✅ [NORMAL] achou por diaPrograma:", keyProg, blocosProg.length);
+      return blocosProg;
+    }
+    FEMFLOW.warn("⚠️ [NORMAL] não achou por diaPrograma, tentando fallback diaCiclo...");
+  }
 
-  FEMFLOW.log("🔍 Blocos recebidos:", blocos.length);
-  return blocos;
+  // 2) fallback diaCiclo
+  if (keyCicl) {
+    const blocosCicl = await getByDiaKey(keyCicl);
+    if (blocosCicl && blocosCicl.length) {
+      FEMFLOW.log("✅ [NORMAL] achou por diaCiclo:", keyCicl, blocosCicl.length);
+      return blocosCicl;
+    }
+  }
+
+  FEMFLOW.warn("⚠️ Nenhum BLOCO encontrado (NORMAL) nem por diaPrograma nem por diaCiclo");
+  return [];
 };
+
 
 /* ============================================================
    Firebase: carregar blocos PERSONAL (personal_trainings/)
+   ✅ Prioridade: diaPrograma → fallback: diaCiclo
 ============================================================ */
 FEMFLOW.engineTreino.carregarBlocosPersonal = async function({
   id,
   enfase,
   fase,
+  diaPrograma,
   diaCiclo
 }) {
   const faseNorm = this.normalizarFase(fase);
-  const enfNorm = this.normalizarEnfase(enfase);
-  const diaKey = `dia_${diaCiclo}`;
+  const enfNorm  = this.normalizarEnfase(enfase);
 
-  FEMFLOW.log("🎨 [PERSONAL] carregando blocos →", id, enfNorm, faseNorm, diaKey);
+  const dProg = Number(diaPrograma || 0);
+  const dCicl = Number(diaCiclo || 0);
+
+  const keyProg = dProg ? `dia_${dProg}` : null;
+  const keyCicl = dCicl ? `dia_${dCicl}` : null;
+
+  FEMFLOW.log("🎨 [PERSONAL] carregar blocos →", { id, enfNorm, faseNorm, keyProg, keyCicl });
 
   const db = firebase.firestore();
 
-  const snap = await db
-    .collection("personal_trainings")
-    .doc(id)
-    .collection(enfNorm)
-    .doc(faseNorm)
-    .collection("dias")
-    .doc(diaKey)
-    .collection("blocos")
-    .get();
+  async function getByDiaKey(diaKey){
+    const snap = await db
+      .collection("personal_trainings")
+      .doc(id)
+      .collection(enfNorm)
+      .doc(faseNorm)
+      .collection("dias")
+      .doc(diaKey)
+      .collection("blocos")
+      .get();
 
-  if (snap.empty) {
-    FEMFLOW.warn("⚠️ Nenhum BLOCO encontrado (PERSONAL)");
-    return [];
+    if (snap.empty) return null;
+
+    const blocos = [];
+    snap.forEach(doc => blocos.push(doc.data()));
+    return blocos;
   }
 
-  const blocos = [];
-  snap.forEach(doc => blocos.push(doc.data()));
+  // 1) diaPrograma
+  if (keyProg) {
+    const blocosProg = await getByDiaKey(keyProg);
+    if (blocosProg && blocosProg.length) {
+      FEMFLOW.log("✅ [PERSONAL] achou por diaPrograma:", keyProg, blocosProg.length);
+      return blocosProg;
+    }
+    FEMFLOW.warn("⚠️ [PERSONAL] não achou por diaPrograma, tentando fallback diaCiclo...");
+  }
 
-  FEMFLOW.log("🔍 Blocos PERSONAL:", blocos.length);
-  return blocos;
+  // 2) fallback diaCiclo
+  if (keyCicl) {
+    const blocosCicl = await getByDiaKey(keyCicl);
+    if (blocosCicl && blocosCicl.length) {
+      FEMFLOW.log("✅ [PERSONAL] achou por diaCiclo:", keyCicl, blocosCicl.length);
+      return blocosCicl;
+    }
+  }
+
+  FEMFLOW.warn("⚠️ Nenhum BLOCO encontrado (PERSONAL) nem por diaPrograma nem por diaCiclo");
+  return [];
 };
+
 
 
 /* ============================================================
@@ -537,10 +590,11 @@ FEMFLOW.engineTreino.montarTreinoFinal = async function ({
   nivel,
   enfase,
   fase,
+  diaPrograma,
   diaCiclo,
   personal = false
-}) {
-
+}) { 
+   
   FEMFLOW.log("🚀 montarTreinoFinal()", { id, nivel, enfase, fase, diaCiclo, personal });
 
   /* ----------------------------------------------------------
@@ -549,10 +603,11 @@ FEMFLOW.engineTreino.montarTreinoFinal = async function ({
   let blocosRaw = [];
 
   if (personal) {
-    blocosRaw = await this.carregarBlocosPersonal({ id, enfase, fase, diaCiclo });
-  } else {
-    blocosRaw = await this.carregarBlocosNormais({ nivel, enfase, fase, diaCiclo });
-  }
+  blocosRaw = await this.carregarBlocosPersonal({ id, enfase, fase, diaPrograma, diaCiclo });
+} else {
+  blocosRaw = await this.carregarBlocosNormais({ nivel, enfase, fase, diaPrograma, diaCiclo });
+}
+
 
   if (!blocosRaw || !blocosRaw.length) {
     FEMFLOW.error("❌ Nenhum bloco encontrado.");
