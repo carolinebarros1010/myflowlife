@@ -56,7 +56,7 @@ if (diaPrograma > 30) {
     };
 
     const diasFase = map[coach][fase];
-    const idx = (dia - 1) % diasFase.length;
+    const idx = (diaPrograma - 1) % diasFase.length;
     return diasFase[idx];
   }
 
