@@ -109,11 +109,13 @@ const personalFinal = isPersonal;
 
     const nivel    = perfil.nivel;
     const enfase   = perfil.enfase;
+    FEMFLOW.enfaseAtual = enfase;
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
 
     // 1) Carregar DiaPrograma (LS → backend → fallback)
       const diaPrograma = await FEMFLOW.getDiaPrograma();
+     FEMFLOW.diaProgramaAtual = diaPrograma;
     if (tituloDia) tituloDia.textContent = `Dia ${diaPrograma}`;
 
     FEMFLOW.log("📌 Perfil recebido:", perfil);
@@ -546,11 +548,13 @@ function initPeso() {
         console.warn("⚠️ Sem ID no localStorage para salvar evolução");
         return;
       }
-
+      const treino = `${FEMFLOW.enfaseAtual}_dia_${diaPrograma}`;
+ 
       try {
         const resp = await FEMFLOW.post({
   action: "salvarevolucao",
   id,
+  treino,
   exercicio,
   peso,
   reps,
@@ -559,7 +563,9 @@ function initPeso() {
   diaPrograma
 });
 
-        console.log("📈 EVOLUÇÃO AUTOMÁTICA:", json);
+
+       console.log("📈 EVOLUÇÃO AUTOMÁTICA:", resp);
+
 
         FEMFLOW.toast("Peso registrado!");
 
@@ -598,7 +604,8 @@ if (btnConfirmarPSE) {
     }
 
     try {
-      const resp = await FEMFLOW.post({
+       const treino = `${FEMFLOW.enfaseAtual}_dia_${diaPrograma}`;
+        const resp = await FEMFLOW.post({
         action: "salvartreino",
         id,
         fase,
