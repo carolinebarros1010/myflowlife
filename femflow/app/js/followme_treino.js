@@ -5,15 +5,16 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
   const id = localStorage.getItem("femflow_id");
-  const coach = localStorage.getItem("femflow_followme_coach");
-  let dia = Number(localStorage.getItem("femflow_followme_dia") || 1);
+const coachRaw = localStorage.getItem("femflow_followme_coach");
+const coach = coachRaw?.replace("followme_", "");
+const fase = localStorage.getItem("femflow_fase") || "follicular";
+const diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
 
-  const fase = localStorage.getItem("femflow_fase") || "follicular";
+if (!id || !coach) {
+  FEMFLOW.toast("Erro: dados do FollowMe ausentes.");
+  return FEMFLOW.router("flowcenter.html");
+}
 
-  if (!id || !coach) {
-    alert("Erro: dados ausentes.");
-    return (location.href = "flowcenter.html");
-  }
 
   // ELEMENTOS
   const tituloCoach = document.getElementById("fmCoachNome");
@@ -27,18 +28,18 @@ document.addEventListener("DOMContentLoaded", async () => {
    1) PROGRESSO FOLLOWME (30 DIAS)
 ============================================================ */
 function atualizarProgresso() {
-  const diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
   const dia = Math.min(diaPrograma, 30);
-
-  progressTxt.textContent = `Dia ${dia} de 30 — Fase: ${fase}`;
-
-  if (dia > 30) {
-    FEMFLOW.toast("🎉 Você concluiu o FollowMe!");
-    FEMFLOW.router("flowcenter.html");
-  }
+  document.getElementById("fmProgress").textContent =
+    `Dia ${dia} de 30 — Fase: ${fase}`;
 }
 
 atualizarProgresso();
+
+if (diaPrograma > 30) {
+  FEMFLOW.toast("🎉 FollowMe concluído!");
+  FEMFLOW.router("flowcenter.html");
+}
+
 
   /* ============================================================
      2) DEFINIR VIDEO DO DIA (coach + fase)
@@ -75,49 +76,35 @@ atualizarProgresso();
    4) SALVAR PSE + AVANÇAR DIA (FOLLOWME)
 ============================================================ */
 async function salvarTreinoFollowMe(pse) {
-
-  const id = localStorage.getItem("femflow_id");
-  const coach = localStorage.getItem("femflow_followme_coach");
-  const fase = localStorage.getItem("femflow_fase") || "follicular";
-
-  const diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
-
-  if (!id || !coach) {
-    FEMFLOW.toast("Erro ao salvar treino.", true);
-    return;
-  }
-
   try {
-
     const resp = await FEMFLOW.post({
       action: "salvartreino",
+
       id,
       fase,
 
-      // 🔥 CONTROLE DE PROGRAMA
+      // 🔥 CONTADOR ÚNICO
       diaPrograma,
-      diaFirebase: null, // FollowMe não usa ciclo
+      diaFirebase: null,
 
-      pse,
-
-      // 🔥 IDENTIFICAÇÃO DO TREINO
+      // 🔥 IDENTIFICAÇÃO
       treino: `followme_${coach}_dia_${diaPrograma}`,
       tipoTreino: "followme",
       coach,
+
+      pse,
 
       // 🔐 SEGURANÇA
       deviceId: FEMFLOW.getDeviceId(),
       sessionToken: FEMFLOW.getSessionToken()
     });
 
-    FEMFLOW.log("📌 FollowMe salvarTreino:", resp);
-
     if (resp.status !== "ok") {
       FEMFLOW.toast("Erro ao salvar treino.", true);
       return;
     }
 
-    // 🔥 atualizar diaPrograma
+    // atualiza diaPrograma
     if (resp.diaPrograma) {
       localStorage.setItem("femflow_diaPrograma", String(resp.diaPrograma));
     }
@@ -125,11 +112,19 @@ async function salvarTreinoFollowMe(pse) {
     FEMFLOW.toast("Treino salvo! 🙌");
     FEMFLOW.router("flowcenter.html");
 
-  } catch (err) {
-    FEMFLOW.error("Erro FollowMe:", err);
+  } catch (e) {
+    FEMFLOW.error("Erro FollowMe:", e);
     FEMFLOW.toast("Erro de conexão.", true);
   }
 }
+
+   document.querySelectorAll(".pse-val").forEach(btn => {
+  btn.onclick = () => {
+    const pse = Number(btn.textContent);
+    salvarTreinoFollowMe(pse);
+  };
+});
+
 
   /* ============================================================
      5) REPLAY PERMITIDO
