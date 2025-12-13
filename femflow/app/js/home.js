@@ -13,21 +13,45 @@ const FOLLOWME_LINKS = {
   karoline: "#",
   thalita: "#"
 };
+/* ============================================================
+   🔄 PERFIL: puxar do backend e persistir no localStorage
+============================================================ */
+async function carregarPerfilEAtualizarStorage() {
+  const id = localStorage.getItem("femflow_id") || "";
+  const email = localStorage.getItem("femflow_email") || "";
 
-function persistPerfil(perfil){
-  localStorage.setItem("femflow_id", perfil.id);
+  // sem identificador -> volta pro login
+  if (!id && !email) return { status: "no_auth" };
+
+  // ✅ chama VALIDAR (fonte da verdade)
+  const qs = new URLSearchParams({ action: "validar" });
+  if (id) qs.set("id", id);
+  else qs.set("email", email);
+
+  const url = `${FEMFLOW.SCRIPT_URL}?${qs.toString()}`;
+  const perfil = await fetch(url).then(r => r.json()).catch(() => ({ status: "error" }));
+
+  return perfil;
+}
+
+function persistPerfil(perfil) {
+  // essenciais
+  localStorage.setItem("femflow_id", perfil.id || "");
   localStorage.setItem("femflow_nome", perfil.nome || "");
   localStorage.setItem("femflow_email", perfil.email || "");
-  localStorage.setItem("femflow_produto", (perfil.produto || "").toLowerCase());
+  localStorage.setItem("femflow_produto", String(perfil.produto || "").toLowerCase());
   localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
   localStorage.setItem("femflow_personal", String(!!perfil.personal));
 
-  localStorage.setItem("femflow_enfase", (perfil.enfase || "nenhuma"));
-  localStorage.setItem("femflow_fase", (perfil.fase || "follicular"));
+  // ciclo + programa (CRÍTICO)
+  localStorage.setItem("femflow_perfilHormonal", String(perfil.perfilHormonal || "regular").toLowerCase());
+  localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao || 28));
+  localStorage.setItem("femflow_fase", String(perfil.fase || "follicular").toLowerCase());
   localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
   localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
-  localStorage.setItem("femflow_perfilHormonal", (perfil.perfilHormonal || "regular"));
-  localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao || 28));
+
+  // enfase salva no backend
+  localStorage.setItem("femflow_enfase", String(perfil.enfase || "nenhuma").toLowerCase());
 }
 
 /* ============================================================
@@ -273,66 +297,51 @@ document.addEventListener("DOMContentLoaded", async () => {
   mostrarLoading();
 
   try {
-    const id = localStorage.getItem("femflow_id");
-    const deviceId = localStorage.getItem("femflow_deviceId");
-    const sessionToken = localStorage.getItem("femflow_sessionToken");
+    const perfil = await carregarPerfilEAtualizarStorage();
 
-    if (!id || !deviceId || !sessionToken) {
-      FEMFLOW.toast("Sessão ausente. Faça login novamente.");
-      FEMFLOW.clearSession();
+    // sem auth
+    if (!perfil || perfil.status === "no_auth") {
+      FEMFLOW.toast("Faça login novamente 🌸");
       esconderLoading();
       return FEMFLOW.router("index.html");
     }
 
-    // ✅ BUSCA PERFIL NO BACKEND (VALIDAR)
-    const url = `${FEMFLOW.SCRIPT_URL}?action=validar&id=${encodeURIComponent(id)}`;
-    const resp = await fetch(url);
-    const perfil = await resp.json();
-
-    // ✅ Se sessão inválida/bloqueada → volta pro login
-    if (!perfil || perfil.status !== "ok" || perfil.status === "blocked") {
+    // bloqueado / sessão inválida
+    if (perfil.status === "blocked" || perfil.status === "denied") {
       FEMFLOW.toast("Sessão inválida. Faça login novamente.");
-      FEMFLOW.clearSession();
+      FEMFLOW.clearSession?.();
       esconderLoading();
       return FEMFLOW.router("index.html");
     }
 
-    // ✅ Atualiza LocalStorage com o que veio do backend
-    localStorage.setItem("femflow_nome", perfil.nome || "");
-    localStorage.setItem("femflow_email", perfil.email || "");
-    localStorage.setItem("femflow_produto", (perfil.produto || "").toLowerCase());
-    localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
-    localStorage.setItem("femflow_personal", String(!!perfil.personal));
-    localStorage.setItem("femflow_nivel", perfil.nivel || "iniciante");
+    // erro do backend
+    if (perfil.status !== "ok") {
+      FEMFLOW.toast("Erro ao atualizar dados. Tente novamente.");
+      esconderLoading();
+      return;
+    }
 
-    // ciclo
-    localStorage.setItem("femflow_fase", perfil.fase || "follicular");
-    localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
-    localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
-    localStorage.setItem("femflow_perfilHormonal", perfil.perfilHormonal || "regular");
+    // ✅ grava tudo no localStorage
+    persistPerfil(perfil);
 
-    // Se o backend retorna isso, mantém:
-    if (perfil.enfase) localStorage.setItem("femflow_enfase", perfil.enfase);
-
-    // ✅ Rails
+    // Rails
     renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
     renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
     renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
     renderRail(document.getElementById("railCasa"), LISTA_CASA);
     renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
 
-    // ✅ Idioma + vídeo
+    // Idioma + vídeo
     aplicarIdiomaHome();
 
   } catch (err) {
-    console.error("Erro HOME:", err);
-    FEMFLOW.toast("Falha ao carregar. Faça login novamente.");
-    FEMFLOW.clearSession();
-    return FEMFLOW.router("index.html");
+    console.error("HOME init erro:", err);
+    FEMFLOW.toast("Falha ao carregar. Verifique internet.");
   } finally {
     esconderLoading();
   }
 });
+
 
 
 /* ============================================================
