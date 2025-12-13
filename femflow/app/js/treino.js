@@ -549,7 +549,9 @@ function initPeso() {
         console.warn("⚠️ Sem ID no localStorage para salvar evolução");
         return;
       }
-      const treino = `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
+      const diaCiclo = Number(localStorage.getItem("femflow_diaCiclo") || 1);
+const treino = `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
+
 
  
       try {
