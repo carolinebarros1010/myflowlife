@@ -257,8 +257,8 @@ function getPerguntasTraduzidas() {
 
     // Definir nível
     let nivel = "iniciante";
-    if (score >= 20) nivel = "avançada";
-    else if (score >= 14) nivel = "intermediária";
+    if (score >= 20) nivel = "avancada";
+    else if (score >= 14) nivel = "intermediaria";
 
     // Coletar respostas
     const respostas = {};
@@ -276,11 +276,11 @@ function getPerguntasTraduzidas() {
     // --------------------------------------------------------
     // 1) VERIFICAR SE E-MAIL JÁ EXISTE NO BACKEND
     // --------------------------------------------------------
-    const check = await fetch(FEMFLOW.SCRIPT_URL, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ action:"verificarEmail", email })
-    }).then(r => r.json());
+    const check = await FEMFLOW.post({
+  action: "verificarEmail",
+  email
+});
+
 
     let r;
 
@@ -288,34 +288,28 @@ function getPerguntasTraduzidas() {
       // --------------------------------------------------------
       // 2A) ATUALIZAR CADASTRO EXISTENTE
       // --------------------------------------------------------
-      r = await fetch(FEMFLOW.SCRIPT_URL, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({
-          action:"atualizarCadastroExistente",
-          id: check.id,
-          nome, email, telefone, senha,
-          nivel,
-          pontuacao: score,
-          anamnese: JSON.stringify(respostas)
-        })
-      }).then(r => r.json());
+     r = await FEMFLOW.post({
+  action: "atualizarCadastroExistente",
+  id: check.id,
+  nome, email, telefone, senha,
+  nivel,
+  pontuacao: score,
+  anamnese: JSON.stringify(respostas)
+});
+
 
     } else {
       // --------------------------------------------------------
       // 2B) CRIAR CADASTRO NOVO
       // --------------------------------------------------------
-      r = await fetch(FEMFLOW.SCRIPT_URL, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({
-          action:"enviarcadastro",
-          nome,email,telefone,senha,
-          nivel,
-          pontuacao: score,
-          anamnese: JSON.stringify(respostas)
-        })
-      }).then(r => r.json());
+     r = await FEMFLOW.post({
+  action: "enviarcadastro",
+  nome, email, telefone, senha,
+  nivel,
+  pontuacao: score,
+  anamnese: JSON.stringify(respostas)
+});
+
     }
 
     if (!r || !(r.status === "ok" || r.status === "created")) {
@@ -334,17 +328,14 @@ function getPerguntasTraduzidas() {
     // --------------------------------------------------------
     // 4) CRIAR CICLO INICIAL AUTOMATICAMENTE
     // --------------------------------------------------------
-    await fetch(FEMFLOW.SCRIPT_URL, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        action:"setciclo",
-        id: localStorage.getItem("femflow_id"),
-        cicloDuracao: 28,
-        dataInicio: new Date().toISOString(),
-        perfilHormonal: "regular"
-      })
-    });
+    await FEMFLOW.post({
+  action: "setciclo",
+  id: localStorage.getItem("femflow_id"),
+  cicloDuracao: 28,
+  dataInicio: new Date().toISOString(),
+  perfilHormonal: "regular"
+});
+
 
     // --------------------------------------------------------
     // 5) EXIBIR NÍVEL NA TELA FINAL
