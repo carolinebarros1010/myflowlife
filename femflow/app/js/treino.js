@@ -232,66 +232,64 @@ function renderTreino(lista) {
    RENDERIZAR 1 BOX COMPLETO
 ============================================================ */
 function renderBox(bloco) {
- if (!Array.isArray(bloco) || bloco.length === 0) {
+  if (!Array.isArray(bloco) || bloco.length === 0) {
     FEMFLOW.warn("⚠️ renderBox recebeu bloco inválido:", bloco);
     return "";
- }
-   
+  }
+  
   const tipoDominante = bloco[0].tipo;
-const boxNum = Number(bloco[0].box || 0);
+  let boxNum = Number(bloco[0].box || 0); // Corrigido: Garantir que `boxNum` seja inicializado corretamente
 
-// 🔒 Segurança: box técnico nunca vira treino
-if (boxNum >= 900 && tipoDominante === "treino") {
-  return null;
-}
-
+  // 🔒 Segurança: box técnico nunca vira treino
+  if (boxNum >= 900 && tipoDominante === "treino") {
+    return null;
+  }
 
   let html = `<div class="carousel-item">`;
 
- /* ======================================================
-   AQUECIMENTO PREMIUM
-====================================================== */
-if (tipoDominante === "aquecimentoPremium") {
-  html += `
-    <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
-    <ul class="ff-passos">
-      ${bloco[0].passos.map(p => `<li>${p.nome}</li>`).join("")}
-    </ul>
-    <p class="ff-sugestao-resp">
-      💨 Sugestão: prepare seu corpo com uma respiração consciente antes de começar.
-    </p>
-    <button class="ff-btn-resp-sugerida"
-            type="button"
-            onclick="location.href='respiracao.html?ret=treino'">
-      🌬️ Abrir protocolos de respiração
-    </button>
-  `;
-  html += `</div>`;
-  return html;
-}
+  /* ======================================================
+     AQUECIMENTO PREMIUM
+  ====================================================== */
+  if (tipoDominante === "aquecimentoPremium") {
+    html += `
+      <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
+      <ul class="ff-passos">
+        ${bloco[0].passos.map(p => `<li>${p.nome}</li>`).join("")}
+      </ul>
+      <p class="ff-sugestao-resp">
+        💨 Sugestão: prepare seu corpo com uma respiração consciente antes de começar.
+      </p>
+      <button class="ff-btn-resp-sugerida"
+              type="button"
+              onclick="location.href='respiracao.html?ret=treino'">
+        🌬️ Abrir protocolos de respiração
+      </button>
+    `;
+    html += `</div>`;
+    return html;
+  }
 
-/* ======================================================
-   RESFRIAMENTO PREMIUM
-====================================================== */
-if (tipoDominante === "resfriamentoPremium") {
-  html += `
-    <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
-    <ul class="ff-passos">
-      ${bloco[0].passos.map(p => `<li>${p.nome}</li>`).join("")}
-    </ul>
-    <p class="ff-sugestao-resp">
-      🌬️ Sugestão: finalize seu treino desacelerando com respiração suave.
-    </p>
-    <button class="ff-btn-resp-sugerida"
-            type="button"
-            onclick="location.href='respiracao.html?ret=treino'">
-      💗 Fazer respiração de fechamento
-    </button>
-  `;
-  html += `</div>`;
-  return html;
-}
-
+  /* ======================================================
+     RESFRIAMENTO PREMIUM
+  ====================================================== */
+  if (tipoDominante === "resfriamentoPremium") {
+    html += `
+      <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
+      <ul class="ff-passos">
+        ${bloco[0].passos.map(p => `<li>${p.nome}</li>`).join("")}
+      </ul>
+      <p class="ff-sugestao-resp">
+        🌬️ Sugestão: finalize seu treino desacelerando com respiração suave.
+      </p>
+      <button class="ff-btn-resp-sugerida"
+              type="button"
+              onclick="location.href='respiracao.html?ret=treino'">
+        💗 Fazer respiração de fechamento
+      </button>
+    `;
+    html += `</div>`;
+    return html;
+  }
 
   /* ======================================================
      CARDIO FINAL
@@ -314,41 +312,41 @@ if (tipoDominante === "resfriamentoPremium") {
     return html;
   }
 
-/* ======================================================
-   HIIT PREMIUM
-====================================================== */
-if (tipoDominante === "hiitPremium") {
-  const h = bloco[0];
+  /* ======================================================
+     HIIT PREMIUM
+  ====================================================== */
+  if (tipoDominante === "hiitPremium") {
+    const h = bloco[0];
 
-  html += `
-    <h2 class="ff-ex-titulo">${h.titulo}</h2>
+    html += `
+      <h2 class="ff-ex-titulo">${h.titulo}</h2>
 
-    <p class="ff-sugestao-hiit">
-      🔥 <b>Escolha a sua forma de HIIT:</b><br>
-      • <b>Na academia:</b> esteira, bike, escada, remo ou air Bike<br>
-      • <b>Em casa:</b> polichinelo, corrida parada, burpee, corda, salto no lugar
-    </p>
+      <p class="ff-sugestao-hiit">
+        🔥 <b>Escolha a sua forma de HIIT:</b><br>
+        • <b>Na academia:</b> esteira, bike, escada, remo ou air Bike<br>
+        • <b>Em casa:</b> polichinelo, corrida parada, burpee, corda, salto no lugar
+      </p>
 
-    <div class="hiit-bubble">
-      <div class="hiit-circle"
-           data-estimulo="${h.forte}"
-           data-descanso="${h.leve}"
-           data-ciclos="${h.ciclos}">
-           ▶
+      <div class="hiit-bubble">
+        <div class="hiit-circle"
+             data-estimulo="${h.forte}"
+             data-descanso="${h.leve}"
+             data-ciclos="${h.ciclos}">
+             ▶
+        </div>
+        <div class="hiit-phase">Toque para iniciar</div>
       </div>
-      <div class="hiit-phase">Toque para iniciar</div>
-    </div>
-  `;
+    `;
 
-  html += `</div>`;
-  return html;
-}
-
+    html += `</div>`;
+    return html;
+  }
 
   /* ======================================================
      TREINO (1 box com vários exercícios)
   ====================================================== */
-  const boxNum = bloco[0].box;
+  // Garantindo que a variável `boxNum` seja atribuída corretamente
+  boxNum = bloco[0].box || 0;
   const serieEsp = bloco[0].serieEspecial
     ? ` — Série ${bloco[0].serieEspecial}`
     : "";
@@ -362,6 +360,7 @@ if (tipoDominante === "hiitPremium") {
   html += `</div>`;
   return html;
 }
+
 /* ============================================================
    BLOCO EXERCÍCIO INDIVIDUAL
 ============================================================ */
