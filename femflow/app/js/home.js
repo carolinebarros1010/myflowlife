@@ -14,6 +14,22 @@ const FOLLOWME_LINKS = {
   thalita: "#"
 };
 
+function persistPerfil(perfil){
+  localStorage.setItem("femflow_id", perfil.id);
+  localStorage.setItem("femflow_nome", perfil.nome || "");
+  localStorage.setItem("femflow_email", perfil.email || "");
+  localStorage.setItem("femflow_produto", (perfil.produto || "").toLowerCase());
+  localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
+  localStorage.setItem("femflow_personal", String(!!perfil.personal));
+
+  localStorage.setItem("femflow_enfase", (perfil.enfase || "nenhuma"));
+  localStorage.setItem("femflow_fase", (perfil.fase || "follicular"));
+  localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
+  localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
+  localStorage.setItem("femflow_perfilHormonal", (perfil.perfilHormonal || "regular"));
+  localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao || 28));
+}
+
 /* ============================================================
    LOADING
 =========================================================== */
