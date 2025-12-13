@@ -126,14 +126,15 @@ const personalFinal = isPersonal;
 if (personalFinal) {
   FEMFLOW.log("🎨 Modo PERSONAL ativado");
 
-  let lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-    id,
-    enfase,
-    fase,
-    diaCiclo,
-    nivel,
-    personal: true
-  });
+let lista = await FEMFLOW.engineTreino.montarTreinoFinal({
+  id,
+  nivel,
+  enfase,
+  fase,
+  diaCiclo,
+  personal: true
+});
+
 
   // fallback se não existir treino personal
   if (!lista || lista.length === 0) {
@@ -548,7 +549,8 @@ function initPeso() {
         console.warn("⚠️ Sem ID no localStorage para salvar evolução");
         return;
       }
-      const treino = `${FEMFLOW.enfaseAtual}_dia_${diaPrograma}`;
+      const treino = `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
+
  
       try {
         const resp = await FEMFLOW.post({
@@ -604,15 +606,15 @@ if (btnConfirmarPSE) {
     }
 
     try {
-       const treino = `${FEMFLOW.enfaseAtual}_dia_${diaPrograma}`;
+      const treino = `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
         const resp = await FEMFLOW.post({
-        action: "salvartreino",
-        id,
-        fase,
-        diaPrograma,          // 🔥 enviado como referência
-        diaFirebase: diaCiclo,
-        pse,
-        treino,
+      action: "salvartreino",
+id,
+diaPrograma,
+diaCiclo,
+pse,
+treino,
+
         deviceId: FEMFLOW.getDeviceId(),
         sessionToken: FEMFLOW.getSessionToken()
       });
@@ -703,9 +705,6 @@ async function getUltimoPeso(id, exercicio) {
   exercicio
 });
 return resp?.peso || "";
-
-    return json.peso || "";
-
   } catch (e) {
     console.warn("Erro ao buscar último peso:", e);
     return "";
