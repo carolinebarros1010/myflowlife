@@ -131,13 +131,6 @@ async function salvarTreinoFollowMe(pse) {
   }
 }
 
-document.querySelectorAll(".pse-val").forEach(btn => {
-  btn.onclick = () => {
-    const val = Number(btn.textContent);
-    salvarTreinoFollowMe(val);
-  };
-});
-
   /* ============================================================
      5) REPLAY PERMITIDO
   ============================================================ */
