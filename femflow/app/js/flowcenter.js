@@ -80,14 +80,14 @@ perfil = { ...perfil, ...perfilFresh };
   const isApp      = produtoRaw === "acesso_app";
 
   /* ============================================================
-     2) SINCRONIZAR FASE HORMONAL (não altera produto)
-  ============================================================ */
-  let ciclo = await FEMFLOW.carregarCicloBackend();
+   2) CICLO (vem do VALIDAR + localStorage)
+============================================================ */
+let ciclo = {
+  fase: (localStorage.getItem("femflow_fase") || perfil.fase || "follicular").toLowerCase(),
+  diaCiclo: Number(localStorage.getItem("femflow_diaCiclo") || perfil.diaCiclo || 1),
+  diaPrograma: Number(localStorage.getItem("femflow_diaPrograma") || perfil.diaPrograma || 1)
+};
 
-  if (!ciclo) {
-    FEMFLOW.toast("Erro ao sincronizar ciclo.");
-    return FEMFLOW.router("home.html");
-  }
    
   /* ============================================================
      3) ATUALIZAR NÍVEL NO TOPO
