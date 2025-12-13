@@ -23,19 +23,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   tituloCoach.textContent = `Treinando com ${coach}`;
 
-  /* ============================================================
-     1) PROGRESSO (1/30)
-  ============================================================ */
-  function atualizarProgresso() {
-    progressTxt.textContent = `Dia ${dia} de 30 — Fase: ${fase}`;
-  }
+ /* ============================================================
+   1) PROGRESSO FOLLOWME (30 DIAS)
+============================================================ */
+function atualizarProgresso() {
+  const diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
+  const dia = Math.min(diaPrograma, 30);
 
-  atualizarProgresso();
+  progressTxt.textContent = `Dia ${dia} de 30 — Fase: ${fase}`;
 
   if (dia > 30) {
-    alert("Parabéns! Você concluiu os 30 dias do FollowMe.");
-    return location.href = "flowcenter.html";
+    FEMFLOW.toast("🎉 Você concluiu o FollowMe!");
+    FEMFLOW.router("flowcenter.html");
   }
+}
+
+atualizarProgresso();
 
   /* ============================================================
      2) DEFINIR VIDEO DO DIA (coach + fase)
@@ -128,6 +131,12 @@ async function salvarTreinoFollowMe(pse) {
   }
 }
 
+document.querySelectorAll(".pse-val").forEach(btn => {
+  btn.onclick = () => {
+    const val = Number(btn.textContent);
+    salvarTreinoFollowMe(val);
+  };
+});
 
   /* ============================================================
      5) REPLAY PERMITIDO
