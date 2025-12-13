@@ -5,10 +5,10 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
   const id = localStorage.getItem("femflow_id");
-  const coach = localStorage.getItem("followme_coach");
-  let dia = Number(localStorage.getItem("followme_diaAtual") || 1);
+  const coach = localStorage.getItem("femflow_followme_coach");
+  let dia = Number(localStorage.getItem("femflow_followme_dia") || 1);
 
-  const fase = localStorage.getItem("femflow_fase_atual") || "follicular";
+  const fase = localStorage.getItem("femflow_fase") || "follicular";
 
   if (!id || !coach) {
     alert("Erro: dados ausentes.");
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     dia++;
-    localStorage.setItem("followme_diaAtual", String(dia));
+    localStorage.setItem("femflow_followme_dia", String(dia));
 
     alert("Treino salvo! Parabéns 🙌");
     location.href = "flowcenter.html";
