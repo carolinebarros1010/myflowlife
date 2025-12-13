@@ -574,7 +574,7 @@ function initPeso() {
 }
 
 /* ============================================================
-     7. SALVAR TREINO
+   7. SALVAR TREINO — VERSÃO FINAL CORRETA
 ============================================================ */
 if (btnSalvar) {
   btnSalvar.onclick = () => modalPSE.classList.remove("hidden");
@@ -587,37 +587,50 @@ if (btnCancelarPSE) {
 if (btnConfirmarPSE) {
   btnConfirmarPSE.onclick = async () => {
 
-    const fase = localStorage.getItem("femflow_fase");
-    const diaFirebase = Number(localStorage.getItem("femflow_diaCiclo") || 1);
-    const pse = Number(pseInput.value || 0);
+    const fase        = localStorage.getItem("femflow_fase");
+    const diaCiclo    = Number(localStorage.getItem("femflow_diaCiclo") || 1);
+    const diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
+    const pse         = Number(pseInput.value || 0);
 
     if (!id) {
-      FEMFLOW.toast("Erro: sem ID.", true);
+      FEMFLOW.toast("Erro: sessão inválida.", true);
       return;
     }
 
     try {
       const resp = await FEMFLOW.post({
-  action: "salvarTreino",
-  id,
-  fase,
-  diaFirebase,
-  pse,
-  treino: "",
-  obs: ""
-});
-
+        action: "salvartreino",
+        id,
+        fase,
+        diaPrograma,          // 🔥 enviado como referência
+        diaFirebase: diaCiclo,
+        pse,
+        treino,
+        deviceId: FEMFLOW.getDeviceId(),
+        sessionToken: FEMFLOW.getSessionToken()
+      });
 
       FEMFLOW.log("📌 salvarTreino:", resp);
 
-      if (resp.status === "ok") {
-        if (resp.novaFase) localStorage.setItem("femflow_fase", resp.novaFase);
-        if (resp.novoDiaCiclo) localStorage.setItem("femflow_diaCiclo", resp.novoDiaCiclo);
-        FEMFLOW.toast("Treino salvo!");
-        await FEMFLOW.incrementarDiaPrograma();
+      if (resp?.status === "ok") {
+
+        // 🔥 BACKEND É A FONTE DA VERDADE
+        if (resp.diaPrograma) {
+          localStorage.setItem("femflow_diaPrograma", String(resp.diaPrograma));
+        }
+
+        if (resp.novaFase) {
+          localStorage.setItem("femflow_fase", resp.novaFase);
+        }
+
+        if (resp.novoDiaCiclo) {
+          localStorage.setItem("femflow_diaCiclo", String(resp.novoDiaCiclo));
+        }
+
+        FEMFLOW.toast("Treino salvo com sucesso! 💪");
 
       } else {
-        FEMFLOW.toast("Erro ao salvar.", true);
+        FEMFLOW.toast("Erro ao salvar treino.", true);
       }
 
     } catch (err) {
@@ -629,21 +642,40 @@ if (btnConfirmarPSE) {
   };
 }
 
+
 /* ============================================================
-     8. BOTÃO DESCANSO
+   8. BOTÃO DESCANSO — VERSÃO FINAL CORRETA
 ============================================================ */
 if (btnDescanso) {
   btnDescanso.onclick = async () => {
 
+    if (!id) {
+      FEMFLOW.toast("Erro: sessão inválida.", true);
+      return;
+    }
+
     try {
-     const resp = await FEMFLOW.post({
-  action: "salvarDescanso",
-  id
-});
+      const resp = await FEMFLOW.post({
+        action: "salvarDescanso",
+        id,
+        deviceId: FEMFLOW.getDeviceId(),
+        sessionToken: FEMFLOW.getSessionToken()
+      });
 
       FEMFLOW.log("📌 descanso:", resp);
-      FEMFLOW.toast("Descanso registrado!");
-      await FEMFLOW.incrementarDiaPrograma();
+
+      if (resp?.status === "ok") {
+
+        // 🔥 Atualiza SOMENTE pelo retorno do backend
+        if (resp.diaPrograma) {
+          localStorage.setItem("femflow_diaPrograma", String(resp.diaPrograma));
+        }
+
+        FEMFLOW.toast("Descanso registrado 🧘‍♀️");
+
+      } else {
+        FEMFLOW.toast("Erro ao registrar descanso.", true);
+      }
 
     } catch (e) {
       FEMFLOW.error("Erro descanso:", e);
@@ -651,6 +683,7 @@ if (btnDescanso) {
     }
   };
 }
+
 
 /* ============================================================
    🔥 PATCH EVOLUÇÃO – BUSCAR ÚLTIMO PESO
