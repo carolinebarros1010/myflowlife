@@ -2,6 +2,28 @@
    FLOWCENTER.JS — FemFlow 2025 • VERSÃO FINAL AJUSTADA
    Correção: Perfil completo vem de carregarPerfil(), não do SYNC
 ============================================================ */
+/* ============================================================
+   🔄 SYNC PERFIL VIA VALIDAR (fonte da verdade)
+============================================================ */
+async function flowcenterSyncPerfil() {
+  const id = localStorage.getItem("femflow_id") || "";
+  const email = localStorage.getItem("femflow_email") || "";
+  if (!id && !email) return { status: "no_auth" };
+
+  const qs = new URLSearchParams({ action: "validar" });
+  if (id) qs.set("id", id);
+  else qs.set("email", email);
+
+  const url = `${FEMFLOW.SCRIPT_URL}?${qs.toString()}`;
+  return await fetch(url).then(r => r.json()).catch(() => ({ status: "error" }));
+}
+
+function flowcenterPersistPerfil(perfil) {
+  localStorage.setItem("femflow_fase", String(perfil.fase || "follicular").toLowerCase());
+  localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
+  localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
+  localStorage.setItem("femflow_enfase", String(perfil.enfase || "nenhuma").toLowerCase());
+}
 
 document.addEventListener("DOMContentLoaded", initFlowCenter);
 
@@ -21,6 +43,33 @@ async function initFlowCenter() {
   FEMFLOW.clearSession();
   return FEMFLOW.router("index.html");
 }
+/* ============================================================
+   🔥 GARANTIR LOCALSTORAGE ATUALIZADO (diaPrograma, fase, diaCiclo)
+============================================================ */
+const perfilFresh = await flowcenterSyncPerfil();
+
+if (!perfilFresh || perfilFresh.status === "no_auth") {
+  FEMFLOW.toast("Faça login novamente 🌸");
+  FEMFLOW.clearSession();
+  return FEMFLOW.router("index.html");
+}
+
+if (perfilFresh.status === "blocked" || perfilFresh.status === "denied") {
+  FEMFLOW.toast("Sessão inválida.");
+  FEMFLOW.clearSession();
+  return FEMFLOW.router("index.html");
+}
+
+if (perfilFresh.status !== "ok") {
+  FEMFLOW.toast("Erro ao atualizar dados. Tente novamente.");
+  return FEMFLOW.router("home.html");
+}
+
+// ✅ Atualiza engrenagens principais
+flowcenterPersistPerfil(perfilFresh);
+
+// ✅ mantém a variável "perfil" coerente para o resto do arquivo
+perfil = { ...perfil, ...perfilFresh };
 
 
   const produtoRaw = (perfil.produto || "").toLowerCase();
@@ -39,7 +88,7 @@ async function initFlowCenter() {
     FEMFLOW.toast("Erro ao sincronizar ciclo.");
     return FEMFLOW.router("home.html");
   }
-
+   
   /* ============================================================
      3) ATUALIZAR NÍVEL NO TOPO
   ============================================================ */
