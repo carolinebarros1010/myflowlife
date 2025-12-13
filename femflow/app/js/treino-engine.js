@@ -172,22 +172,109 @@ FEMFLOW.engineTreino.intercalarHIIT = blocos => {
 };
 
 /* ============================================================
-   6) CONVERSÃO PARA FRONT
+   6) CONVERSÃO PARA FRONT — FEMFLOW PREMIUM
+   Responsável por:
+   • Garantir tipo válido
+   • Garantir box consistente
+   • Converter TODOS os tipos esperados pelo front
 ============================================================ */
-FEMFLOW.engineTreino.converterParaFront = blocos =>
-  blocos.map(b => {
-    if (b.tipo === "treino") return {
-      tipo: "treino",
-      box: b.boxNum,
-      serieEspecial: b.serieEspecial,
-      titulo: b.titulo_pt || b.titulo,
-      link: b.link,
-      series: b.series,
-      reps: b.reps,
-      intervalo: Number(b.intervalo)||0
-    };
-    return b;
-  });
+FEMFLOW.engineTreino.converterParaFront = function (blocos) {
+
+  const saida = [];
+
+  for (const b of blocos) {
+
+    /* ============================
+       AQUECIMENTO
+    ============================ */
+    if (b.tipo === "aquecimento") {
+      saida.push({
+        tipo: "aquecimentoPremium",
+        box: 0,
+        titulo: "🌿 Aquecimento Premium",
+        passos: [
+          { nome: "Mobilidade de Quadril — 40s" },
+          { nome: "Mobilidade Torácica — 40s" },
+          { nome: "Mobilidade de Ombro — 40s" },
+          { nome: "Caminhada Leve — 5 min" }
+        ]
+      });
+      continue;
+    }
+
+    /* ============================
+       TREINO (EXERCÍCIO)
+    ============================ */
+    if (b.tipo === "treino") {
+      saida.push({
+        tipo: "treino",
+        box: b.boxNum ?? 1,
+        serieEspecial: b.serieEspecial || null,
+        titulo: FEMFLOW.getTituloMultilingue
+          ? FEMFLOW.getTituloMultilingue(b)
+          : (b.titulo_pt || b.titulo || "Exercício"),
+        link: b.link || "",
+        series: b.series || "",
+        reps: b.reps || "",
+        intervalo: Number(b.intervalo) || 0
+      });
+      continue;
+    }
+
+    /* ============================
+       HIIT
+    ============================ */
+    if (b.tipo === "hiit") {
+      saida.push({
+        tipo: "hiitPremium",
+        box: b.boxNum ?? 500,
+        titulo: b.titulo || "🔥 HIIT Premium",
+        forte: Number(b.forte) || 30,
+        leve: Number(b.leve) || 30,
+        ciclos: Number(b.ciclos) || 6
+      });
+      continue;
+    }
+
+    /* ============================
+       CARDIO FINAL
+    ============================ */
+    if (b.tipo === "cardio_final") {
+      saida.push({
+        tipo: "cardio_final",
+        box: b.boxNum ?? 900,
+        titulo: b.titulo || "💗 Cardio Final",
+        duracao: Number(b.tempo) || 600
+      });
+      continue;
+    }
+
+    /* ============================
+       RESFRIAMENTO
+    ============================ */
+    if (b.tipo === "resfriamento") {
+      saida.push({
+        tipo: "resfriamentoPremium",
+        box: b.boxNum ?? 999,
+        titulo: "🧘 Resfriamento Premium",
+        passos: [
+          { nome: "Alongamentos leves — 2 min" },
+          { nome: "Respiração consciente — 1 min" }
+        ]
+      });
+      continue;
+    }
+
+    /* ============================
+       FALLBACK DE SEGURANÇA
+       (evita undefined[0])
+    ============================ */
+    console.warn("⚠️ Bloco ignorado no converter:", b);
+  }
+
+  return saida;
+};
+
 
 /* ============================================================
    7) MONTAR TREINO FINAL
