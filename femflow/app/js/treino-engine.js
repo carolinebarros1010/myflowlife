@@ -172,109 +172,87 @@ FEMFLOW.engineTreino.intercalarHIIT = blocos => {
 };
 
 /* ============================================================
-   6) CONVERSÃO PARA FRONT — FEMFLOW PREMIUM
-   Responsável por:
-   • Garantir tipo válido
-   • Garantir box consistente
-   • Converter TODOS os tipos esperados pelo front
+   6) CONVERSÃO PARA FRONT — VERSÃO FINAL FEMFLOW
 ============================================================ */
 FEMFLOW.engineTreino.converterParaFront = function (blocos) {
-
-  const saida = [];
+  const out = [];
 
   for (const b of blocos) {
 
-    /* ============================
+    /* =========================
        AQUECIMENTO
-    ============================ */
+    ========================= */
     if (b.tipo === "aquecimento") {
-      saida.push({
+      out.push({
         tipo: "aquecimentoPremium",
         box: 0,
-        titulo: "🌿 Aquecimento Premium",
-        passos: [
-          { nome: "Mobilidade de Quadril — 40s" },
-          { nome: "Mobilidade Torácica — 40s" },
-          { nome: "Mobilidade de Ombro — 40s" },
-          { nome: "Caminhada Leve — 5 min" }
-        ]
+        titulo: "🌿 Aquecimento",
+        passos: b.passos || []
       });
       continue;
     }
 
-    /* ============================
+    /* =========================
        TREINO (EXERCÍCIO)
-    ============================ */
+    ========================= */
     if (b.tipo === "treino") {
-      saida.push({
+      out.push({
         tipo: "treino",
-        box: b.boxNum ?? 1,
+        box: Number(b.boxNum || b.box || 1),
         serieEspecial: b.serieEspecial || null,
-        titulo: FEMFLOW.getTituloMultilingue
-          ? FEMFLOW.getTituloMultilingue(b)
-          : (b.titulo_pt || b.titulo || "Exercício"),
+        titulo: b.titulo_pt || b.titulo || "Exercício",
         link: b.link || "",
         series: b.series || "",
         reps: b.reps || "",
-        intervalo: Number(b.intervalo) || 0
+        intervalo: Number(b.intervalo) || 60
       });
       continue;
     }
 
-    /* ============================
+    /* =========================
        HIIT
-    ============================ */
+    ========================= */
     if (b.tipo === "hiit") {
-      saida.push({
+      out.push({
         tipo: "hiitPremium",
-        box: b.boxNum ?? 500,
-        titulo: b.titulo || "🔥 HIIT Premium",
-        forte: Number(b.forte) || 30,
-        leve: Number(b.leve) || 30,
+        box: Number(b.boxNum || 500),
+        titulo: b.titulo || "🔥 HIIT",
+        forte: Number(b.forte) || 40,
+        leve: Number(b.leve) || 20,
         ciclos: Number(b.ciclos) || 6
       });
       continue;
     }
 
-    /* ============================
+    /* =========================
        CARDIO FINAL
-    ============================ */
+    ========================= */
     if (b.tipo === "cardio_final") {
-      saida.push({
+      out.push({
         tipo: "cardio_final",
-        box: b.boxNum ?? 900,
+        box: Number(b.boxNum || 900),
         titulo: b.titulo || "💗 Cardio Final",
         duracao: Number(b.tempo) || 600
       });
       continue;
     }
 
-    /* ============================
+    /* =========================
        RESFRIAMENTO
-    ============================ */
+    ========================= */
     if (b.tipo === "resfriamento") {
-      saida.push({
+      out.push({
         tipo: "resfriamentoPremium",
-        box: b.boxNum ?? 999,
-        titulo: "🧘 Resfriamento Premium",
-        passos: [
-          { nome: "Alongamentos leves — 2 min" },
-          { nome: "Respiração consciente — 1 min" }
-        ]
+        box: Number(b.boxNum || 999),
+        titulo: "🧘 Resfriamento",
+        passos: b.passos || []
       });
       continue;
     }
-
-    /* ============================
-       FALLBACK DE SEGURANÇA
-       (evita undefined[0])
-    ============================ */
-    console.warn("⚠️ Bloco ignorado no converter:", b);
   }
 
-  return saida;
+  return out;
 };
-
 
 /* ============================================================
    7) MONTAR TREINO FINAL
@@ -289,8 +267,30 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
 
   if (!blocosRaw.length) return [];
 
-  const ordenados = FEMFLOW.engineTreino.organizarBlocosSimples(blocosRaw);
-  const comHIIT   = FEMFLOW.engineTreino.intercalarHIIT(ordenados);
-  return FEMFLOW.engineTreino.converterParaFront(comHIIT);
+  const ordenados = this.organizarBlocosSimples(blocosRaw);
+const comHIIT   = this.intercalarHIIT(ordenados);
+
+/* 🔒 GARANTIR AQUECIMENTO E RESFRIAMENTO ÚNICOS */
+let aquecimentoInserido = false;
+let resfriamentoInserido = false;
+
+const filtrados = comHIIT.filter(b => {
+  if (b.tipo === "aquecimento") {
+    if (aquecimentoInserido) return false;
+    aquecimentoInserido = true;
+    return true;
+  }
+
+  if (b.tipo === "resfriamento") {
+    if (resfriamentoInserido) return false;
+    resfriamentoInserido = true;
+    return true;
+  }
+
+  return true;
+});
+
+return this.converterParaFront(filtrados);
+
 };
 
