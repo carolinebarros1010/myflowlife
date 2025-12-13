@@ -257,20 +257,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   mostrarLoading();
 
-  // 🔥 HOME usa VALIDAR, NÃO usa SYNC
-  const perfil = await FEMFLOW.carregarPerfil();
+ if (!perfil || perfil.status === "blocked") {
+  FEMFLOW.toast("Sessão inválida.");
+  FEMFLOW.clearSession();
+  esconderLoading();
+  return FEMFLOW.router("index.html");
+}
 
-  if (!perfil){
-    FEMFLOW.toast("Erro ao carregar seus dados.");
-    esconderLoading();
-    return;
-  }
-
-  // Saudação
-  const nome = localStorage.getItem("femflow_nome");
-  if (nome){
-    document.getElementById("bvTexto").textContent = `Bem-vinda, ${nome}!`;
-  }
 
   // Rails
   renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
