@@ -254,34 +254,68 @@ function aplicarIdiomaHome() {
    HOME — AGORA USANDO SOMENTE VALIDAR (SEM SYNC)
 =========================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
-
   mostrarLoading();
 
-  // 🔥 HOME usa VALIDAR
-  const perfil = await FEMFLOW.carregarPerfil();
+  try {
+    const id = localStorage.getItem("femflow_id");
+    const deviceId = localStorage.getItem("femflow_deviceId");
+    const sessionToken = localStorage.getItem("femflow_sessionToken");
 
-  if (!perfil || perfil.status === "blocked") {
-    FEMFLOW.toast("Sessão inválida.");
+    if (!id || !deviceId || !sessionToken) {
+      FEMFLOW.toast("Sessão ausente. Faça login novamente.");
+      FEMFLOW.clearSession();
+      esconderLoading();
+      return FEMFLOW.router("index.html");
+    }
+
+    // ✅ BUSCA PERFIL NO BACKEND (VALIDAR)
+    const url = `${FEMFLOW.SCRIPT_URL}?action=validar&id=${encodeURIComponent(id)}`;
+    const resp = await fetch(url);
+    const perfil = await resp.json();
+
+    // ✅ Se sessão inválida/bloqueada → volta pro login
+    if (!perfil || perfil.status !== "ok" || perfil.status === "blocked") {
+      FEMFLOW.toast("Sessão inválida. Faça login novamente.");
+      FEMFLOW.clearSession();
+      esconderLoading();
+      return FEMFLOW.router("index.html");
+    }
+
+    // ✅ Atualiza LocalStorage com o que veio do backend
+    localStorage.setItem("femflow_nome", perfil.nome || "");
+    localStorage.setItem("femflow_email", perfil.email || "");
+    localStorage.setItem("femflow_produto", (perfil.produto || "").toLowerCase());
+    localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
+    localStorage.setItem("femflow_personal", String(!!perfil.personal));
+    localStorage.setItem("femflow_nivel", perfil.nivel || "iniciante");
+
+    // ciclo
+    localStorage.setItem("femflow_fase", perfil.fase || "follicular");
+    localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
+    localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
+    localStorage.setItem("femflow_perfilHormonal", perfil.perfilHormonal || "regular");
+
+    // Se o backend retorna isso, mantém:
+    if (perfil.enfase) localStorage.setItem("femflow_enfase", perfil.enfase);
+
+    // ✅ Rails
+    renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
+    renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
+    renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
+    renderRail(document.getElementById("railCasa"), LISTA_CASA);
+    renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
+
+    // ✅ Idioma + vídeo
+    aplicarIdiomaHome();
+
+  } catch (err) {
+    console.error("Erro HOME:", err);
+    FEMFLOW.toast("Falha ao carregar. Faça login novamente.");
     FEMFLOW.clearSession();
-    esconderLoading();
     return FEMFLOW.router("index.html");
+  } finally {
+    esconderLoading();
   }
-
-  // 🔐 Atualiza flags de acesso (IMPORTANTE)
-  localStorage.setItem("femflow_produto", perfil.produto || "");
-  localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
-  localStorage.setItem("femflow_personal", String(!!perfil.personal));
-  localStorage.setItem("femflow_nome", perfil.nome || "");
-
-  // Rails
-  renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
-  renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
-  renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
-  renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
-  renderRail(document.getElementById("railCasa"), LISTA_CASA);
-
-  aplicarIdiomaHome();
-  esconderLoading();
 });
 
 
