@@ -236,7 +236,15 @@ function renderBox(bloco) {
     FEMFLOW.warn("⚠️ renderBox recebeu bloco inválido:", bloco);
     return "";
  }
+   
   const tipoDominante = bloco[0].tipo;
+const boxNum = Number(bloco[0].box || 0);
+
+// 🔒 Segurança: box técnico nunca vira treino
+if (boxNum >= 900 && tipoDominante === "treino") {
+  return null;
+}
+
 
   let html = `<div class="carousel-item">`;
 
