@@ -179,6 +179,11 @@ FEMFLOW.engineTreino.converterParaFront = function (blocos) {
 
   for (const b of blocos) {
 
+     // 🔒 Segurança: nunca converter box técnico como treino
+if (b.tipo === "treino" && Number(b.boxNum) >= 900) {
+  continue;
+}
+
     /* =========================
        AQUECIMENTO
     ========================= */
