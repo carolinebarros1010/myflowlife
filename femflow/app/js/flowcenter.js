@@ -15,11 +15,13 @@ async function initFlowCenter() {
      1) CARREGAR PERFIL COMPLETO (produto, ativa, personal)
   ============================================================ */
   let perfil = await FEMFLOW.carregarPerfil();
+   
+   if (!perfil || perfil.status === "blocked") {
+  FEMFLOW.toast("Sessão inválida.");
+  FEMFLOW.clearSession();
+  return FEMFLOW.router("index.html");
+}
 
-  if (!perfil) {
-    FEMFLOW.toast("Falha ao carregar dados da aluna.");
-    return FEMFLOW.router("home.html");
-  }
 
   const produtoRaw = (perfil.produto || "").toLowerCase();
   const nivelRaw   = perfil.nivel?.toLowerCase() || "iniciante";
