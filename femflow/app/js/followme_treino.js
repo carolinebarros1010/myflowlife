@@ -68,40 +68,66 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
 
-  /* ============================================================
-     4) SALVAR PSE + AVANÇAR DIA
-  ============================================================ */
-  function salvarTreino(pse) {
-    fetch(FEMFLOW.ENDPOINT_BACKEND, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "salvarTreino",
-        id,
-        fase,
-        diaFirebase: dia,
-        pse,
-        treino: `followme_${coach}_${fase}_${dia}`
-      })
-    });
+ /* ============================================================
+   4) SALVAR PSE + AVANÇAR DIA (FOLLOWME)
+============================================================ */
+async function salvarTreinoFollowMe(pse) {
 
-    dia++;
-    localStorage.setItem("femflow_followme_dia", String(dia));
+  const id = localStorage.getItem("femflow_id");
+  const coach = localStorage.getItem("femflow_followme_coach");
+  const fase = localStorage.getItem("femflow_fase") || "follicular";
 
-    alert("Treino salvo! Parabéns 🙌");
-    location.href = "flowcenter.html";
+  const diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
+
+  if (!id || !coach) {
+    FEMFLOW.toast("Erro ao salvar treino.", true);
+    return;
   }
 
-  document.querySelectorAll(".pse-val").forEach(btn => {
-    btn.onclick = () => {
-      const val = Number(btn.textContent);
-      salvarTreino(val);
-    };
-  });
+  try {
 
-  document.getElementById("fmCancelarPSE").onclick = () => {
-    modalPSE.classList.add("hidden");
-  };
+    const resp = await FEMFLOW.post({
+      action: "salvartreino",
+      id,
+      fase,
+
+      // 🔥 CONTROLE DE PROGRAMA
+      diaPrograma,
+      diaFirebase: null, // FollowMe não usa ciclo
+
+      pse,
+
+      // 🔥 IDENTIFICAÇÃO DO TREINO
+      treino: `followme_${coach}_dia_${diaPrograma}`,
+      tipoTreino: "followme",
+      coach,
+
+      // 🔐 SEGURANÇA
+      deviceId: FEMFLOW.getDeviceId(),
+      sessionToken: FEMFLOW.getSessionToken()
+    });
+
+    FEMFLOW.log("📌 FollowMe salvarTreino:", resp);
+
+    if (resp.status !== "ok") {
+      FEMFLOW.toast("Erro ao salvar treino.", true);
+      return;
+    }
+
+    // 🔥 atualizar diaPrograma
+    if (resp.diaPrograma) {
+      localStorage.setItem("femflow_diaPrograma", String(resp.diaPrograma));
+    }
+
+    FEMFLOW.toast("Treino salvo! 🙌");
+    FEMFLOW.router("flowcenter.html");
+
+  } catch (err) {
+    FEMFLOW.error("Erro FollowMe:", err);
+    FEMFLOW.toast("Erro de conexão.", true);
+  }
+}
+
 
   /* ============================================================
      5) REPLAY PERMITIDO
