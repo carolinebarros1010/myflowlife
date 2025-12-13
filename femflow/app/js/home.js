@@ -257,24 +257,33 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   mostrarLoading();
 
- if (!perfil || perfil.status === "blocked") {
-  FEMFLOW.toast("Sessão inválida.");
-  FEMFLOW.clearSession();
-  esconderLoading();
-  return FEMFLOW.router("index.html");
-}
+  // 🔥 HOME usa VALIDAR
+  const perfil = await FEMFLOW.carregarPerfil();
 
+  if (!perfil || perfil.status === "blocked") {
+    FEMFLOW.toast("Sessão inválida.");
+    FEMFLOW.clearSession();
+    esconderLoading();
+    return FEMFLOW.router("index.html");
+  }
+
+  // 🔐 Atualiza flags de acesso (IMPORTANTE)
+  localStorage.setItem("femflow_produto", perfil.produto || "");
+  localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
+  localStorage.setItem("femflow_personal", String(!!perfil.personal));
+  localStorage.setItem("femflow_nome", perfil.nome || "");
 
   // Rails
+  renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
   renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
   renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
   renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
   renderRail(document.getElementById("railCasa"), LISTA_CASA);
-  renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
- // 👇 AQUI:
+
   aplicarIdiomaHome();
   esconderLoading();
 });
+
 
 /* ============================================================
    🔥 Quando o idioma mudar → traduz de novo a home
