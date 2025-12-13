@@ -216,6 +216,10 @@ function renderTreino(lista) {
   ============================================================ */
   boxKeys.forEach(boxNum => {
     const bloco = grupos[boxNum];
+     if (!Array.isArray(bloco) || bloco.length === 0) {
+  FEMFLOW.warn("⚠️ Box ignorado (vazio ou inválido):", boxNum);
+  return;
+}
     const html = renderBox(bloco);
     if (html) track.insertAdjacentHTML("beforeend", html);
   });
@@ -228,7 +232,10 @@ function renderTreino(lista) {
    RENDERIZAR 1 BOX COMPLETO
 ============================================================ */
 function renderBox(bloco) {
-
+ if (!Array.isArray(bloco) || bloco.length === 0) {
+    FEMFLOW.warn("⚠️ renderBox recebeu bloco inválido:", bloco);
+    return "";
+ }
   const tipoDominante = bloco[0].tipo;
 
   let html = `<div class="carousel-item">`;
