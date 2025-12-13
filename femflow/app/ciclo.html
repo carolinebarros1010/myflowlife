@@ -155,24 +155,26 @@ function getPerguntas(tipo) {
 
   
 /* ============================================================
-   SALVAR CICLO (LOCAL + BACKEND) — VERSÃO CORRIGIDA 2025
+   SALVAR CICLO — FAST MODE (LOCAL FIRST + 1 POST)
+   FemFlow 2025
 ============================================================ */
-async function salvarCiclo({ perfil, start, length, faseCalc, dia, faseAlta = null }) {
+async function salvarCiclo({
+  perfil,
+  start,
+  length,
+  faseCalc,
+  dia,
+  faseAlta = null
+}) {
 
   ffShowLoading("Configurando seu ciclo…");
   await new Promise(requestAnimationFrame);
 
-  console.log("💾 SALVAR.CICLO.DEBUG =====================================");
-  console.log({ perfil, start, length, faseCalc, dia, faseAlta });
-  console.log("-------------------------------------------------------------");
-  console.log("LOCALSTORAGE → antes de salvar:", {
-    perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-    faseAtual: localStorage.getItem("femflow_fase"),
-    diaCiclo: localStorage.getItem("femflow_diaCiclo")
-  });
+  const idUser = localStorage.getItem("femflow_id");
 
   /* ============================================================
-     1) SALVAR NO LOCALSTORAGE
+     1) SALVAR IMEDIATAMENTE NO LOCALSTORAGE
+     (isso destrava a navegação)
   ============================================================ */
   localStorage.setItem("femflow_perfilHormonal", perfil);
   localStorage.setItem("femflow_cycle_configured", "yes");
@@ -188,90 +190,38 @@ async function salvarCiclo({ perfil, start, length, faseCalc, dia, faseAlta = nu
   }
 
   /* ============================================================
-     2) ENVIAR AO BACKEND (ORDEM CORRETA)
+     2) DISPARAR BACKEND EM BACKGROUND (1 ÚNICA CHAMADA)
+     ⚠️ SEM await bloqueante
   ============================================================ */
-  try {
-    const idUser = localStorage.getItem("femflow_id");
-
-    console.group("📡 DEBUG: ENVIOS AO BACKEND (Sequência Correta)");
-
-    // 1) perfil hormonal
-    console.log("⏳ 1) Enviando perfil hormonal…");
-    await FEMFLOW.post({
-  action: "setperfilhormonal",
-  id: idUser,
-  perfil
-});
-
-// ---------------------------------------------------------
-// 1B) CICLO DURAÇÃO  (novo)
-// ---------------------------------------------------------
-console.log("⏳ 1B) Enviando ciclo duração…");
-await FEMFLOW.post({
-  action: "setciclo",
-  id: idUser,
-  cicloDuracao: length,
-  dataInicio: start.toISOString(),
-  perfilHormonal: perfil
-});
-
-
-    // 2) fase
-    console.log("⏳ 2) Enviando fase…");
-    await FEMFLOW.post({
-  action: "setfase",
-  id: idUser,
-  cicloDuracao: length,
-  dataInicio: start.toISOString(),
-  perfilHormonal: perfil
-});
-
-
-    // 3) dia ciclo
-    console.log("⏳ 3) Enviando dia ciclo…");
-    await FEMFLOW.post({
-  action: "setdiaciclo",
-  id: idUser,
-  cicloDuracao: length,
-  dataInicio: start.toISOString(),
-  perfilHormonal: perfil
-});
-
-
-    // 4) data manual
-    console.log("⏳ 4) Enviando cicloStart manual…");
-    await FEMFLOW.post({
-  action: "setmanualstart",
-  id: idUser,
-  cicloDuracao: length,
-  dataInicio: start.toISOString(),
-  perfilHormonal: perfil
-});
-
-
-    console.groupEnd();
-
-  } catch (e) {
-    console.error("❌ ERRO AO ENVIAR PARA O BACKEND:", e);
-  }
+  FEMFLOW.post({
+    action: "setciclo",
+    id: idUser,
+    cicloDuracao: length,
+    dataInicio: start.toISOString(),
+    perfilHormonal: perfil,
+    fase: faseCalc,
+    dia: dia,
+    diaPrograma: 1
+  }).catch(err => {
+    console.error("⚠️ Erro ao sincronizar ciclo no backend:", err);
+  });
 
   /* ============================================================
-     4) FINALIZAR
+     3) NAVEGAR IMEDIATAMENTE
   ============================================================ */
   FEMFLOW.toast("✨ Ciclo configurado!");
+
   ffShowLoading("Carregando seu painel…");
-  const params = new URLSearchParams(location.search);
-const ret = new URLSearchParams(location.search).get("ret");
 
-// 🔥 Se recebeu "ret", SEMPRE vai para lá
-if (ret) {
+  const ret = new URLSearchParams(location.search).get("ret");
+
+  if (ret) {
     FEMFLOW.router(ret);
-    return;
+  } else {
+    FEMFLOW.router("flowcenter");
+  }
 }
 
-// 🔥 Caso contrário (pós-login), vai para o FlowCenter
-FEMFLOW.router("flowcenter");
-}
 /* ============================================================
    PERFIS E QUIZ
 ============================================================ */
