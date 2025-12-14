@@ -188,23 +188,33 @@ async function salvarCiclo({
   } else {
     localStorage.removeItem("femflow_faseAlta");
   }
+/* ============================================================
+   2) BACKEND — set base do ciclo
+============================================================ */
+await FEMFLOW.post({
+  action: "setciclo",
+  id: idUser,
+  cicloDuracao: length,
+  dataInicio: start.toISOString(),
+  perfilHormonal: perfil,
+  diaPrograma: 1
+});
 
-  /* ============================================================
-     2) DISPARAR BACKEND EM BACKGROUND (1 ÚNICA CHAMADA)
-     ⚠️ SEM await bloqueante
-  ============================================================ */
-  FEMFLOW.post({
-    action: "setciclo",
-    id: idUser,
-    cicloDuracao: length,
-    dataInicio: start.toISOString(),
-    perfilHormonal: perfil,
-    fase: faseCalc,
-    dia: dia,
-    diaPrograma: 1
-  }).catch(err => {
-    console.error("⚠️ Erro ao sincronizar ciclo no backend:", err);
-  });
+/* ============================================================
+   3) SYNC — calcular fase + diaCiclo reais
+============================================================ */
+const sync = await FEMFLOW.get({
+  action: "sync",
+  id: idUser
+});
+
+// 🔥 atualizar cache local com fonte da verdade
+if (sync?.status === "ok") {
+  localStorage.setItem("femflow_fase", sync.fase);
+  localStorage.setItem("femflow_diaCiclo", String(sync.diaCiclo));
+  localStorage.setItem("femflow_diaPrograma", String(sync.diaPrograma || 1));
+}
+
 
   /* ============================================================
      3) NAVEGAR IMEDIATAMENTE
