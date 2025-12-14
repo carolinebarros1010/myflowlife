@@ -369,14 +369,15 @@ FEMFLOW._acaoMenu = function (op) {
       document.getElementById("ff-lang-modal")?.classList.remove("hidden");
       break;
 
-  case "ciclo":
-  FEMFLOW.dispatch("state:changed", {
-    type: "ciclo",
-    impact: "fisiologico"
-  });
-  FEMFLOW.router(`ciclo?ret=${location.pathname.split("/").pop()}`);
-  break;
+    case "ciclo":
+      // 🔥 mudança fisiológica → core decide depois
+      FEMFLOW.dispatch("state:changed", {
+        type: "ciclo",
+        impact: "fisiologico"
+      });
 
+      FEMFLOW.router(`ciclo?ret=${location.pathname.split("/").pop()}`);
+      break;
 
     case "respiracao":
       FEMFLOW.router("respiracao");
@@ -386,27 +387,27 @@ FEMFLOW._acaoMenu = function (op) {
       FEMFLOW.router("evolucao");
       break;
 
-   FEMFLOW.dispatch("state:changed", {
-  type: "nivel",
-  impact: "estrutural"
-});
-
+    case "nivel":
+      // ⚠️ apenas abre modal
+      // o dispatch estrutural acontece SOMENTE na confirmação do nível
+      document.querySelector("#modal-nivel")?.classList.remove("oculto");
+      break;
 
     case "tema":
       document.body.classList.toggle("dark");
-      localStorage.setItem("femflow_theme",
+      localStorage.setItem(
+        "femflow_theme",
         document.body.classList.contains("dark") ? "dark" : "light"
       );
       break;
 
     case "logout":
-  FEMFLOW.clearSession();
-  localStorage.clear();
-  location.href = "index.html";
-  break;
+      FEMFLOW.clearSession();
+      localStorage.clear();
+      location.href = "index.html";
+      break;
 
-
-    case "voltar":
+    case "voltar": {
       const p = location.pathname.split("/").pop();
       const rota = {
         "treino.html": "flowcenter.html",
@@ -417,8 +418,10 @@ FEMFLOW._acaoMenu = function (op) {
       };
       FEMFLOW.router(rota[p] || "home.html");
       break;
+    }
   }
 };
+
 
 FEMFLOW.resetProgramaAtual = function () {
   localStorage.removeItem("femflow_diaPrograma");
