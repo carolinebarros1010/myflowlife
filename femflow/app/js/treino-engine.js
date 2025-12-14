@@ -272,8 +272,8 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
 
   if (!blocosRaw.length) return [];
 
-  const ordenados = this.organizarBlocosSimples(blocosRaw);
-const comHIIT   = this.intercalarHIIT(ordenados);
+ const ordenados = FEMFLOW.engineTreino.organizarBlocosSimples(blocosRaw);
+const comHIIT   = FEMFLOW.engineTreino.intercalarHIIT(ordenados);
 
 /* 🔒 GARANTIR AQUECIMENTO E RESFRIAMENTO ÚNICOS */
 let aquecimentoInserido = false;
@@ -295,7 +295,7 @@ const filtrados = comHIIT.filter(b => {
   return true;
 });
 
-return this.converterParaFront(filtrados);
+return FEMFLOW.engineTreino.converterParaFront(filtrados);
 
 };
 
