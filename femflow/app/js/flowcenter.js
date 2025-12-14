@@ -46,8 +46,12 @@ async function initFlowCenter() {
    if (!perfil || perfil.status === "blocked") {
   FEMFLOW.toast("Sessão inválida.");
   FEMFLOW.clearSession();
-  return FEMFLOW.router("index.html");
-}
+  FEMFLOW.dispatch("state:changed", {
+  type: "auth",
+  impact: "estrutural"
+});
+return;
+   }
 /* ============================================================
    🔥 GARANTIR LOCALSTORAGE ATUALIZADO (diaPrograma, fase, diaCiclo)
 ============================================================ */
@@ -56,18 +60,29 @@ const perfilFresh = await flowcenterSyncPerfil();
 if (!perfilFresh || perfilFresh.status === "no_auth") {
   FEMFLOW.toast("Faça login novamente 🌸");
   FEMFLOW.clearSession();
-  return FEMFLOW.router("index.html");
-}
+  FEMFLOW.dispatch("state:changed", {
+  type: "ciclo",
+  impact: "estrutural"
+});
+return;
 
 if (perfilFresh.status === "blocked" || perfilFresh.status === "denied") {
   FEMFLOW.toast("Sessão inválida.");
   FEMFLOW.clearSession();
-  return FEMFLOW.router("index.html");
+  FEMFLOW.dispatch("state:changed", {
+  type: "auth",
+  impact: "estrutural"
+});
+return;
 }
 
 if (perfilFresh.status !== "ok") {
   FEMFLOW.toast("Erro ao atualizar dados. Tente novamente.");
-  return FEMFLOW.router("home.html");
+  FEMFLOW.dispatch("state:changed", {
+  type: "ciclo",
+  impact: "estrutural"
+});
+return;
 }
 
 // ✅ Atualiza engrenagens principais
@@ -87,7 +102,11 @@ if (cycleChanged) {
   localStorage.removeItem("femflow_cycle_changed");
 
   FEMFLOW.toast("Ciclo atualizado. Escolha um novo treino 🌸");
-  return FEMFLOW.router("home.html");
+  FEMFLOW.dispatch("state:changed", {
+  type: "ciclo",
+  impact: "estrutural"
+});
+return;
 }
   
 
@@ -217,46 +236,53 @@ ciclo.fase = faseMap[ciclo.fase?.toLowerCase()] || ciclo.fase;
     FEMFLOW.router("evolucao.html");
 
   // Treino
-  document.getElementById("toTrain").onclick = () => {
+document.getElementById("toTrain").onclick = () => {
 
-    const enfase = localStorage.getItem("femflow_enfase");
+  const enfase = localStorage.getItem("femflow_enfase");
 
-    if (!enfase) {
-      FEMFLOW.toast("Escolha um treino na Home.");
-      return FEMFLOW.router("home.html");
+  // ❌ Não escolheu treino → Home resolve
+  if (!enfase) {
+    FEMFLOW.toast("Escolha um treino na Home 🌸");
+    FEMFLOW.dispatch("state:changed", {
+      type: "programa",
+      impact: "none"
+    });
+    return;
+  }
+
+     // PERSONAL
+  if (isPersonal) {
+    if (enfase.startsWith("followme_")) {
+      FEMFLOW.toast("FollowMe não faz parte do seu plano.");
+      return FEMFLOW.router("home.html"); // 🔥 venda
     }
+    return FEMFLOW.router("treino.html?personal=1");
+  }
 
-    // PERSONAL
-    if (isPersonal) {
-      if (enfase.startsWith("followme_")) {
-        FEMFLOW.toast("Seu plano não inclui FollowMe.");
-        return;
-      }
-      return FEMFLOW.router("treino.html?personal=1");
+  // FOLLOWME
+  if (isFollow) {
+    if (!enfase.startsWith("followme_")) {
+      FEMFLOW.toast("Seu plano dá acesso apenas ao FollowMe.");
+      return FEMFLOW.router("home.html"); // 🔥 venda
     }
+    return FEMFLOW.router(`followme/${enfase}.html`);
+  }
 
-    // FOLLOWME
-    if (isFollow) {
-      if (!enfase.startsWith("followme_")) {
-        FEMFLOW.toast("Seu plano dá acesso apenas ao FollowMe.");
-        return;
-      }
-      return FEMFLOW.router(`followme/${enfase}.html`);
+  // ACESSO APP
+  if (isApp) {
+    if (enfase.startsWith("followme_")) {
+      FEMFLOW.toast("✨ Em breve! Treine junto.");
+      return FEMFLOW.router("home.html"); // 🔥 venda
     }
+    return FEMFLOW.router("treino.html");
+  }
 
-    // ACESSO APP
-    if (isApp) {
-      if (enfase.startsWith("followme_")) {
-        FEMFLOW.toast("FollowMe não faz parte do seu plano.");
-        return;
-      }
-      return FEMFLOW.router("treino.html");
-    }
+  // fallback comercial
+  FEMFLOW.toast("Escolha um plano para continuar 🌱");
+  FEMFLOW.router("home.html");
+};
 
-    FEMFLOW.toast("Adquira um plano para acessar o treino.");
-  };
-
-  // Endurance
+     // Endurance
   document.getElementById("toEndurance").onclick = () => {
     const id = localStorage.getItem("femflow_id");
     if (id) FEMFLOW.router(`treinoendurance/${id}.html`);
