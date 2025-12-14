@@ -33,6 +33,31 @@ async function carregarPerfilEAtualizarStorage() {
 
   return perfil;
 }
+function ffShowLoading(msg = "Processando…") {
+  let box = document.getElementById("ff-loading");
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "ff-loading";
+    box.className = "ff-loading";
+    box.innerHTML = `
+      <div class="ff-loading-box">
+        <div class="ff-spinner"></div>
+        <p id="ff-loading-text">${msg}</p>
+      </div>
+    `;
+    document.body.appendChild(box);
+  } else {
+    const text = document.getElementById("ff-loading-text");
+    if (text) text.textContent = msg;
+    box.classList.remove("hidden");
+  }
+}
+
+function ffHideLoading() {
+  const box = document.getElementById("ff-loading");
+  if (box) box.classList.add("hidden");
+}
+
 
 function persistPerfil(perfil) {
   // essenciais
@@ -175,10 +200,12 @@ function renderRail(el, lista){
 function handleCardClick(enfase){
    
 if (!localStorage.getItem("femflow_cycle_configured")) {
-    localStorage.setItem("femflow_enfase", enfase);
-    FEMFLOW.router("ciclo?ret=flowcenter");
-    return;
+  ffShowLoading("Configurando seu ciclo…");
+  localStorage.setItem("femflow_enfase", enfase);
+  FEMFLOW.router("ciclo?ret=flowcenter");
+  return;
 }
+
 
   const produto  = (localStorage.getItem("femflow_produto") || "").toLowerCase();
   const ativa    = localStorage.getItem("femflow_ativa") === "true";
@@ -223,6 +250,9 @@ if (!localStorage.getItem("femflow_cycle_configured")) {
 =========================================================== */
 async function selecionarEnfase(enfase){
   const id = localStorage.getItem("femflow_id");
+
+  ffShowLoading("Preparando seu treino…");
+
   localStorage.setItem("femflow_enfase", enfase);
 
   if (id){
@@ -231,11 +261,13 @@ async function selecionarEnfase(enfase){
       headers:{ "Content-Type":"application/json" },
       body:JSON.stringify({ action:"setenfase", id, enfase })
     });
-     await FEMFLOW.reiniciarDiaPrograma();
+
+    await FEMFLOW.reiniciarDiaPrograma();
   }
 
   FEMFLOW.router("flowcenter");
 }
+
 
 /* FOLLOWME */
 async function selecionarCoach(coach){
