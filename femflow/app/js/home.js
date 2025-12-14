@@ -33,31 +33,6 @@ async function carregarPerfilEAtualizarStorage() {
 
   return perfil;
 }
-function ffShowLoading(msg = "Processando…") {
-  let box = document.getElementById("ff-loading");
-  if (!box) {
-    box = document.createElement("div");
-    box.id = "ff-loading";
-    box.className = "ff-loading";
-    box.innerHTML = `
-      <div class="ff-loading-box">
-        <div class="ff-spinner"></div>
-        <p id="ff-loading-text">${msg}</p>
-      </div>
-    `;
-    document.body.appendChild(box);
-  } else {
-    const text = document.getElementById("ff-loading-text");
-    if (text) text.textContent = msg;
-    box.classList.remove("hidden");
-  }
-}
-
-function ffHideLoading() {
-  const box = document.getElementById("ff-loading");
-  if (box) box.classList.add("hidden");
-}
-
 
 function persistPerfil(perfil) {
   // essenciais
@@ -83,37 +58,8 @@ if (!localStorage.getItem("femflow_cycle_changed")) {
   );
 }
 } 
-
-
-/* ============================================================
-   LOADING
-=========================================================== */
-function mostrarLoading() {
-  if (document.getElementById("ff-loading")) return;
-
-  const box = document.createElement("div");
-  box.id = "ff-loading";
-  box.className = "ff-loading";
-
-  box.innerHTML = `
-    <div class="ff-loading-box">
-      <div class="ff-spinner"></div>
-      <p>Carregando…</p>
-    </div>
-  `;
-
-  document.body.appendChild(box);
-}
-
-
-function esconderLoading() {
-  const el = document.getElementById("ff-loading");
-  if (!el) return;
-
-  el.classList.add("hidden");
-
-  setTimeout(() => el.remove(), 400);
-}
+FEMFLOW.showLoading("Carregando…");
+FEMFLOW.hideLoading();
 
 /* ============================================================
    LISTAS DE CARDS
