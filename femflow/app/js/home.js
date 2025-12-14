@@ -206,22 +206,41 @@ if (!localStorage.getItem("femflow_cycle_configured")) {
 async function selecionarEnfase(enfase){
   const id = localStorage.getItem("femflow_id");
 
-  ffShowLoading("Preparando seu treino…");
+  ffShowLoading("Preparando novo programa…");
 
+  // 🔥 1. salvar nova ênfase
   localStorage.setItem("femflow_enfase", enfase);
 
+  // 🔥 2. reset explícito do programa (REGRA FEMFLOW)
+  localStorage.setItem("femflow_diaPrograma", "1");
+
   if (id){
+    // 3. backend: salvar ênfase
     await fetch(FEMFLOW.SCRIPT_URL,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ action:"setenfase", id, enfase })
+      body:JSON.stringify({
+        action:"setenfase",
+        id,
+        enfase
+      })
     });
 
-    await FEMFLOW.reiniciarDiaPrograma();
+    // 4. backend: resetar programa
+    await fetch(FEMFLOW.SCRIPT_URL,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        action:"resetprograma",
+        id
+      })
+    });
   }
 
+  // 5. seguir fluxo normal
   FEMFLOW.router("flowcenter");
 }
+
 
 
 /* FOLLOWME */
