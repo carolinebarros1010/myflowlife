@@ -65,7 +65,7 @@ if (!perfilFresh || perfilFresh.status === "no_auth") {
   impact: "estrutural"
 });
 return;
-
+}
 if (perfilFresh.status === "blocked" || perfilFresh.status === "denied") {
   FEMFLOW.toast("Sessão inválida.");
   FEMFLOW.clearSession();
