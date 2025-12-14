@@ -30,7 +30,8 @@ document.addEventListener("DOMContentLoaded", initFlowCenter);
 async function initFlowCenter() {
 
    
-  ffShowLoading("Preparando seu painel…");
+ FEMFLOW.showLoading("Preparando seu painel…");
+
 
 
   FEMFLOW.inserirHeaderApp?.();
@@ -261,6 +262,8 @@ ciclo.fase = faseMap[ciclo.fase?.toLowerCase()] || ciclo.fase;
     if (id) FEMFLOW.router(`treinoendurance/${id}.html`);
     else location.href = "https://www.myflowlife.com.br/#ofertas";
   };
+   
+FEMFLOW.hideLoading();
 
   document.getElementById("ff-loading")?.classList.add("hidden");
 }
