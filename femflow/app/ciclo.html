@@ -398,6 +398,20 @@ function responderQuiz(v){
    FINAL DO QUIZ — PERFIL ENERGÉTICO e PERFIL HORMONAL IRREGULAR
 ============================================================ */
 function finalizarQuiz(){
+  
+  // 🔒 FALLBACK FEMFLOW — quiz falhou ou não iniciou
+  if (!perguntasAtuais || !perguntasAtuais.length) {
+  // fallback fisiologicamente seguro
+  salvarCiclo({
+    perfil: "energetico",
+    start: new Date(),
+    length: 28,
+    faseCalc: "menstrual",
+    dia: 1
+  });
+  return;
+}
+
 
   const nivel = (localStorage.getItem("femflow_nivel") || "iniciante").toLowerCase();
   const entraAlta = quizScore <= 3;   // true = alta energia
@@ -468,18 +482,19 @@ function finalizarQuiz(){
   console.log("🔋 ENERGETICO.DEBUG → score:", quizScore);
   console.log("🔋 ENERGETICO.DEBUG → perfilInterno:", perfilInterno);
 
-  salvarCiclo({
-    perfil: perfilInterno.replace("_quiz",""),
-    start: new Date(),
-    length: 28,
-    faseCalc,
-    faseAlta: faseAltaNivel,
-    dia: diaReal
-  });
+ const normalizado = normalizarFaseEDia(faseCalc, diaReal);
+
+salvarCiclo({
+  perfil: perfilInterno.replace("_quiz",""),
+  start: new Date(),
+  length: 28,
+  faseCalc: normalizado.fase,
+  faseAlta: faseAltaNivel,
+  dia: normalizado.dia
+});
 }
 
-
-/* ============================================================
+  /* ============================================================
    PERFIL REGULAR — FISIOLÓGICO REAL
 ============================================================ */
 bindTap(document.getElementById("btnConfirmarRegular"), ()=>{
@@ -610,6 +625,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   aplicarIdiomaCiclo();
 });
+/* ============================================================
+   🔧   NORMALIZAR CICLO   menstrual:   [1, 5],  folicular:  [6, 13],
+    ovulatoria: [14, 17],   lutea:      [18, 35]
+============================================================ */
+  
+function normalizarFaseEDia(fase, dia) {
+  const mapa = {
+    menstrual:   [1, 5],
+    folicular:  [6, 13],
+    ovulatoria: [14, 17],
+    lutea:      [18, 35]
+  };
+
+  const range = mapa[fase];
+  if (!range) return { fase: "menstrual", dia: 1 };
+
+  const [min, max] = range;
+
+  if (dia < min) dia = min;
+  if (dia > max) dia = max;
+
+  return { fase, dia };
+}
 
 /* ============================================================
    🔄 Atualizar textos quando trocar idioma
