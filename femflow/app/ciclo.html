@@ -91,13 +91,33 @@
  
 <script>
   const id = localStorage.getItem("femflow_id");
-const produto = localStorage.getItem("femflow_produto");
-const ativa = localStorage.getItem("femflow_ativa") === "true";
 
-if (!id || !produto || !ativa) {
-  FEMFLOW.toast("Acesse pela Home para continuar 🌸");
-  FEMFLOW.router("home");
-}
+// 🔐 validar sessão / token
+(async () => {
+  if (!id) {
+    FEMFLOW.clearSession?.();
+    FEMFLOW.router("index");
+    return;
+  }
+
+  try {
+    const sync = await FEMFLOW.get({ action: "sync", id });
+
+    if (!sync || sync.status !== "ok") {
+      FEMFLOW.clearSession?.();
+      FEMFLOW.router("index");
+      return;
+    }
+
+    // opcional: atualizar cache mínimo
+    localStorage.setItem("femflow_nivel", sync.nivel || localStorage.getItem("femflow_nivel"));
+  } catch (e) {
+    console.error("Erro ao validar sessão:", e);
+    FEMFLOW.clearSession?.();
+    FEMFLOW.router("index");
+  }
+})();
+
 
   
 function ffShowLoading(msg = "Processando…") {
@@ -178,6 +198,7 @@ async function salvarCiclo({
   ============================================================ */
   localStorage.setItem("femflow_perfilHormonal", perfil);
   localStorage.setItem("femflow_cycle_configured", "yes");
+  localStorage.setItem("femflow_cycle_changed", "true"); // 🔥 novo
   localStorage.setItem("femflow_startDate", start.toISOString());
   localStorage.setItem("femflow_cycleLength", String(length));
   localStorage.setItem("femflow_diaCiclo", String(dia));
@@ -225,11 +246,9 @@ if (sync?.status === "ok") {
 
   const ret = new URLSearchParams(location.search).get("ret");
 
-  if (ret) {
-    FEMFLOW.router(ret);
-  } else {
-    FEMFLOW.router("flowcenter");
-  }
+// 🔁 após configurar ciclo, sempre voltar ao HOME
+FEMFLOW.router("home");
+
 }
 
 /* ============================================================
