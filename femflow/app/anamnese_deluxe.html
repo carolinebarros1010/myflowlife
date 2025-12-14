@@ -64,13 +64,15 @@
     input:focus{ border-color:var(--terracota); box-shadow:0 0 0 3px rgba(204,106,90,.18) }
     input[aria-invalid="true"]{ border-color:#d9534f }
     .err{ font-size:.9rem; color:#d9534f; min-height:1.1rem; }
-    button{
-      background:linear-gradient(135deg,var(--verde),var(--terracota));
-      color:#fff; border:none; border-radius:14px;
-      padding:12px 18px; font-size:1rem;
-      width:78%; max-width:300px;
-      cursor:pointer; transition:.25s;
-    }
+   button{
+  background:linear-gradient(135deg,var(--verde),var(--terracota));
+  color:#fff; border:none; border-radius:14px;
+  padding:12px 18px; font-size:1rem;
+  width:100%;               /* 🔥 ocupa o container */
+  max-width:300px;
+  cursor:pointer; transition:.25s;
+}
+
     button[disabled]{opacity:.6; cursor:not-allowed;}
     button:hover:not([disabled]){ transform:translateY(-2px); }
 
@@ -81,7 +83,15 @@
     }
 
     .question{ font-size:1.1rem; font-weight:600; margin:1.2rem 0; }
-    .options{ display:flex; flex-direction:column; gap:10px; }
+    .options{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  width:100%;
+}
+
+
 
     .hidden{ display:none!important }
 
