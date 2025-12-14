@@ -85,12 +85,21 @@ document.getElementById("btnLang").onclick = () => {
 //  3) PERGUNTAS (multilíngue)
 // ============================================================
 function getPerguntasTraduzidas() {
-  const lang = FEMFLOW?.lang || "pt";
-  return JSON.parse(JSON.stringify(
-    FEMFLOW?.anamneseLang?.[lang]?.perguntas ||
-    FEMFLOW.anamneseLang.pt.perguntas
-  ));
+  const lang =
+    FEMFLOW?.lang ||
+    localStorage.getItem("femflow_lang") ||
+    "pt";
+
+  const base = FEMFLOW?.anamneseLang;
+  const perguntas =
+    base?.[lang]?.perguntas ||
+    base?.pt?.perguntas ||
+    [];
+
+  // deep copy para não “sujar” o dicionário ao escrever p.escolha
+  return JSON.parse(JSON.stringify(perguntas));
 }
+
 
 // ============================================================
 //  4) LÓGICA DA ANAMNESE COMPLETA
@@ -337,7 +346,15 @@ async function finalizarAnamnese() {
       idx=0;
       score=0;
       perguntas = getPerguntasTraduzidas();
-      mostrarPergunta();
+
+if (!perguntas.length) {
+  FEMFLOW.toast?.("Carregando perguntas…");
+  setTimeout(() => window.iniciarQuizFemFlow?.(), 250);
+  return;
+}
+
+mostrarPergunta();
+
     };
 
     if (!cardQuiz.classList.contains("hidden")) mostrarPergunta();
