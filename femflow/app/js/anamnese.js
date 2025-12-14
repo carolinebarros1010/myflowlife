@@ -239,117 +239,93 @@ function getPerguntasTraduzidas() {
     });
   }
 
-  // ------------------------------------------------------------
-  // FINALIZAÇÃO DA ANAMNESE
-  // ------------------------------------------------------------
-  async function finalizarAnamnese() {
+// ------------------------------------------------------------
+// FINALIZAÇÃO DA ANAMNESE — VERSÃO FINAL (ALINHADA AO GAS)
+// ------------------------------------------------------------
+async function finalizarAnamnese() {
 
-    cardQuiz.classList.add("hidden");
-    cardFinal.classList.remove("hidden");
+  cardQuiz.classList.add("hidden");
+  cardFinal.classList.remove("hidden");
 
-    const lang = FEMFLOW?.lang || "pt";
+  const lang = FEMFLOW?.lang || "pt";
 
-    finalMsgEl.textContent = {
-      pt: "Analisando seu perfil…",
-      en: "Analyzing your profile…",
-      fr: "Analyse du profil…"
-    }[lang];
+  finalMsgEl.textContent = {
+    pt: "Analisando seu perfil…",
+    en: "Analyzing your profile…",
+    fr: "Analyse du profil…"
+  }[lang];
 
-    // Definir nível
-    let nivel = "iniciante";
-    if (score >= 20) nivel = "avancada";
-    else if (score >= 14) nivel = "intermediaria";
+  // --------------------------------------------------------
+  // 1) DEFINIR NÍVEL PELO SCORE
+  // --------------------------------------------------------
+  let nivel = "iniciante";
+  if (score >= 20) nivel = "avancada";
+  else if (score >= 14) nivel = "intermediaria";
 
-    // Coletar respostas
-    const respostas = {};
-    perguntas.forEach((p, i) => respostas["q"+(i+1)] = p.escolha || 0);
+  // --------------------------------------------------------
+  // 2) COLETAR RESPOSTAS
+  // --------------------------------------------------------
+  const respostas = {};
+  perguntas.forEach((p, i) => respostas["q" + (i + 1)] = p.escolha || 0);
 
-    const { nome, email, telefone, senha } = pegarDadosLead();
+  const { nome, email, telefone, senha } = pegarDadosLead();
 
-    if (!nome || !email || !senha) {
-      FEMFLOW.toast("Erro ao finalizar", true);
-      return;
-    }
-
-    FEMFLOW.toast("Sincronizando…");
-
-    // --------------------------------------------------------
-    // 1) VERIFICAR SE E-MAIL JÁ EXISTE NO BACKEND
-    // --------------------------------------------------------
-    const check = await FEMFLOW.post({
-  action: "verificarEmail",
-  email
-});
-
-
-    let r;
-
-    if (check.status === "existe") {
-      // --------------------------------------------------------
-      // 2A) ATUALIZAR CADASTRO EXISTENTE
-      // --------------------------------------------------------
-     r = await FEMFLOW.post({
-  action: "atualizarCadastroExistente",
-  id: check.id,
-  nome, email, telefone, senha,
-  nivel,
-  pontuacao: score,
-  anamnese: JSON.stringify(respostas)
-});
-
-
-    } else {
-      // --------------------------------------------------------
-      // 2B) CRIAR CADASTRO NOVO
-      // --------------------------------------------------------
-     r = await FEMFLOW.post({
-  action: "enviarcadastro",
-  nome, email, telefone, senha,
-  nivel,
-  pontuacao: score,
-  anamnese: JSON.stringify(respostas)
-});
-
-    }
-
-    if (!r || !(r.status === "ok" || r.status === "created")) {
-      FEMFLOW.toast("Erro ao finalizar", true);
-      finalMsgEl.textContent = "Erro ao concluir.";
-      return;
-    }
-
-    // --------------------------------------------------------
-    // 3) SALVAR ID NO LOCALSTORAGE
-    // --------------------------------------------------------
-    if (r.id) localStorage.setItem("femflow_id", r.id);
-    localStorage.setItem("femflow_email", email);
-    localStorage.setItem("femflow_nivel", nivel);
-
-    // --------------------------------------------------------
-    // 4) CRIAR CICLO INICIAL AUTOMATICAMENTE
-    // --------------------------------------------------------
-    await FEMFLOW.post({
-  action: "setciclo",
-  id: localStorage.getItem("femflow_id"),
-  cicloDuracao: 28,
-  dataInicio: new Date().toISOString(),
-  perfilHormonal: "regular"
-});
-
-
-    // --------------------------------------------------------
-    // 5) EXIBIR NÍVEL NA TELA FINAL
-    // --------------------------------------------------------
-    finalMsgEl.textContent =
-      (lang==="pt" ? "Seu nível é: " :
-       lang==="en" ? "Your level is: " :
-       "Ton niveau est : ") + nivel.toUpperCase();
-
-    // --------------------------------------------------------
-    // 6) IR PARA A PÁGINA DE CICLO
-    // --------------------------------------------------------
-    setTimeout(() => location.href = "ciclo.html", 2800);
+  if (!nome || !email || !senha) {
+    FEMFLOW.toast?.("Erro ao finalizar", true);
+    return;
   }
+
+  FEMFLOW.toast?.("Sincronizando…");
+
+  // --------------------------------------------------------
+  // 3) LOGIN OU CADASTRO (HOTMART + NOVA ALUNA)
+  // --------------------------------------------------------
+  let r;
+  try {
+    r = await FEMFLOW.post({
+      action: "loginOuCadastro",
+      nome,
+      email,
+      telefone,
+      senha,
+      anamnese: JSON.stringify(respostas)
+    });
+  } catch (e) {
+    console.error(e);
+    FEMFLOW.toast?.("Erro de comunicação", true);
+    finalMsgEl.textContent = "Erro ao concluir.";
+    return;
+  }
+
+  if (!r || !(r.status === "ok" || r.status === "created") || !r.id) {
+    FEMFLOW.toast?.("Erro ao finalizar", true);
+    finalMsgEl.textContent = "Erro ao concluir.";
+    return;
+  }
+
+  // --------------------------------------------------------
+  // 4) SALVAR IDENTIDADE LOCAL
+  // --------------------------------------------------------
+  localStorage.setItem("femflow_id", r.id);
+  localStorage.setItem("femflow_email", email);
+  localStorage.setItem("femflow_nivel", nivel);
+
+  // --------------------------------------------------------
+  // 5) MENSAGEM FINAL
+  // --------------------------------------------------------
+  finalMsgEl.textContent =
+    (lang === "pt" ? "Seu nível é: " :
+     lang === "en" ? "Your level is: " :
+     "Ton niveau est : ") + nivel.toUpperCase();
+
+  // --------------------------------------------------------
+  // 6) REDIRECIONAR PARA CICLO
+  // --------------------------------------------------------
+  setTimeout(() => {
+    location.href = "ciclo.html";
+  }, 2500);
+}
+
 
   // ------------------------------------------------------------
   // Inicializar Quiz
