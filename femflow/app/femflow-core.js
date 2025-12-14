@@ -71,6 +71,37 @@ FEMFLOW.toast = (msg, error = false) => {
   box.classList.add("visible");
   setTimeout(() => box.classList.remove("visible"), 2400);
 };
+/* ============================================================
+   ⏳ LOADING GLOBAL — FEMFLOW
+============================================================ */
+
+FEMFLOW.showLoading = function (msg = "Processando…") {
+  let box = document.getElementById("ff-loading");
+
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "ff-loading";
+    box.className = "ff-loading";
+    box.innerHTML = `
+      <div class="ff-loading-box">
+        <div class="ff-spinner"></div>
+        <p id="ff-loading-text">${msg}</p>
+      </div>
+    `;
+    document.body.appendChild(box);
+  } else {
+    const text = document.getElementById("ff-loading-text");
+    if (text) text.textContent = msg;
+    box.classList.remove("hidden");
+  }
+};
+
+FEMFLOW.hideLoading = function () {
+  const box = document.getElementById("ff-loading");
+  if (box) box.classList.add("hidden");
+};
+
+
 
 FEMFLOW.getSession = function () {
   return {
