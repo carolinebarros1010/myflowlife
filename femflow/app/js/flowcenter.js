@@ -29,6 +29,10 @@ document.addEventListener("DOMContentLoaded", initFlowCenter);
 
 async function initFlowCenter() {
 
+   
+  ffShowLoading("Preparando seu painel…");
+
+
   FEMFLOW.inserirHeaderApp?.();
   FEMFLOW.inserirMenuLateral?.();
   FEMFLOW.inserirModalIdioma?.();
@@ -70,6 +74,21 @@ flowcenterPersistPerfil(perfilFresh);
 
 // ✅ mantém a variável "perfil" coerente para o resto do arquivo
 perfil = { ...perfil, ...perfilFresh };
+
+ const cycleChanged = localStorage.getItem("femflow_cycle_changed") === "true";
+
+if (cycleChanged) {
+  // invalida intenção anterior
+  localStorage.removeItem("femflow_enfase");
+  localStorage.removeItem("femflow_diaPrograma");
+
+  // consome a flag
+  localStorage.removeItem("femflow_cycle_changed");
+
+  FEMFLOW.toast("Ciclo atualizado. Escolha um novo treino 🌸");
+  return FEMFLOW.router("home.html");
+}
+  
 
 
   const produtoRaw = (perfil.produto || "").toLowerCase();
@@ -199,7 +218,7 @@ ciclo.fase = faseMap[ciclo.fase?.toLowerCase()] || ciclo.fase;
   // Treino
   document.getElementById("toTrain").onclick = () => {
 
-    const enfase = localStorage.getItem("femflow_enfase") || perfil.enfase;
+    const enfase = localStorage.getItem("femflow_enfase");
 
     if (!enfase) {
       FEMFLOW.toast("Escolha um treino na Home.");
