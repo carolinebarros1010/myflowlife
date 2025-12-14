@@ -82,6 +82,7 @@ if (!localStorage.getItem("femflow_cycle_changed")) {
     String(perfil.enfase || "nenhuma").toLowerCase()
   );
 }
+} 
 
 
 /* ============================================================
