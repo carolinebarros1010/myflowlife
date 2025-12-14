@@ -201,11 +201,19 @@ function renderRail(el, lista){
 function handleCardClick(enfase){
    
 if (!localStorage.getItem("femflow_cycle_configured")) {
+
   ffShowLoading("Configurando seu ciclo…");
   localStorage.setItem("femflow_enfase", enfase);
-  FEMFLOW.router("ciclo?ret=flowcenter");
+
+  FEMFLOW.dispatch("state:changed", {
+    type: "ciclo",
+    impact: "fisiologico"
+  });
+
+  FEMFLOW.router("ciclo");
   return;
 }
+
 
 
   const produto  = (localStorage.getItem("femflow_produto") || "").toLowerCase();
