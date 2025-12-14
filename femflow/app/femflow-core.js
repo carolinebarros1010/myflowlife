@@ -429,39 +429,52 @@ FEMFLOW.resetProgramaAtual = function () {
   localStorage.removeItem("femflow_treinoAtual");
 };
 FEMFLOW.initNivelHandler = function () {
-  const btn = document.getElementById("btnConfirmarNivel");
-  if (!btn || btn.dataset.bound) return;
+  const modal = document.getElementById("modal-nivel");
+  const btnConfirmar = document.getElementById("btnConfirmarNivel");
+  const btnFechar = document.getElementById("fecharNivel");
 
-  btn.dataset.bound = "true"; // 🔒 evita múltiplos binds
+  if (!modal || !btnConfirmar || btnConfirmar.dataset.bound) return;
 
-  btn.onclick = async () => {
-    const nivel = document.querySelector(".nivel-btn.active")?.dataset.nivel;
+  btnConfirmar.dataset.bound = "true";
+
+  // seleção visual
+  modal.querySelectorAll(".nivel-btn").forEach(btn => {
+    btn.onclick = () => {
+      modal.querySelectorAll(".nivel-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    };
+  });
+
+  btnConfirmar.onclick = async () => {
+    const nivel = modal.querySelector(".nivel-btn.active")?.dataset.nivel;
 
     if (!nivel) {
       FEMFLOW.toast("Selecione um nível");
       return;
     }
 
-    // 1️⃣ salva local
+    // salva local
     localStorage.setItem("femflow_nivel", nivel);
 
-    // 2️⃣ salva backend
+    // salva backend
     await FEMFLOW.post({
       action: "setnivel",
       id: localStorage.getItem("femflow_id"),
       nivel
     });
 
-    // 3️⃣ 🔥 evento estrutural
+    // 🔥 evento estrutural
     FEMFLOW.dispatch("state:changed", {
       type: "nivel",
       impact: "estrutural"
     });
 
-    // 4️⃣ fecha modal
-    document.getElementById("modal-nivel")?.classList.add("oculto");
+    modal.classList.add("oculto");
   };
+
+  btnFechar.onclick = () => modal.classList.add("oculto");
 };
+
 
 
 /* ===========================================================
