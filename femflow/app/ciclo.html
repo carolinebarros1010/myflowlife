@@ -247,7 +247,9 @@ if (sync?.status === "ok") {
   const ret = new URLSearchParams(location.search).get("ret");
 
 // 🔁 após configurar ciclo, sempre voltar ao HOME
-FEMFLOW.router("home");
+const ret = new URLSearchParams(location.search).get("ret");
+FEMFLOW.router(ret === "flowcenter" ? "flowcenter" : "home");
+
 
 }
 
