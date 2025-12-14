@@ -428,6 +428,41 @@ FEMFLOW.resetProgramaAtual = function () {
   localStorage.removeItem("femflow_enfase");
   localStorage.removeItem("femflow_treinoAtual");
 };
+FEMFLOW.initNivelHandler = function () {
+  const btn = document.getElementById("btnConfirmarNivel");
+  if (!btn || btn.dataset.bound) return;
+
+  btn.dataset.bound = "true"; // 🔒 evita múltiplos binds
+
+  btn.onclick = async () => {
+    const nivel = document.querySelector(".nivel-btn.active")?.dataset.nivel;
+
+    if (!nivel) {
+      FEMFLOW.toast("Selecione um nível");
+      return;
+    }
+
+    // 1️⃣ salva local
+    localStorage.setItem("femflow_nivel", nivel);
+
+    // 2️⃣ salva backend
+    await FEMFLOW.post({
+      action: "setnivel",
+      id: localStorage.getItem("femflow_id"),
+      nivel
+    });
+
+    // 3️⃣ 🔥 evento estrutural
+    FEMFLOW.dispatch("state:changed", {
+      type: "nivel",
+      impact: "estrutural"
+    });
+
+    // 4️⃣ fecha modal
+    document.getElementById("modal-nivel")?.classList.add("oculto");
+  };
+};
+
 
 /* ===========================================================
    8. CARREGAR PERFIL (VALIDAR)
@@ -493,6 +528,7 @@ FEMFLOW.init = async function () {
     this.inserirHeaderApp();
     this.inserirMenuLateral();
     this.inserirModalIdioma();
+     FEMFLOW.initNivelHandler(); // 🔥 AQUI
     return;
   }
 
