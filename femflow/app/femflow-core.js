@@ -484,11 +484,16 @@ FEMFLOW._acaoMenu = function (op) {
       break;
 
     case "ciclo":
-      // 🔥 mudança fisiológica → core decide depois
-      FEMFLOW.dispatch("state:changed", {
-        type: "ciclo",
-        impact: "fisiologico"
-      });
+  // 🔥 mudança fisiológica
+  FEMFLOW.dispatch("state:changed", {
+    type: "ciclo",
+    impact: "fisiologico"
+  });
+
+  // ✅ sempre volta para flowcenter depois de configurar
+  FEMFLOW.router("ciclo?ret=flowcenter");
+  break;
+
 
       FEMFLOW.router(`ciclo?ret=${location.pathname.split("/").pop()}`);
       break;
@@ -578,12 +583,16 @@ FEMFLOW.initNivelHandler = function () {
     });
 
     // 🔥 evento estrutural
-    FEMFLOW.dispatch("state:changed", {
-      type: "nivel",
-      impact: "estrutural"
-    });
+FEMFLOW.dispatch("state:changed", {
+  type: "nivel",
+  impact: "estrutural"
+});
 
-    modal.classList.add("oculto");
+modal.classList.add("oculto");
+
+// ✅ garante novo treino “de verdade”
+FEMFLOW.router("flowcenter");
+
   };
 
   btnFechar.onclick = () => modal.classList.add("oculto");
@@ -642,6 +651,23 @@ FEMFLOW.sincronizarECdisparar = async function () {
     detail: perfil
   }));
 };
+/* ===========================================================
+   7.5 STATE CHANGED → SEMPRE CAI NO FLOWCENTER
+   (FlowCenter valida/sincroniza no começo)
+=========================================================== */
+
+document.addEventListener("femflow:stateChanged", (e) => {
+  const d = e?.detail || {};
+  const impact = d.impact || "none";
+
+  if (impact === "none") return;
+
+  // 🔥 decisão central: qualquer mudança relevante leva ao FlowCenter,
+  // e o FlowCenter sincroniza com o backend ao abrir
+  if (impact === "fisiologico" || impact === "estrutural") {
+    FEMFLOW.router("flowcenter");
+  }
+});
 
 /* ===========================================================
    10. INIT — FLUXO PRINCIPAL
