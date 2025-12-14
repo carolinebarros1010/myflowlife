@@ -272,30 +272,57 @@ const diuBox = document.getElementById("diuSubmenu");
 /* ============================================================
    BOTÕES PRINCIPAIS
 ============================================================ */
-document.querySelectorAll(".perfil-btn[data-perfil]").forEach(btn=>{
-  bindTap(btn, ()=>{
-    document.querySelectorAll(".perfil-btn[data-perfil]").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
+document.addEventListener("DOMContentLoaded", () => {
 
-    perfilSelecionado = btn.dataset.perfil;
+  // PERFIS PRINCIPAIS
+  document.querySelectorAll(".perfil-btn[data-perfil]").forEach(btn=>{
+    bindTap(btn, ()=>{
 
-    regularBox.style.display="none";
-    quizBox.style.display="none";
-    diuBox.style.display="none";
+      document
+        .querySelectorAll(".perfil-btn[data-perfil]")
+        .forEach(b=>b.classList.remove("active"));
 
-    if(perfilSelecionado==="regular"){
-      regularBox.style.display="block";
-    }
-    else if(perfilSelecionado==="irregular"){
-      iniciarQuizIrregular();
-    }
-    else if(perfilSelecionado==="menopausa"){
-      iniciarQuizMenopausa();
-    }
-    else if(perfilSelecionado==="diu"){
-      diuBox.style.display="block";
-    }
+      btn.classList.add("active");
+
+      perfilSelecionado = btn.dataset.perfil;
+
+      regularBox.style.display="none";
+      quizBox.style.display="none";
+      diuBox.style.display="none";
+
+      if (perfilSelecionado==="regular") {
+        regularBox.style.display="block";
+      }
+      else if (perfilSelecionado==="irregular") {
+        iniciarQuizIrregular();
+      }
+      else if (perfilSelecionado==="menopausa") {
+        iniciarQuizMenopausa();
+      }
+      else if (perfilSelecionado==="diu") {
+        diuBox.style.display="block";
+      }
+    });
   });
+
+  // SUBMENU DIU
+  document.querySelectorAll("[data-diu]").forEach(btn=>{
+    bindTap(btn, ()=>{
+
+      document
+        .querySelectorAll("[data-diu]")
+        .forEach(b=>b.classList.remove("active"));
+
+      btn.classList.add("active");
+
+      if (btn.dataset.diu==="cobre") {
+        regularBox.style.display="block";
+      } else {
+        iniciarQuizDiuHormonal();
+      }
+    });
+  });
+
 });
 
 /* ============================================================
