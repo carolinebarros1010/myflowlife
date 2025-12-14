@@ -274,6 +274,89 @@ FEMFLOW.inserirHeaderApp = function () {
 };
 
 /* ===========================================================
+   🌸 COMMIT DE MUDANÇAS ESTRUTURAIS (NÍVEL / CICLO)
+   Fonte da verdade: BACKEND
+=========================================================== */
+FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
+  const id = localStorage.getItem("femflow_id");
+  if (!id) return;
+
+  FEMFLOW.log?.("Commit mudança:", tipo, payload);
+
+  try {
+    // ----------------------------
+    // 🔁 MUDANÇA DE NÍVEL
+    // ----------------------------
+    if (tipo === "nivel" && payload.nivel) {
+      await fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "setnivel",
+          id,
+          nivel: payload.nivel
+        })
+      });
+
+      // reset de programa é OBRIGATÓRIO
+      await fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "resetprograma",
+          id
+        })
+      });
+    }
+
+    // ----------------------------
+    // 🌙 MUDANÇA DE CICLO
+    // ----------------------------
+    if (tipo === "ciclo") {
+      if (payload.perfilHormonal) {
+        await fetch(FEMFLOW.SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "setperfilhormonal",
+            id,
+            perfil: payload.perfilHormonal
+          })
+        });
+      }
+
+      if (payload.startDate) {
+        await fetch(FEMFLOW.SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "setciclostart",
+            id,
+            startDate: payload.startDate
+          })
+        });
+      }
+
+      // sempre resetar programa
+      await fetch(FEMFLOW.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "resetprograma",
+          id
+        })
+      });
+    }
+
+  } catch (err) {
+    console.error("Erro commitMudanca:", err);
+    FEMFLOW.toast?.("Erro ao aplicar mudança. Tente novamente.");
+  }
+};
+
+
+
+/* ===========================================================
    4. SYNC (NÃO altera produto)
 =========================================================== */
 
