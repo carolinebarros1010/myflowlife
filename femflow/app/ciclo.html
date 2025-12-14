@@ -246,11 +246,9 @@ if (sync?.status === "ok") {
 
   ffShowLoading("Carregando seu painel…");
 
-  const ret = new URLSearchParams(location.search).get("ret");
+const ret = (new URLSearchParams(location.search).get("ret") || "").toLowerCase();
+FEMFLOW.router(ret.includes("flowcenter") ? "flowcenter" : "home");
 
-// 🔁 após configurar ciclo, sempre voltar ao HOME
-const ret = new URLSearchParams(location.search).get("ret");
-FEMFLOW.router(ret === "flowcenter" ? "flowcenter" : "home");
 
 
 }
