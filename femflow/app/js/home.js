@@ -50,9 +50,14 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
   localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
 
-  // enfase salva no backend
-  localStorage.setItem("femflow_enfase", String(perfil.enfase || "nenhuma").toLowerCase());
+ // enfase: apenas espelha se NÃO houver mudança estrutural
+if (!localStorage.getItem("femflow_cycle_changed")) {
+  localStorage.setItem(
+    "femflow_enfase",
+    String(perfil.enfase || "nenhuma").toLowerCase()
+  );
 }
+
 
 /* ============================================================
    LOADING
