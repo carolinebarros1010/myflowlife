@@ -18,6 +18,13 @@ FEMFLOW.setLang = function (lang) {
   localStorage.setItem("femflow_lang", lang);
   document.dispatchEvent(new Event("femflow:langChange"));
 };
+
+FEMFLOW.dispatch = function(type, detail = {}) {
+  document.dispatchEvent(
+    new CustomEvent(`femflow:${type}`, { detail })
+  );
+};
+
 /* ============================================================
    🔐 FEMFLOW — Device + Session helpers
 ============================================================ */
@@ -192,6 +199,29 @@ FEMFLOW.router = pag => {
   }
 };
 
+document.addEventListener("femflow:state:changed", e => {
+  const { type, impact } = e.detail || {};
+
+  FEMFLOW.log("🧠 STATE CHANGED:", type, impact);
+
+  if (impact === "none") return;
+
+  if (impact === "fisiologico") {
+    FEMFLOW.toast("Ajustes aplicados 🌸");
+    FEMFLOW.router("home");
+    return;
+  }
+
+  if (impact === "estrutural") {
+    FEMFLOW.toast("Estrutura atualizada 🌱");
+    FEMFLOW.resetProgramaAtual?.();
+    localStorage.setItem("femflow_cycle_changed", "true");
+    FEMFLOW.router("home");
+  }
+});
+
+
+
 /* ===========================================================
    3. HEADER
 =========================================================== */
@@ -339,9 +369,14 @@ FEMFLOW._acaoMenu = function (op) {
       document.getElementById("ff-lang-modal")?.classList.remove("hidden");
       break;
 
-    case "ciclo":
-      FEMFLOW.router(`ciclo?ret=${location.pathname.split("/").pop()}`);
-      break;
+  case "ciclo":
+  FEMFLOW.dispatch("state:changed", {
+    type: "ciclo",
+    impact: "fisiologico"
+  });
+  FEMFLOW.router(`ciclo?ret=${location.pathname.split("/").pop()}`);
+  break;
+
 
     case "respiracao":
       FEMFLOW.router("respiracao");
@@ -351,9 +386,11 @@ FEMFLOW._acaoMenu = function (op) {
       FEMFLOW.router("evolucao");
       break;
 
-    case "nivel":
-      document.querySelector("#modal-nivel")?.classList.remove("oculto");
-      break;
+   FEMFLOW.dispatch("state:changed", {
+  type: "nivel",
+  impact: "estrutural"
+});
+
 
     case "tema":
       document.body.classList.toggle("dark");
@@ -381,6 +418,12 @@ FEMFLOW._acaoMenu = function (op) {
       FEMFLOW.router(rota[p] || "home.html");
       break;
   }
+};
+
+FEMFLOW.resetProgramaAtual = function () {
+  localStorage.removeItem("femflow_diaPrograma");
+  localStorage.removeItem("femflow_enfase");
+  localStorage.removeItem("femflow_treinoAtual");
 };
 
 /* ===========================================================
