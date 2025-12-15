@@ -199,7 +199,17 @@ await FEMFLOW.post({
   perfilHormonal: perfil,
   });
 
+const perfilFresh = await FEMFLOW.get({
+  action: "validar",
+  id
+});
 
+// agora SIM é fonte da verdade
+localStorage.setItem("femflow_fase", perfilFresh.fase);
+localStorage.setItem("femflow_diaCiclo", perfilFresh.diaCiclo);
+localStorage.setItem("femflow_diaPrograma", perfilFresh.diaPrograma);
+
+FEMFLOW.router("flowcenter");
 
   /* ============================================================
      3) NAVEGAR IMEDIATAMENTE
