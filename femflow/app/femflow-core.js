@@ -72,10 +72,12 @@ FEMFLOW.toast = (msg, error = false) => {
   setTimeout(() => box.classList.remove("visible"), 2400);
 };
 /* ============================================================
-   ⏳ LOADING GLOBAL — FEMFLOW
+   ⏳ LOADING GLOBAL — FEMFLOW (PADRÃO OFICIAL)
 ============================================================ */
 
-FEMFLOW.showLoading = function (msg = "Processando…") {
+FEMFLOW.loading = FEMFLOW.loading || {};
+
+FEMFLOW.loading.show = function (msg = "Processando…") {
   let box = document.getElementById("ff-loading");
 
   if (!box) {
@@ -96,10 +98,11 @@ FEMFLOW.showLoading = function (msg = "Processando…") {
   }
 };
 
-FEMFLOW.hideLoading = function () {
+FEMFLOW.loading.hide = function () {
   const box = document.getElementById("ff-loading");
   if (box) box.classList.add("hidden");
 };
+
 
 
 
