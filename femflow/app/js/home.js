@@ -58,8 +58,7 @@ if (!localStorage.getItem("femflow_cycle_changed")) {
   );
 }
 } 
-FEMFLOW.showLoading("Carregando…");
-FEMFLOW.hideLoading();
+
 
 /* ============================================================
    LISTAS DE CARDS
@@ -148,7 +147,8 @@ function handleCardClick(enfase){
    
 if (!localStorage.getItem("femflow_cycle_configured")) {
 
-  ffShowLoading("Configurando seu ciclo…");
+  FEMFLOW.loading.show("Configurando seu ciclo…");
+
   localStorage.setItem("femflow_enfase", enfase);
 
   FEMFLOW.dispatch("state:changed", {
@@ -206,7 +206,8 @@ if (!localStorage.getItem("femflow_cycle_configured")) {
 async function selecionarEnfase(enfase){
   const id = localStorage.getItem("femflow_id");
 
-  ffShowLoading("Preparando novo programa…");
+ FEMFLOW.loading.show("Preparando novo programa…");
+
 
   // 🔥 1. salvar nova ênfase
   localStorage.setItem("femflow_enfase", enfase);
@@ -305,53 +306,48 @@ function aplicarIdiomaHome() {
    HOME — AGORA USANDO SOMENTE VALIDAR (SEM SYNC)
 =========================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
-  mostrarLoading();
+  FEMFLOW.loading.show("Carregando…");
 
   try {
     const perfil = await carregarPerfilEAtualizarStorage();
 
-    // sem auth
     if (!perfil || perfil.status === "no_auth") {
       FEMFLOW.toast("Faça login novamente 🌸");
-      esconderLoading();
+      FEMFLOW.loading.hide();
       return FEMFLOW.router("index.html");
     }
 
-    // bloqueado / sessão inválida
     if (perfil.status === "blocked" || perfil.status === "denied") {
       FEMFLOW.toast("Sessão inválida. Faça login novamente.");
       FEMFLOW.clearSession?.();
-      esconderLoading();
+      FEMFLOW.loading.hide();
       return FEMFLOW.router("index.html");
     }
 
-    // erro do backend
     if (perfil.status !== "ok") {
       FEMFLOW.toast("Erro ao atualizar dados. Tente novamente.");
-      esconderLoading();
+      FEMFLOW.loading.hide();
       return;
     }
 
-    // ✅ grava tudo no localStorage
     persistPerfil(perfil);
 
-    // Rails
     renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
     renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
     renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
     renderRail(document.getElementById("railCasa"), LISTA_CASA);
     renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
 
-    // Idioma + vídeo
     aplicarIdiomaHome();
 
   } catch (err) {
     console.error("HOME init erro:", err);
     FEMFLOW.toast("Falha ao carregar. Verifique internet.");
   } finally {
-    esconderLoading();
+    FEMFLOW.loading.hide();
   }
 });
+
 
 
 
