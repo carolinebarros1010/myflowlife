@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", initFlowCenter);
 async function initFlowCenter() {
 
    
- FEMFLOW.showLoading("Preparando seu painel…");
+ FEMFLOW.Loading.show("Preparando seu painel…");
 
 
 
@@ -289,7 +289,7 @@ document.getElementById("toTrain").onclick = () => {
     else location.href = "https://www.myflowlife.com.br/#ofertas";
   };
    
-FEMFLOW.hideLoading();
+FEMFLOW.Loading.hide();
 
   document.getElementById("ff-loading")?.classList.add("hidden");
 }
