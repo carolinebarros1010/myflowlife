@@ -13,6 +13,13 @@ const FOLLOWME_LINKS = {
   karoline: "#",
   thalita: "#"
 };
+// 🔒 Garantia de integridade do ciclo
+if (!localStorage.getItem("femflow_cycle_configured")) {
+  FEMFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
+  FEMFLOW.router("ciclo");
+  return;
+}
+
 /* ============================================================
    🔄 PERFIL: puxar do backend e persistir no localStorage
 ============================================================ */
