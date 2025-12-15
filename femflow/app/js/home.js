@@ -322,11 +322,13 @@ if (!localStorage.getItem("femflow_cycle_configured")) {
   try {
     const perfil = await carregarPerfilEAtualizarStorage();
 
-    if (!perfil || perfil.status === "no_auth") {
-      FEMFLOW.toast("Faça login novamente 🌸");
-      FEMFLOW.loading.hide();
-      return FEMFLOW.router("index.html");
-    }
+    if (!localStorage.getItem("femflow_cycle_configured")) {
+  FEMFLOW.loading.hide?.();
+  FEMFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
+  FEMFLOW.router("ciclo");
+  return;
+}
+
 
     if (perfil.status === "blocked" || perfil.status === "denied") {
       FEMFLOW.toast("Sessão inválida. Faça login novamente.");
