@@ -172,66 +172,60 @@ async function salvarCiclo({
   const idUser = localStorage.getItem("femflow_id");
 
   /* ============================================================
-     1) SALVAR IMEDIATAMENTE NO LOCALSTORAGE
-     (isso destrava a navegação)
+     1) CACHE LOCAL (destrava navegação)
   ============================================================ */
   localStorage.setItem("femflow_perfilHormonal", perfil);
   localStorage.setItem("femflow_cycle_configured", "yes");
-  localStorage.setItem("femflow_cycle_changed", "true"); // 🔥 novo
+  localStorage.setItem("femflow_cycle_changed", "true");
   localStorage.setItem("femflow_startDate", start.toISOString());
   localStorage.setItem("femflow_cycleLength", String(length));
-  localStorage.setItem("femflow_diaCiclo", String(dia));
-  localStorage.setItem("femflow_fase", faseCalc.toLowerCase());
 
   if (faseAlta) {
     localStorage.setItem("femflow_faseAlta", faseAlta);
   } else {
     localStorage.removeItem("femflow_faseAlta");
   }
-/* ============================================================
-   2) BACKEND — set base do ciclo
-============================================================ */
-await FEMFLOW.post({
-  action: "setperfilhormonal",
-  id: idUser,
-  perfil: perfil
-});
-
-await FEMFLOW.post({
-  action: "setciclo",
-  id: idUser,
-  cicloDuracao: length,
-  dataInicio: start.toISOString(),
-  perfilHormonal: perfil
-});
-
-// 🔥 AGORA validar (não sync)
-const perfilFresh = await FEMFLOW.get({
-  action: "validar",
-  id: idUser
-});
-
-if (perfilFresh?.status === "ok") {
-  localStorage.setItem("femflow_fase", perfilFresh.fase);
-  localStorage.setItem("femflow_diaCiclo", String(perfilFresh.diaCiclo));
-  localStorage.setItem("femflow_diaPrograma", String(perfilFresh.diaPrograma));
-}
-
-FEMFLOW.router("flowcenter");
 
   /* ============================================================
-     3) NAVEGAR IMEDIATAMENTE
+     2) BACKEND — contrato oficial
+  ============================================================ */
+  await FEMFLOW.post({
+    action: "setperfilhormonal",
+    id: idUser,
+    perfil
+  });
+
+  await FEMFLOW.post({
+    action: "setciclo",
+    id: idUser,
+    cicloDuracao: length,
+    dataInicio: start.toISOString(),
+    perfilHormonal: perfil
+  });
+
+  /* ============================================================
+     3) VALIDAR — fonte da verdade
+  ============================================================ */
+  const perfilFresh = await FEMFLOW.get({
+    action: "validar",
+    id: idUser
+  });
+
+  if (perfilFresh?.status === "ok") {
+    localStorage.setItem("femflow_fase", perfilFresh.fase);
+    localStorage.setItem("femflow_diaCiclo", String(perfilFresh.diaCiclo));
+    localStorage.setItem("femflow_diaPrograma", String(perfilFresh.diaPrograma));
+  }
+
+  /* ============================================================
+     4) FEEDBACK + NAVEGAÇÃO ÚNICA
   ============================================================ */
   FEMFLOW.toast("✨ Ciclo configurado!");
 
-  ffShowLoading("Carregando seu painel…");
-
-const ret = (new URLSearchParams(location.search).get("ret") || "").toLowerCase();
-FEMFLOW.router(ret.includes("flowcenter") ? "flowcenter" : "home");
-
-
-
+  const ret = (new URLSearchParams(location.search).get("ret") || "").toLowerCase();
+  FEMFLOW.router(ret.includes("flowcenter") ? "flowcenter" : "home");
 }
+
 
 /* ============================================================
    PERFIS E QUIZ
