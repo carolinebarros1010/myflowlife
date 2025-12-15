@@ -58,6 +58,11 @@ if (!localStorage.getItem("femflow_cycle_changed")) {
     String(perfil.enfase || "nenhuma").toLowerCase()
   );
 }
+  // se backend já devolve fase/diaCiclo (ou perfilHormonal), considera configurado
+if (perfil.fase && perfil.diaCiclo) {
+  localStorage.setItem("femflow_cycle_configured", "yes");
+}
+ 
 } 
 
 
@@ -315,28 +320,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const perfil = await carregarPerfilEAtualizarStorage();
 
-    if (!localStorage.getItem("femflow_cycle_configured")) {
+   
+ 
+
+      if (perfil.status !== "ok") {
+      FEMFLOW.toast("Erro ao atualizar dados. Tente novamente.");
+      FEMFLOW.loading.hide();
+      return;
+    }
+
+     
+     if (!localStorage.getItem("femflow_cycle_configured")) {
   FEMFLOW.loading.hide?.();
   FEMFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
   FEMFLOW.router("ciclo");
   return;
 }
 
+   
+    persistPerfil(perfil);
 
-    if (perfil.status === "blocked" || perfil.status === "denied") {
+   if (perfil.status === "blocked" || perfil.status === "denied") {
       FEMFLOW.toast("Sessão inválida. Faça login novamente.");
       FEMFLOW.clearSession?.();
       FEMFLOW.loading.hide();
       return FEMFLOW.router("index.html");
-    }
-
-    if (perfil.status !== "ok") {
-      FEMFLOW.toast("Erro ao atualizar dados. Tente novamente.");
-      FEMFLOW.loading.hide();
-      return;
-    }
-
-    persistPerfil(perfil);
+   }
+     
 
     renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
     renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
