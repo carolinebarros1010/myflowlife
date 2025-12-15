@@ -308,14 +308,7 @@ function aplicarIdiomaHome() {
 =========================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
 
-   // 🔒 Garantia de integridade do ciclo
-if (!localStorage.getItem("femflow_cycle_configured")) {
-  FEMFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
-  FEMFLOW.router("ciclo");
-  return;
-}
-
-  FEMFLOW.loading.show("Carregando…");
+   FEMFLOW.loading.show("Carregando…");
 
    
 
