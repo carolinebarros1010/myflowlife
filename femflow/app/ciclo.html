@@ -199,23 +199,6 @@ await FEMFLOW.post({
   perfilHormonal: perfil,
   });
 
-/* ============================================================
-   3) SYNC — calcular fase + diaCiclo reais
-============================================================ */
-const sync = await FEMFLOW.get({
-  action: "sync",
-  id: idUser
-});
-
-// 🔥 atualizar cache local com fonte da verdade
-if (sync?.status === "ok") {
-  localStorage.setItem("femflow_fase", sync.fase);
-  localStorage.setItem("femflow_diaCiclo", String(sync.diaCiclo));
-  if (sync.diaPrograma !== undefined && sync.diaPrograma !== null) {
-  localStorage.setItem("femflow_diaPrograma", String(sync.diaPrograma));
-}
-// senão, NÃO mexe
-}
 
 
   /* ============================================================
