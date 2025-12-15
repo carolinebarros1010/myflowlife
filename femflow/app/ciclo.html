@@ -246,9 +246,14 @@ const diuBox = document.getElementById("diuSubmenu");
 ============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
 
+  // 🔥 GARANTIR LIMPEZA DE LOADING AO ENTRAR NO CICLO
+  FEMFLOW.loading.hide?.();
+
   // PERFIS PRINCIPAIS
   document.querySelectorAll(".perfil-btn[data-perfil]").forEach(btn=>{
     bindTap(btn, ()=>{
+      ...
+
 
       document
         .querySelectorAll(".perfil-btn[data-perfil]")
