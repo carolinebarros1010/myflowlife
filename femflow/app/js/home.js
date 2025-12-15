@@ -13,12 +13,6 @@ const FOLLOWME_LINKS = {
   karoline: "#",
   thalita: "#"
 };
-// 🔒 Garantia de integridade do ciclo
-if (!localStorage.getItem("femflow_cycle_configured")) {
-  FEMFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
-  FEMFLOW.router("ciclo");
-  return;
-}
 
 /* ============================================================
    🔄 PERFIL: puxar do backend e persistir no localStorage
@@ -313,7 +307,17 @@ function aplicarIdiomaHome() {
    HOME — AGORA USANDO SOMENTE VALIDAR (SEM SYNC)
 =========================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
+
+   // 🔒 Garantia de integridade do ciclo
+if (!localStorage.getItem("femflow_cycle_configured")) {
+  FEMFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
+  FEMFLOW.router("ciclo");
+  return;
+}
+
   FEMFLOW.loading.show("Carregando…");
+
+   
 
   try {
     const perfil = await carregarPerfilEAtualizarStorage();
