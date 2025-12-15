@@ -90,9 +90,7 @@
 
  
 <script>
-  const id = localStorage.getItem("femflow_id");
-
-const id = localStorage.getItem("femflow_id");
+ const id = localStorage.getItem("femflow_id");
 
 // 🔐 guarda mínima — ciclo é parte do onboarding
 if (!id) {
@@ -100,18 +98,7 @@ if (!id) {
   FEMFLOW.router("index");
 }
 
-
-    // opcional: atualizar cache mínimo
-    localStorage.setItem("femflow_nivel", sync.nivel || localStorage.getItem("femflow_nivel"));
-  } catch (e) {
-    console.error("Erro ao validar sessão:", e);
-    FEMFLOW.clearSession?.();
-    FEMFLOW.router("index");
-  }
-})();
-
-
-  
+ 
 function ffShowLoading(msg = "Processando…") {
   const box = document.getElementById("ff-loading");
   const text = document.getElementById("ff-loading-text");
