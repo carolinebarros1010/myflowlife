@@ -192,22 +192,30 @@ async function salvarCiclo({
    2) BACKEND — set base do ciclo
 ============================================================ */
 await FEMFLOW.post({
+  action: "setperfilhormonal",
+  id: idUser,
+  perfil: perfil
+});
+
+await FEMFLOW.post({
   action: "setciclo",
   id: idUser,
   cicloDuracao: length,
   dataInicio: start.toISOString(),
-  perfilHormonal: perfil,
-  });
-
-const perfilFresh = await FEMFLOW.get({
-  action: "validar",
-  id
+  perfilHormonal: perfil
 });
 
-// agora SIM é fonte da verdade
-localStorage.setItem("femflow_fase", perfilFresh.fase);
-localStorage.setItem("femflow_diaCiclo", perfilFresh.diaCiclo);
-localStorage.setItem("femflow_diaPrograma", perfilFresh.diaPrograma);
+// 🔥 AGORA validar (não sync)
+const perfilFresh = await FEMFLOW.get({
+  action: "validar",
+  id: idUser
+});
+
+if (perfilFresh?.status === "ok") {
+  localStorage.setItem("femflow_fase", perfilFresh.fase);
+  localStorage.setItem("femflow_diaCiclo", String(perfilFresh.diaCiclo));
+  localStorage.setItem("femflow_diaPrograma", String(perfilFresh.diaPrograma));
+}
 
 FEMFLOW.router("flowcenter");
 
