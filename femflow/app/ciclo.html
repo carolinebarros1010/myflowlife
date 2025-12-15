@@ -92,22 +92,14 @@
 <script>
   const id = localStorage.getItem("femflow_id");
 
-// 🔐 validar sessão / token
-(async () => {
-  if (!id) {
-    FEMFLOW.clearSession?.();
-    FEMFLOW.router("index");
-    return;
-  }
+const id = localStorage.getItem("femflow_id");
 
-  try {
-    const sync = await FEMFLOW.get({ action: "sync", id });
+// 🔐 guarda mínima — ciclo é parte do onboarding
+if (!id) {
+  FEMFLOW.toast?.("Faça login para continuar 🌸");
+  FEMFLOW.router("index");
+}
 
-    if (!sync || sync.status !== "ok") {
-      FEMFLOW.clearSession?.();
-      FEMFLOW.router("index");
-      return;
-    }
 
     // opcional: atualizar cache mínimo
     localStorage.setItem("femflow_nivel", sync.nivel || localStorage.getItem("femflow_nivel"));
