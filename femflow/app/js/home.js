@@ -331,6 +331,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
+        if (perfil.status === "blocked" || perfil.status === "denied") {
+      FEMFLOW.toast("Sessão inválida. Faça login novamente.");
+      FEMFLOW.clearSession?.();
+      FEMFLOW.loading.hide();
+      return FEMFLOW.router("index.html");
+   }
+     
+persistPerfil(perfil);
      
      if (!localStorage.getItem("femflow_cycle_configured")) {
   FEMFLOW.loading.hide?.();
@@ -338,17 +346,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   FEMFLOW.router("ciclo");
   return;
 }
-
-   
-    persistPerfil(perfil);
-
-   if (perfil.status === "blocked" || perfil.status === "denied") {
-      FEMFLOW.toast("Sessão inválida. Faça login novamente.");
-      FEMFLOW.clearSession?.();
-      FEMFLOW.loading.hide();
-      return FEMFLOW.router("index.html");
-   }
-     
 
     renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
     renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
