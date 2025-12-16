@@ -122,10 +122,11 @@ if (cycleChanged && veioDaHome) {
    2) CICLO (vem do VALIDAR + localStorage)
 ============================================================ */
 let ciclo = {
-  fase: (localStorage.getItem("femflow_fase") || perfil.fase || "follicular").toLowerCase(),
-  diaCiclo: Number(localStorage.getItem("femflow_diaCiclo") || perfil.diaCiclo || 1),
-  diaPrograma: Number(localStorage.getItem("femflow_diaPrograma") || perfil.diaPrograma || 1)
+  fase: perfil.fase?.toLowerCase() || "follicular",
+  diaCiclo: Number(perfil.diaCiclo || 1),
+  diaPrograma: Number(perfil.diaPrograma || 1)
 };
+
 
    
   /* ============================================================
