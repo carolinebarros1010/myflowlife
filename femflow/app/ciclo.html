@@ -206,10 +206,11 @@ async function salvarCiclo({
   /* ============================================================
      3) VALIDAR — fonte da verdade
   ============================================================ */
-  const perfilFresh = await FEMFLOW.get({
-    action: "validar",
-    id: idUser
-  });
+  const perfilFresh = await FEMFLOW.post({
+  action: "validar",
+  id: idUser
+});
+
 
   if (perfilFresh?.status === "ok") {
     localStorage.setItem("femflow_fase", perfilFresh.fase);
