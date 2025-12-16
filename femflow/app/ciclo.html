@@ -506,17 +506,6 @@ salvarCiclo({
 
  const normalizado = normalizarFaseEDia(faseCalc, diaReal);
 
-sconst manualStart = calcularDataManualPorFaseEDia(
-  normalizado.fase,
-  normalizado.dia
-);
-
-// 1️⃣ Envia data manual
-await FEMFLOW.post({
-  action: "setmanualstart",
-  id: idUser,
-  startDate: manualStart.toISOString()
-});
 
 const manualStart = calcularDataManualPorFaseEDia(
   normalizado.fase,
