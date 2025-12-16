@@ -53,12 +53,10 @@ function persistPerfil(perfil) {
    localStorage.setItem(  "femflow_dataInicioPrograma",   perfil.dataInicioPrograma ? String(perfil.dataInicioPrograma) : "" );
 
 
- // enfase: apenas espelha se NÃO houver mudança estrutural
-if (!localStorage.getItem("femflow_cycle_changed")) {
-  localStorage.setItem(
-    "femflow_enfase",
-    String(perfil.enfase || "nenhuma").toLowerCase()
-  );
+localStorage.setItem(
+  "femflow_enfase",
+  String(perfil.enfase || "nenhuma").toLowerCase()
+);
 }
   // se backend já devolve fase/diaCiclo (ou perfilHormonal), considera configurado
 if (perfil.fase && perfil.diaCiclo) {
