@@ -177,8 +177,8 @@ async function salvarCiclo({
   localStorage.setItem("femflow_perfilHormonal", perfil);
   localStorage.setItem("femflow_cycle_configured", "yes");
   localStorage.setItem("femflow_cycle_changed", "true");
-  localStorage.setItem("femflow_startDate", start.toISOString());
   localStorage.setItem("femflow_cycleLength", String(length));
+   
 
   if (faseAlta) {
     localStorage.setItem("femflow_faseAlta", faseAlta);
@@ -215,6 +215,10 @@ async function salvarCiclo({
     localStorage.setItem("femflow_fase", perfilFresh.fase);
     localStorage.setItem("femflow_diaCiclo", String(perfilFresh.diaCiclo));
     localStorage.setItem("femflow_diaPrograma", String(perfilFresh.diaPrograma));
+     localStorage.setItem(
+      "femflow_dataInicioPrograma",
+      perfilFresh.dataInicioPrograma ? String(perfilFresh.dataInicioPrograma) : ""
+    );
   }
 
   /* ============================================================
@@ -252,10 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // PERFIS PRINCIPAIS
   document.querySelectorAll(".perfil-btn[data-perfil]").forEach(btn=>{
     bindTap(btn, ()=>{
-      ...
-
-
-      document
+        document
         .querySelectorAll(".perfil-btn[data-perfil]")
         .forEach(b=>b.classList.remove("active"));
 
