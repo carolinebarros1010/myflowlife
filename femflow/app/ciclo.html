@@ -388,18 +388,36 @@ function responderQuiz(v){
 ============================================================ */
 function finalizarQuiz(){
   
-  // 🔒 FALLBACK FEMFLOW — quiz falhou ou não iniciou
-  if (!perguntasAtuais || !perguntasAtuais.length) {
+ // 🔒 FALLBACK FEMFLOW — quiz falhou ou não iniciou
+if (!perguntasAtuais || !perguntasAtuais.length) {
+
+  const idUser = localStorage.getItem("femflow_id");
+
   // fallback fisiologicamente seguro
+  const faseFallback = "menstrual";
+  const diaFallback = 1;
+
+  // dia 1 => data manual = hoje
+  const manualStart = calcularDataManualPorFaseEDia(faseFallback, diaFallback);
+
+  // garante que o backend "ancora" o ciclo no manual start
+  await FEMFLOW.post({
+    action: "setmanualstart",
+    id: idUser,
+    startDate: manualStart.toISOString()
+  });
+
   salvarCiclo({
     perfil: "energetico",
-    start: new Date(),
+    start: manualStart,
     length: 28,
-    faseCalc: "menstrual",
-    dia: 1
+    faseCalc: faseFallback,
+    dia: diaFallback
   });
+
   return;
 }
+
 
 
   const nivel = (localStorage.getItem("femflow_nivel") || "iniciante").toLowerCase();
@@ -496,7 +514,19 @@ await FEMFLOW.post({
   startDate: manualStart.toISOString()
 });
 
-// 2️⃣ Set ciclo
+const manualStart = calcularDataManualPorFaseEDia(
+  normalizado.fase,
+  normalizado.dia
+);
+
+// 1️⃣ Envia DATA MANUAL (fonte da verdade)
+await FEMFLOW.post({
+  action: "setmanualstart",
+  id: idUser,
+  startDate: manualStart.toISOString()
+});
+
+// 2️⃣ Set ciclo respeitando manual start
 salvarCiclo({
   perfil: perfilInterno.replace("_quiz",""),
   start: manualStart,
@@ -505,6 +535,7 @@ salvarCiclo({
   faseAlta: faseAltaNivel,
   dia: normalizado.dia
 });
+
 }
 
   /* ============================================================
