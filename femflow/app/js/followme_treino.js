@@ -7,8 +7,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const id = localStorage.getItem("femflow_id");
 const coachRaw = localStorage.getItem("femflow_followme_coach");
 const coach = coachRaw?.replace("followme_", "");
-const fase = localStorage.getItem("femflow_fase") || "follicular";
-const diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
+const sync = await FEMFLOW.post({
+  action: "validar",
+  id
+});
+
+const fase = sync.fase;
+const diaPrograma = sync.diaPrograma;
+
 
 if (!id || !coach) {
   FEMFLOW.toast("Erro: dados do FollowMe ausentes.");
