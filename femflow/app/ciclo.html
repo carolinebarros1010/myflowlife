@@ -312,21 +312,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-/* ============================================================
-   SUBMENU — DIU
-============================================================ */
-document.querySelectorAll("[data-diu]").forEach(btn=>{
-  bindTap(btn, ()=>{
-    document.querySelectorAll("[data-diu]").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-
-    if(btn.dataset.diu==="cobre"){
-      regularBox.style.display="block";
-    } else {
-      iniciarQuizDiuHormonal();
-    }
-  });
-});
 
 /* ============================================================
    QUIZ — lógicas
@@ -424,110 +409,95 @@ if (!perguntasAtuais || !perguntasAtuais.length) {
   const entraAlta = quizScore <= 3;   // true = alta energia
 
   /* ============================================================
-     1) PERFIL IRREGULAR — fase aproximada
-  ============================================================ */
-  if (perfilInterno === "irregular_quiz") {
+   1) PERFIL IRREGULAR — fase aproximada
+============================================================ */
+if (perfilInterno === "irregular_quiz") {
 
-    let faseAprox = "";
-    if (quizScore >= 4) faseAprox = "lutea";
-    else if (quizScore === 3) faseAprox = "ovulatoria";
-    else if (quizScore === 2) faseAprox = "folicular";
-    else faseAprox = "menstrual";
+  let faseAprox = "";
+  if (quizScore >= 4) faseAprox = "lutea";
+  else if (quizScore === 3) faseAprox = "ovulatoria";
+  else if (quizScore === 2) faseAprox = "folicular";
+  else faseAprox = "menstrual";
 
-    let diaInicial = 1;
-    if (faseAprox === "folicular") diaInicial = 6;
-    if (faseAprox === "ovulatoria")  diaInicial = 14;
-    if (faseAprox === "lutea")     diaInicial = 18;
+  let diaInicial = 1;
+  if (faseAprox === "folicular")  diaInicial = 6;
+  if (faseAprox === "ovulatoria") diaInicial = 14;
+  if (faseAprox === "lutea")      diaInicial = 18;
 
-    // LOG DEBUG IRREGULAR
-    console.log("🔍 IRREGULAR.DEBUG → faseAprox:", faseAprox);
-    console.log("🔍 IRREGULAR.DEBUG → diaInicial:", diaInicial);
-    console.log("🔍 IRREGULAR.DEBUG → perfilInterno:", perfilInterno);
-    console.log("🔍 IRREGULAR.DEBUG → score:", quizScore);
+  console.log("🔍 IRREGULAR.DEBUG → faseAprox:", faseAprox);
+  console.log("🔍 IRREGULAR.DEBUG → diaInicial:", diaInicial);
+  console.log("🔍 IRREGULAR.DEBUG → score:", quizScore);
 
-    const manualStart = calcularDataManualPorFaseEDia(
-  normalizado.fase,
-  normalizado.dia
-);
+  const { normalizado, manualStart } =
+    criarManualStartSeguro(faseAprox, diaInicial);
 
-// fonte da verdade
-await FEMFLOW.post({
-  action: "setmanualstart",
-  id: idUser,
-  startDate: manualStart.toISOString()
-});
+  await FEMFLOW.post({
+    action: "setmanualstart",
+    id: idUser,
+    startDate: manualStart.toISOString()
+  });
 
-// depois usa no salvarCiclo
-salvarCiclo({
-  perfil: perfilInterno.replace("_quiz",""),
-  start: manualStart,
-  length: 28,
-  faseCalc: normalizado.fase,
-  faseAlta: faseAltaNivel,
-  dia: normalizado.dia
-});
+  salvarCiclo({
+    perfil: perfilInterno.replace("_quiz", ""),
+    start: manualStart,
+    length: 28,
+    faseCalc: normalizado.fase,
+    dia: normalizado.dia
+  });
 
+  return;
+}
 
-    return;
-  }
+/* ============================================================
+   2) PERFIL ENERGÉTICO (DIU hormonal ou menopausa)
+============================================================ */
+const faseAltaNivel = faseAltaPorNivel();
+const diaEnergetico = 1;
 
-  /* ============================================================
-     2) PERFIL ENERGÉTICO (DIU hormonal ou menopausa)
-  ============================================================ */
-  const faseAltaNivel = faseAltaPorNivel();
-  const diaEnergetico = 1; // sempre começa 1 energético
+let faseCalc, diaReal;
 
-  let faseCalc, diaReal;
+if (entraAlta) {
+  faseCalc = faseAltaNivel;
 
-  if (entraAlta) {
-    faseCalc = faseAltaNivel;
-
-    if (faseAltaNivel === "lutea") {
-      diaReal = 18 + ((diaEnergetico - 1) % 11);
-    } else if (faseAltaNivel === "folicular") {
-      diaReal = 6 + ((diaEnergetico - 1) % 8);
-    } else if (faseAltaNivel === "ovulatoria") {
-      diaReal = 14 + ((diaEnergetico - 1) % 4);
-    } else {
-      diaReal = 1;
-    }
-
+  if (faseAltaNivel === "lutea") {
+    diaReal = 18 + ((diaEnergetico - 1) % 11);
+  } else if (faseAltaNivel === "folicular") {
+    diaReal = 6 + ((diaEnergetico - 1) % 8);
+  } else if (faseAltaNivel === "ovulatoria") {
+    diaReal = 14 + ((diaEnergetico - 1) % 4);
   } else {
-    faseCalc = "menstrual";
-    diaReal = 1 + ((diaEnergetico - 1) % 5);
+    diaReal = 1;
   }
 
-  // LOG DEBUG ENERGÉTICO
-  console.log("🔋 ENERGETICO.DEBUG → faseAltaNivel:", faseAltaNivel);
-  console.log("🔋 ENERGETICO.DEBUG → faseCalc final:", faseCalc);
-  console.log("🔋 ENERGETICO.DEBUG → diaReal:", diaReal);
-  console.log("🔋 ENERGETICO.DEBUG → score:", quizScore);
-  console.log("🔋 ENERGETICO.DEBUG → perfilInterno:", perfilInterno);
+} else {
+  faseCalc = "menstrual";
+  diaReal = 1 + ((diaEnergetico - 1) % 5);
+}
 
- const normalizado = normalizarFaseEDia(faseCalc, diaReal);
+console.log("🔋 ENERGÉTICO.DEBUG → faseAltaNivel:", faseAltaNivel);
+console.log("🔋 ENERGÉTICO.DEBUG → faseCalc:", faseCalc);
+console.log("🔋 ENERGÉTICO.DEBUG → diaReal:", diaReal);
+console.log("🔋 ENERGÉTICO.DEBUG → score:", quizScore);
 
+const { normalizado, manualStart } =
+  criarManualStartSeguro(faseCalc, diaReal);
 
-const manualStart = calcularDataManualPorFaseEDia(
-  normalizado.fase,
-  normalizado.dia
-);
-
-// 1️⃣ Envia DATA MANUAL (fonte da verdade)
 await FEMFLOW.post({
   action: "setmanualstart",
   id: idUser,
   startDate: manualStart.toISOString()
 });
 
-// 2️⃣ Set ciclo respeitando manual start
 salvarCiclo({
-  perfil: perfilInterno.replace("_quiz",""),
+  perfil: perfilInterno.replace("_quiz", ""),
   start: manualStart,
   length: 28,
   faseCalc: normalizado.fase,
   faseAlta: faseAltaNivel,
   dia: normalizado.dia
 });
+
+return;
 
 }
 
@@ -568,6 +538,8 @@ bindTap(document.getElementById("btnConfirmarRegular"), ()=>{
     dia
   });
 });
+  
+ 
 /* ============================================================
    🔤 TRADUÇÃO — APLICAR IDIOMA NA PÁGINA DE CICLO
 ============================================================ */
@@ -685,7 +657,20 @@ function normalizarFaseEDia(fase, dia) {
 
   return { fase, dia };
 }
+/* ============================================================
+   🛡️ MANUAL START SEGURO — FONTE DA VERDADE
+============================================================ */
+function criarManualStartSeguro(fase, dia) {
+  const normalizado = normalizarFaseEDia(fase, dia);
 
+  const manualStart = calcularDataManualPorFaseEDia(
+    normalizado.fase,
+    normalizado.dia
+  );
+
+  return { normalizado, manualStart };
+}
+  
 /* ============================================================
    🔄 Atualizar textos quando trocar idioma
 ============================================================ */
