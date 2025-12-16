@@ -386,8 +386,8 @@ function responderQuiz(v){
 /* ============================================================
    FINAL DO QUIZ — PERFIL ENERGÉTICO e PERFIL HORMONAL IRREGULAR
 ============================================================ */
-function finalizarQuiz(){
-  
+async function finalizarQuiz(){
+  const idUser = localStorage.getItem("femflow_id");
  // 🔒 FALLBACK FEMFLOW — quiz falhou ou não iniciou
 if (!perguntasAtuais || !perguntasAtuais.length) {
 
@@ -445,22 +445,26 @@ if (!perguntasAtuais || !perguntasAtuais.length) {
     console.log("🔍 IRREGULAR.DEBUG → perfilInterno:", perfilInterno);
     console.log("🔍 IRREGULAR.DEBUG → score:", quizScore);
 
-    const manualStart = calcularDataManualPorFaseEDia(faseAprox, diaInicial);
+    const manualStart = calcularDataManualPorFaseEDia(
+  normalizado.fase,
+  normalizado.dia
+);
 
-// 1️⃣ Envia data manual ao backend (FONTE DA VERDADE)
+// fonte da verdade
 await FEMFLOW.post({
   action: "setmanualstart",
   id: idUser,
   startDate: manualStart.toISOString()
 });
 
-// 2️⃣ Set ciclo normalmente (backend respeita manual start)
+// depois usa no salvarCiclo
 salvarCiclo({
-  perfil: "irregular",
+  perfil: perfilInterno.replace("_quiz",""),
   start: manualStart,
   length: 28,
-  faseCalc: faseAprox,
-  dia: diaInicial
+  faseCalc: normalizado.fase,
+  faseAlta: faseAltaNivel,
+  dia: normalizado.dia
 });
 
 
