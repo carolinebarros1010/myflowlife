@@ -311,6 +311,24 @@ async function finalizarAnamnese() {
     finalMsgEl.textContent = "Erro ao concluir.";
     return;
   }
+ 
+const deviceId = FEMFLOW.getDeviceId(); // precisa ser estável (não aleatório por request)
+
+const loginResp = await FEMFLOW.post({
+  action: "login",
+  email,
+  senha,
+  deviceId
+});
+
+if (loginResp?.status === "ok") {
+  localStorage.setItem("femflow_deviceId", loginResp.deviceId);
+  localStorage.setItem("femflow_sessionToken", loginResp.sessionToken);
+  localStorage.setItem("femflow_sessionExpira", String(loginResp.sessionExpira));
+} else {
+  // fallback: mandar para login / mostrar erro
+}
+
 
   // --------------------------------------------------------
   // 4) SALVAR IDENTIDADE LOCAL
