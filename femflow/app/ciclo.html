@@ -530,19 +530,12 @@ bindTap(document.getElementById("btnConfirmarRegular"), ()=>{
   let d=((diff%len)+len)%len;
   const dia=d===0?1:d+1;
 
-  let fase="";
-  if(dia<=5) fase="menstrual";
-  else if(dia<=13) fase="folicular";
-  else if(dia<=17) fase="ovulatoria";
-  else fase="lutea";
-
   salvarCiclo({
-    perfil:"regular",
-    start,
-    length:len,
-    faseCalc:fase,
-    dia
-  });
+  perfil: "regular",
+  start,
+  length: len
+});
+
 });
   
  
