@@ -92,23 +92,26 @@ perfil = { ...perfil, ...perfilFresh };
 
  const cycleChanged = localStorage.getItem("femflow_cycle_changed") === "true";
 
-if (cycleChanged) {
-  // invalida treino anterior
+const cycleChanged = localStorage.getItem("femflow_cycle_changed") === "true";
+const veioDaHome = !!localStorage.getItem("femflow_enfase");
+
+if (cycleChanged && !veioDaHome) {
   localStorage.removeItem("femflow_enfase");
   localStorage.removeItem("femflow_diaPrograma");
-
-  // consome flag
   localStorage.removeItem("femflow_cycle_changed");
 
   FEMFLOW.toast("Ciclo atualizado. Escolha um novo treino 🌸");
-
-  // ❌ NÃO dar return
-  // ❌ NÃO despachar stateChanged aqui
-  // FlowCenter deve renderizar normalmente
+  FEMFLOW.dispatch("state:changed", {
+    type: "ciclo",
+    impact: "estrutural"
+  });
+  return;
 }
 
-  
-
+// se veio da Home, apenas consome a flag
+if (cycleChanged && veioDaHome) {
+  localStorage.removeItem("femflow_cycle_changed");
+}
 
   const produtoRaw = (perfil.produto || "").toLowerCase();
   const nivelRaw   = perfil.nivel?.toLowerCase() || "iniciante";
