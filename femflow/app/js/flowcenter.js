@@ -91,8 +91,6 @@ flowcenterPersistPerfil(perfilFresh);
 perfil = { ...perfil, ...perfilFresh };
 
  const cycleChanged = localStorage.getItem("femflow_cycle_changed") === "true";
-
-const cycleChanged = localStorage.getItem("femflow_cycle_changed") === "true";
 const veioDaHome = !!localStorage.getItem("femflow_enfase");
 
 if (cycleChanged && !veioDaHome) {
