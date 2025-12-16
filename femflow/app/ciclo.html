@@ -292,23 +292,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // SUBMENU DIU
-  document.querySelectorAll("[data-diu]").forEach(btn=>{
-    bindTap(btn, ()=>{
+// SUBMENU DIU (fecha após seleção)
+document.querySelectorAll("[data-diu]").forEach(btn=>{
+  bindTap(btn, ()=>{
 
-      document
-        .querySelectorAll("[data-diu]")
-        .forEach(b=>b.classList.remove("active"));
+    // remove estado visual dos botões
+    document
+      .querySelectorAll("[data-diu]")
+      .forEach(b=>b.classList.remove("active"));
 
-      btn.classList.add("active");
+    btn.classList.add("active");
 
-      if (btn.dataset.diu==="cobre") {
-        regularBox.style.display="block";
-      } else {
-        iniciarQuizDiuHormonal();
-      }
-    });
+    // 🔒 FECHA O SUBMENU DIU
+    diuBox.style.display = "none";
+
+    // segue o fluxo correto
+    if (btn.dataset.diu === "cobre") {
+      regularBox.style.display = "block";
+    } else {
+      iniciarQuizDiuHormonal();
+    }
   });
+});
+
 
 });
 
