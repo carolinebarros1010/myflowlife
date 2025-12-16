@@ -150,6 +150,14 @@ function getPerguntas(tipo) {
   const ciclo = FEMFLOW.langs[langCode]?.ciclo || FEMFLOW.langs.pt.ciclo;
   return ciclo.quizCiclo?.[tipo] || [];
 }
+  
+function calcularDataManualPorFaseEDia(fase, dia) {
+  const hoje = new Date();
+  const base = new Date(hoje);
+  const deslocamento = Math.max(0, Number(dia) - 1);
+  base.setDate(hoje.getDate() - deslocamento);
+  return base;
+}
 
 
   
@@ -419,13 +427,24 @@ function finalizarQuiz(){
     console.log("🔍 IRREGULAR.DEBUG → perfilInterno:", perfilInterno);
     console.log("🔍 IRREGULAR.DEBUG → score:", quizScore);
 
-    salvarCiclo({
-      perfil: "irregular",
-      start: new Date(),
-      length: 28,
-      faseCalc: faseAprox,
-      dia: diaInicial
-    });
+    const manualStart = calcularDataManualPorFaseEDia(faseAprox, diaInicial);
+
+// 1️⃣ Envia data manual ao backend (FONTE DA VERDADE)
+await FEMFLOW.post({
+  action: "setmanualstart",
+  id: idUser,
+  startDate: manualStart.toISOString()
+});
+
+// 2️⃣ Set ciclo normalmente (backend respeita manual start)
+salvarCiclo({
+  perfil: "irregular",
+  start: manualStart,
+  length: 28,
+  faseCalc: faseAprox,
+  dia: diaInicial
+});
+
 
     return;
   }
@@ -465,9 +484,22 @@ function finalizarQuiz(){
 
  const normalizado = normalizarFaseEDia(faseCalc, diaReal);
 
+sconst manualStart = calcularDataManualPorFaseEDia(
+  normalizado.fase,
+  normalizado.dia
+);
+
+// 1️⃣ Envia data manual
+await FEMFLOW.post({
+  action: "setmanualstart",
+  id: idUser,
+  startDate: manualStart.toISOString()
+});
+
+// 2️⃣ Set ciclo
 salvarCiclo({
   perfil: perfilInterno.replace("_quiz",""),
-  start: new Date(),
+  start: manualStart,
   length: 28,
   faseCalc: normalizado.fase,
   faseAlta: faseAltaNivel,
