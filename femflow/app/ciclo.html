@@ -214,10 +214,10 @@ async function salvarCiclo({
   /* ============================================================
      3) VALIDAR — fonte da verdade
   ============================================================ */
-  const perfilFresh = await FEMFLOW.post({
-  action: "validar",
-  id: idUser
-});
+  const qs = new URLSearchParams({ action: "validar", id: idUser });
+const perfilFresh = await fetch(`${FEMFLOW.SCRIPT_URL}?${qs.toString()}`)
+  .then(r => r.json())
+  .catch(() => ({ status: "error" }));
 
 
   if (perfilFresh?.status === "ok") {
