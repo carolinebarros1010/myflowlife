@@ -184,23 +184,33 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
 
 FEMFLOW.engineTreino.intercalarHIIT = blocos => {
   const out = [];
-  let buf = [], last = null;
+  let buffer = [];
+  let currentBox = null;
 
-  const flush = () => { out.push(...buf); buf=[]; };
+  const flush = () => {
+    if (buffer.length) {
+      out.push(...buffer.sort((a,b)=>a.ordemNum-b.ordemNum));
+      buffer = [];
+    }
+  };
 
   for (const b of blocos) {
-    if (b.tipo === "treino") {
-  if (last !== null && last !== b.boxNum) flush();
-  buf.push(b);
-  last = b.boxNum;
-} else {
-  flush();
-  out.push(b);
-}
-
+    // treino OU hiit pertencem ao mesmo box
+    if (b.tipo === "treino" || b.tipo === "hiit") {
+      if (currentBox !== null && b.boxNum !== currentBox) {
+        flush();
+      }
+      buffer.push(b);
+      currentBox = b.boxNum;
+    } else {
+      flush();
+      out.push(b);
+      currentBox = null;
+    }
   }
+
   flush();
-  return out.sort((a,b)=>a.boxNum-b.boxNum);
+  return out;
 };
 
 /* ============================================================
