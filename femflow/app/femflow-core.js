@@ -683,8 +683,11 @@ FEMFLOW.init = async function () {
   if (p === "home.html") {
     this.inserirHeaderApp();
     this.inserirMenuLateral();
-    this.inserirModalIdioma();
-     FEMFLOW.initNivelHandler(); // 🔥 AQUI
+    this.inserirModalIdioma();   
+     
+     // ⏱️ aguarda o DOM completar
+    requestAnimationFrame(() => {
+      FEMFLOW.initNivelHandler();
     return;
   }
 
@@ -698,11 +701,13 @@ FEMFLOW.init = async function () {
     "followme_treino.html"
   ].includes(p)) {
 
-    this.inserirHeaderApp();
+     this.inserirHeaderApp();
     this.inserirMenuLateral();
     this.inserirModalIdioma();
 
-    // ❌ Removido: initNivelSelector()
+    requestAnimationFrame(() => {
+      FEMFLOW.initNivelHandler();
+    });
 
     if (!localStorage.getItem("femflow_cycle_configured")) {
       location.href = "ciclo.html";
