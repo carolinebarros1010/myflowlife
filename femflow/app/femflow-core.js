@@ -555,9 +555,7 @@ FEMFLOW.initNivelHandler = function () {
   const btnConfirmar = document.getElementById("btnConfirmarNivel");
   const btnFechar = document.getElementById("fecharNivel");
 
-  if (!modal || !btnConfirmar || btnConfirmar.dataset.bound) return;
-
-  btnConfirmar.dataset.bound = "true";
+   btnConfirmar.dataset.bound = "true";
 
   // seleção visual
   modal.querySelectorAll(".nivel-btn").forEach(btn => {
