@@ -133,6 +133,50 @@ function bindTap(el, handler){
   el.addEventListener("touchstart", ()=>{ fired=true; handler(); }, {passive:true});
   el.addEventListener("click", e=>{ if(!fired) handler(); fired=false; });
 }
+/* ============================================================
+   🔋 RESOLVER PERFIL ENERGÉTICO (FINAL • FEMFLOW 2025)
+   - Score define ALTA ou BAIXA
+   - BAIXA → menstrual dia 1 (hoje)
+   - ALTA  → depende do nível:
+       iniciante      → lutea 18
+       intermediaria  → folicular 6
+       avancada       → ovulatoria 14
+============================================================ */
+function resolverPerfilEnergetico(quizScore) {
+  const LIMIAR_ALTA = 6;
+  const entraAlta = quizScore >= LIMIAR_ALTA;
+
+  // ===== FASE BAIXA (FIXA, SEGURA)
+  if (!entraAlta) {
+    return {
+      fase: "menstrual",
+      dia: 1,
+      faseAlta: null
+    };
+  }
+
+  // ===== FASE ALTA (POR NÍVEL)
+  const faseAltaNivel = faseAltaPorNivel();
+
+  if (faseAltaNivel === "lutea") {
+    return { fase: "lutea", dia: 18, faseAlta: "lutea" };
+  }
+
+  if (faseAltaNivel === "folicular") {
+    return { fase: "folicular", dia: 6, faseAlta: "folicular" };
+  }
+
+  if (faseAltaNivel === "ovulatoria") {
+    return { fase: "ovulatoria", dia: 14, faseAlta: "ovulatoria" };
+  }
+
+  // fallback defensivo (não deveria acontecer)
+  return {
+    fase: "menstrual",
+    dia: 1,
+    faseAlta: null
+  };
+}
 
 /* ============================================================
    FASE ALTA POR NÍVEL (ENERGÉTICO)
@@ -461,60 +505,48 @@ salvarCiclo({
   return;
 }
 
+/* ============================================================
+   FINAL DO QUIZ — PERFIL ENERGÉTICO (MENOPAUSA / DIU HORMONAL)
+============================================================ */
 {
-  /* ============================================================
-     2) PERFIL ENERGÉTICO (DIU hormonal ou menopausa)
-  ============================================================ */
+  const idUser = localStorage.getItem("femflow_id");
 
-  const faseAltaNivel = faseAltaPorNivel(); // lutea | folicular | ovulatoria
-  const diaEnergetico = 1;
-
-  let faseCalc, diaReal;
-
-  // 🔑 decisão EXCLUSIVA pelo KISS
-  const LIMIAR_ALTA = 6;
-  const entraAlta = quizScore >= LIMIAR_ALTA;
-
-  if (entraAlta) {
-    faseCalc = faseAltaNivel;
-
-    if (faseAltaNivel === "lutea") {
-      diaReal = 18;
-    } else if (faseAltaNivel === "folicular") {
-      diaReal = 6;
-    } else if (faseAltaNivel === "ovulatoria") {
-      diaReal = 14;
-    } else {
-      throw new Error("Fase alta inválida");
-    }
-
-  } else {
-    faseCalc = "menstrual";
-    diaReal = 1;
-  }
+  // resolve energia + fase + dia de forma CENTRALIZADA
+  const { fase, dia, faseAlta } = resolverPerfilEnergetico(quizScore);
 
   console.log("🔋 ENERGÉTICO.DEBUG → score:", quizScore);
-  console.log("🔋 ENERGÉTICO.DEBUG → entraAlta:", entraAlta);
-  console.log("🔋 ENERGÉTICO.DEBUG → faseCalc:", faseCalc);
-  console.log("🔋 ENERGÉTICO.DEBUG → diaReal:", diaReal);
+  console.log("🔋 ENERGÉTICO.DEBUG → fase:", fase);
+  console.log("🔋 ENERGÉTICO.DEBUG → dia:", dia);
+  console.log("🔋 ENERGÉTICO.DEBUG → faseAlta:", faseAlta);
 
+  // cria manualStart coerente com fase/dia
   const { normalizado, manualStart } =
-    criarManualStartSeguro(faseCalc, diaReal);
+    criarManualStartSeguro(fase, dia);
 
+  // 🔒 ancora o backend na data correta
   await FEMFLOW.post({
     action: "setmanualstart",
     id: idUser,
     startDate: manualStart.toISOString()
   });
 
+  // 🔥 mapear perfil corretamente para o backend
+  const perfilFinalMap = {
+    menopausa_quiz: "energetico",
+    diuHormonal_quiz: "energetico"
+  };
+
+  const perfilFinal =
+    perfilFinalMap[perfilInterno] ||
+    perfilInterno.replace("_quiz", "");
+
   salvarCiclo({
-    perfil: perfilInterno.replace("_quiz", ""),
+    perfil: perfilFinal,
     start: manualStart,
     length: 28,
     faseCalc: normalizado.fase,
-    faseAlta: entraAlta ? faseAltaNivel : null,
-
-    dia: normalizado.dia
+    dia: normalizado.dia,
+    faseAlta: faseAlta // ✅ só existe se entrou em alta
   });
 
   return;
@@ -704,7 +736,6 @@ document.addEventListener("femflow:langChange", () => {
     quizStep.textContent = `${txtPerg} ${quizIdx + 1} ${txtDe} ${perguntasAtuais.length}`;
   }
 });
-
 </script>
   
 <!-- MODAL DE NÍVEL (CICLO) -->
