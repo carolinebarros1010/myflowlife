@@ -254,6 +254,31 @@ input, select {
   font-size: .9rem;
   cursor: pointer;
 }
+.nivel-confirmar {
+  margin-top: 18px;
+  width: 100%;
+  padding: 12px;
+  background: #335953;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background .25s, transform .15s, box-shadow .15s;
+  box-shadow: 0 6px 14px rgba(51, 89, 83, 0.35);
+}
+
+.nivel-confirmar:hover {
+  background: #2b4a45;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(51, 89, 83, 0.45);
+}
+
+.nivel-confirmar:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(51, 89, 83, 0.35);
+}
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
