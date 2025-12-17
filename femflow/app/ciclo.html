@@ -237,7 +237,7 @@ async function salvarCiclo({
   } else {
     localStorage.removeItem("femflow_faseAlta");
   }
-
+}
   /* ============================================================
      2) BACKEND — contrato oficial
   ============================================================ */
@@ -281,8 +281,6 @@ const perfilFresh = await fetch(`${FEMFLOW.SCRIPT_URL}?${qs.toString()}`)
 
   const ret = (new URLSearchParams(location.search).get("ret") || "").toLowerCase();
   FEMFLOW.router(ret.includes("flowcenter") ? "flowcenter" : "home");
-}
-
 
 /* ============================================================
    PERFIS E QUIZ
@@ -334,7 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
         diuBox.style.display="block";
       }
     });
-  });
+    });
 
 // SUBMENU DIU (fecha após seleção)
 document.querySelectorAll("[data-diu]").forEach(btn=>{
