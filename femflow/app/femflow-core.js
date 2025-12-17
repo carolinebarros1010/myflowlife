@@ -103,6 +103,11 @@ FEMFLOW.loading.hide = function () {
   if (box) box.classList.add("hidden");
 };
 
+FEMFLOW.log = function (...args) {
+  if (localStorage.getItem("femflow_dev") === "true") {
+    console.log("[FemFlow]", ...args);
+  }
+};
 
 
 
