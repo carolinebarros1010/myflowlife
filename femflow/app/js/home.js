@@ -63,9 +63,6 @@ if (perfil.fase && perfil.diaCiclo) {
   localStorage.setItem("femflow_cycle_configured", "yes");
 }
  
-} 
-
-
 /* ============================================================
    LISTAS DE CARDS
 =========================================================== */
