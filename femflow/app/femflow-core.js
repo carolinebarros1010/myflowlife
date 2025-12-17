@@ -686,6 +686,7 @@ FEMFLOW.init = async function () {
      // ⏱️ aguarda o DOM completar
     requestAnimationFrame(() => {
       FEMFLOW.initNivelHandler();
+    });   
     return;
   }
 
