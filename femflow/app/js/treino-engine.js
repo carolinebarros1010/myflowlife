@@ -135,23 +135,52 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
 /* ============================================================
    5) ORGANIZAÇÃO + HIIT
 ============================================================ */
-FEMFLOW.engineTreino.organizarBlocosSimples = brutos =>
-  brutos.map(b => {
-    const label = String(b.box || "");
-    let boxNum = parseInt(label.replace(/\D/g, ""));
-    if (b.tipo === "aquecimento") boxNum = -100;
-    else if (b.tipo === "treino" && isNaN(boxNum)) boxNum = 1;
-    else if (b.tipo === "hiit" && isNaN(boxNum)) boxNum = 500;
-    else if (b.tipo === "cardio_final") boxNum = 900;
-    else if (b.tipo === "resfriamento") boxNum = 999;
+FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
 
-    return {
-      ...b,
-      boxNum,
-      ordemNum: Number(b.ordem) || 0,
-      serieEspecial: FEMFLOW.engineTreino.detectarSerieEspecial(label)
-    };
-  }).sort((a,b)=>a.boxNum-b.boxNum || a.ordemNum-b.ordemNum);
+  // 1️⃣ Descobre quais boxes possuem TREINO
+  const boxesComTreino = new Set(
+    brutos
+      .filter(b => b.tipo === "treino")
+      .map(b => parseInt(String(b.box || "").replace(/\D/g, "")))
+      .filter(n => !isNaN(n))
+  );
+
+  return brutos
+    .map(b => {
+
+      const label = String(b.box || "");
+      let boxNum = parseInt(label.replace(/\D/g, ""));
+
+      // Aquecimento
+      if (b.tipo === "aquecimento") boxNum = -100;
+
+      // Treino sem box explícito
+      else if (b.tipo === "treino" && isNaN(boxNum)) boxNum = 1;
+
+      // 🔥 HIIT — regra FemFlow
+      else if (b.tipo === "hiit") {
+        // acompanha treino existente
+        if (boxesComTreino.has(boxNum)) {
+          // mantém boxNum
+        } else {
+          // HIIT solto → final antes do resfriamento
+          boxNum = 500;
+        }
+      }
+
+      else if (b.tipo === "cardio_final") boxNum = 900;
+      else if (b.tipo === "resfriamento") boxNum = 999;
+
+      return {
+        ...b,
+        boxNum,
+        ordemNum: Number(b.ordem) || 0,
+        serieEspecial: FEMFLOW.engineTreino.detectarSerieEspecial(label)
+      };
+    })
+    .sort((a,b)=>a.boxNum-b.boxNum || a.ordemNum-b.ordemNum);
+};
+
 
 FEMFLOW.engineTreino.intercalarHIIT = blocos => {
   const out = [];
@@ -161,11 +190,14 @@ FEMFLOW.engineTreino.intercalarHIIT = blocos => {
 
   for (const b of blocos) {
     if (b.tipo === "treino") {
-      if (last !== null && last !== b.boxNum) flush();
-      buf.push(b); last = b.boxNum;
-    } else {
-      flush(); out.push(b);
-    }
+  if (last !== null && last !== b.boxNum) flush();
+  buf.push(b);
+  last = b.boxNum;
+} else {
+  flush();
+  out.push(b);
+}
+
   }
   flush();
   return out.sort((a,b)=>a.boxNum-b.boxNum);
