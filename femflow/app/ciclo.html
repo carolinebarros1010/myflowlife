@@ -412,7 +412,7 @@ if (!perguntasAtuais || !perguntasAtuais.length) {
 
 
   const nivel = (localStorage.getItem("femflow_nivel") || "iniciante").toLowerCase();
-  const entraAlta = quizScore <= 3;   // true = alta energia
+  
 
   /* ============================================================
    1) PERFIL IRREGULAR — fase aproximada
@@ -443,8 +443,15 @@ if (perfilInterno === "irregular_quiz") {
     startDate: manualStart.toISOString()
   });
 
-  salvarCiclo({
-    perfil: perfilInterno.replace("_quiz", ""),
+ const perfilFinalMap = {
+  menopausa_quiz: "energetico",
+  diuHormonal_quiz: "energetico"
+};
+
+const perfilFinal = perfilFinalMap[perfilInterno] || perfilInterno.replace("_quiz","");
+
+salvarCiclo({
+  perfil: perfilFinal,
     start: manualStart,
     length: 28,
     faseCalc: normalizado.fase,
@@ -454,66 +461,65 @@ if (perfilInterno === "irregular_quiz") {
   return;
 }
 
-/* ============================================================
-   2) PERFIL ENERGÉTICO (DIU hormonal ou menopausa)
-============================================================ */
-const faseAltaNivel = faseAltaPorNivel(); // lutea | folicular | ovulatoria
-const diaEnergetico = 1;
+{
+  /* ============================================================
+     2) PERFIL ENERGÉTICO (DIU hormonal ou menopausa)
+  ============================================================ */
 
-let faseCalc, diaReal;
+  const faseAltaNivel = faseAltaPorNivel(); // lutea | folicular | ovulatoria
+  const diaEnergetico = 1;
 
-// 🔑 decisão EXCLUSIVA pelo KISS
-const LIMIAR_ALTA = 6;
-const entraAlta = quizScore >= LIMIAR_ALTA;
+  let faseCalc, diaReal;
 
-if (entraAlta) {
-  // ===== FASE ALTA =====
-  faseCalc = faseAltaNivel;
+  // 🔑 decisão EXCLUSIVA pelo KISS
+  const LIMIAR_ALTA = 6;
+  const entraAlta = quizScore >= LIMIAR_ALTA;
 
-  if (faseAltaNivel === "lutea") {
-    diaReal = 18;
-  } else if (faseAltaNivel === "folicular") {
-    diaReal = 6;
-  } else if (faseAltaNivel === "ovulatoria") {
-    diaReal = 14;
+  if (entraAlta) {
+    faseCalc = faseAltaNivel;
+
+    if (faseAltaNivel === "lutea") {
+      diaReal = 18;
+    } else if (faseAltaNivel === "folicular") {
+      diaReal = 6;
+    } else if (faseAltaNivel === "ovulatoria") {
+      diaReal = 14;
+    } else {
+      throw new Error("Fase alta inválida");
+    }
+
   } else {
-    throw new Error("Fase alta inválida");
+    faseCalc = "menstrual";
+    diaReal = 1;
   }
 
-} else {
-  // ===== FASE BAIXA (FIXA) =====
-  faseCalc = "menstrual";
-  diaReal = 1;
+  console.log("🔋 ENERGÉTICO.DEBUG → score:", quizScore);
+  console.log("🔋 ENERGÉTICO.DEBUG → entraAlta:", entraAlta);
+  console.log("🔋 ENERGÉTICO.DEBUG → faseCalc:", faseCalc);
+  console.log("🔋 ENERGÉTICO.DEBUG → diaReal:", diaReal);
+
+  const { normalizado, manualStart } =
+    criarManualStartSeguro(faseCalc, diaReal);
+
+  await FEMFLOW.post({
+    action: "setmanualstart",
+    id: idUser,
+    startDate: manualStart.toISOString()
+  });
+
+  salvarCiclo({
+    perfil: perfilInterno.replace("_quiz", ""),
+    start: manualStart,
+    length: 28,
+    faseCalc: normalizado.fase,
+    faseAlta: entraAlta ? faseAltaNivel : null,
+
+    dia: normalizado.dia
+  });
+
+  return;
 }
 
-console.log("🔋 ENERGÉTICO.DEBUG → score:", quizScore);
-console.log("🔋 ENERGÉTICO.DEBUG → entraAlta:", entraAlta);
-console.log("🔋 ENERGÉTICO.DEBUG → faseCalc:", faseCalc);
-console.log("🔋 ENERGÉTICO.DEBUG → diaReal:", diaReal);
-
-// cria manualStart coerente
-const { normalizado, manualStart } =
-  criarManualStartSeguro(faseCalc, diaReal);
-
-await FEMFLOW.post({
-  action: "setmanualstart",
-  id: idUser,
-  startDate: manualStart.toISOString()
-});
-
-
-salvarCiclo({
-  perfil: perfilInterno.replace("_quiz", ""),
-  start: manualStart,
-  length: 28,
-  faseCalc: normalizado.fase,
-  faseAlta: faseAltaNivel,
-  dia: normalizado.dia
-});
-
-return;
-
-}
 
   /* ============================================================
    PERFIL REGULAR — FISIOLÓGICO REAL
