@@ -318,10 +318,51 @@ document.addEventListener("DOMContentLoaded", () => {
       regularBox.style.display="none";
       quizBox.style.display="none";
       diuBox.style.display="none";
+      
+if (perfilSelecionado === "regular") {
+  regularBox.style.display = "block";
 
-      if (perfilSelecionado==="regular") {
-        regularBox.style.display="block";
+  const btn = document.getElementById("btnConfirmarRegular");
+  if (btn && !btn.dataset.bound) {
+    btn.dataset.bound = "true";
+
+    bindTap(btn, async () => {
+
+      const s = document.getElementById("dataUltima")?.value;
+      const len = parseInt(document.getElementById("duracao")?.value || 28, 10);
+
+      if (!s || len < 21 || len > 35) {
+        FEMFLOW.toast("Preencha corretamente data e duração 🌸");
+        return;
       }
+
+      const start = parseDateLocalYYYYMMDD(s);
+      const hoje = new Date();
+      const umDia = 86400000;
+
+      let diff = Math.floor((hoje - start) / umDia);
+      diff = Math.max(0, diff);
+
+      let d = ((diff % len) + len) % len;
+      const dia = d === 0 ? 1 : d + 1;
+
+      let fase = "";
+      if (dia <= 5) fase = "menstrual";
+      else if (dia <= 13) fase = "folicular";
+      else if (dia <= 17) fase = "ovulatoria";
+      else fase = "lutea";
+
+      await salvarCiclo({
+        perfil: "regular",
+        start,
+        length: len,
+        faseCalc: fase,
+        dia
+      });
+    });
+  }
+}
+
       else if (perfilSelecionado==="irregular") {
         iniciarQuizIrregular();
       }
@@ -548,7 +589,7 @@ salvarCiclo({
   /* ============================================================
    PERFIL REGULAR — FISIOLÓGICO REAL
 ============================================================ */
-bindTap(document.getElementById("btnConfirmarRegular"), ()=>{
+bindTap(document.getElementById("btnConfirmarRegular"), async () => {
 
   const s=document.getElementById("dataUltima").value;
   const len=parseInt(document.getElementById("duracao").value||28,10);
