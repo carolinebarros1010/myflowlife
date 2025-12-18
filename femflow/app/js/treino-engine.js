@@ -112,7 +112,12 @@ FEMFLOW.engineTreino.carregarBlocosNormais = async ({
   }
 
   const blocos = [];
-  snap.forEach(d => blocos.push(d.data()));
+ snap.forEach(d => {
+  const data = d.data();
+  console.log("🔥 FIREBASE RAW:", data.box, data.tipo, data);
+  blocos.push(data);
+});
+
   return blocos;
 };
 
@@ -158,6 +163,13 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
       .map(b => parseInt(String(b.box || "").replace(/\D/g, "")))
       .filter(n => !isNaN(n))
   );
+   
+console.log("🧠 ORGANIZAR:", {
+  rawBox: b.box,
+  boxNum,
+  serieDetectada: FEMFLOW.engineTreino.detectarSerieEspecial(String(b.box || "")),
+  tipo: b.tipo
+});
 
   return brutos
     .map(b => {
@@ -324,6 +336,14 @@ if (b.tipo === "hiit") {
       continue;
     }
   }
+out.forEach(o => {
+  console.log("📦 FRONT ITEM:", {
+    tipo: o.tipo,
+    box: o.box,
+    boxKey: o.boxKey,
+    serieEspecial: o.serieEspecial
+  });
+});
 
   return out;
 };
