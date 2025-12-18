@@ -463,31 +463,37 @@ const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
 
   const totalCombo = behavior?.combinados || bloco.length;
 
-  bloco.forEach((ex, index) => {
-
-     console.log("🧪 EX:", {
+   
+ bloco.forEach((ex, index) => {
+    
+    console.log("🧪 EX:", {
   titulo: ex.titulo,
   serieEspecial: ex._serieCodigo,
   isCluster: ex._isCluster,
   behavior
 });
 
-    ex._comboIndex = index + 1;
-    ex._comboTotal = totalCombo;
-    ex._isUltimoDoCombo = index === totalCombo - 1;
+  // 🔥 PROPAGAÇÃO DA SÉRIE DO BOX PARA O EXERCÍCIO
+  ex.serieEspecial = codigoSerie;
 
-    ex._hideRest =
-      behavior?.descansoNoUltimo === true &&
-      !ex._isUltimoDoCombo;
+  ex._comboIndex = index + 1;
+  ex._comboTotal = totalCombo;
+  ex._isUltimoDoCombo = index === totalCombo - 1;
 
-    ex._isCluster = behavior?.cluster === true;
-    ex._serieOrdem = ordemSerie;
-    ex._serieCodigo = codigoSerie;
+  ex._hideRest =
+    behavior?.descansoNoUltimo === true &&
+    !ex._isUltimoDoCombo;
 
-    ex._isRestPause = behavior?.restPause === true;
+  // 🔥 ATIVAÇÕES
+  ex._isCluster   = behavior?.cluster === true;
+  ex._isRestPause = behavior?.restPause === true;
 
-    htmlBox += renderExercicio(ex);
-  });
+  ex._serieOrdem  = ordemSerie;
+  ex._serieCodigo = codigoSerie;
+
+  htmlBox += renderExercicio(ex);
+});
+
 
   htmlBox += `</div>`;
   return htmlBox;
