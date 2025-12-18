@@ -294,6 +294,8 @@ initPeso();
   ============================================================ */
    
 function renderBox(bloco) {
+
+   
   if (!Array.isArray(bloco) || bloco.length === 0) {
     FEMFLOW.warn("⚠️ renderBox recebeu bloco inválido:", bloco);
     return "";
@@ -454,6 +456,10 @@ const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
 
   htmlBox += `</div>`;
   return htmlBox;
+
+console.log("🧩 SERIE RAW:", bloco[0].serieEspecial);
+console.log("🧩 SERIE PARSED:", parseSerieEspecial(bloco[0].serieEspecial));
+
 }
 
 
@@ -656,6 +662,9 @@ function initClusterTimers() {
         }
       }, 1000);
     }, { passive: true });
+     
+     console.log("🔍 EX CLUSTER?", ex.titulo, ex._isCluster);
+
   });
 }
 
