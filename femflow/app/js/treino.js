@@ -60,6 +60,23 @@ if (isPersonal) {
   const pseInput        = document.getElementById("pseInput");
   const btnConfirmarPSE = document.getElementById("btnConfirmarPSE");
   const btnCancelarPSE  = document.getElementById("btnCancelarPSE");
+  const SERIE_BEHAVIOR = {
+  T: { combinados: 3, descansoNoUltimo: true },
+  B: { combinados: 2, descansoNoUltimo: true },
+  Q: { combinados: 4, descansoNoUltimo: true },
+
+  C: { cluster: true, pausas: 10 },
+
+  I: { isometria: 3 },
+
+  CC: { cadenciaExcentrica: true },
+
+  D: { dropset: 3 },
+
+  RP: { restPause: true },
+
+  AE: { ativacao: true }
+};
 
   if (!track) {
     FEMFLOW.error("❌ #carouselTrack não encontrado!");
@@ -263,7 +280,14 @@ function renderBox(bloco) {
     FEMFLOW.warn("⚠️ renderBox recebeu bloco inválido:", bloco);
     return "";
   }
-  
+   
+  const serie = ex.serieEspecial;
+const behavior = SERIE_BEHAVIOR[serie] || {};
+
+const hideRest =
+  behavior.descansoNoUltimo &&
+  ex._isUltimoDoCombo === false;
+
   const tipoDominante = bloco[0].tipo;
   let boxNum = Number(bloco[0].box || 0); // Corrigido: Garantir que `boxNum` seja inicializado corretamente
 
@@ -415,7 +439,7 @@ bloco.forEach(ex => {
 // Fecha box
 html += `</div>`;
 return html;
-
+}
 
 /* ============================================================
    BLOCO EXERCÍCIO INDIVIDUAL
