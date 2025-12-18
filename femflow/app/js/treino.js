@@ -174,9 +174,16 @@ localStorage.setItem("femflow_diaCiclo", diaCiclo);
   });
 
    function getSerieEspecialInfo(codigo) {
+  if (!codigo) return null;
+
   const lang = FEMFLOW.lang || "pt";
-  return FEMFLOW.langs?.[lang]?.series?.[codigo] || null;
+
+  const series = FEMFLOW.langs?.[lang]?.treino?.series;
+  if (!series) return null;
+
+  return series[codigo] || null;
 }
+
 
   /* ============================================================
      2. FUNÇÃO DE RENDER
@@ -362,16 +369,35 @@ function renderBox(bloco) {
     return html;
   }
 
-  /* ======================================================
-     TREINO (1 box com vários exercícios)
-  ====================================================== */
-  // Garantindo que a variável `boxNum` seja atribuída corretamente
-  boxNum = bloco[0].box || 0;
-const codigoSerie = bloco[0].serieEspecial;
-const serieInfo  = codigoSerie ? getSerieEspecialInfo(codigoSerie) : null;
+ /* ======================================================
+   TREINO (1 box com vários exercícios)
+====================================================== */
 
-html += `<h2 class="ff-ex-titulo">Box ${boxNum}${codigoSerie ? ` — ${codigoSerie}` : ""}</h2>`;
+// Garantir boxNum
+boxNum = bloco[0].box || 0;
 
+// Código da série especial (ex: T, B, RP…)
+const codigoSerie = bloco[0].serieEspecial || null;
+
+// Busca info traduzida
+const serieInfo = getSerieEspecialInfo(codigoSerie);
+
+// Classes + atributos visuais
+const serieAttr = codigoSerie
+  ? `data-serie="${codigoSerie}" class="carousel-item ff-box ff-serie-especial"`
+  : `class="carousel-item ff-box"`;
+
+// Abre box
+html = `<div ${serieAttr}>`;
+
+// Título
+html += `
+  <h2 class="ff-ex-titulo">
+    Box ${boxNum}${codigoSerie ? ` — ${codigoSerie}` : ""}
+  </h2>
+`;
+
+// 🔥 BLOCO EXPLICATIVO DA SÉRIE ESPECIAL
 if (serieInfo) {
   html += `
     <div class="ff-serie-box ff-serie-${codigoSerie}">
@@ -381,14 +407,15 @@ if (serieInfo) {
   `;
 }
 
+// Exercícios
+bloco.forEach(ex => {
+  html += renderExercicio(ex);
+});
 
-  bloco.forEach(ex => {
-    html += renderExercicio(ex);
-  });
+// Fecha box
+html += `</div>`;
+return html;
 
-  html += `</div>`;
-  return html;
-}
 
 /* ============================================================
    BLOCO EXERCÍCIO INDIVIDUAL
