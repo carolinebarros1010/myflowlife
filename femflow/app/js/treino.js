@@ -192,6 +192,9 @@ function renderTreino(lista) {
     `;
     return;
   }
+   
+console.log("🧪 GRUPOS RAW:", grupos);
+console.log("🧪 BOX KEYS RAW:", Object.keys(grupos));
 
   /* ============================================================
      1) AGRUPAR ITEMS POR BOX
@@ -205,10 +208,22 @@ function renderTreino(lista) {
   });
 
   /* ordenar box: -100 → 0 → 1 → 2 → … → 500 → 900 → 999 */
-  const boxKeys = Object.keys(grupos)
-    .map(n => Number(n))
-    .sort((a,b)=>a-b);
+  const boxKeys = Object.keys(grupos).sort((a, b) => {
+  const na = parseInt(a);
+  const nb = parseInt(b);
 
+  // ambos numéricos → ordena normal
+  if (!isNaN(na) && !isNaN(nb)) return na - nb;
+
+  // um numérico, outro não → numérico vem primeiro
+  if (!isNaN(na)) return -1;
+  if (!isNaN(nb)) return 1;
+
+  // ambos strings → ordem alfabética
+  return a.localeCompare(b);
+});
+
+console.log("🧪 BOX KEYS ORDENADAS:", boxKeys);
   track.innerHTML = "";
 
   /* ============================================================
