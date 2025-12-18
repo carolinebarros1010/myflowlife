@@ -547,6 +547,25 @@ if (ex._isRestPause && ex._isUltimoDoCombo) {
   `;
 }
 
+   if (behavior?.cadenciaExcentrica) {
+  htmlBox += `
+    <div class="ff-cadencia-note">
+      🐢 Controle a descida do movimento
+    </div>
+  `;
+}
+
+      if (behavior?.isometria) {
+  htmlBox += `
+    <div class="ff-isometria-note">
+      🧊 Segure ${behavior.isometria}s na contração
+    </div>
+  `;
+}
+
+
+   
+
   // ⚠️ COMBO — descanso só no último
   else if (ex._hideRest) {
     descansoHTML = "";
