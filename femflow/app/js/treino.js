@@ -407,8 +407,7 @@ const serieAttr = codigoSerie
   ? `data-serie="${codigoSerie}" class="carousel-item ff-box ff-serie-${codigoSerie}"`
   : `class="carousel-item ff-box"`;
 
-// abre box
-let html = `<div ${serieAttr}>`;
+html = `<div ${serieAttr}>`;
 
 // título + explicação
 if (serieInfo) {
