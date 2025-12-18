@@ -150,7 +150,7 @@ if (!localStorage.getItem("femflow_cycle_configured")) {
 
   localStorage.setItem("femflow_enfase", enfase);
 
-  FEMFLOW.dispatch("state:changed", {
+  FEMFLOW.dispatch("statechanged", {
     type: "ciclo",
     impact: "fisiologico"
   });
