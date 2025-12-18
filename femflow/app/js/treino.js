@@ -518,17 +518,21 @@ function renderExercicio(ex) {
 
   const intervalo = Number(ex.intervalo) || 0;
 const totalSeries = Number(ex.series) || 1;
+   const isRP = ex._isRestPause && ex._isUltimoDoCombo;
+
 
 const serieProgressHTML = `
   <div class="ff-serie-progress"
-       data-serie-atual="1"
-       data-serie-total="${totalSeries}">
+     data-role="serie-progress"
+     data-serie-atual="1"
+     data-serie-total="${totalSeries}">
     Série <b>1</b> / ${totalSeries}
   </div>
 `;
 
 const serieBtnHTML = `
-  <button class="ff-serie-next-btn" type="button">
+  <button class="ff-serie-next-btn"
+        data-role="serie-next">
     ✔️ Concluir série
   </button>
 `;
@@ -561,7 +565,7 @@ const serieBtnHTML = `
    
 if (ex._isRestPause && ex._isUltimoDoCombo) {
   descansoHTML = `
-    <div class="ff-restpause-wrap" data-rp>
+    <div class="ff-restpause-wrap hidden" data-rp="true">
 
       <p class="ff-restpause-label">
         ⚡ Rest-Pause — reduza a carga e execute novamente
@@ -632,41 +636,45 @@ if (ex._isometriaTempo) {
      RENDER FINAL
   ============================ */
 
-  return `
-    <div class="ff-ex-item"
-         data-combo-index="${ex._comboIndex || 1}"
-         data-combo-total="${ex._comboTotal || 1}">
+return `
+  <div class="ff-ex-item"
+       data-combo-index="${ex._comboIndex || 1}"
+       data-combo-total="${ex._comboTotal || 1}"
+       ${isRP ? 'data-rp-required="true" data-rp-done="false"' : ''}>
 
-      <div class="ff-ex-top">
-        <div class="ff-ex-nome">
-          <a href="${ex.link || "#"}" target="_blank">
-            ${ex.titulo}
-          </a>
-        </div>
-
-        <input class="ff-ex-peso"
-               type="number"
-               placeholder="kg"
-               data-ex="${ex.titulo}">
+    <div class="ff-ex-top">
+      <div class="ff-ex-nome">
+        <a href="${ex.link || "#"}" target="_blank">
+          ${ex.titulo}
+        </a>
       </div>
 
-      <div class="ff-info-line">
-        <span>🌀 <b>${ex.series}</b>x</span>
-        <span>🔁 <b>${ex.reps}</b></span>
-        <span>⏱️ <b>${intervalo}s</b></span>
-      </div>
-      
-     
-      ${serieProgressHTML}
-      ${serieBtnHTML}
-      
- <!-- 🔥 AQUI -->
-    ${observacoesHTML}
-    
-      ${descansoHTML}
-
+      <input class="ff-ex-peso"
+             type="number"
+             placeholder="kg"
+             data-ex="${ex.titulo}">
     </div>
-  `;
+
+    <div class="ff-info-line">
+      <span>🌀 <b>${ex.series}</b>x</span>
+      <span>🔁 <b>${ex.reps}</b></span>
+      <span>⏱️ <b>${intervalo}s</b></span>
+    </div>
+
+    <!-- 📊 PROGRESSO DE SÉRIES -->
+    ${serieProgressHTML}
+
+    <!-- ✅ CONCLUIR SÉRIE -->
+    ${serieBtnHTML}
+
+    <!-- 🧠 OBSERVAÇÕES TÉCNICAS (RP / ISOMETRIA / CADÊNCIA) -->
+    ${observacoesHTML}
+
+    <!-- ⏱️ DESCANSO OU REST-PAUSE -->
+    ${descansoHTML}
+
+  </div>
+`;
 }
 
 
@@ -798,7 +806,28 @@ function initClusterTimers() {
     const pausa = 20; // pausa padrão RP (curta)
 
     btn.addEventListener("click", () => {
-      if (rodando) return;
+
+  const rpRequired = exItem.dataset.rpRequired === "true";
+  const rpDone     = exItem.dataset.rpDone === "true";
+
+  // 🔒 BLOQUEIO ABSOLUTO
+  if (rpRequired && !rpDone) {
+    alert("⚡ Execute o Rest-Pause antes de concluir o exercício.");
+    return;
+  }
+
+  if (atual >= total) return;
+
+  atual++;
+  progressEl.dataset.serieAtual = atual;
+  progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
+
+  if (atual === total) {
+    btn.textContent = "✔️ Exercício concluído";
+    btn.classList.add("done");
+    btn.disabled = true;
+  }
+});
 
       rodando = true;
       btn.textContent = "⏸️ Pausando…";
@@ -811,11 +840,22 @@ function initClusterTimers() {
         restante--;
         fill.style.width = `${(restante / pausa) * 100}%`;
 
-        if (restante <= 0) {
-          clearInterval(intv);
-          rodando = false;
-          btn.textContent = "▶️ Repetir Rest-Pause";
-        }
+       if (restante <= 0) {
+  clearInterval(intv);
+  rodando = false;
+  btn.textContent = "✔️ RP concluído";
+
+  rp.addEventListener("rp:concluido", () => {
+  const exItem = rp.closest(".ff-ex-item");
+  if (!exItem) return;
+
+  exItem.dataset.rpDone = "true";
+
+  exItem.classList.add("rp-done");
+});
+
+}
+
       }, 1000);
     });
 
@@ -823,33 +863,73 @@ function initClusterTimers() {
 }
 
 function initSeriesProgress() {
+
   document.querySelectorAll(".ff-ex-item").forEach(exItem => {
 
-    const progressEl = exItem.querySelector(".ff-serie-progress");
-    const btn = exItem.querySelector(".ff-serie-next-btn");
+    const progressEl = exItem.querySelector("[data-role='serie-progress']");
+    const btnSerie   = exItem.querySelector("[data-role='serie-next']");
+    const rpWrap     = exItem.querySelector("[data-rp]");
 
-    if (!progressEl || !btn) return;
+    if (!progressEl || !btnSerie) return;
 
     let atual = Number(progressEl.dataset.serieAtual || 1);
     const total = Number(progressEl.dataset.serieTotal || 1);
 
-    btn.addEventListener("click", () => {
+    let rpConcluido = false;
+    const exigeRP = !!rpWrap;
 
-      if (atual >= total) return;
+    /* ===============================
+       EVENTO: RP CONCLUÍDO
+    =============================== */
+    if (rpWrap) {
+      rpWrap.addEventListener("rp:concluido", () => {
+        rpConcluido = true;
+        exItem.dataset.rpDone = "true";
 
-      atual++;
-      progressEl.dataset.serieAtual = atual;
-      progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
+        btnSerie.disabled = false;
+        btnSerie.textContent = "✔️ Finalizar exercício";
+      });
+    }
 
-      // finalizou o exercício
-      if (atual === total) {
-        btn.textContent = "✔️ Exercício concluído";
-        btn.classList.add("done");
-        btn.disabled = true;
+    /* ===============================
+       CLICK → AVANÇAR SÉRIE
+    =============================== */
+    btnSerie.addEventListener("click", () => {
+
+      /* 🔹 Avanço normal */
+      if (atual < total) {
+        atual++;
+        progressEl.dataset.serieAtual = atual;
+        progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
+        return;
       }
+
+      /* 🔥 Última série → RP obrigatório */
+      if (atual === total && exigeRP && !rpConcluido) {
+
+        rpWrap.classList.remove("hidden");
+        btnSerie.textContent = "⚡ Executar Rest-Pause";
+        btnSerie.disabled = true;
+
+        return;
+      }
+
+      /* ✅ Finalização */
+      if (atual === total && (!exigeRP || rpConcluido)) {
+
+        btnSerie.textContent = "✔️ Exercício concluído";
+        btnSerie.classList.add("done");
+        btnSerie.disabled = true;
+
+        exItem.classList.add("ff-ex-done");
+      }
+
     });
+
   });
 }
+
+
 
 
 
