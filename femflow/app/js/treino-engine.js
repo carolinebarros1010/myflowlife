@@ -190,7 +190,7 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
         ...b,
         boxNum,
         ordemNum: Number(b.ordem) || 0,
-        serieEspecial: FEMFLOW.engineTreino.detectarSerieEspecial(label)
+        serieEspecial: label // mantém "3D", "4AE", etc
       };
     })
     .sort((a,b)=>a.boxNum-b.boxNum);
