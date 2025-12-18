@@ -173,6 +173,11 @@ localStorage.setItem("femflow_diaCiclo", diaCiclo);
 
   });
 
+   function getSerieEspecialInfo(codigo) {
+  const lang = FEMFLOW.lang || "pt";
+  return FEMFLOW.langs?.[lang]?.series?.[codigo] || null;
+}
+
   /* ============================================================
      2. FUNÇÃO DE RENDER
   ============================================================ */
@@ -362,11 +367,20 @@ function renderBox(bloco) {
   ====================================================== */
   // Garantindo que a variável `boxNum` seja atribuída corretamente
   boxNum = bloco[0].box || 0;
-  const serieEsp = bloco[0].serieEspecial
-    ? ` — Série ${bloco[0].serieEspecial}`
-    : "";
+const codigoSerie = bloco[0].serieEspecial;
+const serieInfo  = codigoSerie ? getSerieEspecialInfo(codigoSerie) : null;
 
-  html += `<h2 class="ff-ex-titulo">Box ${boxNum}${serieEsp}</h2>`;
+html += `<h2 class="ff-ex-titulo">Box ${boxNum}${codigoSerie ? ` — ${codigoSerie}` : ""}</h2>`;
+
+if (serieInfo) {
+  html += `
+    <div class="ff-serie-box ff-serie-${codigoSerie}">
+      <strong>${serieInfo.titulo}</strong>
+      <p>${serieInfo.texto}</p>
+    </div>
+  `;
+}
+
 
   bloco.forEach(ex => {
     html += renderExercicio(ex);
