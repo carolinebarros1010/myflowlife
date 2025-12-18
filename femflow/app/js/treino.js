@@ -477,9 +477,22 @@ const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
   // 🔥 ATIVAÇÕES
   ex._isCluster   = behavior?.cluster === true;
   ex._isRestPause = behavior?.restPause === true;
-   ex._rpPausa = behavior?.pausas || 15;
- 
+    // RP
+if (behavior?.restPause) {
+  ex._rpPausa = behavior.pausas || 15; // fallback seguro
+}
+    // Cadência excêntrica
+if (behavior?.cadenciaExcentrica) {
+  ex._cadenciaExcentrica = true;
+}
 
+// Isometria
+if (behavior?.isometria) {
+  ex._isometriaTempo = behavior.isometria; // ex: 3s
+}
+
+
+   
   ex._serieOrdem  = ordemSerie;
   ex._serieCodigo = codigoSerie;
 
@@ -554,18 +567,22 @@ if (ex._isRestPause && ex._isUltimoDoCombo) {
 }
 
 
-   if (behavior?.cadenciaExcentrica) {
-  htmlBox += `
+ let observacoesHTML = "";
+
+// 🐢 Cadência
+if (ex._cadenciaExcentrica) {
+  observacoesHTML += `
     <div class="ff-cadencia-note">
       🐢 Controle a descida do movimento
     </div>
   `;
 }
 
-      if (behavior?.isometria) {
-  htmlBox += `
+// 🧊 Isometria
+if (ex._isometriaTempo) {
+  observacoesHTML += `
     <div class="ff-isometria-note">
-      🧊 Segure ${behavior.isometria}s na contração
+      🧊 Segure ${ex._isometriaTempo}s na contração
     </div>
   `;
 }
