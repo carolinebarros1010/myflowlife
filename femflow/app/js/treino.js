@@ -477,6 +477,8 @@ const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
   // 🔥 ATIVAÇÕES
   ex._isCluster   = behavior?.cluster === true;
   ex._isRestPause = behavior?.restPause === true;
+   ex._rpPausa = behavior?.pausas || 15;
+ 
 
   ex._serieOrdem  = ordemSerie;
   ex._serieCodigo = codigoSerie;
@@ -530,23 +532,27 @@ function renderExercicio(ex) {
    
 if (ex._isRestPause && ex._isUltimoDoCombo) {
   descansoHTML = `
-    <div class="ff-restpause-wrap">
+    <div class="ff-restpause-wrap" data-rp="true">
+
       <p class="ff-restpause-label">
         ⚡ Rest-Pause — reduza a carga e execute novamente
       </p>
 
-      <button class="ff-restpause-btn btnStartTimer">
+      <button class="ff-restpause-btn" data-rp-start>
         ▶️ Iniciar pausa RP
       </button>
 
-      <span class="ff-timer-count">00:${behavior.pausas}</span>
-
-      <div class="ff-timer-bar" data-timer="${behavior.pausas}">
-        <div class="ff-timer-fill"></div>
+      <div class="ff-rp-timer hidden">
+        <span class="ff-rp-count">${ex._rpPausa}</span>s
+        <div class="ff-rp-bar">
+          <div class="ff-rp-fill"></div>
+        </div>
       </div>
+
     </div>
   `;
 }
+
 
    if (behavior?.cadenciaExcentrica) {
   htmlBox += `
@@ -738,52 +744,56 @@ function initClusterTimers() {
 
   });
 }
-   function initRP() {
-  const nodes = document.querySelectorAll("[data-rp='true']");
-  console.log("🔴 initRP() nodes:", nodes.length);
+  function initRP() {
+  const wraps = document.querySelectorAll("[data-rp='true']");
+  console.log("⚡ initRP():", wraps.length);
 
-  nodes.forEach((wrap, idx) => {
-    const btn      = wrap.querySelector("[data-rp-start]");
-    const timerBox = wrap.querySelector(".ff-rp-timer");
-    const countEl  = wrap.querySelector(".ff-rp-count");
-    const fill     = wrap.querySelector(".ff-rp-fill");
+  wraps.forEach((wrap, idx) => {
+    const btn   = wrap.querySelector("[data-rp-start]");
+    const box   = wrap.querySelector(".ff-rp-timer");
+    const count = wrap.querySelector(".ff-rp-count");
+    const fill  = wrap.querySelector(".ff-rp-fill");
 
-    if (!btn || !timerBox || !countEl || !fill) return;
+    if (!btn || !box || !count || !fill) {
+      console.warn("⚠️ RP incompleto:", idx);
+      return;
+    }
 
     if (btn.dataset.bound === "1") return;
     btn.dataset.bound = "1";
 
-    let tempo = 15;
+    let tempo = Number(count.textContent) || 15;
     let rodando = false;
-    let intv = null;
+    let intv;
 
     btn.addEventListener("click", () => {
       if (rodando) return;
 
       rodando = true;
-      btn.textContent = "⏸️ Pausando…";
-      timerBox.classList.remove("hidden");
+      btn.textContent = "⏸️ RP em andamento";
+      box.classList.remove("hidden");
 
-      tempo = 15;
-      countEl.textContent = tempo;
+      let restante = tempo;
+      count.textContent = restante;
       fill.style.width = "100%";
 
       clearInterval(intv);
       intv = setInterval(() => {
-        tempo--;
-        countEl.textContent = tempo;
-        fill.style.width = `${(tempo / 15) * 100}%`;
+        restante--;
+        count.textContent = restante;
+        fill.style.width = `${(restante / tempo) * 100}%`;
 
-        if (tempo <= 0) {
+        if (restante <= 0) {
           clearInterval(intv);
           rodando = false;
-          timerBox.classList.add("hidden");
-          btn.textContent = "🔥 Continue com carga reduzida";
+          box.classList.add("hidden");
+          btn.textContent = "▶️ Executar RP";
         }
       }, 1000);
-    }, { passive: true });
+    });
   });
 }
+
 
 
   /* ============================================================
