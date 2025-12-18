@@ -639,7 +639,10 @@ if (ex._isometriaTempo) {
         <span>🔁 <b>${ex.reps}</b></span>
         <span>⏱️ <b>${intervalo}s</b></span>
       </div>
-
+      
+ <!-- 🔥 AQUI -->
+    ${observacoesHTML}
+    
       ${descansoHTML}
 
     </div>
