@@ -182,6 +182,44 @@ resp: {
     sincronizando: "Sincronizando…",
     treinoSalvo: "Treino salvo!",
     descansoSalvo: "Descanso registrado!"
+},
+series: {
+  T: {
+    titulo: "🔗 Triset",
+    texto: "Três exercícios combinados. Execute todos em sequência e descanse apenas ao final."
+  },
+  B: {
+    titulo: "🔗 Biset",
+    texto: "Dois exercícios combinados. Execute ambos em sequência e descanse apenas ao final."
+  },
+  Q: {
+    titulo: "🔗 Quadriset",
+    texto: "Quatro exercícios combinados. Execute todos em sequência e descanse apenas ao final."
+  },
+  C: {
+    titulo: "⏱️ Cluster",
+    texto: "Cada série é dividida em 4 mini-séries com pausas de 10 segundos entre elas."
+  },
+  I: {
+    titulo: "🧊 Isometria",
+    texto: "Segure a contração máxima por 3 segundos em cada repetição."
+  },
+  CC: {
+    titulo: "🐢 Cadência Controlada",
+    texto: "Controle a fase excêntrica do movimento de forma lenta e consciente."
+  },
+  D: {
+    titulo: "🔥 Dropset",
+    texto: "Ao atingir a falha, reduza a carga 3 vezes consecutivas sem descanso."
+  },
+  RP: {
+    titulo: "⚡ Rest-Pause",
+    texto: "Na última série, após a falha, reduza 50% da carga e execute 20 repetições."
+  },
+  AE: {
+    titulo: "👑 Advanced Elite",
+    texto: "Execução livre, técnica avançada e estímulo máximo."
+  }
 }
 },
 
@@ -350,7 +388,46 @@ resp: {
     sincronizando: "Synchronizing…",
     treinoSalvo: "Workout saved!",
     descansoSalvo: "Rest day registered!"
+  },
+series: {
+  T: {
+    titulo: "🔗 Triset",
+    texto: "Three exercises performed in sequence. Rest only after completing all."
+  },
+  B: {
+    titulo: "🔗 Biset",
+    texto: "Two exercises performed in sequence. Rest only at the end."
+  },
+  Q: {
+    titulo: "🔗 Quadriset",
+    texto: "Four exercises performed in sequence. Rest only after completing all."
+  },
+  C: {
+    titulo: "⏱️ Cluster",
+    texto: "Each set is divided into 4 mini-sets with 10-second pauses."
+  },
+  I: {
+    titulo: "🧊 Isometric",
+    texto: "Hold maximum contraction for 3 seconds on each repetition."
+  },
+  CC: {
+    titulo: "🐢 Controlled Tempo",
+    texto: "Slow and controlled eccentric phase."
+  },
+  D: {
+    titulo: "🔥 Dropset",
+    texto: "After failure, reduce load 3 consecutive times without rest."
+  },
+  RP: {
+    titulo: "⚡ Rest-Pause",
+    texto: "On the last set, after failure, reduce load by 50% and perform 20 reps."
+  },
+  AE: {
+    titulo: "👑 Advanced Elite",
+    texto: "Free execution, advanced technique and maximum stimulus."
   }
+}
+   
 },
 
 /* ============================================================
@@ -517,8 +594,47 @@ resp: {
     sincronizando: "Synchronisation…",
     treinoSalvo: "Entraînement enregistré !",
     descansoSalvo: "Repos enregistré !"
+  },
+  series: {
+  T: {
+    titulo: "🔗 Triset",
+    texto: "Trois exercices enchaînés. Repos uniquement à la fin."
+  },
+  B: {
+    titulo: "🔗 Biset",
+    texto: "Deux exercices enchaînés. Repos uniquement à la fin."
+  },
+  Q: {
+    titulo: "🔗 Quadriset",
+    texto: "Quatre exercices enchaînés. Repos uniquement à la fin."
+  },
+  C: {
+    titulo: "⏱️ Cluster",
+    texto: "Chaque série est divisée en 4 mini-séries avec 10 secondes de pause."
+  },
+  I: {
+    titulo: "🧊 Isométrie",
+    texto: "Maintenez la contraction maximale pendant 3 secondes à chaque répétition."
+  },
+  CC: {
+    titulo: "🐢 Cadence contrôlée",
+    texto: "Phase excentrique lente et contrôlée."
+  },
+  D: {
+    titulo: "🔥 Dropset",
+    texto: "Après l’échec, réduisez la charge 3 fois sans repos."
+  },
+  RP: {
+    titulo: "⚡ Rest-Pause",
+    texto: "À la dernière série, après l’échec, réduisez la charge de 50 % et effectuez 20 répétitions."
+  },
+  AE: {
+    titulo: "👑 Advanced Elite",
+    texto: "Exécution libre, technique avancée et stimulus maximal."
   }
 }
+ }
+
 
 };
 
