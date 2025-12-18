@@ -280,22 +280,18 @@ function renderBox(bloco) {
     FEMFLOW.warn("⚠️ renderBox recebeu bloco inválido:", bloco);
     return "";
   }
-   
-  const serie = ex.serieEspecial;
-const behavior = SERIE_BEHAVIOR[serie] || {};
-
-const hideRest =
-  behavior.descansoNoUltimo &&
-  ex._isUltimoDoCombo === false;
 
   const tipoDominante = bloco[0].tipo;
-  let boxNum = Number(bloco[0].box || 0); // Corrigido: Garantir que `boxNum` seja inicializado corretamente
+  const boxNum = Number(bloco[0].box || 0);
 
-  // 🔒 Segurança: box técnico nunca vira treino
+  // 🔒 segurança
   if (boxNum >= 900 && tipoDominante === "treino") {
     return null;
   }
 
+  /* ======================================================
+     TRATAMENTO DE BLOCOS ESPECIAIS (aquecimento / hiit / etc)
+  ====================================================== */
   let html = `<div class="carousel-item">`;
 
   /* ======================================================
@@ -393,14 +389,18 @@ const hideRest =
     return html;
   }
 
- /* ======================================================
+/* ======================================================
    TREINO (1 box com vários exercícios)
 ====================================================== */
 
-// dados base
-const boxNum      = bloco[0].box || 0;
+// código da série especial (T, B, Q, RP, etc)
 const codigoSerie = bloco[0].serieEspecial || null;
-const serieInfo   = getSerieEspecialInfo(codigoSerie);
+
+// comportamento da série (nível de box)
+const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
+
+// texto traduzido
+const serieInfo = getSerieEspecialInfo(codigoSerie);
 
 // classes visuais
 const serieAttr = codigoSerie
@@ -408,30 +408,44 @@ const serieAttr = codigoSerie
   : `class="carousel-item ff-box"`;
 
 // abre box
-html = `<div ${serieAttr}>`;
+let html = `<div ${serieAttr}>`;
 
-// 🔥 TÍTULO INTELIGENTE
+// título + explicação
 if (serieInfo) {
   html += `
-    <h2 class="ff-ex-titulo">
-      ${serieInfo.titulo}
-    </h2>
+    <h2 class="ff-ex-titulo">${serieInfo.titulo}</h2>
     <div class="ff-serie-box ff-serie-${codigoSerie}">
       <p>${serieInfo.texto}</p>
     </div>
   `;
 } else {
-  html += `
-    <h2 class="ff-ex-titulo">
-      Box ${boxNum}
-    </h2>
-  `;
+  html += `<h2 class="ff-ex-titulo">Box ${boxNum}</h2>`;
 }
+ 
 
-// Exercícios
-bloco.forEach(ex => {
+
+// total de exercícios do combo (triset, biset, quadriset)
+const totalCombo = behavior?.combinados || bloco.length;
+
+bloco.forEach((ex, index) => {
+
+  // informações de combo (base)
+  ex._comboIndex = index + 1;
+  ex._comboTotal = totalCombo;
+  ex._isUltimoDoCombo = index === totalCombo - 1;
+
+  // regra: descanso apenas no último
+  ex._hideRest =
+    behavior?.descansoNoUltimo === true &&
+    !ex._isUltimoDoCombo;
+
+  // flags futuras (cluster / RP / etc)
+  ex._isCluster   = behavior?.cluster === true;
+  ex._isRestPause = behavior?.restPause === true;
+
   html += renderExercicio(ex);
 });
+
 
 // Fecha box
 html += `</div>`;
@@ -447,17 +461,12 @@ function renderExercicio(ex) {
 
   return `
     <div class="ff-ex-item">
+
       <div class="ff-ex-top">
         <div class="ff-ex-nome">
-          <a href="${ex.link || "#"}" target="_blank">
-            ${ex.titulo}
-          </a>
+          <a href="${ex.link || "#"}" target="_blank">${ex.titulo}</a>
         </div>
-
-        <input class="ff-ex-peso"
-               type="number"
-               placeholder="kg"
-               data-ex="${ex.titulo}">
+        <input class="ff-ex-peso" type="number" placeholder="kg">
       </div>
 
       <div class="ff-info-line">
@@ -466,17 +475,16 @@ function renderExercicio(ex) {
         <span>⏱️ <b>${intervalo}s</b></span>
       </div>
 
-      <div class="ff-descanso-wrap">
-        <button class="ff-descanso-btn btnStartTimer">
-          ▶️ Iniciar descanso
-        </button>
-
-        <span class="ff-timer-count">${fmtTime(intervalo)}</span>
-
-        <div class="ff-timer-bar" data-timer="${intervalo}">
-          <div class="ff-timer-fill"></div>
+      ${
+        ex._hideRest ? "" : `
+        <div class="ff-descanso-wrap">
+          <button class="ff-descanso-btn btnStartTimer">▶️ Iniciar descanso</button>
+          <span class="ff-timer-count">${fmtTime(intervalo)}</span>
+          <div class="ff-timer-bar" data-timer="${intervalo}">
+            <div class="ff-timer-fill"></div>
+          </div>
         </div>
-      </div>
+      `}
     </div>
   `;
 }
