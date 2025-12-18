@@ -292,7 +292,7 @@ function renderBox(bloco) {
   /* ======================================================
      TRATAMENTO DE BLOCOS ESPECIAIS (aquecimento / hiit / etc)
   ====================================================== */
-  let html = `<div class="carousel-item">`;
+  let html = "";
 
   /* ======================================================
      AQUECIMENTO PREMIUM
