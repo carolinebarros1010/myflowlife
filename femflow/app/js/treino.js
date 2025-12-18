@@ -526,6 +526,26 @@ function renderExercicio(ex) {
       </div>
     `;
   }
+   
+if (ex._isRestPause && ex._isUltimoDoCombo) {
+  descansoHTML = `
+    <div class="ff-restpause-wrap">
+      <p class="ff-restpause-label">
+        ⚡ Rest-Pause — reduza a carga e execute novamente
+      </p>
+
+      <button class="ff-restpause-btn btnStartTimer">
+        ▶️ Iniciar pausa RP
+      </button>
+
+      <span class="ff-timer-count">00:${behavior.pausas}</span>
+
+      <div class="ff-timer-bar" data-timer="${behavior.pausas}">
+        <div class="ff-timer-fill"></div>
+      </div>
+    </div>
+  `;
+}
 
   // ⚠️ COMBO — descanso só no último
   else if (ex._hideRest) {
