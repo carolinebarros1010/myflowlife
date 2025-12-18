@@ -364,6 +364,60 @@ font-size: 0.9rem !important;
   transition: width 1s linear;
 }
 
+/* ===============================
+   CLUSTER — VISUAL
+================================ */
+
+.ff-cluster-wrap {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #eef4ff, #ffffff);
+  border-left: 5px solid #245fb3;
+}
+
+.ff-cluster-info {
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+  color: #245fb3;
+  font-weight: 600;
+}
+
+.ff-cluster-btn {
+  background: #245fb3;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ff-cluster-timer {
+  margin-top: 8px;
+}
+
+.ff-cluster-count {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #245fb3;
+}
+
+.ff-cluster-bar {
+  height: 6px;
+  background: #dde6f5;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.ff-cluster-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #245fb3, #6fa3ff);
+}
+
+
 /* ============================================================
    7) HIIT (novo engine)
 ============================================================ */
