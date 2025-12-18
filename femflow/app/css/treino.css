@@ -702,5 +702,6 @@ html, body {
 body.debug * {
   outline: 1px dashed red;
 }
+.hidden { display: none !important; }
 
 
