@@ -152,7 +152,6 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
 ============================================================ */
 FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
 
-  // 1️⃣ Descobre quais boxes possuem TREINO
   const boxesComTreino = new Set(
     brutos
       .filter(b => b.tipo === "treino")
@@ -163,8 +162,13 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
   return brutos
     .map(b => {
 
-      const label = String(b.box || "");
-      let boxNum = parseInt(label.replace(/\D/g, ""));
+      const rawLabel = String(b.box || "");
+
+      // 🔢 número do box (1, 2, 3, 4…)
+      let boxNum = parseInt(rawLabel.replace(/\D/g, ""));
+
+      // 🧬 série especial (T, D, AE, C…)
+      const serieCodigo = FEMFLOW.engineTreino.detectarSerieEspecial(rawLabel);
 
       // Aquecimento
       if (b.tipo === "aquecimento") boxNum = -100;
@@ -172,13 +176,9 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
       // Treino sem box explícito
       else if (b.tipo === "treino" && isNaN(boxNum)) boxNum = 1;
 
-      // 🔥 HIIT — regra FemFlow
+      // 🔥 HIIT
       else if (b.tipo === "hiit") {
-        // acompanha treino existente
-        if (boxesComTreino.has(boxNum)) {
-          // mantém boxNum
-        } else {
-          // HIIT solto → final antes do resfriamento
+        if (!boxesComTreino.has(boxNum)) {
           boxNum = 500;
         }
       }
@@ -186,23 +186,18 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
       else if (b.tipo === "cardio_final") boxNum = 900;
       else if (b.tipo === "resfriamento") boxNum = 999;
 
-    // extrai número e código da série
-const rawLabel = String(b.box || "");
-const boxNum = parseInt(rawLabel.replace(/\D/g, ""));
-const serieCodigo = FEMFLOW.engineTreino.detectarSerieEspecial(rawLabel);
+      return {
+        ...b,
+        boxNum,
+        ordemNum: Number(b.ordem) || 0,
 
-return {
-  ...b,
-  boxNum,
-  ordemNum: Number(b.ordem) || 0,
-
-  // 🔥 ENTREGA LIMPA PARA O FRONT
-  serieEspecial: serieCodigo // "D", "AE", "C", etc
-};
-
+        // ✅ SÉRIE LIMPA PARA O FRONT
+        serieEspecial: serieCodigo
+      };
     })
-    .sort((a,b)=>a.boxNum-b.boxNum);
+    .sort((a, b) => a.boxNum - b.boxNum);
 };
+
 
 
 FEMFLOW.engineTreino.intercalarHIIT = blocos => {
