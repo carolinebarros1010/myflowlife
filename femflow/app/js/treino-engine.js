@@ -256,20 +256,26 @@ if (b.tipo === "treino" && Number(b.boxNum) >= 900) {
       continue;
     }
 
-    /* =========================
-       HIIT
-    ========================= */
-    if (b.tipo === "hiit") {
-      out.push({
-        tipo: "hiitPremium",
-        box: Number(b.boxNum || 500),
-        titulo: b.titulo || "🔥 HIIT",
-        forte: Number(b.forte) || 40,
-        leve: Number(b.leve) || 20,
-        ciclos: Number(b.ciclos) || 6
-      });
-      continue;
-    }
+   /* =========================
+   HIIT
+========================= */
+if (b.tipo === "hiit") {
+  const boxBase = Number(b.boxNum || 500);
+
+  out.push({
+    tipo: "hiitPremium",
+    // 🔥 chave de agrupamento visual (novo box)
+    boxKey: `${boxBase}_hiit`,
+    // mantém o número para ordenação/cálculo
+    box: boxBase,
+
+    titulo: b.titulo_pt || b.titulo || "🔥 HIIT",
+    forte: Number(b.forte) || 40,
+    leve: Number(b.leve) || 20,
+    ciclos: Number(b.ciclos) || 6
+  });
+  continue;
+}
 
     /* =========================
        CARDIO FINAL
