@@ -464,9 +464,24 @@ function renderExercicio(ex) {
 
   let descansoHTML = "";
 
-  // ❌ CLUSTER — nunca tem descanso comum
+  // 🔥 CLUSTER — timer próprio
   if (ex._isCluster) {
-    descansoHTML = "";
+    descansoHTML = `
+      <div class="ff-cluster-wrap" data-cluster="true">
+
+        <button class="ff-cluster-btn" data-cluster-start>
+          ▶️ Iniciar bloco
+        </button>
+
+        <div class="ff-cluster-timer hidden">
+          <span class="ff-cluster-count">10</span>s
+          <div class="ff-cluster-bar">
+            <div class="ff-cluster-fill"></div>
+          </div>
+        </div>
+
+      </div>
+    `;
   }
 
   // ⚠️ COMBO — descanso só no último
