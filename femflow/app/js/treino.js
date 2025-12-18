@@ -516,6 +516,21 @@ console.log("🟣 CLUSTER DOM:", document.querySelectorAll("[data-cluster='true'
 function renderExercicio(ex) {
 
   const intervalo = Number(ex.intervalo) || 0;
+const totalSeries = Number(ex.series) || 1;
+
+const serieProgressHTML = `
+  <div class="ff-serie-progress"
+       data-serie-atual="1"
+       data-serie-total="${totalSeries}">
+    Série <b>1</b> / ${totalSeries}
+  </div>
+`;
+
+const serieBtnHTML = `
+  <button class="ff-serie-next-btn" type="button">
+    ✔️ Concluir série
+  </button>
+`;
 
   /* ===========================
      BLOCO DE DESCANSO (CONDICIONAL)
@@ -639,6 +654,10 @@ if (ex._isometriaTempo) {
         <span>🔁 <b>${ex.reps}</b></span>
         <span>⏱️ <b>${intervalo}s</b></span>
       </div>
+      
+     
+      ${serieProgressHTML}
+      ${serieBtnHTML}
       
  <!-- 🔥 AQUI -->
     ${observacoesHTML}
