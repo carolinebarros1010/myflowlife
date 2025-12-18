@@ -295,7 +295,7 @@ console.log("🧪 BOX KEYS ORDENADAS:", boxKeys);
 initTimers();
 initHIIT();
 initClusterTimers(); // 🔥 CLUSTER TIMER REAL
-initRP();  
+initRestPause(); // ✅
 initSeriesProgress();
 initPeso();
 }
@@ -561,23 +561,23 @@ const serieBtnHTML = `
    
 if (ex._isRestPause && ex._isUltimoDoCombo) {
   descansoHTML = `
-    <div class="ff-restpause-wrap" data-rp="true">
+    <div class="ff-restpause-wrap" data-rp>
 
       <p class="ff-restpause-label">
         ⚡ Rest-Pause — reduza a carga e execute novamente
       </p>
 
-      <button class="ff-restpause-btn" data-rp-start>
+      <button class="ff-restpause-btn">
         ▶️ Iniciar pausa RP
       </button>
 
-      <div class="ff-rp-timer hidden">
-        <span class="ff-rp-count">${ex._rpPausa}</span>s
-        <div class="ff-rp-bar">
-          <div class="ff-rp-fill"></div>
-        </div>
-      </div>
+      <span class="ff-restpause-status">
+        Pausa curta • execute novamente
+      </span>
 
+      <div class="ff-rp-bar">
+        <div class="ff-rp-fill"></div>
+      </div>
     </div>
   `;
 }
@@ -784,55 +784,44 @@ function initClusterTimers() {
 
   });
 }
-  function initRP() {
-  const wraps = document.querySelectorAll("[data-rp='true']");
-  console.log("⚡ initRP():", wraps.length);
+  function initRestPause() {
 
-  wraps.forEach((wrap, idx) => {
-    const btn   = wrap.querySelector("[data-rp-start]");
-    const box   = wrap.querySelector(".ff-rp-timer");
-    const count = wrap.querySelector(".ff-rp-count");
-    const fill  = wrap.querySelector(".ff-rp-fill");
+  document.querySelectorAll("[data-rp]").forEach(rp => {
 
-    if (!btn || !box || !count || !fill) {
-      console.warn("⚠️ RP incompleto:", idx);
-      return;
-    }
+    const btn = rp.querySelector(".ff-restpause-btn");
+    const fill = rp.querySelector(".ff-rp-fill");
 
-    if (btn.dataset.bound === "1") return;
-    btn.dataset.bound = "1";
+    if (!btn || !fill) return;
 
-    let tempo = Number(count.textContent) || 15;
     let rodando = false;
-    let intv;
+    let intv = null;
+    const pausa = 20; // pausa padrão RP (curta)
 
     btn.addEventListener("click", () => {
       if (rodando) return;
 
       rodando = true;
-      btn.textContent = "⏸️ RP em andamento";
-      box.classList.remove("hidden");
-
-      let restante = tempo;
-      count.textContent = restante;
+      btn.textContent = "⏸️ Pausando…";
       fill.style.width = "100%";
+
+      let restante = pausa;
 
       clearInterval(intv);
       intv = setInterval(() => {
         restante--;
-        count.textContent = restante;
-        fill.style.width = `${(restante / tempo) * 100}%`;
+        fill.style.width = `${(restante / pausa) * 100}%`;
 
         if (restante <= 0) {
           clearInterval(intv);
           rodando = false;
-          box.classList.add("hidden");
-          btn.textContent = "▶️ Executar RP";
+          btn.textContent = "▶️ Repetir Rest-Pause";
         }
       }, 1000);
     });
+
   });
 }
+
 function initSeriesProgress() {
   document.querySelectorAll(".ff-ex-item").forEach(exItem => {
 
