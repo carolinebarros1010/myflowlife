@@ -268,11 +268,11 @@ console.log("🧪 BOX KEYS ORDENADAS:", boxKeys);
     if (html) track.insertAdjacentHTML("beforeend", html);
   });
 
-  initTimers();
-  initHIIT();
-  initPeso();
-}
-   
+initTimers();
+initHIIT();
+initClusterTimers(); // 🔥 CLUSTER TIMER REAL
+initPeso();
+
  /* ============================================================
      3) RENDER BOX
   ============================================================ */
@@ -575,43 +575,58 @@ function renderExercicio(ex) {
   }
    
 function initClusterTimers() {
-  document.querySelectorAll("[data-cluster='true']").forEach(wrap => {
+  const nodes = document.querySelectorAll("[data-cluster='true']");
+  console.log("🟣 initClusterTimers() nodes:", nodes.length);
 
-    const btn = wrap.querySelector("[data-cluster-start]");
+  nodes.forEach((wrap, idx) => {
+    const btn      = wrap.querySelector("[data-cluster-start]");
     const timerBox = wrap.querySelector(".ff-cluster-timer");
-    const countEl = wrap.querySelector(".ff-cluster-count");
-    const fill = wrap.querySelector(".ff-cluster-fill");
+    const countEl  = wrap.querySelector(".ff-cluster-count");
+    const fill     = wrap.querySelector(".ff-cluster-fill");
 
-    if (!btn || !countEl || !fill) return;
+    if (!btn || !timerBox || !countEl || !fill) {
+      console.warn("⚠️ Cluster wrap incompleto:", { idx, btn: !!btn, timerBox: !!timerBox, countEl: !!countEl, fill: !!fill });
+      return;
+    }
+
+    // evita duplicar handler se re-render
+    if (btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
 
     let tempo = 10;
     let rodando = false;
-    let intv;
+    let intv = null;
 
-    btn.onclick = () => {
+    btn.addEventListener("click", () => {
+      console.log("🟣 click cluster:", idx);
+
       if (rodando) return;
 
       rodando = true;
-      btn.textContent = "⏸️ Pausando…";
+      btn.textContent = "⏸️ Rodando…";
       timerBox.classList.remove("hidden");
+
       tempo = 10;
-
-      fill.style.width = "100%";
       countEl.textContent = tempo;
+      fill.style.width = "100%";
 
+      clearInterval(intv);
       intv = setInterval(() => {
         tempo--;
+        if (tempo < 0) tempo = 0;
+
         countEl.textContent = tempo;
         fill.style.width = `${(tempo / 10) * 100}%`;
 
         if (tempo <= 0) {
           clearInterval(intv);
+          intv = null;
           rodando = false;
           btn.textContent = "▶️ Próximo bloco";
           timerBox.classList.add("hidden");
         }
       }, 1000);
-    };
+    }, { passive: true });
   });
 }
 
