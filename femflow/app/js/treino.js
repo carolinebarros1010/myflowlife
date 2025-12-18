@@ -195,7 +195,7 @@ localStorage.setItem("femflow_diaCiclo", diaCiclo);
 
   const lang = FEMFLOW.lang || "pt";
 
-  const series = FEMFLOW.langs?.[lang]?.treino?.series;
+  const series = FEMFLOW.langs?.[lang]?.series;
   if (!series) return null;
 
   return series[codigo] || null;
