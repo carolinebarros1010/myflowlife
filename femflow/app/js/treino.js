@@ -295,6 +295,7 @@ console.log("🧪 BOX KEYS ORDENADAS:", boxKeys);
 initTimers();
 initHIIT();
 initClusterTimers(); // 🔥 CLUSTER TIMER REAL
+initRP();  
 initPeso();
 }
  /* ============================================================
@@ -737,6 +738,53 @@ function initClusterTimers() {
 
   });
 }
+   function initRP() {
+  const nodes = document.querySelectorAll("[data-rp='true']");
+  console.log("🔴 initRP() nodes:", nodes.length);
+
+  nodes.forEach((wrap, idx) => {
+    const btn      = wrap.querySelector("[data-rp-start]");
+    const timerBox = wrap.querySelector(".ff-rp-timer");
+    const countEl  = wrap.querySelector(".ff-rp-count");
+    const fill     = wrap.querySelector(".ff-rp-fill");
+
+    if (!btn || !timerBox || !countEl || !fill) return;
+
+    if (btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
+
+    let tempo = 15;
+    let rodando = false;
+    let intv = null;
+
+    btn.addEventListener("click", () => {
+      if (rodando) return;
+
+      rodando = true;
+      btn.textContent = "⏸️ Pausando…";
+      timerBox.classList.remove("hidden");
+
+      tempo = 15;
+      countEl.textContent = tempo;
+      fill.style.width = "100%";
+
+      clearInterval(intv);
+      intv = setInterval(() => {
+        tempo--;
+        countEl.textContent = tempo;
+        fill.style.width = `${(tempo / 15) * 100}%`;
+
+        if (tempo <= 0) {
+          clearInterval(intv);
+          rodando = false;
+          timerBox.classList.add("hidden");
+          btn.textContent = "🔥 Continue com carga reduzida";
+        }
+      }, 1000);
+    }, { passive: true });
+  });
+}
+
 
   /* ============================================================
      4. HIIT — versão compatível com engine v4.0
