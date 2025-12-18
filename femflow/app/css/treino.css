@@ -199,6 +199,119 @@ body {
   font-weight: 700;
   margin-left: 8px;
 }
+/* ============================================================
+   SÉRIES ESPECIAIS — BASE VISUAL FEMFLOW
+============================================================ */
+
+.ff-box.ff-serie-especial {
+  border-left: 6px solid transparent;
+  background: #fff;
+}
+
+.ff-serie-box {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  background: #fafafa;
+
+  /* 🔒 leitura garantida */
+  color: #2b2b2b;
+
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.ff-serie-box strong {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+/* ============================================================
+   SÉRIES ESPECIAIS — IDENTIDADE VISUAL POR TIPO
+============================================================ */
+
+/* 🔴 T — TRISET */
+.ff-serie-T {
+  border-left-color: #b23a3a;
+  background: linear-gradient(90deg, #fff5f5, #ffffff);
+}
+.ff-serie-T strong { color: #b23a3a; }
+
+/* 🟠 B — BISET */
+.ff-serie-B {
+  border-left-color: #c56a1a;
+  background: linear-gradient(90deg, #fff7ef, #ffffff);
+}
+.ff-serie-B strong { color: #c56a1a; }
+
+/* 🟣 Q — QUADRISET */
+.ff-serie-Q {
+  border-left-color: #7b3fbf;
+  background: linear-gradient(90deg, #f6f0ff, #ffffff);
+}
+.ff-serie-Q strong { color: #7b3fbf; }
+
+/* 🔵 C — CLUSTER */
+.ff-serie-C {
+  border-left-color: #245fb3;
+  background: linear-gradient(90deg, #eef4ff, #ffffff);
+}
+.ff-serie-C strong { color: #245fb3; }
+
+/* 🟢 I — ISOMETRIA */
+.ff-serie-I {
+  border-left-color: #1f8f4a;
+  background: linear-gradient(90deg, #eefaf3, #ffffff);
+}
+.ff-serie-I strong { color: #1f8f4a; }
+
+/* 🟤 CC — CADÊNCIA CONTROLADA */
+.ff-serie-CC {
+  border-left-color: #6d4c41;
+  background: linear-gradient(90deg, #f6f1ef, #ffffff);
+}
+.ff-serie-CC strong { color: #6d4c41; }
+
+/* ⚫ D — DROPSET */
+.ff-serie-D {
+  border-left-color: #333333;
+  background: linear-gradient(90deg, #f1f1f1, #ffffff);
+}
+.ff-serie-D strong { color: #333333; }
+
+/* 🔥 RP — REST PAUSE */
+.ff-serie-RP {
+  border-left-color: #b93a3a;
+  background: linear-gradient(90deg, #fff0f0, #ffffff);
+}
+.ff-serie-RP strong { color: #b93a3a; }
+
+/* 🟡 AE — ATIVAÇÃO ESPECÍFICA */
+.ff-serie-AE {
+  border-left-color: #b28b00;
+  background: linear-gradient(90deg, #fff9e5, #ffffff);
+}
+.ff-serie-AE strong { color: #b28b00; }
+/* ============================================================
+   SÉRIES ESPECIAIS — ANIMAÇÃO SUTIL
+============================================================ */
+
+.ff-box.ff-serie-especial {
+  animation: serieFadeIn 0.25s ease-out both;
+}
+
+@keyframes serieFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 /* info linha */
 .ff-info-line {
