@@ -229,6 +229,17 @@ localStorage.setItem("femflow_diaCiclo", diaCiclo);
    
 function renderTreino(lista) {
 
+   console.log("🎯 RENDER TREINO LISTA:", lista);
+lista.forEach(item => {
+  console.log("🎯 ITEM:", {
+    tipo: item.tipo,
+    box: item.box,
+    boxKey: item.boxKey,
+    serieEspecial: item.serieEspecial
+  });
+});
+
+
   if (!lista || !lista.length) {
     track.innerHTML = `
       <div class="carousel-item">
@@ -252,6 +263,14 @@ function renderTreino(lista) {
 console.log("🧪 GRUPOS RAW:", grupos);
 console.log("🧪 BOX KEYS RAW:", Object.keys(grupos));
    
+   Object.entries(grupos).forEach(([key, arr]) => {
+  console.log(`🧩 GRUPO ${key}:`, arr.map(i => ({
+    tipo: i.tipo,
+    box: i.box,
+    serieEspecial: i.serieEspecial
+  })));
+});
+
   /* ordenar box: -100 → 0 → 1 → 2 → … → 500 → 900 → 999 */
   const boxKeys = Object.keys(grupos).sort((a, b) => {
   const na = parseInt(a);
@@ -294,6 +313,14 @@ initPeso();
   ============================================================ */
    
 function renderBox(bloco) {
+
+   console.log("🧱 RENDER BOX:", {
+  tipoDominante: bloco[0].tipo,
+  box: bloco[0].box,
+  serieEspecial: bloco[0].serieEspecial,
+  bloco
+});
+
 
    
   if (!Array.isArray(bloco) || bloco.length === 0) {
@@ -437,6 +464,14 @@ const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
   const totalCombo = behavior?.combinados || bloco.length;
 
   bloco.forEach((ex, index) => {
+
+     console.log("🧪 EX:", {
+  titulo: ex.titulo,
+  serieEspecial: ex._serieCodigo,
+  isCluster: ex._isCluster,
+  behavior
+});
+
     ex._comboIndex = index + 1;
     ex._comboTotal = totalCombo;
     ex._isUltimoDoCombo = index === totalCombo - 1;
@@ -462,6 +497,7 @@ console.log("🧩 SERIE PARSED:", parseSerieEspecial(bloco[0].serieEspecial));
 
 }
 
+console.log("🟣 CLUSTER DOM:", document.querySelectorAll("[data-cluster='true']").length);
 
 /* ============================================================
    BLOCO EXERCÍCIO INDIVIDUAL
