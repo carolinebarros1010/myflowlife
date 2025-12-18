@@ -272,9 +272,11 @@ console.log("🧪 BOX KEYS ORDENADAS:", boxKeys);
   initHIIT();
   initPeso();
 }
-/* ============================================================
-   RENDERIZAR 1 BOX COMPLETO
-============================================================ */
+   
+ /* ============================================================
+     3) RENDER BOX
+  ============================================================ */
+   
 function renderBox(bloco) {
   if (!Array.isArray(bloco) || bloco.length === 0) {
     FEMFLOW.warn("⚠️ renderBox recebeu bloco inválido:", bloco);
@@ -284,58 +286,51 @@ function renderBox(bloco) {
   const tipoDominante = bloco[0].tipo;
   const boxNum = Number(bloco[0].box || 0);
 
-  // 🔒 segurança
-  if (boxNum >= 900 && tipoDominante === "treino") {
-    return null;
-  }
-
-  /* ======================================================
-     TRATAMENTO DE BLOCOS ESPECIAIS (aquecimento / hiit / etc)
-  ====================================================== */
-  let html = "";
+  // 🔒 segurança: box técnico nunca vira treino
+  if (boxNum >= 900 && tipoDominante === "treino") return "";
 
   /* ======================================================
      AQUECIMENTO PREMIUM
   ====================================================== */
   if (tipoDominante === "aquecimentoPremium") {
-    html += `
-      <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
-      <ul class="ff-passos">
-        ${bloco[0].passos.map(p => `<li>${p.nome}</li>`).join("")}
-      </ul>
-      <p class="ff-sugestao-resp">
-        💨 Sugestão: prepare seu corpo com uma respiração consciente antes de começar.
-      </p>
-      <button class="ff-btn-resp-sugerida"
-              type="button"
-              onclick="location.href='respiracao.html?ret=treino'">
-        🌬️ Abrir protocolos de respiração
-      </button>
+    return `
+      <div class="carousel-item ff-box">
+        <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
+        <ul class="ff-passos">
+          ${(bloco[0].passos || []).map(p => `<li>${p.nome}</li>`).join("")}
+        </ul>
+        <p class="ff-sugestao-resp">
+          💨 Sugestão: prepare seu corpo com uma respiração consciente antes de começar.
+        </p>
+        <button class="ff-btn-resp-sugerida"
+                type="button"
+                onclick="location.href='respiracao.html?ret=treino'">
+          🌬️ Abrir protocolos de respiração
+        </button>
+      </div>
     `;
-    html += `</div>`;
-    return html;
   }
 
   /* ======================================================
      RESFRIAMENTO PREMIUM
   ====================================================== */
   if (tipoDominante === "resfriamentoPremium") {
-    html += `
-      <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
-      <ul class="ff-passos">
-        ${bloco[0].passos.map(p => `<li>${p.nome}</li>`).join("")}
-      </ul>
-      <p class="ff-sugestao-resp">
-        🌬️ Sugestão: finalize seu treino desacelerando com respiração suave.
-      </p>
-      <button class="ff-btn-resp-sugerida"
-              type="button"
-              onclick="location.href='respiracao.html?ret=treino'">
-        💗 Fazer respiração de fechamento
-      </button>
+    return `
+      <div class="carousel-item ff-box">
+        <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
+        <ul class="ff-passos">
+          ${(bloco[0].passos || []).map(p => `<li>${p.nome}</li>`).join("")}
+        </ul>
+        <p class="ff-sugestao-resp">
+          🌬️ Sugestão: finalize seu treino desacelerando com respiração suave.
+        </p>
+        <button class="ff-btn-resp-sugerida"
+                type="button"
+                onclick="location.href='respiracao.html?ret=treino'">
+          💗 Fazer respiração de fechamento
+        </button>
+      </div>
     `;
-    html += `</div>`;
-    return html;
   }
 
   /* ======================================================
@@ -343,20 +338,20 @@ function renderBox(bloco) {
   ====================================================== */
   if (tipoDominante === "cardio_final") {
     const c = bloco[0];
-    html += `
-      <h2 class="ff-ex-titulo">${c.titulo}</h2>
+    return `
+      <div class="carousel-item ff-box">
+        <h2 class="ff-ex-titulo">${c.titulo}</h2>
 
-      <div class="ff-descanso-wrap">
-        <button class="ff-descanso-btn btnStartTimer">▶️ Iniciar cardio</button>
-        <span class="ff-timer-count">${fmtTime(c.duracao)}</span>
+        <div class="ff-descanso-wrap">
+          <button class="ff-descanso-btn btnStartTimer">▶️ Iniciar cardio</button>
+          <span class="ff-timer-count">${fmtTime(Number(c.duracao) || 0)}</span>
 
-        <div class="ff-timer-bar" data-timer="${c.duracao}">
-          <div class="ff-timer-fill"></div>
+          <div class="ff-timer-bar" data-timer="${Number(c.duracao) || 0}">
+            <div class="ff-timer-fill"></div>
+          </div>
         </div>
       </div>
     `;
-    html += `</div>`;
-    return html;
   }
 
   /* ======================================================
@@ -364,92 +359,74 @@ function renderBox(bloco) {
   ====================================================== */
   if (tipoDominante === "hiitPremium") {
     const h = bloco[0];
+    return `
+      <div class="carousel-item ff-box">
+        <h2 class="ff-ex-titulo">${h.titulo}</h2>
 
-    html += `
-      <h2 class="ff-ex-titulo">${h.titulo}</h2>
+        <p class="ff-sugestao-hiit">
+          🔥 <b>Escolha a sua forma de HIIT:</b><br>
+          • <b>Na academia:</b> esteira, bike, escada, remo ou air Bike<br>
+          • <b>Em casa:</b> polichinelo, corrida parada, burpee, corda, salto no lugar
+        </p>
 
-      <p class="ff-sugestao-hiit">
-        🔥 <b>Escolha a sua forma de HIIT:</b><br>
-        • <b>Na academia:</b> esteira, bike, escada, remo ou air Bike<br>
-        • <b>Em casa:</b> polichinelo, corrida parada, burpee, corda, salto no lugar
-      </p>
-
-      <div class="hiit-bubble">
-        <div class="hiit-circle"
-             data-estimulo="${h.forte}"
-             data-descanso="${h.leve}"
-             data-ciclos="${h.ciclos}">
-             ▶
+        <div class="hiit-bubble">
+          <div class="hiit-circle"
+               data-estimulo="${Number(h.forte) || 40}"
+               data-descanso="${Number(h.leve) || 20}"
+               data-ciclos="${Number(h.ciclos) || 6}">
+               ▶
+          </div>
+          <div class="hiit-phase">Toque para iniciar</div>
         </div>
-        <div class="hiit-phase">Toque para iniciar</div>
       </div>
     `;
-
-    html += `</div>`;
-    return html;
   }
 
-/* ======================================================
-   TREINO (1 box com vários exercícios)
-====================================================== */
+  /* ======================================================
+     TREINO (box com exercícios + série especial)
+  ====================================================== */
+  const codigoSerie = bloco[0].serieEspecial || null;
+  const behavior   = SERIE_BEHAVIOR[codigoSerie] || null;
+  const serieInfo  = getSerieEspecialInfo(codigoSerie);
 
-// código da série especial (T, B, Q, RP, etc)
-const codigoSerie = bloco[0].serieEspecial || null;
+  const serieAttr = codigoSerie
+    ? `data-serie="${codigoSerie}" class="carousel-item ff-box ff-serie-especial ff-serie-${codigoSerie}"`
+    : `class="carousel-item ff-box"`;
 
-// comportamento da série (nível de box)
-const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
+  let htmlBox = `<div ${serieAttr}>`;
 
-// texto traduzido
-const serieInfo = getSerieEspecialInfo(codigoSerie);
+  if (serieInfo) {
+    htmlBox += `
+      <h2 class="ff-ex-titulo">${serieInfo.titulo}</h2>
+      <div class="ff-serie-box ff-serie-${codigoSerie}">
+        <p>${serieInfo.texto}</p>
+      </div>
+    `;
+  } else {
+    htmlBox += `<h2 class="ff-ex-titulo">Box ${boxNum}</h2>`;
+  }
 
-// classes visuais
-const serieAttr = codigoSerie
-  ? `data-serie="${codigoSerie}" class="carousel-item ff-box ff-serie-${codigoSerie}"`
-  : `class="carousel-item ff-box"`;
+  const totalCombo = behavior?.combinados || bloco.length;
 
-html = `<div ${serieAttr}>`;
+  bloco.forEach((ex, index) => {
+    ex._comboIndex = index + 1;
+    ex._comboTotal = totalCombo;
+    ex._isUltimoDoCombo = index === totalCombo - 1;
 
-// título + explicação
-if (serieInfo) {
-  html += `
-    <h2 class="ff-ex-titulo">${serieInfo.titulo}</h2>
-    <div class="ff-serie-box ff-serie-${codigoSerie}">
-      <p>${serieInfo.texto}</p>
-    </div>
-  `;
-} else {
-  html += `<h2 class="ff-ex-titulo">Box ${boxNum}</h2>`;
+    ex._hideRest =
+      behavior?.descansoNoUltimo === true &&
+      !ex._isUltimoDoCombo;
+
+    ex._isCluster   = behavior?.cluster === true;
+    ex._isRestPause = behavior?.restPause === true;
+
+    htmlBox += renderExercicio(ex);
+  });
+
+  htmlBox += `</div>`;
+  return htmlBox;
 }
- 
 
-
-// total de exercícios do combo (triset, biset, quadriset)
-const totalCombo = behavior?.combinados || bloco.length;
-
-bloco.forEach((ex, index) => {
-
-  // informações de combo (base)
-  ex._comboIndex = index + 1;
-  ex._comboTotal = totalCombo;
-  ex._isUltimoDoCombo = index === totalCombo - 1;
-
-  // regra: descanso apenas no último
-  ex._hideRest =
-    behavior?.descansoNoUltimo === true &&
-    !ex._isUltimoDoCombo;
-
-  // flags futuras (cluster / RP / etc)
-  ex._isCluster   = behavior?.cluster === true;
-  ex._isRestPause = behavior?.restPause === true;
-
-  html += renderExercicio(ex);
-});
-
-
-// Fecha box
-html += `</div>`;
-return html;
-}
 
 /* ============================================================
    BLOCO EXERCÍCIO INDIVIDUAL
@@ -659,12 +636,16 @@ function initClusterTimers() {
       const phase = card?.querySelector(".hiit-phase");
 
       circle.textContent = "▶";
-      phase.textContent = "Toque para iniciar";
+      if (!phase) return;
+         phase.textContent = "Toque para iniciar";
 
-      function atualizar() {
-        if (modo === "forte") phase.textContent = `Força (${ciclo}/${ciclosMax})`;
-        else phase.textContent = `Recuperar (${ciclo}/${ciclosMax})`;
-      }
+
+     function atualizar() {
+  if (!phase) return;
+  if (modo === "forte") phase.textContent = `Força (${ciclo}/${ciclosMax})`;
+  else phase.textContent = `Recuperar (${ciclo}/${ciclosMax})`;
+}
+
 
       function iniciar() {
         rodando = true;
