@@ -470,18 +470,16 @@ FEMFLOW._acaoMenu = function (op) {
       break;
 
     case "ciclo":
-  // 🔥 mudança fisiológica
+  
  // dispatch
 FEMFLOW.dispatch("stateChanged", {
-    type: "ciclo",
-    impact: "fisiologico"
-  });
+  type: "ciclo",
+  impact: "fisiologico",
+  source: location.pathname.includes("home") ? "home" : "flowcenter"
+});
+;
 
-  // ✅ sempre volta para flowcenter depois de configurar
-  FEMFLOW.router("ciclo?ret=flowcenter");
-  break;
-
-
+ 
       FEMFLOW.router(`ciclo?ret=${location.pathname.split("/").pop()}`);
       break;
 
@@ -539,9 +537,10 @@ FEMFLOW.initNivelHandler = function () {
   const btnConfirmar = document.getElementById("btnConfirmarNivel");
   const btnFechar = document.getElementById("fecharNivel");
 
-   btnConfirmar.dataset.bound = "true";
+  if (!modal || !btnConfirmar || !btnFechar) return; // 🔧 proteção
 
-  // seleção visual
+  btnConfirmar.dataset.bound = "true";
+
   modal.querySelectorAll(".nivel-btn").forEach(btn => {
     btn.onclick = () => {
       modal.querySelectorAll(".nivel-btn").forEach(b => b.classList.remove("active"));
@@ -551,39 +550,27 @@ FEMFLOW.initNivelHandler = function () {
 
   btnConfirmar.onclick = async () => {
     const nivel = modal.querySelector(".nivel-btn.active")?.dataset.nivel;
+    if (!nivel) return FEMFLOW.toast("Selecione um nível");
 
-    if (!nivel) {
-      FEMFLOW.toast("Selecione um nível");
-      return;
-    }
-
-    // salva local
     localStorage.setItem("femflow_nivel", nivel);
 
-    // salva backend
     await FEMFLOW.post({
       action: "setnivel",
       id: localStorage.getItem("femflow_id"),
       nivel
     });
 
- // dispatch
-FEMFLOW.dispatch("stateChanged", {
-  type: "nivel",
-  impact: "estrutural"
-});
+    FEMFLOW.dispatch("stateChanged", {
+      type: "nivel",
+      impact: "estrutural",
+      source: location.pathname.includes("home") ? "home" : "flowcenter"
+    });
 
-modal.classList.add("oculto");
-
-// ✅ garante novo treino “de verdade”
-FEMFLOW.router("flowcenter");
-
+    modal.classList.add("oculto");
   };
 
   btnFechar.onclick = () => modal.classList.add("oculto");
 };
-
-
 
 /* ===========================================================
    8. CARREGAR PERFIL (VALIDAR)
@@ -641,25 +628,26 @@ FEMFLOW.sincronizarECdisparar = async function () {
    (FlowCenter valida/sincroniza no começo)
 =========================================================== */
 document.addEventListener("femflow:stateChanged", e => {
-  const { impact = "none", source = "flowcenter" } = e.detail || {};
+  const {
+    impact = "none",
+    source = "flowcenter"
+  } = e.detail || {};
 
   if (impact === "none") return;
 
-  // 🔥 regra de ouro
   if (impact === "fisiologico") {
-    if (source === "home") {
-      FEMFLOW.router("home");
-    } else {
-      FEMFLOW.router("flowcenter");
-    }
+    FEMFLOW.toast("Ajustes aplicados 🌸");
+    FEMFLOW.router(source);
     return;
   }
 
   if (impact === "estrutural") {
     FEMFLOW.resetProgramaAtual?.();
-    FEMFLOW.router("flowcenter");
+    FEMFLOW.toast("Estrutura atualizada 🌱");
+    FEMFLOW.router(source);
   }
 });
+
 
 
 /* ===========================================================
