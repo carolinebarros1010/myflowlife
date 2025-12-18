@@ -211,6 +211,7 @@ localStorage.setItem("femflow_diaCiclo", diaCiclo);
     const s = seg % 60;
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }
+   
 function renderTreino(lista) {
 
   if (!lista || !lista.length) {
@@ -272,7 +273,7 @@ initTimers();
 initHIIT();
 initClusterTimers(); // 🔥 CLUSTER TIMER REAL
 initPeso();
-
+}
  /* ============================================================
      3) RENDER BOX
   ============================================================ */
