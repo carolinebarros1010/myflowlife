@@ -397,37 +397,34 @@ const hideRest =
    TREINO (1 box com vários exercícios)
 ====================================================== */
 
-// Garantir boxNum
-boxNum = bloco[0].box || 0;
-
-// Código da série especial (ex: T, B, RP…)
+// dados base
+const boxNum      = bloco[0].box || 0;
 const codigoSerie = bloco[0].serieEspecial || null;
+const serieInfo   = getSerieEspecialInfo(codigoSerie);
 
-// Busca info traduzida
-const serieInfo = getSerieEspecialInfo(codigoSerie);
-
-// Classes + atributos visuais
+// classes visuais
 const serieAttr = codigoSerie
-  ? `data-serie="${codigoSerie}" class="carousel-item ff-box ff-serie-especial"`
+  ? `data-serie="${codigoSerie}" class="carousel-item ff-box ff-serie-${codigoSerie}"`
   : `class="carousel-item ff-box"`;
 
-// Abre box
+// abre box
 html = `<div ${serieAttr}>`;
 
-// Título
-html += `
-  <h2 class="ff-ex-titulo">
-    Box ${boxNum}${codigoSerie ? ` — ${codigoSerie}` : ""}
-  </h2>
-`;
-
-// 🔥 BLOCO EXPLICATIVO DA SÉRIE ESPECIAL
+// 🔥 TÍTULO INTELIGENTE
 if (serieInfo) {
   html += `
+    <h2 class="ff-ex-titulo">
+      ${serieInfo.titulo}
+    </h2>
     <div class="ff-serie-box ff-serie-${codigoSerie}">
-      <strong>${serieInfo.titulo}</strong>
       <p>${serieInfo.texto}</p>
     </div>
+  `;
+} else {
+  html += `
+    <h2 class="ff-ex-titulo">
+      Box ${boxNum}
+    </h2>
   `;
 }
 
