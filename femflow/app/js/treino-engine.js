@@ -164,13 +164,6 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
       .filter(n => !isNaN(n))
   );
    
-console.log("🧠 ORGANIZAR:", {
-  rawBox: b.box,
-  boxNum,
-  serieDetectada: FEMFLOW.engineTreino.detectarSerieEspecial(String(b.box || "")),
-  tipo: b.tipo
-});
-
   return brutos
     .map(b => {
 
