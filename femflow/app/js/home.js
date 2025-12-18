@@ -58,11 +58,7 @@ localStorage.setItem(
   String(perfil.enfase || "nenhuma").toLowerCase()
 );
 }
-  // se backend já devolve fase/diaCiclo (ou perfilHormonal), considera configurado
-if (perfil.fase && perfil.diaCiclo) {
-  localStorage.setItem("femflow_cycle_configured", "yes");
-}
- 
+   
 /* ============================================================
    LISTAS DE CARDS
 =========================================================== */
@@ -334,6 +330,11 @@ document.addEventListener("DOMContentLoaded", async () => {
    }
      
 persistPerfil(perfil);
+
+     // ✅ ciclo configurado vem do VALIDAR
+if (perfil.fase && perfil.diaCiclo) {
+  localStorage.setItem("femflow_cycle_configured", "yes");
+}
      
      if (!localStorage.getItem("femflow_cycle_configured")) {
   FEMFLOW.loading.hide?.();
