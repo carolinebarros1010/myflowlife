@@ -264,9 +264,11 @@ if (b.tipo === "hiit") {
 
   out.push({
     tipo: "hiitPremium",
-    // 🔥 chave de agrupamento visual (novo box)
+
+    // 🔥 CHAVE VISUAL (nova)
     boxKey: `${boxBase}_hiit`,
-    // mantém o número para ordenação/cálculo
+
+    // mantém box numérico para ordenação
     box: boxBase,
 
     titulo: b.titulo_pt || b.titulo || "🔥 HIIT",
@@ -276,6 +278,7 @@ if (b.tipo === "hiit") {
   });
   continue;
 }
+
 
     /* =========================
        CARDIO FINAL
