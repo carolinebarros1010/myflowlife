@@ -338,6 +338,46 @@ body {
   border: 1px dashed #b93a3a;
   font-size: 0.8rem;
 }
+.ff-rp-wrap {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #fff3f3, #ffffff);
+  border-left: 5px solid #b93a3a;
+}
+
+.ff-rp-info {
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+  color: #3a3a3a;
+}
+
+.ff-rp-btn {
+  background: #b93a3a;
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+}
+
+.ff-rp-timer {
+  margin-top: 6px;
+}
+
+.ff-rp-bar {
+  height: 6px;
+  background: #f2dede;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ff-rp-fill {
+  height: 100%;
+  width: 100%;
+  background: #b93a3a;
+  transition: width 1s linear;
+}
+
 /* ============================================================
    CC
 ============================================================ */
