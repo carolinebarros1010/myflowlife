@@ -189,21 +189,11 @@ body {
   font-family: "Playfair Display", serif;
 }
 
-/* ---------- Séries Especiais ---------- */
-.ff-serie-especial {
-  background: var(--terracota-light);
-  color: var(--teal);
-  padding: 4px 10px;
-  border-radius: 10px;
-  font-size: .75rem;
-  font-weight: 700;
-  margin-left: 8px;
-}
 /* ============================================================
    SÉRIES ESPECIAIS — BASE VISUAL FEMFLOW
 ============================================================ */
 
-.ff-box.ff-serie-especial {
+.ff-box[class*="ff-serie-"] {
   border-left: 6px solid transparent;
   background: #fff;
 }
@@ -298,7 +288,7 @@ body {
    SÉRIES ESPECIAIS — ANIMAÇÃO SUTIL
 ============================================================ */
 
-.ff-box.ff-serie-especial {
+.ff-box[class*="ff-serie-"] {
   animation: serieFadeIn 0.25s ease-out both;
 }
 
