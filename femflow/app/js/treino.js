@@ -199,7 +199,7 @@ function renderTreino(lista) {
   const grupos = {}; // { 1:[…], 2:[…], 999:[…]… }
 
   lista.forEach(item => {
-    const box = item.box ?? 0;
+    const box = item.boxKey ?? item.box ?? 0;
     if (!grupos[box]) grupos[box] = [];
     grupos[box].push(item);
   });
