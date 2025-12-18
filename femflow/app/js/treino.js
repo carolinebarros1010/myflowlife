@@ -193,9 +193,6 @@ function renderTreino(lista) {
     return;
   }
    
-console.log("🧪 GRUPOS RAW:", grupos);
-console.log("🧪 BOX KEYS RAW:", Object.keys(grupos));
-
   /* ============================================================
      1) AGRUPAR ITEMS POR BOX
   ============================================================ */
@@ -206,7 +203,10 @@ console.log("🧪 BOX KEYS RAW:", Object.keys(grupos));
     if (!grupos[box]) grupos[box] = [];
     grupos[box].push(item);
   });
-
+   
+console.log("🧪 GRUPOS RAW:", grupos);
+console.log("🧪 BOX KEYS RAW:", Object.keys(grupos));
+   
   /* ordenar box: -100 → 0 → 1 → 2 → … → 500 → 900 → 999 */
   const boxKeys = Object.keys(grupos).sort((a, b) => {
   const na = parseInt(a);
