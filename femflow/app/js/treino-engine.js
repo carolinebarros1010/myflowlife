@@ -178,7 +178,7 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
         serieEspecial: FEMFLOW.engineTreino.detectarSerieEspecial(label)
       };
     })
-    .sort((a,b)=>a.boxNum-b.boxNum || a.ordemNum-b.ordemNum);
+    .sort((a,b)=>a.boxNum-b.boxNum);
 };
 
 
