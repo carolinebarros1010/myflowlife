@@ -58,13 +58,28 @@ FEMFLOW.engineTreino.normalizarEnfase = raw => {
 ============================================================ */
 FEMFLOW.engineTreino.detectarSerieEspecial = label => {
   if (!label) return null;
-  const s = label.toLowerCase();
-  if (s.endsWith("ae")) return "AE";
-  if (s.endsWith("e"))  return "E";
-  if (s.endsWith("t"))  return "T";
-  if (s.endsWith("s"))  return "S";
+
+  const s = label.toLowerCase().replace(/\s+/g, "");
+
+  const regras = [
+    { sufixo: "cc",  codigo: "CC" }, // cadência controlada
+    { sufixo: "rp",  codigo: "RP" }, // rest-pause
+    { sufixo: "ae",  codigo: "AE" }, // all out
+    { sufixo: "d",   codigo: "D"  }, // dropset
+    { sufixo: "q",   codigo: "Q"  }, // quadriset
+    { sufixo: "t",   codigo: "T"  }, // triset
+    { sufixo: "b",   codigo: "B"  }, // biset
+    { sufixo: "c",   codigo: "C"  }, // cluster
+    { sufixo: "i",   codigo: "I"  }  // isometria
+  ];
+
+  for (const r of regras) {
+    if (s.endsWith(r.sufixo)) return r.codigo;
+  }
+
   return null;
 };
+
 
 /* ============================================================
    3) FIREBASE — BLOCO NORMAL
