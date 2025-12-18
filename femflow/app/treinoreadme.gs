@@ -65,3 +65,135 @@ Resfriamento Premium:
 Portanto, somente as colunas:
 tipo, box, ordem, enfase, fase e dia
 são relevantes para estes blocos.
+📘 SÉRIES ESPECIAIS — FEMFLOW (ReadmeTreino.gs)
+
+As Séries Especiais FemFlow são estratégias avançadas de execução utilizadas para modular intensidade, densidade e estímulo metabólico, respeitando o dia do ciclo hormonal e o nível da aluna.
+
+O sistema não calcula cargas automaticamente.
+A execução é guiada pela aluna, com orientação visual no app.
+
+🔹 B — Biset
+
+Combinação de 2 exercícios consecutivos
+
+Executar sem intervalo entre eles
+
+Intervalo somente após o segundo exercício
+
+Objetivo: densidade e economia de tempo
+
+🔹 T — Triset
+
+Combinação de 3 exercícios consecutivos
+
+Executar sem intervalo entre eles
+
+Intervalo somente após o terceiro exercício
+
+Objetivo: alto estresse metabólico
+
+🔹 Q — Quadriset
+
+Combinação de 4 exercícios consecutivos
+
+Executar sem intervalo entre eles
+
+Intervalo somente após o quarto exercício
+
+Objetivo: exaustão localizada intensa
+
+🔹 C — Cluster Set
+
+A série é dividida em 4 blocos menores
+
+Total de repetições ÷ 4
+
+Intervalo de 10 segundos entre blocos
+
+Objetivo: manter qualidade técnica com alta carga
+
+🔹 D — Dropset
+
+Executar a série até a falha
+
+Realizar 3 reduções consecutivas de carga
+
+Executar até a falha em cada redução
+
+Sem intervalo entre as reduções
+
+Intervalo somente após o último drop
+
+Objetivo: estresse metabólico máximo
+
+🔹 RP — Rest-Pause
+
+Aplicado somente na última série
+
+Executar a série até a falha
+
+Reduzir 50% da carga
+
+Executar 20 repetições contínuas
+
+Intervalo somente após concluir o RP
+
+Objetivo: finalização metabólica
+
+🔹 I — Isometria
+
+Manter 3 segundos de contração máxima
+
+Executar a isometria em cada repetição
+
+Objetivo: melhorar controle neuromuscular
+
+🔹 CC — Cadência Controlada
+
+Controle da fase excêntrica do movimento
+
+Velocidade reduzida e consciente
+
+Objetivo: aumentar tempo sob tensão
+
+🔹 AE — Advanced Effort
+
+Marcador de esforço avançado
+
+Não altera a estrutura da série
+
+Indica intensidade elevada e foco máximo
+
+Objetivo: alertar sobre alto nível de exigência
+
+⚠️ Observações Importantes
+
+Séries especiais podem ser combinadas, desde que não conflitem logicamente.
+
+O uso é progressivo, respeitando:
+
+nível da aluna
+
+fase do ciclo hormonal
+
+histórico de treino
+
+A execução deve sempre priorizar:
+
+técnica
+
+consciência corporal
+
+segurança
+
+📋 Tabela — Séries Especiais FemFlow
+Código	Nome	Regra principal
+B	Biset	2 exercícios consecutivos, descanso somente ao final
+T	Triset	3 exercícios consecutivos, descanso somente ao final
+Q	Quadriset	4 exercícios consecutivos, descanso somente ao final
+C	Cluster Set	Reps divididas em 4 blocos com 10s de intervalo
+D	Dropset	3 reduções de carga até a falha, sem intervalo
+RP	Rest-Pause	Falha → 50% da carga → 20 repetições
+I	Isometria	3s de contração máxima em cada repetição
+CC	Cadência Controlada	Fase excêntrica lenta e controlada
+AE	Advanced Effort	Indicador de esforço avançado
