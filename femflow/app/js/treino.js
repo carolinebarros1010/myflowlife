@@ -190,18 +190,7 @@ localStorage.setItem("femflow_diaCiclo", diaCiclo);
 
   });
 
-   function getSerieEspecialInfo(codigo) {
-  if (!codigo) return null;
-
-  const lang = FEMFLOW.lang || "pt";
-
-  const series = FEMFLOW.langs?.[lang]?.series;
-  if (!series) return null;
-
-  return series[codigo] || null;
-}
-   
-  function parseSerieEspecial(raw) {
+    function parseSerieEspecial(raw) {
   if (!raw) return null;
 
   const match = raw.match(/^(\d+)?([A-Z]+)/i);
@@ -1026,3 +1015,13 @@ async function salvarEvolucaoFront(exercicioSlug) {
 }
  
 }); // ← fecha o DOMContentLoaded
+
+window.getSerieEspecialInfo = function (codigo) {
+  if (!codigo) return null;
+
+  const lang = FEMFLOW.lang || "pt";
+  const series = FEMFLOW.langs?.[lang]?.series;
+
+  return series?.[codigo] || null;
+};
+
