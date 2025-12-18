@@ -238,28 +238,6 @@ FEMFLOW.router = pag => {
   }
 };
 
-document.addEventListener("femflow:state:changed", e => {
-  const { type, impact } = e.detail || {};
-
-  FEMFLOW.log("🧠 STATE CHANGED:", type, impact);
-
-  if (impact === "none") return;
-
-  if (impact === "fisiologico") {
-    FEMFLOW.toast("Ajustes aplicados 🌸");
-    FEMFLOW.router("home");
-    return;
-  }
-
-  if (impact === "estrutural") {
-    FEMFLOW.toast("Estrutura atualizada 🌱");
-    FEMFLOW.resetProgramaAtual?.();
-    localStorage.setItem("femflow_cycle_changed", "true");
-    FEMFLOW.router("home");
-  }
-});
-
-
 
 /* ===========================================================
    3. HEADER
@@ -493,7 +471,8 @@ FEMFLOW._acaoMenu = function (op) {
 
     case "ciclo":
   // 🔥 mudança fisiológica
-  FEMFLOW.dispatch("state:changed", {
+ // dispatch
+FEMFLOW.dispatch("stateChanged", {
     type: "ciclo",
     impact: "fisiologico"
   });
@@ -588,8 +567,8 @@ FEMFLOW.initNivelHandler = function () {
       nivel
     });
 
-    // 🔥 evento estrutural
-FEMFLOW.dispatch("state:changed", {
+ // dispatch
+FEMFLOW.dispatch("stateChanged", {
   type: "nivel",
   impact: "estrutural"
 });
@@ -661,19 +640,27 @@ FEMFLOW.sincronizarECdisparar = async function () {
    7.5 STATE CHANGED → SEMPRE CAI NO FLOWCENTER
    (FlowCenter valida/sincroniza no começo)
 =========================================================== */
-
-document.addEventListener("femflow:stateChanged", (e) => {
-  const d = e?.detail || {};
-  const impact = d.impact || "none";
+document.addEventListener("femflow:stateChanged", e => {
+  const { impact = "none", source = "flowcenter" } = e.detail || {};
 
   if (impact === "none") return;
 
-  // 🔥 decisão central: qualquer mudança relevante leva ao FlowCenter,
-  // e o FlowCenter sincroniza com o backend ao abrir
-  if (impact === "fisiologico" || impact === "estrutural") {
+  // 🔥 regra de ouro
+  if (impact === "fisiologico") {
+    if (source === "home") {
+      FEMFLOW.router("home");
+    } else {
+      FEMFLOW.router("flowcenter");
+    }
+    return;
+  }
+
+  if (impact === "estrutural") {
+    FEMFLOW.resetProgramaAtual?.();
     FEMFLOW.router("flowcenter");
   }
 });
+
 
 /* ===========================================================
    10. INIT — FLUXO PRINCIPAL
