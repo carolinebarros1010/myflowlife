@@ -200,6 +200,21 @@ localStorage.setItem("femflow_diaCiclo", diaCiclo);
 
   return series[codigo] || null;
 }
+   
+  function parseSerieEspecial(raw) {
+  if (!raw) return null;
+
+  const match = raw.match(/^(\d+)?([A-Z]+)/i);
+
+  if (!match) return null;
+
+  return {
+    ordem: match[1] ? Number(match[1]) : null, // ex: 3
+    codigo: match[2].toUpperCase(),            // ex: D, AE, T
+    raw
+  };
+}
+ 
 
 
   /* ============================================================
@@ -386,15 +401,25 @@ function renderBox(bloco) {
   /* ======================================================
      TREINO (box com exercícios + série especial)
   ====================================================== */
-  const codigoSerie = bloco[0].serieEspecial || null;
-  const behavior   = SERIE_BEHAVIOR[codigoSerie] || null;
+  const serieParsed = parseSerieEspecial(bloco[0].serieEspecial);
+
+const codigoSerie = serieParsed?.codigo || null;
+const ordemSerie  = serieParsed?.ordem || null;
+
+const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
+
   const serieInfo  = getSerieEspecialInfo(codigoSerie);
 
   const serieAttr = codigoSerie
     ? `data-serie="${codigoSerie}" class="carousel-item ff-box ff-serie-especial ff-serie-${codigoSerie}"`
     : `class="carousel-item ff-box"`;
 
-  let htmlBox = `<div ${serieAttr}>`;
+ let htmlBox = `
+  <div ${serieAttr}
+       data-serie-ordem="${ordemSerie ?? ""}"
+       data-serie-codigo="${codigoSerie ?? ""}">
+`;
+
 
   if (serieInfo) {
     htmlBox += `
@@ -418,7 +443,10 @@ function renderBox(bloco) {
       behavior?.descansoNoUltimo === true &&
       !ex._isUltimoDoCombo;
 
-    ex._isCluster   = behavior?.cluster === true;
+    ex._isCluster = behavior?.cluster === true;
+    ex._serieOrdem = ordemSerie;
+    ex._serieCodigo = codigoSerie;
+
     ex._isRestPause = behavior?.restPause === true;
 
     htmlBox += renderExercicio(ex);
