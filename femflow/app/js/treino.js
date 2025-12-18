@@ -459,14 +459,59 @@ function renderExercicio(ex) {
 
   const intervalo = Number(ex.intervalo) || 0;
 
+  /* ===========================
+     BLOCO DE DESCANSO (CONDICIONAL)
+  ============================ */
+
+  let descansoHTML = "";
+
+  // ❌ CLUSTER — nunca tem descanso comum
+  if (ex._isCluster) {
+    descansoHTML = "";
+  }
+
+  // ⚠️ COMBO — descanso só no último
+  else if (ex._hideRest) {
+    descansoHTML = "";
+  }
+
+  // ✅ NORMAL
+  else {
+    descansoHTML = `
+      <div class="ff-descanso-wrap">
+        <button class="ff-descanso-btn btnStartTimer">
+          ▶️ Iniciar descanso
+        </button>
+
+        <span class="ff-timer-count">${fmtTime(intervalo)}</span>
+
+        <div class="ff-timer-bar" data-timer="${intervalo}">
+          <div class="ff-timer-fill"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* ===========================
+     RENDER FINAL
+  ============================ */
+
   return `
-    <div class="ff-ex-item">
+    <div class="ff-ex-item"
+         data-combo-index="${ex._comboIndex || 1}"
+         data-combo-total="${ex._comboTotal || 1}">
 
       <div class="ff-ex-top">
         <div class="ff-ex-nome">
-          <a href="${ex.link || "#"}" target="_blank">${ex.titulo}</a>
+          <a href="${ex.link || "#"}" target="_blank">
+            ${ex.titulo}
+          </a>
         </div>
-        <input class="ff-ex-peso" type="number" placeholder="kg">
+
+        <input class="ff-ex-peso"
+               type="number"
+               placeholder="kg"
+               data-ex="${ex.titulo}">
       </div>
 
       <div class="ff-info-line">
@@ -475,19 +520,12 @@ function renderExercicio(ex) {
         <span>⏱️ <b>${intervalo}s</b></span>
       </div>
 
-      ${
-        ex._hideRest ? "" : `
-        <div class="ff-descanso-wrap">
-          <button class="ff-descanso-btn btnStartTimer">▶️ Iniciar descanso</button>
-          <span class="ff-timer-count">${fmtTime(intervalo)}</span>
-          <div class="ff-timer-bar" data-timer="${intervalo}">
-            <div class="ff-timer-fill"></div>
-          </div>
-        </div>
-      `}
+      ${descansoHTML}
+
     </div>
   `;
 }
+
 
   
   /* ============================================================
@@ -544,6 +582,47 @@ function renderExercicio(ex) {
       };
     });
   }
+   
+function initClusterTimers() {
+  document.querySelectorAll("[data-cluster='true']").forEach(wrap => {
+
+    const btn = wrap.querySelector("[data-cluster-start]");
+    const timerBox = wrap.querySelector(".ff-cluster-timer");
+    const countEl = wrap.querySelector(".ff-cluster-count");
+    const fill = wrap.querySelector(".ff-cluster-fill");
+
+    if (!btn || !countEl || !fill) return;
+
+    let tempo = 10;
+    let rodando = false;
+    let intv;
+
+    btn.onclick = () => {
+      if (rodando) return;
+
+      rodando = true;
+      btn.textContent = "⏸️ Pausando…";
+      timerBox.classList.remove("hidden");
+      tempo = 10;
+
+      fill.style.width = "100%";
+      countEl.textContent = tempo;
+
+      intv = setInterval(() => {
+        tempo--;
+        countEl.textContent = tempo;
+        fill.style.width = `${(tempo / 10) * 100}%`;
+
+        if (tempo <= 0) {
+          clearInterval(intv);
+          rodando = false;
+          btn.textContent = "▶️ Próximo bloco";
+          timerBox.classList.add("hidden");
+        }
+      }, 1000);
+    };
+  });
+}
 
   /* ============================================================
      4. HIIT — versão compatível com engine v4.0
