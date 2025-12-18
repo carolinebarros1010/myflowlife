@@ -296,6 +296,7 @@ initTimers();
 initHIIT();
 initClusterTimers(); // 🔥 CLUSTER TIMER REAL
 initRP();  
+initSeriesProgress();
 initPeso();
 }
  /* ============================================================
@@ -829,6 +830,34 @@ function initClusterTimers() {
           btn.textContent = "▶️ Executar RP";
         }
       }, 1000);
+    });
+  });
+}
+function initSeriesProgress() {
+  document.querySelectorAll(".ff-ex-item").forEach(exItem => {
+
+    const progressEl = exItem.querySelector(".ff-serie-progress");
+    const btn = exItem.querySelector(".ff-serie-next-btn");
+
+    if (!progressEl || !btn) return;
+
+    let atual = Number(progressEl.dataset.serieAtual || 1);
+    const total = Number(progressEl.dataset.serieTotal || 1);
+
+    btn.addEventListener("click", () => {
+
+      if (atual >= total) return;
+
+      atual++;
+      progressEl.dataset.serieAtual = atual;
+      progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
+
+      // finalizou o exercício
+      if (atual === total) {
+        btn.textContent = "✔️ Exercício concluído";
+        btn.classList.add("done");
+        btn.disabled = true;
+      }
     });
   });
 }
