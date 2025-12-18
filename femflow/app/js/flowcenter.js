@@ -45,7 +45,7 @@ async function initFlowCenter() {
    if (!perfil || perfil.status === "blocked") {
   FEMFLOW.toast("Sessão inválida.");
   FEMFLOW.clearSession();
-  FEMFLOW.dispatch("state:changed", {
+  FEMFLOW.dispatch("stateChanged", {
   type: "auth",
   impact: "estrutural"
 });
@@ -59,7 +59,7 @@ const perfilFresh = await flowcenterSyncPerfil();
 if (!perfilFresh || perfilFresh.status === "no_auth") {
   FEMFLOW.toast("Faça login novamente 🌸");
   FEMFLOW.clearSession();
-  FEMFLOW.dispatch("state:changed", {
+  FEMFLOW.dispatch("stateChanged", {
   type: "ciclo",
   impact: "estrutural"
 });
@@ -68,7 +68,7 @@ return;
 if (perfilFresh.status === "blocked" || perfilFresh.status === "denied") {
   FEMFLOW.toast("Sessão inválida.");
   FEMFLOW.clearSession();
-  FEMFLOW.dispatch("state:changed", {
+  FEMFLOW.dispatch("stateChanged", {
   type: "auth",
   impact: "estrutural"
 });
@@ -77,7 +77,7 @@ return;
 
 if (perfilFresh.status !== "ok") {
   FEMFLOW.toast("Erro ao atualizar dados. Tente novamente.");
-  FEMFLOW.dispatch("state:changed", {
+  FEMFLOW.dispatch("stateChanged", {
   type: "ciclo",
   impact: "estrutural"
 });
@@ -99,7 +99,7 @@ if (cycleChanged && !veioDaHome) {
   localStorage.removeItem("femflow_cycle_changed");
 
   FEMFLOW.toast("Ciclo atualizado. Escolha um novo treino 🌸");
-  FEMFLOW.dispatch("state:changed", {
+  FEMFLOW.dispatch("stateChanged", {
     type: "ciclo",
     impact: "estrutural"
   });
@@ -244,7 +244,7 @@ document.getElementById("toTrain").onclick = () => {
   // ❌ Não escolheu treino → Home resolve
   if (!enfase) {
     FEMFLOW.toast("Escolha um treino na Home 🌸");
-    FEMFLOW.dispatch("state:changed", {
+    FEMFLOW.dispatch("stateChanged", {
       type: "programa",
       impact: "none"
     });
