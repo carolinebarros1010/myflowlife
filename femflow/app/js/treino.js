@@ -792,73 +792,60 @@ function initClusterTimers() {
 
   });
 }
-  function initRestPause() {
+ function initSeriesProgress() {
 
-  document.querySelectorAll("[data-rp]").forEach(rp => {
+  document.querySelectorAll(".ff-ex-item").forEach(exItem => {
 
-    const btn = rp.querySelector(".ff-restpause-btn");
-    const fill = rp.querySelector(".ff-rp-fill");
+    const progressEl = exItem.querySelector("[data-role='serie-progress']");
+    const btnSerie   = exItem.querySelector("[data-role='serie-next']");
+    const rpWrap     = exItem.querySelector("[data-rp]");
 
-    if (!btn || !fill) return;
+    if (!progressEl || !btnSerie) return;
 
-    let rodando = false;
-    let intv = null;
-    const pausa = 20; // pausa padrão RP (curta)
+    let atual = Number(progressEl.dataset.serieAtual || 1);
+    const total = Number(progressEl.dataset.serieTotal || 1);
+    let rpConcluido = false;
 
-    btn.addEventListener("click", () => {
+    btnSerie.addEventListener("click", () => {
 
-  const rpRequired = exItem.dataset.rpRequired === "true";
-  const rpDone     = exItem.dataset.rpDone === "true";
+      /* ===============================
+         AVANÇO NORMAL
+      =============================== */
+      if (atual < total) {
+        atual++;
+        progressEl.dataset.serieAtual = atual;
+        progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
+        return;
+      }
 
-  // 🔒 BLOQUEIO ABSOLUTO
-  if (rpRequired && !rpDone) {
-    alert("⚡ Execute o Rest-Pause antes de concluir o exercício.");
-    return;
-  }
+      /* ===============================
+         ÚLTIMA SÉRIE → RP OBRIGATÓRIO
+      =============================== */
+      if (atual === total && rpWrap && !rpConcluido) {
 
-  if (atual >= total) return;
+        rpWrap.classList.remove("hidden");
 
-  atual++;
-  progressEl.dataset.serieAtual = atual;
-  progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
+        btnSerie.textContent = "⚡ Executar Rest-Pause";
+        btnSerie.disabled = true;
 
-  if (atual === total) {
-    btn.textContent = "✔️ Exercício concluído";
-    btn.classList.add("done");
-    btn.disabled = true;
-  }
-});
+        rpWrap.addEventListener("rp:concluido", () => {
+          rpConcluido = true;
+          btnSerie.disabled = false;
+          btnSerie.textContent = "✔️ Finalizar exercício";
+        }, { once: true });
 
-      rodando = true;
-      btn.textContent = "⏸️ Pausando…";
-      fill.style.width = "100%";
+        return;
+      }
 
-      let restante = pausa;
-
-      clearInterval(intv);
-      intv = setInterval(() => {
-        restante--;
-        fill.style.width = `${(restante / pausa) * 100}%`;
-
-       if (restante <= 0) {
-  clearInterval(intv);
-  rodando = false;
-  btn.textContent = "✔️ RP concluído";
-
-  rp.addEventListener("rp:concluido", () => {
-  const exItem = rp.closest(".ff-ex-item");
-  if (!exItem) return;
-
-  exItem.dataset.rpDone = "true";
-
-  exItem.classList.add("rp-done");
-});
-
-}
-
-      }, 1000);
+      /* ===============================
+         FINALIZA EXERCÍCIO
+      =============================== */
+      if (atual === total && (!rpWrap || rpConcluido)) {
+        btnSerie.textContent = "✔️ Exercício concluído";
+        btnSerie.classList.add("done");
+        btnSerie.disabled = true;
+      }
     });
-
   });
 }
 
