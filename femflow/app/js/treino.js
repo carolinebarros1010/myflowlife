@@ -131,12 +131,12 @@ const personalFinal = isPersonal;
     const diaCiclo = perfil.diaCiclo;
 
     // 1) Carregar DiaPrograma (LS → backend → fallback)
-      const diaPrograma = await FEMFLOW.getDiaPrograma();
-     FEMFLOW.diaProgramaAtual = diaPrograma;
-    if (tituloDia) tituloDia.textContent = t("treino.diaProgramaLabel", {
-  dia: diaPrograma
-});
+const diaPrograma = await FEMFLOW.getDiaPrograma();
+FEMFLOW.diaProgramaAtual = diaPrograma;
 
+if (tituloDia) {
+  tituloDia.textContent = t("treino.diaProgramaLabel", { dia: diaPrograma });
+}
 
     FEMFLOW.log("📌 Perfil recebido:", perfil);
 
