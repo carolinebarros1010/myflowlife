@@ -128,7 +128,19 @@ home: {
     pseTitulo: "Como foi o treino?",
     pseLabel: "PSE (0 a 10)",
     pseSalvar: "Salvar",
-    pseCancelar: "Cancelar"
+    pseCancelar: "Cancelar",
+     hiit: {
+    protocolo: "Protocolo {forte} / {leve}",
+    descricao:
+      "Execute {forte}s em alta intensidade e depois {leve}s de recuperação.",
+    ciclos:
+      "Repita por {ciclos} ciclos seguindo o timer abaixo.",
+    exemplosAcademia:
+      "Academia: esteira, bike, escada, remo, air bike",
+    exemplosCasa:
+      "Em casa: polichinelo, corrida parada, burpee, corda, salto no lugar",
+    iniciar: "Toque para iniciar"
+  } 
   },
 resp: {
   /* Títulos */
@@ -333,7 +345,19 @@ home: {
     pseTitulo: "How was the workout?",
     pseLabel: "RPE (0 to 10)",
     pseSalvar: "Save",
-    pseCancelar: "Cancel"
+    pseCancelar: "Cancel",
+     hiit: {
+  protocolo: "{forte} / {leve} Protocol",
+  descricao:
+    "Perform {forte}s at high intensity followed by {leve}s of recovery.",
+  ciclos:
+    "Repeat for {ciclos} cycles using the timer below.",
+  exemplosAcademia:
+    "Gym: treadmill, bike, stairs, rower, air bike",
+  exemplosCasa:
+    "At home: jumping jacks, running in place, burpees, rope, jumps",
+  iniciar: "Tap to start"
+}
   },
 resp: {
   /* Titles */
@@ -540,7 +564,20 @@ fr: {
     pseTitulo: "Comment était l'entraînement ?",
     pseLabel: "PSE (0 à 10)",
     pseSalvar: "Enregistrer",
-    pseCancelar: "Annuler"
+    pseCancelar: "Annuler",
+    hiit: {
+  protocolo: "Protocole {forte} / {leve}",
+  descricao:
+    "Effectuez {forte}s à haute intensité puis {leve}s de récupération.",
+  ciclos:
+    "Répétez pendant {ciclos} cycles en suivant le minuteur ci-dessous.",
+  exemplosAcademia:
+    "Salle: tapis, vélo, escaliers, rameur, air bike",
+  exemplosCasa:
+    "À la maison: jumping jacks, course sur place, burpees, corde, sauts",
+  iniciar: "Touchez pour commencer"
+}
+ 
   },
 resp: {
   /* Titres */
