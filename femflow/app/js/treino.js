@@ -390,33 +390,45 @@ function renderBox(bloco) {
     `;
   }
 
-  /* ======================================================
-     HIIT PREMIUM
-  ====================================================== */
-  if (tipoDominante === "hiitPremium") {
-    const h = bloco[0];
-    return `
-      <div class="carousel-item ff-box">
-        <h2 class="ff-ex-titulo">${h.titulo}</h2>
+ /* ======================================================
+   HIIT PREMIUM
+====================================================== */
+if (tipoDominante === "hiitPremium") {
+  const h = bloco[0];
 
-        <p class="ff-sugestao-hiit">
-          🔥 <b>Escolha a sua forma de HIIT:</b><br>
-          • <b>Na academia:</b> esteira, bike, escada, remo ou air Bike<br>
+  const forte  = Number(h.forte)  || 40;
+  const leve   = Number(h.leve)   || 20;
+  const ciclos = Number(h.ciclos) || 6;
+
+  return `
+    <div class="carousel-item ff-box">
+      <h2 class="ff-ex-titulo">${h.titulo}</h2>
+
+      <p class="ff-sugestao-hiit">
+        🔥 <b>Protocolo ${forte} / ${leve}</b><br>
+        Execute <b>${forte}s em alta intensidade</b> e depois
+        <b>${leve}s de recuperação</b>.<br>
+        Repita por <b>${ciclos} ciclos</b> seguindo o timer abaixo.<br><br>
+
+        <span class="ff-hiit-exemplos">
+          • <b>Academia:</b> esteira, bike, escada, remo, air bike<br>
           • <b>Em casa:</b> polichinelo, corrida parada, burpee, corda, salto no lugar
-        </p>
+        </span>
+      </p>
 
-        <div class="hiit-bubble">
-          <div class="hiit-circle"
-               data-estimulo="${Number(h.forte) || 40}"
-               data-descanso="${Number(h.leve) || 20}"
-               data-ciclos="${Number(h.ciclos) || 6}">
-               ▶
-          </div>
-          <div class="hiit-phase">Toque para iniciar</div>
+      <div class="hiit-bubble">
+        <div class="hiit-circle"
+             data-estimulo="${forte}"
+             data-descanso="${leve}"
+             data-ciclos="${ciclos}">
+          ▶
         </div>
+        <div class="hiit-phase">Toque para iniciar</div>
       </div>
-    `;
-  }
+    </div>
+  `;
+}
+
 
   /* ======================================================
      TREINO (box com exercícios + série especial)
