@@ -405,14 +405,13 @@ if (tipoDominante === "hiitPremium") {
       <h2 class="ff-ex-titulo">${h.titulo}</h2>
 
       <p class="ff-sugestao-hiit">
-        🔥 <b>Protocolo ${forte} / ${leve}</b><br>
-        Execute <b>${forte}s em alta intensidade</b> e depois
-        <b>${leve}s de recuperação</b>.<br>
-        Repita por <b>${ciclos} ciclos</b> seguindo o timer abaixo.<br><br>
+        🔥 <b>${t("treino.hiit.protocolo", { forte, leve })}</b><br>
+        ${t("treino.hiit.descricao", { forte, leve })}<br>
+        ${t("treino.hiit.ciclos", { ciclos })}<br><br>
 
         <span class="ff-hiit-exemplos">
-          • <b>Academia:</b> esteira, bike, escada, remo, air bike<br>
-          • <b>Em casa:</b> polichinelo, corrida parada, burpee, corda, salto no lugar
+          • <b>${t("treino.hiit.exemplosAcademia")}</b><br>
+          • <b>${t("treino.hiit.exemplosCasa")}</b>
         </span>
       </p>
 
@@ -423,11 +422,12 @@ if (tipoDominante === "hiitPremium") {
              data-ciclos="${ciclos}">
           ▶
         </div>
-        <div class="hiit-phase">Toque para iniciar</div>
+        <div class="hiit-phase">${t("treino.hiit.iniciar")}</div>
       </div>
     </div>
   `;
 }
+
 
 
   /* ======================================================
@@ -1244,4 +1244,26 @@ window.getSerieEspecialInfo = function (codigo) {
 
   return series?.[codigo] || null;
 };
+window.getHiitInfo = function ({ forte, leve, ciclos }) {
+  const lang = FEMFLOW.lang || "pt";
+  const hiit = FEMFLOW.langs?.[lang]?.treino?.hiit;
+  if (!hiit) return null;
+
+  return {
+    protocolo: hiit.protocolo
+      .replace("{forte}", forte)
+      .replace("{leve}", leve),
+
+    descricao: hiit.descricao
+      .replace("{forte}", forte)
+      .replace("{leve}", leve),
+
+    ciclos: hiit.ciclos.replace("{ciclos}", ciclos),
+
+    exemplosAcademia: hiit.exemplosAcademia,
+    exemplosCasa: hiit.exemplosCasa,
+    iniciar: hiit.iniciar
+  };
+};
+
 
