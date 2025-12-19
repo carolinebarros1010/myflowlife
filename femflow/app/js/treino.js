@@ -745,11 +745,11 @@ function initClusterTimers() {
     const fill     = wrap.querySelector(".ff-cluster-fill");
 
     if (!btn || !timerBox || !countEl || !fill) {
-      console.warn("⚠️ Cluster wrap incompleto:", { idx, btn: !!btn, timerBox: !!timerBox, countEl: !!countEl, fill: !!fill });
+      console.warn("⚠️ Cluster wrap incompleto:", { idx });
       return;
     }
 
-    // evita duplicar handler se re-render
+    // evita múltiplos binds
     if (btn.dataset.bound === "1") return;
     btn.dataset.bound = "1";
 
@@ -758,7 +758,6 @@ function initClusterTimers() {
     let intv = null;
 
     btn.addEventListener("click", () => {
-      console.log("🟣 click cluster:", idx);
 
       if (rodando) return;
 
@@ -780,24 +779,21 @@ function initClusterTimers() {
 
         if (tempo <= 0) {
           clearInterval(intv);
-          intv = null;
           rodando = false;
           btn.textContent = "▶️ Próximo bloco";
           timerBox.classList.add("hidden");
         }
       }, 1000);
-    }, { passive: true });
-     
-     console.log("🔍 EX CLUSTER?", ex.titulo, ex._isCluster);
-
+    });
   });
 }
+
 function initRestPause() {
 
-  document.querySelectorAll("[data-rp]").forEach(rp => {
+  document.querySelectorAll("[data-rp='true']").forEach(rpWrap => {
 
-    const btn  = rp.querySelector(".ff-restpause-btn");
-    const fill = rp.querySelector(".ff-rp-fill");
+    const btn  = rpWrap.querySelector(".ff-restpause-btn");
+    const fill = rpWrap.querySelector(".ff-rp-fill");
 
     if (!btn || !fill) return;
 
@@ -822,16 +818,22 @@ function initRestPause() {
         if (restante <= 0) {
           clearInterval(intv);
           rodando = false;
+
           btn.textContent = "✔️ RP concluído";
 
-          rp.dispatchEvent(new CustomEvent("rp:concluido", {
-            bubbles: true
-          }));
+          const exItem = rpWrap.closest(".ff-ex-item");
+          if (exItem) {
+            exItem.dataset.rpDone = "true";
+          }
+
+          // 🔥 DISPARA EVENTO PARA O CONTADOR DE SÉRIES
+          rpWrap.dispatchEvent(new Event("rp:concluido", { bubbles: true }));
         }
       }, 1000);
     });
   });
 }
+
 
 
 function initSeriesProgress() {
