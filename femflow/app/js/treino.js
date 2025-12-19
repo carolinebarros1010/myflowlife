@@ -1320,10 +1320,17 @@ window.t = function (path, vars = {}) {
 
   if (typeof text !== "string") return path;
 
-  return text.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-    return vars[key] ?? "";
-  });
+  return text
+    // 🔁 suporta {variavel}
+    .replace(/\{(\w+)\}/g, (_, key) => {
+      return vars[key] !== undefined ? vars[key] : `{${key}}`;
+    })
+    // 🔁 suporta {{variavel}} (legado)
+    .replace(/\{\{(\w+)\}\}/g, (_, key) => {
+      return vars[key] !== undefined ? vars[key] : `{{${key}}}`;
+    });
 };
+
 
 
 
