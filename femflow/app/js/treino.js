@@ -850,7 +850,10 @@ function initRestPause() {
           }
 
           // 🔥 DISPARA EVENTO PARA O CONTADOR DE SÉRIES
-          rpWrap.dispatchEvent(new Event("rp:concluido", { bubbles: true }));
+         rpWrap.dispatchEvent(
+  new CustomEvent("rp:concluido", { bubbles: true })
+);
+
         }
       }, 1000);
     });
@@ -865,18 +868,18 @@ function initSeriesProgress() {
 
     const progressEl = exItem.querySelector("[data-role='serie-progress']");
     const btnSerie   = exItem.querySelector("[data-role='serie-next']");
-    const rpWrap     = exItem.querySelector("[data-rp]");
+    const rpWrap     = exItem.querySelector("[data-rp='true']");
 
     if (!progressEl || !btnSerie) return;
 
     let atual = Number(progressEl.dataset.serieAtual || 1);
     const total = Number(progressEl.dataset.serieTotal || 1);
 
-    let rpConcluido = false;
     const exigeRP = !!rpWrap;
+    let rpConcluido = false;
 
     /* ===============================
-       EVENTO: RP CONCLUÍDO
+       EVENTO → RP CONCLUÍDO
     =============================== */
     if (rpWrap) {
       rpWrap.addEventListener("rp:concluido", () => {
@@ -885,35 +888,38 @@ function initSeriesProgress() {
 
         btnSerie.disabled = false;
         btnSerie.textContent = "✔️ Finalizar exercício";
-      });
+      }, { once: true });
     }
 
     /* ===============================
-       CLICK → AVANÇAR SÉRIE
+       CLICK → CONCLUIR SÉRIE
     =============================== */
     btnSerie.addEventListener("click", () => {
 
-      /* 🔹 Avanço normal */
-      if (atual < total) {
+      /* 🔹 AINDA NÃO CHEGOU NA ÚLTIMA SÉRIE */
+      if (atual < total - 1) {
         atual++;
         progressEl.dataset.serieAtual = atual;
         progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
         return;
       }
 
-      /* 🔥 Última série → RP obrigatório */
-      if (atual === total && exigeRP && !rpConcluido) {
+      /* 🔥 ENTROU NA ÚLTIMA SÉRIE → MOSTRA RP */
+      if (atual === total - 1 && exigeRP && !rpConcluido) {
+        atual++;
+        progressEl.dataset.serieAtual = atual;
+        progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
 
         rpWrap.classList.remove("hidden");
+
         btnSerie.textContent = "⚡ Executar Rest-Pause";
         btnSerie.disabled = true;
 
         return;
       }
 
-      /* ✅ Finalização */
+      /* ✅ FINALIZA EXERCÍCIO */
       if (atual === total && (!exigeRP || rpConcluido)) {
-
         btnSerie.textContent = "✔️ Exercício concluído";
         btnSerie.classList.add("done");
         btnSerie.disabled = true;
@@ -925,10 +931,6 @@ function initSeriesProgress() {
 
   });
 }
-
-
-
-
 
   /* ============================================================
      4. HIIT — versão compatível com engine v4.0
