@@ -328,46 +328,57 @@ function renderBox(bloco) {
   /* ======================================================
      AQUECIMENTO PREMIUM
   ====================================================== */
-  if (tipoDominante === "aquecimentoPremium") {
-    return `
-      <div class="carousel-item ff-box">
-        <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
-        <ul class="ff-passos">
-          ${(bloco[0].passos || []).map(p => `<li>${p.nome}</li>`).join("")}
-        </ul>
-        <p class="ff-sugestao-resp">
-          💨 Sugestão: prepare seu corpo com uma respiração consciente antes de começar.
-        </p>
-        <button class="ff-btn-resp-sugerida"
-                type="button"
-                onclick="location.href='respiracao.html?ret=treino'">
-          🌬️ Abrir protocolos de respiração
-        </button>
-      </div>
-    `;
-  }
+ if (tipoDominante === "aquecimentoPremium") {
+  const ui = getAquecimentoUI();
+
+  return `
+    <div class="carousel-item ff-box">
+      <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
+
+      <ul class="ff-passos">
+        ${(bloco[0].passos || []).map(p => `<li>${p.nome}</li>`).join("")}
+      </ul>
+
+      <p class="ff-sugestao-resp">
+        ${ui.sugestao}
+      </p>
+
+      <button class="ff-btn-resp-sugerida"
+              type="button"
+              onclick="location.href='respiracao.html?ret=treino'">
+        ${ui.btn}
+      </button>
+    </div>
+  `;
+}
+
 
   /* ======================================================
      RESFRIAMENTO PREMIUM
   ====================================================== */
-  if (tipoDominante === "resfriamentoPremium") {
-    return `
-      <div class="carousel-item ff-box">
-        <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
-        <ul class="ff-passos">
-          ${(bloco[0].passos || []).map(p => `<li>${p.nome}</li>`).join("")}
-        </ul>
-        <p class="ff-sugestao-resp">
-          🌬️ Sugestão: finalize seu treino desacelerando com respiração suave.
-        </p>
-        <button class="ff-btn-resp-sugerida"
-                type="button"
-                onclick="location.href='respiracao.html?ret=treino'">
-          💗 Fazer respiração de fechamento
-        </button>
-      </div>
-    `;
-  }
+ if (tipoDominante === "resfriamentoPremium") {
+  const ui = getResfriamentoUI();
+
+  return `
+    <div class="carousel-item ff-box">
+      <h2 class="ff-ex-titulo">${bloco[0].titulo}</h2>
+
+      <ul class="ff-passos">
+        ${(bloco[0].passos || []).map(p => `<li>${p.nome}</li>`).join("")}
+      </ul>
+
+      <p class="ff-sugestao-resp">
+        ${ui.sugestao}
+      </p>
+
+      <button class="ff-btn-resp-sugerida"
+              type="button"
+              onclick="location.href='respiracao.html?ret=treino'">
+        ${ui.btn}
+      </button>
+    </div>
+  `;
+}
 
   /* ======================================================
      CARDIO FINAL
@@ -428,8 +439,6 @@ if (tipoDominante === "hiitPremium") {
   `;
 }
 
-
-
   /* ======================================================
      TREINO (box com exercícios + série especial)
   ====================================================== */
@@ -442,9 +451,12 @@ const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
 
   const serieInfo  = getSerieEspecialInfo(codigoSerie);
 
-  const serieAttr = codigoSerie
-    ? `data-serie="${codigoSerie}" class="carousel-item ff-box ff-serie-especial ff-serie-${codigoSerie}"`
-    : `class="carousel-item ff-box"`;
+ const serieClass = codigoSerie
+  ? `carousel-item ff-box ff-serie-especial ff-serie-${codigoSerie}`
+  : `carousel-item ff-box`;
+
+const serieData = codigoSerie ? `data-serie="${codigoSerie}"` : "";
+
 
  let htmlBox = `
   <div ${serieAttr}
@@ -515,13 +527,8 @@ if (behavior?.isometria) {
 
   htmlBox += `</div>`;
   return htmlBox;
-
-console.log("🧩 SERIE RAW:", bloco[0].serieEspecial);
-console.log("🧩 SERIE PARSED:", parseSerieEspecial(bloco[0].serieEspecial));
-
 }
 
-console.log("🟣 CLUSTER DOM:", document.querySelectorAll("[data-cluster='true']").length);
 
 /* ============================================================
    BLOCO EXERCÍCIO INDIVIDUAL
@@ -1265,5 +1272,39 @@ window.getHiitInfo = function ({ forte, leve, ciclos }) {
     iniciar: hiit.iniciar
   };
 };
+window.getTreinoText = function (path, fallback = "") {
+  const lang = FEMFLOW.lang || "pt";
+  const parts = String(path || "").split(".");
+  let cur = FEMFLOW.langs?.[lang];
+
+  for (const p of parts) {
+    cur = cur?.[p];
+    if (cur == null) return fallback;
+  }
+  return cur ?? fallback;
+};
+
+window.getAquecimentoUI = function () {
+  return {
+    sugestao: getTreinoText("treino.aquecimento.sugestao",
+      "💨 Sugestão: prepare seu corpo com uma respiração consciente antes de começar."
+    ),
+    btn: getTreinoText("treino.aquecimento.btn",
+      "🌬️ Abrir protocolos de respiração"
+    )
+  };
+};
+
+window.getResfriamentoUI = function () {
+  return {
+    sugestao: getTreinoText("treino.resfriamento.sugestao",
+      "🌬️ Sugestão: finalize seu treino desacelerando com respiração suave."
+    ),
+    btn: getTreinoText("treino.resfriamento.btn",
+      "💗 Fazer respiração de fechamento"
+    )
+  };
+};
+
 
 
