@@ -454,20 +454,20 @@ const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
 
   const serieInfo  = getSerieEspecialInfo(codigoSerie);
 
- // 🔒 DEFINE ANTES DE USAR
-const serieAttr = codigoSerie
-  ? `data-serie="${codigoSerie}" class="carousel-item ff-box ff-serie-especial ff-serie-${codigoSerie}"`
-  : `class="carousel-item ff-box"`;
+const serieClass = codigoSerie
+  ? `carousel-item ff-box ff-serie-especial ff-serie-${codigoSerie}`
+  : `carousel-item ff-box`;
 
-const serieData = codigoSerie ? `data-serie="${codigoSerie}"` : "";
-
+const serieData = codigoSerie
+  ? `data-serie="${codigoSerie}"`
+  : "";
 
  let htmlBox = `
-  <div ${serieAttr}
+  <div class="${serieClass}"
+       ${serieData}
        data-serie-ordem="${ordemSerie ?? ""}"
        data-serie-codigo="${codigoSerie ?? ""}">
 `;
-
 
   if (serieInfo) {
     htmlBox += `
