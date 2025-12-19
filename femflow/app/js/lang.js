@@ -122,6 +122,7 @@ home: {
   treino: {
     tituloTopo: "Treino Diário",
     diaPrograma: "Dia do Programa",
+     diaProgramaLabel: "Dia {{dia}}",
     btnSalvar: "💾 Salvar treino",
     btnDescanso: "🌿 Descanso",
     btnCancelar: "Cancelar",
@@ -348,6 +349,7 @@ home: {
   treino: {
     tituloTopo: "Daily Workout",
     diaPrograma: "Program Day",
+   diaProgramaLabel: "Jour {{dia}}",
     btnSalvar: "💾 Save workout",
     btnDescanso: "🌿 Rest",
     btnCancelar: "Cancel",
@@ -576,6 +578,7 @@ fr: {
   treino: {
     tituloTopo: "Entraînement du jour",
     diaPrograma: "Jour du programme",
+     diaProgramaLabel: "Day {{dia}}",
     btnSalvar: "💾 Enregistrer l’entraînement",
     btnDescanso: "🌿 Repos",
     btnCancelar: "Annuler",
