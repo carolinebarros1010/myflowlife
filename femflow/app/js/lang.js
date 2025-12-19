@@ -140,7 +140,16 @@ home: {
     exemplosCasa:
       "Em casa: polichinelo, corrida parada, burpee, corda, salto no lugar",
     iniciar: "Toque para iniciar"
-  } 
+  },
+     aquecimento: {
+    sugestao: "💨 Sugestão: prepare seu corpo com uma respiração consciente antes de começar.",
+    btn: "🌬️ Abrir protocolos de respiração"
+  },
+
+  resfriamento: {
+    sugestao: "🌬️ Sugestão: finalize seu treino desacelerando com respiração suave.",
+    btn: "💗 Fazer respiração de fechamento"
+  }
   },
 resp: {
   /* Títulos */
@@ -357,7 +366,16 @@ home: {
   exemplosCasa:
     "At home: jumping jacks, running in place, burpees, rope, jumps",
   iniciar: "Tap to start"
-}
+},
+  aquecimento: {
+    sugestao: "💨 Tip: prepare your body with conscious breathing before you start.",
+    btn: "🌬️ Open breathing protocols"
+  },
+
+  resfriamento: {
+    sugestao: "🌬️ Tip: finish your workout by slowing down with gentle breathing.",
+    btn: "💗 Do a closing breathing"
+  }   
   },
 resp: {
   /* Titles */
@@ -576,7 +594,16 @@ fr: {
   exemplosCasa:
     "À la maison: jumping jacks, course sur place, burpees, corde, sauts",
   iniciar: "Touchez pour commencer"
-}
+},
+   aquecimento: {
+    sugestao: "💨 Astuce : prépare ton corps avec une respiration consciente avant de commencer.",
+    btn: "🌬️ Ouvrir les protocoles de respiration"
+  },
+
+  resfriamento: {
+    sugestao: "🌬️ Astuce : termine ton entraînement en ralentissant avec une respiration douce.",
+    btn: "💗 Faire une respiration de fin"
+  }   
  
   },
 resp: {
