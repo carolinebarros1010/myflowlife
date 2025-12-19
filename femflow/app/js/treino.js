@@ -792,62 +792,47 @@ function initClusterTimers() {
 
   });
 }
- function initSeriesProgress() {
+function initRestPause() {
 
-  document.querySelectorAll(".ff-ex-item").forEach(exItem => {
+  document.querySelectorAll("[data-rp]").forEach(rp => {
 
-    const progressEl = exItem.querySelector("[data-role='serie-progress']");
-    const btnSerie   = exItem.querySelector("[data-role='serie-next']");
-    const rpWrap     = exItem.querySelector("[data-rp]");
+    const btn  = rp.querySelector(".ff-restpause-btn");
+    const fill = rp.querySelector(".ff-rp-fill");
 
-    if (!progressEl || !btnSerie) return;
+    if (!btn || !fill) return;
 
-    let atual = Number(progressEl.dataset.serieAtual || 1);
-    const total = Number(progressEl.dataset.serieTotal || 1);
-    let rpConcluido = false;
+    let rodando = false;
+    let intv = null;
+    const pausa = 20;
 
-    btnSerie.addEventListener("click", () => {
+    btn.addEventListener("click", () => {
+      if (rodando) return;
 
-      /* ===============================
-         AVANÇO NORMAL
-      =============================== */
-      if (atual < total) {
-        atual++;
-        progressEl.dataset.serieAtual = atual;
-        progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
-        return;
-      }
+      rodando = true;
+      btn.textContent = "⏸️ Pausando…";
+      fill.style.width = "100%";
 
-      /* ===============================
-         ÚLTIMA SÉRIE → RP OBRIGATÓRIO
-      =============================== */
-      if (atual === total && rpWrap && !rpConcluido) {
+      let restante = pausa;
 
-        rpWrap.classList.remove("hidden");
+      clearInterval(intv);
+      intv = setInterval(() => {
+        restante--;
+        fill.style.width = `${(restante / pausa) * 100}%`;
 
-        btnSerie.textContent = "⚡ Executar Rest-Pause";
-        btnSerie.disabled = true;
+        if (restante <= 0) {
+          clearInterval(intv);
+          rodando = false;
+          btn.textContent = "✔️ RP concluído";
 
-        rpWrap.addEventListener("rp:concluido", () => {
-          rpConcluido = true;
-          btnSerie.disabled = false;
-          btnSerie.textContent = "✔️ Finalizar exercício";
-        }, { once: true });
-
-        return;
-      }
-
-      /* ===============================
-         FINALIZA EXERCÍCIO
-      =============================== */
-      if (atual === total && (!rpWrap || rpConcluido)) {
-        btnSerie.textContent = "✔️ Exercício concluído";
-        btnSerie.classList.add("done");
-        btnSerie.disabled = true;
-      }
+          rp.dispatchEvent(new CustomEvent("rp:concluido", {
+            bubbles: true
+          }));
+        }
+      }, 1000);
     });
   });
 }
+
 
 function initSeriesProgress() {
 
