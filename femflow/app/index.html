@@ -149,7 +149,10 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("femflow_email", res.email || email);
 
     if (res.deviceId) {
-      localStorage.setItem("femflow_device", res.deviceId);
+      localStorage.setItem(
+  "femflow_device_id",
+  res.deviceId || FEMFLOW.getDeviceId()
+);
     }
 
     if (res.sessionToken) {
@@ -229,7 +232,10 @@ if (res.deviceUpdated) {
       localStorage.setItem("femflow_email", res.email || data.email);
 
       if (res.deviceId) {
-        localStorage.setItem("femflow_device", res.deviceId);
+        localStorage.setItem(
+  "femflow_device_id",
+  res.deviceId || FEMFLOW.getDeviceId()
+);
       }
 
       if (res.sessionToken) {
@@ -298,7 +304,11 @@ if (res.deviceUpdated) {
       localStorage.setItem("femflow_email", res.email || email);
 
       if (res.deviceId) {
-        localStorage.setItem("femflow_device", res.deviceId);
+        localStorage.setItem(
+  "femflow_device_id",
+  res.deviceId || FEMFLOW.getDeviceId()
+);
+
       }
 
       if (res.sessionToken) {
