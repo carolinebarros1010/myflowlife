@@ -1,199 +1,147 @@
-treino Fixo:
+📘 README OFICIAL — PLANILHA DE TREINOS FEMFLOW
+1️⃣ Objetivo da Planilha
 
-| tipo         | box | ordem | enfase | fase       | dia | titulo              | link                                         | series | reps | tempo | intervalo | forte | leve | ciclos |
-| ------------ | --- | ----- | ------ | ---------- | --- | ------------------- | -------------------------------------------- | ------ | ---- | ----- | --------- | ----- | ---- | ------ |
-| aquecimento  | 0   | 1     | costas | ovulatoria | 14  | Aquecimento inicial |                                              |        |      |       |           |       |      |        |
-| treino       | 1   | 1     | costas | ovulatoria | 14  | Remada Baixa        | [https://youtu.be/aaa](https://youtu.be/aaa) | 4      | 12   |       | 60        |       |      |        |
-| treino       | 1   | 2     | costas | ovulatoria | 14  | Puxada Aberta       | [https://youtu.be/bbb](https://youtu.be/bbb) | 4      | 12   |       | 60        |       |      |        |
-| treino       | 2E  | 1     | costas | ovulatoria | 14  | Remada Unilateral   | [https://youtu.be/ccc](https://youtu.be/ccc) | 3      | 10   |       | 0         |       |      |        |
-| treino       | 2E  | 2     | costas | ovulatoria | 14  | Facepull            | [https://youtu.be/ddd](https://youtu.be/ddd) | 3      | 15   |       | 45        |       |      |        |
-| treino       | 3S  | 1     | costas | ovulatoria | 14  | Pull Down           | [https://youtu.be/eee](https://youtu.be/eee) | 3      | 12   |       | 0         |       |      |        |
-| treino       | 3S  | 2     | costas | ovulatoria | 14  | Remada Curvada      | [https://youtu.be/fff](https://youtu.be/fff) | 3      | 10   |       | 0         |       |      |        |
-| treino       | 3S  | 3     | costas | ovulatoria | 14  | Remada Neutra       | [https://youtu.be/ggg](https://youtu.be/ggg) | 3      | 12   |       | 60        |       |      |        |
-| treino       | 2AE | 1     | costas | ovulatoria | 14  | Remada Cavalinho    | [https://youtu.be/hhh](https://youtu.be/hhh) | 4      | 10   |       | 0         |       |      |        |
-| treino       | 2AE | 2     | costas | ovulatoria | 14  | Supino Máquina      | [https://youtu.be/iii](https://youtu.be/iii) | 4      | 12   |       | 60        |       |      |        |
-| treino       | 3T  | 1     | costas | ovulatoria | 14  | Retroversão Pulley  | [https://youtu.be/jjj](https://youtu.be/jjj) | 3      | 15   |       | 0         |       |      |        |
-| treino       | 3T  | 2     | costas | ovulatoria | 14  | Pull Down Estendido | [https://youtu.be/kkk](https://youtu.be/kkk) | 3      | 12   |       | 0         |       |      |        |
-| treino       | 3T  | 3     | costas | ovulatoria | 14  | Remada Máquina      | [https://youtu.be/lll](https://youtu.be/lll) | 3      | 12   |       | 45        |       |      |        |
-| hiit         | 3   | 1     | costas | ovulatoria | 14  | HIIT 40/20          |                                              |        |      |       |           | 40    | 20   | 6      |
-| hiit         | 0   | 1     | costas | ovulatoria | 14  | HIIT Final 30/30    |                                              |        |      |       |           | 30    | 30   | 8      |
-| cardio_final | 900 | 1     | costas | ovulatoria | 14  | Cardio Leve         |                                              |        |      | 600   |           |       |      |        |
-| resfriamento | 999 | 1     | costas | ovulatoria | 14  | Resfriamento Final  |                                              |        |      |       |           |       |      |        |
-
-
-treino personal
-
-| id       | tipo         | box | ordem | enfase | fase       | dia | titulo              | link                                         | series | reps | tempo | intervalo | forte | leve | ciclos |
-| -------- | ------------ | --- | ----- | ------ | ---------- | --- | ------------------- | -------------------------------------------- | ------ | ---- | ----- | --------- | ----- | ---- | ------ |
-| FF-92817 | aquecimento  | 0   | 1     | costas | ovulatoria | 14  | Aquecimento inicial |                                              |        |      |       |           |       |      |        |
-| FF-92817 | treino       | 1   | 1     | costas | ovulatoria | 14  | Remada Baixa        | [https://youtu.be/aaa](https://youtu.be/aaa) | 4      | 12   |       | 60        |       |      |        |
-| FF-92817 | treino       | 1   | 2     | costas | ovulatoria | 14  | Puxada Aberta       | [https://youtu.be/bbb](https://youtu.be/bbb) | 4      | 12   |       | 60        |       |      |        |
-| FF-92817 | treino       | 2E  | 1     | costas | ovulatoria | 14  | Remada Unilateral   | [https://youtu.be/ccc](https://youtu.be/ccc) | 3      | 10   |       | 0         |       |      |        |
-| FF-92817 | treino       | 2E  | 2     | costas | ovulatoria | 14  | Facepull            | [https://youtu.be/ddd](https://youtu.be/ddd) | 3      | 15   |       | 45        |       |      |        |
-| FF-92817 | treino       | 3S  | 1     | costas | ovulatoria | 14  | Pull Down           | [https://youtu.be/eee](https://youtu.be/eee) | 3      | 12   |       | 0         |       |      |        |
-| FF-92817 | treino       | 3S  | 2     | costas | ovulatoria | 14  | Remada Curvada      | [https://youtu.be/fff](https://youtu.be/fff) | 3      | 10   |       | 0         |       |      |        |
-| FF-92817 | treino       | 3S  | 3     | costas | ovulatoria | 14  | Remada Neutra       | [https://youtu.be/ggg](https://youtu.be/ggg) | 3      | 12   |       | 60        |       |      |        |
-| FF-92817 | treino       | 2AE | 1     | costas | ovulatoria | 14  | Remada Cavalinho    | [https://youtu.be/hhh](https://youtu.be/hhh) | 4      | 10   |       | 0         |       |      |        |
-| FF-92817 | treino       | 2AE | 2     | costas | ovulatoria | 14  | Supino Máquina      | [https://youtu.be/iii](https://youtu.be/iii) | 4      | 12   |       | 60        |       |      |        |
-| FF-92817 | treino       | 3T  | 1     | costas | ovulatoria | 14  | Retroversão Pulley  | [https://youtu.be/jjj](https://youtu.be/jjj) | 3      | 15   |       | 0         |       |      |        |
-| FF-92817 | treino       | 3T  | 2     | costas | ovulatoria | 14  | Pull Down Estendido | [https://youtu.be/kkk](https://youtu.be/kkk) | 3      | 12   |       | 0         |       |      |        |
-| FF-92817 | treino       | 3T  | 3     | costas | ovulatoria | 14  | Remada Máquina      | [https://youtu.be/lll](https://youtu.be/lll) | 3      | 12   |       | 45        |       |      |        |
-| FF-92817 | hiit         | 3   | 1     | costas | ovulatoria | 14  | HIIT 40/20          |                                              |        |      |       |           | 40    | 20   | 6      |
-| FF-92817 | hiit         | 0   | 1     | costas | ovulatoria | 14  | HIIT Final 30/30    |                                              |        |      |       |           | 30    | 30   | 8      |
-| FF-92817 | cardio_final | 900 | 1     | costas | ovulatoria | 14  | Cardio Leve         |                                              |        |      | 600   |           |       |      |        |
-| FF-92817 | resfriamento | 999 | 1     | costas | ovulatoria | 14  | Resfriamento Final  |                                              |        |      |       |           |       |      |        |
-
-
-Aquecimento e Resfriamento:
-
-O FemFlow não utiliza os valores de séries, reps, intervalo ou tempo
-informados na planilha para blocos do tipo 'aquecimento' ou 'resfriamento'.
-
-Estes blocos são convertidos automaticamente em versões Premium fixas,
-definidas no treino-engine:
-
-Aquecimento Premium:
-- Mobilidade de Quadril (40s)
-- Mobilidade Torácica (40s)
-- Mobilidade de Ombro (40s)
-- Caminhada leve (5 minutos)
-
-Resfriamento Premium:
-- Alongamentos leves (2 minutos)
-- Respiração guiada (1 minuto)
-
-Portanto, somente as colunas:
-tipo, box, ordem, enfase, fase e dia
-são relevantes para estes blocos.
-📘 SÉRIES ESPECIAIS — FEMFLOW (ReadmeTreino.gs)
-
-As Séries Especiais FemFlow são estratégias avançadas de execução utilizadas para modular intensidade, densidade e estímulo metabólico, respeitando o dia do ciclo hormonal e o nível da aluna.
-
-O sistema não calcula cargas automaticamente.
-A execução é guiada pela aluna, com orientação visual no app.
-
-🔹 B — Biset
-
-Combinação de 2 exercícios consecutivos
-
-Executar sem intervalo entre eles
-
-Intervalo somente após o segundo exercício
-
-Objetivo: densidade e economia de tempo
-
-🔹 T — Triset
-
-Combinação de 3 exercícios consecutivos
-
-Executar sem intervalo entre eles
-
-Intervalo somente após o terceiro exercício
-
-Objetivo: alto estresse metabólico
-
-🔹 Q — Quadriset
-
-Combinação de 4 exercícios consecutivos
-
-Executar sem intervalo entre eles
-
-Intervalo somente após o quarto exercício
-
-Objetivo: exaustão localizada intensa
-
-🔹 C — Cluster Set
-
-A série é dividida em 4 blocos menores
-
-Total de repetições ÷ 4
-
-Intervalo de 10 segundos entre blocos
-
-Objetivo: manter qualidade técnica com alta carga
-
-🔹 D — Dropset
-
-Executar a série até a falha
-
-Realizar 3 reduções consecutivas de carga
-
-Executar até a falha em cada redução
-
-Sem intervalo entre as reduções
-
-Intervalo somente após o último drop
-
-Objetivo: estresse metabólico máximo
-
-🔹 RP — Rest-Pause
-
-Aplicado somente na última série
-
-Executar a série até a falha
-
-Reduzir 50% da carga
-
-Executar 20 repetições contínuas
-
-Intervalo somente após concluir o RP
-
-Objetivo: finalização metabólica
-
-🔹 I — Isometria
-
-Manter 3 segundos de contração máxima
-
-Executar a isometria em cada repetição
-
-Objetivo: melhorar controle neuromuscular
-
-🔹 CC — Cadência Controlada
-
-Controle da fase excêntrica do movimento
-
-Velocidade reduzida e consciente
-
-Objetivo: aumentar tempo sob tensão
-
-🔹 AE — Advanced Effort
-
-Marcador de esforço avançado
-
-Não altera a estrutura da série
-
-Indica intensidade elevada e foco máximo
-
-Objetivo: alertar sobre alto nível de exigência
-
-⚠️ Observações Importantes
-
-Séries especiais podem ser combinadas, desde que não conflitem logicamente.
-
-O uso é progressivo, respeitando:
-
-nível da aluna
+Esta planilha é a fonte estrutural dos treinos do FemFlow, utilizada para alimentar o sistema (Firebase + App) com treinos organizados por:
 
 fase do ciclo hormonal
 
-histórico de treino
+dia do ciclo
 
-A execução deve sempre priorizar:
+nível da aluna
 
-técnica
+ênfase muscular
 
-consciência corporal
+A planilha não executa lógica.
+Toda a lógica de ordenação, intercalamento e renderização é feita pelo treino-engine.js.
 
-segurança
+2️⃣ Estrutura das Colunas (Padrão Oficial)
+Coluna	Obrigatória	Descrição
+tipo	✅	Tipo do bloco (aquecimento, treino, hiit, cardio_final, resfriamento)
+box	✅	Agrupador lógico do bloco (número + sufixo opcional)
+ordem	✅	Ordem interna dentro do box
+enfase	✅	Ênfase principal do treino (ex: gluteo)
+fase	✅	Fase do ciclo (menstrual, folicular, ovulatoria, lutea)
+dia	✅	Dia do ciclo (1–30)
+titulo_pt	⚠️	Nome do exercício (português)
+titulo_en	⚠️	Nome do exercício (inglês)
+titulo_fr	⚠️	Nome do exercício (francês)
+link	⚠️	Link do exercício (YouTube Shorts)
+series	⚠️	Número de séries
+reps	⚠️	Repetições
+tempo	⚠️	Tempo (em segundos)
+intervalo	⚠️	Intervalo (em segundos)
+forte	⚠️	Tempo forte do HIIT
+leve	⚠️	Tempo leve do HIIT
+ciclos	⚠️	Número de ciclos do HIIT
 
-📋 Tabela — Séries Especiais FemFlow
-Código	Nome	Regra principal
-B	Biset	2 exercícios consecutivos, descanso somente ao final
-T	Triset	3 exercícios consecutivos, descanso somente ao final
-Q	Quadriset	4 exercícios consecutivos, descanso somente ao final
-C	Cluster Set	Reps divididas em 4 blocos com 10s de intervalo
-D	Dropset	3 reduções de carga até a falha, sem intervalo
-RP	Rest-Pause	Falha → 50% da carga → 20 repetições
-I	Isometria	3s de contração máxima em cada repetição
-CC	Cadência Controlada	Fase excêntrica lenta e controlada
-AE	Advanced Effort	Indicador de esforço avançado
+🔹 Campos marcados como ⚠️ são usados apenas quando o tipo exige.
+
+3️⃣ Tipos de Bloco e Regras
+🔹 Aquecimento
+tipo = aquecimento
+box = 0
+
+
+Séries, reps, tempo e intervalo não são utilizados
+
+O app converte automaticamente para o Aquecimento Premium FemFlow
+
+🔹 Treino (Exercícios)
+tipo = treino
+box = 1, 2, 3...
+
+
+Pode usar letras no box (1T, 2AE, 3S)
+
+O número define a ordem
+
+A letra define série especial (visual e pedagógica)
+
+🔹 HIIT
+tipo = hiit
+
+
+Regras obrigatórias:
+
+Se vinculado a um box → box = número do box
+
+Se HIIT solto → box = 0
+
+ordem ≥ 90 (padrão oficial)
+
+🔹 Cardio Final
+tipo = cardio_final
+box = 900
+
+
+Sempre após o treino
+
+Usa apenas a coluna tempo
+
+🔹 Resfriamento
+tipo = resfriamento
+box = 999   ✅ PADRÃO OFICIAL
+
+
+Séries, reps e tempo não são utilizados
+
+Convertido automaticamente para Resfriamento Premium FemFlow
+
+4️⃣ Séries Especiais (Resumo)
+Código	Nome	Observação
+B	Biset	2 exercícios seguidos
+T	Triset	3 exercícios seguidos
+Q	Quadriset	4 exercícios seguidos
+C	Cluster	Reps divididas
+D	Dropset	Redução de carga
+RP	Rest-Pause	Falha + redução
+I	Isometria	Contração mantida
+CC	Cadência Controlada	Excêntrica lenta
+AE	Advanced Effort	Indicador de alta exigência
+
+📌 O engine não calcula carga.
+As séries especiais são guias de execução.
+
+📅 DIA MODELO — INICIANTE • GLÚTEO
+
+Fase: Folicular
+Dia: 6
+
+tipo            box   ordem  enfase   fase       dia  titulo_pt
+aquecimento     0     1      gluteo   folicular  6    Aquecimento inicial
+
+treino          1     1      gluteo   folicular  6    Agachamento com halter
+treino          1     2      gluteo   folicular  6    Afundo alternado
+treino          1     3      gluteo   folicular  6    Elevação pélvica
+treino          1     4      gluteo   folicular  6    Abdutor máquina
+
+hiit            1     99     gluteo   folicular  6    HIIT curto 20/30
+
+cardio_final    900   1      gluteo   folicular  6    Cardio leve
+
+resfriamento    999   1      gluteo   folicular  6    Resfriamento final
+
+🧠 O que o engine fará automaticamente:
+
+Renderizar Aquecimento Premium
+
+Agrupar os 4 exercícios no Box 1
+
+Inserir o HIIT ao final do box
+
+Inserir o Cardio Final
+
+Renderizar Resfriamento Premium
+
+Garantir que aquecimento e resfriamento apareçam apenas uma vez
+
+5️⃣ Princípios FemFlow (regra de ouro)
+
+A planilha não pensa
+
+O engine não ensina
+
+O método educa o corpo
+
+📌 Se a planilha estiver limpa e coerente,
+📌 o app sempre mostrará o treino certo, no dia certo, para o corpo certo.
