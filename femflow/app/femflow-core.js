@@ -30,14 +30,33 @@ FEMFLOW.dispatch = function(type, detail = {}) {
 ============================================================ */
 
 FEMFLOW.getDeviceId = function () {
+  // 1️⃣ tenta localStorage
   let d = localStorage.getItem("femflow_device_id");
-  if (!d) {
-    d = (crypto?.randomUUID?.() ||
-         ("dev-" + Date.now() + "-" + Math.random().toString(36).slice(2)));
+  if (d) return d;
+
+  // 2️⃣ tenta cookie persistente
+  const m = document.cookie.match(/(?:^|;)\s*ff_device=([^;]+)/);
+  if (m && m[1]) {
+    d = decodeURIComponent(m[1]);
     localStorage.setItem("femflow_device_id", d);
+    return d;
   }
+
+  // 3️⃣ gera novo (primeiro acesso real)
+  d =
+    crypto?.randomUUID?.() ||
+    ("dev-" + Date.now() + "-" + Math.random().toString(36).slice(2));
+
+  // salva nos dois
+  localStorage.setItem("femflow_device_id", d);
+  document.cookie =
+    "ff_device=" +
+    encodeURIComponent(d) +
+    "; path=/; max-age=31536000; SameSite=Lax";
+
   return d;
 };
+
 
 FEMFLOW.getSessionToken = function () {
   return localStorage.getItem("femflow_session_token") || "";
