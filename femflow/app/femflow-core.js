@@ -158,7 +158,11 @@ FEMFLOW.post = async function (payload) {
   if (resp?.status === "blocked" || resp?.status === "denied") {
     FEMFLOW.toast?.("Sessão inválida. Faça login novamente.", true);
     FEMFLOW.clearSession();
-    localStorage.clear();
+
+localStorage.removeItem("femflow_auth");
+localStorage.removeItem("femflow_id");
+localStorage.removeItem("femflow_email");
+// ❗ NÃO remover femflow_device_id
     location.href = "index.html";
     throw new Error("Sessão inválida");
   }
