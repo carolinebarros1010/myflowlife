@@ -155,7 +155,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (res.sessionToken) {
       FEMFLOW.setSessionToken(res.sessionToken);
     }
-
+    
+// 🧠 NOVO — reconciliação silenciosa
+if (res.deviceUpdated) {
+  console.info("🔁 Device atualizado automaticamente pelo backend");
+}
+    
     setMsg("Acesso liberado ✨", true);
     setTimeout(() => location.href = "home.html", 500);
   }
