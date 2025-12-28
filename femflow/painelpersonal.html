@@ -1,670 +1,743 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FemFlow • Painel Personal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@500;600&display=swap"
-    rel="stylesheet"
+<!DOCTYPE html >
+< html lang = "pt-BR" > 
+< cabeçalho >
+  < meta charset = "UTF-8" /> 
+  < meta name = "viewport" content = "width=device-width, initial-scale=1.0" />  
+  <title> FemFlow • Painel Pessoal </title>​
+  < link rel = "preconnect" href = "https://fonts.googleapis.com" />  
+  < link rel = "preconnect" href = "https://fonts.gstatic.com" crossorigin />   
+  < link
+    href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@500;600&display=swap"
+    rel = "folha de estilo"
   />
-  <style>
-    :root {
-      --bg: #fff7f2;
-      --text: #111111;
-      --accent-coral: #ff6b6b;
-      --accent-orange: #ff8e53;
-      --accent-peach: #ffb199;
-      --accent-teal: #335953;
-      --card: #ffffff;
-      --muted: #f1e7e2;
-      --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-      --radius-lg: 22px;
-      --radius-md: 16px;
-      --success: #2f8f5f;
-      --warning: #ff8e53;
-      --error: #e04848;
+  < estilo >
+    :raiz {
+      --bg : #fff7f2 ;
+      --texto : #111111 ;
+      --accent-coral : #ff6b6b ;
+      --acento laranja: #ff8e53 ;
+      --accent-peach : #ffb199;
+      --accent-teal : #335953 ;
+      --card : #ffffff ;
+      --silenciado : #f1e7e2 ;
+      --shadow : 0 16px 40px rgba ( 0 , 0 , 0 , 0.08 );
+   
+      --radius-lg : 22px ;
+      --radius-md : 16px ;
+      --sucesso : #2f8f5f ;
+      --aviso : #ff8e53 ;
+      --erro : #e04848 ;
     }
 
     * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+      box-sized : caixa de borda;
+      margem : 0 ;
+      preenchimento : 0 ;
     }
 
-    body {
-      font-family: "Lato", sans-serif;
-      background: var(--bg);
-      color: var(--text);
+    corpo {
+      família-da-fonte : "Lato" , sem serifa;
+      fundo : var (--bg);
+      cor : var (--texto);
     }
 
-    h1,
-    h2,
+    h1 ,
+    h2 ,
     h3 {
-      font-family: "Playfair Display", serif;
-      font-weight: 600;
+      família-da-fonte : "Playfair Display" , serifada;
+      peso da fonte : 600 ;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
+    um {
+      cor : herdar;
+      decoração-de-texto : nenhuma;
     }
 
     .app {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 24px;
-      display: grid;
-      grid-template-columns: 240px 1fr;
-      gap: 24px;
+      largura máxima : 1400px ;
+      margem : 0 auto;
+      preenchimento : 24px ;
+      exibição : grade;
+      grid-template-columns : 240px 1 fr;
+ 
+      espaço : 24px ;
     }
 
     .topbar {
-      grid-column: 1 / -1;
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      padding: 18px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: var(--shadow);
+      coluna-grade : 1 / - 1 ;
+      fundo : var (--card);
+      raio da borda : var (--radius-lg);
+      preenchimento : 18px 24px ;
+ 
+      exibição : flexível;
+      alinhar-itens : centro;
+      justify-content : espaço-entre;
+      box-shadow : var (--shadow);
     }
 
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+    .marca {
+      exibição : flexível;
+      flex-direction : coluna;
+      espaço : 2px ;
     }
 
     .brand-title {
-      font-size: 22px;
+      tamanho da fonte : 22px ;
     }
 
     .brand-sub {
-      font-size: 14px;
-      color: rgba(17, 17, 17, 0.6);
+      tamanho da fonte : 14px ;
+      cor : rgba ( 17 , 17 , 17 , 0.6 );
     }
 
     .topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+      exibição : flexível;
+      alinhar-itens : centro;
+      espaçamento : 16px ;
     }
 
     .status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
+      exibição : flexível;
+      alinhar-itens : centro;
+      espaçamento : 8px ;
+      tamanho da fonte : 13px ;
+      peso da fonte : 700 ;
+      text-transform : maiúsculas;
     }
 
     .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--warning);
-      box-shadow: 0 0 8px rgba(255, 142, 83, 0.6);
+      largura : 10px ;
+      altura : 10px ;
+      raio-da-borda : 50% ;
+      fundo : era (--aviso);
+      box-shadow : 0 0 8px rgba ( 255 , 142 , 83 , 0.6 );
+   
     }
 
-    .button {
-      border: none;
-      border-radius: 999px;
-      padding: 10px 18px;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      background: linear-gradient(120deg, var(--accent-coral), var(--accent-orange));
-      color: #fff;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+    .botão {
+      borda : nenhuma;
+      raio-da-borda : 999px ;
+      preenchimento : 10px 18px ;
+ 
+      peso da fonte : 700 ;
+      tamanho da fonte : 14px ;
+      cursor : ponteiro;
+      fundo : gradiente-linear ( 120deg , var (--accent-coral), var (--accent-orange));
+      cor : #fff ;
+      transição : transformar 0,2s com suavização, sombra da caixa 0,2s com suavização;
+      exibição : inline-flex;
+      alinhar-itens : centro;
+      espaçamento : 8px ;
     }
 
-    .button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(255, 107, 107, 0.3);
+    .button :hover {
+      transformar : traduzirY (- 1px );
+      box-shadow : 0 8px 18px rgba ( 255 , 107 , 107 , 0.3 );
+   
     }
 
-    .button.secondary {
-      background: var(--card);
-      color: var(--text);
-      border: 1px solid rgba(17, 17, 17, 0.1);
-      box-shadow: none;
+    .botão .secundário {
+      fundo : var (--card);
+      cor : var (--texto);
+      borda : 1px sólida rgba ( 17 , 17 , 17 , 0.1 );
+      sombra-da-caixa : nenhuma;
     }
 
-    .button.ghost {
-      background: transparent;
-      color: var(--accent-teal);
-      border: 1px solid rgba(51, 89, 83, 0.3);
+    .botão .fantasma {
+      fundo : transparente;
+      cor : var (--accent-teal);
+      borda : 1px sólida rgba ( 51 , 89 , 83 , 0.3 );
     }
 
-    .button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
+    .button :disabled {
+      opacidade : 0,6 ;
+      cursor : não permitido;
+      transformar : nenhuma;
+      sombra-da-caixa : nenhuma;
     }
 
-    .button.loading::after {
-      content: "";
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255, 255, 255, 0.6);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
+    .button .loading ::after {
+      contente : "" ;
+      largura : 14px ;
+      altura : 14px ;
+      borda : 2px sólida rgba ( 255 , 255 , 255 , 0.6 );
+      cor-da-borda-superior : #fff ;
+      raio-da-borda : 50% ;
+      animação : rotação linear infinita de 0,6s ;
     }
 
-    .button.success {
-      background: var(--success);
+    .botão .sucesso {
+      fundo : foi (--sucesso);
     }
 
-    .button.error {
-      background: var(--error);
+    .botão .erro {
+      fundo : var (--erro);
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
+    @keyframes girar {
+      para {
+        transformar : rotacionar ( 360 graus );
       }
     }
 
     .sidebar {
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      box-shadow: var(--shadow);
-      position: sticky;
-      top: 24px;
-      align-self: start;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      fundo : var (--card);
+      raio da borda : var (--radius-lg);
+      preenchimento : 20px ;
+      box-shadow : var (--shadow);
+      posição : pegajosa;
+      topo : 24px ;
+      alinhamento-próprio : início;
+      exibição : flexível;
+      flex-direction : coluna;
+      espaçamento : 16px ;
     }
 
     .sidebar h3 {
-      font-size: 16px;
+ 
+      tamanho da fonte : 16px ;
     }
 
-    .nav {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .não {
+      exibição : flexível;
+      flex-direction : coluna;
+      espaçamento : 8px ;
     }
 
-    .nav a {
-      padding: 10px 12px;
-      border-radius: 12px;
-      font-weight: 700;
-      color: rgba(17, 17, 17, 0.75);
-      background: rgba(255, 177, 153, 0.15);
+    .nome {
+ 
+      preenchimento : 10px 12px ;
+ 
+      raio da borda : 12px ;
+      peso da fonte : 700 ;
+      cor : rgba ( 17 , 17 , 17 , 0.75 );
+      fundo : rgba ( 255 , 177 , 153 , 0.15 );
     }
 
-    .nav a:hover {
-      background: rgba(255, 107, 107, 0.2);
-      color: var(--text);
+    .nava:hover {
+ 
+      fundo : rgba ( 255 , 107 , 107 , 0.2 );
+      cor : var (--texto);
     }
 
-    .main {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
+    .principal {
+      exibição : flexível;
+      flex-direction : coluna;
+      espaço : 24px ;
     }
 
     .card {
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
+      fundo : var (--card);
+      raio da borda : var (--radius-lg);
+      preenchimento : 24px ;
+      box-shadow : var (--shadow);
+      exibição : flexível;
+      flex-direction : coluna;
+      espaço : 18px ;
     }
 
     .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
+      exibição : flexível;
+      alinhar-itens : centro;
+      justify-content : espaço-entre;
+      espaçamento : 16px ;
     }
 
     .card-title {
-      font-size: 20px;
+      tamanho da fonte : 20px ;
     }
 
-    .field-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px 20px;
+    .grade-de-campo {
+      exibição : grade;
+      grid-template-columns : repita ( 2 , minmax ( 0 , 1 fr));
+      espaçamento : 16px 20px ;
+ 
     }
 
-    label {
-      font-weight: 700;
-      font-size: 13px;
-      margin-bottom: 6px;
-      display: block;
+    rótulo {
+      peso da fonte : 700 ;
+      tamanho da fonte : 13px ;
+      margem-inferior : 6px ;
+      exibir : bloco;
     }
 
-    input,
-    select,
-    textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(17, 17, 17, 0.15);
-      font-family: inherit;
-      font-size: 14px;
-      background: #fff;
+    pequeno {
+      exibir : bloco;
+      margem superior : 6px ;
+      tamanho da fonte : 12px ;
+      cor : rgba ( 17 , 17 , 17 , 0.65 );
+      altura da linha : 1,4 ;
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 80px;
+    entrada ,
+    selecionar ,
+    área de texto {
+      largura : 100% ;
+      preenchimento : 10px 12px ;
+ 
+      raio da borda : 12px ;
+      borda : 1px sólida rgba ( 17 , 17 , 17 , 0.15 );
+      família-da-fonte : herdar;
+      tamanho da fonte : 14px ;
+      fundo : #fff ;
+    }
+
+    área de texto {
+      redimensionar : vertical;
+      altura mínima : 80px ;
     }
 
     .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
+      exibição : flexível;
+      flex-wrap : envolver;
+      espaçamento : 8px ;
+      margem superior : 8px ;
     }
 
     .chip {
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: rgba(255, 177, 153, 0.25);
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
+      preenchimento : 6px 12px ;
+ 
+      raio-da-borda : 999px ;
+      fundo : rgba ( 255 , 177 , 153 , 0.25 );
+      tamanho da fonte : 12px ;
+      peso da fonte : 700 ;
+      cursor : ponteiro;
     }
 
-    .chip.active {
-      background: rgba(51, 89, 83, 0.15);
-      color: var(--accent-teal);
+    .chip .ativo {
+      fundo : rgba ( 51 , 89 , 83 , 0.15 );
+      cor : var (--accent-teal);
     }
 
     .actions-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
+      exibição : flexível;
+      flex-wrap : envolver;
+      espaço : 12px ;
     }
 
     .preview {
-      background: var(--muted);
-      padding: 12px 16px;
-      border-radius: 14px;
-      font-size: 13px;
-      word-break: break-all;
+      fundo : estava (--silenciado);
+      preenchimento : 12px 16px ;
+ 
+      raio da borda : 14px ;
+      tamanho da fonte : 13px ;
+      quebra-de-palavra : quebrar-tudo;
     }
 
-    .maintenance-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 16px;
-      align-items: end;
+    .grade-de-manutenção {
+      exibição : grade;
+      grid-template-columns : 1.2 fr 1 fr;
+      espaçamento : 16px ;
+      alinhar-itens : fim;
     }
 
     .console {
-      background: #111111;
-      color: #fdf6f1;
-      border-radius: var(--radius-md);
-      padding: 16px;
-      min-height: 220px;
-      font-family: "Courier New", monospace;
-      font-size: 13px;
-      overflow-y: auto;
-      white-space: pre-wrap;
+      fundo : #111111 ;
+      cor : #fdf6f1 ;
+      raio da borda : var (--radius-md);
+      preenchimento : 16px ;
+      altura mínima : 220px ;
+      família-da-fonte : "Courier New" , monoespaçada;
+      tamanho da fonte : 13px ;
+      overflow-y : automático;
+      espaço em branco : pré-quebra de linha;
     }
 
-    .console.empty {
-      opacity: 0.6;
+    .console .vazio {
+      opacidade : 0,6 ;
     }
 
     .log-filter {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
+      exibição : flexível;
+      flex-wrap : envolver;
+      espaço : 12px ;
+      alinhar-itens : centro;
     }
 
     .log-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 260px;
-      overflow-y: auto;
+      exibição : flexível;
+      flex-direction : coluna;
+      espaço : 12px ;
+      altura máxima : 260px ;
+      overflow-y : automático;
     }
 
     .log-item {
-      background: rgba(255, 177, 153, 0.18);
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-size: 13px;
-      line-height: 1.5;
+      fundo : rgba ( 255 , 177 , 153 , 0.18 );
+      preenchimento : 12px 14px ;
+ 
+      raio da borda : 14px ;
+      tamanho da fonte : 13px ;
+      altura da linha : 1,5 ;
     }
 
-    .log-item.ok {
-      border-left: 4px solid var(--success);
+    .log-item .ok {
+      borda-esquerda : 4px sólida var (--sucesso);
     }
 
-    .log-item.error {
-      border-left: 4px solid var(--error);
+    .log-item .error {
+      borda-esquerda : 4px sólida var (--erro);
     }
 
     .log-item span {
-      font-weight: 700;
+ 
+      peso da fonte : 700 ;
     }
 
     .mini-card {
-      background: rgba(255, 177, 153, 0.2);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      fundo : rgba ( 255 , 177 , 153 , 0.2 );
+      raio da borda : 16px ;
+      preenchimento : 16px ;
+      exibição : flexível;
+      flex-direction : coluna;
+      espaço : 10px ;
     }
 
-    .mini-card button {
-      width: 100%;
-      justify-content: center;
+    .mini-card botão {
+ 
+      largura : 100% ;
+      justificar-conteúdo : centralizado;
     }
 
-    .toast {
-      position: fixed;
-      right: 24px;
-      bottom: 24px;
-      background: #111111;
-      color: #fff;
-      padding: 12px 16px;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.2s ease;
-      z-index: 40;
+    .brinde {
+      posição : fixa;
+      direita : 24px ;
+      inferior : 24px ;
+      fundo : #111111 ;
+      cor : #fff ;
+      preenchimento : 12px 16px ;
+ 
+      raio da borda : 12px ;
+      box-shadow : var (--shadow);
+      opacidade : 0 ;
+      transformar : traduzirY ( 10px );
+      transição : todos os 0,2s de suavização;
+      Índice z : 40 ;
     }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
+    .toast .show {
+      opacidade : 1 ;
+      transformar : traduzirY ( 0 );
     }
 
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(17, 17, 17, 0.45);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      z-index: 50;
+    .capital {
+      posição : fixa;
+      inserção : 0 ;
+      fundo : rgba ( 17 , 17 , 17 , 0.45 );
+      exibir : nenhum;
+      alinhar-itens : centro;
+      justificar-conteúdo : centralizado;
+      preenchimento : 24px ;
+      Índice z : 50 ;
     }
 
-    .modal.open {
-      display: flex;
+    .modal .abrir {
+      exibição : flexível;
     }
 
     .modal-content {
-      background: #fff;
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      max-width: 520px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      fundo : #fff ;
+      raio da borda : var (--radius-lg);
+      preenchimento : 24px ;
+      largura máxima : 520px ;
+      largura : 100% ;
+      exibição : flexível;
+      flex-direction : coluna;
+      espaçamento : 16px ;
     }
 
     .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
+      exibição : flexível;
+      justify-content : flex-end;
+      espaço : 12px ;
     }
 
     .drawer-toggle {
-      display: none;
+      exibir : nenhum;
     }
 
-    @media (max-width: 1100px) {
+    @media ( max-width : 1100px ) {
       .app {
-        grid-template-columns: 1fr;
+        grid-template-columns : 1 fr;
       }
 
       .sidebar {
-        position: static;
+        posição : estática;
       }
 
       .drawer-toggle {
-        display: inline-flex;
+        exibição : inline-flex;
       }
 
       .sidebar {
-        display: none;
+        exibir : nenhum;
       }
 
-      .sidebar.open {
-        display: flex;
+      .sidebar .open {
+        exibição : flexível;
       }
     }
 
-    @media (max-width: 760px) {
-      .field-grid,
-      .maintenance-grid {
-        grid-template-columns: 1fr;
+    @media ( max-width : 760px ) {
+      .grade-de-campo ,
+      .grade-de-manutenção {
+        grid-template-columns : 1 fr;
       }
 
       .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        flex-direction : coluna;
+        alinhamento-itens : início-flexível;
+        espaço : 12px ;
       }
 
       .topbar-actions {
-        width: 100%;
-        justify-content: space-between;
+        largura : 100% ;
+        justify-content : espaço-entre;
       }
 
-      .button {
-        width: 100%;
-        justify-content: center;
+      .botão {
+        largura : 100% ;
+        justificar-conteúdo : centralizado;
       }
     }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <div class="topbar">
-      <div class="brand">
-        <h1 class="brand-title">FemFlow • Painel Personal</h1>
-        <span class="brand-sub">Gestão de treinos 30 dias com mood sunset premium</span>
-      </div>
-      <div class="topbar-actions">
-        <div class="status" id="statusIndicator">
-          <span class="status-dot"></span>
-          <span id="statusText">OFFLINE</span>
-        </div>
-        <button class="button secondary" id="openConfig">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 1v3" />
-            <path d="M12 20v3" />
-            <path d="M4.22 4.22l2.12 2.12" />
-            <path d="M17.66 17.66l2.12 2.12" />
-            <path d="M1 12h3" />
-            <path d="M20 12h3" />
-            <path d="M4.22 19.78l2.12-2.12" />
-            <path d="M17.66 6.34l2.12-2.12" />
-            <circle cx="12" cy="12" r="4" />
-          </svg>
+  </ estilo >
+</head>​​
+< corpo >
+  < div class = "app" > 
+    < div class = "topbar" > 
+      < div class = "marca" > 
+        < h1 class = " brand-title" > FemFlow • Painel Pessoal </h1> 
+        <spanclass="brand-sub">Gestão de treinos 30 dias com mood sunset premium</span> 
+      </div>​​
+      < div class = "topbar-actions" > 
+        < div class = "status" id = "statusIndicator" >  
+          < span class = " status - dot" > </span> 
+          < span id = " statusText " > OFFLINE </span> 
+        </div>​​
+        < button class = "button secondary" id = "openConfig" >  
+          < svg width = "16" height = "16" viewBox = "0 0 24 24" fill = "none" stroke = "currentColor" stroke-width = "2" >      
+            < path d = "M12 1v3" /> 
+            < path d = "M12 20v3" /> 
+            < path d = "M4.22 4.22l2.12 2.12" /> 
+            < path d = "M17.66 17.66l2.12 2.12" /> 
+            < path d = "M1 12h3" /> 
+            < path d = "M20 12h3" /> 
+            < path d = "M4.22 19.78l2.12-2.12" /> 
+            < path d = "M17.66 6.34l2.12-2.12" /> 
+            < circle cx = "12" cy = "12" r = "4" />   
+          </ svg >
           Configurar Endpoint
-        </button>
-        <button class="button ghost drawer-toggle" id="toggleNav">Menu</button>
-      </div>
-    </div>
+        </ botão >
+        < button class = "button ghost drawer-toggle" id = " toggleNav " > Menu </button>  
+      </div>​​
+    </div>​​
 
-    <aside class="sidebar" id="sidebar">
+    < aside class = "sidebar" id = "sidebar" >  
       <h3>Navegação</h3>
-      <nav class="nav">
-        <a href="#gerar">Gerar 30 dias</a>
-        <a href="#relinkar">Relinkar aba</a>
-        <a href="#importar">Importar</a>
-        <a href="#full">Pipeline completo (FULL)</a>
-        <a href="#logs">Logs</a>
-      </nav>
-      <div class="mini-card">
+      < nav class = "nav" > 
+        <ahref="#gerar">Gerar 30 dias</a> 
+        < a href = "#relinkar" > Relinkar aba </ a > 
+        <a href="#import"> Importar </a>​​​​​​​ 
+        <a href="#full"> Pipeline completo ( FULL ) </a>​​​ 
+        <a href="#logs"> Logs </a>​​​​​​​ 
+      </ nenhum >
+      < div class = "mini-card" > 
         <strong>Atalhos</strong>
-        <button class="button secondary" data-preset="iniciante">Iniciante • Menstrual • Gluteos</button>
-        <button class="button secondary" data-preset="intermediaria">Intermediaria • Folicular • Corrida longa</button>
-      </div>
-    </aside>
+        <buttonclass="button secondary"data-preset="iniciante">Iniciante • Menstrual • Gluteos</button>  
+        <buttonclass="button secondary"data-preset="intermediaria">Intermediaria • Folicular • Corrida longa</button>  
+      </div>​​
+    </aside>​​
 
-    <main class="main">
-      <section class="card" id="gerar">
-        <div class="card-header">
-          <h2 class="card-title">Parâmetros do Treino</h2>
-          <span class="chip">Desktop-first • Responsivo</span>
-        </div>
-        <form id="paramForm" class="field-grid">
-          <div>
-            <label for="nivel">Nível</label>
-            <select id="nivel" name="nivel" required>
-              <option value="">Selecione</option>
-              <option value="iniciante">Iniciante</option>
-              <option value="intermediaria">Intermediaria</option>
-              <option value="avancada">Avancada</option>
-            </select>
-          </div>
-          <div>
-            <label for="fase">Fase inicial</label>
-            <select id="fase" name="fase" required>
-              <option value="">Selecione</option>
-              <option value="menstrual">Menstrual</option>
-              <option value="folicular">Folicular</option>
-              <option value="ovulatoria">Ovulatoria</option>
-              <option value="lutea">Lutea</option>
-            </select>
-          </div>
-          <div>
-            <label for="enfase">Ênfase</label>
-            <input id="enfase" name="enfase" placeholder="gluteos, corrida longa distancia, natacao" required />
-            <div class="chips" id="chipContainer"></div>
-          </div>
-          <div>
-            <label for="destino">Destino (aba)</label>
-            <input id="destino" name="destino" placeholder="Iniciante" required />
-          </div>
-          <div>
-            <label for="idAluna">ID Aluna (opcional)</label>
-            <input id="idAluna" name="id_aluna" placeholder="123" />
-          </div>
-          <div>
-            <label for="observacao">Observação</label>
-            <textarea id="observacao" name="observacao"></textarea>
-          </div>
-        </form>
-        <div class="actions-row">
-          <button class="button" id="btnGerar" type="button">Gerar 30 dias</button>
-          <button class="button" id="btnFull" type="button">FULL: Gerar + Relinkar + Importar</button>
-        </div>
-        <div class="preview" id="previewUrl">Preview do Request: configure o endpoint.</div>
-      </section>
+    < main class = "main" > 
+      < section class = "card" id = "gerar" >  
+        < div class = "card-header" > 
+          <h2class="card-title">Parâmetros do Treino</h2> 
+          <spanclass="chip">Desktop-first • Responsivo</span> 
+        </div>​​
+        < form id = "paramForm" class = "field-grid" >  
+          <div>​​
+            < label for = "level" > Nível </ label > 
+            < select id = "nivel" name = "nivel" required >   
+              < option value = " " > Selecione </option>​ 
+              <optionvalue="iniciante">Iniciante</option> 
+              < option value = " intermediaria " > Intermediaria </option> 
+              < option value = " avancada " > Avancada </option> 
+            </ select >
+          </div>​​
+          <div>​​
+            < label for = "phase" > Fase inicial do ciclo </label> 
+            < select id = "fase" name = "fase" required >   
+              < option value = " " > Selecione </option>​ 
+              < option value = " menstrual " > Menstrual </option> 
+              < option value = " folicular " > Folicular </option> 
+              < option value = " ovulatoria " > Ovulatoria </option> 
+              < option value = " lutea " > Lutea </option> 
+            </ select >
+            < pequeno >
+              O FemFlow ajusta automaticamente os 30 dias do ciclo hormonal real:
+              Menstrual (1–5) • Folicular (6–13) • Ovulatória (14–17) • Lútea (18–30)
+            </ pequeno >
+          </div>​​
+          <div>​​
+            <labelfor="enfase">Ênfase</label> 
+            <selectid="enfase"name="enfase"required>   
+              < option value = " " > Selecione </option>​ 
+              < option value = " glúteos " > Glúteos </option> 
+              < option value = " core " > Núcleo </option> 
+              <optionvalue="corrida_longa">Corrida longa distância</option> 
+              <optionvalue="corrida_curta">Corrida curta distância</option> 
+              < option value = " remo " > Remo </option> 
+              <optionvalue="natacao">Natação</option> 
+              < option value = "beach_tennis" > Tênis de praia </option> 
+              <optionvalue="tenis">Tênis</option> 
+              <optionvalue="ciclismo">Ciclismo</option> 
+              < option value = "jiu_jitsu" > Jiu - jitsu </option> 
+              < option value = " muay_thai" > Muay thai </option> 
+              <option value="militar">Ênfase Militar (Teste Físico Operacional)</option>
+              < option value = " danca " > Dança </option> 
+              < option value = " surf " > Surfar </option> 
+              < option value = " triatlo " > Triatlo </option> 
+              < option value = " crossfit " > Crossfit </option> 
+            </ select >
+            < div class = " chips" id = " chipContainer" > </div>  
+          </div>​​
+          <div>​​
+            < label for = " destiny" > Destino (aba) </label> 
+            <inputid="destino"name="destino"placeholder="Iniciante"required />    
+          </div>​​
+          <div>​​
+            < label for = " ID do aluno" > ID do aluno ( opcional) </label> 
+            < input id = "idAluna" name = "id_aluna" placeholder = "123" />   
+          </div>​​
+          <div>​​
+            <labelfor="observacao">Observação</label> 
+            <textareaid="observacao"name="observacao"></textarea>  
+          </div>​​
+        </ formulário >
+        < div class = "actions-row" > 
+          < button class = "button" id = " btnGerar" type = " button" > Gerar 30 dias </button>   
+          < button class = "button" id = "btnFull" type = "button" > COMPLETO: Gerar + Relinkar + Importar </button>   
+        </div>​​
+        < div id = " full " > </div> 
+        < div class = "preview" id = "previewUrl" > Pré - visualização da solicitação: configure o endpoint. </div>  
+        < div class = "preview" id = "previewInfo" >  
+          Gerar 30 dias FemFlow
+          <div>Nível: <spandata-preview="nivel">—</span></div> 
+          <div>Ênfase: <spandata-preview="enfase">—</span></div> 
+          <div>Fase inicial selecionada: <spandata-preview="fase">—</span></div> 
+          < div style = "margin-top: 10px;" > 
+            ℹ️ O sistema irá gerar automaticamente:
+            <div>- Dias 1–5: Menstrual</div>
+            <div>- Dias 6–13: Folicular</div>
+            <div>- Dias 14–17: Ovulatória</div>
+            <div>- Dias 18–30: Lútea</div>
+          </div>​​
+        </div>​​
+      </ seção >
 
-      <section class="card" id="relinkar">
-        <div class="card-header">
-          <h2 class="card-title">Ações de Manutenção</h2>
-        </div>
-        <div class="maintenance-grid">
-          <div>
-            <label for="destinoRelink">Nome da aba para relinkar</label>
-            <input id="destinoRelink" placeholder="Usa o destino acima por padrão" />
-          </div>
-          <div class="actions-row">
-            <button class="button secondary" id="btnRelink" type="button">Relinkar</button>
-            <button class="button secondary" id="btnImport" type="button">Importar</button>
-          </div>
-        </div>
-      </section>
+      < section class = "card" id = "relinkar" >  
+        < div class = "card-header" > 
+          <h2class="card-title">Ações de Manutenção</h2> 
+        </div>​​
+        < div class = "maintenance-grid" > 
+          <div>​​
+            < label for = "destinoRelink" > Nome da aba para relinkar </ label > 
+            <inputid="destinoRelink"placeholder="Usa o destino acima por padrão" />  
+          </div>​​
+          < div class = "actions-row" > 
+            < button class = "button secondary" id = "btnRelink" type = " button " > Relinkar </button>   
+            < button class = " button secondary" id = "btnImport" type = " button" > Importar </button>   
+          </div>​​
+        </div>​​
+      </ seção >
 
-      <section class="card" id="importar">
-        <div class="card-header">
-          <h2 class="card-title">Resposta / Resultado</h2>
-        </div>
-        <div class="console empty" id="responseConsole">Nenhum resultado ainda.</div>
-        <div class="actions-row">
-          <button class="button secondary" id="btnCopy">Copiar JSON</button>
-          <button class="button secondary" id="btnDownload">Baixar JSON</button>
-          <button class="button secondary" id="btnClear">Limpar</button>
-        </div>
-      </section>
+      < section class = "card" id = "importar" >  
+        < div class = "card-header" > 
+          <h2class="card-title">Resposta / Resultado</h2> 
+        </div>​​
+        <divclass="console empty"id="responseConsole">Nenhum resultado ainda.</div>  
+        < div class = "actions-row" > 
+          < button class = "button secondary" id = " btnCopy " > Copiar JSON </button>  
+          < button class = "button secondary" id = " btnDownload " > Baixar JSON </button>  
+          < button class = " button secondary" id = " btnClear" > Limpar </button>  
+        </div>​​
+      </ seção >
 
-      <section class="card" id="logs">
-        <div class="card-header">
-          <h2 class="card-title">Logs</h2>
-          <span class="chip">America/Sao_Paulo</span>
-        </div>
-        <div class="log-filter">
-          <div>
-            <label for="logFilter">Filtrar por ação</label>
-            <select id="logFilter">
-              <option value="">Todas</option>
-              <option value="gerar30">Gerar 30 dias</option>
-              <option value="linkar">Relinkar</option>
-              <option value="importar">Importar</option>
-              <option value="full">Pipeline completo</option>
-            </select>
-          </div>
-          <div>
-            <label for="logSearch">Buscar texto</label>
-            <input id="logSearch" placeholder="buscar" />
-          </div>
-        </div>
-        <div class="log-list" id="logList"></div>
-      </section>
-    </main>
-  </div>
+      < section class = "card" id = "logs" >  
+        < div class = "card-header" > 
+          < h2 class = " card - title" > Registros </h2> 
+          < span class = " chip" > América/São Paulo </span> 
+        </div>​​
+        < div class = "log-filter" > 
+          <div>​​
+            <labelfor="logFilter">Filtrar por ação</label> 
+            < select id = "logFilter" > 
+              < option value = " " > Todas </option>​ 
+              <optionvalue="gerar30">Gerar 30 dias</option> 
+              < option value = " linkar " > Relinkar </option> 
+              < option value = " importar " > Importar </option> 
+              < option value = "full " > Pipeline completo </option> 
+            </ select >
+          </div>​​
+          <div>​​
+            < label for = "logSearch" > Buscar texto </ label > 
+            < input id = "logSearch" placeholder = "buscar" />  
+          </div>​​
+        </div>​​
+        < div class = " log-list " id = " logList " > </div>  
+      </ seção >
+      < section class = "card" > 
+        < div class = "card-header" > 
+          < h2 class = " card -title" > Nota FemFlow </h2> 
+        </div>​​
+        < p >
+          🧬 O FemFlow respeita o ciclo hormonal feminino real e ajusta automaticamente
+          volume, intensidade e distribuição dos treinos ao longo dos 30 dias.
+        </p>​​
+      </ seção >
+    </main>​​
+  </div>​​
 
-  <div class="toast" id="toast"></div>
+  < div class = " toast" id = " toast" > </div>  
 
-  <div class="modal" id="configModal">
-    <div class="modal-content">
+  < div class = "modal" id = "configModal" >  
+    < div class = "modal-content" > 
       <h2>Configurar Endpoint</h2>
-      <div>
-        <label for="endpointUrl">BASE_URL do Apps Script</label>
-        <input id="endpointUrl" placeholder="https://script.google.com/macros/s/.../exec" />
-      </div>
-      <div>
-        <label for="modeSelect">Modo preferido</label>
-        <select id="modeSelect">
-          <option value="fetch-first">Tentar FETCH primeiro</option>
-          <option value="link-only">Forçar LINK (sempre abrir nova aba)</option>
-        </select>
-      </div>
-      <div class="modal-actions">
-        <button class="button secondary" id="closeConfig">Cancelar</button>
-        <button class="button" id="saveConfig">Salvar</button>
-      </div>
-    </div>
-  </div>
+      <div>​​
+        < label for = " endpointUrl" > BASE_URL do Apps Script </label> 
+        < input id = "endpointUrl" placeholder = "https://script.google.com/macros/s/.../exec" />  
+      </div>​​
+      <div>​​
+        < label for = "modeSelect" > Modo preferido </ label > 
+        < select id = "modeSelect" > 
+          < option value = "fetch-first" > Tente FETCH primeiro </ option > 
+          <optionvalue="link-only">Forçar LINK (sempre abrir nova aba)</option> 
+        </ select >
+      </div>​​
+      < div class = "modal-actions" > 
+        < button class = "button secondary" id = " closeConfig " > Cancelar </button>  
+        < button class = " button" id = " saveConfig" > Salvar </button>  
+      </div>​​
+    </div>​​
+  </div>​​
 
-  <script>
+  < script >
     const chipOptions = [
-      "corrida longa distancia",
-      "corrida curta distancia",
-      "remo",
-      "natacao",
-      "beach tennis",
-      "tenis",
-      "ciclismo",
-      "jiujitsu",
-      "muai tai",
-      "danca",
-      "surf",
-      "triatlo",
-      "crossfit",
+      { label : "Glúteos" , value : "glúteos" },
+      { label : "Núcleo" , value : "núcleo" },
+      { label: "Corrida longa distância", value: "corrida_longa" },
+      { label: "Corrida curta distância", value: "corrida_curta" },
+      { label : "Remo" , value : "remo" },
+      { label: "Natação", value: "natacao" },
+      { label : "Tênis de praia" , value : "tênis_de_praia" },
+      { label: "Tênis", value: "tenis" },
+      { label : "Ciclismo" , value : "ciclismo" },
+      { rótulo : "Jiu-jitsu" , valor : "jiu_jitsu" },
+      { label : "Muay thai" , value : "muay_thai" },
+      { label : "Dança" , value : "dança" },
+      { label : "Surfar" , value : "surfar" },
+      { label : "Triathlon" , value : "triathlon" },
+      { label : "Crossfit" , value : "crossfit" },
     ];
 
     const defaultPreset = {
@@ -673,323 +746,390 @@
         fase: "menstrual",
         enfase: "gluteos",
         destino: "Iniciante",
-        id_aluna: "",
+        id_aluna : "" ,
       },
       intermediaria: {
-        nivel: "intermediaria",
+        nível : "intermediário "
         fase: "folicular",
-        enfase: "corrida longa distancia",
-        destino: "Intermediaria",
-        id_aluna: "",
+        enfase: "corrida_longa",
+        destino : "Intermediário "
+        id_aluna : "" ,
       },
     };
 
-    const state = {
-      endpoint: localStorage.getItem("femflow_endpoint_url") || "",
-      mode: localStorage.getItem("femflow_mode") || "fetch-first",
-      response: null,
-      logs: [],
+    const estado = {
+      endpoint : localStorage.getItem ( "femflow_endpoint_url" ) || " " ,
+      modo : localStorage.getItem ( "femflow_mode" ) || " fetch -first" ,
+      resposta : nula ,
+      registros : [],
     };
 
-    const qs = (id) => document.getElementById(id);
-    const toast = (msg) => {
-      const el = qs("toast");
-      el.textContent = msg;
-      el.classList.add("show");
-      setTimeout(() => el.classList.remove("show"), 2200);
+    const qs = ( id ) => document . getElementById (id);
+ 
+    const toast = ( msg ) => {
+ 
+      const el = qs ( "torrada" );
+      ou textContent = msg;
+      el.classList.add ( " show " )
+ ;
+      setTimeout ( () => el. classList . remove ( "show" ), 2200 );
     };
 
-    const formatJson = (data) => JSON.stringify(data, null, 2);
+    const formatJson = ( data ) => JSON . stringify (data, null , 2 );
+ 
 
-    const buildUrl = (action, params = {}) => {
-      if (!state.endpoint) return "";
-      const url = new URL(state.endpoint);
-      url.searchParams.set("action", action);
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== "" && value !== undefined && value !== null) {
-          url.searchParams.set(key, value);
+    const buildUrl = ( action, params = {} ) => {
+ 
+      if (!state.endpoint ) return " " ;
+ 
+      const url = new URL (state. endpoint );
+ 
+      url.searchParams.set ( " action" , action)
+ ;
+      Objeto.entradas ( params ).forEach ( ( [ chave, valor] ) => {
+        se (valor !== "" && valor !== undefined && valor !== null ) {
+          url.searchParams.set ( chave , valor)
+ ;
         }
       });
-      return url.toString();
+      retornar url. toString ();
     };
 
-    const updatePreview = () => {
-      const params = collectParams();
-      const preview = buildUrl("gerar30", params);
-      qs("previewUrl").textContent = preview
-        ? `Preview do Request: ${preview}`
-        : "Preview do Request: configure o endpoint.";
+    const updatePreview = ( ) => {
+ 
+      const params = collectParams ();
+      const preview = buildUrl ( "gerar30" , params);
+      qs ( "previewUrl" ). textContent = preview
+        ? `Pré-visualização da solicitação: ${preview} `
+        : "Visualização da solicitação: configure o endpoint." ;
+      document.querySelectorAll ( "[data-preview]" ). forEach ( ( el ) = > {
+        const key =
+ el.dataset.preview ;​
+        el. textContent = params[key] || "—" ;
+      });
     };
 
-    const collectParams = () => {
-      const nivel = qs("nivel").value.trim();
-      const fase = qs("fase").value.trim();
+    const collectParams = ( ) => {
+ 
+      const level = qs ( "level" ). value.trim ( ) ;
+      const fase = qs ( "fase" ). value . trim ();
       const enfase = qs("enfase").value.trim();
-      const destinoField = qs("destino").value.trim();
-      const idAluna = qs("idAluna").value.trim();
-      const destino = idAluna ? `personal_${idAluna}` : destinoField;
-      return { nivel, fase, enfase, destino, id_aluna: idAluna };
+      const destinoField = qs ( "destino" ). value . trim ();
+      const idAluna = qs ( "idAluna" ). value . trim ();
+      const destino = idAluna ? `personal_ ${idAluna} ` : destinoField;
+      return { nivel, fase, enfase, destino, id_aluna : idAluna };
     };
 
-    const validate = (params) => {
-      if (!state.endpoint) {
+    const validate = ( params ) => {
+ 
+      se ( !estado.endpoint ) {
         toast("Informe o endpoint antes de executar.");
-        return false;
+        retornar falso ;
+ 
       }
       if (!params.nivel || !params.fase || !params.enfase) {
         toast("Preencha nivel, fase inicial e enfase.");
-        return false;
+        retornar falso ;
+ 
       }
-      if (!params.destino) {
+      se (!params.destino ) {
         toast("Preencha o destino ou informe um ID de aluna.");
-        return false;
+        retornar falso ;
+ 
       }
-      return true;
+      retornar verdadeiro ;
+ 
     };
 
-    const logEvent = (entry) => {
-      state.logs.unshift(entry);
-      renderLogs();
+    const logEvent = ( entrada ) => {
+ 
+      estado.logs.unshift ( entrada
+ ) ;
+      renderLogs ();
     };
 
-    const renderLogs = () => {
-      const filter = qs("logFilter").value;
-      const search = qs("logSearch").value.toLowerCase();
-      const list = qs("logList");
-      list.innerHTML = "";
+    const renderLogs = ( ) => {
+ 
+      const filter = qs ( "logFilter" ). value ;
+      const search = qs ( "logSearch" ). value . toLowerCase ();
+      const lista = qs ( "logList" );
+      list.innerHTML = " "
+ ;
 
-      state.logs
-        .filter((log) => (filter ? log.action === filter : true))
-        .filter((log) => (search ? JSON.stringify(log).toLowerCase().includes(search) : true))
-        .forEach((log) => {
-          const item = document.createElement("div");
-          item.className = `log-item ${log.status}`;
+      estado. registros
+        .filter ( ( log ) => (filter ? log.action === filter : true ) )
+        .filter ( ( log ) => (
+ search ? JSON.stringify (log) .toLowerCase ( ). includes (search) : true ) )
+        .forEach ( ( log ) = > {
+          const item = document.createElement ( "div " ) ;
+          item.className = `log-item ${log.status } ` ;
           item.innerHTML = `
-            <div><span>${log.time}</span> • <span>${log.action}</span> • ${log.mode}</div>
-            <div>params: ${log.params}</div>
-            <div>status: ${log.status}</div>
-          `;
-          list.appendChild(item);
+            <div><span> ${log.time} </span> • <span> ${log.action} </span> • ${log.mode} </div>
+            <div>params: ${log.params} </div>
+            <div>status: ${log.status} </div>
+          ` ;
+          lista.appendChild ( item);
         });
     };
 
-    const setButtonState = (button, stateLabel, label) => {
-      button.classList.remove("loading", "success", "error");
-      button.disabled = false;
-      button.textContent = label;
-      if (stateLabel === "loading") {
-        button.classList.add("loading");
-        button.disabled = true;
+    const setButtonState = ( button, stateLabel, label ) => {
+ 
+      botão.classList.remove ( "carregando" , " sucesso" , " erro " );
+      botão.desativado = falso ;​
+      botão.textConteúdo = rótulo;
+      se (stateLabel === "carregando" ) {
+        botão.classList.adicionar ( " carregando " )
+ ;
+        botão.desativado = verdadeiro ;​
       }
-      if (stateLabel === "success") button.classList.add("success");
-      if (stateLabel === "error") button.classList.add("error");
+      if (stateLabel === "success" ) button.classList . add ( " success" );
+      if (stateLabel === "error" ) button.classList . add ( " error" );
     };
 
-    const updateResponse = (data) => {
-      const consoleEl = qs("responseConsole");
-      if (!data) {
+    const updateResponse = ( dados ) => {
+ 
+      const consoleEl = qs ( "responseConsole" );
+      se (!dados) {
         consoleEl.textContent = "Nenhum resultado ainda.";
-        consoleEl.classList.add("empty");
-        return;
+        consoleEl.classList.add ( " vazio " )
+ ;
+        retornar ;
       }
-      consoleEl.textContent = formatJson(data);
-      consoleEl.classList.remove("empty");
+      consoleEl. textContent = formatJson (dados);
+      consoleEl.classList.remove ( " empty " )
+ ;
     };
 
-    const runAction = async (action, params, button) => {
-      if (!validate(params)) return;
-      const url = buildUrl(action, params);
-      updatePreview();
+    const runAction = async ( action, params, button ) => {
+ 
+      se (! validar (parâmetros)) retornar ;
+      const url = buildUrl (ação, parâmetros);
+      atualizarPré-visualização ();
 
-      setButtonState(button, "loading", button.textContent);
-      let modeUsed = state.mode === "link-only" ? "LINK" : "FETCH";
-      try {
-        let data = null;
-        if (state.mode === "link-only") {
-          window.open(url, "_blank");
+      setButtonState (button, "carregando" , button. textContent );
+      let modeUsed = state.mode === " link-only" ? "LINK" : "FETCH" ;
+      tentar {
+        let data = null ;
+        se (estado.modo === " somente link" ) {
+          janela.abrir (url, "_blank " )
+ ;
           data = { message: "LINK ONLY: endpoint aberto em nova aba.", url };
-        } else {
-          const response = await fetch(url, { method: "GET" });
-          data = await response.json();
+        } outro {
+          const response = await fetch (url, { method : "GET" });
+ 
+          dados = aguarde resposta.json ( );
         }
-        state.response = data;
-        updateResponse(data);
+        estado.resposta = dados
+ ;
+        atualizarResposta (dados);
         setButtonState(button, "success", "Concluído");
-        logEvent({
-          time: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
-          action,
-          params: JSON.stringify(params),
-          mode: modeUsed,
-          status: "ok",
+        logEvent ({
+          tempo : novo Date (). toLocaleString ( "pt-BR" , { timeZone : "America/Sao_Paulo" }),
+ 
+          Ação,
+          parâmetros : JSON.stringify ( parâmetros ),
+          modo : modoUsado,
+          status : "ok "
         });
-      } catch (error) {
-        if (state.mode !== "link-only") {
-          window.open(url, "_blank");
-          toast("Fetch bloqueado (provável CORS). Abri o endpoint em nova aba.");
-          modeUsed = "LINK-FALLBACK";
+      } catch (erro) {
+        se (estado.modo !== "somente link" )
+ {
+          janela.abrir (url, "_blank " )
+ ;
+          toast ( "Fetch bloqueado (provável CORS). Abri o endpoint em nova aba." );
+          modoUsado = "LINK-FALLBACK" ;
         }
-        state.response = {
+        estado.resposta =
+ {
           error: error.message || "Erro inesperado",
-          action,
+          Ação,
         };
-        updateResponse(state.response);
+        atualizarResposta ( estado.resposta );
         setButtonState(button, "error", "Erro");
-        logEvent({
-          time: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
-          action,
-          params: JSON.stringify(params),
-          mode: modeUsed,
-          status: "error",
+        logEvent ({
+          tempo : novo Date (). toLocaleString ( "pt-BR" , { timeZone : "America/Sao_Paulo" }),
+ 
+          Ação,
+          parâmetros : JSON.stringify ( parâmetros ),
+          modo : modoUsado,
+          status : "erro "
         });
-      } finally {
-        setTimeout(() => {
+      } finalmente {
+        setTimeout ( () => {
           const labelMap = {
             gerar30: "Gerar 30 dias",
             full: "FULL: Gerar + Relinkar + Importar",
-            linkar: "Relinkar",
-            importar: "Importar",
+            linkar : "Relinkar" ,
+            importar : "Importar" ,
           };
-          setButtonState(button, "default", labelMap[action] || "Executar");
-        }, 1600);
+          setButtonState (button, "default" , labelMap[action] || "Executar" );
+        }, 1600 );
       }
     };
 
-    const pingEndpoint = async () => {
-      const statusText = qs("statusText");
-      const dot = document.querySelector(".status-dot");
-      if (!state.endpoint) {
-        statusText.textContent = "OFFLINE";
-        dot.style.background = "var(--warning)";
-        return;
+    const pingEndpoint = async ( ) => {
+ 
+      const statusText = qs ( "statusText" );
+      const dot = document.querySelector ( ".status-dot " )
+ ;
+      se ( !estado.endpoint ) {
+        statusText. textContent = "OFFLINE" ;
+        dot.style.background = " var(--warning ) " ;
+        retornar ;
       }
-      try {
-        const response = await fetch(state.endpoint, { method: "GET" });
-        if (response.ok) {
-          statusText.textContent = "ONLINE";
-          dot.style.background = "var(--success)";
-          return;
+      tentar {
+        const response = await fetch (state. endpoint , { method : "GET" });
+ 
+        se (resposta. ok ) {
+          statusText. textContent = "ONLINE" ;
+          dot.style.background = " var(--success ) " ;
+          retornar ;
         }
-      } catch (error) {
-        // fallback
+      } catch (erro) {
+        // cair pra trás
       }
-      statusText.textContent = "OFFLINE";
-      dot.style.background = "var(--error)";
+      statusText. textContent = "OFFLINE" ;
+      dot.style.background = " var(--error ) " ;
     };
 
-    const persistParams = () => {
-      const params = collectParams();
-      Object.entries(params).forEach(([key, value]) => {
-        localStorage.setItem(`femflow_${key}`, value || "");
+    const persistParams = ( ) => {
+ 
+      const params = collectParams ();
+      Objeto.entradas ( params ).forEach ( ( [ chave, valor] ) => {
+        localStorage.setItem ( `femflow_ $ {key} ` , value || " " );
       });
-      updatePreview();
+      atualizarPré-visualização ();
     };
 
-    const loadParams = () => {
-      qs("nivel").value = localStorage.getItem("femflow_nivel") || "";
-      qs("fase").value = localStorage.getItem("femflow_fase") || "";
+    const loadParams = ( ) => {
+ 
+      qs ( "nivel" ). value = localStorage.getItem ( "femflow_nivel" ) || " " ;
+      qs ( "fase" ). value = localStorage.getItem ( "femflow_fase" ) || " " ;
       qs("enfase").value = localStorage.getItem("femflow_enfase") || "";
-      qs("destino").value = localStorage.getItem("femflow_destino") || "";
-      qs("idAluna").value = localStorage.getItem("femflow_id_aluna") || "";
+      qs ( "destino" ). value = localStorage.getItem ( "femflow_destino" ) || " " ;
+      qs ( " idAluna" ). value = localStorage.getItem ( "femflow_id_aluna" ) || " " ;
     };
 
-    const setupChips = () => {
-      const container = qs("chipContainer");
-      chipOptions.forEach((option) => {
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "chip";
-        chip.textContent = option;
-        chip.addEventListener("click", () => {
-          qs("enfase").value = option;
-          document.querySelectorAll(".chip").forEach((el) => el.classList.remove("active"));
-          chip.classList.add("active");
-          persistParams();
+    const setupChips = ( ) => {
+ 
+      const container = qs ( "chipContainer" );
+      chipOptions.forEach ( ( option ) = > {
+        const chip = document.createElement ( "button " )
+ ;
+        chip. tipo = "botão" ;
+        chip.className = " chip" ;
+        chip.textConteúdo =
+ opção.rótulo ;​
+        chip.addEventListener ( "click" , () = > {
+          qs ( "
+ enfase" ). value = option.value ;
+          document.querySelectorAll ( ".chip" ) . forEach ( ( el ) = > el.classList.remove ( " active" ) );
+          chip.classList.add ( " ativo " )
+ ;
+          persistParams ();
         });
-        container.appendChild(chip);
+        container.appendChild ( chip);
       });
     };
 
-    const setupPresets = () => {
-      document.querySelectorAll("[data-preset]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const preset = defaultPreset[button.dataset.preset];
-          qs("nivel").value = preset.nivel;
-          qs("fase").value = preset.fase;
+    const setupPresets = ( ) => {
+ 
+      document.querySelectorAll ( "[data-preset]" ). forEach ( ( button ) = > {
+        botão.addEventListener ( "click" , () = > {
+          const preset = defaultPreset[button. dataset . preset ];
+          qs ( "nível" )
+ . value = predefinido.nível ;
+          qs ( "fase" )
+ . value = predefinido.fase ;
           qs("enfase").value = preset.enfase;
-          qs("destino").value = preset.destino;
-          qs("idAluna").value = preset.id_aluna;
-          persistParams();
+          qs ( "destino" )
+ . value = predefinido.destino ;
+          qs ( "idAluna" ). value = preset.id_aluna ;
+          persistParams ();
         });
       });
     };
 
-    const init = () => {
-      setupChips();
-      setupPresets();
-      loadParams();
-      updatePreview();
-      pingEndpoint();
+    const init = ( ) => {
+ 
+      setupChips ();
+      setupPresets ();
+      carregarParâmetros ();
+      atualizarPré-visualização ();
+      pingEndpoint ();
     };
 
-    qs("paramForm").addEventListener("input", persistParams);
-    qs("logFilter").addEventListener("change", renderLogs);
-    qs("logSearch").addEventListener("input", renderLogs);
+    qs ( "paramForm" ). addEventListener ( "input" , persistParams);
+    qs ( "logFilter" ). addEventListener ( "change" , renderLogs);
+    qs ( "logSearch" ). addEventListener ( "input" , renderLogs);
 
-    qs("btnGerar").addEventListener("click", () => runAction("gerar30", collectParams(), qs("btnGerar")));
-    qs("btnFull").addEventListener("click", () => runAction("full", collectParams(), qs("btnFull")));
-    qs("btnRelink").addEventListener("click", () => {
-      const params = collectParams();
-      const destino = qs("destinoRelink").value.trim() || params.destino;
-      runAction("linkar", { destino }, qs("btnRelink"));
+    qs ( "btnGerar" ). addEventListener ( "click" , () => runAction ( "gerar30" , collectParams (), qs ( "btnGerar" )));
+ 
+    qs ( "btnFull" ). addEventListener ( "click" , () => runAction ( "full" , collectParams (), qs ( "btnFull" )));
+ 
+    qs ( "btnRelink" ). addEventListener ( "click" , () => {
+      const params = collectParams ();
+      const destino = qs ( "destinoRelink" ). value . trim () || params. destino ;
+      runAction ( "linkar" , { destino }, qs ( "btnRelink" ));
     });
-    qs("btnImport").addEventListener("click", () => runAction("importar", {}, qs("btnImport")));
+    qs ( "btnImport" ). addEventListener ( "click" , () => runAction ( "importar" , {}, qs ( "btnImport" )));
+ 
 
-    qs("btnCopy").addEventListener("click", async () => {
-      if (!state.response) return toast("Nenhum JSON para copiar.");
-      await navigator.clipboard.writeText(formatJson(state.response));
-      toast("JSON copiado.");
+    qs ( "btnCopy" ). addEventListener ( "click" , async () => {
+      if (!state.response) returntoast("Nenhum JSON para copiar.");
+ 
+      await navigator.clipboard.writeText ( formatJson ( state.response ) )
+ ;​
+      toast ( "JSON copiado." );
     });
 
-    qs("btnDownload").addEventListener("click", () => {
-      if (!state.response) return toast("Nenhum JSON para baixar.");
-      const blob = new Blob([formatJson(state.response)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
+    qs ( "btnDownload" ). addEventListener ( "click" , () => {
+      if (!state.response) returntoast("Nenhum JSON para baixar.");
+ 
+      const blob = new Blob ([ formatJson (state. response )], { type : "application/json" });
+ 
+      const url = URL . createObjectURL (blob);
+      const link = document.createElement ( "a " )
+ ;
+      link. href = url;
       link.download = "femflow_resposta.json";
-      link.click();
-      URL.revokeObjectURL(url);
+      link. clique ();
+      URL . revokeObjectURL (url);
     });
 
-    qs("btnClear").addEventListener("click", () => {
-      state.response = null;
-      updateResponse(null);
+    qs ( "btnClear" ). addEventListener ( "click" , () => {
+      estado.resposta = nulo ;
+​
+      atualizarResposta ( nulo );
     });
 
-    qs("openConfig").addEventListener("click", () => {
-      qs("configModal").classList.add("open");
-      qs("endpointUrl").value = state.endpoint;
-      qs("modeSelect").value = state.mode;
+    qs ( "openConfig" ). addEventListener ( "click" , () => {
+      qs ( "configModal" ). classList.add ( " open" )
+ ;
+      qs ( "
+ endpointUrl" ). value = state.endpoint ;
+      qs ( "modeSelect" ). value = state.mode ;
     });
 
-    qs("closeConfig").addEventListener("click", () => qs("configModal").classList.remove("open"));
+    qs ( "closeConfig" ). addEventListener ( "click" , () => qs ( " configModal" ). classList.remove ( " open" ));
+ 
 
-    qs("saveConfig").addEventListener("click", () => {
-      state.endpoint = qs("endpointUrl").value.trim();
-      state.mode = qs("modeSelect").value;
-      localStorage.setItem("femflow_endpoint_url", state.endpoint);
-      localStorage.setItem("femflow_mode", state.mode);
-      qs("configModal").classList.remove("open");
-      updatePreview();
-      pingEndpoint();
+    qs ( "saveConfig" ). addEventListener ( "click" , () => {
+      estado. endpoint = qs ( "endpointUrl" ). valor . trim ();
+      estado.modo = qs ( "modoSelecionar" ) . valor ;
+      localStorage.setItem ( "femflow_endpoint_url " , state.endpoint ) ;
+      localStorage.setItem ( "femflow_mode " , state.mode ) ;
+      qs ( "configModal" ). classList.remove ( " open" ) ;
+      atualizarPré-visualização ();
+      pingEndpoint ();
       toast("Configuração salva.");
     });
 
-    qs("toggleNav").addEventListener("click", () => {
-      qs("sidebar").classList.toggle("open");
+    qs ( "toggleNav" ). addEventListener ( "click" , () => {
+      qs ( "sidebar" ). classList.toggle ( " open" ) ;
     });
 
-    init();
-  </script>
-</body>
-</html>
+    aquecer ();
+  </script>​​
+</body>​​
+</ html >
