@@ -997,9 +997,15 @@
     qs("btnGerar").addEventListener("click", () => runAction("gerar30", collectParams(), qs("btnGerar")));
     qs("btnFull").addEventListener("click", () => runAction("full", collectParams(), qs("btnFull")));
     qs("btnRelink").addEventListener("click", () => {
-      const params = collectParams();
-      const destino = qs("destinoRelink").value.trim() || params.destino;
-      runAction("linkar", { destino }, qs("btnRelink"));
+  const params = collectParams();
+
+  const payload = {
+    destino: qs("destinoRelink").value.trim() || params.destino,
+    nivel: params.nivel,
+    enfase: params.enfase,
+    fase: params.fase
+  };
+  runAction("linkar", payload, qs("btnRelink"));
     });
     qs("btnImport").addEventListener("click", () => runAction("importar", {}, qs("btnImport")));
 
@@ -1052,3 +1058,4 @@
   </script>
 </body>
 </html>
+
