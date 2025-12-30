@@ -28,8 +28,10 @@ pt: {
   },
 
   menu: {
+    title: "Menu",
     fechar: "Fechar",
     idioma: "Idioma",
+    sac: "Preciso de ajuda",
     ciclo: "Ajustar ciclo",
     respiracao: "Respiração",
     treinos: "Meus Treinos",
@@ -260,8 +262,10 @@ en: {
   },
 
   menu: {
+    title: "Menu",
     fechar: "Close",
     idioma: "Language",
+    sac: "I need help",
     ciclo: "Adjust cycle",
     respiracao: "Breathing",
     treinos: "My Workouts",
@@ -489,8 +493,10 @@ fr: {
   },
 
   menu: {
+    title: "Menu",
     fechar: "Fermer",
     idioma: "Langue",
+    sac: "J’ai besoin d’aide",
     ciclo: "Ajuster le cycle",
     respiracao: "Respiration",
     treinos: "Mes Entraînements",
@@ -706,6 +712,20 @@ resp: {
 };
 
 /* ============================================================
+   🧭 BUSCA TRADUÇÃO POR PATH
+============================================================ */
+FEMFLOW.t = function (path, fallback = "") {
+  if (!path) return fallback;
+
+  const langCode = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
+  const langSet = FEMFLOW.langs?.[langCode] || FEMFLOW.langs?.pt || {};
+  const value = path.split(".").reduce((acc, key) => (acc ? acc[key] : undefined), langSet);
+
+  if (value === undefined || value === null) return fallback || path;
+  return value;
+};
+
+/* ============================================================
    🔄 ALTERAR IDIOMA
 ============================================================ */
 FEMFLOW.setLang = function (code) {
@@ -724,5 +744,3 @@ FEMFLOW.setLang = function (code) {
 window.addEventListener("DOMContentLoaded", () => {
     document.dispatchEvent(new CustomEvent("femflow:langReady"));
 });
-
-
