@@ -9,6 +9,116 @@ window.FEMFLOW = window.FEMFLOW || {};
 FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
 
 /* ============================================================
+   🔤 DICIONÁRIO CORE (MENU + SAC)
+============================================================ */
+window.FEMFLOW_LANG = {
+  pt: {
+    menu: {
+      title: "Menu",
+      fechar: "Fechar",
+      idioma: "Idioma",
+      ciclo: "Ajustar ciclo",
+      respiracao: "Respiração",
+      treinos: "Meus Treinos",
+      nivel: "Alterar nível",
+      tema: "Tema",
+      voltar: "Voltar",
+      sair: "Sair",
+      sac: "Preciso de ajuda"
+    },
+
+    sac: {
+      title: "Preciso de ajuda",
+      subtitle: "O que está acontecendo?",
+      options: {
+        treino: "Meu treino não está certo",
+        ciclo: "Meu ciclo ou fase parece errado",
+        registro: "Não consegui registrar treino",
+        acesso: "Problema de acesso",
+        outro: "Outro problema"
+      },
+      placeholder: "Explique com suas palavras (opcional)",
+      enviar: "Enviar",
+      cancelar: "Cancelar",
+      sucesso: "Mensagem enviada com sucesso 💖",
+      erro: "Erro ao enviar. Tente novamente.",
+      selecione: "Selecione uma opção",
+      enviando: "Enviando…"
+    }
+  },
+
+  en: {
+    menu: {
+      title: "Menu",
+      fechar: "Close",
+      idioma: "Language",
+      ciclo: "Adjust cycle",
+      respiracao: "Breathing",
+      treinos: "My Workouts",
+      nivel: "Change level",
+      tema: "Theme",
+      voltar: "Back",
+      sair: "Logout",
+      sac: "I need help"
+    },
+
+    sac: {
+      title: "I need help",
+      subtitle: "What is happening?",
+      options: {
+        treino: "My workout seems wrong",
+        ciclo: "My cycle or phase seems incorrect",
+        registro: "I couldn't log my workout",
+        acesso: "Access or login problem",
+        outro: "Other issue"
+      },
+      placeholder: "Explain in your own words (optional)",
+      enviar: "Send",
+      cancelar: "Cancel",
+      sucesso: "Message sent successfully 💖",
+      erro: "Error sending message. Please try again.",
+      selecione: "Select an option",
+      enviando: "Sending…"
+    }
+  },
+
+  fr: {
+    menu: {
+      title: "Menu",
+      fechar: "Fermer",
+      idioma: "Langue",
+      ciclo: "Ajuster le cycle",
+      respiracao: "Respiration",
+      treinos: "Mes entraînements",
+      nivel: "Changer de niveau",
+      tema: "Thème",
+      voltar: "Retour",
+      sair: "Déconnexion",
+      sac: "J’ai besoin d’aide"
+    },
+
+    sac: {
+      title: "J’ai besoin d’aide",
+      subtitle: "Que se passe-t-il ?",
+      options: {
+        treino: "Mon entraînement ne semble pas correct",
+        ciclo: "Mon cycle ou ma phase semble incorrecte",
+        registro: "Je n’ai pas pu enregistrer l’entraînement",
+        acesso: "Problème d’accès",
+        outro: "Autre problème"
+      },
+      placeholder: "Expliquez avec vos mots (facultatif)",
+      enviar: "Envoyer",
+      cancelar: "Annuler",
+      sucesso: "Message envoyé avec succès 💖",
+      erro: "Erreur lors de l’envoi. Réessayez.",
+      selecione: "Sélectionnez une option",
+      enviando: "Envoi…"
+    }
+  }
+};
+
+/* ============================================================
    🔤 DICIONÁRIO MULTILINGUE
 ============================================================ */
 FEMFLOW.langs = {
@@ -709,32 +819,6 @@ resp: {
  }
 
 
-};
-
-/* ============================================================
-   🧭 BUSCA TRADUÇÃO POR PATH
-============================================================ */
-FEMFLOW.t = function (path, fallback = "") {
-  if (!path) return fallback;
-
-  const langCode = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
-  const langSet = FEMFLOW.langs?.[langCode] || FEMFLOW.langs?.pt || {};
-  const value = path.split(".").reduce((acc, key) => (acc ? acc[key] : undefined), langSet);
-
-  if (value === undefined || value === null) return fallback || path;
-  return value;
-};
-
-/* ============================================================
-   🔄 ALTERAR IDIOMA
-============================================================ */
-FEMFLOW.setLang = function (code) {
-  if (!FEMFLOW.langs[code]) return;
-
-  FEMFLOW.lang = code;
-  localStorage.setItem("femflow_lang", code);
-
-  document.dispatchEvent(new CustomEvent("femflow:langChange"));
 };
 
 /* ============================================================
