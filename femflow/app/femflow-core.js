@@ -580,8 +580,9 @@ FEMFLOW.enviarSAC = async function () {
   const payload = {
     action: "sac_abrir",
     id: localStorage.getItem("femflow_id"),
-    categoria: cat,
+    categoria_ui: cat,
     mensagem,
+    lang: FEMFLOW.lang,
     contexto: {
       pagina: location.pathname.split("/").pop(),
       fase: localStorage.getItem("femflow_fase"),
