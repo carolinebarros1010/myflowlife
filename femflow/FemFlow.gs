@@ -273,6 +273,9 @@ function analisarSACComIA(payload) {
     '- Definir gravidade (1 a 5)',
     '- Sugerir resposta curta',
     '',
+    'Formato obrigatório:',
+    '{"categoria_final":"uso_incorreto|bug|duvida|acesso","subcategoria":"string_curta","gravidade":1,"eh_bug":false,"resposta":{"pt":"Mensagem curta","en":"Short message","fr":"Message courte"},"acao":"auto|humano"}',
+    '',
     'Responda SOMENTE em JSON válido.',
     'Não escreva texto fora do JSON.',
     'Seja objetivo.'
