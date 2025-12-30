@@ -399,40 +399,52 @@ FEMFLOW.carregarCicloBackend = async function () {
    5. MENU LATERAL
 =========================================================== */
 
-FEMFLOW.inserirMenuLateral = function () {
-  if (document.querySelector(".ff-menu-modal")) return;
+FEMFLOW.renderMenuLateral = function () {
+  const modal = document.querySelector(".ff-menu-modal");
+  if (!modal) return;
 
-  const modal = document.createElement("div");
-  modal.className = "ff-menu-modal";
   modal.innerHTML = `
     <div class="ff-menu-box">
-      <h2 class="ff-menu-title">Menu</h2>
+      <h2 class="ff-menu-title">${FEMFLOW.t("menu.title")}</h2>
 
-      <button class="ff-menu-op ff-close"  data-go="fechar">✖️ Fechar</button>
-      <button class="ff-menu-op" data-go="idioma">🌐 Idioma</button>
-      <button class="ff-menu-op" data-go="sac">🛟 Preciso de ajuda</button>
-      <button class="ff-menu-op" data-go="ciclo">🎯 Ajustar ciclo</button>
-      <button class="ff-menu-op" data-go="respiracao">💨 Respiração</button>
-      <button class="ff-menu-op" data-go="treinos">🏃 Meus Treinos</button>
-      <button class="ff-menu-op" data-go="nivel">📊 Alterar nível</button>
-      <button class="ff-menu-op" data-go="tema">🌓 Tema</button>
-      <button class="ff-menu-op" data-go="voltar">🔙 Voltar</button>
+      <button class="ff-menu-op ff-close" data-go="fechar">✖️ ${FEMFLOW.t("menu.fechar")}</button>
+      <button class="ff-menu-op" data-go="idioma">🌐 ${FEMFLOW.t("menu.idioma")}</button>
+      <button class="ff-menu-op" data-go="sac">🛟 ${FEMFLOW.t("menu.sac")}</button>
+      <button class="ff-menu-op" data-go="ciclo">🎯 ${FEMFLOW.t("menu.ciclo")}</button>
+      <button class="ff-menu-op" data-go="respiracao">💨 ${FEMFLOW.t("menu.respiracao")}</button>
+      <button class="ff-menu-op" data-go="treinos">🏃 ${FEMFLOW.t("menu.treinos")}</button>
+      <button class="ff-menu-op" data-go="nivel">📊 ${FEMFLOW.t("menu.nivel")}</button>
+      <button class="ff-menu-op" data-go="tema">🌓 ${FEMFLOW.t("menu.tema")}</button>
+      <button class="ff-menu-op" data-go="voltar">🔙 ${FEMFLOW.t("menu.voltar")}</button>
 
-      <button class="ff-logout" data-go="logout">🚪 Sair</button>
+      <button class="ff-logout" data-go="logout">🚪 ${FEMFLOW.t("menu.sair")}</button>
     </div>
   `;
-
-  document.body.appendChild(modal);
-
-  modal.onclick = e => {
-    if (e.target.classList.contains("ff-menu-modal"))
-      modal.classList.remove("active");
-  };
 
   modal.querySelectorAll(".ff-menu-op, .ff-logout").forEach(btn =>
     btn.onclick = () => FEMFLOW._acaoMenu(btn.dataset.go)
   );
 };
+
+FEMFLOW.inserirMenuLateral = function () {
+  if (document.querySelector(".ff-menu-modal")) return;
+
+  const modal = document.createElement("div");
+  modal.className = "ff-menu-modal";
+
+  document.body.appendChild(modal);
+
+  FEMFLOW.renderMenuLateral();
+
+  modal.onclick = e => {
+    if (e.target.classList.contains("ff-menu-modal"))
+      modal.classList.remove("active");
+  };
+};
+
+document.addEventListener("femflow:langChange", () => {
+  FEMFLOW.renderMenuLateral?.();
+});
 
 /* ===========================================================
    6. MODAL DE IDIOMA
