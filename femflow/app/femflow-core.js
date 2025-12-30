@@ -308,6 +308,9 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
         action: "resetprograma",
         id
       });
+
+      localStorage.setItem("femflow_nivel", payload.nivel);
+      localStorage.removeItem("femflow_diaPrograma");
     }
 
     // ----------------------------
@@ -335,6 +338,16 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
         action: "resetprograma",
         id
       });
+
+      if (payload.perfilHormonal) {
+        localStorage.setItem("femflow_perfilHormonal", payload.perfilHormonal);
+      }
+
+      if (payload.startDate) {
+        localStorage.setItem("femflow_startDate", payload.startDate);
+      }
+
+      localStorage.removeItem("femflow_diaPrograma");
     }
 
   } catch (err) {
