@@ -90,6 +90,10 @@ FEMFLOW.toast = (msg, error = false) => {
   box.classList.add("visible");
   setTimeout(() => box.classList.remove("visible"), 2400);
 };
+
+FEMFLOW.toggleBodyScroll = function (locked) {
+  document.body.classList.toggle("ff-modal-open", locked);
+};
 /* ============================================================
    ⏳ LOADING GLOBAL — FEMFLOW (PADRÃO OFICIAL)
 ============================================================ */
@@ -509,14 +513,32 @@ FEMFLOW.inserirModalSAC = function () {
 
   document.body.appendChild(modal);
 
+  const closeModal = () => {
+    modal.classList.add("hidden");
+    FEMFLOW.toggleBodyScroll(false);
+  };
+
   modal.addEventListener("click", e => {
-    if (e.target.id === "ff-sac-modal") modal.classList.add("hidden");
+    if (e.target.id === "ff-sac-modal") closeModal();
   });
 
-  modal.querySelector("#ff-sac-cancelar").onclick =
-    () => modal.classList.add("hidden");
+  modal.querySelector("#ff-sac-cancelar").onclick = closeModal;
 
   modal.querySelector("#ff-sac-enviar").onclick = FEMFLOW.enviarSAC;
+};
+
+FEMFLOW.abrirModalSAC = function () {
+  const modal = document.getElementById("ff-sac-modal");
+  if (!modal) return;
+  modal.classList.remove("hidden");
+  FEMFLOW.toggleBodyScroll(true);
+};
+
+FEMFLOW.fecharModalSAC = function () {
+  const modal = document.getElementById("ff-sac-modal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  FEMFLOW.toggleBodyScroll(false);
 };
 
 FEMFLOW.enviarSAC = async function () {
@@ -545,7 +567,7 @@ FEMFLOW.enviarSAC = async function () {
     FEMFLOW.loading.show("Enviando…");
     await FEMFLOW.post(payload);
     FEMFLOW.toast("Recebemos sua mensagem 💛");
-    document.getElementById("ff-sac-modal").classList.add("hidden");
+    FEMFLOW.fecharModalSAC();
   } catch (e) {
     FEMFLOW.toast("Erro ao enviar. Tente novamente.", true);
   } finally {
@@ -567,7 +589,7 @@ FEMFLOW._acaoMenu = function (op) {
       break;
 
     case "sac":
-      document.getElementById("ff-sac-modal")?.classList.remove("hidden");
+      FEMFLOW.abrirModalSAC();
       break;
 
     case "ciclo":
