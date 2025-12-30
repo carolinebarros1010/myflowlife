@@ -189,7 +189,7 @@ FEMFLOW.getDiaPrograma = async function () {
 
   try {
    const resp = await FEMFLOW.post({
-  action: "getDiaPrograma",
+  action: "getdiaprograma",
   id
 });
 
@@ -297,24 +297,16 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
     // 🔁 MUDANÇA DE NÍVEL
     // ----------------------------
     if (tipo === "nivel" && payload.nivel) {
-      await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "setnivel",
-          id,
-          nivel: payload.nivel
-        })
+      await FEMFLOW.post({
+        action: "setnivel",
+        id,
+        nivel: payload.nivel
       });
 
       // reset de programa é OBRIGATÓRIO
-      await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "resetprograma",
-          id
-        })
+      await FEMFLOW.post({
+        action: "resetprograma",
+        id
       });
     }
 
@@ -323,37 +315,25 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
     // ----------------------------
     if (tipo === "ciclo") {
       if (payload.perfilHormonal) {
-        await fetch(FEMFLOW.SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "setperfilhormonal",
-            id,
-            perfil: payload.perfilHormonal
-          })
+        await FEMFLOW.post({
+          action: "setperfilhormonal",
+          id,
+          perfil: payload.perfilHormonal
         });
       }
 
       if (payload.startDate) {
-        await fetch(FEMFLOW.SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "setciclostart",
-            id,
-            startDate: payload.startDate
-          })
+        await FEMFLOW.post({
+          action: "setciclostart",
+          id,
+          startDate: payload.startDate
         });
       }
 
       // sempre resetar programa
-      await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "resetprograma",
-          id
-        })
+      await FEMFLOW.post({
+        action: "resetprograma",
+        id
       });
     }
 
@@ -413,6 +393,7 @@ FEMFLOW.inserirMenuLateral = function () {
 
       <button class="ff-menu-op ff-close"  data-go="fechar">✖️ Fechar</button>
       <button class="ff-menu-op" data-go="idioma">🌐 Idioma</button>
+      <button class="ff-menu-op" data-go="sac">🛟 Preciso de ajuda</button>
       <button class="ff-menu-op" data-go="ciclo">🎯 Ajustar ciclo</button>
       <button class="ff-menu-op" data-go="respiracao">💨 Respiração</button>
       <button class="ff-menu-op" data-go="treinos">🏃 Meus Treinos</button>
@@ -480,6 +461,86 @@ FEMFLOW.inserirModalIdioma = function () {
 };
 
 /* ===========================================================
+   6.5 MODAL SAC
+=========================================================== */
+
+FEMFLOW.inserirModalSAC = function () {
+  if (document.getElementById("ff-sac-modal")) return;
+
+  const modal = document.createElement("div");
+  modal.id = "ff-sac-modal";
+  modal.className = "ff-sac-modal hidden";
+
+  modal.innerHTML = `
+    <div class="ff-sac-box">
+      <h2>🛟 Preciso de ajuda</h2>
+
+      <p>O que está acontecendo?</p>
+
+      <div class="ff-sac-options">
+        <label><input type="radio" name="sac_cat" value="treino"> Meu treino não está certo</label>
+        <label><input type="radio" name="sac_cat" value="ciclo"> Meu ciclo / fase parece errado</label>
+        <label><input type="radio" name="sac_cat" value="registro"> Não consegui registrar treino</label>
+        <label><input type="radio" name="sac_cat" value="acesso"> Problema de acesso</label>
+        <label><input type="radio" name="sac_cat" value="outro"> Outro problema</label>
+      </div>
+
+      <textarea id="ff-sac-msg" placeholder="Explique com suas palavras (opcional)"></textarea>
+
+      <div class="ff-sac-actions">
+        <button id="ff-sac-enviar">Enviar</button>
+        <button id="ff-sac-cancelar">Cancelar</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", e => {
+    if (e.target.id === "ff-sac-modal") modal.classList.add("hidden");
+  });
+
+  modal.querySelector("#ff-sac-cancelar").onclick =
+    () => modal.classList.add("hidden");
+
+  modal.querySelector("#ff-sac-enviar").onclick = FEMFLOW.enviarSAC;
+};
+
+FEMFLOW.enviarSAC = async function () {
+  const cat = document.querySelector("input[name='sac_cat']:checked")?.value;
+  if (!cat) return FEMFLOW.toast("Selecione uma opção");
+
+  const mensagem = document.getElementById("ff-sac-msg").value || "";
+
+  const payload = {
+    action: "sac_abrir",
+    id: localStorage.getItem("femflow_id"),
+    categoria: cat,
+    mensagem,
+    contexto: {
+      pagina: location.pathname.split("/").pop(),
+      fase: localStorage.getItem("femflow_fase"),
+      diaCiclo: Number(localStorage.getItem("femflow_diaCiclo") || 0),
+      diaPrograma: Number(localStorage.getItem("femflow_diaPrograma") || 0),
+      perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
+      nivel: localStorage.getItem("femflow_nivel"),
+      enfase: localStorage.getItem("femflow_enfase")
+    }
+  };
+
+  try {
+    FEMFLOW.loading.show("Enviando…");
+    await FEMFLOW.post(payload);
+    FEMFLOW.toast("Recebemos sua mensagem 💛");
+    document.getElementById("ff-sac-modal").classList.add("hidden");
+  } catch (e) {
+    FEMFLOW.toast("Erro ao enviar. Tente novamente.", true);
+  } finally {
+    FEMFLOW.loading.hide();
+  }
+};
+
+/* ===========================================================
    7. AÇÕES DO MENU
 =========================================================== */
 
@@ -490,6 +551,10 @@ FEMFLOW._acaoMenu = function (op) {
 
     case "idioma":
       document.getElementById("ff-lang-modal")?.classList.remove("hidden");
+      break;
+
+    case "sac":
+      document.getElementById("ff-sac-modal")?.classList.remove("hidden");
       break;
 
     case "ciclo":
@@ -530,7 +595,9 @@ FEMFLOW.dispatch("stateChanged", {
 
     case "logout":
       FEMFLOW.clearSession();
-      localStorage.clear();
+      localStorage.removeItem("femflow_id");
+      localStorage.removeItem("femflow_auth");
+      localStorage.removeItem("femflow_email");
       location.href = "index.html";
       break;
 
@@ -684,7 +751,8 @@ FEMFLOW.init = async function () {
   if (p === "home.html") {
     this.inserirHeaderApp();
     this.inserirMenuLateral();
-    this.inserirModalIdioma();   
+    this.inserirModalIdioma();
+    this.inserirModalSAC();
      
      // ⏱️ aguarda o DOM completar
     requestAnimationFrame(() => {
@@ -706,6 +774,7 @@ FEMFLOW.init = async function () {
      this.inserirHeaderApp();
     this.inserirMenuLateral();
     this.inserirModalIdioma();
+    this.inserirModalSAC();
 
     requestAnimationFrame(() => {
       FEMFLOW.initNivelHandler();
