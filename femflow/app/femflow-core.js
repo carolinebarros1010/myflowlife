@@ -19,6 +19,18 @@ FEMFLOW.setLang = function (lang) {
   document.dispatchEvent(new Event("femflow:langChange"));
 };
 
+FEMFLOW.t = function (key) {
+  const lang = FEMFLOW.lang || "pt";
+  const parts = key.split(".");
+  let obj = window.FEMFLOW_LANG?.[lang] || window.FEMFLOW_LANG?.pt;
+
+  for (const p of parts) {
+    if (!obj || obj[p] === undefined) return key;
+    obj = obj[p];
+  }
+  return obj;
+};
+
 FEMFLOW.dispatch = function(type, detail = {}) {
   document.dispatchEvent(
     new CustomEvent(`femflow:${type}`, { detail })
@@ -444,6 +456,7 @@ FEMFLOW.inserirMenuLateral = function () {
 
 document.addEventListener("femflow:langChange", () => {
   FEMFLOW.renderMenuLateral?.();
+  FEMFLOW.renderSAC?.();
 });
 
 /* ===========================================================
@@ -493,6 +506,46 @@ FEMFLOW.inserirModalIdioma = function () {
    6.5 MODAL SAC
 =========================================================== */
 
+FEMFLOW.renderSAC = function () {
+  const modal = document.getElementById("ff-sac-modal");
+  if (!modal) return;
+
+  modal.innerHTML = `
+    <div class="ff-sac-box">
+      <h2>🛟 ${FEMFLOW.t("sac.title")}</h2>
+
+      <p>${FEMFLOW.t("sac.subtitle")}</p>
+
+      <div class="ff-sac-options">
+        <label><input type="radio" name="sac_cat" value="treino"> ${FEMFLOW.t("sac.options.treino")}</label>
+        <label><input type="radio" name="sac_cat" value="ciclo"> ${FEMFLOW.t("sac.options.ciclo")}</label>
+        <label><input type="radio" name="sac_cat" value="registro"> ${FEMFLOW.t("sac.options.registro")}</label>
+        <label><input type="radio" name="sac_cat" value="acesso"> ${FEMFLOW.t("sac.options.acesso")}</label>
+        <label><input type="radio" name="sac_cat" value="outro"> ${FEMFLOW.t("sac.options.outro")}</label>
+      </div>
+
+      <textarea id="ff-sac-msg" placeholder="${FEMFLOW.t("sac.placeholder")}"></textarea>
+
+      <div class="ff-sac-actions">
+        <button id="ff-sac-enviar">${FEMFLOW.t("sac.enviar")}</button>
+        <button id="ff-sac-cancelar">${FEMFLOW.t("sac.cancelar")}</button>
+      </div>
+    </div>
+  `;
+
+  const closeModal = () => {
+    modal.classList.add("hidden");
+    FEMFLOW.toggleBodyScroll(false);
+  };
+
+  modal.onclick = e => {
+    if (e.target.id === "ff-sac-modal") closeModal();
+  };
+
+  modal.querySelector("#ff-sac-cancelar").onclick = closeModal;
+  modal.querySelector("#ff-sac-enviar").onclick = FEMFLOW.enviarSAC;
+};
+
 FEMFLOW.inserirModalSAC = function () {
   if (document.getElementById("ff-sac-modal")) return;
 
@@ -500,43 +553,8 @@ FEMFLOW.inserirModalSAC = function () {
   modal.id = "ff-sac-modal";
   modal.className = "ff-sac-modal hidden";
 
-  modal.innerHTML = `
-    <div class="ff-sac-box">
-      <h2>🛟 Preciso de ajuda</h2>
-
-      <p>O que está acontecendo?</p>
-
-      <div class="ff-sac-options">
-        <label><input type="radio" name="sac_cat" value="treino"> Meu treino não está certo</label>
-        <label><input type="radio" name="sac_cat" value="ciclo"> Meu ciclo / fase parece errado</label>
-        <label><input type="radio" name="sac_cat" value="registro"> Não consegui registrar treino</label>
-        <label><input type="radio" name="sac_cat" value="acesso"> Problema de acesso</label>
-        <label><input type="radio" name="sac_cat" value="outro"> Outro problema</label>
-      </div>
-
-      <textarea id="ff-sac-msg" placeholder="Explique com suas palavras (opcional)"></textarea>
-
-      <div class="ff-sac-actions">
-        <button id="ff-sac-enviar">Enviar</button>
-        <button id="ff-sac-cancelar">Cancelar</button>
-      </div>
-    </div>
-  `;
-
   document.body.appendChild(modal);
-
-  const closeModal = () => {
-    modal.classList.add("hidden");
-    FEMFLOW.toggleBodyScroll(false);
-  };
-
-  modal.addEventListener("click", e => {
-    if (e.target.id === "ff-sac-modal") closeModal();
-  });
-
-  modal.querySelector("#ff-sac-cancelar").onclick = closeModal;
-
-  modal.querySelector("#ff-sac-enviar").onclick = FEMFLOW.enviarSAC;
+  FEMFLOW.renderSAC();
 };
 
 FEMFLOW.abrirModalSAC = function () {
@@ -555,7 +573,7 @@ FEMFLOW.fecharModalSAC = function () {
 
 FEMFLOW.enviarSAC = async function () {
   const cat = document.querySelector("input[name='sac_cat']:checked")?.value;
-  if (!cat) return FEMFLOW.toast("Selecione uma opção");
+  if (!cat) return FEMFLOW.toast(FEMFLOW.t("sac.selecione"));
 
   const mensagem = document.getElementById("ff-sac-msg").value || "";
 
@@ -576,12 +594,12 @@ FEMFLOW.enviarSAC = async function () {
   };
 
   try {
-    FEMFLOW.loading.show("Enviando…");
+    FEMFLOW.loading.show(FEMFLOW.t("sac.enviando"));
     await FEMFLOW.post(payload);
-    FEMFLOW.toast("Recebemos sua mensagem 💛");
+    FEMFLOW.toast(FEMFLOW.t("sac.sucesso"));
     FEMFLOW.fecharModalSAC();
   } catch (e) {
-    FEMFLOW.toast("Erro ao enviar. Tente novamente.", true);
+    FEMFLOW.toast(FEMFLOW.t("sac.erro"), true);
   } finally {
     FEMFLOW.loading.hide();
   }
