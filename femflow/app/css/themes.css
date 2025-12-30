@@ -34,6 +34,11 @@ body.page-treino {
 body.page-evolucao {
   background: linear-gradient(180deg, #FCE3D5 0%, #F4E1D7 100%);
 }
+
+body.ff-modal-open {
+  overflow: hidden;
+  touch-action: none;
+}
 .ff-lang-modal {
   position: fixed;
   inset: 0;
@@ -76,5 +81,76 @@ body.page-evolucao {
   width: 100%;
   margin-top: 12px;
   border-radius: 10px;
+  background: #ddd;
+}
+
+.ff-sac-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  padding: 16px;
+}
+
+.ff-sac-modal.hidden {
+  display: none !important;
+}
+
+.ff-sac-box {
+  background: #fff;
+  width: 90%;
+  max-width: 420px;
+  padding: 22px;
+  border-radius: 20px;
+  text-align: left;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.ff-sac-box h2 {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.ff-sac-options label {
+  display: block;
+  margin: 10px 0;
+  font-size: 0.98rem;
+}
+
+#ff-sac-msg {
+  width: 100%;
+  min-height: 110px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  resize: vertical;
+}
+
+.ff-sac-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ff-sac-actions button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+}
+
+#ff-sac-enviar {
+  background: var(--teal);
+  color: #fff;
+}
+
+#ff-sac-cancelar {
   background: #ddd;
 }
