@@ -3,7 +3,7 @@ const SECURITY_TOKEN = 'Bmc082849$$';
 const ciclo_duracao = 28;
 const data_inicio = new Date();
 const ENABLE_SAC_AI = false;
-const OPENAI_MODEL = 'gpt-4.1-mini';
+const OPENAI_MODEL = 'gpt-4o-mini';
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const SAC_SHEET = 'SAC';
 
@@ -75,7 +75,23 @@ function doPost(e) {
     let aiResult = '';
     let aiError = '';
 
-    if (shouldUseSACAI(payload)) {
+    if (!shouldUseSACAI(payload)) {
+      const contexto = payload.contexto || {};
+      if (payload.categoria_ui === 'treino' && contexto.nivel === 'iniciante' && contexto.fase === 'lutea') {
+        aiResult = JSON.stringify({
+          categoria_final: 'uso_incorreto',
+          subcategoria: 'confusao_treino_do_dia',
+          gravidade: 1,
+          eh_bug: false,
+          resposta: {
+            pt: 'Seu treino está correto 😊 Em alguns dias do ciclo a intensidade muda.',
+            en: 'Your workout is correct 😊 On some cycle days the intensity changes.',
+            fr: 'Votre entraînement est correct 😊 Certains jours du cycle, l’intensité change.'
+          },
+          acao: 'auto'
+        });
+      }
+    } else {
       try {
         const resposta = analisarSACComIA(payload);
         aiResult = resposta ? JSON.stringify(resposta) : '';
@@ -235,6 +251,10 @@ function isSACAIEnabled() {
 function shouldUseSACAI(payload) {
   if (!isSACAIEnabled()) return false;
   if (!payload || !payload.mensagem || !String(payload.mensagem).trim()) return false;
+  const contexto = payload.contexto || {};
+  if (payload.categoria_ui === 'treino' && contexto.nivel === 'iniciante' && contexto.fase === 'lutea') {
+    return false;
+  }
   return true;
 }
 
@@ -245,40 +265,27 @@ function analisarSACComIA(payload) {
   }
 
   const systemPrompt = [
-    'Você é um analista técnico de suporte do aplicativo FemFlow.',
+    'Você é um classificador técnico de SAC do aplicativo FemFlow.',
     '',
-    'Seu papel NÃO é conversar com a usuária.',
-    'Seu papel é analisar relatos de suporte e classificá-los tecnicamente.',
+    'Sua função é:',
+    '- Classificar relatos de suporte',
+    '- Identificar se é bug real ou uso incorreto',
+    '- Definir gravidade (1 a 5)',
+    '- Sugerir resposta curta',
     '',
-    'O FemFlow é um aplicativo de treino feminino baseado no ciclo hormonal.',
-    'Usuárias podem ser iniciantes e cometer erros de uso.',
+    'Formato obrigatório:',
+    '{"categoria_final":"uso_incorreto|bug|duvida|acesso","subcategoria":"string_curta","gravidade":1,"eh_bug":false,"resposta":{"pt":"Mensagem curta","en":"Short message","fr":"Message courte"},"acao":"auto|humano"}',
     '',
-    'Responda SEMPRE em JSON válido.',
-    'NÃO escreva texto fora do JSON.'
+    'Responda SOMENTE em JSON válido.',
+    'Não escreva texto fora do JSON.',
+    'Seja objetivo.'
   ].join('\n');
 
   const userPrompt = {
-    tarefa: 'analisar_sac',
-    entrada: {
-      lang: payload.lang,
-      categoria_ui: payload.categoria_ui,
-      mensagem: payload.mensagem,
-      contexto: payload.contexto
-    },
-    instrucoes: {
-      objetivo: [
-        'Classificar corretamente o tipo de problema',
-        'Avaliar se é bug real ou uso incorreto',
-        'Determinar gravidade',
-        'Sugerir resposta curta e empática'
-      ],
-      regras: [
-        'Considere o nível da aluna (iniciante pode confundir uso)',
-        'Considere a fase do ciclo hormonal',
-        'Não assuma erro do sistema sem evidência',
-        'Se for dúvida comum, marque como uso_incorreto'
-      ]
-    }
+    lang: payload.lang,
+    categoria_ui: payload.categoria_ui,
+    mensagem: payload.mensagem,
+    contexto: payload.contexto
   };
 
   const body = {
