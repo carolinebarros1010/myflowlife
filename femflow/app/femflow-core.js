@@ -297,25 +297,20 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
     // 🔁 MUDANÇA DE NÍVEL
     // ----------------------------
     if (tipo === "nivel" && payload.nivel) {
-      await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "setnivel",
-          id,
-          nivel: payload.nivel
-        })
+      await FEMFLOW.post({
+        action: "setnivel",
+        id,
+        nivel: payload.nivel
       });
 
       // reset de programa é OBRIGATÓRIO
-      await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "resetprograma",
-          id
-        })
+      await FEMFLOW.post({
+        action: "resetprograma",
+        id
       });
+
+      localStorage.setItem("femflow_nivel", payload.nivel);
+      localStorage.removeItem("femflow_diaPrograma");
     }
 
     // ----------------------------
@@ -323,38 +318,36 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
     // ----------------------------
     if (tipo === "ciclo") {
       if (payload.perfilHormonal) {
-        await fetch(FEMFLOW.SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "setperfilhormonal",
-            id,
-            perfil: payload.perfilHormonal
-          })
+        await FEMFLOW.post({
+          action: "setperfilhormonal",
+          id,
+          perfil: payload.perfilHormonal
         });
       }
 
       if (payload.startDate) {
-        await fetch(FEMFLOW.SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "setciclostart",
-            id,
-            startDate: payload.startDate
-          })
+        await FEMFLOW.post({
+          action: "setciclostart",
+          id,
+          startDate: payload.startDate
         });
       }
 
       // sempre resetar programa
-      await fetch(FEMFLOW.SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "resetprograma",
-          id
-        })
+      await FEMFLOW.post({
+        action: "resetprograma",
+        id
       });
+
+      if (payload.perfilHormonal) {
+        localStorage.setItem("femflow_perfilHormonal", payload.perfilHormonal);
+      }
+
+      if (payload.startDate) {
+        localStorage.setItem("femflow_startDate", payload.startDate);
+      }
+
+      localStorage.removeItem("femflow_diaPrograma");
     }
 
   } catch (err) {
