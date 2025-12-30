@@ -2,6 +2,10 @@ const SHEET_ALUNAS = 'Alunas';
 const SECURITY_TOKEN = 'Bmc082849$$';
 const ciclo_duracao = 28;
 const data_inicio = new Date();
+const ENABLE_SAC_AI = false;
+const OPENAI_MODEL = 'gpt-4.1-mini';
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+const SAC_SHEET = 'SAC';
 
 function gerarID() {
   const ts = Utilities.formatDate(new Date(), "GMT-3", "yyMMdd");
@@ -54,6 +58,46 @@ function doGet(e) {
 function doPost(e) {
   const data = JSON.parse(e.postData.contents || '{}');
   const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_ALUNAS);
+
+  if (data.action === 'sac_abrir') {
+    const sacSheet = SpreadsheetApp.getActive().getSheetByName(SAC_SHEET) || SpreadsheetApp.getActive().insertSheet(SAC_SHEET);
+    if (sacSheet.getLastRow() === 0) {
+      sacSheet.appendRow(['Data', 'ID', 'Lang', 'CategoriaUI', 'Mensagem', 'Contexto', 'IA_Ativa', 'IA_Resultado', 'IA_Erro']);
+    }
+
+    const payload = {
+      lang: data.lang || 'pt',
+      categoria_ui: data.categoria_ui || 'outro',
+      mensagem: data.mensagem || '',
+      contexto: data.contexto || {}
+    };
+
+    let aiResult = '';
+    let aiError = '';
+
+    if (shouldUseSACAI(payload)) {
+      try {
+        const resposta = analisarSACComIA(payload);
+        aiResult = resposta ? JSON.stringify(resposta) : '';
+      } catch (err) {
+        aiError = String(err);
+      }
+    }
+
+    sacSheet.appendRow([
+      new Date(),
+      data.id || '',
+      payload.lang,
+      payload.categoria_ui,
+      payload.mensagem,
+      JSON.stringify(payload.contexto),
+      isSACAIEnabled(),
+      aiResult,
+      aiError
+    ]);
+
+    return _json({ status: 'sac_registrado' });
+  }
 
   if (data.event === 'PURCHASE_APPROVED') {
     const newId = gerarID();
@@ -180,4 +224,96 @@ function calcularCiclo(data_inicio, ciclo_duracao = 28) {
 
 function _json(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function isSACAIEnabled() {
+  const prop = PropertiesService.getScriptProperties().getProperty('ENABLE_SAC_AI');
+  if (prop === null) return ENABLE_SAC_AI;
+  return prop === 'true';
+}
+
+function shouldUseSACAI(payload) {
+  if (!isSACAIEnabled()) return false;
+  if (!payload || !payload.mensagem || !String(payload.mensagem).trim()) return false;
+  return true;
+}
+
+function analisarSACComIA(payload) {
+  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY ausente em Script Properties');
+  }
+
+  const systemPrompt = [
+    'Você é um analista técnico de suporte do aplicativo FemFlow.',
+    '',
+    'Seu papel NÃO é conversar com a usuária.',
+    'Seu papel é analisar relatos de suporte e classificá-los tecnicamente.',
+    '',
+    'O FemFlow é um aplicativo de treino feminino baseado no ciclo hormonal.',
+    'Usuárias podem ser iniciantes e cometer erros de uso.',
+    '',
+    'Responda SEMPRE em JSON válido.',
+    'NÃO escreva texto fora do JSON.'
+  ].join('\n');
+
+  const userPrompt = {
+    tarefa: 'analisar_sac',
+    entrada: {
+      lang: payload.lang,
+      categoria_ui: payload.categoria_ui,
+      mensagem: payload.mensagem,
+      contexto: payload.contexto
+    },
+    instrucoes: {
+      objetivo: [
+        'Classificar corretamente o tipo de problema',
+        'Avaliar se é bug real ou uso incorreto',
+        'Determinar gravidade',
+        'Sugerir resposta curta e empática'
+      ],
+      regras: [
+        'Considere o nível da aluna (iniciante pode confundir uso)',
+        'Considere a fase do ciclo hormonal',
+        'Não assuma erro do sistema sem evidência',
+        'Se for dúvida comum, marque como uso_incorreto'
+      ]
+    }
+  };
+
+  const body = {
+    model: OPENAI_MODEL,
+    temperature: 0.2,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: JSON.stringify(userPrompt) }
+    ]
+  };
+
+  const response = UrlFetchApp.fetch(OPENAI_API_URL, {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      Authorization: `Bearer ${apiKey}`
+    },
+    payload: JSON.stringify(body),
+    muteHttpExceptions: true
+  });
+
+  const responseText = response.getContentText();
+  const data = JSON.parse(responseText);
+  const content = data?.choices?.[0]?.message?.content;
+
+  if (!content) {
+    throw new Error(`Resposta IA inválida: ${responseText}`);
+  }
+
+  try {
+    return JSON.parse(content);
+  } catch (err) {
+    return {
+      erro_parse: true,
+      resposta_bruta: content
+    };
+  }
 }
