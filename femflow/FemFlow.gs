@@ -2,6 +2,10 @@ const SHEET_ALUNAS = 'Alunas';
 const SECURITY_TOKEN = 'Bmc082849$$';
 const ciclo_duracao = 28;
 const data_inicio = new Date();
+const ENABLE_SAC_AI = false;
+const OPENAI_MODEL = 'gpt-4o-mini';
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+const SAC_SHEET = 'SAC';
 
 function gerarID() {
   const ts = Utilities.formatDate(new Date(), "GMT-3", "yyMMdd");
@@ -54,6 +58,62 @@ function doGet(e) {
 function doPost(e) {
   const data = JSON.parse(e.postData.contents || '{}');
   const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_ALUNAS);
+
+  if (data.action === 'sac_abrir') {
+    const sacSheet = SpreadsheetApp.getActive().getSheetByName(SAC_SHEET) || SpreadsheetApp.getActive().insertSheet(SAC_SHEET);
+    if (sacSheet.getLastRow() === 0) {
+      sacSheet.appendRow(['Data', 'ID', 'Lang', 'CategoriaUI', 'Mensagem', 'Contexto', 'IA_Ativa', 'IA_Resultado', 'IA_Erro']);
+    }
+
+    const payload = {
+      lang: data.lang || 'pt',
+      categoria_ui: data.categoria_ui || 'outro',
+      mensagem: data.mensagem || '',
+      contexto: data.contexto || {}
+    };
+
+    let aiResult = '';
+    let aiError = '';
+
+    if (!shouldUseSACAI(payload)) {
+      const contexto = payload.contexto || {};
+      if (payload.categoria_ui === 'treino' && contexto.nivel === 'iniciante' && contexto.fase === 'lutea') {
+        aiResult = JSON.stringify({
+          categoria_final: 'uso_incorreto',
+          subcategoria: 'confusao_treino_do_dia',
+          gravidade: 1,
+          eh_bug: false,
+          resposta: {
+            pt: 'Seu treino está correto 😊 Em alguns dias do ciclo a intensidade muda.',
+            en: 'Your workout is correct 😊 On some cycle days the intensity changes.',
+            fr: 'Votre entraînement est correct 😊 Certains jours du cycle, l’intensité change.'
+          },
+          acao: 'auto'
+        });
+      }
+    } else {
+      try {
+        const resposta = analisarSACComIA(payload);
+        aiResult = resposta ? JSON.stringify(resposta) : '';
+      } catch (err) {
+        aiError = String(err);
+      }
+    }
+
+    sacSheet.appendRow([
+      new Date(),
+      data.id || '',
+      payload.lang,
+      payload.categoria_ui,
+      payload.mensagem,
+      JSON.stringify(payload.contexto),
+      isSACAIEnabled(),
+      aiResult,
+      aiError
+    ]);
+
+    return _json({ status: 'sac_registrado' });
+  }
 
   if (data.event === 'PURCHASE_APPROVED') {
     const newId = gerarID();
@@ -180,4 +240,84 @@ function calcularCiclo(data_inicio, ciclo_duracao = 28) {
 
 function _json(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function isSACAIEnabled() {
+  const prop = PropertiesService.getScriptProperties().getProperty('ENABLE_SAC_AI');
+  if (prop === null) return ENABLE_SAC_AI;
+  return prop === 'true';
+}
+
+function shouldUseSACAI(payload) {
+  if (!isSACAIEnabled()) return false;
+  if (!payload || !payload.mensagem || !String(payload.mensagem).trim()) return false;
+  const contexto = payload.contexto || {};
+  if (payload.categoria_ui === 'treino' && contexto.nivel === 'iniciante' && contexto.fase === 'lutea') {
+    return false;
+  }
+  return true;
+}
+
+function analisarSACComIA(payload) {
+  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY ausente em Script Properties');
+  }
+
+  const systemPrompt = [
+    'Você é um classificador técnico de SAC do aplicativo FemFlow.',
+    '',
+    'Sua função é:',
+    '- Classificar relatos de suporte',
+    '- Identificar se é bug real ou uso incorreto',
+    '- Definir gravidade (1 a 5)',
+    '- Sugerir resposta curta',
+    '',
+    'Responda SOMENTE em JSON válido.',
+    'Não escreva texto fora do JSON.',
+    'Seja objetivo.'
+  ].join('\n');
+
+  const userPrompt = {
+    lang: payload.lang,
+    categoria_ui: payload.categoria_ui,
+    mensagem: payload.mensagem,
+    contexto: payload.contexto
+  };
+
+  const body = {
+    model: OPENAI_MODEL,
+    temperature: 0.2,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: JSON.stringify(userPrompt) }
+    ]
+  };
+
+  const response = UrlFetchApp.fetch(OPENAI_API_URL, {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      Authorization: `Bearer ${apiKey}`
+    },
+    payload: JSON.stringify(body),
+    muteHttpExceptions: true
+  });
+
+  const responseText = response.getContentText();
+  const data = JSON.parse(responseText);
+  const content = data?.choices?.[0]?.message?.content;
+
+  if (!content) {
+    throw new Error(`Resposta IA inválida: ${responseText}`);
+  }
+
+  try {
+    return JSON.parse(content);
+  } catch (err) {
+    return {
+      erro_parse: true,
+      resposta_bruta: content
+    };
+  }
 }
