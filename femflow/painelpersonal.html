@@ -794,13 +794,17 @@
       return { nivel, fase, enfase, destino, id_aluna: idAluna };
     };
 
-    const validate = (params) => {
+    const validate = (params, action = "") => {
       if (!state.endpoint) {
         toast("Informe o endpoint antes de executar.");
         return false;
       }
       if (!params.nivel || !params.fase || !params.enfase) {
         toast("Preencha nivel, fase inicial e enfase.");
+        return false;
+      }
+      if (action === "importar" && !params.id_aluna) {
+        toast("Informe o perfil (ID da aluna) antes de importar.");
         return false;
       }
       if (!params.destino) {
@@ -860,7 +864,7 @@
     };
 
     const runAction = async (action, params, button) => {
-      if (!validate(params)) return;
+      if (!validate(params, action)) return;
       const url = buildUrl(action, params);
       updatePreview();
 
