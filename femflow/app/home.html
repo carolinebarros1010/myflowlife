@@ -20,7 +20,12 @@
 </head>
 
 <body>
-  
+  <!-- FIREBASE (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<!-- INIT DO FIREBASE -->
+<script src="js/firebase-init.js"></script>
 
   
   <!-- BEM-VINDA -->
@@ -64,9 +69,17 @@
   <h2 class="home-section-title" id="tituloCasa">Treinar em Casa</h2>
   <div class="rail" id="railCasa"></div>
 
-  <script src="js/lang.js"></script>
-  <script src="femflow-core.js"></script>
-  <script src="js/home.js"></script>
+
+  
+ <script src="js/lang.js"></script>
+<script src="femflow-core.js"></script>
+
+<!-- Firebase precisa existir aqui -->
+<script src="js/firebase-init.js"></script>
+
+<!-- Só agora o home -->
+<script src="js/home.js"></script>
+
 
   <script>
     document.getElementById("btnFlow").onclick = () => FEMFLOW.router("flowcenter");
