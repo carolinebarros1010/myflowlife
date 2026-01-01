@@ -221,6 +221,47 @@ async function carregarCatalogoFirebase() {
 
   return catalogo;
 }
+/* ============================================================
+   🧩 CARDS SIMBÓLICOS (VITRINE COMERCIAL)
+============================================================ */
+
+const CARDS_PERSONAL_SIMBOLICOS = [
+  {
+    enfase: "personal",
+    titulo: "Treino Personalizado",
+    desc: "Treino feito exclusivamente para você",
+    color: "#335953",
+    locked: true,
+    simbolico: true
+  }
+];
+
+const CARDS_FOLLOWME_SIMBOLICOS = [
+  {
+    enfase: "followme_livia_rapaci",
+    titulo: "Treine com Lívia Rapaci",
+    desc: "Programa completo de 30 dias com a coach",
+    color: "#f3c1c1",
+    locked: true,
+    simbolico: true
+  },
+  {
+    enfase: "followme_karoline",
+    titulo: "Treine com Karoline Bombeira",
+    desc: "Rotina intensa e funcional",
+    color: "#ff9f7f",
+    locked: true,
+    simbolico: true
+  },
+  {
+    enfase: "followme_thalita",
+    titulo: "Treine com Thalita Prates",
+    desc: "Força e constância no feminino",
+    color: "#cbb1e6",
+    locked: true,
+    simbolico: true
+  }
+];
 
 /* ============================================================
    RENDERIZAÇÃO DOS CARDS
@@ -258,12 +299,36 @@ function renderRail(el, lista) {
    LÓGICA DE ACESSO POR PRODUTO
 =========================================================== */
 function handleCardClick(enfase, locked) {
+
+  /* =========================================
+     🔒 CARD BLOQUEADO (VITRINE COMERCIAL)
+  ========================================= */
   if (locked) {
+
+    // 🧠 PERSONAL — CTA dedicado
+    if (enfase === "personal" || enfase.startsWith("personal_")) {
+      FEMFLOW.toast("🔒 Treino Personal é um plano exclusivo.");
+      window.open(LINK_PERSONAL, "_blank");
+      return;
+    }
+
+    // ✨ FOLLOWME — programa especial
+    if (enfase.startsWith("followme_")) {
+      FEMFLOW.toast("✨ Programa especial de 30 dias com coach.");
+      // opcional: window.open(FOLLOWME_LINKS[coach], "_blank");
+      return;
+    }
+
+    // 🔹 BLOQUEIO PADRÃO
     FEMFLOW.toast("Plano necessário para acessar este treino.");
     return;
   }
 
+  /* =========================================
+     🌸 CICLO NÃO CONFIGURADO
+  ========================================= */
   if (!localStorage.getItem("femflow_cycle_configured")) {
+
     FEMFLOW.loading.show("Configurando seu ciclo…");
 
     localStorage.setItem("femflow_enfase", enfase);
@@ -273,15 +338,23 @@ function handleCardClick(enfase, locked) {
       impact: "fisiologico",
       source: "home"
     });
+
     return;
   }
 
+  /* =========================================
+     ✨ FOLLOWME ATIVO
+  ========================================= */
   if (inferirCategoria(enfase) === "followme") {
     return selecionarCoach(enfase);
   }
 
+  /* =========================================
+     🔥 TREINO NORMAL
+  ========================================= */
   return selecionarEnfase(enfase);
 }
+
 
 /* ============================================================
    SALVAR ENFASE NORMAL
@@ -418,6 +491,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const catalogo = await carregarCatalogoFirebase();
+     /* ============================================================
+   🧩 INJETAR VITRINE COMERCIAL
+============================================================ */
+
+// PERSONAL — sempre aparece
+if (catalogo.personal.length === 0) {
+  catalogo.personal.push(...CARDS_PERSONAL_SIMBOLICOS);
+}
+
+// FOLLOWME — sempre aparece
+if (catalogo.followme.length === 0) {
+  catalogo.followme.push(...CARDS_FOLLOWME_SIMBOLICOS);
+}
+
 
     renderRail(document.getElementById("railFollowMe"), catalogo.followme);
     renderRail(document.getElementById("railMuscular"), catalogo.muscular);
