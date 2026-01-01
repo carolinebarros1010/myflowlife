@@ -293,6 +293,7 @@ const origemURL = urlParams.get("origemURL") || localStorage.getItem("origemURL"
 if (origem) localStorage.setItem("origem", origem);
 if (ebook) localStorage.setItem("ebook", ebook);
 if (origemURL) localStorage.setItem("origemURL", origemURL);
+if (enfase) localStorage.setItem("enfase", enfase);
 
 // 🔹 Envio do formulário
 form.addEventListener("submit", async (e) => {
@@ -335,5 +336,3 @@ form.addEventListener("submit", async (e) => {
 
 </body>
 </html>
-
-
