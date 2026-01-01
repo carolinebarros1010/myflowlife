@@ -50,81 +50,160 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_fase", String(perfil.fase || "follicular").toLowerCase());
   localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
   localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
-   localStorage.setItem(  "femflow_dataInicioPrograma",   perfil.dataInicioPrograma ? String(perfil.dataInicioPrograma) : "" );
+  localStorage.setItem("femflow_dataInicioPrograma", perfil.dataInicioPrograma ? String(perfil.dataInicioPrograma) : "");
 
-
-localStorage.setItem(
-  "femflow_enfase",
-  String(perfil.enfase || "nenhuma").toLowerCase()
-);
+  localStorage.setItem(
+    "femflow_enfase",
+    String(perfil.enfase || "nenhuma").toLowerCase()
+  );
 }
-   
+
 /* ============================================================
-   LISTAS DE CARDS
+   CATÁLOGO DINÂMICO (FIREBASE)
 =========================================================== */
-const LISTA_MUSCULAR = [
-  { titulo:"Glúteo", enfase:"gluteo", color:"#d98f80", desc:"Foco total no glúteo" },
-  { titulo:"Costas", enfase:"costas", color:"#a6b8c8", desc:"Remadas e postura" },
-  { titulo:"Peito",  enfase:"peito",  color:"#e6a09b", desc:"Força de empurrar" },
-  { titulo:"Braço",  enfase:"braco",  color:"#d38b6e", desc:"Bíceps + tríceps" },
-  { titulo:"Posterior", enfase:"posterior", color:"#b58fb5", desc:"Cadeia posterior" },
-  { titulo:"Quadríceps", enfase:"quadriceps", color:"#9fb7ac", desc:"Pernas fortes" }
-  
-];
+const MUSCULAR_ENFASES = new Set([
+  "gluteo",
+  "quadril",
+  "posterior",
+  "quadriceps",
+  "costas",
+  "peito",
+  "braco",
+  "core"
+]);
 
-const LISTA_ESPORTES = [
-   { titulo:"Militar", enfase:"militar", color:"#8c9aa3", desc:"Teste físico operacional" },
-  { titulo:"Corrida", enfase:"corrida", color:"#b8a59c", desc:"Base aeróbica" },
-  { titulo:"Natação", enfase:"natacao", color:"#80a8b3", desc:"Propulsão aquática" },
-  { titulo:"Remo",    enfase:"remo",    color:"#7f9d94", desc:"Tração e core" },
-  { titulo:"Bike",    enfase:"bike",    color:"#9cc2c1", desc:"Cardio leve/moderado" },
-  { titulo:"Beach",   enfase:"beach",   color:"#e3a689", desc:"Areia e potência" }
-];
+function extrairNivelEnfase(docId) {
+  if (!docId) return null;
+  const partes = String(docId).split("_");
+  if (partes.length < 2) return null;
+  const [nivelRaw, ...resto] = partes;
+  const nivel = nivelRaw.toLowerCase().trim();
+  const enfase = resto.join("_").toLowerCase().trim();
+  if (!nivel || !enfase) return null;
+  return { nivel, enfase };
+}
 
-const LISTA_CASA = [
-  { titulo:"Em Casa", enfase:"casa", color:"#d1a697", desc:"Sem equipamentos" },
-  { titulo:"Casa Glúteo", enfase:"casa_gluteo", color:"#dc9d8c", desc:"Glúteos em casa" },
-  { titulo:"Casa Core",   enfase:"casa_core",   color:"#cababa", desc:"Abdômen e lombar" },
-  { titulo:"Casa Elástico", enfase:"casa_elastico", color:"#d8c4b0", desc:"Elástico" },
-  { titulo:"Casa Halter",   enfase:"casa_halter",   color:"#c6b4a4", desc:"Halter" }
-];
+function normalizarNivel(raw) {
+  const n = (raw || "").toLowerCase().trim();
+  if (n.startsWith("inic")) return "iniciante";
+  if (n.startsWith("inter")) return "intermediaria";
+  if (n.startsWith("avan")) return "avancada";
+  return "iniciante";
+}
 
-const LISTA_PERSONAL = [
-  { titulo:"Treino Personal", enfase:"personal", color:"#335953", desc:"Treino criado pelo Coach" }
-];
+function inferirCategoria(enfase) {
+  if (!enfase) return "esportes";
+  if (enfase.startsWith("followme_")) return "followme";
+  if (enfase.startsWith("personal")) return "personal";
+  if (enfase.startsWith("casa")) return "casa";
+  if (MUSCULAR_ENFASES.has(enfase)) return "muscular";
+  return "esportes";
+}
 
-const LISTA_FOLLOWME = [
-  {
-    titulo:{pt:"Treine com Lívia Rapaci",en:"Train with Lívia Rapaci",fr:"Entraînez-vous avec Lívia"},
-    desc:{pt:"30 dias com a coach Lívia",en:"30 days with Lívia",fr:"30 jours avec Lívia"},
-    enfase:"followme_livia",
-    color:"#f3c1c1"
-  },
-  {
-    titulo:{pt:"Treine com Karoline Bombeira",en:"Train with Karoline",fr:"Entraînez-vous avec Karoline"},
-    desc:{pt:"30 dias com Karoline",en:"30 days with Karoline",fr:"30 jours avec Karoline"},
-    enfase:"followme_karoline",
-    color:"#ff9f7f"
-  },
-  {
-    titulo:{pt:"Treine com Thalita Prates",en:"Train with Thalita",fr:"Entraînez-vous avec Thalita"},
-    desc:{pt:"30 dias com Thalita",en:"30 days with Thalita",fr:"30 jours avec Thalita"},
-    enfase:"followme_thalita",
-    color:"#cbb1e6"
+function podeAcessar(enfase, perfil) {
+  if (!enfase) return false;
+
+  const categoria = inferirCategoria(enfase);
+  const produto = (perfil.produto || "").toLowerCase();
+  const ativa = !!perfil.ativa;
+  const personal = !!perfil.personal;
+
+  if (personal) {
+    return categoria !== "followme";
   }
-];
+
+  if (produto === "acesso_app" && ativa) {
+    return ["muscular", "esportes", "casa"].includes(categoria);
+  }
+
+  if (produto.startsWith("followme_") && ativa) {
+    return enfase === produto;
+  }
+
+  return false;
+}
+
+function formatarTitulo(enfase) {
+  if (!enfase) return "Treino";
+  const limpo = enfase
+    .replace(/^followme_/, "")
+    .replace(/^personal_?/, "personal ")
+    .replace(/_/g, " ")
+    .trim();
+
+  return limpo
+    .split(" ")
+    .filter(Boolean)
+    .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(" ");
+}
+
+function normalizarCardFirebase(enfase, data) {
+  const titulo = data?.titulo || data?.title || formatarTitulo(enfase);
+  const desc = data?.desc || data?.descricao || "";
+  const color = data?.color || data?.cor || "#d1a697";
+
+  return {
+    titulo,
+    desc,
+    enfase,
+    color
+  };
+}
+
+async function carregarCatalogoFirebase() {
+  const nivelAluno = normalizarNivel(localStorage.getItem("femflow_nivel"));
+  const perfil = {
+    produto: localStorage.getItem("femflow_produto"),
+    ativa: localStorage.getItem("femflow_ativa") === "true",
+    personal: localStorage.getItem("femflow_personal") === "true"
+  };
+
+  const catalogo = {
+    followme: [],
+    personal: [],
+    muscular: [],
+    esportes: [],
+    casa: []
+  };
+
+  const snap = await firebase.firestore().collection("exercicios").get();
+  snap.forEach(doc => {
+    const parsed = extrairNivelEnfase(doc.id);
+    if (!parsed) return;
+
+    const { nivel, enfase } = parsed;
+    const categoria = inferirCategoria(enfase);
+    const isFollowme = categoria === "followme";
+    const isPersonal = categoria === "personal";
+    const isCasa = categoria === "casa";
+
+    const nivelOk = nivel === nivelAluno;
+    const incluir = isFollowme || isPersonal || (isCasa ? nivelOk : nivelOk);
+    if (!incluir) return;
+
+    const card = normalizarCardFirebase(enfase, doc.data());
+    card.locked = !podeAcessar(enfase, perfil);
+    catalogo[categoria].push(card);
+  });
+
+  return catalogo;
+}
 
 /* ============================================================
    RENDERIZAÇÃO DOS CARDS
 =========================================================== */
-function cardHTML(p){
+function cardHTML(p) {
   const lang = FEMFLOW.lang || "pt";
   const titulo = typeof p.titulo === "object" ? p.titulo[lang] : p.titulo;
-  const desc   = typeof p.desc   === "object" ? p.desc[lang]   : p.desc;
+  const desc = typeof p.desc === "object" ? p.desc[lang] : p.desc;
+  const lockedClass = p.locked ? " locked" : "";
+  const lockOverlay = p.locked ? '<span class="lock-overlay">🔒</span>' : "";
 
   return `
-    <article class="card" data-enfase="${p.enfase}">
-      <div class="thumb" style="background:${p.color}">
+    <article class="card${lockedClass}" data-enfase="${p.enfase}" data-locked="${p.locked}">
+      <div class="thumb thumb-${p.enfase}" style="background:${p.color}; --thumb-url:url('/femflow/css/cards/${p.enfase}.png');">
+        ${lockOverlay}
         <span class="badge">${titulo}</span>
       </div>
       <div class="info">
@@ -134,80 +213,49 @@ function cardHTML(p){
     </article>`;
 }
 
-function renderRail(el, lista){
+function renderRail(el, lista) {
   el.innerHTML = lista.map(cardHTML).join("");
   el.querySelectorAll(".card").forEach(c =>
-    c.onclick = () => handleCardClick(c.dataset.enfase)
+    c.onclick = () => handleCardClick(c.dataset.enfase, c.dataset.locked === "true")
   );
 }
 
 /* ============================================================
    LÓGICA DE ACESSO POR PRODUTO
 =========================================================== */
-function handleCardClick(enfase){
-   
-if (!localStorage.getItem("femflow_cycle_configured")) {
-
-  FEMFLOW.loading.show("Configurando seu ciclo…");
-
-  localStorage.setItem("femflow_enfase", enfase);
-
- FEMFLOW.dispatch("stateChanged", {
-  type: "ciclo",
-  impact: "fisiologico",
-  source: "home"
-});
-return;
-}
-
-
-
-  const produto  = (localStorage.getItem("femflow_produto") || "").toLowerCase();
-  const ativa    = localStorage.getItem("femflow_ativa") === "true";
-  const personal = localStorage.getItem("femflow_personal") === "true";
-
-  /* PERSONAL TEM ACESSO TOTAL (menos FollowMe) */
-  if (personal){
-    if (enfase.startsWith("followme_")){
-      FEMFLOW.toast("FollowMe não faz parte do seu plano.");
-      return;
-    }
-    return selecionarEnfase(enfase);
+function handleCardClick(enfase, locked) {
+  if (locked) {
+    FEMFLOW.toast("Plano necessário para acessar este treino.");
+    return;
   }
 
-  /* FOLLOWME */
-  if (produto === "followme" && ativa){
-    if (!enfase.startsWith("followme_")){
-      FEMFLOW.toast("Seu plano dá acesso apenas ao FollowMe.");
-      return;
-    }
+  if (!localStorage.getItem("femflow_cycle_configured")) {
+    FEMFLOW.loading.show("Configurando seu ciclo…");
+
+    localStorage.setItem("femflow_enfase", enfase);
+
+    FEMFLOW.dispatch("stateChanged", {
+      type: "ciclo",
+      impact: "fisiologico",
+      source: "home"
+    });
+    return;
+  }
+
+  if (inferirCategoria(enfase) === "followme") {
     return selecionarCoach(enfase);
   }
 
-  /* ACESSO APP */
-  if (produto === "acesso_app" && ativa){
-    if (enfase.startsWith("followme_")){
-      FEMFLOW.toast("✨ Em breve! Treine junto.");
-      return;
-    }
-    if (enfase === "personal"){
-      FEMFLOW.toast("Treino Personal é um produto adicional.");
-      return;
-    }
-    return selecionarEnfase(enfase);
-  }
-
-  FEMFLOW.toast("Adquira acesso para liberar seus treinos.");
+  return selecionarEnfase(enfase);
 }
 
 /* ============================================================
    SALVAR ENFASE NORMAL
 =========================================================== */
-async function selecionarEnfase(enfase){
+async function selecionarEnfase(enfase) {
   const id = localStorage.getItem("femflow_id");
 
- FEMFLOW.loading.show("Preparando novo programa…");
-
+  FEMFLOW.loading.show("Preparando novo programa…");
 
   // 🔥 1. salvar nova ênfase
   localStorage.setItem("femflow_enfase", enfase);
@@ -215,24 +263,24 @@ async function selecionarEnfase(enfase){
   // 🔥 2. reset explícito do programa (REGRA FEMFLOW)
   localStorage.setItem("femflow_diaPrograma", "1");
 
-  if (id){
+  if (id) {
     // 3. backend: salvar ênfase
-    await fetch(FEMFLOW.SCRIPT_URL,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        action:"setenfase",
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setenfase",
         id,
         enfase
       })
     });
 
     // 4. backend: resetar programa
-    await fetch(FEMFLOW.SCRIPT_URL,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        action:"resetprograma",
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "resetprograma",
         id
       })
     });
@@ -242,20 +290,18 @@ async function selecionarEnfase(enfase){
   FEMFLOW.router("flowcenter");
 }
 
-
-
 /* FOLLOWME */
-async function selecionarCoach(coach){
+async function selecionarCoach(coach) {
   const id = localStorage.getItem("femflow_id");
   localStorage.setItem("femflow_enfase", coach);
 
-  if (id){
-    await fetch(FEMFLOW.SCRIPT_URL,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ action:"setenfase", id, enfase:coach })
+  if (id) {
+    await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "setenfase", id, enfase: coach })
     });
-   await FEMFLOW.reiniciarDiaPrograma();
+    await FEMFLOW.reiniciarDiaPrograma();
   }
 
   FEMFLOW.router("flowcenter");
@@ -278,80 +324,74 @@ function aplicarIdiomaHome() {
     bv.textContent = `${L.bemvinda}, ${primeiroNome}!`;
   }
 
-   // Títulos das seções
-  const tPersonal  = document.getElementById("tituloPersonalTopo");
-  const tFollowMe  = document.getElementById("tituloFollowMe");
-  const tMuscular  = document.getElementById("tituloMuscular");
-  const tEsportes  = document.getElementById("tituloEsportes");
-  const tCasa      = document.getElementById("tituloCasa");
+  // Títulos das seções
+  const tPersonal = document.getElementById("tituloPersonalTopo");
+  const tFollowMe = document.getElementById("tituloFollowMe");
+  const tMuscular = document.getElementById("tituloMuscular");
+  const tEsportes = document.getElementById("tituloEsportes");
+  const tCasa = document.getElementById("tituloCasa");
 
-  if (tPersonal)  tPersonal.textContent  = L.tituloPersonal;
-  if (tFollowMe)  tFollowMe.textContent  = L.tituloFollowMe;
-  if (tMuscular)  tMuscular.textContent  = L.tituloMuscular;
-  if (tEsportes)  tEsportes.textContent  = L.tituloEsportes;
-  if (tCasa)      tCasa.textContent      = L.tituloCasa;
-
+  if (tPersonal) tPersonal.textContent = L.tituloPersonal;
+  if (tFollowMe) tFollowMe.textContent = L.tituloFollowMe;
+  if (tMuscular) tMuscular.textContent = L.tituloMuscular;
+  if (tEsportes) tEsportes.textContent = L.tituloEsportes;
+  if (tCasa) tCasa.textContent = L.tituloCasa;
 
   // 🔥 VÍDEO
   const vTitle = document.getElementById("homeVideoTitle");
-  const vSub   = document.getElementById("homeVideoSub");
+  const vSub = document.getElementById("homeVideoSub");
   const vFrame = document.getElementById("homeVideoFrame");
 
   if (vTitle && L.videoTitulo) vTitle.textContent = L.videoTitulo;
-  if (vSub   && L.videoSub)   vSub.textContent   = L.videoSub;
-  if (vFrame && L.videoUrl)   vFrame.src         = L.videoUrl;
+  if (vSub && L.videoSub) vSub.textContent = L.videoSub;
+  if (vFrame && L.videoUrl) vFrame.src = L.videoUrl;
 }
 
 /* ============================================================
    HOME — AGORA USANDO SOMENTE VALIDAR (SEM SYNC)
 =========================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
-
-   FEMFLOW.loading.show("Carregando…");
-
-   
+  FEMFLOW.loading.show("Carregando…");
 
   try {
     const perfil = await carregarPerfilEAtualizarStorage();
 
-   
- 
-
-      if (perfil.status !== "ok") {
+    if (perfil.status !== "ok") {
       FEMFLOW.toast("Erro ao atualizar dados. Tente novamente.");
       FEMFLOW.loading.hide();
       return;
     }
 
-        if (perfil.status === "blocked" || perfil.status === "denied") {
+    if (perfil.status === "blocked" || perfil.status === "denied") {
       FEMFLOW.toast("Sessão inválida. Faça login novamente.");
       FEMFLOW.clearSession?.();
       FEMFLOW.loading.hide();
       return FEMFLOW.router("index.html");
-   }
-     
-persistPerfil(perfil);
+    }
 
-     // ✅ ciclo configurado vem do VALIDAR
-if (perfil.fase && perfil.diaCiclo) {
-  localStorage.setItem("femflow_cycle_configured", "yes");
-}
-     
-     if (!localStorage.getItem("femflow_cycle_configured")) {
-  FEMFLOW.loading.hide?.();
-  FEMFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
-  FEMFLOW.router("ciclo");
-  return;
-}
+    persistPerfil(perfil);
 
-    renderRail(document.getElementById("railFollowMe"), LISTA_FOLLOWME);
-    renderRail(document.getElementById("railMuscular"), LISTA_MUSCULAR);
-    renderRail(document.getElementById("railEsportes"), LISTA_ESPORTES);
-    renderRail(document.getElementById("railCasa"), LISTA_CASA);
-    renderRail(document.getElementById("railPersonal"), LISTA_PERSONAL);
+    // ✅ ciclo configurado vem do VALIDAR
+    if (perfil.fase && perfil.diaCiclo) {
+      localStorage.setItem("femflow_cycle_configured", "yes");
+    }
+
+    if (!localStorage.getItem("femflow_cycle_configured")) {
+      FEMFLOW.loading.hide?.();
+      FEMFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
+      FEMFLOW.router("ciclo");
+      return;
+    }
+
+    const catalogo = await carregarCatalogoFirebase();
+
+    renderRail(document.getElementById("railFollowMe"), catalogo.followme);
+    renderRail(document.getElementById("railMuscular"), catalogo.muscular);
+    renderRail(document.getElementById("railEsportes"), catalogo.esportes);
+    renderRail(document.getElementById("railCasa"), catalogo.casa);
+    renderRail(document.getElementById("railPersonal"), catalogo.personal);
 
     aplicarIdiomaHome();
-
   } catch (err) {
     console.error("HOME init erro:", err);
     FEMFLOW.toast("Falha ao carregar. Verifique internet.");
@@ -359,9 +399,6 @@ if (perfil.fase && perfil.diaCiclo) {
     FEMFLOW.loading.hide();
   }
 });
-
-
-
 
 /* ============================================================
    🔥 Quando o idioma mudar → traduz de novo a home
