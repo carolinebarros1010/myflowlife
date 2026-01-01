@@ -1,35 +1,56 @@
 <?php
-// Permite acesso de qualquer origem (CORS)
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+// ===============================
+// FemFlow Proxy — Versão Oficial
+// ===============================
 
-// Lida com o preflight (OPTIONS)
+// CORS
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// Cache OFF (CRÍTICO)
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+
+// Preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
   http_response_code(200);
   exit;
 }
 
-// Define tipo de resposta
-header("Content-Type: application/json");
+// Endpoint público do backend (Cloudflare Worker)
+$API = "https://api-myflowlife.falling-wildflower-a8c0.workers.dev";
 
-// Lê o corpo da requisição
-$input = file_get_contents("php://input");
+// Método
+$method = $_SERVER['REQUEST_METHOD'];
 
-// URL do seu Apps Script
-$script = "https://script.google.com/macros/s/AKfycbwMdVo_TgYGg5mj5W4wcP1yD2PXRcLkA4tZRcc9TdSe363qIvm29odXkAGyPMIJR0xf/exec";
+// Query string (GET)
+$query = $_SERVER['QUERY_STRING'] ?? "";
 
-// Envia o POST ao Apps Script
-$ch = curl_init($script);
+// Corpo (POST)
+$body = file_get_contents("php://input");
+
+// Monta URL final
+$url = $API . ($query ? "?" . $query : "");
+
+// cURL
+$ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $input);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
-$response = curl_exec($ch);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
-// Fecha conexão
+if ($method === "POST" && !empty($body)) {
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+}
+
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+  "Content-Type: application/json",
+  "X-FemFlow-Proxy: php",
+]);
+
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-// Retorna resposta do Apps Script
+// Retorno
+http_response_code($httpCode);
 echo $response;
-?>
