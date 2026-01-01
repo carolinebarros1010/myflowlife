@@ -40,13 +40,11 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_id", perfil.id || "");
   localStorage.setItem("femflow_nome", perfil.nome || "");
   localStorage.setItem("femflow_email", perfil.email || "");
+   localStorage.setItem("femflow_nivel",  String(perfil.nivel || "iniciante").toLowerCase());
   localStorage.setItem("femflow_produto", String(perfil.produto || "").toLowerCase());
   localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
   localStorage.setItem("femflow_personal", String(!!perfil.personal));
-  localStorage.setItem(
-    "femflow_free_access",
-    perfil.free_access ? JSON.stringify(perfil.free_access) : ""
-  );
+   localStorage.setItem( "femflow_free_access", perfil.free_access ? JSON.stringify(perfil.free_access) : "" );
 
   // ciclo + programa (CRÍTICO)
   localStorage.setItem("femflow_perfilHormonal", String(perfil.perfilHormonal || "regular").toLowerCase());
@@ -221,6 +219,7 @@ async function carregarCatalogoFirebase() {
 
   return catalogo;
 }
+
 /* ============================================================
    🧩 CARDS SIMBÓLICOS (VITRINE COMERCIAL)
 ============================================================ */
@@ -491,19 +490,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const catalogo = await carregarCatalogoFirebase();
-     /* ============================================================
-   🧩 INJETAR VITRINE COMERCIAL
+
+/* ============================================================
+   🧩 INJETAR VITRINE COMERCIAL (LOCAL CORRETO)
 ============================================================ */
 
-// PERSONAL — sempre aparece
+const perfilTemPersonal =
+  localStorage.getItem("femflow_personal") === "true";
+
+const produto =
+  String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+
+/* PERSONAL — sempre aparece */
 if (catalogo.personal.length === 0) {
-  catalogo.personal.push(...CARDS_PERSONAL_SIMBOLICOS);
+  const cards = CARDS_PERSONAL_SIMBOLICOS.map(c => ({
+    ...c,
+    locked: !perfilTemPersonal
+  }));
+  catalogo.personal.push(...cards);
 }
 
-// FOLLOWME — sempre aparece
+/* FOLLOWME — sempre aparece */
 if (catalogo.followme.length === 0) {
-  catalogo.followme.push(...CARDS_FOLLOWME_SIMBOLICOS);
+  const cards = CARDS_FOLLOWME_SIMBOLICOS.map(c => ({
+    ...c,
+    locked: produto !== c.enfase
+  }));
+  catalogo.followme.push(...cards);
 }
+
 
 
     renderRail(document.getElementById("railFollowMe"), catalogo.followme);
