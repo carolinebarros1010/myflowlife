@@ -210,12 +210,16 @@ h1 {
 
 .thumb {
   height: 120px;
-  background: #ddd;
+  background-color: #ddd; /* fallback */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
 }
+
 
 .badge {
   position: absolute;
@@ -388,6 +392,66 @@ footer {
 @keyframes ffPop {
   0%   { transform: scale(0.88); opacity: 0; }
   100% { transform: scale(1);   opacity: 1; }
+}
+/* ============================================================
+   🖼️ THUMBS POR ÊNFASE — AUTO (fallback nativo)
+============================================================ */
+
+/* Exemplo — repetir apenas quando quiser imagem */
+.thumb-gluteo {
+  background-image: url("/femflow/css/cards/gluteo.png");
+}
+
+.thumb-corrida {
+  background-image: url("/femflow/css/cards/corrida.png");
+}
+
+.thumb-triatlon {
+  background-image: url("/femflow/css/cards/triatlon.png");
+}
+
+.thumb-militar {
+  background-image: url("/femflow/css/cards/militar.png");
+}
+
+.thumb-followme_livia_rapaci {
+  background-image: url("/femflow/css/cards/followme_livia_rapaci.png");
+}
+/* ============================================================
+   🔒 CARD BLOQUEADO (vitrine)
+============================================================ */
+.card.locked {
+  opacity: 0.55;
+}
+
+.card.locked .thumb {
+  filter: grayscale(1) brightness(0.7);
+}
+
+.card.locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 1.2rem;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 10px;
+}
+/* ============================================================
+   🎁 BADGE GRATUITO (campanhas)
+============================================================ */
+.badge-free {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: linear-gradient(135deg, #2d8f6f, #5cc9a6);
+  padding: 4px 10px;
+  color: #fff;
+  border-radius: 12px;
+  font-size: .75rem;
+  font-weight: 700;
 }
 
 
