@@ -138,6 +138,22 @@ body {
   z-index: 99999;
 }
 
+@supports (-webkit-touch-callout: none) {
+  .fix-footer {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  .carousel-container,
+  .carousel-track,
+  .carousel-item {
+    position: relative;
+    z-index: 0;
+  }
+}
+
 .btn-primary-clean,
 .btn-secondary-clean,
 .btn-tertiary-clean {
@@ -792,5 +808,4 @@ body.debug * {
   outline: 1px dashed red;
 }
 .hidden { display: none !important; }
-
 
