@@ -68,7 +68,8 @@ const LISTA_MUSCULAR = [
   { titulo:"Peito",  enfase:"peito",  color:"#e6a09b", desc:"Força de empurrar" },
   { titulo:"Braço",  enfase:"braco",  color:"#d38b6e", desc:"Bíceps + tríceps" },
   { titulo:"Posterior", enfase:"posterior", color:"#b58fb5", desc:"Cadeia posterior" },
-  { titulo:"Quadríceps", enfase:"quadriceps", color:"#9fb7ac", desc:"Pernas fortes" }
+  { titulo:"Quadríceps", enfase:"quadriceps", color:"#9fb7ac", desc:"Pernas fortes" },
+  { titulo:"Militar", enfase:"militar", color:"#8c9aa3", desc:"Teste físico operacional" }
 ];
 
 const LISTA_ESPORTES = [
