@@ -112,15 +112,21 @@ function podeAcessar(enfase, perfil) {
   const ativa = !!perfil.ativa;
   const personal = !!perfil.personal;
 
+  if (!ativa) return false;
+
+  // 🔥 PERSONAL = acesso_app + personal
   if (personal) {
-    return categoria !== "followme";
+    if (categoria === "followme") return false;
+    return true; // muscular, esportes, casa e personal
   }
 
-  if (produto === "acesso_app" && ativa) {
+  // 🔹 ACESSO APP
+  if (produto === "acesso_app") {
     return ["muscular", "esportes", "casa"].includes(categoria);
   }
 
-  if (produto.startsWith("followme_") && ativa) {
+  // 🔹 FOLLOWME
+  if (produto.startsWith("followme_")) {
     return enfase === produto;
   }
 
