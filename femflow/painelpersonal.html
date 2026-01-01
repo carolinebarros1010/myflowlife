@@ -1011,7 +1011,7 @@
   };
   runAction("linkar", payload, qs("btnRelink"));
     });
-    qs("btnImport").addEventListener("click", () => runAction("importar", {}, qs("btnImport")));
+    qs("btnImport").addEventListener("click", () => runAction("importar", collectParams(), qs("btnImport")));
 
     qs("btnCopy").addEventListener("click", async () => {
       if (!state.response) return toast("Nenhum JSON para copiar.");
