@@ -43,6 +43,10 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_produto", String(perfil.produto || "").toLowerCase());
   localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
   localStorage.setItem("femflow_personal", String(!!perfil.personal));
+  localStorage.setItem(
+    "femflow_free_access",
+    perfil.free_access ? JSON.stringify(perfil.free_access) : ""
+  );
 
   // ciclo + programa (CRÍTICO)
   localStorage.setItem("femflow_perfilHormonal", String(perfil.perfilHormonal || "regular").toLowerCase());
@@ -153,10 +157,20 @@ function normalizarCardFirebase(enfase, data) {
 
 async function carregarCatalogoFirebase() {
   const nivelAluno = normalizarNivel(localStorage.getItem("femflow_nivel"));
+  let freeAccess = null;
+  const freeAccessRaw = localStorage.getItem("femflow_free_access");
+  if (freeAccessRaw) {
+    try {
+      freeAccess = JSON.parse(freeAccessRaw);
+    } catch (err) {
+      freeAccess = null;
+    }
+  }
   const perfil = {
     produto: localStorage.getItem("femflow_produto"),
     ativa: localStorage.getItem("femflow_ativa") === "true",
-    personal: localStorage.getItem("femflow_personal") === "true"
+    personal: localStorage.getItem("femflow_personal") === "true",
+    free_access: freeAccess
   };
 
   const catalogo = {
@@ -183,7 +197,19 @@ async function carregarCatalogoFirebase() {
     if (!incluir) return;
 
     const card = normalizarCardFirebase(enfase, doc.data());
-    card.locked = !podeAcessar(enfase, perfil);
+    const podeAcessarProduto = podeAcessar(enfase, perfil);
+    const freeAccessEnfases = (perfil.free_access?.enfases || []).map(item =>
+      String(item || "").toLowerCase()
+    );
+    const podeAcessarFree =
+      perfil.free_access?.enabled === true &&
+      freeAccessEnfases.includes(enfase);
+    const podeAcessarCard = podeAcessarProduto || podeAcessarFree;
+
+    card.locked = !podeAcessarCard;
+    if (!podeAcessarProduto && podeAcessarFree) {
+      card.isFree = true;
+    }
     catalogo[categoria].push(card);
   });
 
@@ -199,11 +225,13 @@ function cardHTML(p) {
   const desc = typeof p.desc === "object" ? p.desc[lang] : p.desc;
   const lockedClass = p.locked ? " locked" : "";
   const lockOverlay = p.locked ? '<span class="lock-overlay">🔒</span>' : "";
+  const freeBadge = p.isFree ? '<span class="badge-free">Gratuito</span>' : "";
 
   return `
     <article class="card${lockedClass}" data-enfase="${p.enfase}" data-locked="${p.locked}">
       <div class="thumb thumb-${p.enfase}" style="background:${p.color}; --thumb-url:url('/femflow/css/cards/${p.enfase}.png');">
         ${lockOverlay}
+        ${freeBadge}
         <span class="badge">${titulo}</span>
       </div>
       <div class="info">
