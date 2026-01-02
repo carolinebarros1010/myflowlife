@@ -1279,5 +1279,4 @@ window.t = function (path, vars = {}) {
     FEMFLOW.dispatch("femflow:ready", perfil);
 
   })();
-}); // ← fecha o DOMContentLoaded
 
