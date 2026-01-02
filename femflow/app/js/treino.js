@@ -1250,7 +1250,7 @@ window.t = function (path, vars = {}) {
       return vars[key] !== undefined ? vars[key] : `{{${key}}}`;
     });
 };
-}); // ← fecha o DOMContentLoaded
+
 
 /* =========================================================
      2️⃣ BOOTSTRAP — GARANTE CONTEXTO (NOVO)
@@ -1279,5 +1279,5 @@ window.t = function (path, vars = {}) {
     FEMFLOW.dispatch("femflow:ready", perfil);
 
   })();
-
+}); // ← fecha o DOMContentLoaded
 
