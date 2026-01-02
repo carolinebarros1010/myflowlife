@@ -1,51 +1,23 @@
 /* ============================================================
    FEMFLOW — treino.js v4.0 FINAL (2025)
-   ------------------------------------------------------------
-   • Compatível com treino-engine v4.0
-   • 100% Firebase (blocos)
-   • Suporte total:
-        - Treino PERSONAL
-        - Séries Especiais (2E, 3T, 3S, etc.)
-        - HIIT Premium vindo do Firestore
-        - Cardio Final vindo do Firestore
-        - Treinos normais (exercícios)
-   • Mantida estética FemFlow Premium
 ============================================================ */
 console.log("🔥 treino.js carregou");
 
 document.addEventListener("DOMContentLoaded", () => {
-window.addEventListener("femflow:ready", (ev) => {
-  console.log("🔥 femflow:ready recebido", ev.detail);
-});
-
-   
-const cicloOK = localStorage.getItem("femflow_cycle_configured");
-
-if (!cicloOK) {
-    FEMFLOW.toast("⚠️ Configure seu ciclo antes de treinar.");
-    return location.href = "ciclo.html";
-}
-
-  FEMFLOW.log("🚀 treino.js v4.0 iniciado!");
+  console.log("🧱 DOMContentLoaded no treino");
 
   /* ============================================================
-     0. VARIÁVEIS DA TELA
+     0. VARIÁVEIS DA TELA (NÃO dependem do perfil)
   ============================================================ */
-  /* ============================================================
-   PERSONAL MODE — 3 fontes:
-   1) query string (?personal=1)
-   2) backend (perfil.personal = true)
-   3) localStorage (persistência)
-============================================================ */
-let isPersonalQuery   = location.search.includes("personal=1");
-let isPersonalStorage = localStorage.getItem("femflow_personal") === "true";
 
-let isPersonal = isPersonalQuery || isPersonalStorage;
-if (isPersonal) {
-  document.body.classList.add("personal-mode");
-  FEMFLOW.log("🎨 Layout PERSONAL aplicado");
-}
+  let isPersonalQuery   = location.search.includes("personal=1");
+  let isPersonalStorage = localStorage.getItem("femflow_personal") === "true";
+  let isPersonal        = isPersonalQuery || isPersonalStorage;
 
+  if (isPersonal) {
+    document.body.classList.add("personal-mode");
+    FEMFLOW.log("🎨 Layout PERSONAL aplicado");
+  }
 
   const id = localStorage.getItem("femflow_id");
   if (!id) {
@@ -54,166 +26,106 @@ if (isPersonal) {
     return;
   }
 
-  const track           = document.querySelector("#carouselTrack");
-  const tituloDia       = document.querySelector("#tituloDiaTreino");
-  const footer          = document.querySelector(".fix-footer");
+  const track     = document.querySelector("#carouselTrack");
+  const tituloDia = document.querySelector("#tituloDiaTreino");
+  const footer    = document.querySelector(".fix-footer");
 
   const btnSalvar       = document.getElementById("salvarTreinoBtn");
   const btnDescanso     = document.getElementById("descansoBtn");
   const btnCancelar     = document.getElementById("cancelarTreinoBtn");
-
   const modalPSE        = document.getElementById("modalPSE");
   const pseInput        = document.getElementById("pseInput");
   const btnConfirmarPSE = document.getElementById("btnConfirmarPSE");
   const btnCancelarPSE  = document.getElementById("btnCancelarPSE");
+
   const SERIE_BEHAVIOR = {
-  T: { combinados: 3, descansoNoUltimo: true },
-  B: { combinados: 2, descansoNoUltimo: true },
-  Q: { combinados: 4, descansoNoUltimo: true },
-
-  C: { cluster: true, pausas: 10 },
-
-  I: { isometria: 3 },
-
-  CC: { cadenciaExcentrica: true },
-
-  D: { dropset: 3 },
-
-  RP: { restPause: true },
-
-  AE: { ativacao: true }
-};
+    T:  { combinados: 3, descansoNoUltimo: true },
+    B:  { combinados: 2, descansoNoUltimo: true },
+    Q:  { combinados: 4, descansoNoUltimo: true },
+    C:  { cluster: true, pausas: 10 },
+    I:  { isometria: 3 },
+    CC: { cadenciaExcentrica: true },
+    D:  { dropset: 3 },
+    RP: { restPause: true },
+    AE: { ativacao: true }
+  };
 
   if (!track) {
     FEMFLOW.error("❌ #carouselTrack não encontrado!");
     return;
   }
-/* ============================================================
-   PERSONAL MODE — detectar pelo backend e salvar localmente
-============================================================ */
-function detectarPersonalDoBackend(perfil) {
-  // Produto armazenado na planilha (coluna F)
-  const produto = (perfil.produto || "").toLowerCase().trim();
-
-  // Se for PERSONAL, salvar no localStorage
-  if (produto === "treino_personal") {
-    FEMFLOW.log("🔥 Personal habilitado via backend");
-    localStorage.setItem("femflow_personal", "true");
-    return true;
-  }
-
-  // Se não for personal, limpar eventual flag antiga
-  localStorage.removeItem("femflow_personal");
-  return false;
-}
 
   /* ============================================================
-     1. AGUARDAR SINAL DO BACKEND (perfil carregado)
+     1️⃣ LISTENER ÚNICO — PERFIL PRONTO
   ============================================================ */
   window.addEventListener("femflow:ready", async (ev) => {
 
     const perfil = ev.detail;
-     const personalBackend = detectarPersonalDoBackend(perfil);
-
-// prioridade do backend sobre query
-if (personalBackend) {
-  isPersonal = true;
-  localStorage.setItem("femflow_personal", "true");
-} 
-
-const personalFinal = isPersonal;
-
-
+    console.log("🔥 femflow:ready recebido", perfil);
 
     if (!perfil) {
       FEMFLOW.toast("Erro ao carregar perfil.", true);
       return;
     }
 
+    /* ================= CICLO ================= */
+    const cicloOK = localStorage.getItem("femflow_cycle_configured");
+    if (!cicloOK) {
+      FEMFLOW.toast("⚠️ Configure seu ciclo antes de treinar.");
+      location.href = "ciclo.html";
+      return;
+    }
+
+    FEMFLOW.log("🚀 treino.js v4.0 iniciado!");
+
+    /* ================= PERSONAL BACKEND ================= */
+    const personalBackend = detectarPersonalDoBackend(perfil);
+    if (personalBackend) {
+      isPersonal = true;
+      localStorage.setItem("femflow_personal", "true");
+    }
+    const personalFinal = isPersonal;
+
+    /* ================= PERFIL ================= */
     const nivel    = perfil.nivel;
     const enfase   = perfil.enfase;
-    FEMFLOW.enfaseAtual = enfase;
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
 
-    // 1) Carregar DiaPrograma (LS → backend → fallback)
-const diaPrograma = await FEMFLOW.getDiaPrograma();
-FEMFLOW.diaProgramaAtual = diaPrograma;
+    FEMFLOW.enfaseAtual = enfase;
 
-if (tituloDia) {
-  tituloDia.textContent = t("treino.diaProgramaLabel", { dia: diaPrograma });
-}
+    const diaPrograma = await FEMFLOW.getDiaPrograma();
+    FEMFLOW.diaProgramaAtual = diaPrograma;
 
-    FEMFLOW.log("📌 Perfil recebido:", perfil);
+    if (tituloDia) {
+      tituloDia.textContent = t("treino.diaProgramaLabel", { dia: diaPrograma });
+    }
 
- /* ============================================================
-   🔥 1.1 PERSONAL — modo completo
-============================================================ */
-if (personalFinal) {
-  FEMFLOW.log("🎨 Modo PERSONAL ativado");
+    /* ================= TREINO ================= */
+    let lista;
 
-let lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-  id,
-  nivel,
-  enfase,
-  fase,
-  diaCiclo,
-  personal: true
-});
+    if (personalFinal) {
+      lista = await FEMFLOW.engineTreino.montarTreinoFinal({
+        id, nivel, enfase, fase, diaCiclo, personal: true
+      });
 
-
-  // fallback se não existir treino personal
-  if (!lista || lista.length === 0) {
-    FEMFLOW.warn("⚠️ Nenhum treino PERSONAL encontrado. Voltando ao modo NORMAL.");
-
-    lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-      id,
-      nivel,
-      enfase,
-      fase,
-      diaCiclo,
-      personal: false
-    });
-  }
-
-  renderTreino(lista);
-  return;
-}
-
-
-    /* ============================================================
-       🔥 1.2 NORMAL
-    ============================================================ */
-    const lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-      id,
-      nivel,
-      enfase,
-      fase,
-      diaCiclo,
-      personal: false
-    });
+      if (!lista || !lista.length) {
+        FEMFLOW.warn("⚠️ Sem treino PERSONAL, fallback NORMAL");
+        lista = await FEMFLOW.engineTreino.montarTreinoFinal({
+          id, nivel, enfase, fase, diaCiclo, personal: false
+        });
+      }
+    } else {
+      lista = await FEMFLOW.engineTreino.montarTreinoFinal({
+        id, nivel, enfase, fase, diaCiclo, personal: false
+      });
+    }
 
     renderTreino(lista);
-     localStorage.setItem("femflow_fase", fase);
-localStorage.setItem("femflow_diaCiclo", diaCiclo);
 
+    localStorage.setItem("femflow_fase", fase);
+    localStorage.setItem("femflow_diaCiclo", diaCiclo);
   });
-
-    function parseSerieEspecial(raw) {
-  if (!raw) return null;
-
-  const match = raw.match(/^(\d+)?([A-Z]+)/i);
-
-  if (!match) return null;
-
-  return {
-    ordem: match[1] ? Number(match[1]) : null, // ex: 3
-    codigo: match[2].toUpperCase(),            // ex: D, AE, T
-    raw
-  };
-}
- 
-
 
   /* ============================================================
      2. FUNÇÃO DE RENDER
@@ -1338,7 +1250,34 @@ window.t = function (path, vars = {}) {
       return vars[key] !== undefined ? vars[key] : `{{${key}}}`;
     });
 };
+}); // ← fecha o DOMContentLoaded
 
+/* =========================================================
+     2️⃣ BOOTSTRAP — GARANTE CONTEXTO (NOVO)
+  ========================================================= */
+  (async function bootstrapPerfilTreino() {
 
+    // evita duplicar evento
+    if (window.FEMFLOW?.perfilAtual) {
+      console.log("♻️ Perfil já em memória, redispatch");
+      FEMFLOW.dispatch("femflow:ready", FEMFLOW.perfilAtual);
+      return;
+    }
+
+    console.log("🚀 carregando perfil para treino…");
+
+    const perfil = await FEMFLOW.carregarPerfil();
+    if (!perfil || perfil.status !== "ok") {
+      FEMFLOW.toast("Sessão inválida");
+      location.href = "index.html";
+      return;
+    }
+
+    FEMFLOW.perfilAtual = perfil;
+
+    console.log("🚀 disparando femflow:ready", perfil);
+    FEMFLOW.dispatch("femflow:ready", perfil);
+
+  })();
 
 
