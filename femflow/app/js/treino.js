@@ -55,6 +55,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // INSERIR AQUI
+  function detectarPersonalDoBackend(perfil) {
+    const produto = String(perfil?.produto ?? "").toLowerCase().trim();
+    const isPersonal = produto.includes("personal");
+
+    if (isPersonal) {
+      localStorage.setItem("femflow_personal", "true");
+    } else {
+      localStorage.removeItem("femflow_personal");
+    }
+
+    return isPersonal;
+  }
+
   /* ============================================================
      1️⃣ LISTENER ÚNICO — PERFIL PRONTO
   ============================================================ */
@@ -1279,4 +1293,3 @@ window.t = function (path, vars = {}) {
     FEMFLOW.dispatch("femflow:ready", perfil);
 
   })();
-
