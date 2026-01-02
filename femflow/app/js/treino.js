@@ -11,8 +11,14 @@
         - Treinos normais (exercícios)
    • Mantida estética FemFlow Premium
 ============================================================ */
+console.log("🔥 treino.js carregou");
 
 document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("femflow:ready", (ev) => {
+  console.log("🔥 femflow:ready recebido", ev.detail);
+});
+
+   
 const cicloOK = localStorage.getItem("femflow_cycle_configured");
 
 if (!cicloOK) {
