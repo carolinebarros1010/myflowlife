@@ -391,7 +391,7 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
 
   if (enfase === "personal") {
     FEMFLOW.warn("⚠️ Ênfase inválida 'personal' ignorada pelo engine.");
-    enfase = null;
+    enfase = localStorage.getItem("femflow_enfase") || null;
   }
 
   let blocosRaw = [];
