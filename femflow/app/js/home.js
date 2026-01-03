@@ -324,6 +324,15 @@ function handleCardClick(enfase, locked) {
   }
 
   /* =========================================
+     🧭 MODO PERSONAL (não altera ênfase)
+  ========================================= */
+  if (enfase === "personal") {
+    FEMFLOW.toast("🌟 Modo Personal ativado!");
+    window.location.href = "treino.html?personal=1";
+    return;
+  }
+
+  /* =========================================
      🌸 CICLO NÃO CONFIGURADO
   ========================================= */
   if (localStorage.getItem("femflow_cycle_configured") !== "yes") {
@@ -344,10 +353,6 @@ function handleCardClick(enfase, locked) {
   /* =========================================
      ✅ GARANTIA DE ESTADO MÍNIMO
   ========================================= */
-  if (enfase) {
-    localStorage.setItem("femflow_enfase", enfase);
-  }
-
   const diaProgramaRaw = localStorage.getItem("femflow_diaPrograma");
   const diaPrograma = Number(diaProgramaRaw);
   if (!diaProgramaRaw || Number.isNaN(diaPrograma) || diaPrograma < 1) {
@@ -373,6 +378,11 @@ function handleCardClick(enfase, locked) {
 =========================================================== */
 async function selecionarEnfase(enfase) {
   const id = localStorage.getItem("femflow_id");
+
+  if (!enfase || enfase === "nenhuma" || enfase === "personal") {
+    console.warn("Ênfase inválida bloqueada:", enfase);
+    return;
+  }
 
   FEMFLOW.loading.show("Preparando novo programa…");
 
