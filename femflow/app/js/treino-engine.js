@@ -24,18 +24,6 @@ FEMFLOW.engineTreino.normalizarFase = raw => {
     menstruação: "menstrual",
     menstruacao: "menstrual"
   }[f] || f;
-   
-  if (!faseNorm || !enfNorm || !nivelNorm) {
-  console.error("❌ Dados inválidos para consulta Firebase:", {
-    nivel,
-    enfase,
-    fase,
-    faseNorm,
-    enfNorm,
-    nivelNorm
-  });
-  return [];
-} 
 };
 
 FEMFLOW.engineTreino.normalizarNivel = raw => {
@@ -45,34 +33,6 @@ FEMFLOW.engineTreino.normalizarNivel = raw => {
   if (n.startsWith("avan")) return "avancada";
   return "iniciante";
 };
-
-FEMFLOW.engineTreino.normalizarEnfase = raw => {
-  const e = (raw || "").toLowerCase().trim();
-
-  const map = {
-    gluteo: "gluteo",
-    quadriceps: "quadriceps",
-    posteriores: "posteriores",
-    costas: "costas",
-    braco: "braco",
-    corrida: "corrida",
-    beach: "beach",
-    adaptacao: "adaptacao",
-    casa: "casa",
-    geral: "geral",
-    remo: "remo",
-    natacao: "natacao",
-    personal: "personal"
-  };
-
-  if (!map[e]) {
-    console.error("❌ Enfase inválida para Firebase:", e);
-    return null; // 🔒 aborta path inválido
-  }
-
-  return map[e];
-};
-
 
 /* ============================================================
    2) SÉRIE ESPECIAL
@@ -112,15 +72,13 @@ FEMFLOW.engineTreino.carregarBlocosNormais = async ({
 
  const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
 const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
-const enfNorm   = FEMFLOW.engineTreino.normalizarEnfase(enfase);
 
-if (!faseNorm || !enfNorm || !nivelNorm) {
+if (!faseNorm || !enfase || !nivelNorm) {
   console.error("❌ Dados inválidos para consulta Firebase:", {
     nivel,
     enfase,
     fase,
     faseNorm,
-    enfNorm,
     nivelNorm
   });
   return [];
@@ -133,11 +91,11 @@ if (!faseNorm || !enfNorm || !nivelNorm) {
     return [];
   }
   const diaKey    = `dia_${diaNum}`;
-  const path = `/exercicios/${nivelNorm}_${enfNorm}/fases/${faseNorm}/dias/${diaKey}/blocos`;
+  const path = `/exercicios/${nivelNorm}_${enfase}/fases/${faseNorm}/dias/${diaKey}/blocos`;
 
-  console.log("🔥 FIREBASE PATH:", {
+  console.log("🔥 FIREBASE PATH (ÊNFASE):", {
     nivel: nivelNorm,
-    enfase: enfNorm,
+    enfase,
     fase: faseNorm,
     diaKey
   });
@@ -145,7 +103,7 @@ if (!faseNorm || !enfNorm || !nivelNorm) {
 
   const snap = await firebase.firestore()
     .collection("exercicios")
-    .doc(`${nivelNorm}_${enfNorm}`)
+    .doc(`${nivelNorm}_${enfase}`)
     .collection("fases")
     .doc(faseNorm)
     .collection("dias")
@@ -157,7 +115,7 @@ if (!faseNorm || !enfNorm || !nivelNorm) {
     FEMFLOW.error("❌ Nenhum treino encontrado no Firebase:", {
       path,
       nivel: nivelNorm,
-      enfase: enfNorm,
+      enfase,
       fase: faseNorm,
       diaKey
     });
@@ -183,15 +141,12 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
 }) => {
 
   const faseNorm = FEMFLOW.engineTreino.normalizarFase(fase);
-  const enfNorm  = FEMFLOW.engineTreino.normalizarEnfase(enfase);
-   if (!faseNorm || !enfNorm || !nivelNorm) {
+   if (!faseNorm || !enfase || !id) {
   console.error("❌ Dados inválidos para consulta Firebase:", {
-    nivel,
+    id,
     enfase,
     fase,
-    faseNorm,
-    enfNorm,
-    nivelNorm
+    faseNorm
   });
   return [];
 }
@@ -202,11 +157,11 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
     return [];
   }
   const diaKey   = `dia_${diaNum}`;
-  const path = `/personal_trainings/${id}/${enfNorm}/${faseNorm}/dias/${diaKey}/blocos`;
+  const path = `/personal_trainings/${id}/${enfase}/${faseNorm}/dias/${diaKey}/blocos`;
 
-  console.log("🔥 FIREBASE PATH:", {
+  console.log("🔥 FIREBASE PATH (ÊNFASE):", {
     nivel: id,
-    enfase: enfNorm,
+    enfase,
     fase: faseNorm,
     diaKey
   });
@@ -215,7 +170,7 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
   const snap = await firebase.firestore()
     .collection("personal_trainings")
     .doc(id)
-    .collection(enfNorm)
+    .collection(enfase)
     .doc(faseNorm)
     .collection("dias")
     .doc(diaKey)
@@ -226,7 +181,7 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
     FEMFLOW.error("❌ Nenhum treino PERSONAL encontrado no Firebase:", {
       path,
       id,
-      enfase: enfNorm,
+      enfase,
       fase: faseNorm,
       diaKey
     });
