@@ -24,6 +24,18 @@ FEMFLOW.engineTreino.normalizarFase = raw => {
     menstruação: "menstrual",
     menstruacao: "menstrual"
   }[f] || f;
+   
+  if (!faseNorm || !enfNorm || !nivelNorm) {
+  console.error("❌ Dados inválidos para consulta Firebase:", {
+    nivel,
+    enfase,
+    fase,
+    faseNorm,
+    enfNorm,
+    nivelNorm
+  });
+  return [];
+} 
 };
 
 FEMFLOW.engineTreino.normalizarNivel = raw => {
@@ -36,7 +48,8 @@ FEMFLOW.engineTreino.normalizarNivel = raw => {
 
 FEMFLOW.engineTreino.normalizarEnfase = raw => {
   const e = (raw || "").toLowerCase().trim();
-  return {
+
+  const map = {
     gluteo: "gluteo",
     quadriceps: "quadriceps",
     posteriores: "posteriores",
@@ -50,8 +63,16 @@ FEMFLOW.engineTreino.normalizarEnfase = raw => {
     remo: "remo",
     natacao: "natacao",
     personal: "personal"
-  }[e] || "geral";
+  };
+
+  if (!map[e]) {
+    console.error("❌ Enfase inválida para Firebase:", e);
+    return null; // 🔒 aborta path inválido
+  }
+
+  return map[e];
 };
+
 
 /* ============================================================
    2) SÉRIE ESPECIAL
@@ -89,9 +110,22 @@ FEMFLOW.engineTreino.carregarBlocosNormais = async ({
   nivel, enfase, fase, diaCiclo
 }) => {
 
-  const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
-  const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
-  const enfNorm   = FEMFLOW.engineTreino.normalizarEnfase(enfase);
+ const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
+const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
+const enfNorm   = FEMFLOW.engineTreino.normalizarEnfase(enfase);
+
+if (!faseNorm || !enfNorm || !nivelNorm) {
+  console.error("❌ Dados inválidos para consulta Firebase:", {
+    nivel,
+    enfase,
+    fase,
+    faseNorm,
+    enfNorm,
+    nivelNorm
+  });
+  return [];
+}
+
   console.log("🧠 DIA FISIOLÓGICO RECEBIDO:", diaCiclo);
   const diaNum = Number(diaCiclo);
   if (!Number.isFinite(diaNum) || diaNum < 1) {
@@ -150,6 +184,17 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
 
   const faseNorm = FEMFLOW.engineTreino.normalizarFase(fase);
   const enfNorm  = FEMFLOW.engineTreino.normalizarEnfase(enfase);
+   if (!faseNorm || !enfNorm || !nivelNorm) {
+  console.error("❌ Dados inválidos para consulta Firebase:", {
+    nivel,
+    enfase,
+    fase,
+    faseNorm,
+    enfNorm,
+    nivelNorm
+  });
+  return [];
+}
   console.log("🧠 DIA FISIOLÓGICO RECEBIDO:", diaCiclo);
   const diaNum = Number(diaCiclo);
   if (!Number.isFinite(diaNum) || diaNum < 1) {
