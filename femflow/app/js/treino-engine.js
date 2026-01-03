@@ -53,6 +53,54 @@ FEMFLOW.engineTreino.normalizarEnfase = raw => {
   }[e] || "geral";
 };
 
+FEMFLOW.engineTreino.resolverDiaFirebase = ({
+  fase,
+  diaCiclo,
+  diaPrograma,
+  perfilHormonal
+} = {}) => {
+  const perfil = String(
+    perfilHormonal
+      ?? localStorage.getItem("femflow_perfilHormonal")
+      ?? "regular"
+  ).toLowerCase().trim();
+
+  const diaProgramaRaw = diaPrograma ?? FEMFLOW.diaProgramaAtual
+    ?? localStorage.getItem("femflow_diaPrograma");
+  const diaProgramaNum = Number(diaProgramaRaw);
+
+  if (perfil !== "irregular") {
+    FEMFLOW.log("✅ [resolverDiaFirebase] perfil regular, mantendo diaCiclo:", diaCiclo);
+    return Number(diaCiclo);
+  }
+
+  const faseNorm = FEMFLOW.engineTreino.normalizarFase(fase);
+  const bases = {
+    menstrual: 1,
+    follicular: 6,
+    ovulatoria: 14,
+    lutea: 18
+  };
+  const base = bases[faseNorm];
+
+  if (!base) {
+    FEMFLOW.warn("⚠️ [resolverDiaFirebase] fase inválida, fallback diaCiclo:", faseNorm, diaCiclo);
+    return Number(diaCiclo);
+  }
+
+  if (!Number.isFinite(diaProgramaNum) || diaProgramaNum < 1) {
+    FEMFLOW.warn("⚠️ [resolverDiaFirebase] diaPrograma inválido, fallback diaCiclo:", diaProgramaRaw, diaCiclo);
+    return Number(diaCiclo);
+  }
+
+  const diaFirebase = base + (diaProgramaNum - 1);
+  FEMFLOW.log(
+    "🧭 [resolverDiaFirebase] perfil irregular -> diaFirebase:",
+    { fase: faseNorm, base, diaPrograma: diaProgramaNum, diaFirebase }
+  );
+  return diaFirebase;
+};
+
 /* ============================================================
    2) SÉRIE ESPECIAL
 ============================================================ */
@@ -92,7 +140,8 @@ FEMFLOW.engineTreino.carregarBlocosNormais = async ({
   const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
   const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
   const enfNorm   = FEMFLOW.engineTreino.normalizarEnfase(enfase);
-  const diaKey    = `dia_${Number(diaCiclo)}`;
+  const diaFirebase = FEMFLOW.engineTreino.resolverDiaFirebase({ fase, diaCiclo });
+  const diaKey    = `dia_${Number(diaFirebase)}`;
 
   FEMFLOW.log("🔥 [NORMAL] Firebase por diaCiclo:", diaKey);
 
@@ -131,7 +180,8 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
 
   const faseNorm = FEMFLOW.engineTreino.normalizarFase(fase);
   const enfNorm  = FEMFLOW.engineTreino.normalizarEnfase(enfase);
-  const diaKey   = `dia_${Number(diaCiclo)}`;
+  const diaFirebase = FEMFLOW.engineTreino.resolverDiaFirebase({ fase, diaCiclo });
+  const diaKey   = `dia_${Number(diaFirebase)}`;
 
   FEMFLOW.log("🔥 [PERSONAL] Firebase por diaCiclo:", diaKey);
 
@@ -380,4 +430,3 @@ const filtrados = comHIIT.filter(b => {
 return FEMFLOW.engineTreino.converterParaFront(filtrados);
 
 };
-
