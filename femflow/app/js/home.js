@@ -326,14 +326,15 @@ function handleCardClick(enfase, locked) {
   }
 
   /* =========================================
-     🧭 MODO PERSONAL (não altera ênfase)
-  ========================================= */
-  if (enfase === "personal") {
-    FEMFLOW.toast("🌟 Modo Personal ativado!");
-    localStorage.setItem("femflow_mode_personal", "true");
-    FEMFLOW.router("treino.html");
-    return;
-  }
+   🧭 ATIVAR MODO PERSONAL (SEM NAVEGAR)
+========================================= */
+if (enfase === "personal") {
+  FEMFLOW.toast("🌟 Modo Personal ativado!");
+  localStorage.setItem("femflow_mode_personal", "true");
+
+  // 🔥 NUNCA ir direto para treino
+  return FEMFLOW.router("flowcenter");
+}
 
   localStorage.setItem("femflow_mode_personal", "false");
 
