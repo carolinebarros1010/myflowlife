@@ -81,9 +81,13 @@ document.addEventListener("DOMContentLoaded", () => {
     FEMFLOW.log("🚀 treino.js v4.0 iniciado!");
 
     /* ================= PERSONAL FINAL ================= */
-    localStorage.setItem("femflow_has_personal", perfil.personal ? "true" : "false");
-    const hasPersonal =
-      localStorage.getItem("femflow_has_personal") === "true";
+   // ❌ treino.js NÃO redefine direito
+// localStorage.setItem("femflow_has_personal", ...);
+
+// ✅ apenas lê
+const hasPersonal =
+  localStorage.getItem("femflow_has_personal") === "true";
+
     const modePersonal =
       localStorage.getItem("femflow_mode_personal") === "true";
     const personalFinal = hasPersonal && modePersonal;
@@ -96,7 +100,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ================= PERFIL ================= */
     const nivel    = perfil.nivel;
-    const enfaseFinal = perfil.enfase || localStorage.getItem("femflow_enfase");
+    let enfaseFinal = perfil.enfase || localStorage.getItem("femflow_enfase");
+
+if (!enfaseFinal || enfaseFinal === "nenhuma") {
+  enfaseFinal = null;
+}
+
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
 
@@ -113,9 +122,15 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ================= TREINO ================= */
     let lista;
 
-    lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-      id, nivel, enfase: enfaseFinal, fase, diaCiclo, personal: personalFinal
-    });
+   lista = await FEMFLOW.engineTreino.montarTreinoFinal({
+  id,
+  nivel,
+  enfase: enfaseFinal,
+  fase,
+  diaCiclo,
+  personal: personalFinal
+});
+
 
     renderTreino(lista);
 
@@ -952,7 +967,10 @@ function initPeso() {
         return;
       }
       const diaCiclo = Number(localStorage.getItem("femflow_diaCiclo") || 1);
-const treino = `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
+const treino = personalFinal
+  ? `personal_dia_${diaCiclo}`
+  : `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
+
 
 
  
