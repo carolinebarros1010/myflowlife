@@ -102,7 +102,7 @@ const hasPersonal =
     const nivel    = perfil.nivel;
     let enfaseFinal = perfil.enfase || localStorage.getItem("femflow_enfase");
 
-if (!enfaseFinal || enfaseFinal === "nenhuma") {
+    if (!enfaseFinal || enfaseFinal === "nenhuma") {
   enfaseFinal = null;
 }
 
@@ -111,6 +111,12 @@ if (!enfaseFinal || enfaseFinal === "nenhuma") {
 
     console.log("🧠 ÊNFASE RECEBIDA DO BACKEND:", perfil.enfase);
     FEMFLOW.enfaseAtual = enfaseFinal;
+
+    if (!personalFinal && enfaseFinal === "personal") {
+      FEMFLOW.error("Ênfase inválida 'personal' bloqueada");
+      renderTreino([]);
+      return;
+    }
 
     const diaPrograma = await FEMFLOW.getDiaPrograma();
     FEMFLOW.diaProgramaAtual = diaPrograma;
