@@ -27,6 +27,7 @@ function flowcenterPersistPerfil(perfil) {
   localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
   localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
   localStorage.setItem("femflow_enfase", String(perfil.enfase || "").toLowerCase());
+  localStorage.setItem("femflow_has_personal", perfil.personal ? "true" : "false");
 }
 
 /* ============================================================
@@ -84,8 +85,10 @@ async function initFlowCenter() {
      4) PRODUTO / ACESSOS
   ============================================================ */
   const produtoRaw = String(perfil.produto || "").toLowerCase();
-  const isApp      = produtoRaw === "acesso_app";
-  const isPersonal = !!perfil.personal || produtoRaw.startsWith("personal");
+  const hasPersonal = !!perfil.personal;
+  const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
+  const personal = hasPersonal && modePersonal;
+  const isApp      = produtoRaw === "acesso_app" || hasPersonal;
   const isFollow   = produtoRaw.startsWith("followme_");
 
   const freeEnabled = perfil.free_access?.enabled === true;
@@ -169,12 +172,12 @@ async function initFlowCenter() {
 
     const freeOk = freeValido && freeEnfases.includes(enfase);
 
-    if (isPersonal) {
+    if (personal) {
       if (enfase.startsWith("followme_") && !freeOk) {
         FEMFLOW.toast("FollowMe não incluso no seu plano.");
         return FEMFLOW.router("home.html");
       }
-      return FEMFLOW.router("treino.html?personal=1");
+      return FEMFLOW.router("treino.html");
     }
 
     if (isFollow) {
