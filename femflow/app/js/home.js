@@ -1,6 +1,7 @@
 /* ============================================================
    FemFlow • HOME.JS — VERSÃO FINAL 2025 2(CORRIGIDA)
    Home usa VALIDAR — NUNCA usa SYNC
+   ✅ separa ACESSO (has_personal) de MODO (mode_personal)
 =========================================================== */
 
 /* LINKS */
@@ -40,13 +41,18 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_id", perfil.id || "");
   localStorage.setItem("femflow_nome", perfil.nome || "");
   localStorage.setItem("femflow_email", perfil.email || "");
-   localStorage.setItem("femflow_nivel",  String(perfil.nivel || "iniciante").toLowerCase());
+  localStorage.setItem("femflow_nivel", String(perfil.nivel || "iniciante").toLowerCase());
   localStorage.setItem("femflow_produto", String(perfil.produto || "").toLowerCase());
   localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
+
   // ✅ acesso personal = direito (backend), separado do modo personal (front)
   localStorage.setItem("femflow_has_personal", String(!!perfil.personal));
-  localStorage.removeItem("femflow_personal");
-   localStorage.setItem( "femflow_free_access", perfil.free_access ? JSON.stringify(perfil.free_access) : "" );
+  localStorage.removeItem("femflow_personal"); // legado: nunca usar mais
+
+  localStorage.setItem(
+    "femflow_free_access",
+    perfil.free_access ? JSON.stringify(perfil.free_access) : ""
+  );
 
   // ciclo + programa (CRÍTICO)
   localStorage.setItem("femflow_perfilHormonal", String(perfil.perfilHormonal || "regular").toLowerCase());
@@ -60,6 +66,17 @@ function persistPerfil(perfil) {
     "femflow_enfase",
     String(perfil.enfase || "nenhuma").toLowerCase()
   );
+
+  // ✅ segurança: se não tiver personal, não deixa modo personal ficar travado
+  const hasPersonal = String(!!perfil.personal) === "true";
+  if (!hasPersonal) {
+    localStorage.setItem("femflow_mode_personal", "false");
+  } else {
+    // se ainda não existe, inicializa como false (não ativa sozinho)
+    if (localStorage.getItem("femflow_mode_personal") == null) {
+      localStorage.setItem("femflow_mode_personal", "false");
+    }
+  }
 }
 
 /* ============================================================
@@ -114,7 +131,7 @@ function podeAcessar(enfase, perfil) {
 
   if (!ativa) return false;
 
-  // 🔥 PERSONAL = acesso_app + personal
+  // 🔥 PERSONAL (direito) = acesso_app + personal
   if (personal) {
     if (categoria === "followme") return false;
     return true; // muscular, esportes, casa e personal
@@ -163,15 +180,14 @@ function normalizarCardFirebase(enfase, data) {
 
 async function carregarCatalogoFirebase() {
   const nivelAluno = normalizarNivel(localStorage.getItem("femflow_nivel"));
+
   let freeAccess = null;
   const freeAccessRaw = localStorage.getItem("femflow_free_access");
   if (freeAccessRaw) {
-    try {
-      freeAccess = JSON.parse(freeAccessRaw);
-    } catch (err) {
-      freeAccess = null;
-    }
+    try { freeAccess = JSON.parse(freeAccessRaw); }
+    catch (err) { freeAccess = null; }
   }
+
   const perfil = {
     produto: localStorage.getItem("femflow_produto"),
     ativa: localStorage.getItem("femflow_ativa") === "true",
@@ -194,28 +210,37 @@ async function carregarCatalogoFirebase() {
 
     const { nivel, enfase } = parsed;
     const categoria = inferirCategoria(enfase);
-    const isFollowme = categoria === "followme";
-    const isPersonal = categoria === "personal";
-    const isCasa = categoria === "casa";
 
     const nivelOk = nivel === nivelAluno;
-    const incluir = isFollowme || isPersonal || (isCasa ? nivelOk : nivelOk);
+
+    // followme e personal entram independente do nível do docId
+    const incluir =
+      categoria === "followme" ||
+      categoria === "personal" ||
+      nivelOk;
+
     if (!incluir) return;
 
     const card = normalizarCardFirebase(enfase, doc.data());
+
     const podeAcessarProduto = podeAcessar(enfase, perfil);
+
     const freeAccessEnfases = (perfil.free_access?.enfases || []).map(item =>
       String(item || "").toLowerCase()
     );
+
     const podeAcessarFree =
       perfil.free_access?.enabled === true &&
       freeAccessEnfases.includes(enfase);
+
     const podeAcessarCard = podeAcessarProduto || podeAcessarFree;
 
     card.locked = !podeAcessarCard;
+
     if (!podeAcessarProduto && podeAcessarFree) {
       card.isFree = true;
     }
+
     catalogo[categoria].push(card);
   });
 
@@ -224,7 +249,7 @@ async function carregarCatalogoFirebase() {
 
 /* ============================================================
    🧩 CARDS SIMBÓLICOS (VITRINE COMERCIAL)
-============================================================ */
+=========================================================== */
 
 const CARDS_PERSONAL_SIMBOLICOS = [
   {
@@ -290,6 +315,7 @@ function cardHTML(p) {
 }
 
 function renderRail(el, lista) {
+  if (!el) return;
   el.innerHTML = lista.map(cardHTML).join("");
   el.querySelectorAll(".card").forEach(c =>
     c.onclick = () => handleCardClick(c.dataset.enfase, c.dataset.locked === "true")
@@ -306,7 +332,7 @@ function handleCardClick(enfase, locked) {
   ========================================= */
   if (locked) {
 
-    // 🧠 PERSONAL — CTA dedicado
+    // 🧠 PERSONAL — CTA dedicado (propaganda)
     if (enfase === "personal" || enfase.startsWith("personal_")) {
       FEMFLOW.toast("🔒 Treino Personal é um plano exclusivo.");
       window.open(LINK_PERSONAL, "_blank");
@@ -316,7 +342,6 @@ function handleCardClick(enfase, locked) {
     // ✨ FOLLOWME — programa especial
     if (enfase.startsWith("followme_")) {
       FEMFLOW.toast("✨ Programa especial de 30 dias com coach.");
-      // opcional: window.open(FOLLOWME_LINKS[coach], "_blank");
       return;
     }
 
@@ -326,16 +351,16 @@ function handleCardClick(enfase, locked) {
   }
 
   /* =========================================
-   🧭 ATIVAR MODO PERSONAL (SEM NAVEGAR)
-========================================= */
-if (enfase === "personal") {
-  FEMFLOW.toast("🌟 Modo Personal ativado!");
-  localStorage.setItem("femflow_mode_personal", "true");
+     🧭 PERSONAL DESBLOQUEADO = ativa modo e vai pro FLOWCENTER
+     (NUNCA vai direto para treino)
+  ========================================= */
+  if (enfase === "personal") {
+    FEMFLOW.toast("🌟 Modo Personal ativado!");
+    localStorage.setItem("femflow_mode_personal", "true");
+    return FEMFLOW.router("flowcenter");
+  }
 
-  // 🔥 NUNCA ir direto para treino
-  return FEMFLOW.router("flowcenter");
-}
-
+  // qualquer card normal desativa o modo personal
   localStorage.setItem("femflow_mode_personal", "false");
 
   /* =========================================
@@ -378,7 +403,6 @@ if (enfase === "personal") {
   return selecionarEnfase(enfase);
 }
 
-
 /* ============================================================
    SALVAR ENFASE NORMAL
 =========================================================== */
@@ -392,14 +416,14 @@ async function selecionarEnfase(enfase) {
 
   FEMFLOW.loading.show("Preparando novo programa…");
 
-  // 🔥 1. salvar nova ênfase
+  // 1) salvar nova ênfase
   localStorage.setItem("femflow_enfase", enfase);
 
-  // 🔥 2. reset explícito do programa (REGRA FEMFLOW)
+  // 2) reset explícito do programa (REGRA FEMFLOW)
   localStorage.setItem("femflow_diaPrograma", "1");
 
   if (id) {
-    // 3. backend: salvar ênfase
+    // 3) backend: salvar ênfase
     await fetch(FEMFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -410,7 +434,7 @@ async function selecionarEnfase(enfase) {
       })
     });
 
-    // 4. backend: resetar programa
+    // 4) backend: resetar programa
     await fetch(FEMFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -421,13 +445,17 @@ async function selecionarEnfase(enfase) {
     });
   }
 
-  // 5. seguir fluxo normal
+  // 5) seguir fluxo normal
   FEMFLOW.router("flowcenter");
 }
 
-/* FOLLOWME */
+/* ============================================================
+   FOLLOWME
+=========================================================== */
 async function selecionarCoach(coach) {
   const id = localStorage.getItem("femflow_id");
+
+  localStorage.setItem("femflow_mode_personal", "false");
   localStorage.setItem("femflow_enfase", coach);
 
   if (id) {
@@ -441,6 +469,7 @@ async function selecionarCoach(coach) {
 
   FEMFLOW.router("flowcenter");
 }
+
 /* ============================================================
    APLICAR IDIOMA NA HOME (inclui VÍDEO)
 =========================================================== */
@@ -455,7 +484,6 @@ function aplicarIdiomaHome() {
   // Saudação
   const bv = document.getElementById("bvTexto");
   if (bv) {
-    // usa o texto do lang + primeiro nome
     bv.textContent = `${L.bemvinda}, ${primeiroNome}!`;
   }
 
@@ -520,35 +548,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const catalogo = await carregarCatalogoFirebase();
 
-/* ============================================================
-   🧩 INJETAR VITRINE COMERCIAL (LOCAL CORRETO)
-============================================================ */
+    /* ============================================================
+       🧩 INJETAR VITRINE COMERCIAL (LOCAL CORRETO)
+    ============================================================ */
+    const perfilTemPersonal =
+      localStorage.getItem("femflow_has_personal") === "true";
 
-const perfilTemPersonal =
-  localStorage.getItem("femflow_has_personal") === "true";
+    const produto =
+      String(localStorage.getItem("femflow_produto") || "").toLowerCase();
 
-const produto =
-  String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+    // PERSONAL — sempre aparece:
+    // - se tem personal → desbloqueado (ativa modo personal)
+    // - se não tem → locked e vira propaganda CTA
+    if (catalogo.personal.length === 0) {
+      const cards = CARDS_PERSONAL_SIMBOLICOS.map(c => ({
+        ...c,
+        locked: !perfilTemPersonal
+      }));
+      catalogo.personal.push(...cards);
+    }
 
-/* PERSONAL — sempre aparece */
-if (catalogo.personal.length === 0) {
-  const cards = CARDS_PERSONAL_SIMBOLICOS.map(c => ({
-    ...c,
-    locked: !perfilTemPersonal
-  }));
-  catalogo.personal.push(...cards);
-}
-
-/* FOLLOWME — sempre aparece */
-if (catalogo.followme.length === 0) {
-  const cards = CARDS_FOLLOWME_SIMBOLICOS.map(c => ({
-    ...c,
-    locked: produto !== c.enfase
-  }));
-  catalogo.followme.push(...cards);
-}
-
-
+    // FOLLOWME — sempre aparece como vitrine
+    if (catalogo.followme.length === 0) {
+      const cards = CARDS_FOLLOWME_SIMBOLICOS.map(c => ({
+        ...c,
+        locked: produto !== c.enfase
+      }));
+      catalogo.followme.push(...cards);
+    }
 
     renderRail(document.getElementById("railFollowMe"), catalogo.followme);
     renderRail(document.getElementById("railMuscular"), catalogo.muscular);
