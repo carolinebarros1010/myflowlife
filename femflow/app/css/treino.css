@@ -35,6 +35,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* -------------------- Z-INDEX LAYERS --------------------
+   Base content: 1
+   Fixed UI: 10
+   Overlay (toasts): 20
+   Overlay (modals): 30
+   Keep values small and ordered to avoid iOS stacking quirks.
+---------------------------------------------------------- */
+
 /* ============================================================
    1) TOAST PREMIUM
 ============================================================ */
@@ -51,7 +59,7 @@ body {
   font-weight: 700;
   opacity: 0;
   transition: opacity .35s, transform .35s;
-  z-index: 99999;
+  z-index: 20;
 }
 .toast-box.visible {
   opacity: 1;
@@ -81,7 +89,7 @@ body {
   background: var(--terracota);
   width: 0%;
   transition: width .35s;
-  z-index: 9999;
+  z-index: 10;
 }
 
 /* ============================================================
@@ -93,6 +101,8 @@ body {
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
+  position: relative;
+  z-index: 1;
 }
 
 .carousel-track {
@@ -135,7 +145,32 @@ body {
   display: flex;
   justify-content: center;
   gap: 14px;
-  z-index: 99999;
+  z-index: 10;
+}
+
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari: fixed elements can render beneath overflow scrollers. */
+  .fix-footer {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    pointer-events: auto;
+  }
+
+  /* Avoid transforms on scrollable ancestors: they break fixed stacking on iOS. */
+  .carousel-container,
+  .carousel-track,
+  .carousel-item {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Allow footer to receive taps while keeping carousel scrollable. */
+  .carousel-container {
+    -webkit-overflow-scrolling: touch;
+    pointer-events: auto;
+  }
 }
 
 .btn-primary-clean,
@@ -603,7 +638,7 @@ font-size: 0.9rem !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 30;
 }
 
 .modal-pse-overlay.hidden {
@@ -792,5 +827,3 @@ body.debug * {
   outline: 1px dashed red;
 }
 .hidden { display: none !important; }
-
-
