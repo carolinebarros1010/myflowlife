@@ -75,16 +75,25 @@ FEMFLOW.engineTreino.carregarBlocosNormais = async ({
  const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
 const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
 
-if (!faseNorm || !enfase || !nivelNorm) {
-  console.error("❌ Dados inválidos para consulta Firebase:", {
+if (!faseNorm || !nivelNorm) {
+  console.error("❌ Dados inválidos para consulta Firebase (fase ou nível):", {
     nivel,
-    enfase,
     fase,
     faseNorm,
     nivelNorm
   });
   return [];
 }
+
+if (!enfase) {
+  FEMFLOW.warn("⚠️ Ênfase ausente — consulta Firebase abortada:", {
+    nivel: nivelNorm,
+    fase: faseNorm,
+    diaCiclo
+  });
+  return [];
+}
+
 
   console.log("🧠 DIA FISIOLÓGICO RECEBIDO:", diaCiclo);
   const diaNum = Number(diaCiclo);
@@ -232,14 +241,20 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
       else if (b.tipo === "cardio_final") boxNum = 900;
       else if (b.tipo === "resfriamento") boxNum = 999;
 
-      return {
-        ...b,
-        boxNum,
-        ordemNum: Number(b.ordem) || 0,
+     return {
+  ...b,
 
-        // ✅ SÉRIE LIMPA PARA O FRONT
-        serieEspecial: serieCodigo
-      };
+  // 🔢 Box numérico para ordenação
+  boxNum,
+
+  // 🔑 Preserva chave visual (ex: "1_hiit")
+  boxKey: b.boxKey || null,
+
+  ordemNum: Number(b.ordem) || 0,
+
+  // ✅ SÉRIE LIMPA PARA O FRONT
+  serieEspecial: serieCodigo
+};
     })
     .sort((a, b) => a.boxNum - b.boxNum);
 };
@@ -389,10 +404,14 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
   id, nivel, enfase, fase, diaCiclo, personal=false
 }) => {
 
-  if (enfase === "personal") {
-    FEMFLOW.warn("⚠️ Ênfase inválida 'personal' ignorada pelo engine.");
-    enfase = localStorage.getItem("femflow_enfase") || null;
-  }
+   if (enfase === "personal" || !enfase || enfase === "nenhuma") {
+      FEMFLOW.warn("⚠️ Ênfase inválida 'personal' ignorada pelo engine.");
+  const fallback = localStorage.getItem("femflow_enfase");
+  enfase = fallback && fallback !== "personal" && fallback !== "nenhuma"
+    ? fallback
+    : null;
+}
+
 
   let blocosRaw = [];
   if (personal) {
