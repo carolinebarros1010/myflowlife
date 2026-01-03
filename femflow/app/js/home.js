@@ -353,10 +353,6 @@ function handleCardClick(enfase, locked) {
   /* =========================================
      ✅ GARANTIA DE ESTADO MÍNIMO
   ========================================= */
-  if (enfase) {
-    localStorage.setItem("femflow_enfase", enfase);
-  }
-
   const diaProgramaRaw = localStorage.getItem("femflow_diaPrograma");
   const diaPrograma = Number(diaProgramaRaw);
   if (!diaProgramaRaw || Number.isNaN(diaPrograma) || diaPrograma < 1) {
@@ -382,6 +378,11 @@ function handleCardClick(enfase, locked) {
 =========================================================== */
 async function selecionarEnfase(enfase) {
   const id = localStorage.getItem("femflow_id");
+
+  if (!enfase || enfase === "nenhuma" || enfase === "personal") {
+    console.warn("Ênfase inválida bloqueada:", enfase);
+    return;
+  }
 
   FEMFLOW.loading.show("Preparando novo programa…");
 
