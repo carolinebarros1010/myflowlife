@@ -102,11 +102,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ================= PERFIL ================= */
     const nivel    = perfil.nivel;
-    const enfase   = perfil.enfase;
+    const enfaseFinal = perfil.enfase || localStorage.getItem("femflow_enfase");
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
 
-    FEMFLOW.enfaseAtual = enfase;
+    console.log("🧠 ÊNFASE RECEBIDA DO BACKEND:", perfil.enfase);
+    FEMFLOW.enfaseAtual = enfaseFinal;
 
     const diaPrograma = await FEMFLOW.getDiaPrograma();
     FEMFLOW.diaProgramaAtual = diaPrograma;
@@ -120,18 +121,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (personalFinal) {
       lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-        id, nivel, enfase, fase, diaCiclo, personal: true
+        id, nivel, enfase: enfaseFinal, fase, diaCiclo, personal: true
       });
 
       if (!lista || !lista.length) {
         FEMFLOW.warn("⚠️ Sem treino PERSONAL, fallback NORMAL");
         lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-          id, nivel, enfase, fase, diaCiclo, personal: false
+          id, nivel, enfase: enfaseFinal, fase, diaCiclo, personal: false
         });
       }
     } else {
       lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-        id, nivel, enfase, fase, diaCiclo, personal: false
+        id, nivel, enfase: enfaseFinal, fase, diaCiclo, personal: false
       });
     }
 
