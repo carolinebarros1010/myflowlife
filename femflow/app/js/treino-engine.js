@@ -27,12 +27,14 @@ FEMFLOW.engineTreino.normalizarFase = raw => {
 };
 
 FEMFLOW.engineTreino.normalizarNivel = raw => {
-  const n = (raw || "").toLowerCase();
+  const n = String(raw || "").toLowerCase().trim();
+  if (!n) return null;
   if (n.startsWith("inic")) return "iniciante";
   if (n.startsWith("inter")) return "intermediaria";
   if (n.startsWith("avan")) return "avancada";
-  return "iniciante";
+  return n; // 🔥 respeita backend
 };
+
 
 /* ============================================================
    2) SÉRIE ESPECIAL
@@ -159,12 +161,13 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
   const diaKey   = `dia_${diaNum}`;
   const path = `/personal_trainings/${id}/${enfase}/${faseNorm}/dias/${diaKey}/blocos`;
 
-  console.log("🔥 FIREBASE PATH (ÊNFASE):", {
-    nivel: id,
-    enfase,
-    fase: faseNorm,
-    diaKey
-  });
+  console.log("🔥 FIREBASE PATH (PERSONAL):", {
+  id,
+  enfase,
+  fase: faseNorm,
+  diaKey
+});
+
   FEMFLOW.log("🔥 [PERSONAL] Firebase por diaCiclo:", diaKey);
 
   const snap = await firebase.firestore()
