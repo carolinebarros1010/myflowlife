@@ -3,7 +3,7 @@
    ✔ Perfil vem de VALIDAR
    ✔ Suporte total a idioma
    ✔ Círculo hormonal completo
-   ✔ Botões + rotas seguras
+   ✔ Separação ACESSO x MODO PERSONAL
 =========================================================== */
 
 /* ============================================================
@@ -27,7 +27,12 @@ function flowcenterPersistPerfil(perfil) {
   localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
   localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
   localStorage.setItem("femflow_enfase", String(perfil.enfase || "").toLowerCase());
-  localStorage.setItem("femflow_has_personal", perfil.personal ? "true" : "false");
+
+  // 🔒 direito (vem do backend)
+  localStorage.setItem(
+    "femflow_has_personal",
+    perfil.personal ? "true" : "false"
+  );
 }
 
 /* ============================================================
@@ -44,7 +49,7 @@ async function initFlowCenter() {
   FEMFLOW.inserirModalIdioma?.();
 
   /* ============================================================
-     1) PERFIL BASE (auth + identidade)
+     1) PERFIL BASE (auth)
   ============================================================ */
   let perfil = await FEMFLOW.carregarPerfil();
   if (!perfil || perfil.status === "blocked") {
@@ -69,7 +74,7 @@ async function initFlowCenter() {
   perfil = { ...perfil, ...perfilFresh };
 
   /* ============================================================
-     3) FLAGS DE CICLO
+     3) CICLO
   ============================================================ */
   if (perfil.fase && perfil.diaCiclo) {
     localStorage.setItem("femflow_cycle_configured", "yes");
@@ -82,14 +87,17 @@ async function initFlowCenter() {
   }
 
   /* ============================================================
-     4) PRODUTO / ACESSOS
+     4) PRODUTO / ACESSOS (CORRETO)
   ============================================================ */
-  const produtoRaw = String(perfil.produto || "").toLowerCase();
-  const hasPersonal = !!perfil.personal;
+  const produtoRaw   = String(perfil.produto || "").toLowerCase();
+  const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
   const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
+
+  // 🔥 regra canônica
   const personal = hasPersonal && modePersonal;
-  const isApp      = produtoRaw === "acesso_app" || hasPersonal;
-  const isFollow   = produtoRaw.startsWith("followme_");
+
+  const isApp    = produtoRaw === "acesso_app";
+  const isFollow = produtoRaw.startsWith("followme_");
 
   const freeEnabled = perfil.free_access?.enabled === true;
   const freeUntil   = perfil.free_access?.until ? new Date(perfil.free_access.until) : null;
@@ -99,14 +107,14 @@ async function initFlowCenter() {
   /* ============================================================
      5) CICLO (UI)
   ============================================================ */
-  let ciclo = {
+  const ciclo = {
     fase: perfil.fase?.toLowerCase() || "follicular",
     diaCiclo: Number(perfil.diaCiclo || 1),
     diaPrograma: Number(perfil.diaPrograma || 1)
   };
 
   /* ============================================================
-     6) NÍVEL (H1)
+     6) NÍVEL
   ============================================================ */
   function aplicarNivel() {
     const nivel = (perfil.nivel || "iniciante").toLowerCase();
@@ -116,17 +124,18 @@ async function initFlowCenter() {
       avancada:{pt:"Avançada",en:"Advanced",fr:"Avancée"}
     };
     const lang = FEMFLOW.lang || "pt";
-    document.getElementById("nivelTag").textContent = `— ${map[nivel]?.[lang] || map[nivel].pt}`;
+    document.getElementById("nivelTag").textContent =
+      `— ${map[nivel]?.[lang] || map[nivel].pt}`;
   }
   aplicarNivel();
   document.addEventListener("femflow:langChange", aplicarNivel);
 
   /* ============================================================
-     7) IDIOMA + TEXTO
+     7) IDIOMA
   ============================================================ */
   function aplicarIdioma() {
     const lang = FEMFLOW.lang || "pt";
-    const L = FEMFLOW.langs[lang]?.flowcenter;
+    const L = FEMFLOW.langs?.[lang]?.flowcenter;
     if (!L) return;
 
     const nome = perfil.nome?.split(" ")[0] || "";
@@ -135,7 +144,8 @@ async function initFlowCenter() {
 
     const faseLabel = L[ciclo.fase] || ciclo.fase;
     document.getElementById("centerPhase").textContent = faseLabel;
-    document.getElementById("t_current").textContent = `${L.faseAtual}: ${faseLabel}`;
+    document.getElementById("t_current").textContent =
+      `${L.faseAtual}: ${faseLabel}`;
 
     ["menstrual","follicular","ovulatory","luteal"].forEach(f => {
       document.getElementById("lbl-"+f).textContent = L[f];
@@ -153,18 +163,24 @@ async function initFlowCenter() {
      8) CÍRCULO HORMONAL
   ============================================================ */
   ["menstrual","follicular","ovulatory","luteal"].forEach(f => {
-    document.getElementById("seg-"+f)?.classList.toggle("path-active", f===ciclo.fase);
-    document.getElementById("lbl-"+f)?.classList.toggle("label-active", f===ciclo.fase);
+    document.getElementById("seg-"+f)
+      ?.classList.toggle("path-active", f === ciclo.fase);
+    document.getElementById("lbl-"+f)
+      ?.classList.toggle("label-active", f === ciclo.fase);
   });
 
   /* ============================================================
      9) BOTÕES
   ============================================================ */
-  document.getElementById("toBreath").onclick    = () => FEMFLOW.router("respiracao.html");
-  document.getElementById("toEvolution").onclick = () => FEMFLOW.router("evolucao.html");
+  document.getElementById("toBreath").onclick =
+    () => FEMFLOW.router("respiracao.html");
+
+  document.getElementById("toEvolution").onclick =
+    () => FEMFLOW.router("evolucao.html");
 
   document.getElementById("toTrain").onclick = () => {
     const enfase = localStorage.getItem("femflow_enfase");
+
     if (!enfase) {
       FEMFLOW.toast("Escolha um treino na Home 🌸");
       return FEMFLOW.router("home.html");
@@ -172,6 +188,7 @@ async function initFlowCenter() {
 
     const freeOk = freeValido && freeEnfases.includes(enfase);
 
+    /* 🧭 PRIORIDADE ABSOLUTA — MODO PERSONAL */
     if (personal) {
       if (enfase.startsWith("followme_") && !freeOk) {
         FEMFLOW.toast("FollowMe não incluso no seu plano.");
@@ -180,6 +197,7 @@ async function initFlowCenter() {
       return FEMFLOW.router("treino.html");
     }
 
+    /* ✨ FOLLOWME */
     if (isFollow) {
       if (produtoRaw !== enfase && !freeOk) {
         FEMFLOW.toast("Seu plano libera apenas este FollowMe.");
@@ -188,6 +206,7 @@ async function initFlowCenter() {
       return FEMFLOW.router(`followme/${enfase}.html`);
     }
 
+    /* 🔥 ACESSO APP */
     if (isApp) {
       if (enfase.startsWith("followme_") && !freeOk) {
         FEMFLOW.toast("Programa especial com coach.");
