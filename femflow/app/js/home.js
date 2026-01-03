@@ -43,7 +43,9 @@ function persistPerfil(perfil) {
    localStorage.setItem("femflow_nivel",  String(perfil.nivel || "iniciante").toLowerCase());
   localStorage.setItem("femflow_produto", String(perfil.produto || "").toLowerCase());
   localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
-  localStorage.setItem("femflow_personal", String(!!perfil.personal));
+  // ✅ acesso personal = direito (backend), separado do modo personal (front)
+  localStorage.setItem("femflow_has_personal", String(!!perfil.personal));
+  localStorage.removeItem("femflow_personal");
    localStorage.setItem( "femflow_free_access", perfil.free_access ? JSON.stringify(perfil.free_access) : "" );
 
   // ciclo + programa (CRÍTICO)
@@ -173,7 +175,7 @@ async function carregarCatalogoFirebase() {
   const perfil = {
     produto: localStorage.getItem("femflow_produto"),
     ativa: localStorage.getItem("femflow_ativa") === "true",
-    personal: localStorage.getItem("femflow_personal") === "true",
+    personal: localStorage.getItem("femflow_has_personal") === "true",
     free_access: freeAccess
   };
 
@@ -328,9 +330,12 @@ function handleCardClick(enfase, locked) {
   ========================================= */
   if (enfase === "personal") {
     FEMFLOW.toast("🌟 Modo Personal ativado!");
-    window.location.href = "treino.html?personal=1";
+    localStorage.setItem("femflow_mode_personal", "true");
+    FEMFLOW.router("treino.html");
     return;
   }
+
+  localStorage.setItem("femflow_mode_personal", "false");
 
   /* =========================================
      🌸 CICLO NÃO CONFIGURADO
@@ -519,7 +524,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 ============================================================ */
 
 const perfilTemPersonal =
-  localStorage.getItem("femflow_personal") === "true";
+  localStorage.getItem("femflow_has_personal") === "true";
 
 const produto =
   String(localStorage.getItem("femflow_produto") || "").toLowerCase();

@@ -270,7 +270,7 @@ FEMFLOW.reiniciarDiaPrograma = async function () {
 FEMFLOW.router = pag => {
   const destino = pag.endsWith(".html") ? pag : pag + ".html";
 
-  if (localStorage.getItem("femflow_personal") === "true") {
+  if (localStorage.getItem("femflow_mode_personal") === "true") {
     location.href = `${destino}?personal=1`;
   } else {
     location.href = destino;
@@ -755,10 +755,8 @@ FEMFLOW.carregarPerfil = async function () {
     localStorage.setItem("femflow_produto", produtoRaw);
     localStorage.setItem("femflow_ativa", ativaRaw ? "true" : "false");
 
-    if (produtoRaw.includes("personal"))
-      localStorage.setItem("femflow_personal", "true");
-    else
-      localStorage.removeItem("femflow_personal");
+    localStorage.setItem("femflow_has_personal", r.personal ? "true" : "false");
+    localStorage.removeItem("femflow_personal");
 
     return r;
 

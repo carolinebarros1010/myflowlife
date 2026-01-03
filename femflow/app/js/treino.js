@@ -10,9 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
      0. VARIÁVEIS DA TELA (NÃO dependem do perfil)
   ============================================================ */
 
-  let isPersonalQuery   = location.search.includes("personal=1");
-  let isPersonalStorage = localStorage.getItem("femflow_personal") === "true";
-  let isPersonal        = isPersonalQuery || isPersonalStorage;
+  const hasPersonalStorage =
+    localStorage.getItem("femflow_has_personal") === "true";
+  const modePersonalStorage =
+    localStorage.getItem("femflow_mode_personal") === "true";
+  let isPersonal = hasPersonalStorage && modePersonalStorage;
 
   if (isPersonal) {
     document.body.classList.add("personal-mode");
@@ -55,20 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // INSERIR AQUI
-  function detectarPersonalDoBackend(perfil) {
-    const produto = String(perfil?.produto ?? "").toLowerCase().trim();
-    const isPersonal = produto.includes("personal");
-
-    if (isPersonal) {
-      localStorage.setItem("femflow_personal", "true");
-    } else {
-      localStorage.removeItem("femflow_personal");
-    }
-
-    return isPersonal;
-  }
-
   /* ============================================================
      1️⃣ LISTENER ÚNICO — PERFIL PRONTO
   ============================================================ */
@@ -92,13 +80,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     FEMFLOW.log("🚀 treino.js v4.0 iniciado!");
 
-    /* ================= PERSONAL BACKEND ================= */
-    const personalBackend = detectarPersonalDoBackend(perfil);
-    if (personalBackend) {
-      isPersonal = true;
-      localStorage.setItem("femflow_personal", "true");
+    /* ================= PERSONAL FINAL ================= */
+    localStorage.setItem("femflow_has_personal", perfil.personal ? "true" : "false");
+    const hasPersonal =
+      localStorage.getItem("femflow_has_personal") === "true";
+    const modePersonal =
+      localStorage.getItem("femflow_mode_personal") === "true";
+    const personalFinal = hasPersonal && modePersonal;
+
+    if (personalFinal) {
+      document.body.classList.add("personal-mode");
+    } else {
+      document.body.classList.remove("personal-mode");
     }
-    const personalFinal = isPersonal;
 
     /* ================= PERFIL ================= */
     const nivel    = perfil.nivel;
@@ -119,22 +113,9 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ================= TREINO ================= */
     let lista;
 
-    if (personalFinal) {
-      lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-        id, nivel, enfase: enfaseFinal, fase, diaCiclo, personal: true
-      });
-
-      if (!lista || !lista.length) {
-        FEMFLOW.warn("⚠️ Sem treino PERSONAL, fallback NORMAL");
-        lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-          id, nivel, enfase: enfaseFinal, fase, diaCiclo, personal: false
-        });
-      }
-    } else {
-      lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-        id, nivel, enfase: enfaseFinal, fase, diaCiclo, personal: false
-      });
-    }
+    lista = await FEMFLOW.engineTreino.montarTreinoFinal({
+      id, nivel, enfase: enfaseFinal, fase, diaCiclo, personal: personalFinal
+    });
 
     renderTreino(lista);
 
