@@ -10,48 +10,31 @@ FEMFLOW.engineTreino = {};
    1) NORMALIZAÇÕES
 ============================================================ */
 FEMFLOW.engineTreino.normalizarFase = raw => {
-  if (!raw) return "follicular";
-  const f = raw.toLowerCase().trim();
+  const f = String(raw || "").toLowerCase().trim();
+  if (!f) return "";
   return {
-    ovulatory: "ovulatoria",
-    ovulatório: "ovulatoria",
+    ovulatória: "ovulatoria",
     ovulatoria: "ovulatoria",
     ovulação: "ovulatoria",
-    follicular: "follicular",
-    folicular: "follicular",
-    luteal: "lutea",
+    follicular: "folicular",
+    folicular: "folicular",
+    lútea: "lutea",
     lutea: "lutea",
     menstrual: "menstrual",
+    menstruação: "menstrual",
     menstruacao: "menstrual"
-  }[f] || "follicular";
+  }[f] || f;
 };
 
 FEMFLOW.engineTreino.normalizarNivel = raw => {
-  const n = (raw || "").toLowerCase();
+  const n = String(raw || "").toLowerCase().trim();
+  if (!n) return null;
   if (n.startsWith("inic")) return "iniciante";
   if (n.startsWith("inter")) return "intermediaria";
   if (n.startsWith("avan")) return "avancada";
-  return "iniciante";
+  return n; // 🔥 respeita backend
 };
 
-FEMFLOW.engineTreino.normalizarEnfase = raw => {
-  const e = (raw || "").toLowerCase().trim();
-  return {
-    gluteo: "gluteo",
-    quadriceps: "quadriceps",
-    posteriores: "posteriores",
-    costas: "costas",
-    braco: "braco",
-    corrida: "corrida",
-    beach: "beach",
-    adaptacao: "adaptacao",
-    casa: "casa",
-    geral: "geral",
-    remo: "remo",
-    natacao: "natacao",
-    personal: "personal"
-  }[e] || "geral";
-};
 
 /* ============================================================
    2) SÉRIE ESPECIAL
@@ -89,16 +72,40 @@ FEMFLOW.engineTreino.carregarBlocosNormais = async ({
   nivel, enfase, fase, diaCiclo
 }) => {
 
-  const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
-  const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
-  const enfNorm   = FEMFLOW.engineTreino.normalizarEnfase(enfase);
-  const diaKey    = `dia_${Number(diaCiclo)}`;
+ const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
+const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
 
+if (!faseNorm || !enfase || !nivelNorm) {
+  console.error("❌ Dados inválidos para consulta Firebase:", {
+    nivel,
+    enfase,
+    fase,
+    faseNorm,
+    nivelNorm
+  });
+  return [];
+}
+
+  console.log("🧠 DIA FISIOLÓGICO RECEBIDO:", diaCiclo);
+  const diaNum = Number(diaCiclo);
+  if (!Number.isFinite(diaNum) || diaNum < 1) {
+    console.error("❌ diaCiclo inválido. Abortando consulta Firebase:", diaCiclo);
+    return [];
+  }
+  const diaKey    = `dia_${diaNum}`;
+  const path = `/exercicios/${nivelNorm}_${enfase}/fases/${faseNorm}/dias/${diaKey}/blocos`;
+
+  console.log("🔥 FIREBASE PATH (ÊNFASE):", {
+    nivel: nivelNorm,
+    enfase,
+    fase: faseNorm,
+    diaKey
+  });
   FEMFLOW.log("🔥 [NORMAL] Firebase por diaCiclo:", diaKey);
 
   const snap = await firebase.firestore()
     .collection("exercicios")
-    .doc(`${nivelNorm}_${enfNorm}`)
+    .doc(`${nivelNorm}_${enfase}`)
     .collection("fases")
     .doc(faseNorm)
     .collection("dias")
@@ -107,7 +114,13 @@ FEMFLOW.engineTreino.carregarBlocosNormais = async ({
     .get();
 
   if (snap.empty) {
-    FEMFLOW.warn("⚠️ Nenhum treino encontrado:", diaKey);
+    FEMFLOW.error("❌ Nenhum treino encontrado no Firebase:", {
+      path,
+      nivel: nivelNorm,
+      enfase,
+      fase: faseNorm,
+      diaKey
+    });
     return [];
   }
 
@@ -130,22 +143,53 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
 }) => {
 
   const faseNorm = FEMFLOW.engineTreino.normalizarFase(fase);
-  const enfNorm  = FEMFLOW.engineTreino.normalizarEnfase(enfase);
-  const diaKey   = `dia_${Number(diaCiclo)}`;
+   if (!faseNorm || !enfase || !id) {
+  console.error("❌ Dados inválidos para consulta Firebase:", {
+    id,
+    enfase,
+    fase,
+    faseNorm
+  });
+  return [];
+}
+  console.log("🧠 DIA FISIOLÓGICO RECEBIDO:", diaCiclo);
+  const diaNum = Number(diaCiclo);
+  if (!Number.isFinite(diaNum) || diaNum < 1) {
+    console.error("❌ diaCiclo inválido. Abortando consulta Firebase:", diaCiclo);
+    return [];
+  }
+  const diaKey   = `dia_${diaNum}`;
+  const path = `/personal_trainings/${id}/${enfase}/${faseNorm}/dias/${diaKey}/blocos`;
+
+  console.log("🔥 FIREBASE PATH (PERSONAL):", {
+  id,
+  enfase,
+  fase: faseNorm,
+  diaKey
+});
 
   FEMFLOW.log("🔥 [PERSONAL] Firebase por diaCiclo:", diaKey);
 
   const snap = await firebase.firestore()
     .collection("personal_trainings")
     .doc(id)
-    .collection(enfNorm)
+    .collection(enfase)
     .doc(faseNorm)
     .collection("dias")
     .doc(diaKey)
     .collection("blocos")
     .get();
 
-  if (snap.empty) return [];
+  if (snap.empty) {
+    FEMFLOW.error("❌ Nenhum treino PERSONAL encontrado no Firebase:", {
+      path,
+      id,
+      enfase,
+      fase: faseNorm,
+      diaKey
+    });
+    return [];
+  }
 
   const blocos = [];
   snap.forEach(d => blocos.push(d.data()));
@@ -380,4 +424,3 @@ const filtrados = comHIIT.filter(b => {
 return FEMFLOW.engineTreino.converterParaFront(filtrados);
 
 };
-

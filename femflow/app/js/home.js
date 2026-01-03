@@ -326,7 +326,7 @@ function handleCardClick(enfase, locked) {
   /* =========================================
      🌸 CICLO NÃO CONFIGURADO
   ========================================= */
-  if (!localStorage.getItem("femflow_cycle_configured")) {
+  if (localStorage.getItem("femflow_cycle_configured") !== "yes") {
 
     FEMFLOW.loading.show("Configurando seu ciclo…");
 
@@ -339,6 +339,19 @@ function handleCardClick(enfase, locked) {
     });
 
     return;
+  }
+
+  /* =========================================
+     ✅ GARANTIA DE ESTADO MÍNIMO
+  ========================================= */
+  if (enfase) {
+    localStorage.setItem("femflow_enfase", enfase);
+  }
+
+  const diaProgramaRaw = localStorage.getItem("femflow_diaPrograma");
+  const diaPrograma = Number(diaProgramaRaw);
+  if (!diaProgramaRaw || Number.isNaN(diaPrograma) || diaPrograma < 1) {
+    localStorage.setItem("femflow_diaPrograma", "1");
   }
 
   /* =========================================
