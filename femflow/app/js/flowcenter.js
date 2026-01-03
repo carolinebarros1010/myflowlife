@@ -26,14 +26,27 @@ function flowcenterPersistPerfil(perfil) {
   localStorage.setItem("femflow_fase", String(perfil.fase || "follicular").toLowerCase());
   localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
   localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
-  localStorage.setItem("femflow_enfase", String(perfil.enfase || "").toLowerCase());
 
-  // 🔒 direito (vem do backend)
+  /* ============================================================
+     🧭 ÊNFASE — SÓ sobrescreve se vier VÁLIDA do backend
+     (protege seleção feita na Home)
+  ============================================================ */
+  const enfaseBackend = String(perfil.enfase || "").toLowerCase();
+
+  if (enfaseBackend && enfaseBackend !== "nenhuma") {
+    localStorage.setItem("femflow_enfase", enfaseBackend);
+  }
+  // ❗ caso contrário, mantém a enfase atual do front
+
+  /* ============================================================
+     🔒 DIREITO PERSONAL (backend)
+  ============================================================ */
   localStorage.setItem(
     "femflow_has_personal",
     perfil.personal ? "true" : "false"
   );
 }
+
 
 /* ============================================================
    🚀 INIT
