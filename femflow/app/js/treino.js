@@ -378,10 +378,8 @@ if (tipoDominante === "hiitPremium") {
   /* ======================================================
      TREINO (box com exercícios + série especial)
   ====================================================== */
-  const serieParsed = parseSerieEspecial(bloco[0].serieEspecial);
-
-const codigoSerie = serieParsed?.codigo || null;
-const ordemSerie  = serieParsed?.ordem || null;
+  const codigoSerie = bloco[0].serieEspecial || null;
+  const ordemSerie  = null;
 
 const behavior = SERIE_BEHAVIOR[codigoSerie] || null;
 
