@@ -139,14 +139,13 @@ if (!faseNorm || !enfase || !nivelNorm) {
    🔥 PRIORIDADE ABSOLUTA: diaCiclo
 ============================================================ */
 FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
-  id, enfase, fase, diaCiclo
+  id, fase, diaCiclo
 }) => {
 
   const faseNorm = FEMFLOW.engineTreino.normalizarFase(fase);
-   if (!faseNorm || !enfase || !id) {
+   if (!faseNorm || !id) {
   console.error("❌ Dados inválidos para consulta Firebase:", {
     id,
-    enfase,
     fase,
     faseNorm
   });
@@ -159,11 +158,10 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
     return [];
   }
   const diaKey   = `dia_${diaNum}`;
-  const path = `/personal_trainings/${id}/${enfase}/${faseNorm}/dias/${diaKey}/blocos`;
+  const path = `/personal_trainings/${id}/personal/${faseNorm}/dias/${diaKey}/blocos`;
 
   console.log("🔥 FIREBASE PATH (PERSONAL):", {
   id,
-  enfase,
   fase: faseNorm,
   diaKey
 });
@@ -173,7 +171,7 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
   const snap = await firebase.firestore()
     .collection("personal_trainings")
     .doc(id)
-    .collection(enfase)
+    .collection("personal")
     .doc(faseNorm)
     .collection("dias")
     .doc(diaKey)
@@ -184,7 +182,6 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
     FEMFLOW.error("❌ Nenhum treino PERSONAL encontrado no Firebase:", {
       path,
       id,
-      enfase,
       fase: faseNorm,
       diaKey
     });
@@ -392,9 +389,31 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
   id, nivel, enfase, fase, diaCiclo, personal=false
 }) => {
 
-  const blocosRaw = personal
-    ? await FEMFLOW.engineTreino.carregarBlocosPersonal({ id, enfase, fase, diaCiclo })
-    : await FEMFLOW.engineTreino.carregarBlocosNormais({ nivel, enfase, fase, diaCiclo });
+  if (enfase === "personal") {
+    FEMFLOW.warn("⚠️ Ênfase inválida 'personal' ignorada pelo engine.");
+    enfase = null;
+  }
+
+  let blocosRaw = [];
+  if (personal) {
+    blocosRaw = await FEMFLOW.engineTreino.carregarBlocosPersonal({ id, fase, diaCiclo });
+    if (!blocosRaw.length) {
+      FEMFLOW.warn("⚠️ Sem treino PERSONAL, fallback NORMAL");
+      blocosRaw = await FEMFLOW.engineTreino.carregarBlocosNormais({
+        nivel,
+        enfase,
+        fase,
+        diaCiclo
+      });
+    }
+  } else {
+    blocosRaw = await FEMFLOW.engineTreino.carregarBlocosNormais({
+      nivel,
+      enfase,
+      fase,
+      diaCiclo
+    });
+  }
 
   if (!blocosRaw.length) return [];
 

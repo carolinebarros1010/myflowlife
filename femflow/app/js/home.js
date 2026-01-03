@@ -324,6 +324,15 @@ function handleCardClick(enfase, locked) {
   }
 
   /* =========================================
+     🧭 MODO PERSONAL (não altera ênfase)
+  ========================================= */
+  if (enfase === "personal") {
+    FEMFLOW.toast("🌟 Modo Personal ativado!");
+    window.location.href = "treino.html?personal=1";
+    return;
+  }
+
+  /* =========================================
      🌸 CICLO NÃO CONFIGURADO
   ========================================= */
   if (localStorage.getItem("femflow_cycle_configured") !== "yes") {
