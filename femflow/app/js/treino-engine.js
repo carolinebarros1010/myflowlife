@@ -397,16 +397,7 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
   let blocosRaw = [];
   if (personal) {
     blocosRaw = await FEMFLOW.engineTreino.carregarBlocosPersonal({ id, fase, diaCiclo });
-    if (!blocosRaw.length) {
-      FEMFLOW.warn("⚠️ Sem treino PERSONAL, fallback NORMAL");
-      blocosRaw = await FEMFLOW.engineTreino.carregarBlocosNormais({
-        nivel,
-        enfase,
-        fase,
-        diaCiclo
-      });
-    }
-  } else {
+   } else {
     blocosRaw = await FEMFLOW.engineTreino.carregarBlocosNormais({
       nivel,
       enfase,
