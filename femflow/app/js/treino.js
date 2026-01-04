@@ -37,8 +37,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCancelar     = document.getElementById("cancelarTreinoBtn");
   const modalPSE        = document.getElementById("modalPSE");
   const pseInput        = document.getElementById("pseInput");
+  const pseEmoji        = document.getElementById("pseEmoji");
+  const pseValor        = document.getElementById("pseValor");
   const btnConfirmarPSE = document.getElementById("btnConfirmarPSE");
   const btnCancelarPSE  = document.getElementById("btnCancelarPSE");
+
+  function getPseEmoji(valor) {
+    if (valor <= 2) return "😌";
+    if (valor <= 4) return "🙂";
+    if (valor <= 6) return "😅";
+    if (valor <= 8) return "😓";
+    return "🥵";
+  }
+
+  function atualizarPseDisplay(valor) {
+    if (!pseEmoji || !pseValor) return;
+    const val = Number(valor || 0);
+    pseEmoji.textContent = getPseEmoji(val);
+    pseValor.textContent = String(val);
+  }
 
   function encerrarTreino() {
     FEMFLOW.router("flowcenter.html");
@@ -71,6 +88,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnCancelar) {
     btnCancelar.addEventListener("click", encerrarTreino);
+  }
+
+  if (pseInput) {
+    atualizarPseDisplay(pseInput.value);
+    pseInput.addEventListener("input", (event) => {
+      atualizarPseDisplay(event.target.value);
+    });
   }
 
   const SERIE_BEHAVIOR = {
@@ -274,6 +298,7 @@ initClusterTimers(); // 🔥 CLUSTER TIMER REAL
 initRestPause(); // ✅
 initSeriesProgress();
 initPeso();
+void initPesoPrefill();
 }
  /* ============================================================
      3) RENDER BOX
@@ -1053,6 +1078,24 @@ const treino = isPersonal
     }); // fim do change listener
 
   }); // fim do forEach
+}
+
+async function initPesoPrefill() {
+  if (!id) return;
+
+  const inputs = Array.from(document.querySelectorAll(".ff-ex-peso"));
+
+  await Promise.all(inputs.map(async inp => {
+    if (inp.value) return;
+
+    const exercicio = inp.dataset.ex;
+    if (!exercicio) return;
+
+    const peso = await getUltimoPeso(id, exercicio);
+    if (peso === "" || peso === null || peso === undefined) return;
+
+    inp.value = peso;
+  }));
 }
 
 /* ============================================================
