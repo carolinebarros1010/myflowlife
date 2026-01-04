@@ -41,6 +41,7 @@ function flowcenterPersistPerfil(perfil) {
   /* ============================================================
      🔒 DIREITO PERSONAL (backend)
   ============================================================ */
+  const acessos = perfil.acessos || {};
   localStorage.setItem(
     "femflow_has_personal",
     perfil.acessos?.personal ? "true" : "false"
