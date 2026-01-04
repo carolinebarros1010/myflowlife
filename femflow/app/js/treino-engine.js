@@ -404,13 +404,16 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
   id, nivel, enfase, fase, diaCiclo, personal=false
 }) => {
 
-   if (enfase === "personal" || !enfase || enfase === "nenhuma") {
-      FEMFLOW.warn("⚠️ Ênfase inválida 'personal' ignorada pelo engine.");
-  const fallback = localStorage.getItem("femflow_enfase");
-  enfase = fallback && fallback !== "personal" && fallback !== "nenhuma"
-    ? fallback
-    : null;
-}
+  // 🔒 Personal ignora completamente ênfase
+  if (personal === true) {
+    enfase = null;
+  }
+
+  // 🔒 Treino normal exige ênfase válida
+  if (!personal && (!enfase || enfase === "nenhuma" || enfase === "personal")) {
+    FEMFLOW.warn("⚠️ Treino normal sem ênfase válida.");
+    return [];
+  }
 
 
   let blocosRaw = [];

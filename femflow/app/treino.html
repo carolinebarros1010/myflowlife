@@ -115,8 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const produto  = localStorage.getItem("femflow_produto");
   const cicloOK  = localStorage.getItem("femflow_cycle_configured") === "yes";
   const enfase   = localStorage.getItem("femflow_enfase");
+  const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
+  const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
+  const personal     = hasPersonal && modePersonal;
 
-  if (!id || !produto || !cicloOK || !enfase) {
+  if (!id || !produto || !cicloOK || (!personal && !enfase)) {
     FEMFLOW.toast("Acesse o treino pelo painel do FemFlow.");
     FEMFLOW.router("home.html");
     return;
@@ -201,6 +204,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-
 
 
