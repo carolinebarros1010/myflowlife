@@ -72,7 +72,10 @@
 
       <label class="modal-label" id="pseLabel">PSE (0 a 10)</label>
       <input type="range" min="0" max="10" value="0" id="pseInput" class="modal-slider"/>
-      <div class="pse-emoji" id="pseEmoji" aria-live="polite">😴</div>
+      <div class="pse-emoji" id="pseEmojiWrap" aria-live="polite">
+        <span id="pseEmoji">😴</span>
+        <span class="pse-emoji-value" id="pseEmojiValue">0</span>
+      </div>
 
       <div class="modal-actions">
         <button id="btnConfirmarPSE" class="modal-btn-ok">Salvar</button>
