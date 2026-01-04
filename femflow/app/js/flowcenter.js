@@ -109,6 +109,7 @@ async function initFlowCenter() {
 
   // 🔥 regra canônica
   const personal = hasPersonal && modePersonal;
+  const enduranceEnabled = hasPersonal;
 
   const isApp    = produtoRaw === "acesso_app";
   const isFollow = produtoRaw.startsWith("followme_");
@@ -168,7 +169,9 @@ async function initFlowCenter() {
     document.getElementById("toBreath").textContent    = `💨 ${L.respiracao}`;
     document.getElementById("toTrain").textContent     = `🏃 ${L.treino}`;
     document.getElementById("toEvolution").textContent = `📈 ${L.evolucao}`;
-    document.getElementById("toEndurance").textContent = `🏃‍♂️ ${L.endurance}`;
+    const enduranceLabel = enduranceEnabled ? "🏃‍♂️" : "🔒";
+    document.getElementById("toEndurance").textContent =
+      `${enduranceLabel} ${L.endurance}`;
   }
   aplicarIdioma();
   document.addEventListener("femflow:langChange", aplicarIdioma);
@@ -229,9 +232,16 @@ async function initFlowCenter() {
     FEMFLOW.router("home.html");
   };
 
-  document.getElementById("toEndurance").onclick = () => {
+  const enduranceBtn = document.getElementById("toEndurance");
+  if (enduranceBtn) enduranceBtn.disabled = !enduranceEnabled;
+
+  enduranceBtn.onclick = () => {
+    if (!enduranceEnabled) {
+      FEMFLOW.toast("Endurance disponível apenas no Personal 🌸");
+      return;
+    }
     const id = localStorage.getItem("femflow_id");
-    if (id) FEMFLOW.router(`treinoendurance/${id}.html`);
+    if (id) FEMFLOW.router("geradordecorrida/index.html");
     else location.href = "https://www.myflowlife.com.br/#ofertas";
   };
 
