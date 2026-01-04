@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCancelar     = document.getElementById("cancelarTreinoBtn");
   const modalPSE        = document.getElementById("modalPSE");
   const pseInput        = document.getElementById("pseInput");
+  const pseEmoji        = document.getElementById("pseEmoji");
   const btnConfirmarPSE = document.getElementById("btnConfirmarPSE");
   const btnCancelarPSE  = document.getElementById("btnCancelarPSE");
 
@@ -88,6 +89,23 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!track) {
     FEMFLOW.error("❌ #carouselTrack não encontrado!");
     return;
+  }
+
+  const pseEmojis = ["😴", "🙂", "🙂", "😌", "🙂", "😅", "😅", "😮‍💨", "😮‍💨", "🥵", "🥵"];
+
+  function atualizarEmojiPse(valor) {
+    if (!pseEmoji) return;
+    const idx = Math.max(0, Math.min(10, Number(valor) || 0));
+    pseEmoji.textContent = pseEmojis[idx];
+    pseEmoji.classList.remove("pse-emoji-bounce");
+    window.requestAnimationFrame(() => pseEmoji.classList.add("pse-emoji-bounce"));
+  }
+
+  if (pseInput) {
+    atualizarEmojiPse(pseInput.value);
+    pseInput.addEventListener("input", (event) => {
+      atualizarEmojiPse(event.target.value);
+    });
   }
 
   /* ============================================================

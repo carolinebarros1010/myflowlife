@@ -712,48 +712,18 @@ font-size: 0.9rem !important;
   accent-color: #cc6a5a;
 }
 
-.pse-scale {
-  display: grid;
-  grid-template-columns: repeat(11, minmax(0, 1fr));
-  gap: 6px;
-  margin-bottom: 18px;
-  font-size: 0.7rem;
-  text-align: center;
-  color: #7a7a7a;
-}
-
-.pse-scale span {
+.pse-emoji {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.2rem;
+  margin: 6px 0 18px;
+  color: #cc6a5a;
+  transition: transform 0.15s ease;
 }
 
-.pse-scale span::first-line {
-  font-weight: 600;
-  color: #4d4d4d;
-}
-
-.pse-scale span:nth-child(1),
-.pse-scale span:nth-child(2),
-.pse-scale span:nth-child(3) {
-  color: #6fa8a0;
-}
-
-.pse-scale span:nth-child(4),
-.pse-scale span:nth-child(5),
-.pse-scale span:nth-child(6) {
-  color: #7f8fa1;
-}
-
-.pse-scale span:nth-child(7),
-.pse-scale span:nth-child(8) {
-  color: #a36d5a;
-}
-
-.pse-scale span:nth-child(9),
-.pse-scale span:nth-child(10),
-.pse-scale span:nth-child(11) {
-  color: #c04f3d;
+.pse-emoji.pse-emoji-bounce {
+  transform: scale(1.08);
 }
 
 /* ============================================================
