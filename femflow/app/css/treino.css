@@ -712,6 +712,20 @@ font-size: 0.9rem !important;
   accent-color: #cc6a5a;
 }
 
+.pse-emoji {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.2rem;
+  margin: 6px 0 18px;
+  color: #cc6a5a;
+  transition: transform 0.15s ease;
+}
+
+.pse-emoji.pse-emoji-bounce {
+  transform: scale(1.08);
+}
+
 /* ============================================================
    BOTÕES
 ============================================================ */
