@@ -97,6 +97,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!r.ok) {
       throw new Error(`HTTP ${r.status}: ${text.slice(0, 160)}`);
     }
+    if (!text.trim().startsWith("{")) {
+      console.error("❌ Resposta não-JSON:", text);
+      throw new Error("Servidor retornou HTML");
+    }
     try {
       return JSON.parse(text);
     } catch (err) {
