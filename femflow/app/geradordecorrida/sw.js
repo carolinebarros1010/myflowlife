@@ -40,8 +40,13 @@ self.addEventListener("fetch", event => {
     caches.match(req).then(cached => {
       const fetchPromise = fetch(req)
         .then(netRes => {
+          if (!netRes || netRes.status === 206) return netRes;
           // Atualiza cache em background
-          caches.open(CACHE_NAME).then(c => c.put(req, netRes.clone()));
+          if (!netRes.bodyUsed) {
+            const resClone = netRes.clone();
+            caches.open(CACHE_NAME).then(c => c.put(req, resClone)).catch(() => {});
+            return netRes;
+          }
           return netRes;
         })
         .catch(() => cached || new Response("Você está offline 📴", {status: 200}));

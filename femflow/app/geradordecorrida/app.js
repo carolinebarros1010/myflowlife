@@ -284,18 +284,18 @@ async function syncPerfilBackend() {
   }
 }
 
-function hidratarCamposDoPerfil() {
+function hidratarCamposDoPerfil(perfil = null) {
   const nivelEl = byId('perfilNivelInput');
   const nomeEl = byId('perfilNome');
   const nivelTagEl = byId('perfilNivel');
   const inicioEl = byId('inicio');
 
-  const nivelStorage = normalizarNivel(localStorage.getItem("femflow_nivel"));
-  const diaCicloStorage = parseInt(localStorage.getItem("femflow_diaCiclo") || "1", 10);
-  const cicloDuracaoStorage = parseInt(localStorage.getItem("femflow_cycleLength") || "28", 10);
-  const faseStorage = normalizarFase(localStorage.getItem("femflow_fase"));
-  const inicioStorage = localStorage.getItem("femflow_startDate") || "";
-  const nomeStorage = localStorage.getItem("femflow_nome") || "Aluna";
+  const nivelStorage = normalizarNivel(perfil?.nivel || localStorage.getItem("femflow_nivel"));
+  const diaCicloStorage = parseInt(perfil?.diaCiclo || localStorage.getItem("femflow_diaCiclo") || "1", 10);
+  const cicloDuracaoStorage = parseInt(perfil?.ciclo_duracao || localStorage.getItem("femflow_cycleLength") || "28", 10);
+  const faseStorage = normalizarFase(perfil?.fase || localStorage.getItem("femflow_fase"));
+  const inicioStorage = perfil?.data_inicio || localStorage.getItem("femflow_startDate") || "";
+  const nomeStorage = perfil?.nome || localStorage.getItem("femflow_nome") || "Aluna";
 
   if (nivelEl && nivelStorage) {
     const map = {
@@ -317,7 +317,12 @@ function hidratarCamposDoPerfil() {
       lutea: "Lútea",
       menstrual: "Menstrual"
     }[faseCalc] || faseCalc;
-    nivelTagEl.textContent = `${nivelStorage} • ${faseLabel} • Dia ${diaCicloStorage}`;
+    const nivelLabel = {
+      iniciante: "Iniciante",
+      intermediario: "Intermediária",
+      avancado: "Avançada"
+    }[nivelStorage] || nivelStorage;
+    nivelTagEl.textContent = `${nivelLabel} • ${faseLabel} • Dia ${diaCicloStorage}`;
   }
 
   if (inicioEl && inicioStorage) {
@@ -346,7 +351,7 @@ function gerarMesociclo() {
 
   // === 1. Captura de campos ===
   const provaKmEl = byId('distProva');
-  const nivelEl = byId('nivel');
+  const nivelEl = byId('perfilNivelInput');
   const nTreinosEl = byId('semanal');
   const cooperDistEl = byId('cooperDist');
   const diasEl = byId('dias');
@@ -363,7 +368,7 @@ function gerarMesociclo() {
   }
 
   const provaKm = parseFloat(provaKmEl.value || 10);
-  const nivel = normalizarNivel(nivelEl.value);
+  const nivel = normalizarNivel(localStorage.getItem("femflow_nivel") || nivelEl.value);
   const nTreinos = parseInt(nTreinosEl.value || 4, 10);
   const cooperDist = parseFloat(cooperDistEl.value || 3000);
   const cooperPse = parseInt(cooperPseEl.value || 8, 10);
@@ -621,8 +626,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
       return;
     }
 
-    await syncPerfilBackend();
-    hidratarCamposDoPerfil();
+    const perfil = await syncPerfilBackend();
+    hidratarCamposDoPerfil(perfil);
   })();
 
   // Conectar event listeners aos botões com IDs corretos
