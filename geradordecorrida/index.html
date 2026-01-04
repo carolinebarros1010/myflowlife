@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gerador de Microciclo MyFlowLife v23.1 (PWA)</title>
+  <title>Endurance FemFlow</title>
   <!-- PWA: Manifesto -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#CC6A5A" />
+  <meta name="theme-color" content="#D1A697" />
   <link rel="apple-touch-icon" href="https://www.myflowlife.com.br/assets/icon-192.png" />
     <!-- PWA -->
   <link rel="manifest" href="manifest.json">
@@ -18,13 +18,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    :root { --bg:#0f172a; --panel:#111827; --ink:#e5e7eb; --muted:#9ca3af; --teal:#335953; --terracota:#CC6A5A; --pessego:#EFBDA6; --card:#0b1220; }
+    :root { --bg:#FAF7F5; --panel:#F3C1C1; --ink:#2E2E2E; --muted:#6F6F6F; --teal:#335953; --terracota:#D1A697; --pessego:#CBB1E6; --card:#F3C1C1; }
     html,body{ background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,Helvetica,Arial,sans-serif; margin:0; overflow-x:hidden; }
     *{ transition:background .3s ease,color .3s ease,border .3s ease }
 
     /* Tema claro */
     @media (prefers-color-scheme: light) {
-      :root { --bg:#f8fafc; --panel:#ffffff; --ink:#1e293b; --muted:#64748b; --teal:#335953; --terracota:#b94f3f; --pessego:#e7a98b; --card:#f1f5f9; }
+      :root { --bg:#FAF7F5; --panel:#F3C1C1; --ink:#2E2E2E; --muted:#6F6F6F; --teal:#335953; --terracota:#D1A697; --pessego:#CBB1E6; --card:#F3C1C1; }
       body { color:var(--ink); background:var(--bg) }
       .card, input, select { background:var(--card); color:var(--ink) }
       .btn { color:#fff }
@@ -49,11 +49,11 @@
     @media (max-width:600px){ #siteTitle{ font-size:.85rem } }
 
     /* Botão Premium com glow e tema dinâmico */
-    @keyframes glowPulse { 0%{box-shadow:0 0 10px rgba(239,189,166,.6), 0 0 20px rgba(204,106,90,.4)} 50%{box-shadow:0 0 20px rgba(239,189,166,.9), 0 0 30px rgba(204,106,90,.7)} 100%{box-shadow:0 0 10px rgba(239,189,166,.6), 0 0 20px rgba(204,106,90,.4)} }
-    #btnPremium{ background:linear-gradient(90deg,var(--terracota),var(--pessego)); color:#fff; font-weight:700; font-size:.9rem; padding:10px 16px; border-radius:8px; text-decoration:none; animation:glowPulse 3s ease-in-out infinite; transition:transform .2s ease, opacity .2s ease, background .3s ease }
+    @keyframes glowPulse { 0%{box-shadow:0 0 10px rgba(209,166,151,.6), 0 0 20px rgba(203,177,230,.4)} 50%{box-shadow:0 0 20px rgba(209,166,151,.9), 0 0 30px rgba(203,177,230,.7)} 100%{box-shadow:0 0 10px rgba(209,166,151,.6), 0 0 20px rgba(203,177,230,.4)} }
+    #btnPremium{ background:linear-gradient(90deg,var(--terracota),var(--pessego)); color:#2E2E2E; font-weight:700; font-size:.9rem; padding:10px 16px; border-radius:8px; text-decoration:none; animation:glowPulse 3s ease-in-out infinite; transition:transform .2s ease, opacity .2s ease, background .3s ease }
     #btnPremium:hover{ transform:scale(1.05); opacity:.9 }
-    @media (prefers-color-scheme: light){ #btnPremium{ background:linear-gradient(90deg,var(--teal),var(--terracota)) } }
-    @media (prefers-color-scheme: dark){ #btnPremium{ background:linear-gradient(90deg,var(--pessego),var(--terracota)) } }
+    @media (prefers-color-scheme: light){ #btnPremium{ background:linear-gradient(90deg,var(--teal),var(--terracota)); color:#fff } }
+    @media (prefers-color-scheme: dark){ #btnPremium{ background:linear-gradient(90deg,var(--pessego),var(--terracota)); color:#2E2E2E } }
     @media (max-width:600px){ #btnPremium{ font-size:.8rem; padding:8px 12px } }
 
     /* ===== Layout principal ===== */
@@ -177,13 +177,13 @@ input:focus, select:focus, textarea:focus {
 
   <!-- Topo fixo com Premium -->
   <div class="topbar">
-    <span class="brand">🏃‍♂️ Gerador MyFlowLife</span>
+    <span class="brand">🏃‍♀️ Endurance FemFlow</span>
     <a href="https://www.myflowlife.com.br/premium" id="btnPremium" target="_blank" title="Acesse o Plano Premium MyFlowLife" class="btn-app">💎 COMPRE O PLANO PREMIUM</a>
   </div>
 
   <div class="container">
     <header>
-      <div class="brand">Gerador de Microciclo <span style="color:var(--accent)">MyFlowLife</span> V24</div>
+      <div class="brand">Endurance <span style="color:var(--accent)">FemFlow</span> V24</div>
     </header>
 
     <p class="muted">Escolha perfil, distância da prova e disponibilidade. O sistema monta a semana com velocidade, resistência e potência, ajusta ritmo pelos níveis de esforço e gera PDF e cards.</p>
@@ -191,6 +191,7 @@ input:focus, select:focus, textarea:focus {
     <!-- ENTRADAS -->
     <section class="panel">
       <h2>Entradas</h2>
+      <p class="muted">Realize um teste de 12 min sem parar na modalidade pretendida e insira as informações abaixo (distância em metros e PSE 0 a 10).</p>
       <div class="grid">
         <label>Perfil
           <select id="nivel">
@@ -208,11 +209,36 @@ input:focus, select:focus, textarea:focus {
         <label>Treinos por semana
           <input id="semanal" type="number" min="3" max="6" value="4">
         </label>
-        <label>Ritmo base (min:seg/km)
-          <input id="ritmoBase" value="05:30">
+        <label>Distância no teste Cooper (12 min, em metros)
+          <input id="cooperDist" type="number" min="200" step="10" value="3000">
         </label>
-        <label>Esforço do último treino (1–10)
-          <input id="esforco" type="number" min="1" max="10" step="1" value="7">
+        <label>Modalidade
+          <select id="modalidade">
+            <option value="corrida">Corrida</option>
+            <option value="bike">Ciclismo</option>
+            <option value="remo">Remo ergômetro</option>
+            <option value="natacao">Natação (piscina)</option>
+            <option value="natacao_aberta">Natação em águas abertas</option>
+            <option value="eliptico">Elíptico</option>
+            <option value="caminhada">Caminhada</option>
+            <option value="trilha">Trail/Trilha</option>
+            <option value="aqua_run">Aqua run</option>
+            <option value="esqui">Esqui ergômetro</option>
+          </select>
+        </label>
+        <label>Zona / PSE principal
+          <input id="zona" value="Z2 / PSE 5-6">
+        </label>
+        <label>PSE do teste Cooper (0–10)
+          <input id="cooperPse" type="number" min="0" max="10" step="1" value="8">
+        </label>
+        <label>Fase do ciclo menstrual
+          <select id="faseCiclo">
+            <option value="folicular">Folicular (mais energia)</option>
+            <option value="ovulatoria">Ovulatória (pico de potência)</option>
+            <option value="lutea">Lútea (mais sensível à fadiga)</option>
+            <option value="menstrual">Menstrual (reduzir volume)</option>
+          </select>
         </label>
         <label>Início
           <input id="inicio" type="date">
@@ -248,195 +274,8 @@ input:focus, select:focus, textarea:focus {
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <script>
-    // ========== Utils ==========
-    const byId = id => document.getElementById(id);
-    const toSec = mmss => { const [m,s] = mmss.split(":").map(n=>parseInt(n||0,10)); return m*60 + (s||0); };
-    const toPace = sec => { const m=Math.floor(sec/60), s=Math.round(sec%60); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` };
-    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
-    function faseCor(f){ const cores=['#22c55e','#4ade80','#a3e635','#facc15','#fbbf24','#f59e0b','#f97316','#ea580c','#dc2626','#991b1b']; return cores[Math.min(Math.max(f-1,0),cores.length-1)]; }
-
-    // ========== Bancos ==========
-    const VEL = [
-      {fase:1,nome:'Sprint Curto com Recuperação Completa',duracao:50,dist:2.0,esforco:'8–9',desc:'15’ aquecimento + 12×100 m (95–100%) com 2–3’ pausa + 10’ leve'},
-      {fase:2,nome:'Pirâmide Progressiva de Sprint',duracao:50,dist:1.9,esforco:'8–9',desc:'10’ aquecimento + 60–80–100–120–100–80–60 m (95%) + 10’ leve'},
-      {fase:3,nome:'Sprint com Saída Controlada',duracao:50,dist:1.5,esforco:'9–10',desc:'15’ aquecimento + 8×60 m saída parada + 3×200 m (85%) + 10’ leve'},
-      {fase:4,nome:'Sprint + Pliometria Combinado',duracao:50,dist:2.0,esforco:'8',desc:'10’ aquecimento + 6×40 m (95%) + 3 circuitos pliométricos + 10’ leve'},
-      {fase:5,nome:'Sprint em Ladeira (Força-Velocidade)',duracao:50,dist:2.3,esforco:'9',desc:'15’ aquecimento + 10×80 m subida + 4×100 m plano + 10’ leve'},
-      {fase:6,nome:'Sprint Resistido (Elástico)',duracao:50,dist:1.6,esforco:'9',desc:'15’ aquecimento + 6×30 m resistido + 6×50 m livres + 10’ leve'},
-      {fase:7,nome:'Sprint Assistido (Leve Declive)',duracao:50,dist:1.8,esforco:'8',desc:'10’ aquecimento + 8×80 m descida suave + 10’ leve'},
-      {fase:8,nome:'Sprint com Técnica de Passada',duracao:50,dist:2.4,esforco:'8',desc:'15’ drills técnicos + 6×60 m progressivos + 3×100 m (90%) + 10’ leve'},
-      {fase:9,nome:'Sprint Intervalado Curto (40/20)',duracao:50,dist:3.0,esforco:'8',desc:'10’ aquecimento + 3 blocos de 6×40 m (40” forte/20” leve) + 10’ leve'},
-      {fase:10,nome:'Sprint de Reação (Estímulo Auditivo/Visual)',duracao:50,dist:1.5,esforco:'9',desc:'15’ aquecimento + 10×20 m reação + 6×60 m livres + 10’ leve'},
-    ];
-    const RES = [
-      {fase:1,nome:'Intervalado 300/300',duracao:50,dist:3.0,esforco:'8',desc:'15’ aquecimento + 5×300 m forte (90%) / 300 m leve + 10’ leve'},
-      {fase:2,nome:'Blocos 400 m Forte / 200 m Solto',duracao:50,dist:3.6,esforco:'8–9',desc:'12’ aquecimento + 6 blocos + 10’ leve'},
-      {fase:3,nome:'Billat 30/30 Clássico',duracao:50,dist:5.2,esforco:'8',desc:'10’ aquecimento + 3 blocos de 10×(30” forte/30” leve) + 10’ leve'},
-      {fase:4,nome:'Progressivo 600–400–200',duracao:50,dist:3.6,esforco:'9',desc:'15’ aquecimento + 3 séries (600 / 400 / 200 m) + 10’ leve'},
-      {fase:5,nome:'Pirâmide Inversa de Resistência',duracao:50,dist:3.2,esforco:'9',desc:'12’ aquecimento + 800–600–400–200 m + 3’ pausa + 10’ leve'},
-      {fase:6,nome:'Intervalado 200 m / 45\" pausa',duracao:50,dist:3.0,esforco:'8–9',desc:'10’ aquecimento + 12×200 m a 90% com 45\" trote + 10’ leve'},
-      {fase:7,nome:'Séries 500 m com Recuperação Ativa',duracao:50,dist:3.5,esforco:'8',desc:'15’ aquecimento + 6×500 m a 90% com 90\" leve + 10’ leve'},
-      {fase:8,nome:'Intervalado 300 m Forte + 100 m Leve',duracao:50,dist:3.2,esforco:'9',desc:'10’ aquecimento + 8×(300 m 95% + 100 m leve) + 3’ pausa + 10’ leve'},
-      {fase:9,nome:'Blocos Crescentes 200–300–400',duracao:50,dist:3.2,esforco:'8–9',desc:'12’ aquecimento + (4×200) + (3×300) + (2×400) + 10’ leve'},
-      {fase:10,nome:'Intervalado Extensivo 1’ Forte / 1’ Leve',duracao:50,dist:5.0,esforco:'8',desc:'10’ aquecimento + 4 blocos de 6×(1’ forte/1’ leve) + 10’ leve'},
-    ];
-    const POT = [
-      {fase:1,nome:'Sprint em Subida + Pliometria',duracao:50,dist:null,esforco:'9',desc:'15’ aquecimento + 8×60 m subida (6%) + 3 circuitos pliométricos (saltos caixa + unilaterais + skipping) + 10’ leve'},
-      {fase:2,nome:'Sprint Resistido (Cinto/Elástico/Trenó)',duracao:50,dist:null,esforco:'9–10',desc:'15’ aquecimento + 6×30 m resistido + 6×50 m livres (90%) + 10’ leve'},
-      {fase:3,nome:'Pliometria Horizontal + Corrida Explosiva',duracao:50,dist:null,esforco:'8',desc:'10’ aquecimento + 3 blocos (10 saltos horizontais + 60 m sprint) com 2’ pausa + 10’ leve'},
-      {fase:4,nome:'Corrida com Paradas e Retomadas',duracao:50,dist:null,esforco:'8',desc:'12’ aquecimento + 3 blocos de 6×(40 m acelera / 10 m para / retoma) + 10’ leve'},
-      {fase:5,nome:'Sprint com Carga Parcial (Colete/5%)',duracao:50,dist:null,esforco:'8–9',desc:'15’ aquecimento + 10×60 m com leve sobrecarga + 2’ pausa + 10’ leve'},
-      {fase:6,nome:'Circuito de Força Explosiva (Funcional)',duracao:50,dist:null,esforco:'8',desc:'10’ aquecimento + 3 circuitos: kettlebell swing 10x + salto agachado 10x + corrida 40 m + 2’ pausa + 10’ leve'},
-      {fase:7,nome:'Sprint com Mudança de Direção',duracao:50,dist:null,esforco:'8',desc:'10’ aquecimento + 4 blocos de 6 sprints (20 m ida/volta) com 90” pausa + 10’ leve'},
-      {fase:8,nome:'Potência Cíclica (Fartlek Explosivo)',duracao:50,dist:null,esforco:'8',desc:'10’ leve + 4×4’ (20” forte / 40” moderado) + 3’ pausa + 10’ leve'},
-      {fase:9,nome:'Treino Contrastado (Cargas + Corrida)',duracao:50,dist:null,esforco:'9',desc:'10’ aquecimento + (agachamento 6 rep 60%1RM → sprint 40 m) × 6 com 2’ pausa + 10’ leve'},
-      {fase:10,nome:'Sprint com Passadas Longas (Overspeed)',duracao:50,dist:null,esforco:'8–9',desc:'15’ aquecimento + 6×100 m amplitude máxima (90%) + 2’ pausa + 10’ leve'},
-    ];
-
-    // ========== Progressão com memória ==========
-    const getFase = tipo => parseInt(localStorage.getItem(`fase_${tipo}`) || 1, 10);
-    const setFase = (tipo,fase) => localStorage.setItem(`fase_${tipo}`, Math.min(fase,10));
-    function pickSeq(arr, tipo){ let f=getFase(tipo); if(f>arr.length) f=arr.length; const treino=arr[f-1]; setFase(tipo, Math.min(f+1,10)); return treino; }
-    function exibirFasesAtuais(){ const items=[{tipo:'VEL',nome:'Velocidade'},{tipo:'RES',nome:'Resistência'},{tipo:'POT',nome:'Potência'}].map(({tipo,nome})=>{ const f=getFase(tipo); const cor=faseCor(f); return `<span style="color:${cor};font-weight:600">${nome} – Fase ${f}</span>`; }); byId('fasesInfo').innerHTML=items.join(' | '); }
-    function resetarFases(){ ['VEL','RES','POT'].forEach(k=>localStorage.removeItem(`fase_${k}`)); exibirFasesAtuais(); alert('Progressão reiniciada com sucesso!'); }
-
-    // ========== Feedback sonoro/visual ==========
-    function playFeedback(buttonId){ const snd=byId('clickSound'); const btn=byId(buttonId); if(snd){ snd.volume=.3; const p=snd.play(); if(p!==undefined){ p.catch(()=>console.log('🔇 Som bloqueado.')) } } if(btn){ btn.classList.add('pulse'); setTimeout(()=>btn.classList.remove('pulse'),300); } }
-
-    // ========== Gráfico ==========
-    let chart;
-
-    // ========== Gerar plano ==========
-    function gerarPlano(){
-      // Entrada
-      const perfil = byId('perfil').value;
-      const distProva = parseFloat(byId('distProva').value);
-      const semana = parseInt(byId('semana').value,10);
-      const esforco = parseInt(byId('esforco').value,10);
-      const treinos = parseInt(byId('treinosSemana').value,10);
-      const ritmoBase = toSec(byId('ritmoMedio').value);
-
-      // Ritmo ajustado (esforço)
-      let fator=1; if(esforco>=9) fator=1.10; else if(esforco>=7) fator=1.05; else if(esforco<=2) fator=0.90; else if(esforco<=4) fator=0.95; const ritmoAjust = ritmoBase*fator;
-
-      // Volume máximo (perfil)
-      let fMax = perfil==='iniciante'?1.5: perfil==='intermediario'?2.0:2.5; const volMaxKm = distProva*fMax;
-
-      // Progressão 12s (pico 8), choque 3/7, recuperação 4/8
-      const pico=8; let perc=semana/pico; if(perc>1) perc=1-((semana-pico)/(12-pico)); perc=Math.max(0.6,perc); let volSemKm=volMaxKm*perc; if(semana===3||semana===7) volSemKm*=1.1; if(semana===4||semana===8) volSemKm*=0.8;
-
-      const tempoTotalMin = Math.round(volSemKm*(ritmoAjust/60));
-      byId('kVolMax').textContent=`${volMaxKm.toFixed(1)} km`;
-      byId('kVolSug').textContent=`${volSemKm.toFixed(1)} km`;
-      byId('kTempo').textContent=`${tempoTotalMin} min`;
-      byId('kRitmo').textContent=`${toPace(ritmoAjust)}/km`;
-
-      // Slots e prioridades
-      const dias=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
-      let slots=treinos; let vel=1,res=1,pot=0,prePot=0; if(perfil==='intermediario'){vel=1;res=2;pot=(semana%2===0?1:0)} if(perfil==='avancado'){vel=2;res=2;pot=(semana%2===0?1:0);prePot=1} if(perfil==='iniciante'){pot=(semana%2===0?1:0)}
-
-      let plan=[]; function pushSess(tipo,obj){ if(slots>0){ plan.push({tipo,...obj}); slots--; } }
-
-      if(prePot && slots>0){ pushSess('Potência Pré-treino',{nome:'Potência Pré-treino (técnica + drills)',duracao:25,dist:null,esforco:'6–7',desc:'10’ mobilidade + 6×30” bounding/skip A + 6×20 m aceleração + 5’ leve'}); prePot--; }
-      for(let i=0;i<vel;i++){ pushSess('Velocidade', pickSeq(VEL,'VEL')); }
-      for(let i=0;i<res;i++){ pushSess('Resistência de Velocidade', pickSeq(RES,'RES')); }
-      for(let i=0;i<pot;i++){ pushSess('Potência', pickSeq(POT,'POT')); }
-      while(slots>0){ const easyKm=Math.max(4,(volSemKm*0.12)); plan.push({tipo:'Rodagem/Regenerativo',nome:'Rodagem confortável',duracao:Math.round(easyKm*(ritmoAjust/60)),dist:parseFloat(easyKm.toFixed(1)),esforco:'4–6',desc:'Respiração nasal, técnica solta e cadência confortável.'}); slots--; }
-
-      // Normalização de volume
-      const distTotalPlanKm = plan.reduce((s,p)=> s + (p.dist||0), 0); const fatorDistrib = distTotalPlanKm>0 ? volSemKm/distTotalPlanKm : 1; plan = plan.map(p=>{ const d=p.dist? parseFloat((p.dist*fatorDistrib).toFixed(1)) : null; const t=d? Math.round(d*(ritmoAjust/60)) : p.duracao; return {...p,dist:d,duracao:t}; });
-
-      // Fases atuais
-      exibirFasesAtuais();
-
-      // Tabela
-      const tbl=document.createElement('table'); tbl.innerHTML=`<thead><tr><th>Dia</th><th>Tipo</th><th>Treino</th><th>Duração</th><th>Distância</th><th>Esforço</th><th>Descrição</th></tr></thead>`; const tb=document.createElement('tbody'); plan.forEach((p,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${dias[i]||'-'}</td><td>${p.tipo}</td><td>${p.nome}</td><td>${p.duracao} min</td><td>${p.dist? p.dist+' km':'—'}</td><td>${p.esforco}</td><td>${p.desc}</td>`; tb.appendChild(tr); }); tbl.appendChild(tb); const wrap=byId('tabelaWrap'); wrap.innerHTML=''; wrap.appendChild(tbl);
-
-      // Cards
-      const cards=byId('cardsWrap'); cards.innerHTML=''; plan.forEach((p,i)=>{ const c=document.createElement('div'); c.className='mini-card'; c.id='card-'+i; const fLabel = (p.tipo.startsWith('Velocidade')?'VEL':p.tipo.startsWith('Resistência')?'RES':p.tipo.startsWith('Potência')?'POT':null); const f = fLabel? getFase(fLabel) : 1; const cor=faseCor(Math.max(f-1,1)); c.style.borderTop=`3px solid ${cor}`; c.innerHTML=`<h4>${p.tipo}</h4><div class="tag">${p.nome}</div><p style="margin:8px 0 6px"><b>Duração:</b> ${p.duracao} min • <b>Distância:</b> ${p.dist? p.dist+' km':'—'} • <b>Esforço:</b> ${p.esforco}</p><p style="margin:0">${p.desc}</p>`; cards.appendChild(c); });
-
-      // Gráfico (FIX: usa volMaxKm já declarado)
-      const volumeSemanas=[]; const intensidadeSemanas=[]; 
-      for(let s=1;s<=12;s++){
-        let pc=s/pico; if(pc>1) pc=1-((s-pico)/(12-pico)); pc=Math.max(0.6,pc);
-        let v=volMaxKm*pc; if(s===3||s===7)v*=1.1; if(s===4||s===8)v*=0.8;
-        volumeSemanas.push(parseFloat(v.toFixed(1)));
-        intensidadeSemanas.push(s<4?5:s<8?7:s<11?8.5:7.5);
-      }
-      if(chart) chart.destroy();
-      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-      const corTexto = prefersLight ? '#1e293b' : '#e5e7eb';
-      chart = new Chart(byId('grafico'),{ type:'line', data:{ labels:Array.from({length:12},(_,i)=>`S${i+1}`), datasets:[ {label:'Volume (km)', data:volumeSemanas, borderColor:'#EFBDA6', backgroundColor:'rgba(239,189,166,0.25)', yAxisID:'y1', tension:.3}, {label:'Intensidade (1–10)', data:intensidadeSemanas, borderColor:'#335953', backgroundColor:'rgba(51,89,83,0.25)', yAxisID:'y2', tension:.3} ] }, options:{ responsive:true, maintainAspectRatio:false, scales:{ y1:{type:'linear',position:'left',title:{display:true,text:'Volume (km)'}}, y2:{type:'linear',position:'right',title:{display:true,text:'Intensidade'},grid:{drawOnChartArea:false}} }, plugins:{ legend:{ labels:{ color:corTexto } } }, color:corTexto } });
-    }
-
-    // ========== Exportações ==========
-    async function exportarPDF(){ const { jsPDF } = window.jspdf; const doc=new jsPDF({unit:'pt',format:'a4'}); const margin=36; let y=margin; doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text('Plano Semanal – MyFlowLife', margin, y); y+=18; const fasesLine=['VEL','RES','POT'].map(k=>{const nm=k==='VEL'?'Velocidade':k==='RES'?'Resistência':'Potência'; const f=getFase(k); return `${nm} – F${f}`}).join(' | '); doc.setTextColor(204,106,90); doc.text(fasesLine, margin, y); y+=14; doc.setTextColor(0,0,0); doc.setFont('helvetica',''); doc.setFontSize(11); doc.text(`Perfil: ${byId('perfil').value} • Distância-alvo: ${byId('distProva').value} km • Semana: ${byId('semana').value}`, margin, y); y+=14; doc.text(`Volume: ${byId('kVolSug').textContent} • Tempo: ${byId('kTempo').textContent} • Ritmo: ${byId('kRitmo').textContent}`, margin, y); y+=22; const table=byId('tabelaWrap').querySelector('table'); if(!table){ alert('Gere o plano antes de exportar.'); return; } const rows=[...table.querySelectorAll('tbody tr')].map(tr=>[...tr.children].map(td=>td.textContent)); const headers=[...table.querySelectorAll('thead th')].map(th=>th.textContent); doc.setFont('helvetica','bold'); let x=margin; const colW=[70,110,150,80,80,60,170]; headers.forEach((h,i)=>{ doc.text(h,x,y); x+=colW[i]; }); y+=14; doc.setFont('helvetica',''); rows.forEach(r=>{ x=margin; if(y>780){ doc.addPage(); y=margin; } r.forEach((cell,i)=>{ const txt=String(cell); const split=doc.splitTextToSize(txt, colW[i]-6); doc.text(split,x,y); x+=colW[i]; }); y+=18; }); doc.save('Plano_Semanal_MyFlowLife.pdf'); }
-
-    async function gerarCards(){ const wrap=byId('cardsWrap'); if(!wrap.children.length){ alert('Gere o plano antes de criar os cards.'); return; } let i=0; for(const el of wrap.children){ const canvas=await html2canvas(el,{backgroundColor:'#0b1620',scale:2}); const url=canvas.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download=`card_${++i}.png`; a.click(); } }
-
-    // ========== Testes ==========
-    function runTests(){ const out=byId('testsOut'); const results=[]; try{ results.push({name:'toSec 06:00 = 360', ok:toSec('06:00')===360}); }catch(e){ results.push({name:'toSec', ok:false, err:e}); } try{ results.push({name:'toPace 375s = 06:15', ok:toPace(375)==='06:15'}); }catch(e){ results.push({name:'toPace', ok:false, err:e}); } try{ results.push({name:'Campo #esforco existe', ok:!!byId('esforco')}); }catch(e){ results.push({name:'Campo esforco', ok:false, err:e}); }
-      try{ gerarPlano(); const hasRows=!!(byId('tabelaWrap').querySelector('tbody tr')); results.push({name:'gerarPlano produz tabela', ok:hasRows}); }catch(e){ results.push({name:'gerarPlano', ok:false, err:e}); }
-      // Novos testes: execução dupla e perfis
-      try{ gerarPlano(); results.push({name:'gerarPlano pode rodar 2x sem erro', ok:true}); }catch(e){ results.push({name:'gerarPlano repetido', ok:false, err:e}); }
-      try{ const dist=10; byId('distProva').value=dist; byId('perfil').value='intermediario'; gerarPlano(); const vm=parseFloat(byId('kVolMax').textContent); results.push({name:'Perfil intermediário = 2x distância', ok: Math.abs(vm - (2*dist))<0.01 }); }catch(e){ results.push({name:'Perfil intermediário cálculo volMax', ok:false, err:e}); }
-      out.innerHTML = results.map(r=>`<div class="${r.ok?'ok':'bad'}">${r.ok?'✔':'✖'} ${r.name}${r.err?' — '+r.err:''}</div>`).join(''); }
-
-    // ========== Splash + som (toca só 1ª vez) ==========
-    window.addEventListener('load', ()=>{
-      const b = byId('btnPremium'); b.style.opacity = window.scrollY > 50 ? 1 : 0.85;
-      const splash = byId('splashScreen'); const sound = byId('splashSound'); const played = localStorage.getItem('splashSoundPlayed');
-      if(!played && sound){ sound.volume=.25; const p=sound.play(); if(p!==undefined){ p.catch(()=>console.log('🔇 Som do splash bloqueado.')); } localStorage.setItem('splashSoundPlayed','true'); }
-      setTimeout(()=> splash && splash.remove(), 3200);
-    });
-
-  <!-- Sons opcionais (seguro mesmo se não existirem ainda) -->
-  <audio id="splashSound" src="https://cdn.myflowlife.com/sounds/flow_inspire.mp3" preload="auto"></audio>
-  <audio id="clickSound" src="https://cdn.myflowlife.com/sounds/flow_click.mp3" preload="auto"></audio>
-
-  <!-- ======================================
-       JS principal — versão segura p/ GitHub Pages
-       ====================================== -->
-  <script>
-    console.log("⚡ Verificando app.js...");
-
-    // Teste rápido: força remoção do splash se o app falhar
-    window.addEventListener("load", () => {
-      setTimeout(() => {
-        const splash = document.getElementById("splash");
-        if (splash) {
-          splash.classList.add("hidden");
-          console.log("💡 Splash forçado a desaparecer.");
-        }
-      }, 1200);
-    });
-  </script>
-
-<!-- Importação correta para GitHub Pages -->
-<script src="https://carolinebarros1010.github.io/myflowlife/geradordecorrida/app.js" defer></script>
-
-<!-- Registro do Service Worker e fallback do Splash -->
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js")
-      .then(() => console.log("✅ SW V24 ativo e funcional"))
-      .catch(err => console.warn("SW falhou:", err));
-  }
-
-  // Fallback: se algo travar, splash desaparece de qualquer jeito
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-      const splash = document.getElementById("splash");
-      if (splash) {
-        splash.classList.add("hidden");
-        console.log("💡 Splash forçado a desaparecer.");
-      }
-    }, 1200);
-  });
-</script>
+  <script src="./app.js" defer></script>
 
 
 </body>
 </html>
-
