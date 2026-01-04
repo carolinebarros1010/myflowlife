@@ -70,8 +70,7 @@ function persistPerfil(perfil) {
   );
 
   // ✅ segurança: se não tiver personal, não deixa modo personal ficar travado
-  const hasPersonal = String(acessos.personal === true) === "true";
-  if (!hasPersonal) {
+    if (!hasPersonal) {
     localStorage.setItem("femflow_mode_personal", "false");
   } else {
     // se ainda não existe, inicializa como false (não ativa sozinho)
@@ -117,7 +116,7 @@ function normalizarNivel(raw) {
 function inferirCategoria(enfase) {
   if (!enfase) return "esportes";
   if (enfase.startsWith("followme_")) return "followme";
-  if (enfase.startsWith("personal")) return "personal";
+ if (enfase === "personal") return "personal";
   if (enfase.startsWith("casa")) return "casa";
   if (MUSCULAR_ENFASES.has(enfase)) return "muscular";
   return "esportes";
@@ -129,7 +128,8 @@ function podeAcessar(enfase, perfil) {
   const categoria = inferirCategoria(enfase);
   const produto = (perfil.produto || "").toLowerCase();
   const ativa = !!perfil.ativa;
-  const personal = !!perfil.personal;
+ const personal = localStorage.getItem("femflow_has_personal") === "true";
+
 
   if (!ativa) return false;
 
