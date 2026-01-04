@@ -558,6 +558,13 @@ function toast(msg){
 window.addEventListener('DOMContentLoaded', ()=>{
   console.log("⚡️ Gerador de Corrida V24 conectado");
 
+  const id = localStorage.getItem("femflow_id");
+  const hasPersonal = localStorage.getItem("femflow_has_personal") === "true";
+  if (!id || !hasPersonal) {
+    window.location.href = "../index.html";
+    return;
+  }
+
   const nivelEl = byId('nivel');
   const faseEl = byId('faseCiclo');
   const diaCicloEl = byId('diaCiclo');
