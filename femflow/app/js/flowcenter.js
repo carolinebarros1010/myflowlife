@@ -231,7 +231,7 @@ async function initFlowCenter() {
 
   document.getElementById("toEndurance").onclick = () => {
     const id = localStorage.getItem("femflow_id");
-    if (id) FEMFLOW.router(`treinoendurance/${id}.html`);
+    if (id) FEMFLOW.router("geradordecorrida/index.html");
     else location.href = "https://www.myflowlife.com.br/#ofertas";
   };
 
