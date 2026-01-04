@@ -176,6 +176,20 @@ h3 {
   transform: translateY(-2px);
 }
 
+.tool:disabled,
+.tool[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.tool:disabled:hover,
+.tool[disabled]:hover {
+  background: rgba(255,255,255,0.75);
+  color: var(--terracota);
+  transform: none;
+}
+
 /* ==========================================================
    DEBUG PANEL (opcional)
 ========================================================== */
@@ -294,4 +308,3 @@ body.personal-mode #tituloApp::after {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-
