@@ -324,6 +324,25 @@ function pickTreinoUnico(categoria, usados) {
 }
 
 /* ======= GERAÇÃO DE MESOCICLO (30 dias) ======= */
+let mesocicloPlan = [];
+let semanaAtiva = 0;
+
+function atualizarTabsSemana() {
+  const tabs = document.querySelectorAll(".week-tab");
+  tabs.forEach(tab => {
+    const weekIndex = Number(tab.dataset.week || 0);
+    tab.setAttribute("aria-pressed", weekIndex === semanaAtiva ? "true" : "false");
+  });
+}
+
+function renderSemanaAtiva() {
+  if (!mesocicloPlan.length) return;
+  const planoSemana = mesocicloPlan.filter(item => item.semana === semanaAtiva);
+  renderSemana(planoSemana);
+  plotSemana(planoSemana);
+  atualizarTabsSemana();
+}
+
 function gerarMesociclo() {
   console.log("⚙️ Iniciando geração do mesociclo (30 dias)...");
 
@@ -463,6 +482,8 @@ function gerarMesociclo() {
 
     plano.push({
       dia: `${diaAbrev.toUpperCase()} • ${dataLabel}`,
+      semana: weekIndex,
+      dataISO: data.toISOString().slice(0, 10),
       nome: treino.nome,
       tipo: treinoLabels[categoria] || treino.tipo,
       fase: faseInfo.fase,
@@ -480,8 +501,9 @@ function gerarMesociclo() {
   }
 
   // === 5. Renderização ===
-  renderSemana(plano);
-  plotSemana(plano);
+  mesocicloPlan = plano;
+  semanaAtiva = 0;
+  renderSemanaAtiva();
   toast("Mesociclo gerado com sucesso!");
   playFeedback("success");
 
@@ -636,6 +658,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   const btnInfoTeste = byId('btnInfoTeste');
   const modalTeste = byId('modalTeste');
   const btnFecharModal = byId('btnFecharModal');
+  const weekTabs = document.querySelectorAll(".week-tab");
 
   if (btnGerarPlano) {
     btnGerarPlano.addEventListener('click', gerarMesociclo);
@@ -643,6 +666,14 @@ window.addEventListener('DOMContentLoaded', ()=>{
   } else {
     console.warn("⚠️ Botão 'btnGerarPlano' não encontrado");
   }
+
+  weekTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      const weekIndex = Number(tab.dataset.week || 0);
+      semanaAtiva = weekIndex;
+      renderSemanaAtiva();
+    });
+  });
 
   if (btnInfoTeste && modalTeste) {
     btnInfoTeste.addEventListener('click', () => {

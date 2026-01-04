@@ -100,6 +100,35 @@ body { background: var(--bg); color: var(--text); }
   color: var(--text);
 }
 
+/* ====== Tabs de semana */
+.week-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: .5rem 0 1rem;
+}
+
+.week-tab {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  padding: .45rem .75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.week-tab[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+.week-tab:hover {
+  background: var(--card-soft);
+}
+
 /* ====== Form */
 .grid {
   display: grid;
