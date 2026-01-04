@@ -82,6 +82,24 @@ body { background: var(--bg); color: var(--text); }
 }
 .muted { color: var(--muted); }
 
+.panel-inner {
+  margin-top: 1rem;
+  background: #faf7f5;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text);
+}
+
 /* ====== Form */
 .grid {
   display: grid;
@@ -138,6 +156,24 @@ select:focus {
   background: var(--danger);
   border-color: #d86f6f;
   color: #fff;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-icon:hover {
+  background: var(--card-soft);
 }
 
 /* ====== Grid tipo Netflix */
@@ -248,4 +284,41 @@ canvas { width: 100%; height: 320px; }
 @keyframes spin {
   from { transform: rotate(-10deg) scale(.98); }
   to { transform: rotate(10deg) scale(1.02); }
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(46, 46, 46, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+  z-index: 80;
+}
+
+.modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: #faf7f5;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  max-width: 420px;
+  width: calc(100% - 2rem);
+  color: var(--text);
+  box-shadow: 0 20px 40px rgba(46, 46, 46, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-bottom: .5rem;
 }

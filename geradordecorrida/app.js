@@ -425,10 +425,12 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
   // Conectar event listeners aos botões com IDs corretos
   const btnGerarPlano = byId('btnGerarPlano');
-  const btnRodarTestes = byId('btnRodarTestes');
   const btnExportarPDF = byId('btnExportarPDF');
   const btnGerarCards = byId('btnGerarCards');
   const btnResetar = byId('btnResetar');
+  const btnInfoTeste = byId('btnInfoTeste');
+  const modalTeste = byId('modalTeste');
+  const btnFecharModal = byId('btnFecharModal');
 
   if (btnGerarPlano) {
     btnGerarPlano.addEventListener('click', gerarPlano);
@@ -437,11 +439,27 @@ window.addEventListener('DOMContentLoaded', ()=>{
     console.warn("⚠️ Botão 'btnGerarPlano' não encontrado");
   }
 
-  if (btnRodarTestes) {
-    btnRodarTestes.addEventListener('click', runTests);
-    console.log("✅ Evento conectado: btnRodarTestes");
-  } else {
-    console.warn("⚠️ Botão 'btnRodarTestes' não encontrado");
+  if (btnInfoTeste && modalTeste) {
+    btnInfoTeste.addEventListener('click', () => {
+      modalTeste.classList.add('is-open');
+      modalTeste.setAttribute('aria-hidden', 'false');
+    });
+  }
+
+  if (btnFecharModal && modalTeste) {
+    btnFecharModal.addEventListener('click', () => {
+      modalTeste.classList.remove('is-open');
+      modalTeste.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  if (modalTeste) {
+    modalTeste.addEventListener('click', (event) => {
+      if (event.target === modalTeste) {
+        modalTeste.classList.remove('is-open');
+        modalTeste.setAttribute('aria-hidden', 'true');
+      }
+    });
   }
 
   if (btnExportarPDF) {

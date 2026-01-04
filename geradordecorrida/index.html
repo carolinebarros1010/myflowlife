@@ -18,7 +18,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    :root { --bg:#FAF7F5; --panel:#F3C1C1; --ink:#2E2E2E; --muted:#6F6F6F; --teal:#335953; --terracota:#D1A697; --pessego:#CBB1E6; --card:#F3C1C1; }
+    :root { --bg:#FAF7F5; --panel:#F3C1C1; --ink:#2E2E2E; --muted:#6F6F6F; --teal:#335953; --terracota:#D1A697; --pessego:#CBB1E6; --card:#F3C1C1; --border:#D1A697; }
     html,body{ background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,Helvetica,Arial,sans-serif; margin:0; overflow-x:hidden; }
     *{ transition:background .3s ease,color .3s ease,border .3s ease }
 
@@ -58,7 +58,7 @@
 
     /* ===== Layout principal ===== */
     .wrap{ max-width:1200px; margin:auto; padding:22px; margin-top:70px }
-    .brand{ font-weight:900; font-size:1.3rem; letter-spacing:.3px }
+    .brand{ font-weight:900; font-size:1.3rem; letter-spacing:.3px; color:var(--ink) }
     .sub{ color:var(--muted); margin:0 0 16px }
     .grid{ display:grid; gap:16px }
     .row,.row3{ display:grid; gap:10px }
@@ -66,11 +66,11 @@
     .row3{ grid-template-columns:repeat(3,1fr) }
     @media (max-width:900px){ .grid{ grid-template-columns:1fr } .row,.row3{ grid-template-columns:1fr } .brand{ font-size:1.1rem } }
 
-    .card{ background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:18px; overflow-x:auto }
+    .card{ background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.35)); border:1px solid var(--border); border-radius:16px; padding:18px; overflow-x:auto }
     label{ display:block; font-size:.85rem; margin:8px 0 6px; color:var(--muted) }
-    input,select,button{ width:100%; box-sizing:border-box; background:#0b1620; color:var(--ink); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 12px; font-size:14px; outline:none }
-    input:focus,select:focus{ border-color:var(--teal) }
-    .btn{ cursor:pointer; background:linear-gradient(90deg,var(--teal),var(--terracota)); border:none; font-weight:700; border-radius:10px; padding:10px 14px; min-width:150px }
+    input,select,button{ width:100%; box-sizing:border-box; background:#FAF7F5; color:var(--ink); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:14px; outline:none }
+    input:focus,select:focus{ border-color:var(--teal); box-shadow:0 0 0 3px rgba(51,89,83,.15) }
+    .btn{ cursor:pointer; background:linear-gradient(90deg,var(--teal),var(--terracota)); border:none; font-weight:700; border-radius:10px; padding:10px 14px; min-width:150px; color:#fff }
     .btn:hover{ opacity:.9 }
 
     /* Ações e divisórias */
@@ -80,17 +80,17 @@
     @media (prefers-color-scheme: light){ section.card:nth-of-type(2){ border-top:1px solid rgba(0,0,0,.1) } }
 
     .kpi{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-top:8px }
-    .kpi>div{ background:#0b1620; border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:12px; text-align:center }
+    .kpi>div{ background:#FAF7F5; border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center }
     .kpi .t{ display:block; color:var(--muted); font-size:.75rem }
     .kpi .v{ display:block; font-size:1.1rem; font-weight:800 }
 
     table{ width:100%; border-collapse:separate; border-spacing:0 8px; min-width:700px }
-    th,td{ text-align:left; padding:10px; background:#0b1620; border-top:1px solid rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.06) }
+    th,td{ text-align:left; padding:10px; background:#FAF7F5; border-top:1px solid var(--border); border-bottom:1px solid var(--border); color:var(--ink) }
     #tabelaWrap{ overflow-x:auto }
 
     .card-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px }
     @media (max-width:400px){ .card-grid{ grid-template-columns:1fr } }
-    .mini-card{ background:#0b1620; border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:14px }
+    .mini-card{ background:#FAF7F5; border:1px solid var(--border); border-radius:14px; padding:14px }
     .mini-card h4{ margin:0 0 6px }
     .tag{ display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.12); font-size:.72rem; color:var(--pessego) }
     canvas{ width:100%!important; height:200px!important }
@@ -148,13 +148,13 @@ input:focus, select:focus, textarea:focus {
       <defs>
         <!-- Gradiente animado compartilhado -->
         <linearGradient id="gradFlow" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#EFBDA6">
+          <stop offset="0%" stop-color="#D1A697">
             <animate attributeName="offset" values="-0.2;1.2" dur="2.5s" repeatCount="indefinite" />
           </stop>
           <stop offset="50%" stop-color="#FFFFFF">
             <animate attributeName="offset" values="0;1" dur="2.5s" repeatCount="indefinite" />
           </stop>
-          <stop offset="100%" stop-color="#CC6A5A">
+          <stop offset="100%" stop-color="#CBB1E6">
             <animate attributeName="offset" values="0.8;-0.2" dur="2.5s" repeatCount="indefinite" />
           </stop>
         </linearGradient>
@@ -162,12 +162,12 @@ input:focus, select:focus, textarea:focus {
 
       <!-- Texto principal -->
       <text x="0" y="42" font-size="38" font-weight="700" font-family="Poppins, sans-serif" fill="url(#gradFlow)">
-        MyFlowLife
+        FemFlow
       </text>
 
       <!-- Subtítulo “Potência Sustentável” com mesmo gradiente -->
       <text x="0" y="80" font-size="22" font-weight="600" font-family="Poppins, sans-serif" fill="url(#gradFlow)">
-        Potência Sustentável
+        Treinamento Feminino
       </text>
     </svg>
   </div>
@@ -178,7 +178,7 @@ input:focus, select:focus, textarea:focus {
   <!-- Topo fixo com Premium -->
   <div class="topbar">
     <span class="brand">🏃‍♀️ Endurance FemFlow</span>
-    <a href="https://www.myflowlife.com.br/premium" id="btnPremium" target="_blank" title="Acesse o Plano Premium MyFlowLife" class="btn-app">💎 COMPRE O PLANO PREMIUM</a>
+    <a href="https://www.myflowlife.com.br/premium" id="btnPremium" target="_blank" title="Acesse o Plano Premium MyFlowLife" class="btn-app">💎 FEMFLOW CENTER</a>
   </div>
 
   <div class="container">
@@ -191,65 +191,88 @@ input:focus, select:focus, textarea:focus {
     <!-- ENTRADAS -->
     <section class="panel">
       <h2>Entradas</h2>
-      <p class="muted">Realize um teste de 12 min sem parar na modalidade pretendida e insira as informações abaixo (distância em metros e PSE 0 a 10).</p>
-      <div class="grid">
-        <label>Perfil
-          <select id="nivel">
-            <option value="iniciante">Iniciante</option>
-            <option value="intermediario">Intermediário</option>
-            <option value="avancado">Avançado</option>
-          </select>
-        </label>
-        <label>Distância da prova (km)
-          <input id="distProva" type="number" min="3" value="10">
-        </label>
-        <label>Dias da semana
-          <input id="dias" value="ter,qui,sab,dom">
-        </label>
-        <label>Treinos por semana
-          <input id="semanal" type="number" min="3" max="6" value="4">
-        </label>
-        <label>Distância no teste Cooper (12 min, em metros)
-          <input id="cooperDist" type="number" min="200" step="10" value="3000">
-        </label>
-        <label>Modalidade
-          <select id="modalidade">
-            <option value="corrida">Corrida</option>
-            <option value="bike">Ciclismo</option>
-            <option value="remo">Remo ergômetro</option>
-            <option value="natacao">Natação (piscina)</option>
-            <option value="natacao_aberta">Natação em águas abertas</option>
-            <option value="eliptico">Elíptico</option>
-            <option value="caminhada">Caminhada</option>
-            <option value="trilha">Trail/Trilha</option>
-            <option value="aqua_run">Aqua run</option>
-            <option value="esqui">Esqui ergômetro</option>
-          </select>
-        </label>
-        <label>Zona / PSE principal
-          <input id="zona" value="Z2 / PSE 5-6">
-        </label>
-        <label>PSE do teste Cooper (0–10)
-          <input id="cooperPse" type="number" min="0" max="10" step="1" value="8">
-        </label>
-        <label>Fase do ciclo menstrual
-          <select id="faseCiclo">
-            <option value="folicular">Folicular (mais energia)</option>
-            <option value="ovulatoria">Ovulatória (pico de potência)</option>
-            <option value="lutea">Lútea (mais sensível à fadiga)</option>
-            <option value="menstrual">Menstrual (reduzir volume)</option>
-          </select>
-        </label>
-        <label>Início
-          <input id="inicio" type="date">
-        </label>
+      <div class="panel panel-inner">
+        <div class="panel-header">
+          <h3>Teste</h3>
+          <button id="btnInfoTeste" class="btn-icon" type="button" aria-label="Informações do teste">i</button>
+        </div>
+        <p class="muted">Realize um teste de 12 min sem parar na modalidade pretendida e insira as informações abaixo (distância em metros e PSE 0 a 10).</p>
+        <div class="grid">
+          <label>Distância no teste Cooper (12 min, em metros)
+            <input id="cooperDist" type="number" min="200" step="10" value="3000">
+          </label>
+          <label>Modalidade do teste
+            <select id="modalidade">
+              <option value="corrida">Corrida</option>
+              <option value="bike">Ciclismo</option>
+              <option value="remo">Remo ergômetro</option>
+              <option value="natacao">Natação (piscina)</option>
+              <option value="natacao_aberta">Natação em águas abertas</option>
+              <option value="eliptico">Elíptico</option>
+              <option value="caminhada">Caminhada</option>
+              <option value="trilha">Trail/Trilha</option>
+              <option value="aqua_run">Aqua run</option>
+              <option value="esqui">Esqui ergômetro</option>
+            </select>
+          </label>
+          <label>Zona do teste / PSE principal
+            <input id="zona" value="Z2 / PSE 5-6">
+          </label>
+          <label>PSE do teste Cooper (0–10)
+            <input id="cooperPse" type="number" min="0" max="10" step="1" value="8">
+          </label>
+        </div>
+      </div>
+
+      <div class="panel panel-inner">
+        <div class="panel-header">
+          <h3>Prova objetivo</h3>
+        </div>
+        <div class="grid">
+          <label>Perfil
+            <select id="nivel">
+              <option value="iniciante">Iniciante</option>
+              <option value="intermediario">Intermediário</option>
+              <option value="avancado">Avançado</option>
+            </select>
+          </label>
+          <label>Distância da prova (km)
+            <input id="distProva" type="number" min="3" value="10">
+          </label>
+          <label>Dias da semana
+            <input id="dias" value="ter,qui,sab,dom">
+          </label>
+          <label>Treinos por semana
+            <input id="semanal" type="number" min="3" max="6" value="4">
+          </label>
+          <label>Fase do ciclo menstrual
+            <select id="faseCiclo">
+              <option value="folicular">Folicular (mais energia)</option>
+              <option value="ovulatoria">Ovulatória (pico de potência)</option>
+              <option value="lutea">Lútea (mais sensível à fadiga)</option>
+              <option value="menstrual">Menstrual (reduzir volume)</option>
+            </select>
+          </label>
+          <label>Início
+            <input id="inicio" type="date">
+          </label>
+        </div>
       </div>
 
       <div class="actions" style="margin-top:1rem;">
         <button id="btnGerarPlano" class="btn primary">Gerar plano da semana</button>
-        <button id="btnRodarTestes" class="btn">Rodar testes</button>
       </div>
     </section>
+
+    <div id="modalTeste" class="modal" aria-hidden="true">
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTesteTitulo">
+        <div class="modal-header">
+          <h3 id="modalTesteTitulo">Como realizar o teste</h3>
+          <button class="btn-icon" id="btnFecharModal" type="button" aria-label="Fechar">×</button>
+        </div>
+        <p>Faça 12 minutos contínuos na modalidade escolhida, mantendo o melhor ritmo sustentável. Ao final, registre a distância em metros e a percepção de esforço (PSE 0–10).</p>
+      </div>
+    </div>
 
     <!-- RESULTADOS -->
     <section class="panel">
