@@ -195,21 +195,17 @@ async function initFlowCenter() {
   document.getElementById("toTrain").onclick = () => {
     const enfase = localStorage.getItem("femflow_enfase");
 
+    /* 🧭 PRIORIDADE ABSOLUTA — MODO PERSONAL */
+    if (personal) {
+      return FEMFLOW.router("treino.html");
+    }
+
     if (!enfase) {
       FEMFLOW.toast("Escolha um treino na Home 🌸");
       return FEMFLOW.router("home.html");
     }
 
     const freeOk = freeValido && freeEnfases.includes(enfase);
-
-    /* 🧭 PRIORIDADE ABSOLUTA — MODO PERSONAL */
-    if (personal) {
-      if (enfase.startsWith("followme_") && !freeOk) {
-        FEMFLOW.toast("FollowMe não incluso no seu plano.");
-        return FEMFLOW.router("home.html");
-      }
-      return FEMFLOW.router("treino.html");
-    }
 
     /* ✨ FOLLOWME */
     if (isFollow) {

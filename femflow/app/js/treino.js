@@ -102,9 +102,14 @@ const hasPersonal =
     const nivel    = perfil.nivel;
     let enfaseFinal = perfil.enfase || localStorage.getItem("femflow_enfase");
 
+    // 🔥 Personal nunca é ênfase
+    if (enfaseFinal === "personal") {
+      enfaseFinal = null;
+    }
+
     if (!enfaseFinal || enfaseFinal === "nenhuma") {
-  enfaseFinal = null;
-}
+      enfaseFinal = null;
+    }
 
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
@@ -112,9 +117,9 @@ const hasPersonal =
     console.log("🧠 ÊNFASE RECEBIDA DO BACKEND:", perfil.enfase);
     FEMFLOW.enfaseAtual = enfaseFinal;
 
-    if (!personalFinal && enfaseFinal === "personal") {
-      FEMFLOW.error("Ênfase inválida 'personal' bloqueada");
-      renderTreino([]);
+    if (!personalFinal && !enfaseFinal) {
+      FEMFLOW.toast("Escolha um treino na Home 🌸");
+      FEMFLOW.router("home.html");
       return;
     }
 
