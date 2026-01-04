@@ -829,29 +829,32 @@ function initSeriesProgress() {
       }, { once: true });
     }
 
+    const updateSerieProgress = (serieAtual) => {
+      progressEl.dataset.serieAtual = serieAtual;
+      progressEl.innerHTML = `Série <b>${serieAtual}</b> / ${total}`;
+
+      if (serieAtual === total) {
+        btnSerie.classList.add("done");
+      }
+    };
+
     /* ===============================
        CLICK → CONCLUIR SÉRIE
     =============================== */
     btnSerie.addEventListener("click", () => {
 
-      /* 🔹 AINDA NÃO CHEGOU NA ÚLTIMA SÉRIE */
-      if (atual < total - 1) {
+      /* 🔹 AVANÇA A CONTAGEM ATÉ A ÚLTIMA SÉRIE */
+      if (atual < total) {
         atual++;
-        progressEl.dataset.serieAtual = atual;
-        progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
-        return;
-      }
+        updateSerieProgress(atual);
 
-      /* 🔥 ENTROU NA ÚLTIMA SÉRIE → MOSTRA RP */
-      if (atual === total - 1 && exigeRP && !rpConcluido) {
-        atual++;
-        progressEl.dataset.serieAtual = atual;
-        progressEl.innerHTML = `Série <b>${atual}</b> / ${total}`;
+        /* 🔥 ENTROU NA ÚLTIMA SÉRIE → MOSTRA RP */
+        if (atual === total && exigeRP && !rpConcluido) {
+          rpWrap.classList.remove("hidden");
 
-        rpWrap.classList.remove("hidden");
-
-        btnSerie.textContent = "⚡ Executar Rest-Pause";
-        btnSerie.disabled = true;
+          btnSerie.textContent = "⚡ Executar Rest-Pause";
+          btnSerie.disabled = true;
+        }
 
         return;
       }
