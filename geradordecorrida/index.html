@@ -211,8 +211,33 @@ input:focus, select:focus, textarea:focus {
         <label>Ritmo base (min:seg/km)
           <input id="ritmoBase" value="05:30">
         </label>
+        <label>Modalidade
+          <select id="modalidade">
+            <option value="corrida">Corrida</option>
+            <option value="bike">Ciclismo</option>
+            <option value="remo">Remo ergômetro</option>
+            <option value="natacao">Natação (piscina)</option>
+            <option value="natacao_aberta">Natação em águas abertas</option>
+            <option value="eliptico">Elíptico</option>
+            <option value="caminhada">Caminhada</option>
+            <option value="trilha">Trail/Trilha</option>
+            <option value="aqua_run">Aqua run</option>
+            <option value="esqui">Esqui ergômetro</option>
+          </select>
+        </label>
+        <label>Zona / PSE principal
+          <input id="zona" value="Z2 / PSE 5-6">
+        </label>
         <label>Esforço do último treino (1–10)
           <input id="esforco" type="number" min="1" max="10" step="1" value="7">
+        </label>
+        <label>Fase do ciclo menstrual
+          <select id="faseCiclo">
+            <option value="folicular">Folicular (mais energia)</option>
+            <option value="ovulatoria">Ovulatória (pico de potência)</option>
+            <option value="lutea">Lútea (mais sensível à fadiga)</option>
+            <option value="menstrual">Menstrual (reduzir volume)</option>
+          </select>
         </label>
         <label>Início
           <input id="inicio" type="date">
