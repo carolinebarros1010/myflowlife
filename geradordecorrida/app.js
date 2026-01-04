@@ -110,12 +110,13 @@ function gerarPlano() {
 
   // === 1. Captura de campos ===
   const provaKmEl = byId('distProva');
-  const nivelEl = byId('perfil');
-  const nTreinosEl = byId('treinosSemana');
-  const ritmoEl = byId('ritmoMedio');
+  const nivelEl = byId('nivel');
+  const nTreinosEl = byId('semanal');
+  const ritmoEl = byId('ritmoBase');
+  const diasEl = byId('dias');
   const esforcoEl = byId('esforco');
 
-  if (!provaKmEl || !nivelEl || !nTreinosEl || !ritmoEl || !esforcoEl) {
+  if (!provaKmEl || !nivelEl || !nTreinosEl || !ritmoEl || !esforcoEl || !diasEl) {
     console.error("❌ Um ou mais campos de entrada não foram encontrados no HTML!");
     toast("Erro: campo não encontrado no formulário.");
     playFeedback("error");
@@ -126,6 +127,10 @@ function gerarPlano() {
   const nivel = nivelEl.value;
   const nTreinos = parseInt(nTreinosEl.value || 4, 10);
   const ritmoBaseSec = toSecPace(ritmoEl.value || "5:30");
+  const dias = diasEl.value
+    .split(",")
+    .map((d) => d.trim())
+    .filter(Boolean);
   const esforco = parseInt(esforcoEl.value || 7, 10);
 
   console.log(`📊 Dados recebidos → prova=${provaKm}km | nível=${nivel} | treinos=${nTreinos} | ritmo=${ritmoEl.value} | esforço=${esforco}`);
@@ -161,11 +166,15 @@ function gerarPlano() {
     if (distAcum + alvo > volMaxKm) alvo = Math.max(2, volMaxKm - distAcum);
 
     semana.push({
-      dia: `Dia ${i + 1}`,
+      dia: dias[i] ? dias[i][0].toUpperCase() + dias[i].slice(1) : `Dia ${i + 1}`,
       nome: treino.nome,
       tipo: treino.tipo,
       distKm: round2(alvo),
-      ritmo: paceStr(treino.leve ? ritmoLeve : ritmoForte),
+      ritmo: paceStr(
+        ["intensidade", "res_vel", "potencia"].includes(treino.tipo)
+          ? ritmoForte
+          : ritmoLeve
+      ),
       desc: treino.desc
     });
 
@@ -174,6 +183,7 @@ function gerarPlano() {
 
   // === 5. Renderização ===
   renderSemana(semana);
+  plotSemana(semana);
   toast("Plano gerado com sucesso!");
   playFeedback("success");
 
@@ -194,6 +204,7 @@ function renderSemana(semana){
     const el = document.createElement('article');
     el.className = "card";
     el.innerHTML = `
+      <div class="thumb"></div>
       <div class="body">
         <span class="badge">${t.dia}</span>
         <div class="title">${idx+1}. ${t.nome}</div>
@@ -233,7 +244,7 @@ function runTests(){
     ["paceStr 330 = 5:30", () => paceStr(330) === "5:30"],
     ["Seq vel avança", () => { const n=seq.vel; pickSequencial('vel'); return seq.vel===n+1; }],
     ["Sem var pace NaN", () => !isNaN(toSecPace("4:05"))],
-    ["Elementos existem", () => !!byId('distProva') && !!byId('nivel') && !!byId('semanal')]
+    ["Elementos existem", () => !!byId('distProva') && !!byId('nivel') && !!byId('semanal') && !!byId('ritmoBase') && !!byId('dias')]
   ];
   const fails = tests.filter(t => {
     try {
@@ -316,7 +327,10 @@ window.addEventListener('DOMContentLoaded', ()=>{
     btnResetar.addEventListener('click', ()=> {
       const grid = byId('card-grid');
       if (grid) grid.innerHTML=""; 
-      if(window.chart) chart.destroy(); 
+      if (chart) {
+        chart.destroy();
+        chart = null;
+      }
       toast("🗑️ Tudo limpo"); 
     });
     console.log("✅ Evento conectado: btnResetar");
@@ -337,4 +351,3 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.warn("⚠️ SW falhou:", err));
   });
 }
-

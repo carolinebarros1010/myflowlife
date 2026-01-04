@@ -114,6 +114,24 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  const pseEmojis = ["😴", "🙂", "🙂", "😌", "🙂", "😅", "😅", "😮‍💨", "😮‍💨", "🥵", "🥵"];
+
+  function atualizarEmojiPse(valor) {
+    if (!pseEmoji) return;
+    const idx = Math.max(0, Math.min(10, Number(valor) || 0));
+    pseEmoji.textContent = pseEmojis[idx];
+    if (pseEmojiValue) pseEmojiValue.textContent = String(idx);
+    pseEmoji.classList.remove("pse-emoji-bounce");
+    window.requestAnimationFrame(() => pseEmoji.classList.add("pse-emoji-bounce"));
+  }
+
+  if (pseInput) {
+    atualizarEmojiPse(pseInput.value);
+    pseInput.addEventListener("input", (event) => {
+      atualizarEmojiPse(event.target.value);
+    });
+  }
+
   /* ============================================================
      1️⃣ LISTENER ÚNICO — PERFIL PRONTO
   ============================================================ */
