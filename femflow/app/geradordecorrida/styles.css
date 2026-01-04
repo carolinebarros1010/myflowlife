@@ -192,8 +192,8 @@ select:focus {
   height: 32px;
   border-radius: 50%;
   border: 1px solid var(--border);
-  background: #fff;
-  color: #2e2e2e;
+  background: #cc6a5a;
+  color: #fff;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -202,7 +202,7 @@ select:focus {
 }
 
 .btn-icon:hover {
-  background: var(--card-soft);
+  background: #b85d4e;
 }
 
 /* ====== Grid tipo Netflix */
@@ -334,7 +334,7 @@ canvas { width: 100%; height: 320px; }
 }
 
 .modal-content {
-  background: #faf7f5;
+  background: #fff5ef;
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1rem 1.25rem;
