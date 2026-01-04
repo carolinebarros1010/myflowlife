@@ -294,6 +294,7 @@ initClusterTimers(); // 🔥 CLUSTER TIMER REAL
 initRestPause(); // ✅
 initSeriesProgress();
 initPeso();
+void initPesoPrefill();
 }
  /* ============================================================
      3) RENDER BOX
@@ -1073,6 +1074,24 @@ const treino = isPersonal
     }); // fim do change listener
 
   }); // fim do forEach
+}
+
+async function initPesoPrefill() {
+  if (!id) return;
+
+  const inputs = Array.from(document.querySelectorAll(".ff-ex-peso"));
+
+  await Promise.all(inputs.map(async inp => {
+    if (inp.value) return;
+
+    const exercicio = inp.dataset.ex;
+    if (!exercicio) return;
+
+    const peso = await getUltimoPeso(id, exercicio);
+    if (peso === "" || peso === null || peso === undefined) return;
+
+    inp.value = peso;
+  }));
 }
 
 /* ============================================================
