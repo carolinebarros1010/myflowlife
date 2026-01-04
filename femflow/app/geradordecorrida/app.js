@@ -323,9 +323,9 @@ function pickTreinoUnico(categoria, usados) {
   return treino;
 }
 
-/* ======= GERAÇÃO DE PLANO (compatível com HTML atual) ======= */
-function gerarPlano() {
-  console.log("⚙️ Iniciando geração do plano...");
+/* ======= GERAÇÃO DE MESOCICLO (30 dias) ======= */
+function gerarMesociclo() {
+  console.log("⚙️ Iniciando geração do mesociclo (30 dias)...");
 
   // === 1. Captura de campos ===
   const provaKmEl = byId('distProva');
@@ -339,8 +339,9 @@ function gerarPlano() {
   const cicloDuracaoEl = byId('cicloDuracao');
   const modalidadeEl = byId('modalidade');
   const zonaEl = byId('zona');
+  const inicioEl = byId('inicio');
 
-  if (!provaKmEl || !nivelEl || !nTreinosEl || !cooperDistEl || !cooperPseEl || !diasEl || !faseEl || !diaCicloEl || !cicloDuracaoEl || !modalidadeEl || !zonaEl) {
+  if (!provaKmEl || !nivelEl || !nTreinosEl || !cooperDistEl || !cooperPseEl || !diasEl || !faseEl || !diaCicloEl || !cicloDuracaoEl || !modalidadeEl || !zonaEl || !inicioEl) {
     console.error("❌ Um ou mais campos de entrada não foram encontrados no HTML!");
     toast("Erro: campo não encontrado no formulário.");
     playFeedback("error");
@@ -361,6 +362,7 @@ function gerarPlano() {
   const cicloDuracao = parseInt(cicloDuracaoEl.value || 28, 10);
   const modalidade = modalidadeEl.value;
   const zona = zonaEl.value || "Z2 / PSE 5-6";
+  const inicioRaw = inicioEl.value;
 
   if (nTreinos > 5) {
     toast("Máximo de 5 treinos por semana para respeitar a recuperação.");
@@ -394,16 +396,47 @@ function gerarPlano() {
   const ritmoForteBase = ritmoBaseSec * (1 - varPct);
   const ritmoLeveBase = ritmoBaseSec * (1 + varPct * 0.6);
 
-  // === 4. Montagem dos treinos ===
-  const semana = [];
+  // === 4. Montagem do mesociclo ===
+  const plano = [];
   let distAcum = 0;
-  const distribuicao = montarDistribuicaoSemanal(nTreinos, nivel);
   const usados = new Set();
+  const inicio = inicioRaw ? new Date(`${inicioRaw}T00:00:00`) : new Date();
+  const diaSemanaMap = {
+    dom: 0,
+    seg: 1,
+    ter: 2,
+    qua: 3,
+    qui: 4,
+    sex: 5,
+    sab: 6
+  };
+  const diasTreino = new Set(
+    dias.map(d => d.toLowerCase()).map(d => d.slice(0, 3))
+  );
+  const semanas = [];
+  for (let i = 0; i < 30; i++) {
+    const data = new Date(inicio);
+    data.setDate(inicio.getDate() + i);
+    const weekIndex = Math.floor(i / 7);
+    if (!semanas[weekIndex]) {
+      semanas[weekIndex] = {
+        distribuicao: montarDistribuicaoSemanal(nTreinos, nivel),
+        indice: 0
+      };
+    }
+    const semanaAtual = semanas[weekIndex];
+    const diaAbrev = Object.keys(diaSemanaMap).find(
+      key => diaSemanaMap[key] === data.getDay()
+    );
+    const isTreino = diaAbrev && diasTreino.has(diaAbrev);
+    if (!isTreino) continue;
+    if (semanaAtual.indice >= semanaAtual.distribuicao.length) continue;
 
-  for (let i = 0; i < distribuicao.length; i++) {
-    const categoria = distribuicao[i];
+    const categoria = semanaAtual.distribuicao[semanaAtual.indice];
+    semanaAtual.indice += 1;
     const treino = pickTreinoUnico(categoria, usados);
     if (!treino) continue;
+
     const faseInfo = Number.isFinite(diaCiclo)
       ? calcularFasePorDia(diaCiclo + i, cicloDuracao)
       : { fase: faseCiclo, dia: 1 };
@@ -423,9 +456,13 @@ function gerarPlano() {
     const tempoMax = tempoCorridaMin * fatorModalidade.max;
     const estrutura = buildEstrutura(tempoMin, tempoMax);
     const distanciaEstimada = formatDistanciaEstimativa(modalidade, alvo);
+    const dataLabel = data.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit"
+    });
 
-    semana.push({
-      dia: dias[i] ? dias[i][0].toUpperCase() + dias[i].slice(1) : `Dia ${i + 1}`,
+    plano.push({
+      dia: `${diaAbrev.toUpperCase()} • ${dataLabel}`,
       nome: treino.nome,
       tipo: treinoLabels[categoria] || treino.tipo,
       fase: faseInfo.fase,
@@ -443,13 +480,13 @@ function gerarPlano() {
   }
 
   // === 5. Renderização ===
-  renderSemana(semana);
-  plotSemana(semana);
-  toast("Plano gerado com sucesso!");
+  renderSemana(plano);
+  plotSemana(plano);
+  toast("Mesociclo gerado com sucesso!");
   playFeedback("success");
 
-  console.log("✅ Plano semanal gerado:");
-  console.table(semana);
+  console.log("✅ Mesociclo gerado:");
+  console.table(plano);
 }
 
 
@@ -601,7 +638,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   const btnFecharModal = byId('btnFecharModal');
 
   if (btnGerarPlano) {
-    btnGerarPlano.addEventListener('click', gerarPlano);
+    btnGerarPlano.addEventListener('click', gerarMesociclo);
     console.log("✅ Evento conectado: btnGerarPlano");
   } else {
     console.warn("⚠️ Botão 'btnGerarPlano' não encontrado");
