@@ -37,8 +37,43 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCancelar     = document.getElementById("cancelarTreinoBtn");
   const modalPSE        = document.getElementById("modalPSE");
   const pseInput        = document.getElementById("pseInput");
+  const pseEmoji        = document.getElementById("pseEmoji");
+  const pseEmojiValue   = document.getElementById("pseEmojiValue");
   const btnConfirmarPSE = document.getElementById("btnConfirmarPSE");
   const btnCancelarPSE  = document.getElementById("btnCancelarPSE");
+
+  function encerrarTreino() {
+    FEMFLOW.router("flowcenter.html");
+  }
+
+  function registrarEvolucao({ pse, diaPrograma }) {
+    const histRaw = localStorage.getItem("femflow_hist") || "[]";
+    let hist;
+
+    try {
+      hist = JSON.parse(histRaw);
+    } catch {
+      hist = [];
+    }
+
+    const entry = {
+      pse,
+      data: new Date().toISOString(),
+      diaPrograma
+    };
+
+    hist.push(entry);
+    hist = hist.slice(-40);
+    localStorage.setItem("femflow_hist", JSON.stringify(hist));
+
+    if (diaPrograma) {
+      localStorage.setItem("femflow_dia_treino", String(diaPrograma));
+    }
+  }
+
+  if (btnCancelar) {
+    btnCancelar.addEventListener("click", encerrarTreino);
+  }
 
   const SERIE_BEHAVIOR = {
     T:  { combinados: 3, descansoNoUltimo: true },
@@ -55,6 +90,24 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!track) {
     FEMFLOW.error("❌ #carouselTrack não encontrado!");
     return;
+  }
+
+  const pseEmojis = ["😴", "🙂", "🙂", "😌", "🙂", "😅", "😅", "😮‍💨", "😮‍💨", "🥵", "🥵"];
+
+  function atualizarEmojiPse(valor) {
+    if (!pseEmoji) return;
+    const idx = Math.max(0, Math.min(10, Number(valor) || 0));
+    pseEmoji.textContent = pseEmojis[idx];
+    if (pseEmojiValue) pseEmojiValue.textContent = String(idx);
+    pseEmoji.classList.remove("pse-emoji-bounce");
+    window.requestAnimationFrame(() => pseEmoji.classList.add("pse-emoji-bounce"));
+  }
+
+  if (pseInput) {
+    atualizarEmojiPse(pseInput.value);
+    pseInput.addEventListener("input", (event) => {
+      atualizarEmojiPse(event.target.value);
+    });
   }
 
   /* ============================================================
@@ -1085,6 +1138,8 @@ treino,
         }
 
         FEMFLOW.toast("Treino salvo com sucesso! 💪");
+        registrarEvolucao({ pse, diaPrograma: resp.diaPrograma || diaPrograma });
+        encerrarTreino();
 
       } else {
         FEMFLOW.toast("Erro ao salvar treino.", true);
@@ -1129,6 +1184,8 @@ if (btnDescanso) {
         }
 
         FEMFLOW.toast("Descanso registrado 🧘‍♀️");
+        registrarEvolucao({ pse: 0, diaPrograma: resp.diaPrograma });
+        encerrarTreino();
 
       } else {
         FEMFLOW.toast("Erro ao registrar descanso.", true);
