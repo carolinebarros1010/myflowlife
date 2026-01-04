@@ -202,71 +202,7 @@ function formatDistanciaEstimativa(modalidade, distKm) {
   return `${round2(distKm)} km`;
 }
 
-/* ======= Tabelas de Fases (sequencial 1→10) ======= */
-const fasesVelocidadePura = [
-  {nome:"Sprint Curto + Rec. Completa", distKm:2.0, desc:"15' aquece + 12×100m (95–100%) 2–3' pausa + 10' leve", tipo:"intensidade"},
-  {nome:"Pirâmide Sprint 60–120", distKm:1.9, desc:"10' aquece + 60–80–100–120–100–80–60 (95%) + 10' leve", tipo:"intensidade"},
-  {nome:"Saída Controlada + 200m", distKm:1.5, desc:"15' aquece + 8×60m saída parada + 3×200m (85%) + 10' leve", tipo:"intensidade"},
-  {nome:"Sprint + Pliometria", distKm:2.0, desc:"10' aquece + 6×40m (95%) + 3 circuitos pliométricos + 10' leve", tipo:"intensidade"},
-  {nome:"Ladeira (Força-Velocidade)", distKm:2.3, desc:"15' aquece + 10×80m subida + 4×100m plano + 10' leve", tipo:"potencia"},
-  {nome:"Sprint Resistido", distKm:1.6, desc:"15' aquece + 6×30m resistido + 6×50m livres (90%) + 10' leve", tipo:"potencia"},
-  {nome:"Sprint Assistido", distKm:1.8, desc:"10' aquece + 8×80m descida suave + 10' leve", tipo:"intensidade"},
-  {nome:"Técnica de Passada", distKm:2.4, desc:"15' drills + 6×60m progressivos + 3×100m (90%) + 10' leve", tipo:"intensidade"},
-  {nome:"Intervalado Curto 40/20", distKm:3.0, desc:"10' aquece + 3 blocos de 6×40m (forte)/20m (leve) + 10' leve", tipo:"intensidade"},
-  {nome:"Reação (auditivo/visual)", distKm:1.5, desc:"15' aquece + 10×20m reação + 6×60m livres + 10' leve", tipo:"intensidade"},
-  {nome:"Sprint com Ritmo Técnico", distKm:2.1, desc:"12' aquece + 8×80m com foco em mecânica + 8' leve", tipo:"intensidade"},
-  {nome:"Sprint 150m com pausa longa", distKm:2.2, desc:"10' aquece + 6×150m (90–95%) 3' pausa + 10' leve", tipo:"intensidade"},
-  {nome:"Pliometria + sprint curto", distKm:2.0, desc:"10' aquece + 3×(6 saltos + 60m forte) + 10' leve", tipo:"potencia"},
-  {nome:"Sprint em blocos 30/30", distKm:2.4, desc:"12' aquece + 2×(6×30\" forte/30\" leve) + 8' leve", tipo:"intensidade"},
-  {nome:"Sprints 60m com técnica", distKm:1.8, desc:"10' aquece + 10×60m (90–95%) foco em postura + 8' leve", tipo:"intensidade"},
-  {nome:"Progressivo 80–120m", distKm:2.3, desc:"12' aquece + 4×(80m/100m/120m) 2' pausa + 8' leve", tipo:"intensidade"},
-  {nome:"Sprint com ritmo controlado", distKm:2.0, desc:"10' aquece + 6×120m (85–90%) + 8' leve", tipo:"intensidade"},
-  {nome:"Velocidade com técnica de braço", distKm:2.1, desc:"12' aquece + 8×100m foco em braço + 8' leve", tipo:"intensidade"},
-];
-
-const fasesResVelocidade = [
-  {nome:"300/300", distKm:3.0, desc:"15' aquece + 5×300m forte /300m leve +10' leve", tipo:"res_vel"},
-  {nome:"400F/200S blocos", distKm:3.6, desc:"12' aquece + 6 blocos + 10' leve", tipo:"res_vel"},
-  {nome:"Billat 30/30", distKm:5.2, desc:"10' aquece + 3×(10×30\" forte/30\" leve) + 10' leve", tipo:"res_vel"},
-  {nome:"Progressivo 600–400–200", distKm:3.6, desc:"15' aquece + 3 séries (600/400/200) + 10' leve", tipo:"res_vel"},
-  {nome:"Pirâmide inversa", distKm:3.2, desc:"12' aquece + 800–600–400–200 + 3' pausa + 10' leve", tipo:"res_vel"},
-  {nome:"12×200m /45s", distKm:3.0, desc:"10' aquece + 12×200m (90%) 45\" trote + 10' leve", tipo:"res_vel"},
-  {nome:"6×500m (90%)", distKm:3.5, desc:"15' aquece + 6×500m 90% com 90\" leve + 10' leve", tipo:"res_vel"},
-  {nome:"8×(300F+100L)", distKm:3.2, desc:"10' aquece + 8×(300m 95% + 100m leve) + 10' leve", tipo:"res_vel"},
-  {nome:"Blocos 200–300–400", distKm:3.2, desc:"12' aquece + (4×200)+(3×300)+(2×400)+10' leve", tipo:"res_vel"},
-  {nome:"1' forte / 1' leve", distKm:5.0, desc:"10' aquece + 4×(6×1' forte/1' leve) + 10' leve", tipo:"res_vel"},
-  {nome:"Séries 600m controladas", distKm:3.6, desc:"12' aquece + 4×600m (85–90%) 2' leve + 8' leve", tipo:"res_vel"},
-  {nome:"Intervalos 2' forte/1' leve", distKm:4.8, desc:"10' aquece + 5×(2' forte/1' leve) + 8' leve", tipo:"res_vel"},
-  {nome:"Progressivo 800–600–400", distKm:3.8, desc:"15' aquece + 800/600/400 forte + 10' leve", tipo:"res_vel"},
-  {nome:"Blocos 3' forte/2' leve", distKm:5.4, desc:"12' aquece + 4×(3' forte/2' leve) + 8' leve", tipo:"res_vel"},
-  {nome:"Intervalado 5×700m", distKm:4.2, desc:"15' aquece + 5×700m (88–92%) 2' leve + 8' leve", tipo:"res_vel"},
-  {nome:"Progressivo 1000–800–600", distKm:4.6, desc:"15' aquece + 1000/800/600 forte + 10' leve", tipo:"res_vel"},
-  {nome:"Tempo run fracionado", distKm:5.0, desc:"12' aquece + 3×6' ritmo forte/2' leve + 8' leve", tipo:"res_vel"},
-  {nome:"Intervalado 90\" forte/60\" leve", distKm:4.5, desc:"10' aquece + 8×(90\" forte/60\" leve) + 8' leve", tipo:"res_vel"},
-];
-
-const fasesPotencia = [
-  {nome:"Subida + Pliometria", distKm:1.8, desc:"8×60m subida (6%) + 3c pliométricos + 10' leve", tipo:"potencia"},
-  {nome:"Resistido (trenó/elástico)", distKm:1.6, desc:"6×30m resistido + 6×50m livres (90%)", tipo:"potencia"},
-  {nome:"Plio horizontal + sprint", distKm:2.0, desc:"3×(10 saltos + 60m sprint)", tipo:"potencia"},
-  {nome:"Acelera/Para/Retoma", distKm:2.0, desc:"3×6×(40m acelera/10m para/retoma)", tipo:"potencia"},
-  {nome:"Carga parcial 5%", distKm:1.8, desc:"10×60m com leve sobrecarga", tipo:"potencia"},
-  {nome:"Circuito força explosiva", distKm:1.6, desc:"3c: swing 10 + salto 10 + corrida 40m", tipo:"potencia"},
-  {nome:"Mudança de direção", distKm:1.9, desc:"4×6 sprints (20m ida/20m volta)", tipo:"potencia"},
-  {nome:"Fartlek explosivo", distKm:2.4, desc:"4×4' (20\" forte / 40\" moderado)", tipo:"potencia"},
-  {nome:"Treino contrastado", distKm:1.6, desc:"(agach 6rep 60%1RM → sprint 40m) ×6", tipo:"potencia"},
-  {nome:"Passadas longas (overspeed)", distKm:2.0, desc:"6×100m foco amplitude (90%)", tipo:"potencia"},
-  {nome:"Explosão curta em subida", distKm:1.7, desc:"10' aquece + 8×40m subida + 8' leve", tipo:"potencia"},
-  {nome:"Saltos reativos + aceleração", distKm:1.8, desc:"10' aquece + 4×(8 saltos reativos + 40m forte) + 10' leve", tipo:"potencia"},
-  {nome:"Sprint com resistência elástica", distKm:1.6, desc:"6×20m resistido + 6×40m livres (90%)", tipo:"potencia"},
-  {nome:"Sprints curtos em escada", distKm:1.5, desc:"10' aquece + 6×(escada 20\" + sprint 30m) + 8' leve", tipo:"potencia"},
-  {nome:"Saltos unilaterais + aceleração", distKm:1.8, desc:"10' aquece + 3×(8 saltos unilaterais + 50m forte) + 10' leve", tipo:"potencia"},
-  {nome:"Sprints 10/20/30m", distKm:1.7, desc:"12' aquece + 4 blocos 10m/20m/30m + 8' leve", tipo:"potencia"},
-  {nome:"Circuito potência com corrida", distKm:1.9, desc:"10' aquece + 3×(agacho 6rep + 40m forte) + 10' leve", tipo:"potencia"},
-  {nome:"Arranque com tração", distKm:1.6, desc:"12' aquece + 6×20m tração + 6×30m livres + 8' leve", tipo:"potencia"},
-];
-
-const seq = { vel:0, res:0, pot:0 };
+const seq = {};
 
 const ajusteFaseCiclo = {
   folicular: { volume: 1.0, intensidade: 1.0 },
@@ -275,24 +211,35 @@ const ajusteFaseCiclo = {
   menstrual: { volume: 0.7, intensidade: 0.8 },
 };
 
-/* ======= Funções Principais ======= */
-function pickSequencial(cat){
-  if (cat==='vel') { const i = seq.vel % fasesVelocidadePura.length; seq.vel++; return fasesVelocidadePura[i]; }
-  if (cat==='res') { const i = seq.res % fasesResVelocidade.length; seq.res++; return fasesResVelocidade[i]; }
-  if (cat==='pot'){ const i = seq.pot % fasesPotencia.length; seq.pot++; return fasesPotencia[i]; }
-}
-
-const treinoCategorias = {
-  resistencia: { picker: () => pickSequencial("res"), lista: fasesResVelocidade },
-  velocidade: { picker: () => pickSequencial("pot"), lista: fasesPotencia },
-  velocidade_pura: { picker: () => pickSequencial("vel"), lista: fasesVelocidadePura }
-};
-
 const treinoLabels = {
   resistencia: "resistência",
   velocidade: "velocidade",
   velocidade_pura: "velocidade pura"
 };
+
+const tipoPorCategoria = {
+  resistencia: "res_vel",
+  velocidade: "potencia",
+  velocidade_pura: "intensidade"
+};
+
+function getTreinosModalidade(modalidade, categoria) {
+  const catalogo = window.TREINOS_POR_MODALIDADE || {};
+  const base = catalogo[modalidade] || catalogo.corrida || {};
+  return base[categoria] || [];
+}
+
+function pickSequencial(modalidade, categoria) {
+  const lista = getTreinosModalidade(modalidade, categoria);
+  if (!lista.length) return null;
+  const key = `${modalidade}:${categoria}`;
+  if (!seq[key]) seq[key] = 0;
+  const idx = seq[key] % lista.length;
+  seq[key] += 1;
+  const treino = { ...lista[idx] };
+  treino.tipo = treino.tipo || tipoPorCategoria[categoria] || "res_vel";
+  return treino;
+}
 
 function montarDistribuicaoSemanal(nTreinos, nivel) {
   const base = ["resistencia", "velocidade", "velocidade_pura"];
@@ -307,19 +254,19 @@ function montarDistribuicaoSemanal(nTreinos, nivel) {
   return base.concat(extras).slice(0, nTreinos);
 }
 
-function pickTreinoUnico(categoria, usados) {
-  const alvo = treinoCategorias[categoria];
-  if (!alvo) return null;
-  const maxTentativas = alvo.lista.length;
+function pickTreinoUnico(modalidade, categoria, usados) {
+  const lista = getTreinosModalidade(modalidade, categoria);
+  if (!lista.length) return null;
+  const maxTentativas = lista.length;
   for (let i = 0; i < maxTentativas; i++) {
-    const treino = alvo.picker();
-    if (!usados.has(treino.nome)) {
+    const treino = pickSequencial(modalidade, categoria);
+    if (treino && !usados.has(treino.nome)) {
       usados.add(treino.nome);
       return treino;
     }
   }
-  const treino = alvo.picker();
-  usados.add(treino.nome);
+  const treino = pickSequencial(modalidade, categoria);
+  if (treino) usados.add(treino.nome);
   return treino;
 }
 
@@ -338,10 +285,9 @@ async function syncPerfilBackend() {
 }
 
 function hidratarCamposDoPerfil() {
-  const nivelEl = byId('nivel');
-  const faseEl = byId('faseCiclo');
-  const diaCicloEl = byId('diaCiclo');
-  const cicloDuracaoEl = byId('cicloDuracao');
+  const nivelEl = byId('perfilNivelInput');
+  const nomeEl = byId('perfilNome');
+  const nivelTagEl = byId('perfilNivel');
   const inicioEl = byId('inicio');
 
   const nivelStorage = normalizarNivel(localStorage.getItem("femflow_nivel"));
@@ -349,21 +295,29 @@ function hidratarCamposDoPerfil() {
   const cicloDuracaoStorage = parseInt(localStorage.getItem("femflow_cycleLength") || "28", 10);
   const faseStorage = normalizarFase(localStorage.getItem("femflow_fase"));
   const inicioStorage = localStorage.getItem("femflow_startDate") || "";
+  const nomeStorage = localStorage.getItem("femflow_nome") || "Aluna";
 
-  if (nivelEl && nivelStorage) nivelEl.value = nivelStorage;
-  if (diaCicloEl && Number.isFinite(diaCicloStorage)) {
-    diaCicloEl.value = String(diaCicloStorage);
-  }
-  if (cicloDuracaoEl && Number.isFinite(cicloDuracaoStorage)) {
-    cicloDuracaoEl.value = String(cicloDuracaoStorage);
-    diaCicloEl?.setAttribute("max", String(cicloDuracaoStorage));
+  if (nivelEl && nivelStorage) {
+    const map = {
+      iniciante: "Iniciante",
+      intermediario: "Intermediária",
+      avancado: "Avançada"
+    };
+    nivelEl.value = map[nivelStorage] || nivelStorage;
   }
 
-  if (faseEl) {
+  if (nomeEl) nomeEl.textContent = nomeStorage;
+  if (nivelTagEl) {
     const faseCalc = Number.isFinite(diaCicloStorage)
       ? calcularFasePorDia(diaCicloStorage, cicloDuracaoStorage).fase
       : faseStorage;
-    faseEl.value = faseCalc || "folicular";
+    const faseLabel = {
+      folicular: "Folicular",
+      ovulatoria: "Ovulatória",
+      lutea: "Lútea",
+      menstrual: "Menstrual"
+    }[faseCalc] || faseCalc;
+    nivelTagEl.textContent = `${nivelStorage} • ${faseLabel} • Dia ${diaCicloStorage}`;
   }
 
   if (inicioEl && inicioStorage) {
@@ -397,14 +351,11 @@ function gerarMesociclo() {
   const cooperDistEl = byId('cooperDist');
   const diasEl = byId('dias');
   const cooperPseEl = byId('cooperPse');
-  const faseEl = byId('faseCiclo');
-  const diaCicloEl = byId('diaCiclo');
-  const cicloDuracaoEl = byId('cicloDuracao');
   const modalidadeEl = byId('modalidade');
   const zonaEl = byId('zona');
   const inicioEl = byId('inicio');
 
-  if (!provaKmEl || !nivelEl || !nTreinosEl || !cooperDistEl || !cooperPseEl || !diasEl || !faseEl || !diaCicloEl || !cicloDuracaoEl || !modalidadeEl || !zonaEl || !inicioEl) {
+  if (!provaKmEl || !nivelEl || !nTreinosEl || !cooperDistEl || !cooperPseEl || !diasEl || !modalidadeEl || !zonaEl || !inicioEl) {
     console.error("❌ Um ou mais campos de entrada não foram encontrados no HTML!");
     toast("Erro: campo não encontrado no formulário.");
     playFeedback("error");
@@ -420,9 +371,9 @@ function gerarMesociclo() {
     .split(",")
     .map((d) => d.trim())
     .filter(Boolean);
-  const faseCiclo = normalizarFase(faseEl.value);
-  const diaCiclo = parseInt(diaCicloEl.value || 1, 10);
-  const cicloDuracao = parseInt(cicloDuracaoEl.value || 28, 10);
+  const faseCiclo = normalizarFase(localStorage.getItem("femflow_fase"));
+  const diaCiclo = parseInt(localStorage.getItem("femflow_diaCiclo") || "1", 10);
+  const cicloDuracao = parseInt(localStorage.getItem("femflow_cycleLength") || "28", 10);
   const modalidade = modalidadeEl.value;
   const zona = zonaEl.value || "Z2 / PSE 5-6";
   const inicioRaw = inicioEl.value;
@@ -497,7 +448,7 @@ function gerarMesociclo() {
 
     const categoria = semanaAtual.distribuicao[semanaAtual.indice];
     semanaAtual.indice += 1;
-    const treino = pickTreinoUnico(categoria, usados);
+    const treino = pickTreinoUnico(modalidade, categoria, usados);
     if (!treino) continue;
 
     const faseInfo = Number.isFinite(diaCiclo)
@@ -611,9 +562,10 @@ function runTests(){
   const tests = [
     ["toSecPace 5:30 = 330", () => toSecPace("5:30") === 330],
     ["paceStr 330 = 5:30", () => paceStr(330) === "5:30"],
-    ["Seq vel avança", () => { const n=seq.vel; pickSequencial('vel'); return seq.vel===n+1; }],
+    ["Seq vel avança", () => { const key = "corrida:velocidade_pura"; const n=seq[key] || 0; pickSequencial('corrida', 'velocidade_pura'); return seq[key] === n + 1; }],
     ["Sem var pace NaN", () => !isNaN(toSecPace("4:05"))],
-    ["Elementos existem", () => !!byId('distProva') && !!byId('nivel') && !!byId('semanal') && !!byId('cooperDist') && !!byId('cooperPse') && !!byId('dias') && !!byId('faseCiclo') && !!byId('diaCiclo') && !!byId('cicloDuracao') && !!byId('modalidade') && !!byId('zona')]
+    ["Treinos por modalidade carregados", () => !!window.TREINOS_POR_MODALIDADE?.corrida?.resistencia?.length],
+    ["Elementos existem", () => !!byId('distProva') && !!byId('perfilNivelInput') && !!byId('semanal') && !!byId('cooperDist') && !!byId('cooperPse') && !!byId('dias') && !!byId('modalidade') && !!byId('zona')]
   ];
   const fails = tests.filter(t => {
     try {

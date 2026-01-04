@@ -185,6 +185,10 @@ input:focus, select:focus, textarea:focus {
   <div class="container">
     <header>
       <div class="brand">Endurance <span style="color:var(--accent)">FemFlow</span></div>
+      <div class="profile-summary">
+        <span id="perfilNome" class="profile-name">—</span>
+        <span id="perfilNivel" class="profile-tag">—</span>
+      </div>
     </header>
 
     <p class="muted">Escolha perfil, distância da prova e disponibilidade. O sistema monta um mesociclo de 30 dias com velocidade, resistência e velocidade pura, ajusta volume/intensidade pelo ciclo e gera PDF e cards.</p>
@@ -231,11 +235,7 @@ input:focus, select:focus, textarea:focus {
         </div>
         <div class="grid">
           <label>Perfil
-            <select id="nivel">
-              <option value="iniciante">Iniciante</option>
-              <option value="intermediario">Intermediário</option>
-              <option value="avancado">Avançado</option>
-            </select>
+            <input id="perfilNivelInput" type="text" value="Iniciante" readonly>
           </label>
           <label>Distância da prova (km)
             <input id="distProva" type="number" min="3" value="10">
@@ -245,20 +245,6 @@ input:focus, select:focus, textarea:focus {
           </label>
           <label>Treinos por semana
             <input id="semanal" type="number" min="3" max="5" value="4">
-          </label>
-          <label>Dia do ciclo (início)
-            <input id="diaCiclo" type="number" min="1" max="35" value="1">
-          </label>
-          <label>Duração do ciclo (dias)
-            <input id="cicloDuracao" type="number" min="21" max="35" value="28">
-          </label>
-          <label>Fase do ciclo menstrual
-            <select id="faseCiclo">
-              <option value="folicular">Folicular (mais energia)</option>
-              <option value="ovulatoria">Ovulatória (pico de potência)</option>
-              <option value="lutea">Lútea (mais sensível à fadiga)</option>
-              <option value="menstrual">Menstrual (reduzir volume)</option>
-            </select>
           </label>
           <label>Início
             <input id="inicio" type="date">
@@ -312,6 +298,7 @@ input:focus, select:focus, textarea:focus {
   <div id="toast" class="toast"></div>
 
   <script src="../femflow-core.js"></script>
+  <script src="./treinos.js"></script>
   <script src="./app.js" defer></script>
 
 

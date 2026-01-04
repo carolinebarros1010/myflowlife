@@ -100,6 +100,29 @@ body { background: var(--bg); color: var(--text); }
   color: var(--text);
 }
 
+/* ====== Perfil */
+.profile-summary {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-top: .35rem;
+  flex-wrap: wrap;
+}
+
+.profile-name {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-tag {
+  background: var(--card-soft);
+  color: var(--text);
+  border-radius: 999px;
+  padding: .2rem .65rem;
+  font-size: .85rem;
+  border: 1px solid var(--border);
+}
+
 /* ====== Tabs de semana */
 .week-tabs {
   display: flex;
