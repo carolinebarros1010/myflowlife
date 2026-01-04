@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gerador de Microciclo MyFlowLife v23.1 (PWA)</title>
+  <title>Endurance FemFlow</title>
   <!-- PWA: Manifesto -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#CC6A5A" />
+  <meta name="theme-color" content="#D1A697" />
   <link rel="apple-touch-icon" href="https://www.myflowlife.com.br/assets/icon-192.png" />
     <!-- PWA -->
   <link rel="manifest" href="manifest.json">
@@ -18,13 +18,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    :root { --bg:#0f172a; --panel:#111827; --ink:#e5e7eb; --muted:#9ca3af; --teal:#335953; --terracota:#CC6A5A; --pessego:#EFBDA6; --card:#0b1220; }
+    :root { --bg:#FAF7F5; --panel:#F3C1C1; --ink:#2E2E2E; --muted:#6F6F6F; --teal:#335953; --terracota:#D1A697; --pessego:#CBB1E6; --card:#F3C1C1; }
     html,body{ background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,Helvetica,Arial,sans-serif; margin:0; overflow-x:hidden; }
     *{ transition:background .3s ease,color .3s ease,border .3s ease }
 
     /* Tema claro */
     @media (prefers-color-scheme: light) {
-      :root { --bg:#f8fafc; --panel:#ffffff; --ink:#1e293b; --muted:#64748b; --teal:#335953; --terracota:#b94f3f; --pessego:#e7a98b; --card:#f1f5f9; }
+      :root { --bg:#FAF7F5; --panel:#F3C1C1; --ink:#2E2E2E; --muted:#6F6F6F; --teal:#335953; --terracota:#D1A697; --pessego:#CBB1E6; --card:#F3C1C1; }
       body { color:var(--ink); background:var(--bg) }
       .card, input, select { background:var(--card); color:var(--ink) }
       .btn { color:#fff }
@@ -49,11 +49,11 @@
     @media (max-width:600px){ #siteTitle{ font-size:.85rem } }
 
     /* Botão Premium com glow e tema dinâmico */
-    @keyframes glowPulse { 0%{box-shadow:0 0 10px rgba(239,189,166,.6), 0 0 20px rgba(204,106,90,.4)} 50%{box-shadow:0 0 20px rgba(239,189,166,.9), 0 0 30px rgba(204,106,90,.7)} 100%{box-shadow:0 0 10px rgba(239,189,166,.6), 0 0 20px rgba(204,106,90,.4)} }
-    #btnPremium{ background:linear-gradient(90deg,var(--terracota),var(--pessego)); color:#fff; font-weight:700; font-size:.9rem; padding:10px 16px; border-radius:8px; text-decoration:none; animation:glowPulse 3s ease-in-out infinite; transition:transform .2s ease, opacity .2s ease, background .3s ease }
+    @keyframes glowPulse { 0%{box-shadow:0 0 10px rgba(209,166,151,.6), 0 0 20px rgba(203,177,230,.4)} 50%{box-shadow:0 0 20px rgba(209,166,151,.9), 0 0 30px rgba(203,177,230,.7)} 100%{box-shadow:0 0 10px rgba(209,166,151,.6), 0 0 20px rgba(203,177,230,.4)} }
+    #btnPremium{ background:linear-gradient(90deg,var(--terracota),var(--pessego)); color:#2E2E2E; font-weight:700; font-size:.9rem; padding:10px 16px; border-radius:8px; text-decoration:none; animation:glowPulse 3s ease-in-out infinite; transition:transform .2s ease, opacity .2s ease, background .3s ease }
     #btnPremium:hover{ transform:scale(1.05); opacity:.9 }
-    @media (prefers-color-scheme: light){ #btnPremium{ background:linear-gradient(90deg,var(--teal),var(--terracota)) } }
-    @media (prefers-color-scheme: dark){ #btnPremium{ background:linear-gradient(90deg,var(--pessego),var(--terracota)) } }
+    @media (prefers-color-scheme: light){ #btnPremium{ background:linear-gradient(90deg,var(--teal),var(--terracota)); color:#fff } }
+    @media (prefers-color-scheme: dark){ #btnPremium{ background:linear-gradient(90deg,var(--pessego),var(--terracota)); color:#2E2E2E } }
     @media (max-width:600px){ #btnPremium{ font-size:.8rem; padding:8px 12px } }
 
     /* ===== Layout principal ===== */
@@ -177,13 +177,13 @@ input:focus, select:focus, textarea:focus {
 
   <!-- Topo fixo com Premium -->
   <div class="topbar">
-    <span class="brand">🏃‍♂️ Gerador MyFlowLife</span>
+    <span class="brand">🏃‍♀️ Endurance FemFlow</span>
     <a href="https://www.myflowlife.com.br/premium" id="btnPremium" target="_blank" title="Acesse o Plano Premium MyFlowLife" class="btn-app">💎 COMPRE O PLANO PREMIUM</a>
   </div>
 
   <div class="container">
     <header>
-      <div class="brand">Gerador de Microciclo <span style="color:var(--accent)">MyFlowLife</span> V24</div>
+      <div class="brand">Endurance <span style="color:var(--accent)">FemFlow</span> V24</div>
     </header>
 
     <p class="muted">Escolha perfil, distância da prova e disponibilidade. O sistema monta a semana com velocidade, resistência e potência, ajusta ritmo pelos níveis de esforço e gera PDF e cards.</p>
@@ -231,14 +231,6 @@ input:focus, select:focus, textarea:focus {
         </label>
         <label>PSE do teste Cooper (0–10)
           <input id="cooperPse" type="number" min="0" max="10" step="1" value="8">
-        </label>
-        <label>Fase do ciclo menstrual
-          <select id="faseCiclo">
-            <option value="folicular">Folicular (mais energia)</option>
-            <option value="ovulatoria">Ovulatória (pico de potência)</option>
-            <option value="lutea">Lútea (mais sensível à fadiga)</option>
-            <option value="menstrual">Menstrual (reduzir volume)</option>
-          </select>
         </label>
         <label>Fase do ciclo menstrual
           <select id="faseCiclo">
