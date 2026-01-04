@@ -973,9 +973,14 @@ function initPeso() {
         return;
       }
       const diaCiclo = Number(localStorage.getItem("femflow_diaCiclo") || 1);
-const treino = personalFinal
+const isPersonal =
+  localStorage.getItem("femflow_has_personal") === "true" &&
+  localStorage.getItem("femflow_mode_personal") === "true";
+
+const treino = isPersonal
   ? `personal_dia_${diaCiclo}`
   : `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
+
 
 
 
@@ -1034,7 +1039,14 @@ if (btnConfirmarPSE) {
     }
 
     try {
-      const treino = `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
+      const isPersonal =
+  localStorage.getItem("femflow_has_personal") === "true" &&
+  localStorage.getItem("femflow_mode_personal") === "true";
+
+const treino = isPersonal
+  ? `personal_dia_${diaCiclo}`
+  : `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
+
         const resp = await FEMFLOW.post({
       action: "salvartreino",
 id,
