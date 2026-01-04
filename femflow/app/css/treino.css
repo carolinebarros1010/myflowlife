@@ -169,7 +169,8 @@ body {
   /* Allow footer to receive taps while keeping carousel scrollable. */
   .carousel-container {
     -webkit-overflow-scrolling: touch;
-    pointer-events: none;
+    pointer-events: auto;
+    touch-action: pan-x;
   }
 
   .carousel-track,
