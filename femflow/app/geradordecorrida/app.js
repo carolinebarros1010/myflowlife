@@ -327,6 +327,50 @@ function pickTreinoUnico(categoria, usados) {
 let mesocicloPlan = [];
 let semanaAtiva = 0;
 
+async function syncPerfilBackend() {
+  if (!window.FEMFLOW?.carregarPerfil) return null;
+  try {
+    return await FEMFLOW.carregarPerfil();
+  } catch (error) {
+    console.warn("⚠️ Falha ao sincronizar perfil:", error);
+    return null;
+  }
+}
+
+function hidratarCamposDoPerfil() {
+  const nivelEl = byId('nivel');
+  const faseEl = byId('faseCiclo');
+  const diaCicloEl = byId('diaCiclo');
+  const cicloDuracaoEl = byId('cicloDuracao');
+  const inicioEl = byId('inicio');
+
+  const nivelStorage = normalizarNivel(localStorage.getItem("femflow_nivel"));
+  const diaCicloStorage = parseInt(localStorage.getItem("femflow_diaCiclo") || "1", 10);
+  const cicloDuracaoStorage = parseInt(localStorage.getItem("femflow_cycleLength") || "28", 10);
+  const faseStorage = normalizarFase(localStorage.getItem("femflow_fase"));
+  const inicioStorage = localStorage.getItem("femflow_startDate") || "";
+
+  if (nivelEl && nivelStorage) nivelEl.value = nivelStorage;
+  if (diaCicloEl && Number.isFinite(diaCicloStorage)) {
+    diaCicloEl.value = String(diaCicloStorage);
+  }
+  if (cicloDuracaoEl && Number.isFinite(cicloDuracaoStorage)) {
+    cicloDuracaoEl.value = String(cicloDuracaoStorage);
+    diaCicloEl?.setAttribute("max", String(cicloDuracaoStorage));
+  }
+
+  if (faseEl) {
+    const faseCalc = Number.isFinite(diaCicloStorage)
+      ? calcularFasePorDia(diaCicloStorage, cicloDuracaoStorage).fase
+      : faseStorage;
+    faseEl.value = faseCalc || "folicular";
+  }
+
+  if (inicioEl && inicioStorage) {
+    inicioEl.value = inicioStorage.slice(0, 10);
+  }
+}
+
 function atualizarTabsSemana() {
   const tabs = document.querySelectorAll(".week-tab");
   tabs.forEach(tab => {
@@ -617,38 +661,17 @@ function toast(msg){
 window.addEventListener('DOMContentLoaded', ()=>{
   console.log("⚡️ Gerador de Corrida V24 conectado");
 
-  const id = localStorage.getItem("femflow_id");
-  const hasPersonal = localStorage.getItem("femflow_has_personal") === "true";
-  if (!id || !hasPersonal) {
-    window.location.href = "../index.html";
-    return;
-  }
+  (async () => {
+    const id = localStorage.getItem("femflow_id");
+    const hasPersonal = localStorage.getItem("femflow_has_personal") === "true";
+    if (!id || !hasPersonal) {
+      window.location.href = "../index.html";
+      return;
+    }
 
-  const nivelEl = byId('nivel');
-  const faseEl = byId('faseCiclo');
-  const diaCicloEl = byId('diaCiclo');
-  const cicloDuracaoEl = byId('cicloDuracao');
-
-  const nivelStorage = normalizarNivel(localStorage.getItem("femflow_nivel"));
-  const diaCicloStorage = parseInt(localStorage.getItem("femflow_diaCiclo") || "1", 10);
-  const cicloDuracaoStorage = parseInt(localStorage.getItem("femflow_cycleLength") || "28", 10);
-  const faseStorage = normalizarFase(localStorage.getItem("femflow_fase"));
-
-  if (nivelEl && nivelStorage) nivelEl.value = nivelStorage;
-  if (diaCicloEl && Number.isFinite(diaCicloStorage)) {
-    diaCicloEl.value = String(diaCicloStorage);
-  }
-  if (cicloDuracaoEl && Number.isFinite(cicloDuracaoStorage)) {
-    cicloDuracaoEl.value = String(cicloDuracaoStorage);
-    diaCicloEl?.setAttribute("max", String(cicloDuracaoStorage));
-  }
-
-  if (faseEl) {
-    const faseCalc = Number.isFinite(diaCicloStorage)
-      ? calcularFasePorDia(diaCicloStorage, cicloDuracaoStorage).fase
-      : faseStorage;
-    faseEl.value = faseCalc || "folicular";
-  }
+    await syncPerfilBackend();
+    hidratarCamposDoPerfil();
+  })();
 
   // Conectar event listeners aos botões com IDs corretos
   const btnGerarPlano = byId('btnGerarPlano');
