@@ -506,7 +506,10 @@ font-size: 0.9rem !important;
 }
 
 .ff-serie-next-btn.done{
-  opacity: .7;
+  background: #1f8f4a;
+  border-color: #1f8f4a;
+  color: #fff;
+  opacity: .85;
 }
 
 
