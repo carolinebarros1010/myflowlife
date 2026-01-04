@@ -46,7 +46,7 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
 
   // ✅ acesso personal = direito (backend), separado do modo personal (front)
-  localStorage.setItem("femflow_has_personal", String(!!perfil.personal));
+  localStorage.setItem("femflow_has_personal", String(!!perfil.acessos?.personal));
   localStorage.removeItem("femflow_personal"); // legado: nunca usar mais
 
   localStorage.setItem(
@@ -68,7 +68,7 @@ function persistPerfil(perfil) {
   );
 
   // ✅ segurança: se não tiver personal, não deixa modo personal ficar travado
-  const hasPersonal = String(!!perfil.personal) === "true";
+  const hasPersonal = String(!!perfil.acessos?.personal) === "true";
   if (!hasPersonal) {
     localStorage.setItem("femflow_mode_personal", "false");
   } else {
@@ -357,7 +357,7 @@ function handleCardClick(enfase, locked) {
   if (enfase === "personal") {
     FEMFLOW.toast("🌟 Modo Personal ativado!");
     localStorage.setItem("femflow_mode_personal", "true");
-    return FEMFLOW.router("flowcenter");
+    return FEMFLOW.router("flowcenter.html");
   }
 
   // qualquer card normal desativa o modo personal

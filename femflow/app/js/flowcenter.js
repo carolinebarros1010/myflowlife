@@ -43,7 +43,7 @@ function flowcenterPersistPerfil(perfil) {
   ============================================================ */
   localStorage.setItem(
     "femflow_has_personal",
-    perfil.personal ? "true" : "false"
+    perfil.acessos?.personal ? "true" : "false"
   );
 }
 
