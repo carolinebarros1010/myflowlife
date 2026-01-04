@@ -16,13 +16,16 @@ FEMFLOW.engineTreino.normalizarFase = raw => {
     ovulatória: "ovulatoria",
     ovulatoria: "ovulatoria",
     ovulação: "ovulatoria",
+    ovulation: "ovulatoria",
     follicular: "folicular",
     folicular: "folicular",
     lútea: "lutea",
     lutea: "lutea",
+    luteal: "lutea",
     menstrual: "menstrual",
     menstruação: "menstrual",
-    menstruacao: "menstrual"
+    menstruacao: "menstrual",
+    menstruation: "menstrual"
   }[f] || f;
 };
 
