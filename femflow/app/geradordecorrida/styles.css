@@ -164,7 +164,7 @@ select:focus {
   border-radius: 50%;
   border: 1px solid var(--border);
   background: #fff;
-  color: var(--text);
+  color: #2e2e2e;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -311,8 +311,13 @@ canvas { width: 100%; height: 320px; }
   padding: 1rem 1.25rem;
   max-width: 420px;
   width: calc(100% - 2rem);
-  color: var(--text);
+  color: #2e2e2e;
   box-shadow: 0 20px 40px rgba(46, 46, 46, 0.2);
+}
+
+.modal-content p,
+.modal-content h3 {
+  color: #2e2e2e;
 }
 
 .modal-header {
