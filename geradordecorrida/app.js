@@ -208,14 +208,14 @@ function gerarPlano() {
   const provaKmEl = byId('distProva');
   const nivelEl = byId('nivel');
   const nTreinosEl = byId('semanal');
-  const ritmoEl = byId('ritmoBase');
+  const cooperDistEl = byId('cooperDist');
   const diasEl = byId('dias');
-  const esforcoEl = byId('esforco');
+  const cooperPseEl = byId('cooperPse');
   const faseEl = byId('faseCiclo');
   const modalidadeEl = byId('modalidade');
   const zonaEl = byId('zona');
 
-  if (!provaKmEl || !nivelEl || !nTreinosEl || !ritmoEl || !esforcoEl || !diasEl || !faseEl || !modalidadeEl || !zonaEl) {
+  if (!provaKmEl || !nivelEl || !nTreinosEl || !cooperDistEl || !cooperPseEl || !diasEl || !faseEl || !modalidadeEl || !zonaEl) {
     console.error("❌ Um ou mais campos de entrada não foram encontrados no HTML!");
     toast("Erro: campo não encontrado no formulário.");
     playFeedback("error");
@@ -225,18 +225,27 @@ function gerarPlano() {
   const provaKm = parseFloat(provaKmEl.value || 10);
   const nivel = nivelEl.value;
   const nTreinos = parseInt(nTreinosEl.value || 4, 10);
-  const ritmoBaseSec = toSecPace(ritmoEl.value || "5:30");
+  const cooperDist = parseFloat(cooperDistEl.value || 3000);
+  const cooperPse = parseInt(cooperPseEl.value || 8, 10);
   const dias = diasEl.value
     .split(",")
     .map((d) => d.trim())
     .filter(Boolean);
-  const esforco = parseInt(esforcoEl.value || 7, 10);
   const faseCiclo = faseEl.value;
   const modalidade = modalidadeEl.value;
   const zona = zonaEl.value || "Z2 / PSE 5-6";
   const ajuste = ajusteFaseCiclo[faseCiclo] || ajusteFaseCiclo.folicular;
 
-  console.log(`📊 Dados recebidos → prova=${provaKm}km | nível=${nivel} | treinos=${nTreinos} | ritmo=${ritmoEl.value} | esforço=${esforco}`);
+  if (!cooperDist || cooperDist <= 0) {
+    toast("Informe a distância do teste Cooper (12 min).");
+    playFeedback("error");
+    return;
+  }
+
+  const cooperKm = cooperDist / 1000;
+  const ritmoBaseSec = (12 * 60) / cooperKm;
+
+  console.log(`📊 Dados recebidos → prova=${provaKm}km | nível=${nivel} | treinos=${nTreinos} | Cooper=${cooperDist}m | PSE=${cooperPse}`);
 
   // === 2. Ajuste do volume conforme nível ===
   let fator = 2.0;
@@ -249,7 +258,7 @@ function gerarPlano() {
 
   // === 3. Cálculo do ritmo e variação pelo esforço ===
   const varMin = 0.05, varMax = 0.10;
-  const escala = 1 - (clamp(esforco, 1, 10) - 1) / 9;
+  const escala = 1 - clamp(cooperPse, 0, 10) / 10;
   const varPct = varMin + (varMax - varMin) * escala;
   const fatorIntensidade = 1 / ajuste.intensidade;
   const ritmoForte = ritmoBaseSec * (1 - varPct) * fatorIntensidade;
@@ -366,7 +375,7 @@ function runTests(){
     ["paceStr 330 = 5:30", () => paceStr(330) === "5:30"],
     ["Seq vel avança", () => { const n=seq.vel; pickSequencial('vel'); return seq.vel===n+1; }],
     ["Sem var pace NaN", () => !isNaN(toSecPace("4:05"))],
-    ["Elementos existem", () => !!byId('distProva') && !!byId('nivel') && !!byId('semanal') && !!byId('ritmoBase') && !!byId('dias') && !!byId('faseCiclo') && !!byId('modalidade') && !!byId('zona')]
+    ["Elementos existem", () => !!byId('distProva') && !!byId('nivel') && !!byId('semanal') && !!byId('cooperDist') && !!byId('cooperPse') && !!byId('dias') && !!byId('faseCiclo') && !!byId('modalidade') && !!byId('zona')]
   ];
   const fails = tests.filter(t => {
     try {

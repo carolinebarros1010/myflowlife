@@ -191,6 +191,7 @@ input:focus, select:focus, textarea:focus {
     <!-- ENTRADAS -->
     <section class="panel">
       <h2>Entradas</h2>
+      <p class="muted">Realize um teste de 12 min sem parar na modalidade pretendida e insira as informações abaixo (distância em metros e PSE 0 a 10).</p>
       <div class="grid">
         <label>Perfil
           <select id="nivel">
@@ -208,8 +209,8 @@ input:focus, select:focus, textarea:focus {
         <label>Treinos por semana
           <input id="semanal" type="number" min="3" max="6" value="4">
         </label>
-        <label>Ritmo base (min:seg/km)
-          <input id="ritmoBase" value="05:30">
+        <label>Distância no teste Cooper (12 min, em metros)
+          <input id="cooperDist" type="number" min="200" step="10" value="3000">
         </label>
         <label>Modalidade
           <select id="modalidade">
@@ -228,8 +229,16 @@ input:focus, select:focus, textarea:focus {
         <label>Zona / PSE principal
           <input id="zona" value="Z2 / PSE 5-6">
         </label>
-        <label>Esforço do último treino (1–10)
-          <input id="esforco" type="number" min="1" max="10" step="1" value="7">
+        <label>PSE do teste Cooper (0–10)
+          <input id="cooperPse" type="number" min="0" max="10" step="1" value="8">
+        </label>
+        <label>Fase do ciclo menstrual
+          <select id="faseCiclo">
+            <option value="folicular">Folicular (mais energia)</option>
+            <option value="ovulatoria">Ovulatória (pico de potência)</option>
+            <option value="lutea">Lútea (mais sensível à fadiga)</option>
+            <option value="menstrual">Menstrual (reduzir volume)</option>
+          </select>
         </label>
         <label>Fase do ciclo menstrual
           <select id="faseCiclo">
