@@ -202,6 +202,39 @@ function formatDistanciaEstimativa(modalidade, distKm) {
   return `${round2(distKm)} km`;
 }
 
+function formatRitmoLabel(modalidade, ritmoSessao) {
+  const labelMap = {
+    corrida: "Ritmo base (corrida):",
+    bike: "Ritmo base (ciclismo):",
+    remo: "Ritmo base (remo):",
+    natacao: "Ritmo base (natação):",
+    natacao_aberta: "Ritmo base (natação em águas abertas):",
+    eliptico: "Ritmo base (elíptico):",
+    caminhada: "Ritmo base (caminhada):",
+    trilha: "Ritmo base (trilha):",
+    aqua_run: "Ritmo base (aqua run):",
+    esqui: "Ritmo base (esqui ergômetro):"
+  };
+  const unitMap = {
+    corrida: "min/km",
+    bike: "km/h",
+    remo: "min/500 m",
+    natacao: "min/100 m",
+    natacao_aberta: "min/100 m",
+    eliptico: "tempo / PSE / RPM",
+    caminhada: "min/km",
+    trilha: "min/km + PSE",
+    aqua_run: "tempo / PSE",
+    esqui: "min/500 m"
+  };
+  const label = labelMap[modalidade] || "Ritmo base:";
+  const unit = unitMap[modalidade] || "min/km";
+  if (unit.includes("tempo")) {
+    return `${label} ${unit}`;
+  }
+  return `${label} ${ritmoSessao} ${unit}`;
+}
+
 const seq = {};
 
 const ajusteFaseCiclo = {
@@ -489,6 +522,7 @@ function gerarMesociclo() {
       fase: faseInfo.fase,
       distKm: round2(alvo),
       ritmo: ritmoSessao,
+      ritmoLabel: formatRitmoLabel(modalidade, ritmoSessao),
       modalidade,
       zona,
       tempo: formatRange(tempoMin, tempoMax),
@@ -534,7 +568,7 @@ function renderSemana(semana){
         <div class="kv">${t.estrutura.aquecimento}</div>
         <div class="kv">${t.estrutura.principal}</div>
         <div class="kv">${t.estrutura.desaquecimento}</div>
-        <div class="kv">Ritmo base (corrida): <b>${t.ritmo} min/km</b></div>
+        <div class="kv">${t.ritmoLabel || `Ritmo base (corrida): ${t.ritmo} min/km`}</div>
         <p class="kv">${t.desc || ""}</p>
       </div>`;
     grid.appendChild(el);
