@@ -702,6 +702,25 @@ font-size: 0.9rem !important;
   margin-bottom: 14px;
 }
 
+.pse-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  color: #335953;
+  margin-bottom: 8px;
+}
+
+.pse-emoji {
+  font-size: 1.6rem;
+}
+
+.pse-value {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
 /* ============================================================
    SLIDER PSE
 ============================================================ */
