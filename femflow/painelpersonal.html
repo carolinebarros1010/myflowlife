@@ -887,6 +887,14 @@
       consoleEl.classList.remove("empty");
     };
 
+    const buildFetchHint = (errorMessage) => {
+      const msg = String(errorMessage || "").toLowerCase();
+      if (msg.includes("failed to fetch") || msg.includes("networkerror")) {
+        return "Fetch bloqueado (provável CORS) ou Web App inacessível. Verifique se o Apps Script está publicado como Web App e com acesso 'Qualquer pessoa'.";
+      }
+      return "";
+    };
+
     const runAction = async (action, params, button) => {
       if (!validate(params, action)) return;
       const url = buildUrl(action, params);
@@ -923,6 +931,7 @@
           status: "ok",
         });
       } catch (error) {
+        const hint = buildFetchHint(error.message);
         if (state.mode !== "link-only") {
           window.open(url, "_blank");
           toast("Fetch bloqueado (provável CORS). Abri o endpoint em nova aba.");
@@ -932,6 +941,7 @@
           error: error.message || "Erro inesperado",
           action,
           url,
+          hint: hint || undefined,
         };
         updateResponse(state.response);
         setButtonState(button, "error", "Erro");
@@ -941,7 +951,7 @@
           params: JSON.stringify(params),
           mode: modeUsed,
           status: "error",
-          detail: error.message || "Erro inesperado",
+          detail: hint ? `${error.message || "Erro inesperado"} | ${hint}` : error.message || "Erro inesperado",
         });
       } finally {
         setTimeout(() => {
