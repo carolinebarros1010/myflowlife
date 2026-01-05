@@ -122,7 +122,7 @@
       font-size: 14px;
       cursor: pointer;
       background: linear-gradient(120deg, var(--accent-coral), var(--accent-orange));
-      color: #fff;
+      color: #2f1a14;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       display: inline-flex;
       align-items: center;
@@ -794,21 +794,43 @@
       return { nivel, fase, enfase, destino, id_aluna: idAluna };
     };
 
+    const logValidationFailure = (action, params, reason) => {
+      const entry = {
+        time: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+        action,
+        params: JSON.stringify(params),
+        mode: state.mode === "link-only" ? "LINK" : "FETCH",
+        status: "error",
+        detail: reason,
+      };
+      logEvent(entry);
+      state.response = { error: reason, action, params };
+      updateResponse(state.response);
+    };
+
     const validate = (params, action = "") => {
       if (!state.endpoint) {
-        toast("Informe o endpoint antes de executar.");
+        const reason = "Informe o endpoint antes de executar.";
+        toast(reason);
+        logValidationFailure(action, params, reason);
         return false;
       }
       if (!params.nivel || !params.fase || !params.enfase) {
-        toast("Preencha nivel, fase inicial e enfase.");
+        const reason = "Preencha nivel, fase inicial e enfase.";
+        toast(reason);
+        logValidationFailure(action, params, reason);
         return false;
       }
       if (action === "importar" && !params.id_aluna) {
-        toast("Informe o perfil (ID da aluna) antes de importar.");
+        const reason = "Informe o perfil (ID da aluna) antes de importar.";
+        toast(reason);
+        logValidationFailure(action, params, reason);
         return false;
       }
       if (!params.destino) {
-        toast("Preencha o destino ou informe um ID de aluna.");
+        const reason = "Preencha o destino ou informe um ID de aluna.";
+        toast(reason);
+        logValidationFailure(action, params, reason);
         return false;
       }
       return true;
@@ -831,9 +853,11 @@
         .forEach((log) => {
           const item = document.createElement("div");
           item.className = `log-item ${log.status}`;
+          const detailLine = log.detail ? `<div>detalhe: ${log.detail}</div>` : "";
           item.innerHTML = `
             <div><span>${log.time}</span> • <span>${log.action}</span> • ${log.mode}</div>
             <div>params: ${log.params}</div>
+            ${detailLine}
             <div>status: ${log.status}</div>
           `;
           list.appendChild(item);
@@ -863,6 +887,17 @@
       consoleEl.classList.remove("empty");
     };
 
+    const buildFetchHint = (errorMessage, errorName) => {
+      if (errorName === "AbortError") {
+        return "Tempo limite excedido. O Apps Script pode estar travado ou executando além do limite. Verifique os logs de execução no Apps Script.";
+      }
+      const msg = String(errorMessage || "").toLowerCase();
+      if (msg.includes("failed to fetch") || msg.includes("networkerror")) {
+        return "Fetch bloqueado (provável CORS) ou Web App inacessível. Verifique se o Apps Script está publicado como Web App e com acesso 'Qualquer pessoa'.";
+      }
+      return "";
+    };
+
     const runAction = async (action, params, button) => {
       if (!validate(params, action)) return;
       const url = buildUrl(action, params);
@@ -876,8 +911,20 @@
           window.open(url, "_blank");
           data = { message: "LINK ONLY: endpoint aberto em nova aba.", url };
         } else {
-          const response = await fetch(url, { method: "GET" });
-          data = await response.json();
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
+          const response = await fetch(url, { method: "GET", signal: controller.signal });
+          clearTimeout(timeoutId);
+          const contentType = response.headers.get("content-type") || "";
+          const payload = contentType.includes("application/json")
+            ? await response.json()
+            : await response.text();
+          if (!response.ok) {
+            throw new Error(
+              `Erro HTTP ${response.status}: ${typeof payload === "string" ? payload : JSON.stringify(payload)}`
+            );
+          }
+          data = payload;
         }
         state.response = data;
         updateResponse(data);
@@ -890,14 +937,20 @@
           status: "ok",
         });
       } catch (error) {
+        const hint = buildFetchHint(error.message, error.name);
         if (state.mode !== "link-only") {
           window.open(url, "_blank");
-          toast("Fetch bloqueado (provável CORS). Abri o endpoint em nova aba.");
+          const toastMessage = hint
+            ? hint
+            : "Fetch bloqueado (provável CORS). Abri o endpoint em nova aba.";
+          toast(toastMessage);
           modeUsed = "LINK-FALLBACK";
         }
         state.response = {
           error: error.message || "Erro inesperado",
           action,
+          url,
+          hint: hint || undefined,
         };
         updateResponse(state.response);
         setButtonState(button, "error", "Erro");
@@ -907,6 +960,7 @@
           params: JSON.stringify(params),
           mode: modeUsed,
           status: "error",
+          detail: hint ? `${error.message || "Erro inesperado"} | ${hint}` : error.message || "Erro inesperado",
         });
       } finally {
         setTimeout(() => {
