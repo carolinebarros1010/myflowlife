@@ -877,7 +877,16 @@
           data = { message: "LINK ONLY: endpoint aberto em nova aba.", url };
         } else {
           const response = await fetch(url, { method: "GET" });
-          data = await response.json();
+          const contentType = response.headers.get("content-type") || "";
+          const payload = contentType.includes("application/json")
+            ? await response.json()
+            : await response.text();
+          if (!response.ok) {
+            throw new Error(
+              `Erro HTTP ${response.status}: ${typeof payload === "string" ? payload : JSON.stringify(payload)}`
+            );
+          }
+          data = payload;
         }
         state.response = data;
         updateResponse(data);
@@ -898,6 +907,7 @@
         state.response = {
           error: error.message || "Erro inesperado",
           action,
+          url,
         };
         updateResponse(state.response);
         setButtonState(button, "error", "Erro");
