@@ -801,6 +801,7 @@
         params: JSON.stringify(params),
         mode: state.mode === "link-only" ? "LINK" : "FETCH",
         status: "error",
+        detail: reason,
       };
       logEvent(entry);
       state.response = { error: reason, action, params };
@@ -852,9 +853,11 @@
         .forEach((log) => {
           const item = document.createElement("div");
           item.className = `log-item ${log.status}`;
+          const detailLine = log.detail ? `<div>detalhe: ${log.detail}</div>` : "";
           item.innerHTML = `
             <div><span>${log.time}</span> • <span>${log.action}</span> • ${log.mode}</div>
             <div>params: ${log.params}</div>
+            ${detailLine}
             <div>status: ${log.status}</div>
           `;
           list.appendChild(item);
@@ -938,6 +941,7 @@
           params: JSON.stringify(params),
           mode: modeUsed,
           status: "error",
+          detail: error.message || "Erro inesperado",
         });
       } finally {
         setTimeout(() => {
