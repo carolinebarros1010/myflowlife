@@ -887,7 +887,10 @@
       consoleEl.classList.remove("empty");
     };
 
-    const buildFetchHint = (errorMessage) => {
+    const buildFetchHint = (errorMessage, errorName) => {
+      if (errorName === "AbortError") {
+        return "Tempo limite excedido. O Apps Script pode estar travado ou executando além do limite. Verifique os logs de execução no Apps Script.";
+      }
       const msg = String(errorMessage || "").toLowerCase();
       if (msg.includes("failed to fetch") || msg.includes("networkerror")) {
         return "Fetch bloqueado (provável CORS) ou Web App inacessível. Verifique se o Apps Script está publicado como Web App e com acesso 'Qualquer pessoa'.";
@@ -908,7 +911,10 @@
           window.open(url, "_blank");
           data = { message: "LINK ONLY: endpoint aberto em nova aba.", url };
         } else {
-          const response = await fetch(url, { method: "GET" });
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
+          const response = await fetch(url, { method: "GET", signal: controller.signal });
+          clearTimeout(timeoutId);
           const contentType = response.headers.get("content-type") || "";
           const payload = contentType.includes("application/json")
             ? await response.json()
@@ -931,10 +937,13 @@
           status: "ok",
         });
       } catch (error) {
-        const hint = buildFetchHint(error.message);
+        const hint = buildFetchHint(error.message, error.name);
         if (state.mode !== "link-only") {
           window.open(url, "_blank");
-          toast("Fetch bloqueado (provável CORS). Abri o endpoint em nova aba.");
+          const toastMessage = hint
+            ? hint
+            : "Fetch bloqueado (provável CORS). Abri o endpoint em nova aba.";
+          toast(toastMessage);
           modeUsed = "LINK-FALLBACK";
         }
         state.response = {
