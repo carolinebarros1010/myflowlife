@@ -327,7 +327,7 @@ function hidratarCamposDoPerfil(perfil = null) {
   const diaCicloStorage = parseInt(perfil?.diaCiclo || localStorage.getItem("femflow_diaCiclo") || "1", 10);
   const cicloDuracaoStorage = parseInt(perfil?.ciclo_duracao || localStorage.getItem("femflow_cycleLength") || "28", 10);
   const faseStorage = normalizarFase(perfil?.fase || localStorage.getItem("femflow_fase"));
-  const inicioStorage = perfil?.data_inicio || localStorage.getItem("femflow_startDate") || "";
+  const inicioStorage = localStorage.getItem("femflow_training_start") || "";
   const nomeStorage = perfil?.nome || localStorage.getItem("femflow_nome") || "Aluna";
 
   if (nivelEl && nivelStorage) {
@@ -379,6 +379,29 @@ function renderSemanaAtiva() {
   atualizarTabsSemana();
 }
 
+function persistMesociclo() {
+  if (!mesocicloPlan.length) return;
+  localStorage.setItem("femflow_mesociclo_plan", JSON.stringify(mesocicloPlan));
+  localStorage.setItem("femflow_mesociclo_week", String(semanaAtiva));
+}
+
+function carregarMesocicloSalvo() {
+  const raw = localStorage.getItem("femflow_mesociclo_plan");
+  if (!raw) return false;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.length) return false;
+    mesocicloPlan = parsed;
+    const weekRaw = parseInt(localStorage.getItem("femflow_mesociclo_week") || "0", 10);
+    semanaAtiva = Number.isFinite(weekRaw) ? weekRaw : 0;
+    renderSemanaAtiva();
+    return true;
+  } catch (error) {
+    console.warn("⚠️ Falha ao carregar mesociclo salvo:", error);
+    return false;
+  }
+}
+
 function gerarMesociclo() {
   console.log("⚙️ Iniciando geração do mesociclo (30 dias)...");
 
@@ -415,6 +438,9 @@ function gerarMesociclo() {
   const modalidade = modalidadeEl.value;
   const zona = zonaEl.value || "Z2 / PSE 5-6";
   const inicioRaw = inicioEl.value;
+  if (inicioRaw) {
+    localStorage.setItem("femflow_training_start", inicioRaw);
+  }
 
   if (nTreinos > 5) {
     toast("Máximo de 5 treinos por semana para respeitar a recuperação.");
@@ -538,6 +564,7 @@ function gerarMesociclo() {
   mesocicloPlan = plano;
   semanaAtiva = 0;
   renderSemanaAtiva();
+  persistMesociclo();
   toast("Mesociclo gerado com sucesso!");
   playFeedback("success");
 
@@ -662,6 +689,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
     const perfil = await syncPerfilBackend();
     hidratarCamposDoPerfil(perfil);
+    carregarMesocicloSalvo();
   })();
 
   // Conectar event listeners aos botões com IDs corretos
@@ -686,6 +714,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
       const weekIndex = Number(tab.dataset.week || 0);
       semanaAtiva = weekIndex;
       renderSemanaAtiva();
+      localStorage.setItem("femflow_mesociclo_week", String(semanaAtiva));
     });
   });
 
@@ -730,6 +759,10 @@ window.addEventListener('DOMContentLoaded', ()=>{
         chart.destroy();
         chart = null;
       }
+      mesocicloPlan = [];
+      semanaAtiva = 0;
+      localStorage.removeItem("femflow_mesociclo_plan");
+      localStorage.removeItem("femflow_mesociclo_week");
       toast("🗑️ Tudo limpo"); 
     });
     console.log("✅ Evento conectado: btnResetar");
