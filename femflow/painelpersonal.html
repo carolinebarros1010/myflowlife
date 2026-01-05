@@ -794,21 +794,42 @@
       return { nivel, fase, enfase, destino, id_aluna: idAluna };
     };
 
+    const logValidationFailure = (action, params, reason) => {
+      const entry = {
+        time: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+        action,
+        params: JSON.stringify(params),
+        mode: state.mode === "link-only" ? "LINK" : "FETCH",
+        status: "error",
+      };
+      logEvent(entry);
+      state.response = { error: reason, action, params };
+      updateResponse(state.response);
+    };
+
     const validate = (params, action = "") => {
       if (!state.endpoint) {
-        toast("Informe o endpoint antes de executar.");
+        const reason = "Informe o endpoint antes de executar.";
+        toast(reason);
+        logValidationFailure(action, params, reason);
         return false;
       }
       if (!params.nivel || !params.fase || !params.enfase) {
-        toast("Preencha nivel, fase inicial e enfase.");
+        const reason = "Preencha nivel, fase inicial e enfase.";
+        toast(reason);
+        logValidationFailure(action, params, reason);
         return false;
       }
       if (action === "importar" && !params.id_aluna) {
-        toast("Informe o perfil (ID da aluna) antes de importar.");
+        const reason = "Informe o perfil (ID da aluna) antes de importar.";
+        toast(reason);
+        logValidationFailure(action, params, reason);
         return false;
       }
       if (!params.destino) {
-        toast("Preencha o destino ou informe um ID de aluna.");
+        const reason = "Preencha o destino ou informe um ID de aluna.";
+        toast(reason);
+        logValidationFailure(action, params, reason);
         return false;
       }
       return true;
