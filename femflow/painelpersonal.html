@@ -746,6 +746,7 @@
     const state = {
       endpoint: localStorage.getItem("femflow_endpoint_url") || "",
       mode: localStorage.getItem("femflow_mode") || "fetch-first",
+      timeoutMs: Number(localStorage.getItem("femflow_timeout_ms") || 180000),
       response: null,
       logs: [],
     };
@@ -912,7 +913,7 @@
           data = { message: "LINK ONLY: endpoint aberto em nova aba.", url };
         } else {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000);
+          const timeoutId = setTimeout(() => controller.abort(), state.timeoutMs);
           const response = await fetch(url, { method: "GET", signal: controller.signal });
           clearTimeout(timeoutId);
           const contentType = response.headers.get("content-type") || "";
