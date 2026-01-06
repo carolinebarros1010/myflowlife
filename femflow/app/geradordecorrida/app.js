@@ -66,13 +66,13 @@ function normalizarNivel(raw) {
 
 function normalizarFase(raw) {
   const f = String(raw || "").toLowerCase().trim();
-  if (!f) return "folicular";
+  if (!f) return "follicular";
   return {
     ovulatória: "ovulatoria",
     ovulatoria: "ovulatoria",
     ovulação: "ovulatoria",
-    follicular: "folicular",
-    folicular: "folicular",
+    follicular: "follicular",
+    folicular: "follicular",
     lútea: "lutea",
     lutea: "lutea",
     luteal: "lutea",
@@ -87,12 +87,12 @@ function calcularFasesPorCiclo(cicloDuracao) {
   const duracao = Math.max(21, Math.min(35, Number(cicloDuracao) || 28));
   const base = {
     menstrual: 5,
-    folicular: 8,
+    follicular: 8,
     ovulatoria: 4,
     lutea: 11
   };
   const totalBase = 28;
-  const fases = ["menstrual", "folicular", "ovulatoria", "lutea"];
+  const fases = ["menstrual", "follicular", "ovulatoria", "lutea"];
   const valores = fases.map(f => ({
     fase: f,
     valor: (base[f] / totalBase) * duracao
@@ -134,12 +134,12 @@ function calcularFasePorDia(diaCiclo, cicloDuracao) {
   const tamanhos = calcularFasesPorCiclo(duracao);
   const limites = {
     menstrual: tamanhos.menstrual,
-    folicular: tamanhos.menstrual + tamanhos.folicular,
-    ovulatoria: tamanhos.menstrual + tamanhos.folicular + tamanhos.ovulatoria
+    follicular: tamanhos.menstrual + tamanhos.follicular,
+    ovulatoria: tamanhos.menstrual + tamanhos.follicular + tamanhos.ovulatoria
   };
 
   if (diaNormalizado <= limites.menstrual) return { fase: "menstrual", dia: diaNormalizado };
-  if (diaNormalizado <= limites.folicular) return { fase: "folicular", dia: diaNormalizado };
+  if (diaNormalizado <= limites.follicular) return { fase: "follicular", dia: diaNormalizado };
   if (diaNormalizado <= limites.ovulatoria) return { fase: "ovulatoria", dia: diaNormalizado };
   return { fase: "lutea", dia: diaNormalizado };
 }
@@ -238,7 +238,7 @@ function formatRitmoLabel(modalidade, ritmoSessao) {
 const seq = {};
 
 const ajusteFaseCiclo = {
-  folicular: { volume: 1.0, intensidade: 1.0 },
+  follicular: { volume: 1.0, intensidade: 1.0 },
   ovulatoria: { volume: 0.95, intensidade: 1.05 },
   lutea: { volume: 0.85, intensidade: 0.9 },
   menstrual: { volume: 0.7, intensidade: 0.8 },
@@ -345,7 +345,7 @@ function hidratarCamposDoPerfil(perfil = null) {
       ? calcularFasePorDia(diaCicloStorage, cicloDuracaoStorage).fase
       : faseStorage;
     const faseLabel = {
-      folicular: "Folicular",
+      follicular: "Folicular",
       ovulatoria: "Ovulatória",
       lutea: "Lútea",
       menstrual: "Menstrual"
@@ -518,7 +518,7 @@ function gerarMesociclo() {
     const faseInfo = Number.isFinite(diaCiclo)
       ? calcularFasePorDia(diaCiclo + i, cicloDuracao)
       : { fase: faseCiclo, dia: 1 };
-    const ajusteDia = ajusteFaseCiclo[faseInfo.fase] || ajusteFaseCiclo.folicular;
+    const ajusteDia = ajusteFaseCiclo[faseInfo.fase] || ajusteFaseCiclo.follicular;
 
     let alvo = treino.distKm * ajusteDia.volume;
     if (distAcum + alvo > volMaxKm) alvo = Math.max(2, volMaxKm - distAcum);
