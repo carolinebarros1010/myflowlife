@@ -157,16 +157,16 @@ function resolverPerfilEnergetico(quizScore) {
   // ===== FASE ALTA (POR NÍVEL)
   const faseAltaNivel = faseAltaPorNivel();
 
-  if (faseAltaNivel === "lutea") {
-    return { faseEnergetica: "lutea", diaCicloInicial: 18 };
+  if (faseAltaNivel === "luteal") {
+    return { faseEnergetica: "luteal", diaCicloInicial: 18 };
   }
 
-  if (faseAltaNivel === "folicular") {
-    return { faseEnergetica: "folicular", diaCicloInicial: 6 };
+  if (faseAltaNivel === "follicular") {
+    return { faseEnergetica: "follicular", diaCicloInicial: 6 };
   }
 
-  if (faseAltaNivel === "ovulatoria") {
-    return { faseEnergetica: "ovulatoria", diaCicloInicial: 14 };
+  if (faseAltaNivel === "ovulatory") {
+    return { faseEnergetica: "ovulatory", diaCicloInicial: 14 };
   }
 
   // fallback defensivo (não deveria acontecer)
@@ -181,9 +181,9 @@ function resolverPerfilEnergetico(quizScore) {
 ============================================================ */
 function faseAltaPorNivel(){
   const nivel=(localStorage.getItem("femflow_nivel")||"iniciante").toLowerCase();
-  if(nivel==="iniciante") return "lutea";
-  if(nivel==="intermediaria") return "folicular";
-  return "ovulatoria";
+  if(nivel==="iniciante") return "luteal";
+  if(nivel==="intermediaria") return "follicular";
+  return "ovulatory";
 }
 
 
@@ -442,15 +442,15 @@ if (!perguntasAtuais || !perguntasAtuais.length) {
 if (cicloState.perfilInterno === "irregular_quiz") {
 
   let faseAprox = "";
-  if (quizScore >= 4) faseAprox = "lutea";
-  else if (quizScore === 3) faseAprox = "ovulatoria";
-  else if (quizScore === 2) faseAprox = "folicular";
+  if (quizScore >= 4) faseAprox = "luteal";
+  else if (quizScore === 3) faseAprox = "ovulatory";
+  else if (quizScore === 2) faseAprox = "follicular";
   else faseAprox = "menstrual";
 
   let diaInicial = 1;
-  if (faseAprox === "folicular")  diaInicial = 6;
-  if (faseAprox === "ovulatoria") diaInicial = 14;
-  if (faseAprox === "lutea")      diaInicial = 18;
+  if (faseAprox === "follicular")  diaInicial = 6;
+  if (faseAprox === "ovulatory") diaInicial = 14;
+  if (faseAprox === "luteal")      diaInicial = 18;
 
   console.log("🔍 IRREGULAR.DEBUG → faseAprox:", faseAprox);
   console.log("🔍 IRREGULAR.DEBUG → diaInicial:", diaInicial);
