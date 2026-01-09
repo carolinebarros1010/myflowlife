@@ -269,6 +269,38 @@ const quizBox  = document.getElementById("quizBox");
 const regularBox=document.getElementById("regularBox");
 const diuBox = document.getElementById("diuSubmenu");
 
+function bindConfirmarRegular() {
+  const btn = document.getElementById("btnConfirmarRegular");
+  if (btn && !btn.dataset.bound) {
+    btn.dataset.bound = "true";
+
+    bindTap(btn, async () => {
+      const s = document.getElementById("dataUltima")?.value;
+      const len = parseInt(document.getElementById("duracao")?.value || 28, 10);
+
+      if (!s || len < 21 || len > 35) {
+        FEMFLOW.toast("Preencha corretamente data e duração 🌸");
+        return;
+      }
+
+      const start = parseDateLocalYYYYMMDD(s);
+      const hoje = new Date();
+      const umDia = 86400000;
+
+      let diff = Math.floor((hoje - start) / umDia);
+      diff = Math.max(0, diff);
+
+      let d = ((diff % len) + len) % len;
+      const diaCicloInicial = d === 0 ? 1 : d + 1;
+
+      await salvarCiclo({
+        diaCicloInicial,
+        cicloDuracao: len
+      });
+    });
+  }
+}
+
 /* ============================================================
    BOTÕES PRINCIPAIS
 ============================================================ */
@@ -294,37 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
 if (cicloState.perfilSelecionado === "regular") {
   regularBox.style.display = "block";
-
-  const btn = document.getElementById("btnConfirmarRegular");
-  if (btn && !btn.dataset.bound) {
-    btn.dataset.bound = "true";
-
-    bindTap(btn, async () => {
-
-      const s = document.getElementById("dataUltima")?.value;
-      const len = parseInt(document.getElementById("duracao")?.value || 28, 10);
-
-      if (!s || len < 21 || len > 35) {
-        FEMFLOW.toast("Preencha corretamente data e duração 🌸");
-        return;
-      }
-
-      const start = parseDateLocalYYYYMMDD(s);
-      const hoje = new Date();
-      const umDia = 86400000;
-
-      let diff = Math.floor((hoje - start) / umDia);
-      diff = Math.max(0, diff);
-
-      let d = ((diff % len) + len) % len;
-      const diaCicloInicial = d === 0 ? 1 : d + 1;
-
-      await salvarCiclo({
-        diaCicloInicial,
-        cicloDuracao: len
-      });
-    });
-  }
+  bindConfirmarRegular();
 }
 
       else if (cicloState.perfilSelecionado==="irregular") {
@@ -356,6 +358,7 @@ document.querySelectorAll("[data-diu]").forEach(btn=>{
     // segue o fluxo correto
     if (btn.dataset.diu === "cobre") {
       regularBox.style.display = "block";
+      bindConfirmarRegular();
     } else {
       iniciarQuizDiuHormonal();
     }
