@@ -213,26 +213,23 @@ async function salvarCiclo({ diaCicloInicial, cicloDuracao }) {
   /* ============================================================
      2) BACKEND — contrato oficial
   ============================================================ */
- await FEMFLOW.post({
+const resp = await FEMFLOW.post({
   action: "setciclo",
   id: idUser,
-
-  // ✅ PERFIL: vem do front
-  perfilHormonal: cicloState.perfilSelecionado,   // regular | irregular | diu | menopausa
-  perfilInterno: cicloState.perfilInterno,        // irregular_quiz | diuHormonal_quiz | menopausa_quiz | null
-
-  // ✅ CICLO
+  perfilHormonal: cicloState.perfilSelecionado,
+  perfilInterno: cicloState.perfilInterno,
   cicloDuracao,
   diaCicloInicial,
   diaPrograma: 1
 });
-  
+
 if (!resp || resp.status !== "ok") {
   console.log("❌ setciclo falhou:", resp);
   FEMFLOW.toast("Erro ao salvar perfil/ciclo. Tente novamente.");
   FEMFLOW.loading.hide?.();
   return;
 }
+
 
   /* ============================================================
      3) VALIDAR — fonte da verdade
