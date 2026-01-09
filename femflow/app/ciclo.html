@@ -213,13 +213,20 @@ async function salvarCiclo({ diaCicloInicial, cicloDuracao }) {
   /* ============================================================
      2) BACKEND — contrato oficial
   ============================================================ */
-  await FEMFLOW.post({
-    action: "setciclo",
-    id: idUser,
-    cicloDuracao,
-    diaCicloInicial,
-    diaPrograma: 1
-  });
+ await FEMFLOW.post({
+  action: "setciclo",
+  id: idUser,
+
+  // ✅ PERFIL: vem do front
+  perfilHormonal: cicloState.perfilSelecionado,   // regular | irregular | diu | menopausa
+  perfilInterno: cicloState.perfilInterno,        // irregular_quiz | diuHormonal_quiz | menopausa_quiz | null
+
+  // ✅ CICLO
+  cicloDuracao,
+  diaCicloInicial,
+  diaPrograma: 1
+});
+
 
   /* ============================================================
      3) VALIDAR — fonte da verdade
