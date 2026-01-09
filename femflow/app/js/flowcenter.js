@@ -122,8 +122,28 @@ async function initFlowCenter() {
   /* ============================================================
      5) CICLO (UI)
   ============================================================ */
+  const normalizarFase = (raw) => {
+    const f = String(raw || "").toLowerCase().trim();
+    if (!f) return "follicular";
+    return {
+      ovulatória: "ovulatory",
+      ovulatoria: "ovulatory",
+      ovulação: "ovulatory",
+      ovulation: "ovulatory",
+      folicular: "follicular",
+      follicular: "follicular",
+      lútea: "luteal",
+      lutea: "luteal",
+      luteal: "luteal",
+      menstrual: "menstrual",
+      menstruação: "menstrual",
+      menstruacao: "menstrual",
+      menstruation: "menstrual"
+    }[f] || f;
+  };
+
   const ciclo = {
-    fase: perfil.fase?.toLowerCase() || "follicular",
+    fase: normalizarFase(perfil.fase),
     diaCiclo: Number(perfil.diaCiclo || 1),
     diaPrograma: Number(perfil.diaPrograma || 1)
   };
