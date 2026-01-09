@@ -149,9 +149,8 @@ function resolverPerfilEnergetico(quizScore) {
   // ===== FASE BAIXA (FIXA, SEGURA)
   if (!entraAlta) {
     return {
-      fase: "menstrual",
-      dia: 1,
-      faseAlta: null
+      faseEnergetica: "menstrual",
+      diaCicloInicial: 1
     };
   }
 
@@ -159,22 +158,21 @@ function resolverPerfilEnergetico(quizScore) {
   const faseAltaNivel = faseAltaPorNivel();
 
   if (faseAltaNivel === "lutea") {
-    return { fase: "lutea", dia: 18, faseAlta: "lutea" };
+    return { faseEnergetica: "lutea", diaCicloInicial: 18 };
   }
 
   if (faseAltaNivel === "folicular") {
-    return { fase: "folicular", dia: 6, faseAlta: "folicular" };
+    return { faseEnergetica: "folicular", diaCicloInicial: 6 };
   }
 
   if (faseAltaNivel === "ovulatoria") {
-    return { fase: "ovulatoria", dia: 14, faseAlta: "ovulatoria" };
+    return { faseEnergetica: "ovulatoria", diaCicloInicial: 14 };
   }
 
   // fallback defensivo (não deveria acontecer)
   return {
-    fase: "menstrual",
-    dia: 1,
-    faseAlta: null
+    faseEnergetica: "menstrual",
+    diaCicloInicial: 1
   };
 }
 
@@ -195,28 +193,11 @@ function getPerguntas(tipo) {
   return ciclo.quizCiclo?.[tipo] || [];
 }
   
-function calcularDataManualPorFaseEDia(fase, dia) {
-  const hoje = new Date();
-  const base = new Date(hoje);
-  const deslocamento = Math.max(0, Number(dia) - 1);
-  base.setDate(hoje.getDate() - deslocamento);
-  return base;
-}
-
-
-  
 /* ============================================================
    SALVAR CICLO — FAST MODE (LOCAL FIRST + 1 POST)
    FemFlow 2025
 ============================================================ */
-async function salvarCiclo({
-  perfil,
-  start,
-  length,
-  faseCalc,
-  dia,
-  faseAlta = null
-}) {
+async function salvarCiclo({ diaCicloInicial, cicloDuracao }) {
 
   ffShowLoading("Configurando seu ciclo…");
   await new Promise(requestAnimationFrame);
@@ -226,33 +207,18 @@ async function salvarCiclo({
   /* ============================================================
      1) CACHE LOCAL (destrava navegação)
   ============================================================ */
-  localStorage.setItem("femflow_perfilHormonal", perfil);
   localStorage.setItem("femflow_cycle_configured", "yes");
   localStorage.setItem("femflow_cycle_changed", "true");
-  localStorage.setItem("femflow_cycleLength", String(length));
-   
-
-  if (faseAlta) {
-    localStorage.setItem("femflow_faseAlta", faseAlta);
-  } else {
-    localStorage.removeItem("femflow_faseAlta");
-  }
 
   /* ============================================================
      2) BACKEND — contrato oficial
   ============================================================ */
   await FEMFLOW.post({
-    action: "setperfilhormonal",
-    id: idUser,
-    perfil
-  });
-
-  await FEMFLOW.post({
     action: "setciclo",
     id: idUser,
-    cicloDuracao: length,
-    dataInicio: start.toISOString(),
-    perfilHormonal: perfil
+    cicloDuracao,
+    diaCicloInicial,
+    diaPrograma: 1
   });
 
   /* ============================================================
@@ -267,11 +233,6 @@ const perfilFresh = await fetch(`${FEMFLOW.SCRIPT_URL}?${qs.toString()}`)
   if (perfilFresh?.status === "ok") {
     localStorage.setItem("femflow_fase", perfilFresh.fase);
     localStorage.setItem("femflow_diaCiclo", String(perfilFresh.diaCiclo));
-    localStorage.setItem("femflow_diaPrograma", String(perfilFresh.diaPrograma));
-     localStorage.setItem(
-      "femflow_dataInicioPrograma",
-      perfilFresh.dataInicioPrograma ? String(perfilFresh.dataInicioPrograma) : ""
-    );
   }
 
   /* ============================================================
@@ -285,8 +246,10 @@ const perfilFresh = await fetch(`${FEMFLOW.SCRIPT_URL}?${qs.toString()}`)
 /* ============================================================
    PERFIS E QUIZ
 ============================================================ */
-let perfilSelecionado=null;
-let perfilInterno=null;
+const cicloState = {
+  perfilSelecionado: null,
+  perfilInterno: null
+};
 let perguntasAtuais=[];
 let quizIdx=0, quizScore=0;
 
@@ -313,13 +276,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       btn.classList.add("active");
 
-      perfilSelecionado = btn.dataset.perfil;
+      cicloState.perfilSelecionado = btn.dataset.perfil;
 
       regularBox.style.display="none";
       quizBox.style.display="none";
       diuBox.style.display="none";
       
-if (perfilSelecionado === "regular") {
+if (cicloState.perfilSelecionado === "regular") {
   regularBox.style.display = "block";
 
   const btn = document.getElementById("btnConfirmarRegular");
@@ -344,32 +307,23 @@ if (perfilSelecionado === "regular") {
       diff = Math.max(0, diff);
 
       let d = ((diff % len) + len) % len;
-      const dia = d === 0 ? 1 : d + 1;
-
-      let fase = "";
-      if (dia <= 5) fase = "menstrual";
-      else if (dia <= 13) fase = "folicular";
-      else if (dia <= 17) fase = "ovulatoria";
-      else fase = "lutea";
+      const diaCicloInicial = d === 0 ? 1 : d + 1;
 
       await salvarCiclo({
-        perfil: "regular",
-        start,
-        length: len,
-        faseCalc: fase,
-        dia
+        diaCicloInicial,
+        cicloDuracao: len
       });
     });
   }
 }
 
-      else if (perfilSelecionado==="irregular") {
+      else if (cicloState.perfilSelecionado==="irregular") {
         iniciarQuizIrregular();
       }
-      else if (perfilSelecionado==="menopausa") {
+      else if (cicloState.perfilSelecionado==="menopausa") {
         iniciarQuizMenopausa();
       }
-      else if (perfilSelecionado==="diu") {
+      else if (cicloState.perfilSelecionado==="diu") {
         diuBox.style.display="block";
       }
      });
@@ -403,19 +357,19 @@ document.querySelectorAll("[data-diu]").forEach(btn=>{
    QUIZ — lógicas
 ============================================================ */
 function iniciarQuizIrregular(){
-  perfilInterno="irregular_quiz";
+  cicloState.perfilInterno="irregular_quiz";
   perguntasAtuais = getPerguntas("irregular");
   abrirQuiz();
 }
 
 function iniciarQuizMenopausa(){
-  perfilInterno="menopausa_quiz";
+  cicloState.perfilInterno="menopausa_quiz";
   perguntasAtuais = getPerguntas("menopausa");
   abrirQuiz();
 }
 
 function iniciarQuizDiuHormonal(){
-  perfilInterno="diuHormonal_quiz";
+  cicloState.perfilInterno="diuHormonal_quiz";
   perguntasAtuais = getPerguntas("diuHormonal");
   abrirQuiz();
 }
@@ -458,44 +412,21 @@ function responderQuiz(v){
    FINAL DO QUIZ — PERFIL ENERGÉTICO e PERFIL HORMONAL IRREGULAR
 ============================================================ */
 async function finalizarQuiz(){
-  const idUser = localStorage.getItem("femflow_id");
  // 🔒 FALLBACK FEMFLOW — quiz falhou ou não iniciou
 if (!perguntasAtuais || !perguntasAtuais.length) {
 
-  const idUser = localStorage.getItem("femflow_id");
-
   // fallback fisiologicamente seguro
-  const faseFallback = "menstrual";
   const diaFallback = 1;
 
-  // dia 1 => data manual = hoje
-  const manualStart = calcularDataManualPorFaseEDia(faseFallback, diaFallback);
-
-  // garante que o backend "ancora" o ciclo no manual start
-  await FEMFLOW.post({
-    action: "setmanualstart",
-    id: idUser,
-    startDate: manualStart.toISOString()
-  });
-
-  salvarCiclo({
-    perfil: "energetico",
-    start: manualStart,
-    length: 28,
-    faseCalc: faseFallback,
-    dia: diaFallback
-  });
+  salvarCiclo({ diaCicloInicial: diaFallback, cicloDuracao: 28 });
 
   return;
 }
 
-  const nivel = (localStorage.getItem("femflow_nivel") || "iniciante").toLowerCase();
-  
-
   /* ============================================================
    1) PERFIL IRREGULAR — fase aproximada
 ============================================================ */
-if (perfilInterno === "irregular_quiz") {
+if (cicloState.perfilInterno === "irregular_quiz") {
 
   let faseAprox = "";
   if (quizScore >= 4) faseAprox = "lutea";
@@ -512,28 +443,9 @@ if (perfilInterno === "irregular_quiz") {
   console.log("🔍 IRREGULAR.DEBUG → diaInicial:", diaInicial);
   console.log("🔍 IRREGULAR.DEBUG → score:", quizScore);
 
-  const { normalizado, manualStart } =
-    criarManualStartSeguro(faseAprox, diaInicial);
-
-  await FEMFLOW.post({
-    action: "setmanualstart",
-    id: idUser,
-    startDate: manualStart.toISOString()
-  });
-
- const perfilFinalMap = {
-  menopausa_quiz: "energetico",
-  diuHormonal_quiz: "energetico"
-};
-
-const perfilFinal = perfilFinalMap[perfilInterno] || perfilInterno.replace("_quiz","");
-
 salvarCiclo({
-  perfil: perfilFinal,
-    start: manualStart,
-    length: 28,
-    faseCalc: normalizado.fase,
-    dia: normalizado.dia
+    diaCicloInicial: diaInicial,
+    cicloDuracao: 28
   });
 
   return;
@@ -542,45 +454,14 @@ salvarCiclo({
 /* ============================================================
    FINAL DO QUIZ — PERFIL ENERGÉTICO (MENOPAUSA / DIU HORMONAL)
 ============================================================ */
-  const idUser = localStorage.getItem("femflow_id");
-
   // resolve energia + fase + dia de forma CENTRALIZADA
-  const { fase, dia, faseAlta } = resolverPerfilEnergetico(quizScore);
+  const { faseEnergetica, diaCicloInicial } = resolverPerfilEnergetico(quizScore);
 
   console.log("🔋 ENERGÉTICO.DEBUG → score:", quizScore);
-  console.log("🔋 ENERGÉTICO.DEBUG → fase:", fase);
-  console.log("🔋 ENERGÉTICO.DEBUG → dia:", dia);
-  console.log("🔋 ENERGÉTICO.DEBUG → faseAlta:", faseAlta);
+  console.log("🔋 ENERGÉTICO.DEBUG → faseEnergetica:", faseEnergetica);
+  console.log("🔋 ENERGÉTICO.DEBUG → diaCicloInicial:", diaCicloInicial);
 
-  // cria manualStart coerente com fase/dia
-  const { normalizado, manualStart } =
-    criarManualStartSeguro(fase, dia);
-
-  // 🔒 ancora o backend na data correta
-  await FEMFLOW.post({
-    action: "setmanualstart",
-    id: idUser,
-    startDate: manualStart.toISOString()
-  });
-
-  // 🔥 mapear perfil corretamente para o backend
-  const perfilFinalMap = {
-    menopausa_quiz: "energetico",
-    diuHormonal_quiz: "energetico"
-  };
-
-  const perfilFinal =
-    perfilFinalMap[perfilInterno] ||
-    perfilInterno.replace("_quiz", "");
-
-  salvarCiclo({
-    perfil: perfilFinal,
-    start: manualStart,
-    length: 28,
-    faseCalc: normalizado.fase,
-    dia: normalizado.dia,
-    faseAlta: faseAlta // ✅ só existe se entrou em alta
-  });
+  salvarCiclo({ diaCicloInicial, cicloDuracao: 28 });
 
   return;
 }
@@ -599,21 +480,7 @@ bindTap(document.getElementById("btnConfirmarRegular"), async () => {
     return;
   }
 
-  const start=parseDateLocalYYYYMMDD(s);
-  const hoje=new Date();
-  const umDia=86400000;
-
-  let diff=Math.floor((hoje-start)/umDia);
-  diff=Math.max(0,diff);
-
-  let d=((diff%len)+len)%len;
-  const dia=d===0?1:d+1;
-
-  salvarCiclo({
-  perfil: "regular",
-  start,
-  length: len
-});
+  salvarCiclo({ diaCicloInicial: 1, cicloDuracao: 28 });
 
 });
 }
@@ -714,43 +581,6 @@ document.addEventListener("DOMContentLoaded", () => {
   aplicarIdiomaCiclo();
 });
 /* ============================================================
-   🔧   NORMALIZAR CICLO   menstrual:   [1, 5],  folicular:  [6, 13],
-    ovulatoria: [14, 17],   lutea:      [18, 35]
-============================================================ */
-  
-function normalizarFaseEDia(fase, dia) {
-  const mapa = {
-    menstrual:   [1, 5],
-    folicular:  [6, 13],
-    ovulatoria: [14, 17],
-    lutea:      [18, 35]
-  };
-
-  const range = mapa[fase];
-  if (!range) return { fase: "menstrual", dia: 1 };
-
-  const [min, max] = range;
-
-  if (dia < min) dia = min;
-  if (dia > max) dia = max;
-
-  return { fase, dia };
-}
-/* ============================================================
-   🛡️ MANUAL START SEGURO — FONTE DA VERDADE
-============================================================ */
-function criarManualStartSeguro(fase, dia) {
-  const normalizado = normalizarFaseEDia(fase, dia);
-
-  const manualStart = calcularDataManualPorFaseEDia(
-    normalizado.fase,
-    normalizado.dia
-  );
-
-  return { normalizado, manualStart };
-}
-  
-/* ============================================================
    🔄 Atualizar textos quando trocar idioma
 ============================================================ */
 document.addEventListener("femflow:langChange", () => {
@@ -758,7 +588,7 @@ document.addEventListener("femflow:langChange", () => {
 
   // Se o quiz estiver aberto, reescreve a pergunta + passo
   if (quizBox && quizBox.style.display !== "none") {
-    const tipo = (perfilInterno || "").replace("_quiz", "");
+    const tipo = (cicloState.perfilInterno || "").replace("_quiz", "");
     perguntasAtuais = getPerguntas(tipo) || [];
 
     quizPerg.textContent = perguntasAtuais[quizIdx] || "";
