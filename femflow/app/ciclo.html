@@ -226,7 +226,13 @@ async function salvarCiclo({ diaCicloInicial, cicloDuracao }) {
   diaCicloInicial,
   diaPrograma: 1
 });
-
+  
+if (!resp || resp.status !== "ok") {
+  console.log("❌ setciclo falhou:", resp);
+  FEMFLOW.toast("Erro ao salvar perfil/ciclo. Tente novamente.");
+  FEMFLOW.loading.hide?.();
+  return;
+}
 
   /* ============================================================
      3) VALIDAR — fonte da verdade
