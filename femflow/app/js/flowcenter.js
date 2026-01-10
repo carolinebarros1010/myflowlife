@@ -122,8 +122,28 @@ async function initFlowCenter() {
   /* ============================================================
      5) CICLO (UI)
   ============================================================ */
+  const normalizarFase = (raw) => {
+    const f = String(raw || "").toLowerCase().trim();
+    if (!f) return "follicular";
+    return {
+      ovulatória: "ovulatory",
+      ovulatoria: "ovulatory",
+      ovulação: "ovulatory",
+      ovulation: "ovulatory",
+      folicular: "follicular",
+      follicular: "follicular",
+      lútea: "luteal",
+      lutea: "luteal",
+      luteal: "luteal",
+      menstrual: "menstrual",
+      menstruação: "menstrual",
+      menstruacao: "menstrual",
+      menstruation: "menstrual"
+    }[f] || f;
+  };
+
   const ciclo = {
-    fase: perfil.fase?.toLowerCase() || "follicular",
+    fase: normalizarFase(perfil.fase),
     diaCiclo: Number(perfil.diaCiclo || 1),
     diaPrograma: Number(perfil.diaPrograma || 1)
   };
@@ -157,7 +177,7 @@ async function initFlowCenter() {
     document.getElementById("tituloFlow").textContent = `${nome}, ${L.titulo}`;
     document.getElementById("subFlow").textContent = L.sub;
 
-    const faseLabel = L[ciclo.fase] || ciclo.fase;
+    const faseLabel = L[normalizarFase(ciclo.fase)] || ciclo.fase;
     document.getElementById("centerPhase").textContent = faseLabel;
     document.getElementById("t_current").textContent =
       `${L.faseAtual}: ${faseLabel}`;
