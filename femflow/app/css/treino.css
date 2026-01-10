@@ -101,6 +101,8 @@ body {
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
   position: relative;
   z-index: 1;
 }
@@ -128,6 +130,7 @@ body {
   padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
 
   scroll-snap-align: center;
+  scroll-snap-stop: always;
   overflow-y: auto;
    
   box-shadow: 0 4px 14px var(--shadow);
