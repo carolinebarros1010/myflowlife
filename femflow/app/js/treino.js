@@ -31,6 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const track     = document.querySelector("#carouselTrack");
   const tituloDia = document.querySelector("#tituloDiaTreino");
   const footer    = document.querySelector(".fix-footer");
+  const carousel  = document.querySelector(".carousel-container");
+  const indicator = document.getElementById("carouselIndicator");
+  const indicatorDots = document.getElementById("carouselIndicatorDots");
+  const indicatorThumb = document.getElementById("carouselIndicatorThumb");
 
   const btnSalvar       = document.getElementById("salvarTreinoBtn");
   const btnDescanso     = document.getElementById("descansoBtn");
@@ -112,6 +116,72 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!track) {
     FEMFLOW.error("❌ #carouselTrack não encontrado!");
     return;
+  }
+
+  let carouselScrollHandler = null;
+
+  function updateCarouselIndicator({ index, total }) {
+    if (!indicatorDots || !indicatorThumb) return;
+
+    const dots = Array.from(indicatorDots.children);
+    dots.forEach((dot, dotIndex) => {
+      dot.classList.toggle("is-active", dotIndex === index);
+    });
+
+    const bar = indicatorThumb.parentElement;
+    const barWidth = bar?.clientWidth || 0;
+    if (!barWidth || total <= 0) return;
+
+    const thumbWidth = Math.max(18, Math.round(barWidth / total));
+    const maxLeft = barWidth - thumbWidth;
+    const left = total > 1 ? Math.round((index / (total - 1)) * maxLeft) : 0;
+
+    indicatorThumb.style.width = `${thumbWidth}px`;
+    indicatorThumb.style.left = `${left}px`;
+  }
+
+  function initCarouselIndicator() {
+    if (!carousel || !indicator || !indicatorDots || !indicatorThumb) return;
+
+    const items = Array.from(track.querySelectorAll(".carousel-item"));
+    const total = items.length;
+
+    indicator.classList.toggle("is-hidden", total <= 1);
+    indicatorDots.innerHTML = "";
+
+    if (total <= 1) return;
+
+    items.forEach((_, idx) => {
+      const dot = document.createElement("span");
+      dot.className = "carousel-dot";
+      dot.setAttribute("aria-hidden", "true");
+      dot.addEventListener("click", () => {
+        const gap = parseFloat(getComputedStyle(track).gap || 0);
+        const step = items[0].getBoundingClientRect().width + gap;
+        carousel.scrollTo({ left: step * idx, behavior: "smooth" });
+      });
+      indicatorDots.appendChild(dot);
+    });
+
+    const gap = parseFloat(getComputedStyle(track).gap || 0);
+    const step = items[0].getBoundingClientRect().width + gap;
+
+    const update = () => {
+      const idx = Math.max(
+        0,
+        Math.min(total - 1, Math.round(carousel.scrollLeft / step))
+      );
+      updateCarouselIndicator({ index: idx, total });
+    };
+
+    if (carouselScrollHandler) {
+      carousel.removeEventListener("scroll", carouselScrollHandler);
+    }
+
+    carouselScrollHandler = () => window.requestAnimationFrame(update);
+    carousel.addEventListener("scroll", carouselScrollHandler, { passive: true });
+    window.addEventListener("resize", update);
+    update();
   }
 
   const pseEmojis = ["😴", "🙂", "🙂", "😌", "🙂", "😅", "😅", "😮‍💨", "😮‍💨", "🥵", "🥵"];
@@ -248,6 +318,9 @@ lista.forEach(item => {
 
 
   if (!lista || !lista.length) {
+    if (indicator) {
+      indicator.classList.add("is-hidden");
+    }
     track.innerHTML = `
       <div class="carousel-item">
         <p>Nenhum treino disponível para hoje.</p>
@@ -311,12 +384,13 @@ console.log("🧪 BOX KEYS ORDENADAS:", boxKeys);
   });
 
 initTimers();
-initHIIT();
-initClusterTimers(); // 🔥 CLUSTER TIMER REAL
-initRestPause(); // ✅
-initSeriesProgress();
-initPeso();
-void initPesoPrefill();
+  initHIIT();
+  initClusterTimers(); // 🔥 CLUSTER TIMER REAL
+  initRestPause(); // ✅
+  initSeriesProgress();
+  initPeso();
+  void initPesoPrefill();
+  initCarouselIndicator();
 }
  /* ============================================================
      3) RENDER BOX

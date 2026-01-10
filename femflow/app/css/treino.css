@@ -95,6 +95,67 @@ body {
 /* ============================================================
    3) CARROSSEL
 ============================================================ */
+.carousel-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 6px auto 8px;
+  color: var(--teal);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.carousel-indicator.is-hidden {
+  display: none;
+}
+
+.carousel-indicator-text {
+  opacity: 0.7;
+  font-weight: 600;
+}
+
+.carousel-indicator-bar {
+  width: 120px;
+  height: 4px;
+  background: rgba(204, 106, 90, 0.2);
+  border-radius: 999px;
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-indicator-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 36px;
+  border-radius: 999px;
+  background: var(--terracota);
+  transition: left 0.2s ease, width 0.2s ease;
+}
+
+.carousel-indicator-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--terracota-light);
+  opacity: 0.55;
+  transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+}
+
+.carousel-dot.is-active {
+  opacity: 1;
+  background: var(--terracota);
+  transform: scale(1.15);
+}
+
 .carousel-container {
   width: 100%;
   height: calc(100dvh - 110px);
