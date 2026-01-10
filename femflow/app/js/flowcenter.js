@@ -177,7 +177,7 @@ async function initFlowCenter() {
     document.getElementById("tituloFlow").textContent = `${nome}, ${L.titulo}`;
     document.getElementById("subFlow").textContent = L.sub;
 
-    const faseLabel = L[ciclo.fase] || ciclo.fase;
+    const faseLabel = L[normalizarFase(ciclo.fase)] || ciclo.fase;
     document.getElementById("centerPhase").textContent = faseLabel;
     document.getElementById("t_current").textContent =
       `${L.faseAtual}: ${faseLabel}`;
