@@ -512,12 +512,14 @@ function aplicarIdiomaHome() {
   const tMuscular = document.getElementById("tituloMuscular");
   const tEsportes = document.getElementById("tituloEsportes");
   const tCasa = document.getElementById("tituloCasa");
+  const btnFlow = document.getElementById("btnFlow");
 
   if (tPersonal) tPersonal.textContent = L.tituloPersonal;
   if (tFollowMe) tFollowMe.textContent = L.tituloFollowMe;
   if (tMuscular) tMuscular.textContent = L.tituloMuscular;
   if (tEsportes) tEsportes.textContent = L.tituloEsportes;
   if (tCasa) tCasa.textContent = L.tituloCasa;
+  if (btnFlow && L.botaoFlowcenter) btnFlow.textContent = L.botaoFlowcenter;
 
   // 🔥 VÍDEO
   const vTitle = document.getElementById("homeVideoTitle");
