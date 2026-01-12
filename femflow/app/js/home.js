@@ -302,7 +302,7 @@ const CARD_THUMBS = {
 
 function getThumbUrl(enfase) {
   const file = CARD_THUMBS[enfase];
-  return file ? `/femflow/css/cards/${file}` : "";
+  return file ? `css/cards/${file}` : "";
 }
 
 /* ============================================================
