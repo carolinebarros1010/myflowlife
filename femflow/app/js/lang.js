@@ -156,6 +156,7 @@ home: {
       videoSub:   "Assista ao vídeo rápido antes de começar.",
       videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_PT",
 
+      botaoFlowcenter: "Continue seu treino",
       tituloPersonal:  "Personal",
       tituloFollowMe:  "Treine junto por 30 dias",
       tituloMuscular:  "Treinos por ênfase",
@@ -390,6 +391,7 @@ home: {
       videoSub:   "Watch this quick video before you start.",
       videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_EN",
 
+      botaoFlowcenter: "Continue your workout",
       tituloPersonal:  "Personal Training",
       tituloFollowMe:  "Train together for 30 days",
       tituloMuscular:  "Muscle focus training",
@@ -621,6 +623,7 @@ fr: {
       videoSub:   "Regardez cette vidéo avant de commencer.",
       videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_FR",
 
+      botaoFlowcenter: "Continuez votre entraînement",
       tituloPersonal:  "Personal",
       tituloFollowMe:  "Entraînez-vous pendant 30 jours",
       tituloMuscular:  "Entraînements par groupe musculaire",
