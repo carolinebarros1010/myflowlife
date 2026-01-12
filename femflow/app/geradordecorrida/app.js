@@ -700,6 +700,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
   const btnInfoTeste = byId('btnInfoTeste');
   const modalTeste = byId('modalTeste');
   const btnFecharModal = byId('btnFecharModal');
+  const modalEnduranceInfo = byId('modalEnduranceInfo');
+  const btnFecharEnduranceInfo = byId('btnFecharEnduranceInfo');
   const weekTabs = document.querySelectorAll(".week-tab");
 
   if (btnGerarPlano) {
@@ -739,6 +741,29 @@ window.addEventListener('DOMContentLoaded', ()=>{
         modalTeste.setAttribute('aria-hidden', 'true');
       }
     });
+  }
+
+  if (btnFecharEnduranceInfo && modalEnduranceInfo) {
+    btnFecharEnduranceInfo.addEventListener('click', () => {
+      modalEnduranceInfo.classList.remove('is-open');
+      modalEnduranceInfo.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  if (modalEnduranceInfo) {
+    modalEnduranceInfo.addEventListener('click', (event) => {
+      if (event.target === modalEnduranceInfo) {
+        modalEnduranceInfo.classList.remove('is-open');
+        modalEnduranceInfo.setAttribute('aria-hidden', 'true');
+      }
+    });
+  }
+
+  if (modalEnduranceInfo) {
+    window.setTimeout(() => {
+      modalEnduranceInfo.classList.add('is-open');
+      modalEnduranceInfo.setAttribute('aria-hidden', 'false');
+    }, 400);
   }
 
   if (btnExportarPDF) {
