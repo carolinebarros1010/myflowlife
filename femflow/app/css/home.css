@@ -209,7 +209,7 @@ h1 {
 }
 
 .thumb {
-  height: 120px;
+  height: 140px;
   background: #ddd;
   background-image: var(--thumb-url, none);
   background-position: center;
@@ -221,6 +221,10 @@ h1 {
   position: relative;
 }
 
+.thumb.has-image {
+  background-size: contain;
+  background-position: center;
+}
 
 .badge {
   position: absolute;
@@ -421,7 +425,7 @@ footer {
 
 /* Exemplo — repetir apenas quando quiser imagem */
 .thumb-gluteo {
-  background-image: url("/femflow/css/cards/gluteo.png");
+  background-image: url("/femflow/css/cards/gluteos.jpg");
 }
 
 .thumb-corrida {
@@ -433,7 +437,7 @@ footer {
 }
 
 .thumb-militar {
-  background-image: url("/femflow/css/cards/militar.png");
+  background-image: url("/femflow/css/cards/militar.jpg");
 }
 
 .thumb-followme_livia_rapaci {
@@ -475,5 +479,4 @@ footer {
   font-size: .75rem;
   font-weight: 700;
 }
-
 
