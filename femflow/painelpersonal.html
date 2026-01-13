@@ -551,6 +551,15 @@
             </select>
           </div>
           <div>
+            <label for="padraoCiclo">Padrão do ciclo</label>
+            <select id="padraoCiclo" name="padrao_ciclo" required>
+              <option value="">Selecione</option>
+              <option value="3">ABC (3 dias)</option>
+              <option value="4">ABCD (4 dias)</option>
+              <option value="5">ABCDE (5 dias)</option>
+            </select>
+          </div>
+          <div>
             <label for="fase">Fase inicial do ciclo</label>
             <select id="fase" name="fase" required>
               <option value="">Selecione</option>
@@ -829,6 +838,7 @@
 
     const collectParams = () => {
       const nivel = qs("nivel").value.trim();
+      const padraoCiclo = qs("padraoCiclo").value.trim();
       const fase = qs("fase").value.trim();
       const enfase = qs("enfase").value.trim();
       const destinoField = qs("destino").value.trim();
@@ -840,6 +850,7 @@
       const serieEspecialDiaTipo = qs("serieEspecialDiaTipo").value.trim();
       return {
         nivel,
+        padraoCiclo,
         fase,
         enfase,
         destino,
@@ -874,6 +885,12 @@
       }
       if (!params.nivel || !params.fase || !params.enfase) {
         const reason = "Preencha nivel, fase inicial e enfase.";
+        toast(reason);
+        logValidationFailure(action, params, reason);
+        return false;
+      }
+      if (!params.padraoCiclo) {
+        const reason = "Selecione o padrão do ciclo.";
         toast(reason);
         logValidationFailure(action, params, reason);
         return false;
@@ -1073,6 +1090,7 @@
 
     const loadParams = () => {
       qs("nivel").value = localStorage.getItem("femflow_nivel") || "";
+      qs("padraoCiclo").value = localStorage.getItem("femflow_padraoCiclo") || "";
       qs("fase").value = localStorage.getItem("femflow_fase") || "";
       qs("enfase").value = localStorage.getItem("femflow_enfase") || "";
       qs("destino").value = localStorage.getItem("femflow_destino") || "";
@@ -1190,6 +1208,9 @@
   </script>
 </body>
 </html>
+
+
+
 
 
 
