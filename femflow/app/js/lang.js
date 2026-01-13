@@ -343,6 +343,10 @@ series: {
     titulo: "🐢 Cadência Controlada",
     texto: "Controle a fase excêntrica do movimento de forma lenta e consciente."
   },
+  SM: {
+    titulo: "🎯 Submáxima",
+    texto: "Trabalhe abaixo da falha, mantendo 1–3 repetições em reserva para consistência e técnica."
+  },
   D: {
     titulo: "🔥 Dropset",
     texto: "Ao atingir a falha, reduza a carga 3 vezes consecutivas sem descanso."
@@ -573,6 +577,10 @@ series: {
   CC: {
     titulo: "🐢 Controlled Tempo",
     texto: "Slow and controlled eccentric phase."
+  },
+  SM: {
+    titulo: "🎯 Submaximal",
+    texto: "Work below failure, keeping 1–3 reps in reserve for consistency and technique."
   },
   D: {
     titulo: "🔥 Dropset",
@@ -805,6 +813,10 @@ resp: {
   CC: {
     titulo: "🐢 Cadence contrôlée",
     texto: "Phase excentrique lente et contrôlée."
+  },
+  SM: {
+    titulo: "🎯 Submaximale",
+    texto: "Travaillez en dessous de l’échec, en gardant 1 à 3 répétitions en réserve."
   },
   D: {
     titulo: "🔥 Dropset",

@@ -49,6 +49,7 @@ FEMFLOW.engineTreino.detectarSerieEspecial = label => {
 
   const regras = [
     { sufixo: "cc",  codigo: "CC" }, // cadência controlada
+    { sufixo: "sm",  codigo: "SM" }, // submáxima
     { sufixo: "rp",  codigo: "RP" }, // rest-pause
     { sufixo: "ae",  codigo: "AE" }, // all out
     { sufixo: "d",   codigo: "D"  }, // dropset
