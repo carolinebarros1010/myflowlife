@@ -133,7 +133,7 @@ body { background: var(--bg); color: var(--text); }
 
 .week-tab {
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--card-soft);
   color: var(--text);
   padding: .45rem .75rem;
   border-radius: 999px;
@@ -149,7 +149,7 @@ body { background: var(--bg); color: var(--text); }
 }
 
 .week-tab:hover {
-  background: var(--card-soft);
+  background: var(--card);
 }
 
 /* ====== Form */

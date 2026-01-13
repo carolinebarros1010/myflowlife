@@ -42,24 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalPSE        = document.getElementById("modalPSE");
   const pseInput        = document.getElementById("pseInput");
   const pseEmoji        = document.getElementById("pseEmoji");
-  const pseValor        = document.getElementById("pseValor");
+  const pseEmojiValue   = document.getElementById("pseEmojiValue");
   const btnConfirmarPSE = document.getElementById("btnConfirmarPSE");
   const btnCancelarPSE  = document.getElementById("btnCancelarPSE");
-
-  function getPseEmoji(valor) {
-    if (valor <= 2) return "😌";
-    if (valor <= 4) return "🙂";
-    if (valor <= 6) return "😅";
-    if (valor <= 8) return "😓";
-    return "🥵";
-  }
-
-  function atualizarPseDisplay(valor) {
-    if (!pseEmoji || !pseValor) return;
-    const val = Number(valor || 0);
-    pseEmoji.textContent = getPseEmoji(val);
-    pseValor.textContent = String(val);
-  }
 
   function encerrarTreino() {
     FEMFLOW.router("flowcenter.html");
@@ -92,13 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnCancelar) {
     btnCancelar.addEventListener("click", encerrarTreino);
-  }
-
-  if (pseInput) {
-    atualizarPseDisplay(pseInput.value);
-    pseInput.addEventListener("input", (event) => {
-      atualizarPseDisplay(event.target.value);
-    });
   }
 
   const SERIE_BEHAVIOR = {
