@@ -291,6 +291,23 @@ const CARDS_FOLLOWME_SIMBOLICOS = [
   }
 ];
 
+const CARD_THUMBS = {
+  gluteo: "gluteos.jpg",
+  gluteos: "gluteos.jpg",
+  quadriceps: "quadriceps.jpg",
+  costas: "costas.jpg",
+  ombro: "ombro.jpg",
+  peito: "peitoral.jpg",
+  peitoral: "peitoral.jpg",
+  militar: "militar.jpg"
+};
+
+function getThumbUrl(enfase) {
+  const file = CARD_THUMBS[enfase];
+  if (!file) return "";
+  return new URL(`css/cards/${file}`, window.location.href).toString();
+}
+
 /* ============================================================
    RENDERIZAÇÃO DOS CARDS
 =========================================================== */
@@ -301,10 +318,13 @@ function cardHTML(p) {
   const lockedClass = p.locked ? " locked" : "";
   const lockOverlay = p.locked ? '<span class="lock-overlay">🔒</span>' : "";
   const freeBadge = p.isFree ? '<span class="badge-free">Gratuito</span>' : "";
+  const thumbUrl = getThumbUrl(p.enfase);
+  const thumbClass = `thumb thumb-${p.enfase}${thumbUrl ? " has-image" : ""}`;
+  const thumbStyle = `${thumbUrl ? `--thumb-url:url('${thumbUrl}');` : ""}background-color:${p.color};`;
 
   return `
     <article class="card${lockedClass}" data-enfase="${p.enfase}" data-locked="${p.locked}">
-      <div class="thumb thumb-${p.enfase}" style="background:${p.color}; --thumb-url:url('/femflow/css/cards/${p.enfase}.png');">
+      <div class="${thumbClass}" style="${thumbStyle}">
         ${lockOverlay}
         ${freeBadge}
         <span class="badge">${titulo}</span>
