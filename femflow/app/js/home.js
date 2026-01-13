@@ -320,7 +320,7 @@ function cardHTML(p) {
   const freeBadge = p.isFree ? '<span class="badge-free">Gratuito</span>' : "";
   const thumbUrl = getThumbUrl(p.enfase);
   const thumbClass = `thumb thumb-${p.enfase}${thumbUrl ? " has-image" : ""}`;
-  const thumbStyle = `${thumbUrl ? `--thumb-url:url('${thumbUrl}');` : ""}background:${p.color};`;
+  const thumbStyle = `${thumbUrl ? `--thumb-url:url('${thumbUrl}');` : ""}background-color:${p.color};`;
 
   return `
     <article class="card${lockedClass}" data-enfase="${p.enfase}" data-locked="${p.locked}">
