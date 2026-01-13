@@ -156,6 +156,7 @@ home: {
       videoSub:   "Assista ao vídeo rápido antes de começar.",
       videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_PT",
 
+      botaoFlowcenter: "Continue seu treino",
       tituloPersonal:  "Personal",
       tituloFollowMe:  "Treine junto por 30 dias",
       tituloMuscular:  "Treinos por ênfase",
@@ -342,6 +343,10 @@ series: {
     titulo: "🐢 Cadência Controlada",
     texto: "Controle a fase excêntrica do movimento de forma lenta e consciente."
   },
+  SM: {
+    titulo: "🎯 Submáxima",
+    texto: "Trabalhe abaixo da falha, mantendo 1–3 repetições em reserva para consistência e técnica."
+  },
   D: {
     titulo: "🔥 Dropset",
     texto: "Ao atingir a falha, reduza a carga 3 vezes consecutivas sem descanso."
@@ -390,6 +395,7 @@ home: {
       videoSub:   "Watch this quick video before you start.",
       videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_EN",
 
+      botaoFlowcenter: "Continue your workout",
       tituloPersonal:  "Personal Training",
       tituloFollowMe:  "Train together for 30 days",
       tituloMuscular:  "Muscle focus training",
@@ -572,6 +578,10 @@ series: {
     titulo: "🐢 Controlled Tempo",
     texto: "Slow and controlled eccentric phase."
   },
+  SM: {
+    titulo: "🎯 Submaximal",
+    texto: "Work below failure, keeping 1–3 reps in reserve for consistency and technique."
+  },
   D: {
     titulo: "🔥 Dropset",
     texto: "After failure, reduce load 3 consecutive times without rest."
@@ -621,6 +631,7 @@ fr: {
       videoSub:   "Regardez cette vidéo avant de commencer.",
       videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_FR",
 
+      botaoFlowcenter: "Continuez votre entraînement",
       tituloPersonal:  "Personal",
       tituloFollowMe:  "Entraînez-vous pendant 30 jours",
       tituloMuscular:  "Entraînements par groupe musculaire",
@@ -802,6 +813,10 @@ resp: {
   CC: {
     titulo: "🐢 Cadence contrôlée",
     texto: "Phase excentrique lente et contrôlée."
+  },
+  SM: {
+    titulo: "🎯 Submaximale",
+    texto: "Travaillez en dessous de l’échec, en gardant 1 à 3 répétitions en réserve."
   },
   D: {
     titulo: "🔥 Dropset",
