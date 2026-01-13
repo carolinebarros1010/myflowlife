@@ -209,7 +209,7 @@ h1 {
 }
 
 .thumb {
-  height: 120px;
+  height: 140px;
   background: #ddd;
   background-image: var(--thumb-url, none);
   background-position: center;
@@ -221,6 +221,10 @@ h1 {
   position: relative;
 }
 
+.thumb.has-image {
+  background-size: contain;
+  background-position: center;
+}
 
 .badge {
   position: absolute;
@@ -421,23 +425,28 @@ footer {
 
 /* Exemplo — repetir apenas quando quiser imagem */
 .thumb-gluteo {
-  background-image: url("/femflow/css/cards/gluteo.png");
-}
-
-.thumb-corrida {
-  background-image: url("/femflow/css/cards/corrida.png");
-}
-
-.thumb-triatlon {
-  background-image: url("/femflow/css/cards/triatlon.png");
+  background-image: url("cards/gluteos.jpg");
 }
 
 .thumb-militar {
-  background-image: url("/femflow/css/cards/militar.png");
+  background-image: url("cards/militar.jpg");
 }
 
-.thumb-followme_livia_rapaci {
-  background-image: url("/femflow/css/cards/followme_livia_rapaci.png");
+.thumb-ombro {
+  background-image: url("cards/ombro.jpg");
+}
+
+.thumb-quadriceps {
+  background-image: url("cards/quadriceps.jpg");
+}
+
+.thumb-costas {
+  background-image: url("cards/costas.jpg");
+}
+
+.thumb-peito,
+.thumb-peitoral {
+  background-image: url("cards/peitoral.jpg");
 }
 /* ============================================================
    🔒 CARD BLOQUEADO (vitrine)
@@ -475,5 +484,3 @@ footer {
   font-size: .75rem;
   font-weight: 700;
 }
-
-
