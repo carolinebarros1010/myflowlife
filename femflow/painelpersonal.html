@@ -254,72 +254,6 @@
       display: block;
     }
 
-    .label-with-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .info-icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 1px solid rgba(17, 17, 17, 0.2);
-      background: #fff;
-      color: var(--accent-teal);
-      font-size: 11px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: help;
-      padding: 0;
-      position: relative;
-    }
-
-    .info-icon::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% + 10px);
-      transform: translate(-50%, -4px);
-      background: #111111;
-      color: #ffffff;
-      padding: 8px 10px;
-      border-radius: 10px;
-      font-size: 12px;
-      line-height: 1.4;
-      width: 220px;
-      text-align: left;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 10;
-    }
-
-    .info-icon::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% + 4px);
-      transform: translateX(-50%);
-      border-width: 6px 6px 0 6px;
-      border-style: solid;
-      border-color: #111111 transparent transparent transparent;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      pointer-events: none;
-      z-index: 9;
-    }
-
-    .info-icon:hover::after,
-    .info-icon:focus-visible::after,
-    .info-icon:hover::before,
-    .info-icon:focus-visible::before {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
     small {
       display: block;
       margin-top: 6px;
@@ -608,10 +542,7 @@
         </div>
         <form id="paramForm" class="field-grid">
           <div>
-            <label for="nivel" class="label-with-info">
-              <span>Nível</span>
-              <button class="info-icon" type="button" aria-label="Explicação do nível" data-tooltip="Define a experiência da aluna para ajustar volume e intensidade. Essas informações já foram coletadas na anamnese FemFlow.">i</button>
-            </label>
+            <label for="nivel">Nível</label>
             <select id="nivel" name="nivel" required>
               <option value="">Selecione</option>
               <option value="iniciante">Iniciante</option>
@@ -620,10 +551,7 @@
             </select>
           </div>
           <div>
-            <label for="fase" class="label-with-info">
-              <span>Fase inicial do ciclo</span>
-              <button class="info-icon" type="button" aria-label="Explicação da fase inicial" data-tooltip="Indique a fase atual do ciclo para iniciar o planejamento de 30 dias. Essas informações já foram coletadas na anamnese FemFlow.">i</button>
-            </label>
+            <label for="fase">Fase inicial do ciclo</label>
             <select id="fase" name="fase" required>
               <option value="">Selecione</option>
               <option value="menstrual">Menstrual</option>
@@ -637,10 +565,7 @@
             </small>
           </div>
           <div>
-            <label for="enfase" class="label-with-info">
-              <span>Ênfase</span>
-              <button class="info-icon" type="button" aria-label="Explicação da ênfase" data-tooltip="Escolha o foco principal para personalizar os treinos. Essas informações já foram coletadas na anamnese FemFlow.">i</button>
-            </label>
+            <label for="enfase">Ênfase</label>
             <select id="enfase" name="enfase" required>
               <option value="">Selecione</option>
               <option value="gluteos">Glúteos</option>
@@ -663,25 +588,58 @@
             <div class="chips" id="chipContainer"></div>
           </div>
           <div>
-            <label for="destino" class="label-with-info">
-              <span>Destino (aba)</span>
-              <button class="info-icon" type="button" aria-label="Explicação do destino" data-tooltip="Nome da aba no Google Sheets onde o plano será gerado. Essas informações já foram coletadas na anamnese FemFlow.">i</button>
-            </label>
+            <label for="destino">Destino (aba)</label>
             <input id="destino" name="destino" placeholder="Iniciante" required />
           </div>
           <div>
-            <label for="idAluna" class="label-with-info">
-              <span>ID Aluna (opcional)</span>
-              <button class="info-icon" type="button" aria-label="Explicação do ID da aluna" data-tooltip="Se informado, o sistema usa os dados da aluna cadastrada automaticamente. Essas informações já foram coletadas na anamnese FemFlow.">i</button>
-            </label>
+            <label for="idAluna">ID Aluna (opcional)</label>
             <input id="idAluna" name="id_aluna" placeholder="123" />
           </div>
           <div>
-            <label for="observacao" class="label-with-info">
-              <span>Observação</span>
-              <button class="info-icon" type="button" aria-label="Explicação da observação" data-tooltip="Notas extras ou instruções específicas para acompanhar o pedido.">i</button>
-            </label>
+            <label for="observacao">Observação</label>
             <textarea id="observacao" name="observacao"></textarea>
+          </div>
+          <div>
+            <label for="serieEspecialAtiva">Série especial</label>
+            <select id="serieEspecialAtiva" name="serie_especial">
+              <option value="nao">Não aplicar</option>
+              <option value="sim">Aplicar</option>
+            </select>
+          </div>
+          <div>
+            <label for="serieEspecialFase">Fase da série especial</label>
+            <select id="serieEspecialFase" name="serie_especial_fase">
+              <option value="">Selecione</option>
+              <option value="menstrual">Menstrual</option>
+              <option value="folicular">Folicular</option>
+              <option value="ovulatoria">Ovulatoria</option>
+              <option value="lutea">Lutea</option>
+            </select>
+          </div>
+          <div>
+            <label for="serieEspecialTipo">Tipo da série especial</label>
+            <select id="serieEspecialTipo" name="serie_especial_tipo">
+              <option value="">Selecione</option>
+              <option value="cc">CC • Cadência controlada</option>
+              <option value="sm">SM • Submáxima</option>
+              <option value="rp">RP • Rest-pause</option>
+              <option value="ae">AE • All out</option>
+              <option value="d">D • Dropset</option>
+              <option value="q">Q • Quadriset</option>
+              <option value="t">T • Triset</option>
+              <option value="b">B • Biset</option>
+              <option value="c">C • Cluster</option>
+              <option value="i">I • Isometria</option>
+            </select>
+          </div>
+          <div>
+            <label for="serieEspecialDiaTipo">Série especial por dia (opcional)</label>
+            <input
+              id="serieEspecialDiaTipo"
+              name="serie_especial_dia_tipo"
+              placeholder="Ex: 4:rp, 7:t, 12:b"
+            />
+            <small>Use dia:tipo (1–30). Exemplo: 4:rp aplica RP apenas no dia 4.</small>
           </div>
         </form>
         <div class="actions-row">
@@ -711,10 +669,7 @@
         </div>
         <div class="maintenance-grid">
           <div>
-            <label for="destinoRelink" class="label-with-info">
-              <span>Nome da aba para relinkar</span>
-              <button class="info-icon" type="button" aria-label="Explicação do relink" data-tooltip="Informe a aba que será relinkada; se estiver vazio, usa o destino acima.">i</button>
-            </label>
+            <label for="destinoRelink">Nome da aba para relinkar</label>
             <input id="destinoRelink" placeholder="Usa o destino acima por padrão" />
           </div>
           <div class="actions-row">
@@ -879,7 +834,21 @@
       const destinoField = qs("destino").value.trim();
       const idAluna = qs("idAluna").value.trim();
       const destino = idAluna ? `personal_${idAluna}` : destinoField;
-      return { nivel, fase, enfase, destino, id_aluna: idAluna };
+      const serieEspecialAtiva = qs("serieEspecialAtiva").value.trim();
+      const serieEspecialFase = qs("serieEspecialFase").value.trim();
+      const serieEspecialTipo = qs("serieEspecialTipo").value.trim();
+      const serieEspecialDiaTipo = qs("serieEspecialDiaTipo").value.trim();
+      return {
+        nivel,
+        fase,
+        enfase,
+        destino,
+        id_aluna: idAluna,
+        serieEspecialAtiva,
+        serieEspecialFase,
+        serieEspecialTipo,
+        serieEspecialDiaTipo
+      };
     };
 
     const logValidationFailure = (action, params, reason) => {
@@ -920,6 +889,15 @@
         toast(reason);
         logValidationFailure(action, params, reason);
         return false;
+      }
+      if (params.serieEspecialAtiva === "sim") {
+        const temDias = Boolean(params.serieEspecialDiaTipo);
+        if (!temDias && (!params.serieEspecialFase || !params.serieEspecialTipo)) {
+          const reason = "Selecione fase e tipo da série especial.";
+          toast(reason);
+          logValidationFailure(action, params, reason);
+          return false;
+        }
       }
       return true;
     };
@@ -1099,6 +1077,10 @@
       qs("enfase").value = localStorage.getItem("femflow_enfase") || "";
       qs("destino").value = localStorage.getItem("femflow_destino") || "";
       qs("idAluna").value = localStorage.getItem("femflow_id_aluna") || "";
+      qs("serieEspecialAtiva").value = localStorage.getItem("femflow_serieEspecialAtiva") || "nao";
+      qs("serieEspecialFase").value = localStorage.getItem("femflow_serieEspecialFase") || "";
+      qs("serieEspecialTipo").value = localStorage.getItem("femflow_serieEspecialTipo") || "";
+      qs("serieEspecialDiaTipo").value = localStorage.getItem("femflow_serieEspecialDiaTipo") || "";
     };
 
     const setupChips = () => {
@@ -1208,5 +1190,7 @@
   </script>
 </body>
 </html>
+
+
 
 
