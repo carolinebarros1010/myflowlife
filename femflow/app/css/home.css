@@ -428,20 +428,25 @@ footer {
   background-image: url("cards/gluteos.jpg");
 }
 
-.thumb-corrida {
-  background-image: url("cards/corrida.png");
-}
-
-.thumb-triatlon {
-  background-image: url("cards/triatlon.png");
-}
-
 .thumb-militar {
   background-image: url("cards/militar.jpg");
 }
 
-.thumb-followme_livia_rapaci {
-  background-image: url("cards/followme_livia_rapaci.png");
+.thumb-ombro {
+  background-image: url("cards/ombro.jpg");
+}
+
+.thumb-quadriceps {
+  background-image: url("cards/quadriceps.jpg");
+}
+
+.thumb-costas {
+  background-image: url("cards/costas.jpg");
+}
+
+.thumb-peito,
+.thumb-peitoral {
+  background-image: url("cards/peitoral.jpg");
 }
 /* ============================================================
    🔒 CARD BLOQUEADO (vitrine)

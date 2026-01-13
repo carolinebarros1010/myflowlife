@@ -293,16 +293,19 @@ const CARDS_FOLLOWME_SIMBOLICOS = [
 
 const CARD_THUMBS = {
   gluteo: "gluteos.jpg",
+  gluteos: "gluteos.jpg",
   quadriceps: "quadriceps.jpg",
   costas: "costas.jpg",
   ombro: "ombro.jpg",
   peito: "peitoral.jpg",
+  peitoral: "peitoral.jpg",
   militar: "militar.jpg"
 };
 
 function getThumbUrl(enfase) {
   const file = CARD_THUMBS[enfase];
-  return file ? `css/cards/${file}` : "";
+  if (!file) return "";
+  return new URL(`css/cards/${file}`, window.location.href).toString();
 }
 
 /* ============================================================
