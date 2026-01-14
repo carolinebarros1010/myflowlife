@@ -881,12 +881,24 @@
     };
 
     const validate = (params, action = "") => {
+      const normalizedAction = String(action || "").toLowerCase().trim();
       if (!state.endpoint) {
         const reason = "Informe o endpoint antes de executar.";
         toast(reason);
         logValidationFailure(action, params, reason);
         return false;
       }
+
+      if (["linkar", "importar"].includes(normalizedAction)) {
+        if (!params.destino) {
+          const reason = "Preencha o destino ou informe um ID de aluna.";
+          toast(reason);
+          logValidationFailure(action, params, reason);
+          return false;
+        }
+        return true;
+      }
+
       if (!params.nivel || !params.fase || !params.enfase) {
         const reason = "Preencha nivel, fase inicial e enfase.";
         toast(reason);
