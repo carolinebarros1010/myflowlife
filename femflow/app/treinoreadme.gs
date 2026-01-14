@@ -114,7 +114,14 @@ aquecimento     0     1      gluteo   folicular  6    Aquecimento inicial
 treino          1     1      gluteo   folicular  6    Agachamento com halter
 treino          1     2      gluteo   folicular  6    Afundo alternado
 treino          1     3      gluteo   folicular  6    Elevação pélvica
-treino          1     4      gluteo   folicular  6    Abdutor máquina
+treino          2     1     gluteo   folicular  6    Abdutor máquina
+treino          2     2      gluteo   folicular  6    Supino maquina
+treino          3T     1      gluteo   folicular  6    triceps Testa
+treino          3T     2      gluteo   folicular  6    triceps corda
+treino          3T     3     gluteo   folicular  6    triceps paralela
+treino          4RP     1      gluteo   folicular  6    Agachamento Smith
+treino          5C    1      gluteo   folicular  6    Cadeira Extensora
+
 
 hiit            1     99     gluteo   folicular  6    HIIT curto 20/30
 
