@@ -886,11 +886,19 @@
         return false;
       }
 
-      if (normalizedAction === "serieespecial" && params.serieEspecialAtiva !== "sim") {
-        const reason = "Ative a série especial antes de aplicar.";
-        toast(reason);
-        logValidationFailure(action, params, reason);
-        return false;
+      if (normalizedAction === "serieespecial") {
+        if (params.serieEspecialAtiva !== "sim") {
+          const reason = "Ative a série especial antes de aplicar.";
+          toast(reason);
+          logValidationFailure(action, params, reason);
+          return false;
+        }
+        if (!params.serieEspecialDiaTipo) {
+          const reason = "Informe os dias específicos da série especial.";
+          toast(reason);
+          logValidationFailure(action, params, reason);
+          return false;
+        }
       }
 
       if (normalizedAction !== "serieespecial" && (!params.nivel || !params.enfase)) {
@@ -911,7 +919,7 @@
         logValidationFailure(action, params, reason);
         return false;
       }
-      if (params.serieEspecialAtiva === "sim") {
+      if (normalizedAction !== "serieespecial" && params.serieEspecialAtiva === "sim") {
         const temDias = Boolean(params.serieEspecialDiaTipo);
         if (!temDias && (!params.serieEspecialFase || !params.serieEspecialTipo)) {
           const reason = "Selecione fase e tipo da série especial.";
