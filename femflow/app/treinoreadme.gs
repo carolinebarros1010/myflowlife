@@ -98,6 +98,7 @@ RP	Rest-Pause	Falha + redução
 I	Isometria	Contração mantida
 CC	Cadência Controlada	Excêntrica lenta
 AE	Advanced Effort	Indicador de alta exigência
+SM SubMAX
 
 📌 O engine não calcula carga.
 As séries especiais são guias de execução.
