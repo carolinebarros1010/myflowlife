@@ -62,7 +62,19 @@ document.addEventListener("DOMContentLoaded", () => {
     pseValor.textContent = String(val);
   }
 
+  let treinoExtraAtivo = false;
+
+  function restaurarEnfaseNormal() {
+    if (!treinoExtraAtivo) return;
+    const enfaseBase = localStorage.getItem("femflow_enfase_base");
+    if (enfaseBase) {
+      localStorage.setItem("femflow_enfase", enfaseBase);
+    }
+    localStorage.removeItem("femflow_enfase_base");
+  }
+
   function encerrarTreino() {
+    restaurarEnfaseNormal();
     FEMFLOW.router("flowcenter.html");
   }
 
@@ -246,7 +258,11 @@ const hasPersonal =
 
     /* ================= PERFIL ================= */
     const nivel    = perfil.nivel;
-    let enfaseFinal = perfil.enfase || localStorage.getItem("femflow_enfase");
+    const enfaseLocal = localStorage.getItem("femflow_enfase");
+    let enfaseFinal = perfil.enfase || enfaseLocal;
+    if (enfaseLocal && FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocal)) {
+      enfaseFinal = enfaseLocal;
+    }
 
     // 🔥 Personal nunca é ênfase
     if (enfaseFinal === "personal") {
@@ -260,6 +276,7 @@ const hasPersonal =
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
     const isExtraTreino = FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseFinal);
+    treinoExtraAtivo = Boolean(isExtraTreino);
 
     console.log("🧠 ÊNFASE RECEBIDA DO BACKEND:", perfil.enfase);
     FEMFLOW.enfaseAtual = enfaseFinal;
