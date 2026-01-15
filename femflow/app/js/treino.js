@@ -47,6 +47,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnConfirmarPSE = document.getElementById("btnConfirmarPSE");
   const btnCancelarPSE  = document.getElementById("btnCancelarPSE");
 
+  const extraParam = new URLSearchParams(window.location.search).get("extra");
+  const extraParamNorm = String(extraParam || "").toLowerCase().trim();
+  if (extraParamNorm.startsWith("extra_")) {
+    const enfaseAtual = localStorage.getItem("femflow_enfase");
+    if (enfaseAtual && !FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseAtual)) {
+      localStorage.setItem("femflow_enfase_base", enfaseAtual);
+    }
+    localStorage.setItem("femflow_treino_extra", "true");
+    localStorage.setItem("femflow_enfase", extraParamNorm);
+  }
+
   function getPseEmoji(valor) {
     if (valor <= 2) return "😌";
     if (valor <= 4) return "🙂";
@@ -262,6 +273,9 @@ const hasPersonal =
     const enfaseLocal = localStorage.getItem("femflow_enfase");
     const extraSessaoAtiva = localStorage.getItem("femflow_treino_extra") === "true";
     let enfaseFinal = perfil.enfase || enfaseLocal;
+    if (extraParamNorm.startsWith("extra_")) {
+      enfaseFinal = extraParamNorm;
+    }
     if (extraSessaoAtiva && enfaseLocal) {
       enfaseFinal = enfaseLocal;
     }
