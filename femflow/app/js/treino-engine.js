@@ -9,6 +9,9 @@ FEMFLOW.engineTreino = {};
 /* ============================================================
    1) NORMALIZAÇÕES
 ============================================================ */
+FEMFLOW.engineTreino.isExtraEnfase = enfase =>
+  String(enfase || "").toLowerCase().trim().startsWith("extra_");
+
 FEMFLOW.engineTreino.normalizarFase = raw => {
   const f = String(raw || "").toLowerCase().trim();
   if (!f) return "";
@@ -49,7 +52,6 @@ FEMFLOW.engineTreino.detectarSerieEspecial = label => {
 
   const regras = [
     { sufixo: "cc",  codigo: "CC" }, // cadência controlada
-    { sufixo: "sm",  codigo: "SM" }, // submáxima
     { sufixo: "rp",  codigo: "RP" }, // rest-pause
     { sufixo: "ae",  codigo: "AE" }, // all out
     { sufixo: "d",   codigo: "D"  }, // dropset
@@ -148,7 +150,56 @@ if (!enfase) {
 };
 
 /* ============================================================
-   4) FIREBASE — BLOCO PERSONAL
+   4) FIREBASE — BLOCO EXTRA (fixo)
+============================================================ */
+FEMFLOW.engineTreino.carregarBlocosExtras = async ({
+  nivel, enfase
+}) => {
+  const enfaseNorm = String(enfase || "").toLowerCase().trim();
+  const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
+
+  if (!enfaseNorm) {
+    FEMFLOW.warn("⚠️ Ênfase extra ausente — consulta Firebase abortada.");
+    return [];
+  }
+
+  const docIds = [];
+  if (nivelNorm) docIds.push(`${nivelNorm}_${enfaseNorm}`);
+  docIds.push(enfaseNorm);
+
+  for (const docId of docIds) {
+    const snap = await firebase.firestore()
+      .collection("exercicios_extra")
+      .doc(docId)
+      .collection("blocos")
+      .get();
+
+    if (!snap.empty) {
+      const blocos = [];
+      snap.forEach(d => blocos.push(d.data()));
+      return blocos;
+    }
+  }
+
+  const flatSnap = await firebase.firestore()
+    .collection("exercicios_extra")
+    .where("enfase", "==", enfaseNorm)
+    .get();
+
+  if (!flatSnap.empty) {
+    const blocos = [];
+    flatSnap.forEach(d => blocos.push(d.data()));
+    return blocos.sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+  }
+
+  FEMFLOW.error("❌ Nenhum treino EXTRA encontrado no Firebase:", {
+    enfase: enfaseNorm
+  });
+  return [];
+};
+
+/* ============================================================
+   5) FIREBASE — BLOCO PERSONAL
    🔥 PRIORIDADE ABSOLUTA: diaCiclo
 ============================================================ */
 FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
@@ -207,7 +258,7 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
 };
 
 /* ============================================================
-   5) ORGANIZAÇÃO + HIIT
+   6) ORGANIZAÇÃO + HIIT
 ============================================================ */
 FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
 
@@ -408,20 +459,24 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
   id, nivel, enfase, fase, diaCiclo, personal=false
 }) => {
 
+  const isExtra = FEMFLOW.engineTreino.isExtraEnfase(enfase);
+
   // 🔒 Personal ignora completamente ênfase
-  if (personal === true) {
+  if (personal === true && !isExtra) {
     enfase = null;
   }
 
   // 🔒 Treino normal exige ênfase válida
-  if (!personal && (!enfase || enfase === "nenhuma" || enfase === "personal")) {
+  if (!personal && !isExtra && (!enfase || enfase === "nenhuma" || enfase === "personal")) {
     FEMFLOW.warn("⚠️ Treino normal sem ênfase válida.");
     return [];
   }
 
 
   let blocosRaw = [];
-  if (personal) {
+  if (isExtra) {
+    blocosRaw = await FEMFLOW.engineTreino.carregarBlocosExtras({ nivel, enfase });
+  } else if (personal) {
     blocosRaw = await FEMFLOW.engineTreino.carregarBlocosPersonal({ id, fase, diaCiclo });
    } else {
     blocosRaw = await FEMFLOW.engineTreino.carregarBlocosNormais({
