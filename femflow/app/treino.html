@@ -93,6 +93,7 @@
 
   <!-- FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 
@@ -105,6 +106,12 @@
     messagingSenderId: "929402947409",
     appId: "1:929402947409:web:b65b7775ac44edeb4283ae"
   });
+
+  if (firebase.auth) {
+    firebase.auth().signInAnonymously().catch((err) => {
+      console.warn("[FemFlow] Auth anônimo falhou:", err);
+    });
+  }
 </script>
 
 <!-- SCRIPTS FEMFLOW -->

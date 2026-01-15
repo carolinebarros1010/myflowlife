@@ -263,9 +263,14 @@ function initFlowCenter() {
     btn.addEventListener("click", () => {
       const enfase = btn.dataset.extraEnfase;
       if (!enfase) return;
+      const enfaseAtual = localStorage.getItem("femflow_enfase");
+      if (enfaseAtual && !FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseAtual)) {
+        localStorage.setItem("femflow_enfase_base", enfaseAtual);
+      }
+      localStorage.setItem("femflow_treino_extra", "true");
       localStorage.setItem("femflow_enfase", enfase);
       fecharModalExtra();
-      FEMFLOW.router("treino.html");
+      FEMFLOW.router(`treino.html?extra=${encodeURIComponent(enfase)}`);
     });
   });
 

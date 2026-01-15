@@ -395,7 +395,16 @@ FEMFLOW.carregarCicloBackend = async function () {
     localStorage.setItem("femflow_diaCiclo", resp.diaCiclo);
     localStorage.setItem("femflow_perfilHormonal", resp.perfilHormonal);
     localStorage.setItem("femflow_nivel", resp.nivel);
-    localStorage.setItem("femflow_enfase", resp.enfase);
+    const enfaseAtual = localStorage.getItem("femflow_enfase");
+    const extraAtivo = localStorage.getItem("femflow_treino_extra") === "true";
+    const enfaseAtualExtra = String(enfaseAtual || "").toLowerCase().startsWith("extra_");
+    if (extraAtivo && enfaseAtualExtra) {
+      if (resp.enfase && !localStorage.getItem("femflow_enfase_base")) {
+        localStorage.setItem("femflow_enfase_base", resp.enfase);
+      }
+    } else {
+      localStorage.setItem("femflow_enfase", resp.enfase);
+    }
     localStorage.setItem("femflow_cycleLength", resp.ciclo_duracao);
     localStorage.setItem("femflow_startDate", resp.data_inicio);
 
@@ -742,7 +751,16 @@ FEMFLOW.carregarPerfil = async function () {
 
     localStorage.setItem("femflow_nome", r.nome || "Aluna");
     localStorage.setItem("femflow_fase", r.fase);
-    localStorage.setItem("femflow_enfase", r.enfase);
+    const enfaseAtual = localStorage.getItem("femflow_enfase");
+    const extraAtivo = localStorage.getItem("femflow_treino_extra") === "true";
+    const enfaseAtualExtra = String(enfaseAtual || "").toLowerCase().startsWith("extra_");
+    if (extraAtivo && enfaseAtualExtra) {
+      if (r.enfase && !localStorage.getItem("femflow_enfase_base")) {
+        localStorage.setItem("femflow_enfase_base", r.enfase);
+      }
+    } else {
+      localStorage.setItem("femflow_enfase", r.enfase);
+    }
     localStorage.setItem("femflow_diaCiclo", r.diaCiclo);
     localStorage.setItem("femflow_nivel", r.nivel);
     localStorage.setItem("femflow_startDate", r.data_inicio);

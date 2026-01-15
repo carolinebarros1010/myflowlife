@@ -47,6 +47,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnConfirmarPSE = document.getElementById("btnConfirmarPSE");
   const btnCancelarPSE  = document.getElementById("btnCancelarPSE");
 
+  const extraParam = new URLSearchParams(window.location.search).get("extra");
+  const extraParamNorm = String(extraParam || "").toLowerCase().trim();
+  if (extraParamNorm.startsWith("extra_")) {
+    const enfaseAtual = localStorage.getItem("femflow_enfase");
+    if (enfaseAtual && !FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseAtual)) {
+      localStorage.setItem("femflow_enfase_base", enfaseAtual);
+    }
+    localStorage.setItem("femflow_treino_extra", "true");
+    localStorage.setItem("femflow_enfase", extraParamNorm);
+  }
+
   function getPseEmoji(valor) {
     if (valor <= 2) return "😌";
     if (valor <= 4) return "🙂";
@@ -62,7 +73,20 @@ document.addEventListener("DOMContentLoaded", () => {
     pseValor.textContent = String(val);
   }
 
+  let treinoExtraAtivo = false;
+
+  function restaurarEnfaseNormal() {
+    if (!treinoExtraAtivo) return;
+    const enfaseBase = localStorage.getItem("femflow_enfase_base");
+    if (enfaseBase) {
+      localStorage.setItem("femflow_enfase", enfaseBase);
+    }
+    localStorage.removeItem("femflow_enfase_base");
+    localStorage.removeItem("femflow_treino_extra");
+  }
+
   function encerrarTreino() {
+    restaurarEnfaseNormal();
     FEMFLOW.router("flowcenter.html");
   }
 
@@ -246,7 +270,18 @@ const hasPersonal =
 
     /* ================= PERFIL ================= */
     const nivel    = perfil.nivel;
-    let enfaseFinal = perfil.enfase || localStorage.getItem("femflow_enfase");
+    const enfaseLocal = localStorage.getItem("femflow_enfase");
+    const extraSessaoAtiva = localStorage.getItem("femflow_treino_extra") === "true";
+    let enfaseFinal = perfil.enfase || enfaseLocal;
+    if (extraParamNorm.startsWith("extra_")) {
+      enfaseFinal = extraParamNorm;
+    }
+    if (extraSessaoAtiva && enfaseLocal) {
+      enfaseFinal = enfaseLocal;
+    }
+    if (!extraSessaoAtiva && enfaseLocal && FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocal)) {
+      enfaseFinal = enfaseLocal;
+    }
 
     // 🔥 Personal nunca é ênfase
     if (enfaseFinal === "personal") {
@@ -260,6 +295,10 @@ const hasPersonal =
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
     const isExtraTreino = FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseFinal);
+    treinoExtraAtivo = Boolean(extraSessaoAtiva);
+    if (!extraSessaoAtiva && isExtraTreino) {
+      localStorage.removeItem("femflow_treino_extra");
+    }
 
     console.log("🧠 ÊNFASE RECEBIDA DO BACKEND:", perfil.enfase);
     FEMFLOW.enfaseAtual = enfaseFinal;
