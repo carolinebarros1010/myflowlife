@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const track     = document.querySelector("#carouselTrack");
   const tituloDia = document.querySelector("#tituloDiaTreino");
+  const tituloTopo = document.querySelector("#tituloTreinoTopo");
   const footer    = document.querySelector(".fix-footer");
   const carousel  = document.querySelector(".carousel-container");
   const indicator = document.getElementById("carouselIndicator");
@@ -42,9 +43,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalPSE        = document.getElementById("modalPSE");
   const pseInput        = document.getElementById("pseInput");
   const pseEmoji        = document.getElementById("pseEmoji");
-  const pseEmojiValue   = document.getElementById("pseEmojiValue");
+  const pseValor        = document.getElementById("pseValor");
   const btnConfirmarPSE = document.getElementById("btnConfirmarPSE");
   const btnCancelarPSE  = document.getElementById("btnCancelarPSE");
+
+  function getPseEmoji(valor) {
+    if (valor <= 2) return "😌";
+    if (valor <= 4) return "🙂";
+    if (valor <= 6) return "😅";
+    if (valor <= 8) return "😓";
+    return "🥵";
+  }
+
+  function atualizarPseDisplay(valor) {
+    if (!pseEmoji || !pseValor) return;
+    const val = Number(valor || 0);
+    pseEmoji.textContent = getPseEmoji(val);
+    pseValor.textContent = String(val);
+  }
 
   function encerrarTreino() {
     FEMFLOW.router("flowcenter.html");
@@ -77,6 +93,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnCancelar) {
     btnCancelar.addEventListener("click", encerrarTreino);
+  }
+
+  if (pseInput) {
+    atualizarPseDisplay(pseInput.value);
+    pseInput.addEventListener("input", (event) => {
+      atualizarPseDisplay(event.target.value);
+    });
   }
 
   const SERIE_BEHAVIOR = {
@@ -236,6 +259,7 @@ const hasPersonal =
 
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
+    const isExtraTreino = FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseFinal);
 
     console.log("🧠 ÊNFASE RECEBIDA DO BACKEND:", perfil.enfase);
     FEMFLOW.enfaseAtual = enfaseFinal;
@@ -246,11 +270,29 @@ const hasPersonal =
       return;
     }
 
-    const diaPrograma = await FEMFLOW.getDiaPrograma();
-    FEMFLOW.diaProgramaAtual = diaPrograma;
+    const extraLabels = {
+      extra_superior: t("treino.extraOpcoes.superior"),
+      extra_inferior: t("treino.extraOpcoes.inferior"),
+      extra_abdomem: t("treino.extraOpcoes.abdomem"),
+      extra_mobilidade: t("treino.extraOpcoes.mobilidade")
+    };
 
-    if (tituloDia) {
-      tituloDia.textContent = t("treino.diaProgramaLabel", { dia: diaPrograma });
+    if (isExtraTreino) {
+      FEMFLOW.diaProgramaAtual = Number(localStorage.getItem("femflow_diaPrograma") || 1);
+      if (tituloTopo) {
+        tituloTopo.textContent = t("treino.tituloExtra");
+      }
+      if (tituloDia) {
+        const extraLabel = extraLabels[enfaseFinal] || t("treino.extraLabel");
+        tituloDia.textContent = t("treino.extraTitulo", { tipo: extraLabel });
+      }
+    } else {
+      const diaPrograma = await FEMFLOW.getDiaPrograma();
+      FEMFLOW.diaProgramaAtual = diaPrograma;
+
+      if (tituloDia) {
+        tituloDia.textContent = t("treino.diaProgramaLabel", { dia: diaPrograma });
+      }
     }
 
     /* ================= TREINO ================= */
@@ -262,7 +304,7 @@ const hasPersonal =
   enfase: enfaseFinal,
   fase,
   diaCiclo,
-  personal: personalFinal
+  personal: personalFinal && !isExtraTreino
 });
 
 
