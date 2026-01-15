@@ -177,9 +177,18 @@ home: {
 
   // BOTÕES
   treino: "Treino",
+  treinoExtra: "Treino extra",
   evolucao: "Evolução",
   respiracao: "Respiração",
-  endurance: "Endurance"
+  endurance: "Endurance",
+
+  treinoExtraTitulo: "Treino Extra",
+  treinoExtraSub: "Escolha a área que deseja focar hoje.",
+  treinoExtraSuperior: "Superior",
+  treinoExtraInferior: "Inferior",
+  treinoExtraAbdomem: "Abdômen",
+  treinoExtraMobilidade: "Mobilidade",
+  treinoExtraFechar: "Fechar"
 }
 ,
 
@@ -234,8 +243,17 @@ home: {
 
   treino: {
     tituloTopo: "Treino Diário",
+    tituloExtra: "Treino Extra",
     diaPrograma: "Dia do Programa",
      diaProgramaLabel: "Dia {dia}",
+    extraTitulo: "Treino extra — {tipo}",
+    extraLabel: "Geral",
+    extraOpcoes: {
+      superior: "Superior",
+      inferior: "Inferior",
+      abdomem: "Abdômen",
+      mobilidade: "Mobilidade"
+    },
     btnSalvar: "💾 Salvar treino",
     btnDescanso: "🌿 Descanso",
     btnCancelar: "Cancelar",
@@ -343,10 +361,6 @@ series: {
     titulo: "🐢 Cadência Controlada",
     texto: "Controle a fase excêntrica do movimento de forma lenta e consciente."
   },
-  SM: {
-    titulo: "🎯 Submáxima",
-    texto: "Trabalhe abaixo da falha, mantendo 1–3 repetições em reserva para consistência e técnica."
-  },
   D: {
     titulo: "🔥 Dropset",
     texto: "Ao atingir a falha, reduza a carga 3 vezes consecutivas sem descanso."
@@ -413,9 +427,18 @@ home: {
   luteal: "Luteal",
 
   treino: "Training",
+  treinoExtra: "Extra training",
   evolucao: "Progress",
   respiracao: "Breathing",
-  endurance: "Endurance"
+  endurance: "Endurance",
+
+  treinoExtraTitulo: "Extra Training",
+  treinoExtraSub: "Choose the area you want to focus on today.",
+  treinoExtraSuperior: "Upper body",
+  treinoExtraInferior: "Lower body",
+  treinoExtraAbdomem: "Abs",
+  treinoExtraMobilidade: "Mobility",
+  treinoExtraFechar: "Close"
 },
 
   ciclo: {
@@ -468,8 +491,17 @@ home: {
 
   treino: {
     tituloTopo: "Daily Workout",
+    tituloExtra: "Extra Workout",
     diaPrograma: "Program Day",
    diaProgramaLabel: "Day {dia}",
+    extraTitulo: "Extra workout — {tipo}",
+    extraLabel: "General",
+    extraOpcoes: {
+      superior: "Upper body",
+      inferior: "Lower body",
+      abdomem: "Abs",
+      mobilidade: "Mobility"
+    },
     btnSalvar: "💾 Save workout",
     btnDescanso: "🌿 Rest",
     btnCancelar: "Cancel",
@@ -578,10 +610,6 @@ series: {
     titulo: "🐢 Controlled Tempo",
     texto: "Slow and controlled eccentric phase."
   },
-  SM: {
-    titulo: "🎯 Submaximal",
-    texto: "Work below failure, keeping 1–3 reps in reserve for consistency and technique."
-  },
   D: {
     titulo: "🔥 Dropset",
     texto: "After failure, reduce load 3 consecutive times without rest."
@@ -649,9 +677,18 @@ fr: {
   luteal: "Lutéale",
 
   treino: "Entraînement",
+  treinoExtra: "Entraînement extra",
   evolucao: "Évolution",
   respiracao: "Respiration",
-  endurance: "Endurance"
+  endurance: "Endurance",
+
+  treinoExtraTitulo: "Entraînement extra",
+  treinoExtraSub: "Choisissez la zone que vous souhaitez travailler aujourd’hui.",
+  treinoExtraSuperior: "Haut du corps",
+  treinoExtraInferior: "Bas du corps",
+  treinoExtraAbdomem: "Abdos",
+  treinoExtraMobilidade: "Mobilité",
+  treinoExtraFechar: "Fermer"
 },
 
   ciclo: {
@@ -704,8 +741,17 @@ fr: {
 
   treino: {
     tituloTopo: "Entraînement du jour",
+    tituloExtra: "Entraînement extra",
     diaPrograma: "Jour du programme",
      diaProgramaLabel: "Jour {dia}",
+    extraTitulo: "Entraînement extra — {tipo}",
+    extraLabel: "Général",
+    extraOpcoes: {
+      superior: "Haut du corps",
+      inferior: "Bas du corps",
+      abdomem: "Abdos",
+      mobilidade: "Mobilité"
+    },
     btnSalvar: "💾 Enregistrer l’entraînement",
     btnDescanso: "🌿 Repos",
     btnCancelar: "Annuler",
@@ -813,10 +859,6 @@ resp: {
   CC: {
     titulo: "🐢 Cadence contrôlée",
     texto: "Phase excentrique lente et contrôlée."
-  },
-  SM: {
-    titulo: "🎯 Submaximale",
-    texto: "Travaillez en dessous de l’échec, en gardant 1 à 3 répétitions en réserve."
   },
   D: {
     titulo: "🔥 Dropset",
