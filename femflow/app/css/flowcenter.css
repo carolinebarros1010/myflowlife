@@ -191,6 +191,77 @@ h3 {
 }
 
 /* ==========================================================
+   MODAL TREINO EXTRA
+========================================================== */
+.modal-extra {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.modal-extra.oculto {
+  display: none;
+}
+
+.modal-extra-box {
+  background: #fff7f2;
+  padding: 26px;
+  border-radius: 22px;
+  width: 85%;
+  max-width: 360px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.15);
+  text-align: center;
+  animation: fadeIn .15s ease-out;
+}
+
+.modal-extra-box h2 {
+  margin-top: 0;
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  color: #335953;
+  font-size: 1.3rem;
+}
+
+.modal-extra-sub {
+  margin: 8px 0 14px;
+  color: #7b6e68;
+  font-size: 0.95rem;
+}
+
+.extra-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: #fff;
+  border: 2px solid #335953;
+  border-radius: 14px;
+  color: #335953;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.extra-btn:hover {
+  background: #335953;
+  color: #fff;
+}
+
+.extra-close {
+  margin-top: 16px;
+  background: transparent;
+  border: none;
+  color: #cc6a5a;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ==========================================================
    DEBUG PANEL (opcional)
 ========================================================== */
 #debugPanel {
