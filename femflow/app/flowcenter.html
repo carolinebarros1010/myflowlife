@@ -59,6 +59,7 @@
 <div class="toolbar">
   <button class="tool" id="toBreath">💨 —</button>
   <button class="tool" id="toTrain">🏃 —</button>
+  <button class="tool" id="toExtraTrain">✨ —</button>
   <button class="tool" id="toEvolution">📈 —</button>
   <button class="tool" id="toEndurance">🏃‍♂️ Endurance</button>
 </div>
@@ -80,6 +81,21 @@
   </div>
 </div>
 
+<!-- MODAL DE TREINO EXTRA -->
+<div id="modal-extra" class="modal-extra oculto">
+  <div class="modal-extra-box">
+    <h2 id="extraTitle">✨ Treino Extra</h2>
+    <p id="extraSub" class="modal-extra-sub">Escolha a área que deseja focar hoje.</p>
+
+    <button class="extra-btn" data-extra-enfase="extra_superior">Superior</button>
+    <button class="extra-btn" data-extra-enfase="extra_inferior">Inferior</button>
+    <button class="extra-btn" data-extra-enfase="extra_abdomem">Abdômen</button>
+    <button class="extra-btn" data-extra-enfase="extra_mobilidade">Mobilidade</button>
+
+    <button id="fecharExtra" class="extra-close">Fechar</button>
+  </div>
+</div>
+
 
 <div id="ff-loading" class="ff-loading">
   <div class="ff-loading-box">
@@ -94,4 +110,3 @@
 
 </body>
 </html>
-
