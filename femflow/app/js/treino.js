@@ -71,6 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("femflow_enfase", enfaseBase);
     }
     localStorage.removeItem("femflow_enfase_base");
+    localStorage.removeItem("femflow_treino_extra");
   }
 
   function encerrarTreino() {
@@ -259,8 +260,12 @@ const hasPersonal =
     /* ================= PERFIL ================= */
     const nivel    = perfil.nivel;
     const enfaseLocal = localStorage.getItem("femflow_enfase");
+    const extraSessaoAtiva = localStorage.getItem("femflow_treino_extra") === "true";
     let enfaseFinal = perfil.enfase || enfaseLocal;
-    if (enfaseLocal && FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocal)) {
+    if (extraSessaoAtiva && enfaseLocal) {
+      enfaseFinal = enfaseLocal;
+    }
+    if (!extraSessaoAtiva && enfaseLocal && FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocal)) {
       enfaseFinal = enfaseLocal;
     }
 
@@ -276,7 +281,10 @@ const hasPersonal =
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
     const isExtraTreino = FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseFinal);
-    treinoExtraAtivo = Boolean(isExtraTreino);
+    treinoExtraAtivo = Boolean(extraSessaoAtiva);
+    if (!extraSessaoAtiva && isExtraTreino) {
+      localStorage.removeItem("femflow_treino_extra");
+    }
 
     console.log("🧠 ÊNFASE RECEBIDA DO BACKEND:", perfil.enfase);
     FEMFLOW.enfaseAtual = enfaseFinal;

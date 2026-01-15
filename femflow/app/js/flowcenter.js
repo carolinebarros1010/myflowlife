@@ -267,6 +267,7 @@ function initFlowCenter() {
       if (enfaseAtual && !FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseAtual)) {
         localStorage.setItem("femflow_enfase_base", enfaseAtual);
       }
+      localStorage.setItem("femflow_treino_extra", "true");
       localStorage.setItem("femflow_enfase", enfase);
       fecharModalExtra();
       FEMFLOW.router("treino.html");
