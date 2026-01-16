@@ -60,10 +60,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .split("?")[0]
     .replace(/\.html.*$/, "");
   if (extraParamNorm.startsWith("extra_")) {
-    const enfaseAtual = localStorage.getItem("femflow_enfase");
-    if (enfaseAtual && !FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseAtual)) {
-      localStorage.setItem("femflow_enfase_base", enfaseAtual);
-    }
     localStorage.setItem("femflow_treino_extra", "true");
     localStorage.setItem("femflow_enfase", extraParamNorm);
   }
@@ -85,18 +81,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let treinoExtraAtivo = false;
 
-  function restaurarEnfaseNormal() {
-    if (!treinoExtraAtivo) return;
-    const enfaseBase = localStorage.getItem("femflow_enfase_base");
-    if (enfaseBase) {
-      localStorage.setItem("femflow_enfase", enfaseBase);
-    }
-    localStorage.removeItem("femflow_enfase_base");
-    localStorage.removeItem("femflow_treino_extra");
-  }
-
   function encerrarTreino() {
-    restaurarEnfaseNormal();
+    if (treinoExtraAtivo) {
+      localStorage.removeItem("femflow_treino_extra");
+    }
     FEMFLOW.router("flowcenter.html");
   }
 
@@ -376,16 +364,8 @@ const hasPersonal =
       enfaseFinal = enfaseLocal;
     }
     if (!extraSessaoAtiva && enfaseLocal && FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocal)) {
-      const enfaseBase = localStorage.getItem("femflow_enfase_base");
-      if (enfaseBase) {
-        localStorage.setItem("femflow_enfase", enfaseBase);
-      } else {
-        localStorage.removeItem("femflow_enfase");
-      }
-      localStorage.removeItem("femflow_enfase_base");
       localStorage.removeItem("femflow_treino_extra");
-      enfaseLocal = localStorage.getItem("femflow_enfase");
-      enfaseFinal = perfil.enfase || enfaseLocal;
+      enfaseFinal = perfil.enfase || null;
     }
 
     // 🔥 Personal nunca é ênfase
