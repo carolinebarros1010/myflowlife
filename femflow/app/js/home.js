@@ -101,22 +101,26 @@ const TITULOS_ESPECIAIS = {
   forcaabc: "Força",
   quadriceps: "Quadríceps",
   gluteos: "Glúteos",
-  corrida_longa: "Corrida longa"
+  corrida_longa: "Corrida longa",
+  casa_core_gluteo: "Glúteo e Core"
 };
 
 const CARDS_HOME_PRESETS = [
   "avancada_corrida_longa",
   "avancada_forcaabc",
   "avancada_gluteos",
+  "avancada_casa_core_gluteo",
   "avancada_militar",
   "avancada_quadriceps",
   "iniciante_corrida_longa",
+  "iniciante_casa_core_gluteo",
   "iniciante_costas",
   "iniciante_forcaabc",
   "iniciante_gluteos",
   "iniciante_militar",
   "iniciante_quadriceps",
   "intermediaria_corrida_longa",
+  "intermediaria_casa_core_gluteo",
   "intermediaria_forcaabc",
   "intermediaria_gluteos",
   "intermediaria_militar",
@@ -351,6 +355,8 @@ const CARDS_FOLLOWME_SIMBOLICOS = [
 const CARD_THUMBS = {
   gluteo: "gluteos.jpg",
   gluteos: "gluteos.jpg",
+  casa_core_gluteo: "casa_core_gluteo.jpg",
+  corrida_longa: "corrida_Longa.jpg",
   quadriceps: "quadriceps.jpg",
   costas: "costas.jpg",
   ombro: "ombro.jpg",
