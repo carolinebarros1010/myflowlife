@@ -560,8 +560,8 @@
           </div>
           <div>
             <label for="enfase">Ênfase</label>
-            <select id="enfase" name="enfase" required>
-              <option value="">Selecione</option>
+            <input id="enfase" name="enfase" list="enfaseList" placeholder="Digite ou selecione" required />
+            <datalist id="enfaseList">
               <option value="gluteos">Glúteos</option>
               <option value="core">Core</option>
               <option value="corrida_longa">Corrida longa distância</option>
@@ -578,7 +578,7 @@
               <option value="surf">Surf</option>
               <option value="triatlo">Triatlo</option>
               <option value="crossfit">Crossfit</option>
-            </select>
+            </datalist>
             <div class="chips" id="chipContainer"></div>
           </div>
           <div>
@@ -1098,6 +1098,7 @@
       Object.entries(params).forEach(([key, value]) => {
         localStorage.setItem(`femflow_${key}`, value || "");
       });
+      syncChips();
       updatePreview();
     };
 
@@ -1120,6 +1121,7 @@
         chip.type = "button";
         chip.className = "chip";
         chip.textContent = option.label;
+        chip.dataset.value = option.value;
         chip.addEventListener("click", () => {
           qs("enfase").value = option.value;
           document.querySelectorAll(".chip").forEach((el) => el.classList.remove("active"));
@@ -1127,6 +1129,13 @@
           persistParams();
         });
         container.appendChild(chip);
+      });
+    };
+
+    const syncChips = () => {
+      const current = qs("enfase").value.trim().toLowerCase();
+      document.querySelectorAll(".chip").forEach((chip) => {
+        chip.classList.toggle("active", chip.dataset.value === current);
       });
     };
 
@@ -1147,6 +1156,7 @@
       setupChips();
       setupPresets();
       loadParams();
+      syncChips();
       updatePreview();
       pingEndpoint();
     };
