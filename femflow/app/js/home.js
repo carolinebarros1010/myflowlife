@@ -356,13 +356,16 @@ const CARD_THUMBS = {
   gluteo: "gluteos.jpg",
   gluteos: "gluteos.jpg",
   casa_core_gluteo: "casa_core_gluteo.jpg",
+  casa_mobilidade: "casa_mobilidade.jpg",
   corrida_longa: "corrida_Longa.jpg",
   quadriceps: "quadriceps.jpg",
   costas: "costas.jpg",
+  forcaabc: "forcaabc.jpg",
   ombro: "ombro.jpg",
   peito: "peitoral.jpg",
   peitoral: "peitoral.jpg",
-  militar: "militar.jpg"
+  militar: "militar.jpg",
+  remo_oceanico: "remo_oceanico.jpg"
 };
 
 function getThumbUrl(enfase) {
