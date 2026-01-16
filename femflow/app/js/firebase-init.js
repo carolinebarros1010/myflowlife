@@ -10,13 +10,12 @@
   }
 
   const firebaseConfig = {
-    apiKey: "AIzaSyB675lX-la7dGkZP1tfvzlPZ4oxvMPLBh0",
+    apiKey: "AIzaSyCNDL55caHcFqLpCPgxq5QK2Yt9YkXAvkE",
     authDomain: "femflow-ebec2.firebaseapp.com",
     projectId: "femflow-ebec2",
-    storageBucket: "femflow-ebec2.firebasestorage.app",
-    messagingSenderId: "1043953159611",
-    appId: "1:1043953159611:web:d12b82f744740f3124c89e",
-    measurementId: "G-6F644L5VTW"
+    storageBucket: "femflow-ebec2.appspot.com",
+    messagingSenderId: "929402947409",
+    appId: "1:929402947409:web:b65b7775ac44edeb4283ae"
   };
 
   try {
@@ -27,5 +26,4 @@
     console.error("[FemFlow] Erro ao inicializar Firebase:", err);
   }
 })();
-
 
