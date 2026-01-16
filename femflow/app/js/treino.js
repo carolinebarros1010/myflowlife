@@ -434,20 +434,14 @@ const hasPersonal =
     }
 
     /* ================= TREINO ================= */
-    let lista;
-
-   lista = await FEMFLOW.engineTreino.montarTreinoFinal({
-  id,
-  nivel,
-  enfase: enfaseFinal,
-  fase,
-  diaCiclo,
-  personal: personalFinal && !isExtraTreino
+    const lista = await FEMFLOW.engineTreino.montarTreinoFinal({
+      id,
+      nivel,
+      enfase: enfaseFinal,
+      fase,
+      diaCiclo,
+      personal: personalFinal && !isExtraTreino
     });
-  })();
-}
-}
-
 
     renderTreino(lista);
 
