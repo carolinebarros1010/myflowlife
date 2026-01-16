@@ -180,15 +180,20 @@ async function carregarEbooks(){
 
     const capa = eb.capa?.startsWith('http') ? eb.capa : `ebooks/${eb.capa}`;
     const rotulo = (eb.tipo === 'download') ? 'Baixar' : 'Comprar';
+    const nomeExibicao = eb.nomeExibicao || eb.nome || '';
+    const nomeFirebase = eb.nomeFirebase || eb.nome || '';
 
     // link tratado — sem href direto, chamando goCadastro()
     const destino = eb.link?.startsWith('http') ? eb.link : `ebooks/${eb.link}`;
 
     card.innerHTML = `
-      <div class="cover"><img src="${capa}" alt="${eb.nome || ''}" loading="lazy"></div>
+      <div class="cover"><img src="${capa}" alt="${nomeExibicao}" loading="lazy"></div>
       <div class="meta">
-        <div class="price"><small>R$</small> ${eb.preco || '0,00'}</div>
-        <a class="cta" href="#" onclick="return goCadastro('${destino}','${eb.nome}','${eb.tipo}')">${rotulo}</a>
+        <div class="info">
+          <div class="title">${nomeExibicao}</div>
+          <div class="price"><small>R$</small> ${eb.preco || '0,00'}</div>
+        </div>
+        <a class="cta" href="#" onclick="return goCadastro('${destino}','${nomeFirebase}','${eb.tipo}')">${rotulo}</a>
       </div>`;
     wrap.appendChild(card);
   });
