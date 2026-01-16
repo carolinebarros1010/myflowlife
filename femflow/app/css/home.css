@@ -209,7 +209,8 @@ h1 {
 }
 
 .thumb {
-  height: 140px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   background: #ddd;
   background-image: var(--thumb-url, none);
   background-position: center;
