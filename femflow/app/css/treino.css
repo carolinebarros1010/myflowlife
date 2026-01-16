@@ -728,7 +728,6 @@ font-size: 0.9rem !important;
   position: absolute;
   inset: 0;
   background: rgba(8, 12, 12, 0.6);
-  backdrop-filter: blur(6px);
   mask-image: radial-gradient(
     circle at var(--spot-x) var(--spot-y),
     transparent 0,
