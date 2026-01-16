@@ -362,7 +362,7 @@ const CARD_THUMBS = {
 function getThumbUrl(enfase) {
   const file = CARD_THUMBS[enfase];
   if (!file) return "";
-  return new URL(`css/cards/${file}`, window.location.href).toString();
+  return new URL(`/femflow/app/css/cards/${file}`, window.location.origin).toString();
 }
 
 /* ============================================================
