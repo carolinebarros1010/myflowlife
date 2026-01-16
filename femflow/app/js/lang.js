@@ -261,6 +261,18 @@ home: {
     pseLabel: "PSE (0 a 10)",
     pseSalvar: "Salvar",
     pseCancelar: "Cancelar",
+    tour: {
+      step: "{atual}/{total}",
+      salvarTitulo: "Salve seu treino",
+      salvarTexto: "Ao finalizar, salve para registrar seu PSE e evolução.",
+      descansoTitulo: "Treino também é descanso",
+      descansoTexto: "Selecione quando for descansar para manter seu ciclo alinhado.",
+      cancelarTitulo: "Voltar ao painel",
+      cancelarTexto: "Use cancelar para sair do treino e voltar ao FlowCenter.",
+      next: "Próximo",
+      finish: "Concluir",
+      skip: "Pular"
+    },
      hiit: {
     protocolo: "Protocolo {forte} / {leve}",
     descricao:
@@ -509,6 +521,18 @@ home: {
     pseLabel: "RPE (0 to 10)",
     pseSalvar: "Save",
     pseCancelar: "Cancel",
+    tour: {
+      step: "{atual}/{total}",
+      salvarTitulo: "Save your workout",
+      salvarTexto: "When you finish, save it to record your RPE and progress.",
+      descansoTitulo: "Rest is also training",
+      descansoTexto: "Select this when you’re resting to keep your cycle aligned.",
+      cancelarTitulo: "Back to the panel",
+      cancelarTexto: "Use cancel to leave the workout and return to FlowCenter.",
+      next: "Next",
+      finish: "Done",
+      skip: "Skip"
+    },
      hiit: {
   protocolo: "{forte} / {leve} Protocol",
   descricao:
@@ -759,6 +783,18 @@ fr: {
     pseLabel: "PSE (0 à 10)",
     pseSalvar: "Enregistrer",
     pseCancelar: "Annuler",
+    tour: {
+      step: "{atual}/{total}",
+      salvarTitulo: "Enregistrez votre entraînement",
+      salvarTexto: "À la fin, enregistrez pour noter votre PSE et votre progression.",
+      descansoTitulo: "Le repos fait aussi partie de l’entraînement",
+      descansoTexto: "Sélectionnez-le quand vous êtes au repos pour garder votre cycle aligné.",
+      cancelarTitulo: "Retour au tableau",
+      cancelarTexto: "Utilisez annuler pour quitter l’entraînement et revenir au FlowCenter.",
+      next: "Suivant",
+      finish: "Terminer",
+      skip: "Ignorer"
+    },
     hiit: {
   protocolo: "Protocole {forte} / {leve}",
   descricao:
