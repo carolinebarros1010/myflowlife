@@ -708,6 +708,110 @@ font-size: 0.9rem !important;
   font-family: "Playfair Display", serif;
 }
 
+/* ============================================================
+   TOUR TREINO (primeiro acesso)
+============================================================ */
+.treino-tour {
+  position: fixed;
+  inset: 0;
+  --spot-x: 50%;
+  --spot-y: 80%;
+  --spot-r: 90px;
+  background: radial-gradient(
+      circle at var(--spot-x) var(--spot-y),
+      rgba(8, 12, 12, 0) 0,
+      rgba(8, 12, 12, 0) var(--spot-r),
+      rgba(8, 12, 12, 0.6) calc(var(--spot-r) + 12px),
+      rgba(8, 12, 12, 0.6) 100%
+    );
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 32;
+}
+
+.treino-tour.is-hidden {
+  display: none;
+}
+
+.treino-tour-card {
+  width: min(92%, 420px);
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px 20px 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  font-family: "Lato", sans-serif;
+  text-align: center;
+  animation: modalFadeUp 0.25s ease-out;
+}
+
+.treino-tour-step {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+  margin-bottom: 10px;
+}
+
+.treino-tour-title {
+  font-family: "Playfair Display", serif;
+  font-size: 1.35rem;
+  color: #335953;
+  margin-bottom: 8px;
+}
+
+.treino-tour-text {
+  font-size: 0.98rem;
+  color: #4b4b4b;
+  margin-bottom: 18px;
+}
+
+.treino-tour-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.treino-tour-next,
+.treino-tour-skip {
+  flex: 1;
+  padding: 11px 0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.treino-tour-next {
+  background: linear-gradient(135deg, #cc6a5a, #e38d7c);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(204, 106, 90, 0.35);
+}
+
+.treino-tour-skip {
+  background: #f2f2f2;
+  color: #4b4b4b;
+}
+
+.tour-highlight {
+  position: relative;
+  z-index: 33;
+  pointer-events: none;
+  box-shadow: 0 0 12px rgba(204, 106, 90, 0.55),
+    0 0 20px rgba(204, 106, 90, 0.35);
+}
+
+.tour-highlight::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: 999px;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 8px rgba(204, 106, 90, 0.25);
+  pointer-events: none;
+}
+
 
 /* ============================================================
    MODAL PSE — Salvar Treino
