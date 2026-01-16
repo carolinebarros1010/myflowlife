@@ -126,17 +126,32 @@ document.addEventListener("DOMContentLoaded", () => {
       step.target.classList.add("tour-highlight");
       const setSpotlight = () => {
         const rect = step.target.getBoundingClientRect();
-        const radius = Math.max(rect.width, rect.height) / 2 + 28;
-        tourOverlay.style.setProperty("--spot-x", `${rect.left + rect.width / 2}px`);
-        tourOverlay.style.setProperty("--spot-y", `${rect.top + rect.height / 2}px`);
+        const viewport = window.visualViewport;
+        const offsetX = viewport?.offsetLeft || 0;
+        const offsetY = viewport?.offsetTop || 0;
+        const viewportHeight = viewport?.height || window.innerHeight;
+        const isFooterTarget = Boolean(step.target.closest(".fix-footer"));
+        const baseRadius = Math.max(rect.width, rect.height) / 2 + 28;
+        const targetCenterX = rect.left + rect.width / 2 + offsetX;
+        const targetCenterY = rect.top + rect.height / 2 + offsetY;
+        const spotlightBottom = viewportHeight + offsetY;
+        const radius = isFooterTarget
+          ? baseRadius + Math.max(0, spotlightBottom - targetCenterY)
+          : baseRadius;
+        const spotlightY = isFooterTarget ? spotlightBottom : targetCenterY;
+
+        tourOverlay.style.setProperty("--spot-x", `${targetCenterX}px`);
+        tourOverlay.style.setProperty("--spot-y", `${spotlightY}px`);
         tourOverlay.style.setProperty("--spot-r", `${radius}px`);
       };
 
-      step.target.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center"
-      });
+      if (!step.target.closest(".fix-footer")) {
+        step.target.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "center"
+        });
+      }
 
       window.requestAnimationFrame(setSpotlight);
       window.setTimeout(setSpotlight, 300);
