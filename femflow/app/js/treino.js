@@ -187,12 +187,12 @@ document.addEventListener("DOMContentLoaded", () => {
     limparDestaquesTour();
     tourOverlay.classList.add("is-hidden");
     tourOverlay.setAttribute("aria-hidden", "true");
-    localStorage.setItem(tourKey, "done");
+    localStorage.setItem(window.FEMFLOW_TOUR_KEY, "done");
   }
 
   function iniciarTourTreino() {
     if (!tourOverlay) return;
-    if (localStorage.getItem(tourKey) === "done") return;
+    if (localStorage.getItem(window.FEMFLOW_TOUR_KEY) === "done") return;
     if (!btnSalvar || !btnDescanso || !btnCancelar) return;
     tourIndex = 0;
     tourOverlay.classList.remove("is-hidden");
