@@ -1,9 +1,14 @@
 /* ============================================================
    FEMFLOW — treino.js v4.0 FINAL (2025)
 ============================================================ */
-console.log("🔥 treino.js carregou");
+if (window.FEMFLOW_TREINO_LOADED) {
+  console.warn("⚠️ treino.js já carregado. Ignorando nova execução.");
+} else {
+  window.FEMFLOW_TREINO_LOADED = true;
+  console.log("🔥 treino.js carregou");
 
-document.addEventListener("DOMContentLoaded", () => {
+  (function iniciarTreino() {
+    document.addEventListener("DOMContentLoaded", () => {
   console.log("🧱 DOMContentLoaded no treino");
 
   /* ============================================================
@@ -510,7 +515,10 @@ const hasPersonal =
   fase,
   diaCiclo,
   personal: personalFinal && !isExtraTreino
-});
+    });
+  })();
+}
+}
 
 
     renderTreino(lista);
