@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const targetCenterY = rect.top + rect.height / 2 + offsetY;
         const spotlightBottom = viewportHeight + offsetY;
         const footerOvershoot = 18;
-        const footerExtraDrop = 20;
+        const footerExtraDrop = 30;
         const minFooterRadius = 72;
         const radius = isFooterTarget
           ? Math.max(baseRadius, minFooterRadius) +
@@ -158,93 +158,6 @@ document.addEventListener("DOMContentLoaded", () => {
           inline: "center"
         });
       }
-
-      window.requestAnimationFrame(setSpotlight);
-      window.setTimeout(setSpotlight, 300);
-    }
-
-    if (tourTitle) tourTitle.textContent = step.title;
-    if (tourText) tourText.textContent = step.text;
-    if (tourStep) {
-      tourStep.textContent = t("treino.tour.step", {
-        atual: tourIndex + 1,
-        total: tourSteps.length
-      });
-    }
-    if (tourSkip) {
-      tourSkip.textContent = t("treino.tour.skip");
-    }
-    if (tourNext) {
-      tourNext.textContent =
-        tourIndex === tourSteps.length - 1
-          ? t("treino.tour.finish")
-          : t("treino.tour.next");
-    }
-  }
-
-  function finalizarTour() {
-    if (!tourOverlay) return;
-    limparDestaquesTour();
-    tourOverlay.classList.add("is-hidden");
-    tourOverlay.setAttribute("aria-hidden", "true");
-    localStorage.setItem(tourKey, "done");
-  }
-
-  function iniciarTourTreino() {
-    if (!tourOverlay) return;
-    if (localStorage.getItem(tourKey) === "done") return;
-    if (!btnSalvar || !btnDescanso || !btnCancelar) return;
-    tourIndex = 0;
-    tourOverlay.classList.remove("is-hidden");
-    tourOverlay.setAttribute("aria-hidden", "false");
-    atualizarTourUI();
-  }
-
-  var tourTargets = [btnSalvar, btnDescanso, btnCancelar].filter(Boolean);
-  var tourSteps = [
-    {
-      target: btnSalvar,
-      title: t("treino.tour.salvarTitulo"),
-      text: t("treino.tour.salvarTexto")
-    },
-    {
-      target: btnDescanso,
-      title: t("treino.tour.descansoTitulo"),
-      text: t("treino.tour.descansoTexto")
-    },
-    {
-      target: btnCancelar,
-      title: t("treino.tour.cancelarTitulo"),
-      text: t("treino.tour.cancelarTexto")
-    }
-  ];
-  var tourIndex = 0;
-
-  function limparDestaquesTour() {
-    tourTargets.forEach((element) => element?.classList.remove("tour-highlight"));
-  }
-
-  function atualizarTourUI() {
-    const step = tourSteps[tourIndex];
-    if (!step || !tourOverlay) return;
-
-    limparDestaquesTour();
-    if (step.target) {
-      step.target.classList.add("tour-highlight");
-      const setSpotlight = () => {
-        const rect = step.target.getBoundingClientRect();
-        const radius = Math.max(rect.width, rect.height) / 2 + 28;
-        const offsetY = 18;
-        tourOverlay.style.setProperty("--spot-x", `${rect.left + rect.width / 2}px`);
-        tourOverlay.style.setProperty("--spot-y", `${rect.top + rect.height / 2 + offsetY}px`);
-        tourOverlay.style.setProperty("--spot-r", `${radius}px`);
-      };
-
-      step.target.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center"
-      });
 
       window.requestAnimationFrame(setSpotlight);
       window.setTimeout(setSpotlight, 300);
