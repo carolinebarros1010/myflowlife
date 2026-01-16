@@ -54,7 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const tourSkip        = document.getElementById("treinoTourSkip");
 
   const extraParam = new URLSearchParams(window.location.search).get("extra");
-  const extraParamNorm = String(extraParam || "").toLowerCase().trim();
+  const extraParamNorm = String(extraParam || "")
+    .toLowerCase()
+    .trim()
+    .split("?")[0]
+    .replace(/\.html.*$/, "");
   if (extraParamNorm.startsWith("extra_")) {
     const enfaseAtual = localStorage.getItem("femflow_enfase");
     if (enfaseAtual && !FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseAtual)) {
@@ -362,7 +366,7 @@ const hasPersonal =
 
     /* ================= PERFIL ================= */
     const nivel    = perfil.nivel;
-    const enfaseLocal = localStorage.getItem("femflow_enfase");
+    let enfaseLocal = localStorage.getItem("femflow_enfase");
     const extraSessaoAtiva = localStorage.getItem("femflow_treino_extra") === "true";
     let enfaseFinal = perfil.enfase || enfaseLocal;
     if (extraParamNorm.startsWith("extra_")) {
@@ -372,7 +376,16 @@ const hasPersonal =
       enfaseFinal = enfaseLocal;
     }
     if (!extraSessaoAtiva && enfaseLocal && FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocal)) {
-      enfaseFinal = enfaseLocal;
+      const enfaseBase = localStorage.getItem("femflow_enfase_base");
+      if (enfaseBase) {
+        localStorage.setItem("femflow_enfase", enfaseBase);
+      } else {
+        localStorage.removeItem("femflow_enfase");
+      }
+      localStorage.removeItem("femflow_enfase_base");
+      localStorage.removeItem("femflow_treino_extra");
+      enfaseLocal = localStorage.getItem("femflow_enfase");
+      enfaseFinal = perfil.enfase || enfaseLocal;
     }
 
     // 🔥 Personal nunca é ênfase
@@ -404,7 +417,7 @@ const hasPersonal =
     const extraLabels = {
       extra_superior: t("treino.extraOpcoes.superior"),
       extra_inferior: t("treino.extraOpcoes.inferior"),
-      extra_abdomem: t("treino.extraOpcoes.abdomem"),
+      extra_abdomen: t("treino.extraOpcoes.abdomem"),
       extra_mobilidade: t("treino.extraOpcoes.mobilidade")
     };
 
