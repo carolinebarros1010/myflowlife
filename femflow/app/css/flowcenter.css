@@ -53,9 +53,9 @@ h1 {
   margin: 0;
 }
 
-h3 {
+#tituloFlow {
   font-family: "Playfair Display", serif;
-  font-size: 0.6rem;
+  font-size: 18px;
   color: var(--verde);
   margin-top: 6px;
 }
