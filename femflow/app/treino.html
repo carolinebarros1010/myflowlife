@@ -108,18 +108,17 @@
 
   <!-- FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 
- <script>
-  firebase.initializeApp({
-    apiKey: "AIzaSyCNDL55caHcFqLpCPgxq5QK2Yt9YkXAvkE",
-    authDomain: "femflow-ebec2.firebaseapp.com",
-    projectId: "femflow-ebec2",
-    storageBucket: "femflow-ebec2.appspot.com",
-    messagingSenderId: "929402947409",
-    appId: "1:929402947409:web:b65b7775ac44edeb4283ae"
-  });
+<script src="js/firebase-init.js?v=20250127"></script>
+<script>
+  if (firebase.auth) {
+    firebase.auth().signInAnonymously().catch((err) => {
+      console.warn("[FemFlow] Auth anônimo falhou:", err);
+    });
+  }
 </script>
 
 <!-- SCRIPTS FEMFLOW -->

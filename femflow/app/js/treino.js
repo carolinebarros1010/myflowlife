@@ -58,12 +58,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const tourSkip        = document.getElementById("treinoTourSkip");
 
   const extraParam = new URLSearchParams(window.location.search).get("extra");
-  const extraParamNorm = String(extraParam || "").toLowerCase().trim();
+  const extraParamNorm = String(extraParam || "")
+    .toLowerCase()
+    .trim()
+    .split("?")[0]
+    .replace(/\.html.*$/, "");
   if (extraParamNorm.startsWith("extra_")) {
-    const enfaseAtual = localStorage.getItem("femflow_enfase");
-    if (enfaseAtual && !FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseAtual)) {
-      localStorage.setItem("femflow_enfase_base", enfaseAtual);
-    }
     localStorage.setItem("femflow_treino_extra", "true");
     localStorage.setItem("femflow_enfase", extraParamNorm);
   }
@@ -85,19 +85,324 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let treinoExtraAtivo = false;
 
-  function restaurarEnfaseNormal() {
-    if (!treinoExtraAtivo) return;
-    const enfaseBase = localStorage.getItem("femflow_enfase_base");
-    if (enfaseBase) {
-      localStorage.setItem("femflow_enfase", enfaseBase);
+  function encerrarTreino() {
+    if (treinoExtraAtivo) {
+      localStorage.removeItem("femflow_treino_extra");
     }
-    localStorage.removeItem("femflow_enfase_base");
-    localStorage.removeItem("femflow_treino_extra");
+    FEMFLOW.router("flowcenter.html");
   }
 
-  function encerrarTreino() {
-    restaurarEnfaseNormal();
-    FEMFLOW.router("flowcenter.html");
+  const TOUR_KEY = "femflow_treino_tour_v1";
+  const tourTargets = [btnSalvar, btnDescanso, btnCancelar].filter(Boolean);
+  const tourSteps = [
+    {
+      target: btnSalvar,
+      title: t("treino.tour.salvarTitulo"),
+      text: t("treino.tour.salvarTexto")
+    },
+    {
+      target: btnDescanso,
+      title: t("treino.tour.descansoTitulo"),
+      text: t("treino.tour.descansoTexto")
+    },
+    {
+      target: btnCancelar,
+      title: t("treino.tour.cancelarTitulo"),
+      text: t("treino.tour.cancelarTexto")
+    }
+  ];
+  let tourIndex = 0;
+
+  function limparDestaquesTour() {
+    tourTargets.forEach((element) => element?.classList.remove("tour-highlight"));
+  }
+
+  function atualizarTourUI() {
+    const step = tourSteps[tourIndex];
+    if (!step || !tourOverlay) return;
+
+    limparDestaquesTour();
+    if (step.target) {
+      step.target.classList.add("tour-highlight");
+    }
+
+    if (tourTitle) tourTitle.textContent = step.title;
+    if (tourText) tourText.textContent = step.text;
+    if (tourStep) {
+      tourStep.textContent = t("treino.tour.step", {
+        atual: tourIndex + 1,
+        total: tourSteps.length
+      });
+    }
+    if (tourSkip) {
+      tourSkip.textContent = t("treino.tour.skip");
+    }
+    if (tourNext) {
+      tourNext.textContent =
+        tourIndex === tourSteps.length - 1
+          ? t("treino.tour.finish")
+          : t("treino.tour.next");
+    }
+  }
+
+  function finalizarTour() {
+    if (!tourOverlay) return;
+    limparDestaquesTour();
+    tourOverlay.classList.add("is-hidden");
+    tourOverlay.setAttribute("aria-hidden", "true");
+    localStorage.setItem(TOUR_KEY, "done");
+  }
+
+  function iniciarTourTreino() {
+    if (!tourOverlay) return;
+    if (localStorage.getItem(TOUR_KEY) === "done") return;
+    if (!btnSalvar || !btnDescanso || !btnCancelar) return;
+    tourIndex = 0;
+    tourOverlay.classList.remove("is-hidden");
+    tourOverlay.setAttribute("aria-hidden", "false");
+    atualizarTourUI();
+  }
+
+  const TOUR_KEY = "femflow_treino_tour_v1";
+  const tourTargets = [btnSalvar, btnDescanso, btnCancelar].filter(Boolean);
+  const tourSteps = [
+    {
+      target: btnSalvar,
+      title: t("treino.tour.salvarTitulo"),
+      text: t("treino.tour.salvarTexto")
+    },
+    {
+      target: btnDescanso,
+      title: t("treino.tour.descansoTitulo"),
+      text: t("treino.tour.descansoTexto")
+    },
+    {
+      target: btnCancelar,
+      title: t("treino.tour.cancelarTitulo"),
+      text: t("treino.tour.cancelarTexto")
+    }
+  ];
+  let tourIndex = 0;
+
+  function limparDestaquesTour() {
+    tourTargets.forEach((element) => element?.classList.remove("tour-highlight"));
+  }
+
+  function atualizarTourUI() {
+    const step = tourSteps[tourIndex];
+    if (!step || !tourOverlay) return;
+
+    limparDestaquesTour();
+    if (step.target) {
+      step.target.classList.add("tour-highlight");
+      step.target.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center"
+      });
+      const rect = step.target.getBoundingClientRect();
+      const radius = Math.max(rect.width, rect.height) / 2 + 28;
+      tourOverlay.style.setProperty("--spot-x", `${rect.left + rect.width / 2}px`);
+      tourOverlay.style.setProperty("--spot-y", `${rect.top + rect.height / 2}px`);
+      tourOverlay.style.setProperty("--spot-r", `${radius}px`);
+    }
+
+    if (tourTitle) tourTitle.textContent = step.title;
+    if (tourText) tourText.textContent = step.text;
+    if (tourStep) {
+      tourStep.textContent = t("treino.tour.step", {
+        atual: tourIndex + 1,
+        total: tourSteps.length
+      });
+    }
+    if (tourSkip) {
+      tourSkip.textContent = t("treino.tour.skip");
+    }
+    if (tourNext) {
+      tourNext.textContent =
+        tourIndex === tourSteps.length - 1
+          ? t("treino.tour.finish")
+          : t("treino.tour.next");
+    }
+  }
+
+  function finalizarTour() {
+    if (!tourOverlay) return;
+    limparDestaquesTour();
+    tourOverlay.classList.add("is-hidden");
+    tourOverlay.setAttribute("aria-hidden", "true");
+    localStorage.setItem(TOUR_KEY, "done");
+  }
+
+  function iniciarTourTreino() {
+    if (!tourOverlay) return;
+    if (localStorage.getItem(TOUR_KEY) === "done") return;
+    if (!btnSalvar || !btnDescanso || !btnCancelar) return;
+    tourIndex = 0;
+    tourOverlay.classList.remove("is-hidden");
+    tourOverlay.setAttribute("aria-hidden", "false");
+    atualizarTourUI();
+  }
+
+  const tourKey = window.FEMFLOW_TOUR_KEY;
+  const tourTargets = [btnSalvar, btnDescanso, btnCancelar].filter(Boolean);
+  const tourSteps = [
+    {
+      target: btnSalvar,
+      title: t("treino.tour.salvarTitulo"),
+      text: t("treino.tour.salvarTexto")
+    },
+    {
+      target: btnDescanso,
+      title: t("treino.tour.descansoTitulo"),
+      text: t("treino.tour.descansoTexto")
+    },
+    {
+      target: btnCancelar,
+      title: t("treino.tour.cancelarTitulo"),
+      text: t("treino.tour.cancelarTexto")
+    }
+  ];
+  let tourIndex = 0;
+
+  function limparDestaquesTour() {
+    tourTargets.forEach((element) => element?.classList.remove("tour-highlight"));
+  }
+
+  function atualizarTourUI() {
+    const step = tourSteps[tourIndex];
+    if (!step || !tourOverlay) return;
+
+    limparDestaquesTour();
+    if (step.target) {
+      step.target.classList.add("tour-highlight");
+      step.target.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center"
+      });
+      const rect = step.target.getBoundingClientRect();
+      const radius = Math.max(rect.width, rect.height) / 2 + 28;
+      tourOverlay.style.setProperty("--spot-x", `${rect.left + rect.width / 2}px`);
+      tourOverlay.style.setProperty("--spot-y", `${rect.top + rect.height / 2}px`);
+      tourOverlay.style.setProperty("--spot-r", `${radius}px`);
+    }
+
+    if (tourTitle) tourTitle.textContent = step.title;
+    if (tourText) tourText.textContent = step.text;
+    if (tourStep) {
+      tourStep.textContent = t("treino.tour.step", {
+        atual: tourIndex + 1,
+        total: tourSteps.length
+      });
+    }
+    if (tourSkip) {
+      tourSkip.textContent = t("treino.tour.skip");
+    }
+    if (tourNext) {
+      tourNext.textContent =
+        tourIndex === tourSteps.length - 1
+          ? t("treino.tour.finish")
+          : t("treino.tour.next");
+    }
+  }
+
+  function finalizarTour() {
+    if (!tourOverlay) return;
+    limparDestaquesTour();
+    tourOverlay.classList.add("is-hidden");
+    tourOverlay.setAttribute("aria-hidden", "true");
+    localStorage.setItem(tourKey, "done");
+  }
+
+  function iniciarTourTreino() {
+    if (!tourOverlay) return;
+    if (localStorage.getItem(tourKey) === "done") return;
+    if (!btnSalvar || !btnDescanso || !btnCancelar) return;
+    tourIndex = 0;
+    tourOverlay.classList.remove("is-hidden");
+    tourOverlay.setAttribute("aria-hidden", "false");
+    atualizarTourUI();
+  }
+
+  const tourTargets = [btnSalvar, btnDescanso, btnCancelar].filter(Boolean);
+  const tourSteps = [
+    {
+      target: btnSalvar,
+      title: t("treino.tour.salvarTitulo"),
+      text: t("treino.tour.salvarTexto")
+    },
+    {
+      target: btnDescanso,
+      title: t("treino.tour.descansoTitulo"),
+      text: t("treino.tour.descansoTexto")
+    },
+    {
+      target: btnCancelar,
+      title: t("treino.tour.cancelarTitulo"),
+      text: t("treino.tour.cancelarTexto")
+    }
+  ];
+  let tourIndex = 0;
+
+  function limparDestaquesTour() {
+    tourTargets.forEach((element) => element?.classList.remove("tour-highlight"));
+  }
+
+  function atualizarTourUI() {
+    const step = tourSteps[tourIndex];
+    if (!step || !tourOverlay) return;
+
+    limparDestaquesTour();
+    if (step.target) {
+      step.target.classList.add("tour-highlight");
+      step.target.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center"
+      });
+      const rect = step.target.getBoundingClientRect();
+      const radius = Math.max(rect.width, rect.height) / 2 + 28;
+      tourOverlay.style.setProperty("--spot-x", `${rect.left + rect.width / 2}px`);
+      tourOverlay.style.setProperty("--spot-y", `${rect.top + rect.height / 2}px`);
+      tourOverlay.style.setProperty("--spot-r", `${radius}px`);
+    }
+
+    if (tourTitle) tourTitle.textContent = step.title;
+    if (tourText) tourText.textContent = step.text;
+    if (tourStep) {
+      tourStep.textContent = t("treino.tour.step", {
+        atual: tourIndex + 1,
+        total: tourSteps.length
+      });
+    }
+    if (tourSkip) {
+      tourSkip.textContent = t("treino.tour.skip");
+    }
+    if (tourNext) {
+      tourNext.textContent =
+        tourIndex === tourSteps.length - 1
+          ? t("treino.tour.finish")
+          : t("treino.tour.next");
+    }
+  }
+
+  function finalizarTour() {
+    if (!tourOverlay) return;
+    limparDestaquesTour();
+    tourOverlay.classList.add("is-hidden");
+    tourOverlay.setAttribute("aria-hidden", "true");
+    localStorage.setItem(TOUR_KEY, "done");
+  }
+
+  function iniciarTourTreino() {
+    if (!tourOverlay) return;
+    if (localStorage.getItem(TOUR_KEY) === "done") return;
+    if (!btnSalvar || !btnDescanso || !btnCancelar) return;
+    tourIndex = 0;
+    tourOverlay.classList.remove("is-hidden");
+    tourOverlay.setAttribute("aria-hidden", "false");
+    atualizarTourUI();
   }
 
   const tourTargets = [btnSalvar, btnDescanso, btnCancelar].filter(Boolean);
@@ -375,7 +680,7 @@ const hasPersonal =
 
     /* ================= PERFIL ================= */
     const nivel    = perfil.nivel;
-    const enfaseLocal = localStorage.getItem("femflow_enfase");
+    let enfaseLocal = localStorage.getItem("femflow_enfase");
     const extraSessaoAtiva = localStorage.getItem("femflow_treino_extra") === "true";
     let enfaseFinal = perfil.enfase || enfaseLocal;
     if (extraParamNorm.startsWith("extra_")) {
@@ -385,7 +690,8 @@ const hasPersonal =
       enfaseFinal = enfaseLocal;
     }
     if (!extraSessaoAtiva && enfaseLocal && FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocal)) {
-      enfaseFinal = enfaseLocal;
+      localStorage.removeItem("femflow_treino_extra");
+      enfaseFinal = perfil.enfase || null;
     }
 
     // 🔥 Personal nunca é ênfase
@@ -417,7 +723,7 @@ const hasPersonal =
     const extraLabels = {
       extra_superior: t("treino.extraOpcoes.superior"),
       extra_inferior: t("treino.extraOpcoes.inferior"),
-      extra_abdomem: t("treino.extraOpcoes.abdomem"),
+      extra_abdomen: t("treino.extraOpcoes.abdomem"),
       extra_mobilidade: t("treino.extraOpcoes.mobilidade")
     };
 
@@ -449,7 +755,10 @@ const hasPersonal =
   fase,
   diaCiclo,
   personal: personalFinal && !isExtraTreino
-});
+    });
+  })();
+}
+}
 
 
     renderTreino(lista);

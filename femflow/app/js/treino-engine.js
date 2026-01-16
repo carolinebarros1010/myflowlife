@@ -80,6 +80,10 @@ FEMFLOW.engineTreino.carregarBlocosNormais = async ({
 
  const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
 const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
+const authUid = firebase?.auth?.()?.currentUser?.uid || null;
+console.log("🔍 [NORMAL] Firebase auth status:", authUid ? "logado" : "sem login", {
+  uid: authUid
+});
 
 if (!faseNorm || !nivelNorm) {
   console.error("❌ Dados inválidos para consulta Firebase (fase ou nível):", {
@@ -116,17 +120,29 @@ if (!enfase) {
     fase: faseNorm,
     diaKey
   });
+  console.log("🔎 [NORMAL] Coleção/Doc:", {
+    collection: "exercicios",
+    doc: `${nivelNorm}_${enfase}`,
+    fase: faseNorm,
+    diaKey
+  });
   FEMFLOW.log("🔥 [NORMAL] Firebase por diaCiclo:", diaKey);
 
-  const snap = await firebase.firestore()
-    .collection("exercicios")
-    .doc(`${nivelNorm}_${enfase}`)
-    .collection("fases")
-    .doc(faseNorm)
-    .collection("dias")
-    .doc(diaKey)
-    .collection("blocos")
-    .get();
+  let snap;
+  try {
+    snap = await firebase.firestore()
+      .collection("exercicios")
+      .doc(`${nivelNorm}_${enfase}`)
+      .collection("fases")
+      .doc(faseNorm)
+      .collection("dias")
+      .doc(diaKey)
+      .collection("blocos")
+      .get();
+  } catch (err) {
+    console.error("❌ [NORMAL] Erro ao buscar no Firebase:", err);
+    return [];
+  }
 
   if (snap.empty) {
     FEMFLOW.error("❌ Nenhum treino encontrado no Firebase:", {
@@ -136,6 +152,7 @@ if (!enfase) {
       fase: faseNorm,
       diaKey
     });
+    console.log("🧪 [NORMAL] Documentos retornados:", snap.size);
     return [];
   }
 
@@ -157,22 +174,32 @@ FEMFLOW.engineTreino.carregarBlocosExtras = async ({
 }) => {
   const enfaseNorm = String(enfase || "").toLowerCase().trim();
   const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
+  const authUid = firebase?.auth?.()?.currentUser?.uid || null;
+  console.log("🔍 [EXTRA] Firebase auth status:", authUid ? "logado" : "sem login", {
+    uid: authUid
+  });
 
   if (!enfaseNorm) {
     FEMFLOW.warn("⚠️ Ênfase extra ausente — consulta Firebase abortada.");
     return [];
   }
 
-  const docIds = [];
-  if (nivelNorm) docIds.push(`${nivelNorm}_${enfaseNorm}`);
-  docIds.push(enfaseNorm);
+  const docIds = [enfaseNorm];
 
   for (const docId of docIds) {
-    const snap = await firebase.firestore()
-      .collection("exercicios_extra")
-      .doc(docId)
-      .collection("blocos")
-      .get();
+    let snap;
+    try {
+      snap = await firebase.firestore()
+        .collection("exercicios_extra")
+        .doc(docId)
+        .collection("blocos")
+        .get();
+    } catch (err) {
+      console.error("❌ [EXTRA] Erro ao buscar no Firebase:", err, {
+        docId
+      });
+      return [];
+    }
 
     if (!snap.empty) {
       const blocos = [];
@@ -195,6 +222,7 @@ FEMFLOW.engineTreino.carregarBlocosExtras = async ({
   FEMFLOW.error("❌ Nenhum treino EXTRA encontrado no Firebase:", {
     enfase: enfaseNorm
   });
+  console.log("🧪 [EXTRA] Documentos retornados:", flatSnap.size);
   return [];
 };
 
@@ -207,6 +235,10 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
 }) => {
 
   const faseNorm = FEMFLOW.engineTreino.normalizarFase(fase);
+  const authUid = firebase?.auth?.()?.currentUser?.uid || null;
+  console.log("🔍 [PERSONAL] Firebase auth status:", authUid ? "logado" : "sem login", {
+    uid: authUid
+  });
    if (!faseNorm || !id) {
   console.error("❌ Dados inválidos para consulta Firebase:", {
     id,
@@ -232,15 +264,21 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
 
   FEMFLOW.log("🔥 [PERSONAL] Firebase por diaCiclo:", diaKey);
 
-  const snap = await firebase.firestore()
-    .collection("personal_trainings")
-    .doc(id)
-    .collection("personal")
-    .doc(faseNorm)
-    .collection("dias")
-    .doc(diaKey)
-    .collection("blocos")
-    .get();
+  let snap;
+  try {
+    snap = await firebase.firestore()
+      .collection("personal_trainings")
+      .doc(id)
+      .collection("personal")
+      .doc(faseNorm)
+      .collection("dias")
+      .doc(diaKey)
+      .collection("blocos")
+      .get();
+  } catch (err) {
+    console.error("❌ [PERSONAL] Erro ao buscar no Firebase:", err);
+    return [];
+  }
 
   if (snap.empty) {
     FEMFLOW.error("❌ Nenhum treino PERSONAL encontrado no Firebase:", {
@@ -249,6 +287,7 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
       fase: faseNorm,
       diaKey
     });
+    console.log("🧪 [PERSONAL] Documentos retornados:", snap.size);
     return [];
   }
 
