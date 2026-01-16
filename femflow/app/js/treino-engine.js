@@ -184,9 +184,7 @@ FEMFLOW.engineTreino.carregarBlocosExtras = async ({
     return [];
   }
 
-  const docIds = [];
-  if (nivelNorm) docIds.push(`${nivelNorm}_${enfaseNorm}`);
-  docIds.push(enfaseNorm);
+  const docIds = [enfaseNorm];
 
   for (const docId of docIds) {
     let snap;
