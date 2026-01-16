@@ -355,6 +355,8 @@ const CARDS_FOLLOWME_SIMBOLICOS = [
 const CARD_THUMBS = {
   gluteo: "gluteos.jpg",
   gluteos: "gluteos.jpg",
+  casa_core_gluteo: "casa_core_gluteo.jpg",
+  corrida_longa: "corrida_Longa.jpg",
   quadriceps: "quadriceps.jpg",
   costas: "costas.jpg",
   ombro: "ombro.jpg",
