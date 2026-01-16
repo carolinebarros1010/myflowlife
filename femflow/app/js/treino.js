@@ -135,12 +135,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const targetCenterX = rect.left + rect.width / 2 + offsetX;
         const targetCenterY = rect.top + rect.height / 2 + offsetY;
         const spotlightBottom = viewportHeight + offsetY;
-        const footerOvershoot = 22;
+        const footerOvershoot = 18;
+        const footerExtraDrop = 20;
+        const minFooterRadius = 72;
         const radius = isFooterTarget
-          ? baseRadius + Math.max(0, spotlightBottom - targetCenterY)
+          ? Math.max(baseRadius, minFooterRadius) +
+            Math.max(0, spotlightBottom - targetCenterY)
           : baseRadius;
         const spotlightY = isFooterTarget
-          ? spotlightBottom + footerOvershoot
+          ? spotlightBottom + footerOvershoot + footerExtraDrop
           : targetCenterY;
 
         tourOverlay.style.setProperty("--spot-x", `${targetCenterX}px`);
