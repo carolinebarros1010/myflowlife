@@ -47,5 +47,149 @@
     "preco": "0,00",
     "link": "downloads/nutricao_ciclo_hormonal.pdf",
     "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "avancada_corrida_longa",
+    "nomeExibicao": "Avançada • Corrida longa",
+    "nomeFirebase": "avancada_corrida_longa",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "avancada_forcaabc",
+    "nomeExibicao": "Avançada • Força",
+    "nomeFirebase": "forcaabc",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "avancada_gluteos",
+    "nomeExibicao": "Avançada • Glúteos",
+    "nomeFirebase": "avancada_gluteos",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "avancada_militar",
+    "nomeExibicao": "Avançada • Militar",
+    "nomeFirebase": "avancada_militar",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "avancada_quadriceps",
+    "nomeExibicao": "Avançada • Quadríceps",
+    "nomeFirebase": "avancada_quadriceps",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "iniciante_corrida_longa",
+    "nomeExibicao": "Iniciante • Corrida longa",
+    "nomeFirebase": "iniciante_corrida_longa",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "iniciante_costas",
+    "nomeExibicao": "Iniciante • Costas",
+    "nomeFirebase": "iniciante_costas",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "iniciante_forcaabc",
+    "nomeExibicao": "Iniciante • Força",
+    "nomeFirebase": "forcaabc",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "iniciante_gluteos",
+    "nomeExibicao": "Iniciante • Glúteos",
+    "nomeFirebase": "iniciante_gluteos",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "iniciante_militar",
+    "nomeExibicao": "Iniciante • Militar",
+    "nomeFirebase": "iniciante_militar",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "iniciante_quadriceps",
+    "nomeExibicao": "Iniciante • Quadríceps",
+    "nomeFirebase": "iniciante_quadriceps",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "intermediaria_corrida_longa",
+    "nomeExibicao": "Intermediária • Corrida longa",
+    "nomeFirebase": "intermediaria_corrida_longa",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "intermediaria_forcaabc",
+    "nomeExibicao": "Intermediária • Força",
+    "nomeFirebase": "forcaabc",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "intermediaria_gluteos",
+    "nomeExibicao": "Intermediária • Glúteos",
+    "nomeFirebase": "intermediaria_gluteos",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "intermediaria_militar",
+    "nomeExibicao": "Intermediária • Militar",
+    "nomeFirebase": "intermediaria_militar",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
+  },
+  {
+    "capa": "placeholder.png",
+    "nome": "intermediaria_quadriceps",
+    "nomeExibicao": "Intermediária • Quadríceps",
+    "nomeFirebase": "intermediaria_quadriceps",
+    "preco": "0,00",
+    "link": "index.html",
+    "tipo": "download"
   }
 ]

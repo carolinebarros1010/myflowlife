@@ -85,14 +85,43 @@ function persistPerfil(perfil) {
 =========================================================== */
 const MUSCULAR_ENFASES = new Set([
   "gluteo",
+  "gluteos",
   "quadril",
   "posterior",
   "quadriceps",
   "costas",
   "peito",
   "braco",
-  "core"
+  "core",
+  "forcaabc",
+  "militar"
 ]);
+
+const TITULOS_ESPECIAIS = {
+  forcaabc: "Força",
+  quadriceps: "Quadríceps",
+  gluteos: "Glúteos",
+  corrida_longa: "Corrida longa"
+};
+
+const CARDS_HOME_PRESETS = [
+  "avancada_corrida_longa",
+  "avancada_forcaabc",
+  "avancada_gluteos",
+  "avancada_militar",
+  "avancada_quadriceps",
+  "iniciante_corrida_longa",
+  "iniciante_costas",
+  "iniciante_forcaabc",
+  "iniciante_gluteos",
+  "iniciante_militar",
+  "iniciante_quadriceps",
+  "intermediaria_corrida_longa",
+  "intermediaria_forcaabc",
+  "intermediaria_gluteos",
+  "intermediaria_militar",
+  "intermediaria_quadriceps"
+];
 
 function extrairNivelEnfase(docId) {
   if (!docId) return null;
@@ -154,6 +183,7 @@ function podeAcessar(enfase, perfil) {
 
 function formatarTitulo(enfase) {
   if (!enfase) return "Treino";
+  if (TITULOS_ESPECIAIS[enfase]) return TITULOS_ESPECIAIS[enfase];
   const limpo = enfase
     .replace(/^followme_/, "")
     .replace(/^personal_?/, "personal ")
@@ -178,6 +208,45 @@ function normalizarCardFirebase(enfase, data) {
     enfase,
     color
   };
+}
+
+function avaliarAcessoCard(enfase, perfil) {
+  const podeAcessarProduto = podeAcessar(enfase, perfil);
+
+  const freeAccessEnfases = (perfil.free_access?.enfases || []).map(item =>
+    String(item || "").toLowerCase()
+  );
+
+  const podeAcessarFree =
+    perfil.free_access?.enabled === true &&
+    freeAccessEnfases.includes(enfase);
+
+  return {
+    locked: !(podeAcessarProduto || podeAcessarFree),
+    isFree: !podeAcessarProduto && podeAcessarFree
+  };
+}
+
+function injetarCardsPresets(catalogo, perfil, nivelAluno) {
+  CARDS_HOME_PRESETS.forEach(docId => {
+    const parsed = extrairNivelEnfase(docId);
+    if (!parsed) return;
+
+    const { nivel, enfase } = parsed;
+    if (nivel !== nivelAluno) return;
+
+    const categoria = inferirCategoria(enfase);
+    if (!catalogo[categoria]) return;
+
+    const jaExiste = catalogo[categoria].some(card => card.enfase === enfase);
+    if (jaExiste) return;
+
+    const card = normalizarCardFirebase(enfase, { titulo: formatarTitulo(enfase) });
+    const acesso = avaliarAcessoCard(enfase, perfil);
+    card.locked = acesso.locked;
+    if (acesso.isFree) card.isFree = true;
+    catalogo[categoria].push(card);
+  });
 }
 
 async function carregarCatalogoFirebase() {
@@ -225,26 +294,14 @@ async function carregarCatalogoFirebase() {
 
     const card = normalizarCardFirebase(enfase, doc.data());
 
-    const podeAcessarProduto = podeAcessar(enfase, perfil);
-
-    const freeAccessEnfases = (perfil.free_access?.enfases || []).map(item =>
-      String(item || "").toLowerCase()
-    );
-
-    const podeAcessarFree =
-      perfil.free_access?.enabled === true &&
-      freeAccessEnfases.includes(enfase);
-
-    const podeAcessarCard = podeAcessarProduto || podeAcessarFree;
-
-    card.locked = !podeAcessarCard;
-
-    if (!podeAcessarProduto && podeAcessarFree) {
-      card.isFree = true;
-    }
+    const acesso = avaliarAcessoCard(enfase, perfil);
+    card.locked = acesso.locked;
+    if (acesso.isFree) card.isFree = true;
 
     catalogo[categoria].push(card);
   });
+
+  injetarCardsPresets(catalogo, perfil, nivelAluno);
 
   return catalogo;
 }
@@ -305,7 +362,7 @@ const CARD_THUMBS = {
 function getThumbUrl(enfase) {
   const file = CARD_THUMBS[enfase];
   if (!file) return "";
-  return new URL(`css/cards/${file}`, window.location.href).toString();
+  return new URL(`/femflow/app/css/cards/${file}`, window.location.origin).toString();
 }
 
 /* ============================================================
