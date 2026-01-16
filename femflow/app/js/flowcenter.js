@@ -204,7 +204,7 @@ function initFlowCenter() {
     const extraLabels = {
       extra_superior: L.treinoExtraSuperior,
       extra_inferior: L.treinoExtraInferior,
-      extra_abdomem: L.treinoExtraAbdomem,
+      extra_abdomen: L.treinoExtraAbdomem,
       extra_mobilidade: L.treinoExtraMobilidade
     };
     document.querySelectorAll("[data-extra-enfase]").forEach(btn => {
