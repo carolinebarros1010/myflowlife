@@ -395,15 +395,6 @@ function getThumbUrl(enfase) {
 =========================================================== */
 const EBOOKS_FALLBACK_COLOR = "#fceae3";
 
-function slugifyEbookName(nome) {
-  return (nome || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
 function resolveEbookUrl(path) {
   const cleanPath = String(path || "").replace(/^\/+/, "");
   if (!cleanPath) return "";
@@ -429,12 +420,10 @@ function ebookCardHTML(ebook) {
   const desc = [preco, acao].filter(Boolean).join(" • ");
   const capa = ebook.capa ? resolveEbookUrl(ebook.capa) : "";
   const thumbStyle = `${capa ? `--thumb-url:url('${capa}');` : ""}background-color:${EBOOKS_FALLBACK_COLOR};`;
-  const ebookSlug = ebook.slug || slugifyEbookName(titulo);
-  const origem = ebook.tipo === "download" ? "download" : "premium";
   const destino = resolveEbookLink(ebook.link);
 
   return `
-    <article class="card" data-ebook="${ebookSlug}" data-origem="${origem}" data-destino="${destino}">
+    <article class="card" data-destino="${destino}">
       <div class="thumb${capa ? " has-image" : ""}" style="${thumbStyle}">
         <span class="badge">eBook</span>
       </div>
@@ -449,8 +438,11 @@ function renderEbookRail(el, lista) {
   if (!el) return;
   el.innerHTML = lista.map(ebookCardHTML).join("");
   el.querySelectorAll(".card").forEach(card => {
-    card.onclick = () =>
-      goCadastro(card.dataset.destino, card.dataset.ebook, card.dataset.origem);
+    card.onclick = () => {
+      if (card.dataset.destino) {
+        window.location.href = card.dataset.destino;
+      }
+    };
   });
 }
 
@@ -464,17 +456,6 @@ async function carregarEbooks() {
     console.warn("Falha ao carregar ebooks:", err);
     return [];
   }
-}
-
-function goCadastro(destino, ebook, origem) {
-  try {
-    localStorage.setItem("origemURL", destino);
-  } catch (err) {
-    console.warn("Sem acesso ao localStorage:", err);
-  }
-
-  const url = `/cadastro/index.html?ebook=${encodeURIComponent(ebook)}&origem=${encodeURIComponent(origem)}`;
-  window.location.href = url;
 }
 
 /* ============================================================
