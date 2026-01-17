@@ -100,14 +100,6 @@ const MUSCULAR_ENFASES = new Set([
   "militar"
 ]);
 
-const TITULOS_ESPECIAIS = {
-  forcaabc: "Força",
-  quadriceps: "Quadríceps",
-  gluteos: "Glúteos",
-  corrida_longa: "Corrida longa",
-  casa_core_gluteo: "Glúteo e Core"
-};
-
 const CARDS_HOME_PRESETS = [
   "avancada_corrida_longa",
   "avancada_costas",
@@ -119,6 +111,7 @@ const CARDS_HOME_PRESETS = [
   "avancada_militar",
   "avancada_quadriceps",
   "avancada_remo_oceanico",
+  "avancada_casa_queima_gordura",
   "iniciante_corrida_longa",
   "iniciante_casa_core_gluteo",
   "iniciante_costas",
@@ -130,6 +123,7 @@ const CARDS_HOME_PRESETS = [
   "iniciante_peitoral",
   "iniciante_quadriceps",
   "iniciante_remo_oceanico",
+  "iniciante_casa_queima_gordura",
   "intermediaria_corrida_longa",
   "intermediaria_costas",
   "intermediaria_casa_core_gluteo",
@@ -139,7 +133,8 @@ const CARDS_HOME_PRESETS = [
   "intermediaria_ombro",
   "intermediaria_peitoral",
   "intermediaria_quadriceps",
-  "intermediaria_remo_oceanico"
+  "intermediaria_remo_oceanico",
+  "intermediaria_casa_queima_gordura"
 ];
 
 function extrairNivelEnfase(docId) {
@@ -202,7 +197,10 @@ function podeAcessar(enfase, perfil) {
 
 function formatarTitulo(enfase) {
   if (!enfase) return "Treino";
-  if (TITULOS_ESPECIAIS[enfase]) return TITULOS_ESPECIAIS[enfase];
+  const lang = FEMFLOW.lang || "pt";
+  const tituloLang = FEMFLOW.langs?.[lang]?.home?.cards?.[enfase];
+  if (tituloLang) return tituloLang;
+
   const limpo = enfase
     .replace(/^followme_/, "")
     .replace(/^personal_?/, "personal ")
