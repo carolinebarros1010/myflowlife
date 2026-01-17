@@ -7,6 +7,7 @@
 /* LINKS */
 const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
 const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
+const EBOOKS_DATA_URL = "ebooks/ebooks.json";
 
 /* FOLLOWME */
 const FOLLOWME_LINKS = {
@@ -387,6 +388,93 @@ function getThumbUrl(enfase) {
 }
 
 /* ============================================================
+   EBOOKS — CARDS NETFLIX
+=========================================================== */
+const EBOOKS_FALLBACK_COLOR = "#fceae3";
+
+function slugifyEbookName(nome) {
+  return (nome || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function resolveEbookUrl(path) {
+  const cleanPath = String(path || "").replace(/^\/+/, "");
+  if (!cleanPath) return "";
+  return new URL(`/femflow/app/ebooks/${cleanPath}`, window.location.origin).toString();
+}
+
+function resolveEbookLink(link) {
+  if (!link) return "";
+  if (String(link).startsWith("http")) return link;
+  return resolveEbookUrl(link);
+}
+
+function formatarPrecoEbook(preco, tipo) {
+  if (tipo === "download" || preco === "0,00") return "Gratuito";
+  if (!preco) return "";
+  return `R$ ${preco}`;
+}
+
+function ebookCardHTML(ebook) {
+  const titulo = ebook.nome || "eBook";
+  const preco = formatarPrecoEbook(ebook.preco, ebook.tipo);
+  const acao = ebook.tipo === "download" ? "Baixar" : "Comprar";
+  const desc = [preco, acao].filter(Boolean).join(" • ");
+  const capa = ebook.capa ? resolveEbookUrl(ebook.capa) : "";
+  const thumbStyle = `${capa ? `--thumb-url:url('${capa}');` : ""}background-color:${EBOOKS_FALLBACK_COLOR};`;
+  const ebookSlug = ebook.slug || slugifyEbookName(titulo);
+  const origem = ebook.tipo === "download" ? "download" : "premium";
+  const destino = resolveEbookLink(ebook.link);
+
+  return `
+    <article class="card" data-ebook="${ebookSlug}" data-origem="${origem}" data-destino="${destino}">
+      <div class="thumb${capa ? " has-image" : ""}" style="${thumbStyle}">
+        <span class="badge">eBook</span>
+      </div>
+      <div class="info">
+        <h3 class="ttl">${titulo}</h3>
+        <p class="desc">${desc}</p>
+      </div>
+    </article>`;
+}
+
+function renderEbookRail(el, lista) {
+  if (!el) return;
+  el.innerHTML = lista.map(ebookCardHTML).join("");
+  el.querySelectorAll(".card").forEach(card => {
+    card.onclick = () =>
+      goCadastro(card.dataset.destino, card.dataset.ebook, card.dataset.origem);
+  });
+}
+
+async function carregarEbooks() {
+  try {
+    const resp = await fetch(EBOOKS_DATA_URL, { cache: "no-store" });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.warn("Falha ao carregar ebooks:", err);
+    return [];
+  }
+}
+
+function goCadastro(destino, ebook, origem) {
+  try {
+    localStorage.setItem("origemURL", destino);
+  } catch (err) {
+    console.warn("Sem acesso ao localStorage:", err);
+  }
+
+  const url = `/cadastro/index.html?ebook=${encodeURIComponent(ebook)}&origem=${encodeURIComponent(origem)}`;
+  window.location.href = url;
+}
+
+/* ============================================================
    RENDERIZAÇÃO DOS CARDS
 =========================================================== */
 function cardHTML(p) {
@@ -593,6 +681,7 @@ function aplicarIdiomaHome() {
   const tMuscular = document.getElementById("tituloMuscular");
   const tEsportes = document.getElementById("tituloEsportes");
   const tCasa = document.getElementById("tituloCasa");
+  const tEbooks = document.getElementById("tituloEbooks");
   const btnFlow = document.getElementById("btnFlow");
 
   if (tPersonal) tPersonal.textContent = L.tituloPersonal;
@@ -600,6 +689,7 @@ function aplicarIdiomaHome() {
   if (tMuscular) tMuscular.textContent = L.tituloMuscular;
   if (tEsportes) tEsportes.textContent = L.tituloEsportes;
   if (tCasa) tCasa.textContent = L.tituloCasa;
+  if (tEbooks) tEbooks.textContent = L.tituloEbooks;
   if (btnFlow && L.botaoFlowcenter) btnFlow.textContent = L.botaoFlowcenter;
 
   // 🔥 VÍDEO
@@ -684,6 +774,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderRail(document.getElementById("railEsportes"), catalogo.esportes);
     renderRail(document.getElementById("railCasa"), catalogo.casa);
     renderRail(document.getElementById("railPersonal"), catalogo.personal);
+    renderEbookRail(document.getElementById("railEbooks"), await carregarEbooks());
 
     aplicarIdiomaHome();
   } catch (err) {
