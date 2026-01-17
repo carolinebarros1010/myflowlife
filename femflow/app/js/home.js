@@ -134,7 +134,8 @@ const CARDS_HOME_PRESETS = [
   "intermediaria_peitoral",
   "intermediaria_quadriceps",
   "intermediaria_remo_oceanico",
-  "intermediaria_casa_queima_gordura"
+  "intermediaria_casa_queima_gordura",
+  "intermediaria_casa_fullbody_praia"
 ];
 
 function extrairNivelEnfase(docId) {
@@ -370,6 +371,7 @@ const CARD_THUMBS = {
   gluteos: "gluteos.jpg",
   casa_core_gluteo: "casa_core_gluteo.jpg",
   casa_mobilidade: "casa_mobilidade.jpg",
+  casa_fullbody_praia: "casa_fullbody_praia.jpg",
   corrida_longa: "corrida_Longa.jpg",
   quadriceps: "quadriceps.jpg",
   costas: "costas.jpg",
