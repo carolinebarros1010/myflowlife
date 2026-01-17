@@ -554,3 +554,54 @@ const filtrados = comHIIT.filter(b => {
 return FEMFLOW.engineTreino.converterParaFront(filtrados);
 
 };
+
+/* ============================================================
+   8) LISTAR EXERCÍCIOS POR DIA (USO EM MODAL)
+============================================================ */
+FEMFLOW.engineTreino.listarExerciciosDia = async ({
+  id, nivel, enfase, fase, diaCiclo, personal = false
+}) => {
+  const isExtra = FEMFLOW.engineTreino.isExtraEnfase(enfase);
+
+  if (isExtra) {
+    return [];
+  }
+
+  if (personal === true && !isExtra) {
+    enfase = null;
+  }
+
+  if (!personal && !isExtra && (!enfase || enfase === "nenhuma" || enfase === "personal")) {
+    FEMFLOW.warn("⚠️ Lista do próximo treino sem ênfase válida.");
+    return [];
+  }
+
+  let blocosRaw = [];
+  if (personal) {
+    blocosRaw = await FEMFLOW.engineTreino.carregarBlocosPersonal({ id, fase, diaCiclo });
+  } else {
+    blocosRaw = await FEMFLOW.engineTreino.carregarBlocosNormais({
+      nivel,
+      enfase,
+      fase,
+      diaCiclo
+    });
+  }
+
+  if (!blocosRaw.length) return [];
+
+  const ordenados = FEMFLOW.engineTreino.organizarBlocosSimples(blocosRaw);
+  const comHIIT = FEMFLOW.engineTreino.intercalarHIIT(ordenados);
+  const nomes = [];
+  const vistos = new Set();
+
+  for (const bloco of comHIIT) {
+    if (bloco.tipo !== "treino") continue;
+    const titulo = bloco.titulo_pt || bloco.titulo || "";
+    if (!titulo || vistos.has(titulo)) continue;
+    nomes.push(titulo);
+    vistos.add(titulo);
+  }
+
+  return nomes;
+};
