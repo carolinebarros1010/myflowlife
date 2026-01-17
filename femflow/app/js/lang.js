@@ -198,6 +198,7 @@ home: {
   evolucao: "Evolução",
   respiracao: "Respiração",
   endurance: "Endurance",
+  proximoTreino: "Ver próximo treino",
 
   treinoExtraTitulo: "Treino Extra",
   treinoExtraSub: "Escolha a área que deseja focar hoje.",
@@ -482,6 +483,7 @@ home: {
   evolucao: "Progress",
   respiracao: "Breathing",
   endurance: "Endurance",
+  proximoTreino: "See next workout",
 
   treinoExtraTitulo: "Extra Training",
   treinoExtraSub: "Choose the area you want to focus on today.",
@@ -766,6 +768,7 @@ fr: {
   evolucao: "Évolution",
   respiracao: "Respiration",
   endurance: "Endurance",
+  proximoTreino: "Voir le prochain entraînement",
 
   treinoExtraTitulo: "Entraînement extra",
   treinoExtraSub: "Choisissez la zone que vous souhaitez travailler aujourd’hui.",
