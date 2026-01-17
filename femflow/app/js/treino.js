@@ -97,6 +97,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const tourKey = window.FEMFLOW_TOUR_KEY;
+  const tourReset = new URLSearchParams(window.location.search).get("tour");
+  if (tourReset === "1") {
+    localStorage.removeItem(tourKey);
+  }
   const tourTargets = [btnSalvar, btnDescanso, btnCancelar].filter(Boolean);
   const tourSteps = [
     {
