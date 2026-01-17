@@ -112,6 +112,7 @@ const CARDS_HOME_PRESETS = [
   "avancada_remo_oceanico",
   "avancada_casa_queima_gordura",
   "iniciante_corrida_longa",
+  "iniciante_casa_core_gluteo",
   "iniciante_costas",
   "iniciante_casa_core_gluteo",
   "iniciante_forcaabc",
