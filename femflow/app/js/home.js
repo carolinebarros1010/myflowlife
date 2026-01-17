@@ -417,6 +417,8 @@ function ebookCardHTML(ebook) {
   const titulo = ebook.nome || "eBook";
   const preco = formatarPrecoEbook(ebook.preco, ebook.tipo);
   const acao = ebook.tipo === "download" ? "Baixar" : "Comprar";
+  const gratuito = ebook.tipo === "download" || ebook.preco === "0,00";
+  const badgeGratuito = gratuito ? '<span class="badge-free">Gratuito</span>' : "";
   const desc = [preco, acao].filter(Boolean).join(" • ");
   const capa = ebook.capa ? resolveEbookUrl(ebook.capa) : "";
   const thumbStyle = `${capa ? `--thumb-url:url('${capa}');` : ""}background-color:${EBOOKS_FALLBACK_COLOR};`;
@@ -425,7 +427,7 @@ function ebookCardHTML(ebook) {
   return `
     <article class="card" data-destino="${destino}">
       <div class="thumb${capa ? " has-image" : ""}" style="${thumbStyle}">
-        <span class="badge">eBook</span>
+        ${badgeGratuito}
       </div>
       <div class="info">
         <h3 class="ttl">${titulo}</h3>
