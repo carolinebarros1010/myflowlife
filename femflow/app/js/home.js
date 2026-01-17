@@ -117,6 +117,7 @@ const CARDS_HOME_PRESETS = [
   "avancada_quadriceps",
   "avancada_remo_oceanico",
   "iniciante_corrida_longa",
+  "iniciante_casa_core_gluteo",
   "iniciante_costas",
   "iniciante_casa_core_gluteo",
   "iniciante_forcaabc",

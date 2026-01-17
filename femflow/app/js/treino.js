@@ -135,12 +135,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const targetCenterX = rect.left + rect.width / 2 + offsetX;
         const targetCenterY = rect.top + rect.height / 2 + offsetY;
         const spotlightBottom = viewportHeight + offsetY;
-        const footerOvershoot = 22;
+        const footerOvershoot = 18;
+        const footerExtraDrop = 45;
+        const footerSpotRadius = 84;
         const radius = isFooterTarget
-          ? baseRadius + Math.max(0, spotlightBottom - targetCenterY)
+          ? footerSpotRadius + Math.max(0, spotlightBottom - targetCenterY)
           : baseRadius;
         const spotlightY = isFooterTarget
-          ? spotlightBottom + footerOvershoot
+          ? spotlightBottom + footerOvershoot + footerExtraDrop
           : targetCenterY;
 
         tourOverlay.style.setProperty("--spot-x", `${targetCenterX}px`);
@@ -184,12 +186,12 @@ document.addEventListener("DOMContentLoaded", () => {
     limparDestaquesTour();
     tourOverlay.classList.add("is-hidden");
     tourOverlay.setAttribute("aria-hidden", "true");
-    localStorage.setItem(tourKey, "done");
+    localStorage.setItem(window.FEMFLOW_TOUR_KEY, "done");
   }
 
   function iniciarTourTreino() {
     if (!tourOverlay) return;
-    if (localStorage.getItem(tourKey) === "done") return;
+    if (localStorage.getItem(window.FEMFLOW_TOUR_KEY) === "done") return;
     if (!btnSalvar || !btnDescanso || !btnCancelar) return;
     tourIndex = 0;
     tourOverlay.classList.remove("is-hidden");
