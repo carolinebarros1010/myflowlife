@@ -174,15 +174,19 @@ function sacDecisionMatrix_(ctx) {
 
 function sacAbrir_(data) {
 
+  const contexto = data.contexto || {};
+  const categoria = data.categoria || data.categoria_ui || "outro";
+
   const decisao = sacDecisionMatrix_({
-    categoria: data.categoria,
+    categoria,
     mensagem: data.mensagem,
     lang: data.lang,
-    nivel: data.nivel,
-    fase: data.fase,
-    diaPrograma: data.diaPrograma,
-    perfilHormonal: data.perfilHormonal,
-    origem: data.origem
+    nivel: data.nivel || contexto.nivel,
+    fase: data.fase || contexto.fase,
+    diaPrograma: data.diaPrograma || contexto.diaPrograma,
+    perfilHormonal: data.perfilHormonal || contexto.perfilHormonal,
+    origem: data.origem || "app",
+    pagina: data.pagina || contexto.pagina
   });
 
   return {
