@@ -1,5 +1,5 @@
 // 🌸 FemFlow Service Worker v5.0 (PWA + CORS safe)
-const CACHE_NAME = "femflow-cache-v6";
+const CACHE_NAME = "femflow-cache-v7";
 
 // Arquivos principais do app (tela, JS e manifest)
 const ASSETS = [
