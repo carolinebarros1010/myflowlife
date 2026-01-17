@@ -177,7 +177,7 @@ home: {
         peitoral: "Peitoral",
         militar: "Militar",
         remo_oceanico: "Remo oceânico",
-        beach_tennis_hybrid: "Beach Tennis"
+        beach_tennis: "Beach Tennis"
       }
     },
   flowcenter: {
@@ -459,7 +459,7 @@ home: {
         peitoral: "Pectorals",
         militar: "Military",
         remo_oceanico: "Ocean rowing",
-        beach_tennis_hybrid: "Beach Tennis"
+        beach_tennis: "Beach Tennis"
       }
     },
  flowcenter: {
@@ -738,7 +738,7 @@ fr: {
         peitoral: "Pectoraux",
         militar: "Militaire",
         remo_oceanico: "Aviron océanique",
-        beach_tennis_hybrid: "Beach Tennis"
+        beach_tennis: "Beach Tennis"
       }
     },
   flowcenter: {
