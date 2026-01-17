@@ -250,6 +250,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+
+
   const SERIE_BEHAVIOR = {
     T:  { combinados: 3, descansoNoUltimo: true },
     B:  { combinados: 2, descansoNoUltimo: true },
