@@ -176,6 +176,7 @@ function sacAbrir_(data) {
 
   const contexto = data.contexto || {};
   const categoria = data.categoria || data.categoria_ui || "outro";
+  const ticketId = gerarTicketSAC_();
 
   const decisao = sacDecisionMatrix_({
     categoria,
@@ -189,8 +190,21 @@ function sacAbrir_(data) {
     pagina: data.pagina || contexto.pagina
   });
 
+  registrarSACLog_({
+    ticketId,
+    id: data.id,
+    categoria,
+    mensagem: data.mensagem,
+    severidade: decisao.severidade,
+    rota: decisao.rota,
+    origem: data.origem || "app",
+    pagina: data.pagina || contexto.pagina,
+    timestamp: new Date()
+  });
+
   return {
     status: "ok",
+    ticketId,
     decisao
   };
 }
