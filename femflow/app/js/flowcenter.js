@@ -300,12 +300,21 @@ function initFlowCenter() {
     }, 9000);
   };
 
-  const definirModalProximoTextos = (dia) => {
+  const definirModalProximoTextos = ({ diaAtual, proximoDia }) => {
+    const faseLabel =
+      FEMFLOW.langs?.[FEMFLOW.lang || "pt"]?.flowcenter?.[normalizarFase(ciclo.fase)] ||
+      ciclo.fase;
     if (modalProximoTitulo) {
-      modalProximoTitulo.textContent = t("treino.proximoModal.titulo", { dia });
+      modalProximoTitulo.textContent = t("treino.proximoModal.titulo", {
+        diaAtual,
+        fase: faseLabel
+      });
     }
     if (modalProximoSub) {
-      modalProximoSub.textContent = t("treino.proximoModal.subtitulo");
+      modalProximoSub.textContent = t("treino.proximoModal.subtitulo", {
+        proximoDia,
+        fase: faseLabel
+      });
     }
   };
 
@@ -341,7 +350,7 @@ function initFlowCenter() {
     });
 
     modalProximoLista.innerHTML = "";
-    definirModalProximoTextos(proximoDia);
+    definirModalProximoTextos({ diaAtual, proximoDia });
 
     if (!exercicios.length) {
       const li = document.createElement("li");
