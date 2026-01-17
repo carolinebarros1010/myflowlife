@@ -26,6 +26,9 @@ function flowcenterPersistPerfil(perfil) {
   localStorage.setItem("femflow_fase", String(perfil.fase || "follicular").toLowerCase());
   localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
   localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
+  if (perfil.ciclo_duracao) {
+    localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao));
+  }
 
   /* ============================================================
      🧭 ÊNFASE — SÓ sobrescreve se vier VÁLIDA do backend
@@ -318,8 +321,14 @@ function initFlowCenter() {
     const diaAtual = Number(ciclo.diaCiclo || 1);
     if (!Number.isFinite(diaAtual) || diaAtual < 1) return;
 
-    const cicloLength = Number(localStorage.getItem("femflow_cycleLength") || 28);
-    const cicloValido = Number.isFinite(cicloLength) && cicloLength > 0 ? cicloLength : 28;
+    const cicloLength = Number(localStorage.getItem("femflow_cycleLength"));
+    const cicloPerfil = Number(perfil.ciclo_duracao || 0);
+    const cicloValido =
+      Number.isFinite(cicloLength) && cicloLength > 0
+        ? cicloLength
+        : Number.isFinite(cicloPerfil) && cicloPerfil > 0
+        ? cicloPerfil
+        : 28;
     const proximoDia = diaAtual + 1 > cicloValido ? 1 : diaAtual + 1;
 
     const exercicios = await FEMFLOW.engineTreino.listarExerciciosDia({
