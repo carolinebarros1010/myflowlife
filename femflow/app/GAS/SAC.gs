@@ -174,19 +174,37 @@ function sacDecisionMatrix_(ctx) {
 
 function sacAbrir_(data) {
 
+  const contexto = data.contexto || {};
+  const categoria = data.categoria || data.categoria_ui || "outro";
+  const ticketId = gerarTicketSAC_();
+
   const decisao = sacDecisionMatrix_({
-    categoria: data.categoria,
+    categoria,
     mensagem: data.mensagem,
     lang: data.lang,
-    nivel: data.nivel,
-    fase: data.fase,
-    diaPrograma: data.diaPrograma,
-    perfilHormonal: data.perfilHormonal,
-    origem: data.origem
+    nivel: data.nivel || contexto.nivel,
+    fase: data.fase || contexto.fase,
+    diaPrograma: data.diaPrograma || contexto.diaPrograma,
+    perfilHormonal: data.perfilHormonal || contexto.perfilHormonal,
+    origem: data.origem || "app",
+    pagina: data.pagina || contexto.pagina
+  });
+
+  registrarSACLog_({
+    ticketId,
+    id: data.id,
+    categoria,
+    mensagem: data.mensagem,
+    severidade: decisao.severidade,
+    rota: decisao.rota,
+    origem: data.origem || "app",
+    pagina: data.pagina || contexto.pagina,
+    timestamp: new Date()
   });
 
   return {
     status: "ok",
+    ticketId,
     decisao
   };
 }
@@ -233,6 +251,7 @@ function sacOrquestrador_(ctx) {
     ticketId,
     id: ctx.id,
     categoria: ctx.categoria,
+    mensagem: ctx.mensagem,
     severidade: decisao.severidade,
     rota: decisao.rota,
     origem: ctx.origem,
@@ -374,6 +393,7 @@ function registrarSACLog_(entry) {
         "TicketId",
         "AlunoId",
         "Categoria",
+        "Mensagem",
         "Severidade",
         "Rota",
         "Origem",
@@ -386,6 +406,7 @@ function registrarSACLog_(entry) {
       entry.ticketId,
       entry.id,
       entry.categoria,
+      entry.mensagem,
       entry.severidade,
       entry.rota,
       entry.origem,
