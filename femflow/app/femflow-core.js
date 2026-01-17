@@ -398,12 +398,14 @@ FEMFLOW.carregarCicloBackend = async function () {
     const enfaseAtual = localStorage.getItem("femflow_enfase");
     const extraAtivo = localStorage.getItem("femflow_treino_extra") === "true";
     const enfaseAtualExtra = String(enfaseAtual || "").toLowerCase().startsWith("extra_");
+    const enfaseBackend = String(resp.enfase || "").toLowerCase().trim();
+    const enfaseValida = Boolean(enfaseBackend && enfaseBackend !== "nenhuma");
     if (extraAtivo && enfaseAtualExtra) {
-      if (resp.enfase && !localStorage.getItem("femflow_enfase_base")) {
-        localStorage.setItem("femflow_enfase_base", resp.enfase);
+      if (enfaseValida && !localStorage.getItem("femflow_enfase_base")) {
+        localStorage.setItem("femflow_enfase_base", enfaseBackend);
       }
-    } else {
-      localStorage.setItem("femflow_enfase", resp.enfase);
+    } else if (enfaseValida) {
+      localStorage.setItem("femflow_enfase", enfaseBackend);
     }
     localStorage.setItem("femflow_cycleLength", resp.ciclo_duracao);
     localStorage.setItem("femflow_startDate", resp.data_inicio);
@@ -754,12 +756,14 @@ FEMFLOW.carregarPerfil = async function () {
     const enfaseAtual = localStorage.getItem("femflow_enfase");
     const extraAtivo = localStorage.getItem("femflow_treino_extra") === "true";
     const enfaseAtualExtra = String(enfaseAtual || "").toLowerCase().startsWith("extra_");
+    const enfaseBackend = String(r.enfase || "").toLowerCase().trim();
+    const enfaseValida = Boolean(enfaseBackend && enfaseBackend !== "nenhuma");
     if (extraAtivo && enfaseAtualExtra) {
-      if (r.enfase && !localStorage.getItem("femflow_enfase_base")) {
-        localStorage.setItem("femflow_enfase_base", r.enfase);
+      if (enfaseValida && !localStorage.getItem("femflow_enfase_base")) {
+        localStorage.setItem("femflow_enfase_base", enfaseBackend);
       }
-    } else {
-      localStorage.setItem("femflow_enfase", r.enfase);
+    } else if (enfaseValida) {
+      localStorage.setItem("femflow_enfase", enfaseBackend);
     }
     localStorage.setItem("femflow_diaCiclo", r.diaCiclo);
     localStorage.setItem("femflow_nivel", r.nivel);
