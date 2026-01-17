@@ -45,6 +45,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnDescanso     = document.getElementById("descansoBtn");
   const btnCancelar     = document.getElementById("cancelarTreinoBtn");
   const modalPSE        = document.getElementById("modalPSE");
+  const modalProximoTreino = document.getElementById("modalProximoTreino");
+  const modalProximoTitulo = document.getElementById("modalProximoTitulo");
+  const modalProximoSub = document.getElementById("modalProximoSub");
+  const modalProximoLista = document.getElementById("modalProximoLista");
   const pseInput        = document.getElementById("pseInput");
   const pseEmoji        = document.getElementById("pseEmoji");
   const pseValor        = document.getElementById("pseValor");
@@ -475,6 +479,16 @@ const hasPersonal =
 
     window.requestAnimationFrame(() => {
       iniciarTourTreino();
+    });
+
+    void mostrarProximoTreino({
+      id,
+      nivel,
+      enfase: enfaseFinal,
+      fase,
+      diaCiclo,
+      personal: personalFinal && !isExtraTreino,
+      isExtraTreino
     });
 
     localStorage.setItem("femflow_fase", fase);
