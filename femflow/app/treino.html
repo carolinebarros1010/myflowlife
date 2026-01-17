@@ -91,6 +91,17 @@
     </div>
   </div>
 
+  <!-- MODAL PRÓXIMO TREINO -->
+  <div id="modalProximoTreino" class="modal-proximo-overlay hidden" aria-hidden="true">
+    <div class="modal-proximo-card" role="dialog" aria-modal="true">
+      <h3 class="modal-proximo-title" id="modalProximoTitulo">Próximo treino</h3>
+      <p class="modal-proximo-subtitle" id="modalProximoSub">
+        Veja os exercícios para se programar.
+      </p>
+      <ul class="modal-proximo-list" id="modalProximoLista"></ul>
+    </div>
+  </div>
+
   <!-- TOUR TREINO (primeiro acesso) -->
   <div id="treinoTour" class="treino-tour is-hidden" aria-hidden="true">
     <div class="treino-tour-card" role="dialog" aria-modal="true">
@@ -197,6 +208,20 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("pseLabel").textContent          = L.treino.pseLabel;
     document.getElementById("btnConfirmarPSE").textContent   = L.treino.pseSalvar;
     document.getElementById("btnCancelarPSE").textContent    = L.treino.pseCancelar;
+    const modalProximoTitulo = document.getElementById("modalProximoTitulo");
+    const modalProximoSub = document.getElementById("modalProximoSub");
+    if (modalProximoTitulo) {
+      const diaAtual = Number(localStorage.getItem("femflow_diaCiclo") || 1);
+      const cicloLength = Number(localStorage.getItem("femflow_cycleLength") || 28);
+      const cicloValido = Number.isFinite(cicloLength) && cicloLength > 0 ? cicloLength : 28;
+      const proximoDia = diaAtual + 1 > cicloValido ? 1 : diaAtual + 1;
+      modalProximoTitulo.textContent = t("treino.proximoModal.titulo", {
+        dia: proximoDia
+      });
+    }
+    if (modalProximoSub) {
+      modalProximoSub.textContent = L.treino.proximoModal.subtitulo;
+    }
   }
 
   /* ============================================================

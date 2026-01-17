@@ -45,6 +45,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnDescanso     = document.getElementById("descansoBtn");
   const btnCancelar     = document.getElementById("cancelarTreinoBtn");
   const modalPSE        = document.getElementById("modalPSE");
+  const modalProximoTreino = document.getElementById("modalProximoTreino");
+  const modalProximoTitulo = document.getElementById("modalProximoTitulo");
+  const modalProximoSub = document.getElementById("modalProximoSub");
+  const modalProximoLista = document.getElementById("modalProximoLista");
   const pseInput        = document.getElementById("pseInput");
   const pseEmoji        = document.getElementById("pseEmoji");
   const pseValor        = document.getElementById("pseValor");
@@ -248,6 +252,69 @@ document.addEventListener("DOMContentLoaded", () => {
     pseInput.addEventListener("input", (event) => {
       atualizarPseDisplay(event.target.value);
     });
+  }
+
+  function definirModalProximoTreinoTextos(dia) {
+    if (!modalProximoTitulo || !modalProximoSub) return;
+    modalProximoTitulo.textContent = t("treino.proximoModal.titulo", { dia });
+    modalProximoSub.textContent = t("treino.proximoModal.subtitulo");
+  }
+
+  function abrirModalProximoTreino() {
+    if (!modalProximoTreino) return;
+    modalProximoTreino.classList.remove("hidden");
+    modalProximoTreino.setAttribute("aria-hidden", "false");
+    window.setTimeout(() => {
+      modalProximoTreino.classList.add("hidden");
+      modalProximoTreino.setAttribute("aria-hidden", "true");
+    }, 9000);
+  }
+
+  async function mostrarProximoTreino({
+    id,
+    nivel,
+    enfase,
+    fase,
+    diaCiclo,
+    personal,
+    isExtraTreino
+  }) {
+    if (!modalProximoTreino || !modalProximoLista || isExtraTreino) return;
+
+    const diaAtual = Number(diaCiclo);
+    if (!Number.isFinite(diaAtual) || diaAtual < 1) return;
+
+    const cicloLength = Number(localStorage.getItem("femflow_cycleLength") || 28);
+    const cicloValido = Number.isFinite(cicloLength) && cicloLength > 0 ? cicloLength : 28;
+    const proximoDia = diaAtual + 1 > cicloValido ? 1 : diaAtual + 1;
+
+    const exercicios = await FEMFLOW.engineTreino.listarExerciciosDia({
+      id,
+      nivel,
+      enfase,
+      fase,
+      diaCiclo: proximoDia,
+      personal
+    });
+
+    modalProximoLista.innerHTML = "";
+    definirModalProximoTreinoTextos(proximoDia);
+
+    if (!exercicios.length) {
+      const li = document.createElement("li");
+      li.textContent = t("treino.proximoModal.vazio");
+      modalProximoLista.appendChild(li);
+      abrirModalProximoTreino();
+      return;
+    }
+
+    exercicios.forEach((nome) => {
+      const li = document.createElement("li");
+      li.textContent = nome;
+      modalProximoLista.appendChild(li);
+    });
+
+    abrirModalProximoTreino();
   }
 
   const SERIE_BEHAVIOR = {
@@ -473,6 +540,16 @@ const hasPersonal =
 
     window.requestAnimationFrame(() => {
       iniciarTourTreino();
+    });
+
+    void mostrarProximoTreino({
+      id,
+      nivel,
+      enfase: enfaseFinal,
+      fase,
+      diaCiclo,
+      personal: personalFinal && !isExtraTreino,
+      isExtraTreino
     });
 
     localStorage.setItem("femflow_fase", fase);
