@@ -107,24 +107,36 @@ const TITULOS_ESPECIAIS = {
 
 const CARDS_HOME_PRESETS = [
   "avancada_corrida_longa",
+  "avancada_costas",
   "avancada_forcaabc",
   "avancada_gluteos",
+  "avancada_ombro",
+  "avancada_peitoral",
   "avancada_casa_core_gluteo",
   "avancada_militar",
   "avancada_quadriceps",
+  "avancada_remo_oceanico",
   "iniciante_corrida_longa",
   "iniciante_casa_core_gluteo",
   "iniciante_costas",
+  "iniciante_casa_core_gluteo",
   "iniciante_forcaabc",
   "iniciante_gluteos",
   "iniciante_militar",
+  "iniciante_ombro",
+  "iniciante_peitoral",
   "iniciante_quadriceps",
+  "iniciante_remo_oceanico",
   "intermediaria_corrida_longa",
+  "intermediaria_costas",
   "intermediaria_casa_core_gluteo",
   "intermediaria_forcaabc",
   "intermediaria_gluteos",
   "intermediaria_militar",
-  "intermediaria_quadriceps"
+  "intermediaria_ombro",
+  "intermediaria_peitoral",
+  "intermediaria_quadriceps",
+  "intermediaria_remo_oceanico"
 ];
 
 function extrairNivelEnfase(docId) {
