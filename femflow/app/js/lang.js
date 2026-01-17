@@ -278,6 +278,11 @@ home: {
     pseLabel: "PSE (0 a 10)",
     pseSalvar: "Salvar",
     pseCancelar: "Cancelar",
+    proximoModal: {
+      titulo: "Próximo treino (Dia {dia})",
+      subtitulo: "Veja os exercícios para se programar.",
+      vazio: "Estamos preparando o próximo treino."
+    },
     tour: {
       step: "{atual}/{total}",
       salvarTitulo: "Salve seu treino",
@@ -555,6 +560,11 @@ home: {
     pseLabel: "RPE (0 to 10)",
     pseSalvar: "Save",
     pseCancelar: "Cancel",
+    proximoModal: {
+      titulo: "Next workout (Day {dia})",
+      subtitulo: "Preview the exercises so you can plan ahead.",
+      vazio: "We are preparing the next workout."
+    },
     tour: {
       step: "{atual}/{total}",
       salvarTitulo: "Save your workout",
@@ -834,6 +844,11 @@ fr: {
     pseLabel: "PSE (0 à 10)",
     pseSalvar: "Enregistrer",
     pseCancelar: "Annuler",
+    proximoModal: {
+      titulo: "Prochain entraînement (Jour {dia})",
+      subtitulo: "Prévisualisez les exercices pour vous organiser.",
+      vazio: "Nous préparons le prochain entraînement."
+    },
     tour: {
       step: "{atual}/{total}",
       salvarTitulo: "Enregistrez votre entraînement",
