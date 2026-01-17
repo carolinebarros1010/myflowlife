@@ -111,6 +111,7 @@ const CARDS_HOME_PRESETS = [
   "avancada_militar",
   "avancada_quadriceps",
   "avancada_remo_oceanico",
+  "avancada_beach_tennis_hybrid",
   "avancada_casa_queima_gordura",
   "iniciante_corrida_longa",
   "iniciante_casa_core_gluteo",
@@ -123,6 +124,7 @@ const CARDS_HOME_PRESETS = [
   "iniciante_peitoral",
   "iniciante_quadriceps",
   "iniciante_remo_oceanico",
+  "iniciante_beach_tennis_hybrid",
   "iniciante_casa_queima_gordura",
   "intermediaria_corrida_longa",
   "intermediaria_costas",
@@ -134,6 +136,7 @@ const CARDS_HOME_PRESETS = [
   "intermediaria_peitoral",
   "intermediaria_quadriceps",
   "intermediaria_remo_oceanico",
+  "intermediaria_beach_tennis_hybrid",
   "intermediaria_casa_queima_gordura",
   "intermediaria_casa_fullbody_praia"
 ];
@@ -381,7 +384,8 @@ const CARD_THUMBS = {
   peito: "peitoral.jpg",
   peitoral: "peitoral.jpg",
   militar: "militar.jpg",
-  remo_oceanico: "remo_oceanico.jpg"
+  remo_oceanico: "remo_oceanico.jpg",
+  beach_tennis_hybrid: "beach_tennis_hybrid.jpg"
 };
 
 function getThumbUrl(enfase) {

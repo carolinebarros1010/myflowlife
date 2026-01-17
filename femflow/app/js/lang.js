@@ -162,7 +162,23 @@ home: {
       tituloMuscular:  "Treinos por ênfase",
       tituloEsportes:  "Esportes",
       tituloCasa:      "Treinar em casa",
-      tituloEbooks:    "Ebooks"
+      cards: {
+        forcaabc: "Força",
+        quadriceps: "Quadríceps",
+        gluteos: "Glúteos",
+        corrida_longa: "Corrida longa",
+        casa_core_gluteo: "Glúteo e Core",
+        casa_queima_gordura: "Queima de Gordura",
+        casa_mobilidade: "Mobilidade",
+        casa_fullbody_praia: "Fullbody Praia",
+        costas: "Costas",
+        ombro: "Ombro",
+        peito: "Peito",
+        peitoral: "Peitoral",
+        militar: "Militar",
+        remo_oceanico: "Remo oceânico",
+        beach_tennis_hybrid: "Beach Tennis"
+      }
     },
   flowcenter: {
   // TÍTULOS
@@ -428,7 +444,23 @@ home: {
       tituloMuscular:  "Muscle focus training",
       tituloEsportes:  "Sports",
       tituloCasa:      "Home training",
-      tituloEbooks:    "Ebooks"
+      cards: {
+        forcaabc: "Strength",
+        quadriceps: "Quadriceps",
+        gluteos: "Glutes",
+        corrida_longa: "Long run",
+        casa_core_gluteo: "Glutes & Core",
+        casa_queima_gordura: "Fat Burn",
+        casa_mobilidade: "Mobility",
+        casa_fullbody_praia: "Beach full body",
+        costas: "Back",
+        ombro: "Shoulders",
+        peito: "Chest",
+        peitoral: "Pectorals",
+        militar: "Military",
+        remo_oceanico: "Ocean rowing",
+        beach_tennis_hybrid: "Beach Tennis"
+      }
     },
  flowcenter: {
   titulo: "Your hormonal phase",
@@ -691,7 +723,23 @@ fr: {
       tituloMuscular:  "Entraînements par groupe musculaire",
       tituloEsportes:  "Sports",
       tituloCasa:      "S'entraîner à la maison",
-      tituloEbooks:    "Ebooks"
+      cards: {
+        forcaabc: "Force",
+        quadriceps: "Quadriceps",
+        gluteos: "Fessiers",
+        corrida_longa: "Course longue",
+        casa_core_gluteo: "Fessiers et core",
+        casa_queima_gordura: "Brûle-graisse",
+        casa_mobilidade: "Mobilité",
+        casa_fullbody_praia: "Full body plage",
+        costas: "Dos",
+        ombro: "Épaules",
+        peito: "Poitrine",
+        peitoral: "Pectoraux",
+        militar: "Militaire",
+        remo_oceanico: "Aviron océanique",
+        beach_tennis_hybrid: "Beach Tennis"
+      }
     },
   flowcenter: {
   titulo: "Votre phase hormonale",
