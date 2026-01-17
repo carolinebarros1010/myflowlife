@@ -177,7 +177,9 @@ home: {
         peitoral: "Peitoral",
         militar: "Militar",
         remo_oceanico: "Remo oceânico",
-        beach_tennis: "Beach Tennis"
+        beach_tennis: "Beach Tennis",
+        jiu_jitsu: "Jiu-jítsu",
+        natacao: "Natação"
       }
     },
   flowcenter: {
@@ -466,7 +468,9 @@ home: {
         peitoral: "Pectorals",
         militar: "Military",
         remo_oceanico: "Ocean rowing",
-        beach_tennis: "Beach Tennis"
+        beach_tennis: "Beach Tennis",
+        jiu_jitsu: "Jiu-jitsu",
+        natacao: "Swimming"
       }
     },
  flowcenter: {
@@ -752,7 +756,9 @@ fr: {
         peitoral: "Pectoraux",
         militar: "Militaire",
         remo_oceanico: "Aviron océanique",
-        beach_tennis: "Beach Tennis"
+        beach_tennis: "Beach Tennis",
+        jiu_jitsu: "Jiu-jitsu",
+        natacao: "Natation"
       }
     },
   flowcenter: {

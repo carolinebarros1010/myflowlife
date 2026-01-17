@@ -45,6 +45,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnDescanso     = document.getElementById("descansoBtn");
   const btnCancelar     = document.getElementById("cancelarTreinoBtn");
   const modalPSE        = document.getElementById("modalPSE");
+  const modalProximoTreino = document.getElementById("modalProximoTreino");
+  const modalProximoTitulo = document.getElementById("modalProximoTitulo");
+  const modalProximoSub = document.getElementById("modalProximoSub");
+  const modalProximoLista = document.getElementById("modalProximoLista");
   const pseInput        = document.getElementById("pseInput");
   const pseEmoji        = document.getElementById("pseEmoji");
   const pseValor        = document.getElementById("pseValor");
@@ -93,6 +97,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const tourKey = window.FEMFLOW_TOUR_KEY;
+  const tourReset = new URLSearchParams(window.location.search).get("tour");
+  if (tourReset === "1") {
+    localStorage.removeItem(tourKey);
+  }
   const tourTargets = [btnSalvar, btnDescanso, btnCancelar].filter(Boolean);
   const tourSteps = [
     {
@@ -136,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const targetCenterY = rect.top + rect.height / 2 + offsetY;
         const spotlightBottom = viewportHeight + offsetY;
         const footerOvershoot = 18;
-        const footerExtraDrop = 45;
+        const footerExtraDrop = 85;
         const footerSpotRadius = 84;
         const radius = isFooterTarget
           ? footerSpotRadius + Math.max(0, spotlightBottom - targetCenterY)
@@ -475,6 +483,16 @@ const hasPersonal =
 
     window.requestAnimationFrame(() => {
       iniciarTourTreino();
+    });
+
+    void mostrarProximoTreino({
+      id,
+      nivel,
+      enfase: enfaseFinal,
+      fase,
+      diaCiclo,
+      personal: personalFinal && !isExtraTreino,
+      isExtraTreino
     });
 
     localStorage.setItem("femflow_fase", fase);
