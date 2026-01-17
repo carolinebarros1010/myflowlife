@@ -283,7 +283,8 @@ home: {
     pseCancelar: "Cancelar",
     proximoModal: {
       titulo: "Hoje: {diaAtual}º dia da fase {fase}",
-      subtitulo: "Próximo: {proximoDia}º dia da fase {fase}. (Dia do ciclo, não do programa.)",
+      subtitulo: "Amanhã: {proximoDia}º dia da fase {fase}. (Dia do ciclo, não do programa.)",
+      listaTitulo: "Treino de amanhã",
       vazio: "Estamos preparando o próximo treino."
     },
     tour: {
@@ -568,7 +569,8 @@ home: {
     pseCancelar: "Cancel",
     proximoModal: {
       titulo: "Today: Day {diaAtual} of the {fase} phase",
-      subtitulo: "Next: Day {proximoDia} of the {fase} phase. (Cycle day, not program day.)",
+      subtitulo: "Tomorrow: Day {proximoDia} of the {fase} phase. (Cycle day, not program day.)",
+      listaTitulo: "Tomorrow's workout",
       vazio: "We are preparing the next workout."
     },
     tour: {
@@ -855,7 +857,8 @@ fr: {
     pseCancelar: "Annuler",
     proximoModal: {
       titulo: "Aujourd’hui : {diaAtual}e jour de la phase {fase}",
-      subtitulo: "Prochain : {proximoDia}e jour de la phase {fase}. (Jour du cycle, pas du programme.)",
+      subtitulo: "Demain : {proximoDia}e jour de la phase {fase}. (Jour du cycle, pas du programme.)",
+      listaTitulo: "Entraînement de demain",
       vazio: "Nous préparons le prochain entraînement."
     },
     tour: {

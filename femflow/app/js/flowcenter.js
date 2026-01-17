@@ -286,6 +286,7 @@ function initFlowCenter() {
   const modalProximoTreino = document.getElementById("modalProximoTreino");
   const modalProximoTitulo = document.getElementById("modalProximoTitulo");
   const modalProximoSub = document.getElementById("modalProximoSub");
+  const modalProximoListaTitulo = document.getElementById("modalProximoListaTitulo");
   const modalProximoLista = document.getElementById("modalProximoLista");
   let modalProximoTimeout = null;
 
@@ -315,6 +316,9 @@ function initFlowCenter() {
         proximoDia,
         fase: faseLabel
       });
+    }
+    if (modalProximoListaTitulo) {
+      modalProximoListaTitulo.textContent = t("treino.proximoModal.listaTitulo");
     }
   };
 
