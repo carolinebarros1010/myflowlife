@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const targetCenterY = rect.top + rect.height / 2 + offsetY;
         const spotlightBottom = viewportHeight + offsetY;
         const footerOvershoot = 18;
-        const footerExtraDrop = 45;
+        const footerExtraDrop = 85;
         const footerSpotRadius = 84;
         const radius = isFooterTarget
           ? footerSpotRadius + Math.max(0, spotlightBottom - targetCenterY)
