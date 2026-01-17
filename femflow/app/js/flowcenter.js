@@ -26,6 +26,9 @@ function flowcenterPersistPerfil(perfil) {
   localStorage.setItem("femflow_fase", String(perfil.fase || "follicular").toLowerCase());
   localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
   localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
+  if (perfil.ciclo_duracao) {
+    localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao));
+  }
 
   /* ============================================================
      🧭 ÊNFASE — SÓ sobrescreve se vier VÁLIDA do backend
@@ -167,6 +170,23 @@ function initFlowCenter() {
   aplicarNivel();
   document.addEventListener("femflow:langChange", aplicarNivel);
 
+  const t = (path, vars = {}) => {
+    const lang = FEMFLOW.lang || "pt";
+    const parts = path.split(".");
+    let text = FEMFLOW.langs?.[lang];
+    for (const p of parts) {
+      text = text?.[p];
+    }
+    if (typeof text !== "string") return path;
+    return text
+      .replace(/\{(\w+)\}/g, (_, key) =>
+        vars[key] !== undefined ? vars[key] : `{${key}}`
+      )
+      .replace(/\{\{(\w+)\}\}/g, (_, key) =>
+        vars[key] !== undefined ? vars[key] : `{{${key}}}`
+      );
+  };
+
   /* ============================================================
      7) IDIOMA
   ============================================================ */
@@ -195,6 +215,10 @@ function initFlowCenter() {
     const enduranceLabel = enduranceEnabled ? "🏃‍♂️" : "🔒";
     document.getElementById("toEndurance").textContent =
       `${enduranceLabel} ${L.endurance}`;
+    const nextTreinoBtn = document.getElementById("toNextTreino");
+    if (nextTreinoBtn) {
+      nextTreinoBtn.textContent = `🗓️ ${L.proximoTreino}`;
+    }
 
     const extraTitle = document.getElementById("extraTitle");
     const extraSub = document.getElementById("extraSub");
@@ -257,6 +281,103 @@ function initFlowCenter() {
     modalExtra.addEventListener("click", (event) => {
       if (event.target === modalExtra) fecharModalExtra();
     });
+  }
+
+  const modalProximoTreino = document.getElementById("modalProximoTreino");
+  const modalProximoTitulo = document.getElementById("modalProximoTitulo");
+  const modalProximoSub = document.getElementById("modalProximoSub");
+  const modalProximoListaTitulo = document.getElementById("modalProximoListaTitulo");
+  const modalProximoLista = document.getElementById("modalProximoLista");
+  let modalProximoTimeout = null;
+
+  const abrirModalProximoTreino = () => {
+    if (!modalProximoTreino) return;
+    if (modalProximoTimeout) window.clearTimeout(modalProximoTimeout);
+    modalProximoTreino.classList.remove("hidden");
+    modalProximoTreino.setAttribute("aria-hidden", "false");
+    modalProximoTimeout = window.setTimeout(() => {
+      modalProximoTreino.classList.add("hidden");
+      modalProximoTreino.setAttribute("aria-hidden", "true");
+    }, 9000);
+  };
+
+  const definirModalProximoTextos = ({ diaAtual, proximoDia }) => {
+    const faseLabel =
+      FEMFLOW.langs?.[FEMFLOW.lang || "pt"]?.flowcenter?.[normalizarFase(ciclo.fase)] ||
+      ciclo.fase;
+    if (modalProximoTitulo) {
+      modalProximoTitulo.textContent = t("treino.proximoModal.titulo", {
+        diaAtual,
+        fase: faseLabel
+      });
+    }
+    if (modalProximoSub) {
+      modalProximoSub.textContent = t("treino.proximoModal.subtitulo", {
+        proximoDia,
+        fase: faseLabel
+      });
+    }
+    if (modalProximoListaTitulo) {
+      modalProximoListaTitulo.textContent = t("treino.proximoModal.listaTitulo");
+    }
+  };
+
+  const carregarProximoTreino = async () => {
+    if (!modalProximoLista || !FEMFLOW.engineTreino?.listarExerciciosDia) return;
+
+    const enfaseAtual = localStorage.getItem("femflow_enfase");
+    if (!personal && !enfaseAtual) {
+      FEMFLOW.toast("Escolha um treino na Home 🌸");
+      return;
+    }
+
+    const diaAtual = Number(ciclo.diaCiclo || 1);
+    if (!Number.isFinite(diaAtual) || diaAtual < 1) return;
+
+    const cicloLength = Number(localStorage.getItem("femflow_cycleLength"));
+    const cicloPerfil = Number(perfil.ciclo_duracao || 0);
+    const cicloValido =
+      Number.isFinite(cicloLength) && cicloLength > 0
+        ? cicloLength
+        : Number.isFinite(cicloPerfil) && cicloPerfil > 0
+        ? cicloPerfil
+        : 28;
+    const proximoDia = diaAtual + 1 > cicloValido ? 1 : diaAtual + 1;
+
+    const exercicios = await FEMFLOW.engineTreino.listarExerciciosDia({
+      id: localStorage.getItem("femflow_id"),
+      nivel: perfil.nivel,
+      enfase: enfaseAtual,
+      fase: perfil.fase,
+      diaCiclo: proximoDia,
+      personal
+    });
+
+    modalProximoLista.innerHTML = "";
+    definirModalProximoTextos({ diaAtual, proximoDia });
+
+    if (!exercicios.length) {
+      const li = document.createElement("li");
+      li.textContent = t("treino.proximoModal.vazio");
+      modalProximoLista.appendChild(li);
+      abrirModalProximoTreino();
+      return;
+    }
+
+    exercicios.forEach((nome) => {
+      const li = document.createElement("li");
+      li.textContent = nome;
+      modalProximoLista.appendChild(li);
+    });
+
+    abrirModalProximoTreino();
+  };
+
+  const nextTreinoBtn = document.getElementById("toNextTreino");
+  if (nextTreinoBtn) {
+    nextTreinoBtn.onclick = () => {
+      void carregarProximoTreino();
+    };
   }
 
   document.querySelectorAll("[data-extra-enfase]").forEach(btn => {
