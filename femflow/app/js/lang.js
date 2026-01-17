@@ -162,7 +162,21 @@ home: {
       tituloMuscular:  "Treinos por ênfase",
       tituloEsportes:  "Esportes",
       tituloCasa:      "Treinar em casa",
-      tituloEbooks:    "eBooks"
+      cards: {
+        forcaabc: "Força",
+        quadriceps: "Quadríceps",
+        gluteos: "Glúteos",
+        corrida_longa: "Corrida longa",
+        casa_core_gluteo: "Glúteo e Core",
+        casa_queima_gordura: "Queima de Gordura",
+        casa_mobilidade: "Mobilidade",
+        costas: "Costas",
+        ombro: "Ombro",
+        peito: "Peito",
+        peitoral: "Peitoral",
+        militar: "Militar",
+        remo_oceanico: "Remo oceânico"
+      }
     },
   flowcenter: {
   // TÍTULOS
@@ -428,7 +442,21 @@ home: {
       tituloMuscular:  "Muscle focus training",
       tituloEsportes:  "Sports",
       tituloCasa:      "Home training",
-      tituloEbooks:    "eBooks"
+      cards: {
+        forcaabc: "Strength",
+        quadriceps: "Quadriceps",
+        gluteos: "Glutes",
+        corrida_longa: "Long run",
+        casa_core_gluteo: "Glutes & Core",
+        casa_queima_gordura: "Fat Burn",
+        casa_mobilidade: "Mobility",
+        costas: "Back",
+        ombro: "Shoulders",
+        peito: "Chest",
+        peitoral: "Pectorals",
+        militar: "Military",
+        remo_oceanico: "Ocean rowing"
+      }
     },
  flowcenter: {
   titulo: "Your hormonal phase",
@@ -691,7 +719,21 @@ fr: {
       tituloMuscular:  "Entraînements par groupe musculaire",
       tituloEsportes:  "Sports",
       tituloCasa:      "S'entraîner à la maison",
-      tituloEbooks:    "eBooks"
+      cards: {
+        forcaabc: "Force",
+        quadriceps: "Quadriceps",
+        gluteos: "Fessiers",
+        corrida_longa: "Course longue",
+        casa_core_gluteo: "Fessiers et core",
+        casa_queima_gordura: "Brûle-graisse",
+        casa_mobilidade: "Mobilité",
+        costas: "Dos",
+        ombro: "Épaules",
+        peito: "Poitrine",
+        peitoral: "Pectoraux",
+        militar: "Militaire",
+        remo_oceanico: "Aviron océanique"
+      }
     },
   flowcenter: {
   titulo: "Votre phase hormonale",
