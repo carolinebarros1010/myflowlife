@@ -101,26 +101,41 @@ const TITULOS_ESPECIAIS = {
   forcaabc: "Força",
   quadriceps: "Quadríceps",
   gluteos: "Glúteos",
-  corrida_longa: "Corrida longa"
+  corrida_longa: "Corrida longa",
+  casa_core_gluteo: "Glúteo e Core"
 };
 
 const CARDS_HOME_PRESETS = [
   "avancada_corrida_longa",
+  "avancada_costas",
   "avancada_forcaabc",
   "avancada_gluteos",
+  "avancada_ombro",
+  "avancada_peitoral",
+  "avancada_casa_core_gluteo",
   "avancada_militar",
   "avancada_quadriceps",
+  "avancada_remo_oceanico",
   "iniciante_corrida_longa",
   "iniciante_costas",
+  "iniciante_casa_core_gluteo",
   "iniciante_forcaabc",
   "iniciante_gluteos",
   "iniciante_militar",
+  "iniciante_ombro",
+  "iniciante_peitoral",
   "iniciante_quadriceps",
+  "iniciante_remo_oceanico",
   "intermediaria_corrida_longa",
+  "intermediaria_costas",
+  "intermediaria_casa_core_gluteo",
   "intermediaria_forcaabc",
   "intermediaria_gluteos",
   "intermediaria_militar",
-  "intermediaria_quadriceps"
+  "intermediaria_ombro",
+  "intermediaria_peitoral",
+  "intermediaria_quadriceps",
+  "intermediaria_remo_oceanico"
 ];
 
 function extrairNivelEnfase(docId) {
@@ -351,12 +366,17 @@ const CARDS_FOLLOWME_SIMBOLICOS = [
 const CARD_THUMBS = {
   gluteo: "gluteos.jpg",
   gluteos: "gluteos.jpg",
+  casa_core_gluteo: "casa_core_gluteo.jpg",
+  casa_mobilidade: "casa_mobilidade.jpg",
+  corrida_longa: "corrida_Longa.jpg",
   quadriceps: "quadriceps.jpg",
   costas: "costas.jpg",
+  forcaabc: "forcaabc.jpg",
   ombro: "ombro.jpg",
   peito: "peitoral.jpg",
   peitoral: "peitoral.jpg",
-  militar: "militar.jpg"
+  militar: "militar.jpg",
+  remo_oceanico: "remo_oceanico.jpg"
 };
 
 function getThumbUrl(enfase) {
