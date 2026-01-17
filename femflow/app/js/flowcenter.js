@@ -167,6 +167,23 @@ function initFlowCenter() {
   aplicarNivel();
   document.addEventListener("femflow:langChange", aplicarNivel);
 
+  const t = (path, vars = {}) => {
+    const lang = FEMFLOW.lang || "pt";
+    const parts = path.split(".");
+    let text = FEMFLOW.langs?.[lang];
+    for (const p of parts) {
+      text = text?.[p];
+    }
+    if (typeof text !== "string") return path;
+    return text
+      .replace(/\{(\w+)\}/g, (_, key) =>
+        vars[key] !== undefined ? vars[key] : `{${key}}`
+      )
+      .replace(/\{\{(\w+)\}\}/g, (_, key) =>
+        vars[key] !== undefined ? vars[key] : `{{${key}}}`
+      );
+  };
+
   /* ============================================================
      7) IDIOMA
   ============================================================ */

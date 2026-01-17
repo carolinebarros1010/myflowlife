@@ -198,7 +198,7 @@ home: {
   evolucao: "Evolução",
   respiracao: "Respiração",
   endurance: "Endurance",
-  proximoTreino: "Ver próximo treino",
+  proximoTreino: "Programa-se",
 
   treinoExtraTitulo: "Treino Extra",
   treinoExtraSub: "Escolha a área que deseja focar hoje.",
