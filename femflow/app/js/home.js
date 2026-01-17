@@ -496,7 +496,6 @@ function cardHTML(p) {
       <div class="${thumbClass}" style="${thumbStyle}">
         ${lockOverlay}
         ${freeBadge}
-        <span class="badge">${titulo}</span>
       </div>
       <div class="info">
         <h3 class="ttl">${titulo}</h3>
