@@ -200,6 +200,7 @@ home: {
   evolucao: "Evolução",
   respiracao: "Respiração",
   endurance: "Endurance",
+  proximoTreino: "Programa-se",
 
   treinoExtraTitulo: "Treino Extra",
   treinoExtraSub: "Escolha a área que deseja focar hoje.",
@@ -280,6 +281,11 @@ home: {
     pseLabel: "PSE (0 a 10)",
     pseSalvar: "Salvar",
     pseCancelar: "Cancelar",
+    proximoModal: {
+      titulo: "Hoje: {diaAtual}º dia da fase {fase}",
+      subtitulo: "Próximo: {proximoDia}º dia da fase {fase}. (Dia do ciclo, não do programa.)",
+      vazio: "Estamos preparando o próximo treino."
+    },
     tour: {
       step: "{atual}/{total}",
       salvarTitulo: "Salve seu treino",
@@ -481,6 +487,7 @@ home: {
   evolucao: "Progress",
   respiracao: "Breathing",
   endurance: "Endurance",
+  proximoTreino: "See next workout",
 
   treinoExtraTitulo: "Extra Training",
   treinoExtraSub: "Choose the area you want to focus on today.",
@@ -559,6 +566,11 @@ home: {
     pseLabel: "RPE (0 to 10)",
     pseSalvar: "Save",
     pseCancelar: "Cancel",
+    proximoModal: {
+      titulo: "Today: Day {diaAtual} of the {fase} phase",
+      subtitulo: "Next: Day {proximoDia} of the {fase} phase. (Cycle day, not program day.)",
+      vazio: "We are preparing the next workout."
+    },
     tour: {
       step: "{atual}/{total}",
       salvarTitulo: "Save your workout",
@@ -762,6 +774,7 @@ fr: {
   evolucao: "Évolution",
   respiracao: "Respiration",
   endurance: "Endurance",
+  proximoTreino: "Voir le prochain entraînement",
 
   treinoExtraTitulo: "Entraînement extra",
   treinoExtraSub: "Choisissez la zone que vous souhaitez travailler aujourd’hui.",
@@ -840,6 +853,11 @@ fr: {
     pseLabel: "PSE (0 à 10)",
     pseSalvar: "Enregistrer",
     pseCancelar: "Annuler",
+    proximoModal: {
+      titulo: "Aujourd’hui : {diaAtual}e jour de la phase {fase}",
+      subtitulo: "Prochain : {proximoDia}e jour de la phase {fase}. (Jour du cycle, pas du programme.)",
+      vazio: "Nous préparons le prochain entraînement."
+    },
     tour: {
       step: "{atual}/{total}",
       salvarTitulo: "Enregistrez votre entraînement",
