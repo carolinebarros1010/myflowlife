@@ -161,7 +161,8 @@ home: {
       tituloFollowMe:  "Treine junto por 30 dias",
       tituloMuscular:  "Treinos por ênfase",
       tituloEsportes:  "Esportes",
-      tituloCasa:      "Treinar em casa"
+      tituloCasa:      "Treinar em casa",
+      tituloEbooks:    "Ebooks"
     },
   flowcenter: {
   // TÍTULOS
@@ -426,7 +427,8 @@ home: {
       tituloFollowMe:  "Train together for 30 days",
       tituloMuscular:  "Muscle focus training",
       tituloEsportes:  "Sports",
-      tituloCasa:      "Home training"
+      tituloCasa:      "Home training",
+      tituloEbooks:    "Ebooks"
     },
  flowcenter: {
   titulo: "Your hormonal phase",
@@ -688,7 +690,8 @@ fr: {
       tituloFollowMe:  "Entraînez-vous pendant 30 jours",
       tituloMuscular:  "Entraînements par groupe musculaire",
       tituloEsportes:  "Sports",
-      tituloCasa:      "S'entraîner à la maison"
+      tituloCasa:      "S'entraîner à la maison",
+      tituloEbooks:    "Ebooks"
     },
   flowcenter: {
   titulo: "Votre phase hormonale",
