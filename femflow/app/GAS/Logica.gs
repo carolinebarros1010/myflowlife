@@ -46,8 +46,8 @@ function calcularCicloReal(params) {
 if (perfil === "regular" || perfil === "diu") {
   if (dia <= 5)  return { fase: "menstrual", dia };
   if (dia <= 13) return { fase: "follicular", dia };
-  if (dia <= 17) return { fase: "ovulatory", dia };
-  return { fase: "luteal", dia: Math.max(18, dia) };
+  if (dia <= 17) return { fase: "ovulatoria", dia };
+  return { fase: "lutea", dia: Math.max(18, dia) };
 }
 
 if (perfil === "energetico" || perfil === "menopausa" || perfil === "diu_hormonal") {
@@ -55,8 +55,8 @@ if (perfil === "energetico" || perfil === "menopausa" || perfil === "diu_hormona
 
   if (d <= 5)  return { fase: "menstrual", dia: d };
   if (d <= 13) return { fase: "follicular", dia: d };
-  if (d <= 17) return { fase: "ovulatory", dia: d };
-  return { fase: "luteal", dia: Math.max(18, d) };
+  if (d <= 17) return { fase: "ovulatoria", dia: d };
+  return { fase: "lutea", dia: Math.max(18, d) };
 }
 
 
@@ -86,12 +86,12 @@ if (perfil === "irregular") {
   }
 
   if (d <= 17) {
-    return { fase: "ovulatory", dia: d };
+    return { fase: "ovulatoria", dia: d };
   }
 
   // 🔒 GARANTIA: lútea nunca abaixo de 18
   return {
-    fase: "luteal",
+    fase: "lutea",
     dia: Math.max(18, d)
   };
 }
@@ -155,8 +155,8 @@ function setCiclo_(data) {
   const fasePorDia = (dia) => {
     if (dia <= 5)  return "menstrual";
     if (dia <= 13) return "follicular";
-    if (dia <= 17) return "ovulatory";
-    return "luteal";
+    if (dia <= 17) return "ovulatoria";
+    return "lutea";
   };
 
   /* ===============================
@@ -286,9 +286,9 @@ function resolverDiaTreino(params) {
   if (perfilHormonal === "energetico") {
 
     const faseAlta = {
-      iniciante: "luteal",
+      iniciante: "lutea",
       intermediaria: "follicular",
-      avancada: "ovulatory"
+      avancada: "ovulatoria"
     };
 
     return {
@@ -356,8 +356,8 @@ function fasePorDiaCiclo_(dia) {
   const d = Number(dia) || 1;
    if (dia <= 5)  return "menstrual";
   if (dia <= 13) return "follicular";
-  if (dia <= 17) return "ovulatory";
-  return "luteal";
+  if (dia <= 17) return "ovulatoria";
+  return "lutea";
 }
 
 /* ======================================================
@@ -395,8 +395,8 @@ function calcularEFixarFase_(id) {
 
       if (d <= 5) fase = "menstrual";
       else if (d <= 13) fase = "follicular";
-      else if (d <= 17) fase = "ovulatory";
-      else fase = "luteal";
+      else if (d <= 17) fase = "ovulatoria";
+      else fase = "lutea";
     }
 
     /* ============================
@@ -406,8 +406,8 @@ function calcularEFixarFase_(id) {
       // aqui a fase já foi induzida no onboarding
       if (diaCiclo <= 5) fase = "menstrual";
       else if (diaCiclo <= 13) fase = "follicular";
-      else if (diaCiclo <= 17) fase = "ovulatory";
-      else fase = "luteal";
+      else if (diaCiclo <= 17) fase = "ovulatoria";
+      else fase = "lutea";
     }
 
     /* ============================
@@ -416,8 +416,8 @@ function calcularEFixarFase_(id) {
   // regra única por dia para TODOS os perfis
 if (diaCiclo <= 5) fase = "menstrual";
 else if (diaCiclo <= 13) fase = "follicular";
-else if (diaCiclo <= 17) fase = "ovulatory";
-else fase = "luteal";
+else if (diaCiclo <= 17) fase = "ovulatoria";
+else fase = "lutea";
 
 
     /* ============================
