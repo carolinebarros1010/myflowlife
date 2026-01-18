@@ -45,9 +45,11 @@ function flowcenterPersistPerfil(perfil) {
      🔒 DIREITO PERSONAL (backend)
   ============================================================ */
   const acessos = perfil.acessos || {};
+  const produto = String(perfil.produto || "").toLowerCase();
+  const isVip = produto === "vip";
   localStorage.setItem(
     "femflow_has_personal",
-    acessos.personal === true ? "true" : "false"
+    acessos.personal === true || isVip ? "true" : "false"
   );
 }
 
@@ -109,6 +111,7 @@ function initFlowCenter() {
      4) PRODUTO / ACESSOS (CORRETO)
   ============================================================ */
   const produtoRaw   = String(perfil.produto || "").toLowerCase();
+  const isVip = produtoRaw === "vip";
   const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
   const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
 
@@ -411,6 +414,13 @@ function initFlowCenter() {
     const freeOk = freeValido && freeEnfases.includes(enfase);
 
     /* ✨ FOLLOWME */
+    if (isVip) {
+      if (enfase.startsWith("followme_")) {
+        return FEMFLOW.router(`followme/${enfase}.html`);
+      }
+      return FEMFLOW.router("treino.html");
+    }
+
     if (isFollow) {
       if (produtoRaw !== enfase && !freeOk) {
         FEMFLOW.toast("Seu plano libera apenas este FollowMe.");
