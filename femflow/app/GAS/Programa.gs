@@ -49,7 +49,7 @@ function aplicarDescansoAutomatico_(shA, rowIndex, opts) {
   }
 
   const diffMs = agora - ultima;
-  const diaMs = 23 * 60 * 60 * 1000;
+  const diaMs = 24 * 60 * 60 * 1000;
   const dias = Math.floor(diffMs / diaMs);
 
   if (dias <= 0) {
