@@ -224,6 +224,7 @@ function _loginOuCadastro(data) {
   const nome      = String(data.nome || "").trim();
   const email     = String(data.email || "").toLowerCase().trim();
   const telefone  = String(data.telefone || "").trim();
+  const dataNascimento = String(data.dataNascimento || "").trim();
   const senha     = String(data.senha || "").trim();
   const anamnese  = data.anamnese || "";
 
@@ -251,6 +252,9 @@ function _loginOuCadastro(data) {
       sh.getRange(linha, 3).setValue(email);
       sh.getRange(linha, 4).setValue(telefone);
       sh.getRange(linha, 5).setValue(senhaHash);
+      if (dataNascimento) {
+        sh.getRange(linha, COL_DATA_NASCIMENTO + 1).setValue(dataNascimento);
+      }
 
       sh.getRange(linha, 9).setValue(nivelDetectado);
       sh.getRange(linha, 16).setValue(pont);
@@ -300,7 +304,8 @@ function _loginOuCadastro(data) {
     "",                     // SessionToken
     "",                     // SessionExpira
     "",                     // data
-    ""                      // ultima
+    "",                     // ultima
+    dataNascimento          // DataNascimento (AF)
 
   ]);
 
