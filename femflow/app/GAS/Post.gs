@@ -177,6 +177,13 @@ function doPost(e) {
         break;
 
       /* ===========================
+         📆 TREINOS POR SEMANA
+      ============================ */
+      case "settreinossemana":
+        resposta = setTreinosSemana_(data);
+        break;
+
+      /* ===========================
          🛒 HOTMART / DEFAULT
       ============================ */
       default:
@@ -193,4 +200,3 @@ function doPost(e) {
 
   return _json(resposta);
 }
-

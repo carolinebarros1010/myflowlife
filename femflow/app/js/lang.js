@@ -207,6 +207,13 @@ home: {
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jítsu",
         natacao: "Natação"
+      },
+      treinosSemana: {
+        titulo: "Quantos dias por semana você pretende treinar?",
+        subtitulo: "Isso ajuda a identificar descanso e ausência corretamente.",
+        opcao: "{n}x/semana",
+        salvar: "Salvar",
+        cancelar: "Agora não"
       }
     },
   flowcenter: {
@@ -302,7 +309,6 @@ home: {
       mobilidade: "Mobilidade"
     },
     btnSalvar: "💾 Salvar treino",
-    btnDescanso: "🌿 Descanso",
     btnCancelar: "Cancelar",
     pseTitulo: "Como foi o treino?",
     pseLabel: "PSE (0 a 10)",
@@ -318,8 +324,6 @@ home: {
       step: "{atual}/{total}",
       salvarTitulo: "Salve seu treino",
       salvarTexto: "Ao finalizar, salve para registrar seu PSE e evolução.",
-      descansoTitulo: "Treino também é descanso",
-      descansoTexto: "Selecione quando for descansar para manter seu ciclo alinhado.",
       cancelarTitulo: "Voltar ao painel",
       cancelarTexto: "Use cancelar para sair do treino e voltar ao FlowCenter.",
       next: "Próximo",
@@ -498,6 +502,13 @@ home: {
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jitsu",
         natacao: "Swimming"
+      },
+      treinosSemana: {
+        titulo: "How many days per week do you plan to train?",
+        subtitulo: "This helps us identify rest and absence correctly.",
+        opcao: "{n}x/week",
+        salvar: "Save",
+        cancelar: "Not now"
       }
     },
  flowcenter: {
@@ -588,7 +599,6 @@ home: {
       mobilidade: "Mobility"
     },
     btnSalvar: "💾 Save workout",
-    btnDescanso: "🌿 Rest",
     btnCancelar: "Cancel",
     pseTitulo: "How was the workout?",
     pseLabel: "RPE (0 to 10)",
@@ -604,8 +614,6 @@ home: {
       step: "{atual}/{total}",
       salvarTitulo: "Save your workout",
       salvarTexto: "When you finish, save it to record your RPE and progress.",
-      descansoTitulo: "Rest is also training",
-      descansoTexto: "Select this when you’re resting to keep your cycle aligned.",
       cancelarTitulo: "Back to the panel",
       cancelarTexto: "Use cancel to leave the workout and return to FlowCenter.",
       next: "Next",
@@ -786,6 +794,13 @@ fr: {
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jitsu",
         natacao: "Natation"
+      },
+      treinosSemana: {
+        titulo: "Combien de jours par semaine souhaitez-vous vous entraîner ?",
+        subtitulo: "Cela aide à identifier correctement repos et absence.",
+        opcao: "{n}x/semaine",
+        salvar: "Enregistrer",
+        cancelar: "Pas maintenant"
       }
     },
   flowcenter: {
@@ -876,7 +891,6 @@ fr: {
       mobilidade: "Mobilité"
     },
     btnSalvar: "💾 Enregistrer l’entraînement",
-    btnDescanso: "🌿 Repos",
     btnCancelar: "Annuler",
     pseTitulo: "Comment était l'entraînement ?",
     pseLabel: "PSE (0 à 10)",
@@ -892,8 +906,6 @@ fr: {
       step: "{atual}/{total}",
       salvarTitulo: "Enregistrez votre entraînement",
       salvarTexto: "À la fin, enregistrez pour noter votre PSE et votre progression.",
-      descansoTitulo: "Le repos fait aussi partie de l’entraînement",
-      descansoTexto: "Sélectionnez-le quand vous êtes au repos pour garder votre cycle aligné.",
       cancelarTitulo: "Retour au tableau",
       cancelarTexto: "Utilisez annuler pour quitter l’entraînement et revenir au FlowCenter.",
       next: "Suivant",
