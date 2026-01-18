@@ -57,7 +57,7 @@ function _assertSession_(id, deviceId, sessionToken) {
     deviceId = "";
   }
 
-  const sh = _sheet(SHEET_ALUNAS);
+  const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   if (!sh) return { ok: false, msg: "sheet_not_found" };
 
   const rows = sh.getDataRange().getValues();
