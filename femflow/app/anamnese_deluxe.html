@@ -63,6 +63,14 @@
     }
     input:focus{ border-color:var(--terracota); box-shadow:0 0 0 3px rgba(204,106,90,.18) }
     input[aria-invalid="true"]{ border-color:#d9534f }
+    label{
+      display:block;
+      margin:0.4rem auto -0.4rem;
+      width:78%; max-width:300px;
+      text-align:left;
+      font-size:.85rem;
+      color:var(--texto);
+    }
     .err{ font-size:.9rem; color:#d9534f; min-height:1.1rem; }
    button{
   background:linear-gradient(135deg,var(--verde),var(--terracota));
@@ -128,6 +136,10 @@
 
     <input id="telefone" type="tel" placeholder="Telefone (opcional)">
     <div id="eTel" class="err"></div>
+
+    <label id="labelDataNascimento" for="dataNascimento">Data de nascimento</label>
+    <input id="dataNascimento" type="date" required>
+    <div id="eDataNascimento" class="err"></div>
 
     <input id="senha" type="password" placeholder="Crie uma senha (mín. 6)">
     <div id="eSenha" class="err"></div>

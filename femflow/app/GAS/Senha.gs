@@ -93,7 +93,8 @@ function _assertSession_(id, deviceId, sessionToken) {
       }
     }
 
-    return { ok: true, row: i + 1, deviceUpdated };
+    const autoDescanso = aplicarDescansoAutomatico_(sh, i);
+    return { ok: true, row: i + 1, deviceUpdated, autoDescanso };
   }
 
   return { ok: false, msg: "id_not_found" };
@@ -194,6 +195,8 @@ function _fazerLogin(data) {
       sh.getRange(i + 1, COL_DIA_PROGRAMA + 1).setValue(1);
     }
 
+    const autoDescanso = aplicarDescansoAutomatico_(sh, i);
+
     // 🔄 Sync de ciclo no login (atualiza DiaCiclo/Fase se permitido)
     const syncResult = sync(id);
 
@@ -215,7 +218,8 @@ function _fazerLogin(data) {
 
       deviceId: deviceId,
       sessionToken: sessionToken,
-      sessionExpira: sessionExp
+      sessionExpira: sessionExp,
+      autoDescanso: autoDescanso
     };
   }
 
@@ -228,6 +232,7 @@ function _loginOuCadastro(data) {
   const nome      = String(data.nome || "").trim();
   const email     = String(data.email || "").toLowerCase().trim();
   const telefone  = String(data.telefone || "").trim();
+  const dataNascimento = String(data.dataNascimento || "").trim();
   const senha     = String(data.senha || "").trim();
   const anamnese  = data.anamnese || "";
 
@@ -255,6 +260,9 @@ function _loginOuCadastro(data) {
       sh.getRange(linha, 3).setValue(email);
       sh.getRange(linha, 4).setValue(telefone);
       sh.getRange(linha, 5).setValue(senhaHash);
+      if (dataNascimento) {
+        sh.getRange(linha, COL_DATA_NASCIMENTO + 1).setValue(dataNascimento);
+      }
 
       sh.getRange(linha, 9).setValue(nivelDetectado);
       sh.getRange(linha, 16).setValue(pont);
@@ -304,7 +312,12 @@ function _loginOuCadastro(data) {
     "",                     // SessionToken
     "",                     // SessionExpira
     "",                     // data
-    ""                      // ultima
+    "",                     // ultima
+    "",                     // FreeEnabled (AB)
+    "",                     // FreeEnfases (AC)
+    "",                     // FreeUntil (AD)
+    "",                     // acesso_personal (AE)
+    dataNascimento          // DataNascimento (AF)
 
   ]);
 
