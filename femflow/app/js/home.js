@@ -43,12 +43,14 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_nome", perfil.nome || "");
   localStorage.setItem("femflow_email", perfil.email || "");
   localStorage.setItem("femflow_nivel", String(perfil.nivel || "iniciante").toLowerCase());
-  localStorage.setItem("femflow_produto", String(perfil.produto || "").toLowerCase());
-  localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
+  const produto = String(perfil.produto || "").toLowerCase();
+  const isVip = produto === "vip";
+  localStorage.setItem("femflow_produto", produto);
+  localStorage.setItem("femflow_ativa", String(isVip || !!perfil.ativa));
 
   // ✅ acesso personal = direito (backend), separado do modo personal (front)
   const acessos = perfil.acessos || {};
-  const hasPersonal = acessos.personal === true;
+  const hasPersonal = acessos.personal === true || isVip;
   localStorage.setItem("femflow_has_personal", String(hasPersonal));
   localStorage.removeItem("femflow_personal"); // legado: nunca usar mais
 
@@ -182,11 +184,14 @@ function podeAcessar(enfase, perfil) {
 
   const categoria = inferirCategoria(enfase);
   const produto = (perfil.produto || "").toLowerCase();
+  const isVip = produto === "vip";
   const ativa = !!perfil.ativa;
  const personal = localStorage.getItem("femflow_has_personal") === "true";
 
 
-  if (!ativa) return false;
+  if (!ativa && !isVip) return false;
+
+  if (isVip) return true;
 
   // 🔥 PERSONAL (direito) = acesso_app + personal
   if (personal) {
@@ -747,6 +752,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const produto =
       String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+    const isVip = produto === "vip";
 
     // PERSONAL — sempre aparece:
     // - se tem personal → desbloqueado (ativa modo personal)
@@ -763,7 +769,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (catalogo.followme.length === 0) {
       const cards = CARDS_FOLLOWME_SIMBOLICOS.map(c => ({
         ...c,
-        locked: produto !== c.enfase
+        locked: !isVip && produto !== c.enfase
       }));
       catalogo.followme.push(...cards);
     }
