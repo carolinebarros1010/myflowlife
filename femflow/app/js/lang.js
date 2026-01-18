@@ -206,7 +206,8 @@ home: {
         remo_oceanico: "Remo oceânico",
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jítsu",
-        natacao: "Natação"
+        natacao: "Natação",
+        surf: "Surf"
       }
     },
   flowcenter: {
@@ -494,7 +495,8 @@ home: {
         remo_oceanico: "Ocean rowing",
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jitsu",
-        natacao: "Swimming"
+        natacao: "Swimming",
+        surf: "Surf"
       }
     },
  flowcenter: {
@@ -779,7 +781,8 @@ fr: {
         remo_oceanico: "Aviron océanique",
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jitsu",
-        natacao: "Natation"
+        natacao: "Natation",
+        surf: "Surf"
       }
     },
   flowcenter: {

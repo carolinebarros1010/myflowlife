@@ -116,6 +116,7 @@ const CARDS_HOME_PRESETS = [
   "avancada_beach_tennis",
   "avancada_jiu_jitsu",
   "avancada_natacao",
+  "avancada_surf",
   "avancada_casa_queima_gordura",
   "avancada_casa_fullbody_praia",
   "iniciante_corrida_longa",
@@ -132,6 +133,7 @@ const CARDS_HOME_PRESETS = [
   "iniciante_beach_tennis",
   "iniciante_jiu_jitsu",
   "iniciante_natacao",
+  "iniciante_surf",
   "iniciante_casa_queima_gordura",
   "iniciante_casa_fullbody_praia",
   "intermediaria_corrida_longa",
@@ -147,6 +149,7 @@ const CARDS_HOME_PRESETS = [
   "intermediaria_beach_tennis",
   "intermediaria_jiu_jitsu",
   "intermediaria_natacao",
+  "intermediaria_surf",
   "intermediaria_casa_queima_gordura",
   "intermediaria_casa_fullbody_praia"
 ];
@@ -400,7 +403,8 @@ const CARD_THUMBS = {
   remo_oceanico: "remo_oceanico.jpg",
   beach_tennis: "beach_tennis_hybrid.jpg",
   jiu_jitsu: "jiu_jitsu.jpg",
-  natacao: "natacao.jpg"
+  natacao: "natacao.jpg",
+  surf: "surf.jpg"
 };
 
 function getThumbUrl(enfase) {
