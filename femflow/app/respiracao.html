@@ -155,6 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let cicloAtivo = false;
   let protocoloAtual = null;
+  let vibracaoAtiva = false;
 
   const drawer     = document.getElementById("breathDrawer");
   const modal      = document.getElementById("breathModal");
@@ -230,7 +231,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     drawer.classList.add("active");
 
     btnStart.style.display = "block";
-    btnStart.onclick = () => startProtocolo(protocoloAtual);
+    btnStart.onclick = () => {
+      vibracaoAtiva = true;
+      dispararVibracao("start");
+      startProtocolo(protocoloAtual);
+    };
 
     modal.style.background = p.cor + "22";
     circle.style.background = p.cor;
@@ -276,11 +281,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     label.textContent = nomeFase[faseIndex];
     circle.style.background = cor;
+    dispararVibracao(faseIndex);
 
     for (let s = segundos; s >= 1; s--){
       circle.textContent = s;
       await esperar(1000);
     }
+  }
+
+  function dispararVibracao(faseIndex){
+    if (!vibracaoAtiva) return;
+    if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
+    if (document.hidden) return;
+
+    const vibracoes = {
+      start: 120,
+      0: 80,
+      1: 280,
+      2: 80,
+      3: 280
+    };
+
+    const duracao = vibracoes[faseIndex];
+    if (!duracao) return;
+
+    navigator.vibrate(duracao);
   }
 
   async function startProtocolo(p){
