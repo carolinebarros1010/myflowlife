@@ -53,6 +53,54 @@ window.FEMFLOW_LANG = {
       erro: "Erro ao enviar. Tente novamente.",
       selecione: "Selecione uma opção",
       enviando: "Enviando…"
+    },
+
+    respiracao: {
+      titulo1: "Respirações",
+      titulo2: "FemFlow",
+      sub: "Escolha o protocolo conforme seu momento 🌿",
+      preparar: "Preparar...",
+      footer: "Inspire equilíbrio. Expire leveza.",
+      tituloModal: "Respiração",
+      grupos: {
+        ciclo: "Respirações do Ciclo",
+        treino: "Respirações para Treinar",
+        universal: "Respirações Universais"
+      },
+      botoes: {
+        iniciar: "Iniciar Respiração",
+        voltarRespiracoes: "← voltar às respirações",
+        voltarTreino: "← voltar ao treino"
+      },
+      fases: {
+        inspire: "Inspire",
+        segure: "Segure",
+        expire: "Expire"
+      },
+      protocolos: {
+        raiz: "Respiração Raiz",
+        clareza: "Respiração Clareza",
+        brilho: "Respiração Brilho",
+        sereno: "Respiração Sereno",
+        wake: "Wake Flow",
+        charge: "Charge Flow",
+        release: "Release Flow",
+        restore: "Restore Flow",
+        equilibrio: "Respiração Equilíbrio",
+        transparencia: "Respiração Transparência"
+      },
+      descricoes: {
+        raiz: "Acalma o corpo, reduz tensões e ajuda você a retornar ao eixo interno.",
+        clareza: "Traz foco, leveza mental e sensação de reorganização.",
+        brilho: "Eleva sua energia e presença durante fases mais fortes do ciclo.",
+        sereno: "Suaviza irritabilidade, oscilações emocionais e TPM.",
+        wake: "Ativa o corpo sem acelerar demais.",
+        charge: "Energia imediata para treinos fortes.",
+        release: "Dissolve tensões e acalma pós-treino.",
+        restore: "Recupera o sistema nervoso profundamente.",
+        equilibrio: "Centraliza sua mente e emoções.",
+        transparencia: "Traz clareza emocional instantânea."
+      }
     }
   },
 
@@ -97,6 +145,54 @@ window.FEMFLOW_LANG = {
       erro: "Error sending message. Please try again.",
       selecione: "Select an option",
       enviando: "Sending…"
+    },
+
+    respiracao: {
+      titulo1: "Breathing",
+      titulo2: "FemFlow",
+      sub: "Choose the protocol for your moment 🌿",
+      preparar: "Get ready...",
+      footer: "Inhale balance. Exhale lightness.",
+      tituloModal: "Breathing",
+      grupos: {
+        ciclo: "Cycle Breathing",
+        treino: "Training Breathing",
+        universal: "Universal Breathing"
+      },
+      botoes: {
+        iniciar: "Start Breathing",
+        voltarRespiracoes: "← back to breathing",
+        voltarTreino: "← back to training"
+      },
+      fases: {
+        inspire: "Inhale",
+        segure: "Hold",
+        expire: "Exhale"
+      },
+      protocolos: {
+        raiz: "Root Breathing",
+        clareza: "Clarity Breathing",
+        brilho: "Glow Breathing",
+        sereno: "Serene Breathing",
+        wake: "Wake Flow",
+        charge: "Charge Flow",
+        release: "Release Flow",
+        restore: "Restore Flow",
+        equilibrio: "Balance Breathing",
+        transparencia: "Transparency Breathing"
+      },
+      descricoes: {
+        raiz: "Calms the body, reduces tension, and helps you return to your inner center.",
+        clareza: "Brings focus, mental lightness, and a sense of reorganization.",
+        brilho: "Boosts your energy and presence during stronger phases of the cycle.",
+        sereno: "Softens irritability, emotional swings, and PMS.",
+        wake: "Energizes the body without over-accelerating.",
+        charge: "Immediate energy for intense training sessions.",
+        release: "Dissolves tension and calms the body after training.",
+        restore: "Deeply restores the nervous system.",
+        equilibrio: "Centers your mind and emotions.",
+        transparencia: "Brings instant emotional clarity."
+      }
     }
   },
 
@@ -141,6 +237,54 @@ window.FEMFLOW_LANG = {
       erro: "Erreur lors de l’envoi. Réessayez.",
       selecione: "Sélectionnez une option",
       enviando: "Envoi…"
+    },
+
+    respiracao: {
+      titulo1: "Respirations",
+      titulo2: "FemFlow",
+      sub: "Choisissez le protocole selon votre moment 🌿",
+      preparar: "Préparez-vous...",
+      footer: "Inspirez l'équilibre. Expirez la légèreté.",
+      tituloModal: "Respiration",
+      grupos: {
+        ciclo: "Respirations du cycle",
+        treino: "Respirations pour s'entraîner",
+        universal: "Respirations universelles"
+      },
+      botoes: {
+        iniciar: "Démarrer la respiration",
+        voltarRespiracoes: "← revenir aux respirations",
+        voltarTreino: "← revenir à l'entraînement"
+      },
+      fases: {
+        inspire: "Inspirez",
+        segure: "Retenez",
+        expire: "Expirez"
+      },
+      protocolos: {
+        raiz: "Respiration Racine",
+        clareza: "Respiration Clarté",
+        brilho: "Respiration Éclat",
+        sereno: "Respiration Serein",
+        wake: "Wake Flow",
+        charge: "Charge Flow",
+        release: "Release Flow",
+        restore: "Restore Flow",
+        equilibrio: "Respiration Équilibre",
+        transparencia: "Respiration Transparence"
+      },
+      descricoes: {
+        raiz: "Apaise le corps, réduit les tensions et vous aide à revenir à votre axe intérieur.",
+        clareza: "Apporte concentration, légèreté mentale et sensation de réorganisation.",
+        brilho: "Renforce votre énergie et votre présence pendant les phases plus fortes du cycle.",
+        sereno: "Adoucit l'irritabilité, les variations émotionnelles et le SPM.",
+        wake: "Active le corps sans l'accélérer excessivement.",
+        charge: "Énergie immédiate pour les entraînements intenses.",
+        release: "Dissout les tensions et calme le corps après l'entraînement.",
+        restore: "Restaure profondément le système nerveux.",
+        equilibrio: "Recentre votre esprit et vos émotions.",
+        transparencia: "Apporte une clarté émotionnelle instantanée."
+      }
     }
   }
 };
