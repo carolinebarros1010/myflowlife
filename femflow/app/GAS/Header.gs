@@ -20,6 +20,8 @@ const COL_FREE_ENABLED = 27; // AB
 const COL_FREE_ENFASES = 28; // AC
 const COL_FREE_UNTIL   = 29; // AD
 const COL_ACESSO_PERSONAL   = 30; // 🔥 AJUSTE PARA AE REAL
+const COL_AUSENCIA_ATIVA    = 32; // AG
+const COL_AUSENCIA_INICIO   = 33; // AH
 
 /**
  * ✅ HEADER OFICIAL (corrigido)
