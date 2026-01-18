@@ -300,7 +300,7 @@ FEMFLOW.renderVipBadge = function () {
         position: fixed;
         top: 10px;
         right: 12px;
-        z-index: 200000;
+        z-index: 120000;
         padding: 4px 10px;
         border-radius: 999px;
         background: rgba(51, 89, 83, 0.15);
@@ -311,6 +311,7 @@ FEMFLOW.renderVipBadge = function () {
         letter-spacing: 0.12em;
         text-transform: uppercase;
         backdrop-filter: blur(6px);
+        pointer-events: none;
       }
 
       body.dark #ffVipBadge {
