@@ -265,6 +265,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const textos = obterTextosRespiracao();
 
+    if (btnStart) btnStart.textContent = textos.botoes.iniciar;
+    if (btnClose) btnClose.textContent = textos.botoes.voltarRespiracoes;
+
     protocoloAtual = p;
     protocoloAtualId = tipo;
     cicloAtivo = false;
@@ -323,8 +326,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function animarContagem(segundos, faseIndex, cor){
     const textos = obterTextosRespiracao();
-
-    if (!cicloAtivo) return;
 
     label.textContent = textos.fases[faseIndex];
     circle.style.background = cor;
