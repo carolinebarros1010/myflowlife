@@ -42,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const indicatorThumb = document.getElementById("carouselIndicatorThumb");
 
   const btnSalvar       = document.getElementById("salvarTreinoBtn");
-  const btnDescanso     = document.getElementById("descansoBtn");
   const btnCancelar     = document.getElementById("cancelarTreinoBtn");
   const modalPSE        = document.getElementById("modalPSE");
   const pseInput        = document.getElementById("pseInput");
@@ -97,17 +96,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tourReset === "1") {
     localStorage.removeItem(tourKey);
   }
-  const tourTargets = [btnSalvar, btnDescanso, btnCancelar].filter(Boolean);
+  const tourTargets = [btnSalvar, btnCancelar].filter(Boolean);
   const tourSteps = [
     {
       target: btnSalvar,
       title: t("treino.tour.salvarTitulo"),
       text: t("treino.tour.salvarTexto")
-    },
-    {
-      target: btnDescanso,
-      title: t("treino.tour.descansoTitulo"),
-      text: t("treino.tour.descansoTexto")
     },
     {
       target: btnCancelar,
@@ -196,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function iniciarTourTreino() {
     if (!tourOverlay) return;
     if (localStorage.getItem(window.FEMFLOW_TOUR_KEY) === "done") return;
-    if (!btnSalvar || !btnDescanso || !btnCancelar) return;
+    if (!btnSalvar || !btnCancelar) return;
     tourIndex = 0;
     tourOverlay.classList.remove("is-hidden");
     tourOverlay.setAttribute("aria-hidden", "false");
@@ -1457,50 +1451,6 @@ treino,
     }
 
     modalPSE.classList.add("hidden");
-  };
-}
-
-
-/* ============================================================
-   8. BOTÃO DESCANSO — VERSÃO FINAL CORRETA
-============================================================ */
-if (btnDescanso) {
-  btnDescanso.onclick = async () => {
-
-    if (!id) {
-      FEMFLOW.toast("Erro: sessão inválida.", true);
-      return;
-    }
-
-    try {
-      const resp = await FEMFLOW.post({
-        action: "salvarDescanso",
-        id,
-        deviceId: FEMFLOW.getDeviceId(),
-        sessionToken: FEMFLOW.getSessionToken()
-      });
-
-      FEMFLOW.log("📌 descanso:", resp);
-
-      if (resp?.status === "ok") {
-
-        // 🔥 Atualiza SOMENTE pelo retorno do backend
-        if (resp.diaPrograma) {
-          localStorage.setItem("femflow_diaPrograma", String(resp.diaPrograma));
-        }
-
-        FEMFLOW.toast("Descanso registrado 🧘‍♀️");
-        registrarEvolucao({ pse: 0, diaPrograma: resp.diaPrograma });
-        encerrarTreino();
-
-      } else {
-        FEMFLOW.toast("Erro ao registrar descanso.", true);
-      }
-
-    } catch (e) {
-      FEMFLOW.error("Erro descanso:", e);
-      FEMFLOW.toast("Erro ao salvar descanso.", true);
-    }
   };
 }
 

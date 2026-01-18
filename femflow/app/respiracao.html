@@ -37,7 +37,7 @@
   </style>
 </head>
 
-<body>
+<body class="pagina-respiracao">
 
 <h1 id="respTituloTopo">
   <span id="respTitulo1">Respirações</span>
@@ -105,7 +105,9 @@ document.addEventListener("DOMContentLoaded", async () => {
      🔥 PROTEÇÃO DE ACESSO → Se não tiver login ou produto, volta para HOME
   ============================================================ */
   const produto = localStorage.getItem("femflow_produto");
-  const ativa   = localStorage.getItem("femflow_ativa") === "true";
+  const produtoNorm = String(produto || "").toLowerCase();
+  const isVip = produtoNorm === "vip";
+  const ativa   = isVip || localStorage.getItem("femflow_ativa") === "true";
 
   if (!produto || !ativa) {
     FEMFLOW.toast("Acesse a Home para continuar 🌸");
@@ -298,6 +300,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   ============================================================ */
   function fecharDrawer(){
     cicloAtivo = false;
+    vibracaoAtiva = false;
     drawer.classList.remove("active");
   }
 
@@ -329,6 +332,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     dispararVibracao(faseIndex);
 
     for (let s = segundos; s >= 1; s--){
+      if (!cicloAtivo) return;
       circle.textContent = s;
       await esperar(1000);
     }

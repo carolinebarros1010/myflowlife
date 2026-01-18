@@ -26,6 +26,15 @@ window.FEMFLOW_LANG = {
       sair: "Sair",
       sac: "Preciso de ajuda"
     },
+    nivelModal: {
+      title: "Selecione seu nível",
+      iniciante: "Iniciante",
+      intermediaria: "Intermediária",
+      avancada: "Avançada",
+      confirmar: "Confirmar nível",
+      fechar: "Fechar",
+      selecione: "Selecione um nível"
+    },
 
     sac: {
       title: "Preciso de ajuda",
@@ -109,6 +118,15 @@ window.FEMFLOW_LANG = {
       sair: "Logout",
       sac: "I need help"
     },
+    nivelModal: {
+      title: "Select your level",
+      iniciante: "Beginner",
+      intermediaria: "Intermediate",
+      avancada: "Advanced",
+      confirmar: "Confirm level",
+      fechar: "Close",
+      selecione: "Select a level"
+    },
 
     sac: {
       title: "I need help",
@@ -191,6 +209,15 @@ window.FEMFLOW_LANG = {
       voltar: "Retour",
       sair: "Déconnexion",
       sac: "J’ai besoin d’aide"
+    },
+    nivelModal: {
+      title: "Sélectionnez votre niveau",
+      iniciante: "Débutante",
+      intermediaria: "Intermédiaire",
+      avancada: "Avancée",
+      confirmar: "Confirmer le niveau",
+      fechar: "Fermer",
+      selecione: "Sélectionnez un niveau"
     },
 
     sac: {
@@ -323,7 +350,8 @@ home: {
         remo_oceanico: "Remo oceânico",
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jítsu",
-        natacao: "Natação"
+        natacao: "Natação",
+        surf: "Surf"
       }
     },
   flowcenter: {
@@ -419,7 +447,6 @@ home: {
       mobilidade: "Mobilidade"
     },
     btnSalvar: "💾 Salvar treino",
-    btnDescanso: "🌿 Descanso",
     btnCancelar: "Cancelar",
     pseTitulo: "Como foi o treino?",
     pseLabel: "PSE (0 a 10)",
@@ -435,8 +462,6 @@ home: {
       step: "{atual}/{total}",
       salvarTitulo: "Salve seu treino",
       salvarTexto: "Ao finalizar, salve para registrar seu PSE e evolução.",
-      descansoTitulo: "Treino também é descanso",
-      descansoTexto: "Selecione quando for descansar para manter seu ciclo alinhado.",
       cancelarTitulo: "Voltar ao painel",
       cancelarTexto: "Use cancelar para sair do treino e voltar ao FlowCenter.",
       next: "Próximo",
@@ -614,7 +639,8 @@ home: {
         remo_oceanico: "Ocean rowing",
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jitsu",
-        natacao: "Swimming"
+        natacao: "Swimming",
+        surf: "Surf"
       }
     },
  flowcenter: {
@@ -705,7 +731,6 @@ home: {
       mobilidade: "Mobility"
     },
     btnSalvar: "💾 Save workout",
-    btnDescanso: "🌿 Rest",
     btnCancelar: "Cancel",
     pseTitulo: "How was the workout?",
     pseLabel: "RPE (0 to 10)",
@@ -721,8 +746,6 @@ home: {
       step: "{atual}/{total}",
       salvarTitulo: "Save your workout",
       salvarTexto: "When you finish, save it to record your RPE and progress.",
-      descansoTitulo: "Rest is also training",
-      descansoTexto: "Select this when you’re resting to keep your cycle aligned.",
       cancelarTitulo: "Back to the panel",
       cancelarTexto: "Use cancel to leave the workout and return to FlowCenter.",
       next: "Next",
@@ -902,7 +925,8 @@ fr: {
         remo_oceanico: "Aviron océanique",
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jitsu",
-        natacao: "Natation"
+        natacao: "Natation",
+        surf: "Surf"
       }
     },
   flowcenter: {
@@ -993,7 +1017,6 @@ fr: {
       mobilidade: "Mobilité"
     },
     btnSalvar: "💾 Enregistrer l’entraînement",
-    btnDescanso: "🌿 Repos",
     btnCancelar: "Annuler",
     pseTitulo: "Comment était l'entraînement ?",
     pseLabel: "PSE (0 à 10)",
@@ -1009,8 +1032,6 @@ fr: {
       step: "{atual}/{total}",
       salvarTitulo: "Enregistrez votre entraînement",
       salvarTexto: "À la fin, enregistrez pour noter votre PSE et votre progression.",
-      descansoTitulo: "Le repos fait aussi partie de l’entraînement",
-      descansoTexto: "Sélectionnez-le quand vous êtes au repos pour garder votre cycle aligné.",
       cancelarTitulo: "Retour au tableau",
       cancelarTexto: "Utilisez annuler pour quitter l’entraînement et revenir au FlowCenter.",
       next: "Suivant",
