@@ -26,6 +26,15 @@ window.FEMFLOW_LANG = {
       sair: "Sair",
       sac: "Preciso de ajuda"
     },
+    nivelModal: {
+      title: "Selecione seu nível",
+      iniciante: "Iniciante",
+      intermediaria: "Intermediária",
+      avancada: "Avançada",
+      confirmar: "Confirmar nível",
+      fechar: "Fechar",
+      selecione: "Selecione um nível"
+    },
 
     sac: {
       title: "Preciso de ajuda",
@@ -61,6 +70,15 @@ window.FEMFLOW_LANG = {
       sair: "Logout",
       sac: "I need help"
     },
+    nivelModal: {
+      title: "Select your level",
+      iniciante: "Beginner",
+      intermediaria: "Intermediate",
+      avancada: "Advanced",
+      confirmar: "Confirm level",
+      fechar: "Close",
+      selecione: "Select a level"
+    },
 
     sac: {
       title: "I need help",
@@ -95,6 +113,15 @@ window.FEMFLOW_LANG = {
       voltar: "Retour",
       sair: "Déconnexion",
       sac: "J’ai besoin d’aide"
+    },
+    nivelModal: {
+      title: "Sélectionnez votre niveau",
+      iniciante: "Débutante",
+      intermediaria: "Intermédiaire",
+      avancada: "Avancée",
+      confirmar: "Confirmer le niveau",
+      fechar: "Fermer",
+      selecione: "Sélectionnez un niveau"
     },
 
     sac: {
