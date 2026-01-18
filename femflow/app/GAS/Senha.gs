@@ -45,6 +45,14 @@ function _findRowById_(sh, id) {
   return -1;
 }
 
+function _ensureColunasAusencia_(sh) {
+  const requiredCols = COL_AUSENCIA_INICIO + 1;
+  const maxCols = sh.getMaxColumns();
+  if (maxCols < requiredCols) {
+    sh.insertColumnsAfter(maxCols, requiredCols - maxCols);
+  }
+}
+
 /**
  * ✅ _assertSession_ (UNIFICADO e COMPATÍVEL)
  * - Aceita (id, deviceId, sessionToken)
@@ -93,6 +101,7 @@ function _assertSession_(id, deviceId, sessionToken) {
       }
     }
 
+    _ensureColunasAusencia_(sh);
     const autoDescanso = aplicarDescansoAutomatico_(sh, i);
     return { ok: true, row: i + 1, deviceUpdated, autoDescanso };
   }
@@ -195,6 +204,7 @@ function _fazerLogin(data) {
       sh.getRange(i + 1, COL_DIA_PROGRAMA + 1).setValue(1);
     }
 
+    _ensureColunasAusencia_(sh);
     const autoDescanso = aplicarDescansoAutomatico_(sh, i);
 
     // 🔄 Sync de ciclo no login (atualiza DiaCiclo/Fase se permitido)
