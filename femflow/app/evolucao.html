@@ -118,7 +118,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* 🔐 Proteção de acesso */
   const id = localStorage.getItem("femflow_id");
   const produto = localStorage.getItem("femflow_produto");
-  const ativa   = localStorage.getItem("femflow_ativa") === "true";
+  const produtoNorm = String(produto || "").toLowerCase();
+  const isVip = produtoNorm === "vip";
+  const ativa   = isVip || localStorage.getItem("femflow_ativa") === "true";
 
   if (!id || !produto || !ativa) {
     FEMFLOW.toast("Acesse pela Home para continuar 🌸");
