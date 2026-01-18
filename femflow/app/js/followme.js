@@ -72,10 +72,11 @@ function renderCoaches(){
 window.iniciarFollowMe = function(enfase){
 
   const produto = (localStorage.getItem("femflow_produto") || "").toLowerCase();
-  const ativa   = localStorage.getItem("femflow_ativa") === "true";
+  const isVip = produto === "vip";
+  const ativa   = isVip || localStorage.getItem("femflow_ativa") === "true";
 
   // restrição de acesso
-  if (produto !== "followme" || !ativa){
+  if (!ativa || (!isVip && !produto.startsWith("followme_"))){
     FEMFLOW.toast("Seu plano não inclui o Treino Junto por 30 dias.");
     return;
   }

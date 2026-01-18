@@ -203,6 +203,7 @@ button:hover {
   pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$">
 
     <input type="text" id="telefone" name="telefone" placeholder="(11) 98234-7127" required pattern="^[0-9()\\s-]{8,15}$">
+    <input type="date" id="data-nascimento" name="dataNascimento" required>
     <button type="submit">Continuar</button>
   </form>
 
@@ -242,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
       nome: form.nome.value.trim(),
       email: form.email.value.trim(),
       telefone: form.telefone.value.trim(),
+      dataNascimento: form.dataNascimento.value,
       origem: localStorage.getItem("origem") || "desconhecida",
       ebook: localStorage.getItem("ebook") || "não informado"
     };
@@ -303,6 +305,7 @@ form.addEventListener("submit", async (e) => {
     nome: form.nome.value.trim(),
     email: form.email.value.trim(),
     telefone: form.telefone.value.trim(),
+    dataNascimento: form.dataNascimento.value,
     origem: localStorage.getItem("origem") || "desconhecida",
     ebook: localStorage.getItem("ebook") || "não informado",
     origemURL: localStorage.getItem("origemURL") || ""
