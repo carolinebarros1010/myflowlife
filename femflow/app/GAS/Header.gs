@@ -32,8 +32,8 @@ const HEADER_ALUNAS = [
   "Nivel","CicloDuracao","DataInicio","LinkPlanilha","Enfase","Fase","DiaCiclo",
   "Pontuacao","AnamneseJSON","TokenReset","TokenExpira","PerfilHormonal",
   "CicloStartDateManual","DiaPrograma","DeviceId","SessionToken","SessionExpira",
-  "DataInicioPrograma","UltimaAtividade", "FreeEnabled" , "FreeEnfases", "FreeUntil",
-  "acesso_personal", "DataNascimento"
+  "DataInicioPrograma","UltimaAtividade", "FreeEnabled" , "FreeEnfases", "FreeUntil", "acesso_personal",
+  "ColAF","AusenciaAtiva","AusenciaInicio"
 ];
 
 // índices (0-based) para leitura rápida
@@ -43,4 +43,3 @@ const COL_SESSION_TOKEN  = 23; // col 24
 const COL_SESSION_EXP    = 24; // col 25
 const COL_DATA_INICIO_PROGRAMA = 25; // ajuste conforme posição real
 const COL_ULTIMA_ATIVIDADE     = 26; // ajuste conforme posição real
-const COL_DATA_NASCIMENTO      = 31; // AF

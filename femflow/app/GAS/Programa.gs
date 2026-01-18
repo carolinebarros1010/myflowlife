@@ -65,7 +65,8 @@ function aplicarDescansoAutomatico_(shA, rowIndex, opts) {
       shA.getRange(rowIndex + 1, COL_AUSENCIA_ATIVA + 1).setValue(true);
       const inicioAtual = shA.getRange(rowIndex + 1, COL_AUSENCIA_INICIO + 1).getValue();
       if (!(inicioAtual instanceof Date) || isNaN(inicioAtual.getTime())) {
-        shA.getRange(rowIndex + 1, COL_AUSENCIA_INICIO + 1).setValue(agora);
+        const inicioAusencia = new Date(ultima.getTime() + (3 * diaMs));
+        shA.getRange(rowIndex + 1, COL_AUSENCIA_INICIO + 1).setValue(inicioAusencia);
       }
     }
     return { status: "ausencia", dias };
