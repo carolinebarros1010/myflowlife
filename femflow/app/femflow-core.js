@@ -468,6 +468,7 @@ FEMFLOW.inserirMenuLateral = function () {
 document.addEventListener("femflow:langChange", () => {
   FEMFLOW.renderMenuLateral?.();
   FEMFLOW.renderSAC?.();
+  FEMFLOW.renderNivelModal?.();
 });
 
 /* ===========================================================
@@ -699,12 +700,40 @@ FEMFLOW.resetProgramaAtual = function () {
   localStorage.removeItem("femflow_enfase");
   localStorage.removeItem("femflow_treinoAtual");
 };
+
+FEMFLOW.renderNivelModal = function () {
+  const modal = document.getElementById("modal-nivel");
+  if (!modal) return;
+
+  const title = modal.querySelector("h2");
+  if (title) title.textContent = `📊 ${FEMFLOW.t("nivelModal.title")}`;
+
+  const labels = {
+    iniciante: FEMFLOW.t("nivelModal.iniciante"),
+    intermediaria: FEMFLOW.t("nivelModal.intermediaria"),
+    avancada: FEMFLOW.t("nivelModal.avancada")
+  };
+
+  modal.querySelectorAll(".nivel-btn").forEach(btn => {
+    const key = btn.dataset.nivel;
+    if (labels[key]) btn.textContent = labels[key];
+  });
+
+  const btnConfirmar = modal.querySelector("#btnConfirmarNivel");
+  if (btnConfirmar) btnConfirmar.textContent = FEMFLOW.t("nivelModal.confirmar");
+
+  const btnFechar = modal.querySelector("#fecharNivel");
+  if (btnFechar) btnFechar.textContent = FEMFLOW.t("nivelModal.fechar");
+};
+
 FEMFLOW.initNivelHandler = function () {
   const modal = document.getElementById("modal-nivel");
   const btnConfirmar = document.getElementById("btnConfirmarNivel");
   const btnFechar = document.getElementById("fecharNivel");
 
   if (!modal || !btnConfirmar || !btnFechar) return; // 🔧 proteção
+
+  FEMFLOW.renderNivelModal?.();
 
   btnConfirmar.dataset.bound = "true";
 
@@ -717,7 +746,7 @@ FEMFLOW.initNivelHandler = function () {
 
   btnConfirmar.onclick = async () => {
     const nivel = modal.querySelector(".nivel-btn.active")?.dataset.nivel;
-    if (!nivel) return FEMFLOW.toast("Selecione um nível");
+    if (!nivel) return FEMFLOW.toast(FEMFLOW.t("nivelModal.selecione"));
 
     localStorage.setItem("femflow_nivel", nivel);
 
