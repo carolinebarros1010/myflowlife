@@ -93,7 +93,8 @@ function _assertSession_(id, deviceId, sessionToken) {
       }
     }
 
-    return { ok: true, row: i + 1, deviceUpdated };
+    const autoDescanso = aplicarDescansoAutomatico_(sh, i);
+    return { ok: true, row: i + 1, deviceUpdated, autoDescanso };
   }
 
   return { ok: false, msg: "id_not_found" };
@@ -194,6 +195,8 @@ function _fazerLogin(data) {
       sh.getRange(i + 1, COL_DIA_PROGRAMA + 1).setValue(1);
     }
 
+    const autoDescanso = aplicarDescansoAutomatico_(sh, i);
+
     // 🔄 Sync de ciclo no login (atualiza DiaCiclo/Fase se permitido)
     const syncResult = sync(id);
 
@@ -215,7 +218,8 @@ function _fazerLogin(data) {
 
       deviceId: deviceId,
       sessionToken: sessionToken,
-      sessionExpira: sessionExp
+      sessionExpira: sessionExp,
+      autoDescanso: autoDescanso
     };
   }
 
