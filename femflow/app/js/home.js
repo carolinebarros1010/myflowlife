@@ -43,12 +43,14 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_nome", perfil.nome || "");
   localStorage.setItem("femflow_email", perfil.email || "");
   localStorage.setItem("femflow_nivel", String(perfil.nivel || "iniciante").toLowerCase());
-  localStorage.setItem("femflow_produto", String(perfil.produto || "").toLowerCase());
-  localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
+  const produto = String(perfil.produto || "").toLowerCase();
+  const isVip = produto === "vip";
+  localStorage.setItem("femflow_produto", produto);
+  localStorage.setItem("femflow_ativa", String(isVip || !!perfil.ativa));
 
   // ✅ acesso personal = direito (backend), separado do modo personal (front)
   const acessos = perfil.acessos || {};
-  const hasPersonal = acessos.personal === true;
+  const hasPersonal = acessos.personal === true || isVip;
   localStorage.setItem("femflow_has_personal", String(hasPersonal));
   localStorage.removeItem("femflow_personal"); // legado: nunca usar mais
 
@@ -114,6 +116,7 @@ const CARDS_HOME_PRESETS = [
   "avancada_beach_tennis",
   "avancada_jiu_jitsu",
   "avancada_natacao",
+  "avancada_surf",
   "avancada_casa_queima_gordura",
   "avancada_casa_fullbody_praia",
   "iniciante_corrida_longa",
@@ -130,6 +133,7 @@ const CARDS_HOME_PRESETS = [
   "iniciante_beach_tennis",
   "iniciante_jiu_jitsu",
   "iniciante_natacao",
+  "iniciante_surf",
   "iniciante_casa_queima_gordura",
   "iniciante_casa_fullbody_praia",
   "intermediaria_corrida_longa",
@@ -145,6 +149,7 @@ const CARDS_HOME_PRESETS = [
   "intermediaria_beach_tennis",
   "intermediaria_jiu_jitsu",
   "intermediaria_natacao",
+  "intermediaria_surf",
   "intermediaria_casa_queima_gordura",
   "intermediaria_casa_fullbody_praia"
 ];
@@ -182,11 +187,14 @@ function podeAcessar(enfase, perfil) {
 
   const categoria = inferirCategoria(enfase);
   const produto = (perfil.produto || "").toLowerCase();
+  const isVip = produto === "vip";
   const ativa = !!perfil.ativa;
  const personal = localStorage.getItem("femflow_has_personal") === "true";
 
 
-  if (!ativa) return false;
+  if (!ativa && !isVip) return false;
+
+  if (isVip) return true;
 
   // 🔥 PERSONAL (direito) = acesso_app + personal
   if (personal) {
@@ -395,7 +403,8 @@ const CARD_THUMBS = {
   remo_oceanico: "remo_oceanico.jpg",
   beach_tennis: "beach_tennis_hybrid.jpg",
   jiu_jitsu: "jiu_jitsu.jpg",
-  natacao: "natacao.jpg"
+  natacao: "natacao.jpg",
+  surf: "surf.jpg"
 };
 
 function getThumbUrl(enfase) {
@@ -747,6 +756,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const produto =
       String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+    const isVip = produto === "vip";
 
     // PERSONAL — sempre aparece:
     // - se tem personal → desbloqueado (ativa modo personal)
@@ -763,7 +773,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (catalogo.followme.length === 0) {
       const cards = CARDS_FOLLOWME_SIMBOLICOS.map(c => ({
         ...c,
-        locked: produto !== c.enfase
+        locked: !isVip && produto !== c.enfase
       }));
       catalogo.followme.push(...cards);
     }

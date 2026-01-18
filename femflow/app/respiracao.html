@@ -105,7 +105,9 @@ document.addEventListener("DOMContentLoaded", async () => {
      🔥 PROTEÇÃO DE ACESSO → Se não tiver login ou produto, volta para HOME
   ============================================================ */
   const produto = localStorage.getItem("femflow_produto");
-  const ativa   = localStorage.getItem("femflow_ativa") === "true";
+  const produtoNorm = String(produto || "").toLowerCase();
+  const isVip = produtoNorm === "vip";
+  const ativa   = isVip || localStorage.getItem("femflow_ativa") === "true";
 
   if (!produto || !ativa) {
     FEMFLOW.toast("Acesse a Home para continuar 🌸");
