@@ -395,6 +395,11 @@ if (res.deviceUpdated) {
       en:{ bem:"Welcome", sub:"Access or create your account to start your cycle", email:"Your email", senha:"Your password", entrar:"Login", cad:"Don’t have an account? Sign up", esq:"Forgot my password" },
       fr:{ bem:"Bienvenue", sub:"Accédez ou créez votre compte pour commencer votre cycle", email:"Votre e-mail", senha:"Votre mot de passe", entrar:"Entrer", cad:"Pas de compte ? S'inscrire", esq:"J’ai oublié mon mot de passe" }
     }[lang] || T.pt;
+    const labels = {
+      pt: "Português",
+      en: "English",
+      fr: "Français"
+    };
 
     $("#tLoginBemVinda").textContent = T.bem;
     $("#tLoginSub").textContent      = T.sub;
@@ -403,6 +408,7 @@ if (res.deviceUpdated) {
     $("#btnEntrar").textContent      = T.entrar;
     $("#linkCadastro").textContent   = T.cad;
     $("#goRecuperar").textContent    = T.esq;
+    btnLang.textContent              = `🌐 ${labels[lang] || labels.pt}`;
   }
 
   window.setLoginLang = lang => {
