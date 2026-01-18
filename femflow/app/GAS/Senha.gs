@@ -313,6 +313,10 @@ function _loginOuCadastro(data) {
     "",                     // SessionExpira
     "",                     // data
     "",                     // ultima
+    "",                     // FreeEnabled (AB)
+    "",                     // FreeEnfases (AC)
+    "",                     // FreeUntil (AD)
+    "",                     // acesso_personal (AE)
     dataNascimento          // DataNascimento (AF)
 
   ]);
