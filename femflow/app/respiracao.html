@@ -297,6 +297,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   ============================================================ */
   function fecharDrawer(){
     cicloAtivo = false;
+    vibracaoAtiva = false;
     drawer.classList.remove("active");
   }
 
@@ -323,11 +324,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function animarContagem(segundos, faseIndex, cor){
     const textos = obterTextosRespiracao();
 
+    if (!cicloAtivo) return;
+
     label.textContent = textos.fases[faseIndex];
     circle.style.background = cor;
     dispararVibracao(faseIndex);
 
     for (let s = segundos; s >= 1; s--){
+      if (!cicloAtivo) return;
       circle.textContent = s;
       await esperar(1000);
     }
