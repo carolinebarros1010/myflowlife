@@ -276,11 +276,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     label.textContent = nomeFase[faseIndex];
     circle.style.background = cor;
+    dispararVibracao(faseIndex);
 
     for (let s = segundos; s >= 1; s--){
       circle.textContent = s;
       await esperar(1000);
     }
+  }
+
+  function dispararVibracao(faseIndex){
+    if (!("vibrate" in navigator)) return;
+
+    const vibracoes = {
+      0: 80,
+      1: 280,
+      2: 80,
+      3: 280
+    };
+
+    const duracao = vibracoes[faseIndex];
+    if (!duracao) return;
+
+    navigator.vibrate(duracao);
   }
 
   async function startProtocolo(p){
