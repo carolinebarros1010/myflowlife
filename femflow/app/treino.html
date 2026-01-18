@@ -77,10 +77,12 @@
       <h3 class="modal-title" id="pseTitulo">Como foi o treino?</h3>
 
       <label class="modal-label" id="pseLabel">PSE (0 a 10)</label>
-      <input type="range" min="0" max="10" value="0" id="pseInput" class="modal-slider"/>
-      <div class="pse-emoji" id="pseEmojiWrap" aria-live="polite">
-        <span id="pseEmoji">😴</span>
-        <span class="pse-emoji-value" id="pseEmojiValue">0</span>
+      <div class="pse-slider-wrapper">
+        <div class="pse-emoji" id="pseEmojiWrap" aria-live="polite">
+          <span id="pseEmoji">😴</span>
+          <span class="pse-emoji-value" id="pseEmojiValue">0</span>
+        </div>
+        <input type="range" min="0" max="10" value="0" id="pseInput" class="modal-slider"/>
       </div>
 
       <div class="modal-actions">
