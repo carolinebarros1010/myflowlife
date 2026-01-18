@@ -93,7 +93,8 @@ function _assertSession_(id, deviceId, sessionToken) {
       }
     }
 
-    return { ok: true, row: i + 1, deviceUpdated };
+    const autoDescanso = aplicarDescansoAutomatico_(sh, i);
+    return { ok: true, row: i + 1, deviceUpdated, autoDescanso };
   }
 
   return { ok: false, msg: "id_not_found" };
@@ -137,6 +138,8 @@ function _fazerLogin(data) {
     const emailDB    = String(row[2] || "").toLowerCase().trim();
     const senhaHash  = String(row[4] || "").trim();
     const produto    = row[5];
+    const produtoNorm = String(produto || "").toLowerCase().trim();
+    const isVip = produtoNorm === "vip";
     const dataCompra = row[6];
     const ativa      = !!row[7];
     const nivel      = row[8];
@@ -153,17 +156,19 @@ function _fazerLogin(data) {
       return { status: "error", msg: "Senha incorreta." };
     }
 
-    // assinatura expirada
-    if (dataCompra) {
-      const diff = (new Date() - new Date(dataCompra)) / 86400000;
-      if (diff > 30) {
-        sh.getRange(i + 1, 8).setValue(false); // LicencaAtiva
-        return { status: "expired", msg: "Sua assinatura expirou.", email: email, id: id };
+    if (!isVip) {
+      // assinatura expirada
+      if (dataCompra) {
+        const diff = (new Date() - new Date(dataCompra)) / 86400000;
+        if (diff > 30) {
+          sh.getRange(i + 1, 8).setValue(false); // LicencaAtiva
+          return { status: "expired", msg: "Sua assinatura expirou.", email: email, id: id };
+        }
       }
-    }
 
-    if (!ativa) {
-      return { status: "inactive", msg: "Assinatura inativa.", email: email, id: id };
+      if (!ativa) {
+        return { status: "inactive", msg: "Assinatura inativa.", email: email, id: id };
+      }
     }
 
     // 🔒 DEVICE LOCK
@@ -190,6 +195,8 @@ function _fazerLogin(data) {
       sh.getRange(i + 1, COL_DIA_PROGRAMA + 1).setValue(1);
     }
 
+    const autoDescanso = aplicarDescansoAutomatico_(sh, i);
+
     // 🔄 Sync de ciclo no login (atualiza DiaCiclo/Fase se permitido)
     const syncResult = sync(id);
 
@@ -205,13 +212,14 @@ function _fazerLogin(data) {
       diaCiclo: syncResult && syncResult.diaCiclo ? syncResult.diaCiclo : diaCiclo,
       perfilHormonal: perfilHormonal,
       produto: produto,
-      personal: row[COL_ACESSO_PERSONAL] === true,
+      personal: row[COL_ACESSO_PERSONAL] === true || isVip,
       ciclo_duracao: ciclo,
       data_inicio: inicio,
 
       deviceId: deviceId,
       sessionToken: sessionToken,
-      sessionExpira: sessionExp
+      sessionExpira: sessionExp,
+      autoDescanso: autoDescanso
     };
   }
 
@@ -224,6 +232,7 @@ function _loginOuCadastro(data) {
   const nome      = String(data.nome || "").trim();
   const email     = String(data.email || "").toLowerCase().trim();
   const telefone  = String(data.telefone || "").trim();
+  const dataNascimento = String(data.dataNascimento || "").trim();
   const senha     = String(data.senha || "").trim();
   const anamnese  = data.anamnese || "";
 
@@ -251,6 +260,9 @@ function _loginOuCadastro(data) {
       sh.getRange(linha, 3).setValue(email);
       sh.getRange(linha, 4).setValue(telefone);
       sh.getRange(linha, 5).setValue(senhaHash);
+      if (dataNascimento) {
+        sh.getRange(linha, COL_DATA_NASCIMENTO + 1).setValue(dataNascimento);
+      }
 
       sh.getRange(linha, 9).setValue(nivelDetectado);
       sh.getRange(linha, 16).setValue(pont);
@@ -300,7 +312,12 @@ function _loginOuCadastro(data) {
     "",                     // SessionToken
     "",                     // SessionExpira
     "",                     // data
-    ""                      // ultima
+    "",                     // ultima
+    "",                     // FreeEnabled (AB)
+    "",                     // FreeEnfases (AC)
+    "",                     // FreeUntil (AD)
+    "",                     // acesso_personal (AE)
+    dataNascimento          // DataNascimento (AF)
 
   ]);
 

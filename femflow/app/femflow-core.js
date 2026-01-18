@@ -282,6 +282,62 @@ FEMFLOW.router = pag => {
    3. HEADER
 =========================================================== */
 
+FEMFLOW.renderVipBadge = function () {
+  const produto = localStorage.getItem("femflow_produto");
+  const isVip = String(produto || "").toLowerCase() === "vip";
+  const existing = document.getElementById("ffVipBadge");
+
+  if (!isVip) {
+    existing?.remove();
+    return;
+  }
+
+  if (!document.getElementById("ffVipBadgeStyle")) {
+    const style = document.createElement("style");
+    style.id = "ffVipBadgeStyle";
+    style.textContent = `
+      #ffVipBadge {
+        position: fixed;
+        top: 10px;
+        right: 12px;
+        z-index: 200000;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(51, 89, 83, 0.15);
+        color: #335953;
+        border: 1px solid rgba(51, 89, 83, 0.35);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        backdrop-filter: blur(6px);
+      }
+
+      body.dark #ffVipBadge {
+        background: rgba(209, 166, 151, 0.2);
+        color: #f4e7e1;
+        border-color: rgba(209, 166, 151, 0.5);
+      }
+
+      @media (max-width: 600px) {
+        #ffVipBadge {
+          top: 8px;
+          right: 8px;
+          font-size: 10px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  if (!existing) {
+    const badge = document.createElement("div");
+    badge.id = "ffVipBadge";
+    badge.textContent = "VIP";
+    document.body.appendChild(badge);
+  }
+};
+
 FEMFLOW.inserirHeaderApp = function () {
   if (document.querySelector("#femflowHeader")) return;
 
@@ -293,6 +349,7 @@ FEMFLOW.inserirHeaderApp = function () {
   `;
 
   document.body.prepend(h);
+  FEMFLOW.renderVipBadge?.();
 
   h.querySelector("#ffMenuBtn").onclick = () =>
     document.querySelector(".ff-menu-modal")?.classList.add("active");
@@ -398,12 +455,14 @@ FEMFLOW.carregarCicloBackend = async function () {
     const enfaseAtual = localStorage.getItem("femflow_enfase");
     const extraAtivo = localStorage.getItem("femflow_treino_extra") === "true";
     const enfaseAtualExtra = String(enfaseAtual || "").toLowerCase().startsWith("extra_");
+    const enfaseBackend = String(resp.enfase || "").toLowerCase().trim();
+    const enfaseValida = Boolean(enfaseBackend && enfaseBackend !== "nenhuma");
     if (extraAtivo && enfaseAtualExtra) {
-      if (resp.enfase && !localStorage.getItem("femflow_enfase_base")) {
-        localStorage.setItem("femflow_enfase_base", resp.enfase);
+      if (enfaseValida && !localStorage.getItem("femflow_enfase_base")) {
+        localStorage.setItem("femflow_enfase_base", enfaseBackend);
       }
-    } else {
-      localStorage.setItem("femflow_enfase", resp.enfase);
+    } else if (enfaseValida) {
+      localStorage.setItem("femflow_enfase", enfaseBackend);
     }
     localStorage.setItem("femflow_cycleLength", resp.ciclo_duracao);
     localStorage.setItem("femflow_startDate", resp.data_inicio);
@@ -466,6 +525,7 @@ FEMFLOW.inserirMenuLateral = function () {
 document.addEventListener("femflow:langChange", () => {
   FEMFLOW.renderMenuLateral?.();
   FEMFLOW.renderSAC?.();
+  FEMFLOW.renderNivelModal?.();
 });
 
 /* ===========================================================
@@ -697,12 +757,40 @@ FEMFLOW.resetProgramaAtual = function () {
   localStorage.removeItem("femflow_enfase");
   localStorage.removeItem("femflow_treinoAtual");
 };
+
+FEMFLOW.renderNivelModal = function () {
+  const modal = document.getElementById("modal-nivel");
+  if (!modal) return;
+
+  const title = modal.querySelector("h2");
+  if (title) title.textContent = `📊 ${FEMFLOW.t("nivelModal.title")}`;
+
+  const labels = {
+    iniciante: FEMFLOW.t("nivelModal.iniciante"),
+    intermediaria: FEMFLOW.t("nivelModal.intermediaria"),
+    avancada: FEMFLOW.t("nivelModal.avancada")
+  };
+
+  modal.querySelectorAll(".nivel-btn").forEach(btn => {
+    const key = btn.dataset.nivel;
+    if (labels[key]) btn.textContent = labels[key];
+  });
+
+  const btnConfirmar = modal.querySelector("#btnConfirmarNivel");
+  if (btnConfirmar) btnConfirmar.textContent = FEMFLOW.t("nivelModal.confirmar");
+
+  const btnFechar = modal.querySelector("#fecharNivel");
+  if (btnFechar) btnFechar.textContent = FEMFLOW.t("nivelModal.fechar");
+};
+
 FEMFLOW.initNivelHandler = function () {
   const modal = document.getElementById("modal-nivel");
   const btnConfirmar = document.getElementById("btnConfirmarNivel");
   const btnFechar = document.getElementById("fecharNivel");
 
   if (!modal || !btnConfirmar || !btnFechar) return; // 🔧 proteção
+
+  FEMFLOW.renderNivelModal?.();
 
   btnConfirmar.dataset.bound = "true";
 
@@ -715,7 +803,7 @@ FEMFLOW.initNivelHandler = function () {
 
   btnConfirmar.onclick = async () => {
     const nivel = modal.querySelector(".nivel-btn.active")?.dataset.nivel;
-    if (!nivel) return FEMFLOW.toast("Selecione um nível");
+    if (!nivel) return FEMFLOW.toast(FEMFLOW.t("nivelModal.selecione"));
 
     localStorage.setItem("femflow_nivel", nivel);
 
@@ -754,12 +842,14 @@ FEMFLOW.carregarPerfil = async function () {
     const enfaseAtual = localStorage.getItem("femflow_enfase");
     const extraAtivo = localStorage.getItem("femflow_treino_extra") === "true";
     const enfaseAtualExtra = String(enfaseAtual || "").toLowerCase().startsWith("extra_");
+    const enfaseBackend = String(r.enfase || "").toLowerCase().trim();
+    const enfaseValida = Boolean(enfaseBackend && enfaseBackend !== "nenhuma");
     if (extraAtivo && enfaseAtualExtra) {
-      if (r.enfase && !localStorage.getItem("femflow_enfase_base")) {
-        localStorage.setItem("femflow_enfase_base", r.enfase);
+      if (enfaseValida && !localStorage.getItem("femflow_enfase_base")) {
+        localStorage.setItem("femflow_enfase_base", enfaseBackend);
       }
-    } else {
-      localStorage.setItem("femflow_enfase", r.enfase);
+    } else if (enfaseValida) {
+      localStorage.setItem("femflow_enfase", enfaseBackend);
     }
     localStorage.setItem("femflow_diaCiclo", r.diaCiclo);
     localStorage.setItem("femflow_nivel", r.nivel);
@@ -768,13 +858,18 @@ FEMFLOW.carregarPerfil = async function () {
     localStorage.setItem("femflow_perfilHormonal", r.perfilHormonal);
 
     const produtoRaw = (r.produto || "").toLowerCase().trim();
-    const ativaRaw   = r.ativa === true || r.ativa === "true";
+    const isVip = produtoRaw === "vip";
+    const ativaRaw   = isVip || r.ativa === true || r.ativa === "true";
 
     localStorage.setItem("femflow_produto", produtoRaw);
     localStorage.setItem("femflow_ativa", ativaRaw ? "true" : "false");
 
-    localStorage.setItem("femflow_has_personal", r.personal ? "true" : "false");
+    localStorage.setItem(
+      "femflow_has_personal",
+      r.personal || isVip ? "true" : "false"
+    );
     localStorage.removeItem("femflow_personal");
+    FEMFLOW.renderVipBadge?.();
 
     return r;
 
@@ -828,6 +923,7 @@ document.addEventListener("femflow:stateChanged", e => {
 
 FEMFLOW.init = async function () {
   const p = (location.pathname.split("/").pop() || "").toLowerCase();
+  FEMFLOW.renderVipBadge?.();
 
   // HOME → sem SYNC
   if (p === "home.html") {

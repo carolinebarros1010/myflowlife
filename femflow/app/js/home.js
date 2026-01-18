@@ -7,6 +7,7 @@
 /* LINKS */
 const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
 const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
+const EBOOKS_DATA_URL = "ebooks/ebooks.json";
 
 /* FOLLOWME */
 const FOLLOWME_LINKS = {
@@ -42,12 +43,14 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_nome", perfil.nome || "");
   localStorage.setItem("femflow_email", perfil.email || "");
   localStorage.setItem("femflow_nivel", String(perfil.nivel || "iniciante").toLowerCase());
-  localStorage.setItem("femflow_produto", String(perfil.produto || "").toLowerCase());
-  localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
+  const produto = String(perfil.produto || "").toLowerCase();
+  const isVip = produto === "vip";
+  localStorage.setItem("femflow_produto", produto);
+  localStorage.setItem("femflow_ativa", String(isVip || !!perfil.ativa));
 
   // ✅ acesso personal = direito (backend), separado do modo personal (front)
   const acessos = perfil.acessos || {};
-  const hasPersonal = acessos.personal === true;
+  const hasPersonal = acessos.personal === true || isVip;
   localStorage.setItem("femflow_has_personal", String(hasPersonal));
   localStorage.removeItem("femflow_personal"); // legado: nunca usar mais
 
@@ -117,6 +120,7 @@ const CARDS_HOME_PRESETS = [
   "avancada_casa_queima_gordura",
   "avancada_casa_fullbody_praia",
   "iniciante_corrida_longa",
+  "iniciante_casa_core_gluteo",
   "iniciante_costas",
   "iniciante_casa_core_gluteo",
   "iniciante_forcaabc",
@@ -183,11 +187,14 @@ function podeAcessar(enfase, perfil) {
 
   const categoria = inferirCategoria(enfase);
   const produto = (perfil.produto || "").toLowerCase();
+  const isVip = produto === "vip";
   const ativa = !!perfil.ativa;
  const personal = localStorage.getItem("femflow_has_personal") === "true";
 
 
-  if (!ativa) return false;
+  if (!ativa && !isVip) return false;
+
+  if (isVip) return true;
 
   // 🔥 PERSONAL (direito) = acesso_app + personal
   if (personal) {
@@ -407,6 +414,76 @@ function getThumbUrl(enfase) {
 }
 
 /* ============================================================
+   EBOOKS — CARDS NETFLIX
+=========================================================== */
+const EBOOKS_FALLBACK_COLOR = "#fceae3";
+
+function resolveEbookUrl(path) {
+  const cleanPath = String(path || "").replace(/^\/+/, "");
+  if (!cleanPath) return "";
+  return new URL(`/femflow/app/ebooks/${cleanPath}`, window.location.origin).toString();
+}
+
+function resolveEbookLink(link) {
+  if (!link) return "";
+  if (String(link).startsWith("http")) return link;
+  return resolveEbookUrl(link);
+}
+
+function formatarPrecoEbook(preco, tipo) {
+  if (tipo === "download" || preco === "0,00") return "Gratuito";
+  if (!preco) return "";
+  return `R$ ${preco}`;
+}
+
+function ebookCardHTML(ebook) {
+  const titulo = ebook.nome || "eBook";
+  const preco = formatarPrecoEbook(ebook.preco, ebook.tipo);
+  const acao = ebook.tipo === "download" ? "Baixar" : "Comprar";
+  const gratuito = ebook.tipo === "download" || ebook.preco === "0,00";
+  const badgeGratuito = gratuito ? '<span class="badge-free">Gratuito</span>' : "";
+  const desc = [preco, acao].filter(Boolean).join(" • ");
+  const capa = ebook.capa ? resolveEbookUrl(ebook.capa) : "";
+  const thumbStyle = `${capa ? `--thumb-url:url('${capa}');` : ""}background-color:${EBOOKS_FALLBACK_COLOR};`;
+  const destino = resolveEbookLink(ebook.link);
+
+  return `
+    <article class="card" data-destino="${destino}">
+      <div class="thumb${capa ? " has-image" : ""}" style="${thumbStyle}">
+        ${badgeGratuito}
+      </div>
+      <div class="info">
+        <h3 class="ttl">${titulo}</h3>
+        <p class="desc">${desc}</p>
+      </div>
+    </article>`;
+}
+
+function renderEbookRail(el, lista) {
+  if (!el) return;
+  el.innerHTML = lista.map(ebookCardHTML).join("");
+  el.querySelectorAll(".card").forEach(card => {
+    card.onclick = () => {
+      if (card.dataset.destino) {
+        window.location.href = card.dataset.destino;
+      }
+    };
+  });
+}
+
+async function carregarEbooks() {
+  try {
+    const resp = await fetch(EBOOKS_DATA_URL, { cache: "no-store" });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.warn("Falha ao carregar ebooks:", err);
+    return [];
+  }
+}
+
+/* ============================================================
    RENDERIZAÇÃO DOS CARDS
 =========================================================== */
 function cardHTML(p) {
@@ -612,6 +689,7 @@ function aplicarIdiomaHome() {
   const tMuscular = document.getElementById("tituloMuscular");
   const tEsportes = document.getElementById("tituloEsportes");
   const tCasa = document.getElementById("tituloCasa");
+  const tEbooks = document.getElementById("tituloEbooks");
   const btnFlow = document.getElementById("btnFlow");
 
   if (tPersonal) tPersonal.textContent = L.tituloPersonal;
@@ -619,6 +697,7 @@ function aplicarIdiomaHome() {
   if (tMuscular) tMuscular.textContent = L.tituloMuscular;
   if (tEsportes) tEsportes.textContent = L.tituloEsportes;
   if (tCasa) tCasa.textContent = L.tituloCasa;
+  if (tEbooks) tEbooks.textContent = L.tituloEbooks;
   if (btnFlow && L.botaoFlowcenter) btnFlow.textContent = L.botaoFlowcenter;
 
   // 🔥 VÍDEO
@@ -677,6 +756,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const produto =
       String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+    const isVip = produto === "vip";
 
     // PERSONAL — sempre aparece:
     // - se tem personal → desbloqueado (ativa modo personal)
@@ -693,7 +773,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (catalogo.followme.length === 0) {
       const cards = CARDS_FOLLOWME_SIMBOLICOS.map(c => ({
         ...c,
-        locked: produto !== c.enfase
+        locked: !isVip && produto !== c.enfase
       }));
       catalogo.followme.push(...cards);
     }
@@ -703,6 +783,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderRail(document.getElementById("railEsportes"), catalogo.esportes);
     renderRail(document.getElementById("railCasa"), catalogo.casa);
     renderRail(document.getElementById("railPersonal"), catalogo.personal);
+    renderEbookRail(document.getElementById("railEbooks"), await carregarEbooks());
 
     aplicarIdiomaHome();
   } catch (err) {
