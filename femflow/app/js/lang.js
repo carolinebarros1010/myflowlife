@@ -325,7 +325,7 @@ home: {
       bemvinda: "Bem-vinda",
       videoTitulo: "Como funciona o FemFlow",
       videoSub:   "Assista ao vídeo rápido antes de começar.",
-      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_PT",
+      videoUrl:   "https://www.youtube.com/embed/pAifTtNF9sQ",
 
       botaoFlowcenter: "Continue seu treino",
       tituloPersonal:  "Personal",
@@ -620,7 +620,7 @@ home: {
       bemvinda: "Welcome",
       videoTitulo: "How FemFlow works",
       videoSub:   "Watch this quick video before you start.",
-      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_EN",
+      videoUrl:   "https://www.youtube.com/embed/tOm9I6eKOj4",
 
       botaoFlowcenter: "Continue your workout",
       tituloPersonal:  "Personal Training",
@@ -912,7 +912,7 @@ fr: {
       bemvinda: "Bienvenue",
       videoTitulo: "Comment fonctionne FemFlow",
       videoSub:   "Regardez cette vidéo avant de commencer.",
-      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_FR",
+      videoUrl:   "https://www.youtube.com/embed/2N9Lf3dSGpo",
 
       botaoFlowcenter: "Continuez votre entraînement",
       tituloPersonal:  "Personal",
