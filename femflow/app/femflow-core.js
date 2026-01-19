@@ -283,8 +283,9 @@ FEMFLOW.router = pag => {
 =========================================================== */
 
 FEMFLOW.renderVipBadge = function () {
+  const id = localStorage.getItem("femflow_id");
   const produto = localStorage.getItem("femflow_produto");
-  const isVip = String(produto || "").toLowerCase() === "vip";
+  const isVip = Boolean(id) && String(produto || "").toLowerCase() === "vip";
   const existing = document.getElementById("ffVipBadge");
 
   if (!isVip) {
