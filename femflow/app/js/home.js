@@ -124,6 +124,100 @@ async function carregarPerfilEAtualizarStorage() {
   return perfil;
 }
 
+function parseBooleanish(value) {
+  if (typeof value === "boolean") return value;
+  if (value == null) return false;
+  const normalized = String(value).trim().toLowerCase();
+  return ["true", "1", "yes", "sim", "y"].includes(normalized);
+}
+
+function parseFreeEnfases(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw.map(item => String(item || "").toLowerCase().trim()).filter(Boolean);
+  }
+
+  const text = String(raw).trim();
+  if (!text) return [];
+
+  if (text.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) {
+        return parsed.map(item => String(item || "").toLowerCase().trim()).filter(Boolean);
+      }
+    } catch (err) {
+      // fall back to splitting
+    }
+  }
+
+  return text
+    .split(/[,\n;|]+/)
+    .map(item => item.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function parseFreeUntil(raw) {
+  if (!raw) return null;
+  if (raw instanceof Date && !isNaN(raw.getTime())) {
+    return raw.toISOString().split("T")[0];
+  }
+
+  const text = String(raw).trim();
+  if (!text) return null;
+
+  const match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (match) {
+    const [, dd, mm, yyyy] = match;
+    return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+  }
+
+  return text;
+}
+
+function normalizarFreeAccess(perfil) {
+  if (!perfil) return null;
+
+  if (perfil.free_access) {
+    if (typeof perfil.free_access === "string") {
+      try {
+        const parsed = JSON.parse(perfil.free_access);
+        if (parsed && typeof parsed === "object") return parsed;
+      } catch (err) {
+        // ignore
+      }
+    } else if (typeof perfil.free_access === "object") {
+      return perfil.free_access;
+    }
+  }
+
+  const enabledRaw =
+    perfil.freeEnabled ??
+    perfil.FreeEnabled ??
+    perfil.free_enabled ??
+    perfil.freeenabled;
+  const enfasesRaw =
+    perfil.freeEnfases ??
+    perfil.FreeEnfases ??
+    perfil.free_enfases ??
+    perfil.freeenfases;
+  const untilRaw =
+    perfil.freeUntil ??
+    perfil.FreeUntil ??
+    perfil.free_until ??
+    perfil.freeuntil;
+
+  if (enabledRaw == null && enfasesRaw == null && untilRaw == null) {
+    return null;
+  }
+
+  return {
+    enabled: parseBooleanish(enabledRaw),
+    enfases: parseFreeEnfases(enfasesRaw),
+    until: parseFreeUntil(untilRaw)
+  };
+}
+
 function persistPerfil(perfil) {
   // essenciais
   localStorage.setItem("femflow_id", perfil.id || "");
@@ -141,9 +235,10 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_has_personal", String(hasPersonal));
   localStorage.removeItem("femflow_personal"); // legado: nunca usar mais
 
+  const freeAccess = normalizarFreeAccess(perfil);
   localStorage.setItem(
     "femflow_free_access",
-    perfil.free_access ? JSON.stringify(perfil.free_access) : ""
+    freeAccess ? JSON.stringify(freeAccess) : ""
   );
 
   // ciclo + programa (CRÍTICO)
