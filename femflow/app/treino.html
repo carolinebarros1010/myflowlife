@@ -155,11 +155,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
   const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
   const personal     = hasPersonal && modePersonal;
+  const acessoValido = Boolean(id && produto);
 
-  if (!id || !produto || !cicloOK || (!personal && !enfase)) {
+  if (!acessoValido) {
     FEMFLOW.toast("Acesse o treino pelo painel do FemFlow.");
     FEMFLOW.router("home.html");
     return;
+  }
+
+  if (!personal) {
+    if (!cicloOK) {
+      FEMFLOW.toast("Configure seu ciclo antes de acessar o treino.");
+      FEMFLOW.router("ciclo.html");
+      return;
+    }
+
+    if (!enfase) {
+      FEMFLOW.toast("Acesse o treino pelo painel do FemFlow.");
+      FEMFLOW.router("home.html");
+      return;
+    }
   }
 
   /* ------------------------------------------------------------
