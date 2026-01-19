@@ -55,12 +55,16 @@ function _processarHotmart(data) {
   /* ======================================================
      1) EVENTO
   ====================================================== */
-  let eventoRaw = String(data.event || data.Event || data.event_name || "");
+  let eventoRaw = String(data.event || data.event_name || data.type || "");
   if (!eventoRaw && data.data && data.data.event_name) {
     eventoRaw = String(data.data.event_name || "");
   }
+  if (!eventoRaw && data.Event) {
+    eventoRaw = String(data.Event || "");
+  }
 
-  const evento = eventoRaw.toUpperCase().replace(/\s+/g, "_").trim();
+  const evento = String(eventoRaw || "").trim();
+  const eventoNorm = _norm(evento);
 
   Logger.log("📬 Hotmart evento: " + evento);
   Logger.log("📦 Payload keys: " + Object.keys(data || {}).join(","));
@@ -149,10 +153,7 @@ function _processarHotmart(data) {
   /* ======================================================
      5) COMPRA APROVADA
   ====================================================== */
-  if (
-    evento.includes("PURCHASE_APPROVED") ||
-    evento.includes("SUBSCRIPTION_APPROVED")
-  ) {
+  if (eventoNorm === _norm("Compra aprovada")) {
 
     const row = findRowByEmail(email);
     let idAluno = "";
@@ -179,33 +180,15 @@ function _processarHotmart(data) {
     } else {
       idAluno = gerarID();
 
-      sh.appendRow([
-        idAluno,
-        nome,
-        email,
-        telefone,
-        "",
-        "acesso_app",
-        new Date(),
-        true,
-        "iniciante",
-        28,
-        new Date(),
-        "",
-        "nenhuma",
-        "follicular",
-        1,
-        "",
-        "",
-        "",
-        "",
-        "regular",
-        "",
-        1,
-        "",
-        "",
-        ""
-      ]);
+      const rowData = new Array(HEADER_ALUNAS.length).fill("");
+      rowData[0] = idAluno;
+      rowData[1] = nome;
+      rowData[2] = email;
+      rowData[3] = telefone;
+      rowData[5] = productName || "acesso_app";
+      rowData[6] = new Date();
+      rowData[7] = true;
+      sh.appendRow(rowData);
 
       const newRow = sh.getLastRow();
 
@@ -223,11 +206,30 @@ function _processarHotmart(data) {
   }
 
   /* ======================================================
-     6) CANCELAMENTO / CHARGEBACK
+     6) RENOVAÇÃO / ATUALIZAÇÃO COBRANÇA
+  ====================================================== */
+  if (eventoNorm === _norm("Atualização de Data de Cobrança de Assinatura")) {
+    const row = findRowByEmail(email);
+    if (row <= 0) {
+      return { status: "notfound", email, evento };
+    }
+
+    sh.getRange(row, 8).setValue(true); // LicencaAtiva
+    sh.getRange(row, 7).setValue(new Date()); // DataAtualizacao
+
+    if (telefone) sh.getRange(row, 4).setValue(telefone);
+
+    return { status: "ok", msg: "renovacao_assinatura", evento };
+  }
+
+  /* ======================================================
+     7) CANCELAMENTO / REEMBOLSO / CHARGEBACK
   ====================================================== */
   if (
-    evento.includes("SUBSCRIPTION_CANCELLATION") ||
-    evento.includes("CHARGEBACK")
+    eventoNorm === _norm("Compra cancelada") ||
+    eventoNorm === _norm("Cancelamento de Assinatura") ||
+    eventoNorm === _norm("Compra reembolsada") ||
+    eventoNorm === _norm("Chargeback")
   ) {
 
     const row = findRowByEmail(email);
@@ -249,7 +251,7 @@ function _processarHotmart(data) {
         sh.getRange(row, COL_ACESSO_PERSONAL + 1).setValue(false);
       }
 
-const COL_ACESSO_FOLLOWME = 31; // ajuste para a coluna real
+      const COL_ACESSO_FOLLOWME = 31; // ajuste para a coluna real
       if (typeof COL_ACESSO_FOLLOWME === "number") {
         sh.getRange(row, COL_ACESSO_FOLLOWME + 1).setValue("");
       }
@@ -261,7 +263,7 @@ const COL_ACESSO_FOLLOWME = 31; // ajuste para a coluna real
   }
 
   /* ======================================================
-     7) FALLBACK
+     8) FALLBACK
   ====================================================== */
   return { status: "ignored", evento };
 }
@@ -269,7 +271,7 @@ const COL_ACESSO_FOLLOWME = 31; // ajuste para a coluna real
 function _pareceHotmart_(data) {
   if (!data) return false;
   return !!(
-    data.event || data.Event || data.event_name ||
+    data.event || data.Event || data.event_name || data.type ||
     (data.data && (data.data.event_name || data.data.buyer || data.data.product)) ||
     data.buyer || data.product ||
     data["data.event_name"] || data["buyer[email]"] || data["buyer.email"]
