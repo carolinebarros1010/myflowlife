@@ -416,7 +416,7 @@ function initFlowCenter() {
 
     const freeOk = freeValido && freeEnfases.includes(enfase);
 
-    if (isTrial && !perfil.ativa) {
+    if (isTrial) {
       FEMFLOW.toast("Seu teste grátis terminou. Assine para continuar.");
       return window.open(LINK_ACESSO_APP, "_blank");
     }

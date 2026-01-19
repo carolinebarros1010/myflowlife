@@ -294,7 +294,7 @@ function _loginOuCadastro(data) {
     senhaHash,              // SenhaHash
     "trial_app",            // Produto
     hoje,                   // DataCompra
-    true,                   // LicencaAtiva
+    false,                  // LicencaAtiva
     nivelDetectado,         // Nivel
     Number(data.cicloDuracao) || 28, // CicloDuracao
     hoje,                   // DataInicio

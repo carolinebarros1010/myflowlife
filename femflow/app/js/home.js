@@ -280,7 +280,7 @@ function podeAcessar(enfase, perfil) {
  const personal = localStorage.getItem("femflow_has_personal") === "true";
 
 
-  if (!ativa && !isVip) return false;
+  if ((!ativa || isTrial) && !isVip) return false;
 
   if (isVip) return true;
 
