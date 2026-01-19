@@ -90,37 +90,67 @@ const MUSCULAR_ENFASES = new Set([
   "posterior",
   "quadriceps",
   "costas",
+  "ombro",
   "peito",
+  "peitoral",
   "braco",
   "core",
   "forcaabc",
   "militar"
 ]);
 
-const TITULOS_ESPECIAIS = {
-  forcaabc: "Força",
-  quadriceps: "Quadríceps",
-  gluteos: "Glúteos",
-  corrida_longa: "Corrida longa"
-};
-
 const CARDS_HOME_PRESETS = [
   "avancada_corrida_longa",
+  "avancada_costas",
   "avancada_forcaabc",
   "avancada_gluteos",
+  "avancada_ombro",
+  "avancada_peitoral",
+  "avancada_casa_core_gluteo",
   "avancada_militar",
   "avancada_quadriceps",
+  "avancada_remo_oceanico",
+  "avancada_beach_tennis",
+  "avancada_jiu_jitsu",
+  "avancada_natacao",
+  "avancada_surf",
+  "avancada_corrida_curta",
+  "avancada_casa_queima_gordura",
+  "avancada_casa_fullbody_praia",
   "iniciante_corrida_longa",
   "iniciante_costas",
+  "iniciante_casa_core_gluteo",
   "iniciante_forcaabc",
   "iniciante_gluteos",
   "iniciante_militar",
+  "iniciante_ombro",
+  "iniciante_peitoral",
   "iniciante_quadriceps",
+  "iniciante_remo_oceanico",
+  "iniciante_beach_tennis",
+  "iniciante_jiu_jitsu",
+  "iniciante_natacao",
+  "iniciante_surf",
+  "iniciante_corrida_curta",
+  "iniciante_casa_queima_gordura",
+  "iniciante_casa_fullbody_praia",
   "intermediaria_corrida_longa",
+  "intermediaria_costas",
+  "intermediaria_casa_core_gluteo",
   "intermediaria_forcaabc",
   "intermediaria_gluteos",
   "intermediaria_militar",
-  "intermediaria_quadriceps"
+  "intermediaria_ombro",
+  "intermediaria_peitoral",
+  "intermediaria_quadriceps",
+  "intermediaria_remo_oceanico",
+  "intermediaria_beach_tennis",
+  "intermediaria_jiu_jitsu",
+  "intermediaria_natacao",
+  "intermediaria_surf",
+  "intermediaria_corrida_curta",
+  "intermediaria_casa_queima_gordura",
+  "intermediaria_casa_fullbody_praia"
 ];
 
 function extrairNivelEnfase(docId) {
@@ -183,7 +213,10 @@ function podeAcessar(enfase, perfil) {
 
 function formatarTitulo(enfase) {
   if (!enfase) return "Treino";
-  if (TITULOS_ESPECIAIS[enfase]) return TITULOS_ESPECIAIS[enfase];
+  const lang = FEMFLOW.lang || "pt";
+  const tituloLang = FEMFLOW.langs?.[lang]?.home?.cards?.[enfase];
+  if (tituloLang) return tituloLang;
+
   const limpo = enfase
     .replace(/^followme_/, "")
     .replace(/^personal_?/, "personal ")
@@ -351,12 +384,25 @@ const CARDS_FOLLOWME_SIMBOLICOS = [
 const CARD_THUMBS = {
   gluteo: "gluteos.jpg",
   gluteos: "gluteos.jpg",
+  casa_core_gluteo: "casa_core_gluteo.jpg",
+  casa_mobilidade: "casa_mobilidade.jpg",
+  casa_queima_gordura: "casa_queima_gordura.jpg",
+  casa_fullbody_praia: "casa_fullbody_praia.jpg",
+  corrida_longa: "corrida_Longa.jpg",
   quadriceps: "quadriceps.jpg",
   costas: "costas.jpg",
+  forcaabc: "forcaabc.jpg",
   ombro: "ombro.jpg",
   peito: "peitoral.jpg",
   peitoral: "peitoral.jpg",
-  militar: "militar.jpg"
+  militar: "militar.jpg",
+  remo_oceanico: "remo_oceanico.jpg",
+  beach_tennis: "beach_tennis_hybrid.jpg",
+  jiu_jitsu: "jiu_jitsu.jpg",
+  natacao: "natacao.jpg",
+  surf: "surf.jpg",
+  personal_ricardojr: "personal_ricardojr.jpg",
+  corrida_curta: "corrida_curta.jpg"
 };
 
 function getThumbUrl(enfase) {
@@ -384,7 +430,6 @@ function cardHTML(p) {
       <div class="${thumbClass}" style="${thumbStyle}">
         ${lockOverlay}
         ${freeBadge}
-        <span class="badge">${titulo}</span>
       </div>
       <div class="info">
         <h3 class="ttl">${titulo}</h3>
