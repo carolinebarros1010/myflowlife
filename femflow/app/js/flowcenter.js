@@ -122,7 +122,7 @@ function initFlowCenter() {
   const personal = hasPersonal && modePersonal;
   const enduranceEnabled = hasPersonal;
 
-  const isApp    = produtoRaw === "acesso_app";
+  const isApp    = produtoRaw === "acesso_app" || isTrial;
   const isFollow = produtoRaw.startsWith("followme_");
 
   const freeEnabled = perfil.free_access?.enabled === true;

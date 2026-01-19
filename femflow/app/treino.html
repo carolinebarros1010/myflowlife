@@ -68,7 +68,6 @@
   <!-- Rodapé -->
   <div class="fix-footer">
     <button id="salvarTreinoBtn" class="btn-primary-clean">💾 Salvar treino</button>
-    <button id="descansoBtn" class="btn-secondary-clean">🌿 Descanso</button>
     <button id="cancelarTreinoBtn" class="btn-tertiary-clean">Cancelar</button>
   </div>
 
@@ -78,10 +77,12 @@
       <h3 class="modal-title" id="pseTitulo">Como foi o treino?</h3>
 
       <label class="modal-label" id="pseLabel">PSE (0 a 10)</label>
-      <input type="range" min="0" max="10" value="0" id="pseInput" class="modal-slider"/>
-      <div class="pse-emoji" id="pseEmojiWrap" aria-live="polite">
-        <span id="pseEmoji">😴</span>
-        <span class="pse-emoji-value" id="pseEmojiValue">0</span>
+      <div class="pse-slider-wrapper">
+        <div class="pse-emoji" id="pseEmojiWrap" aria-live="polite">
+          <span id="pseEmoji">😴</span>
+          <span class="pse-emoji-value" id="pseEmojiValue">0</span>
+        </div>
+        <input type="range" min="0" max="10" value="0" id="pseInput" class="modal-slider"/>
       </div>
 
       <div class="modal-actions">
@@ -154,11 +155,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
   const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
   const personal     = hasPersonal && modePersonal;
+  const acessoValido = Boolean(id && produto);
 
-  if (!id || !produto || !cicloOK || (!personal && !enfase)) {
+  if (!acessoValido) {
     FEMFLOW.toast("Acesse o treino pelo painel do FemFlow.");
     FEMFLOW.router("home.html");
     return;
+  }
+
+  if (!personal) {
+    if (!cicloOK) {
+      FEMFLOW.toast("Configure seu ciclo antes de acessar o treino.");
+      FEMFLOW.router("ciclo.html");
+      return;
+    }
+
+    if (!enfase) {
+      FEMFLOW.toast("Acesse o treino pelo painel do FemFlow.");
+      FEMFLOW.router("home.html");
+      return;
+    }
   }
 
   /* ------------------------------------------------------------
@@ -201,7 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("tituloDiaTreino").textContent   = L.treino.diaPrograma;
 
     document.getElementById("salvarTreinoBtn").textContent   = L.treino.btnSalvar;
-    document.getElementById("descansoBtn").textContent       = L.treino.btnDescanso;
     document.getElementById("cancelarTreinoBtn").textContent = L.treino.btnCancelar;
 
     document.getElementById("pseTitulo").textContent         = L.treino.pseTitulo;

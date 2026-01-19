@@ -12,9 +12,96 @@ const EBOOKS_DATA_URL = "ebooks/ebooks.json";
 /* FOLLOWME */
 const FOLLOWME_LINKS = {
   livia: "#",
-  karoline: "#",
-  thalita: "#"
+  karoline: "#"
 };
+
+const TREINOS_SEMANA_KEY = "femflow_treinos_semana";
+const TREINOS_SEMANA_PADRAO = 3;
+let treinosSemanaResolve = null;
+let treinosSemanaSelecionado = null;
+
+function atualizarModalTreinosSemana() {
+  const modal = document.getElementById("treinosSemanaModal");
+  if (!modal) return;
+
+  const lang = FEMFLOW.lang || "pt";
+  const L = FEMFLOW.langs?.[lang]?.home?.treinosSemana;
+  const titulo = document.getElementById("treinosSemanaTitulo");
+  const subtitulo = document.getElementById("treinosSemanaSub");
+  const options = document.getElementById("treinosSemanaOptions");
+  const btnSalvar = document.getElementById("treinosSemanaSalvar");
+  const btnCancelar = document.getElementById("treinosSemanaCancelar");
+
+  if (titulo && L?.titulo) titulo.textContent = L.titulo;
+  if (subtitulo && L?.subtitulo) subtitulo.textContent = L.subtitulo;
+  if (btnSalvar && L?.salvar) btnSalvar.textContent = L.salvar;
+  if (btnCancelar && L?.cancelar) btnCancelar.textContent = L.cancelar;
+
+  if (!options) return;
+  options.innerHTML = "";
+  const current = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
+  for (let i = 1; i <= 7; i++) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ff-modal-option";
+    if (i === current) btn.classList.add("is-active");
+    const label = L?.opcao ? L.opcao.replace("{n}", i) : `${i}x/semana`;
+    btn.textContent = label;
+    btn.dataset.valor = String(i);
+    btn.addEventListener("click", () => {
+      treinosSemanaSelecionado = i;
+      options.querySelectorAll(".ff-modal-option").forEach((el) =>
+        el.classList.toggle("is-active", el.dataset.valor === String(i))
+      );
+    });
+    options.appendChild(btn);
+  }
+}
+
+function abrirModalTreinosSemana() {
+  const modal = document.getElementById("treinosSemanaModal");
+  if (!modal) return Promise.resolve(false);
+  treinosSemanaSelecionado = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
+  atualizarModalTreinosSemana();
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+
+  return new Promise((resolve) => {
+    treinosSemanaResolve = resolve;
+  });
+}
+
+function fecharModalTreinosSemana() {
+  const modal = document.getElementById("treinosSemanaModal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+async function salvarTreinosSemana(valor) {
+  localStorage.setItem(TREINOS_SEMANA_KEY, String(valor));
+  const id = localStorage.getItem("femflow_id");
+  if (!id) return;
+
+  await fetch(FEMFLOW.SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "settreinossemana",
+      id,
+      treinosSemana: valor
+    })
+  });
+}
+
+async function garantirTreinosSemana() {
+  const valorRaw = localStorage.getItem(TREINOS_SEMANA_KEY);
+  const valor = Number(valorRaw);
+  if (Number.isFinite(valor) && valor >= 1 && valor <= 7) return true;
+
+  const aprovado = await abrirModalTreinosSemana();
+  return aprovado === true;
+}
 
 /* ============================================================
    🔄 PERFIL: puxar do backend e persistir no localStorage
@@ -116,6 +203,7 @@ const CARDS_HOME_PRESETS = [
   "avancada_beach_tennis",
   "avancada_jiu_jitsu",
   "avancada_natacao",
+  "avancada_surf",
   "avancada_casa_queima_gordura",
   "avancada_casa_fullbody_praia",
   "iniciante_corrida_longa",
@@ -132,6 +220,7 @@ const CARDS_HOME_PRESETS = [
   "iniciante_beach_tennis",
   "iniciante_jiu_jitsu",
   "iniciante_natacao",
+  "iniciante_surf",
   "iniciante_casa_queima_gordura",
   "iniciante_casa_fullbody_praia",
   "intermediaria_corrida_longa",
@@ -147,6 +236,7 @@ const CARDS_HOME_PRESETS = [
   "intermediaria_beach_tennis",
   "intermediaria_jiu_jitsu",
   "intermediaria_natacao",
+  "intermediaria_surf",
   "intermediaria_casa_queima_gordura",
   "intermediaria_casa_fullbody_praia"
 ];
@@ -201,7 +291,7 @@ function podeAcessar(enfase, perfil) {
   }
 
   // 🔹 ACESSO APP
-  if (produto === "acesso_app") {
+  if (produto === "acesso_app" || isTrial) {
     return ["muscular", "esportes", "casa"].includes(categoria);
   }
 
@@ -372,14 +462,6 @@ const CARDS_FOLLOWME_SIMBOLICOS = [
     color: "#ff9f7f",
     locked: true,
     simbolico: true
-  },
-  {
-    enfase: "followme_thalita",
-    titulo: "Treine com Thalita Prates",
-    desc: "Força e constância no feminino",
-    color: "#cbb1e6",
-    locked: true,
-    simbolico: true
   }
 ];
 
@@ -401,7 +483,8 @@ const CARD_THUMBS = {
   remo_oceanico: "remo_oceanico.jpg",
   beach_tennis: "beach_tennis_hybrid.jpg",
   jiu_jitsu: "jiu_jitsu.jpg",
-  natacao: "natacao.jpg"
+  natacao: "natacao.jpg",
+  surf: "surf.jpg"
 };
 
 function getThumbUrl(enfase) {
@@ -511,14 +594,16 @@ function renderRail(el, lista) {
   if (!el) return;
   el.innerHTML = lista.map(cardHTML).join("");
   el.querySelectorAll(".card").forEach(c =>
-    c.onclick = () => handleCardClick(c.dataset.enfase, c.dataset.locked === "true")
+    c.onclick = () => {
+      void handleCardClick(c.dataset.enfase, c.dataset.locked === "true");
+    }
   );
 }
 
 /* ============================================================
    LÓGICA DE ACESSO POR PRODUTO
 =========================================================== */
-function handleCardClick(enfase, locked) {
+async function handleCardClick(enfase, locked) {
 
   /* =========================================
      🔒 CARD BLOQUEADO (VITRINE COMERCIAL)
@@ -549,6 +634,9 @@ function handleCardClick(enfase, locked) {
     FEMFLOW.toast("Plano necessário para acessar este treino.");
     return;
   }
+
+  const treinosOk = await garantirTreinosSemana();
+  if (!treinosOk) return;
 
   /* =========================================
      🧭 PERSONAL DESBLOQUEADO = ativa modo e vai pro FLOWCENTER
@@ -712,6 +800,8 @@ function aplicarIdiomaHome() {
   if (vTitle && L.videoTitulo) vTitle.textContent = L.videoTitulo;
   if (vSub && L.videoSub) vSub.textContent = L.videoSub;
   if (vFrame && L.videoUrl) vFrame.src = L.videoUrl;
+
+  atualizarModalTreinosSemana();
 }
 
 /* ============================================================
@@ -721,6 +811,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   FEMFLOW.loading.show("Carregando…");
 
   try {
+    const treinosStorage = Number(localStorage.getItem(TREINOS_SEMANA_KEY));
+    if (Number.isFinite(treinosStorage)) {
+      treinosSemanaSelecionado = treinosStorage;
+    }
+
+    const modalSalvar = document.getElementById("treinosSemanaSalvar");
+    const modalCancelar = document.getElementById("treinosSemanaCancelar");
+    const modalOverlay = document.getElementById("treinosSemanaModal");
+
+    if (modalSalvar) {
+      modalSalvar.addEventListener("click", async () => {
+        const valor = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
+        await salvarTreinosSemana(valor);
+        fecharModalTreinosSemana();
+        if (treinosSemanaResolve) treinosSemanaResolve(true);
+        treinosSemanaResolve = null;
+      });
+    }
+
+    if (modalCancelar) {
+      modalCancelar.addEventListener("click", () => {
+        fecharModalTreinosSemana();
+        if (treinosSemanaResolve) treinosSemanaResolve(false);
+        treinosSemanaResolve = null;
+      });
+    }
+
+    if (modalOverlay) {
+      modalOverlay.addEventListener("click", (event) => {
+        if (event.target !== modalOverlay) return;
+        fecharModalTreinosSemana();
+        if (treinosSemanaResolve) treinosSemanaResolve(false);
+        treinosSemanaResolve = null;
+      });
+    }
+
     const perfil = await carregarPerfilEAtualizarStorage();
 
     if (perfil.status !== "ok") {
