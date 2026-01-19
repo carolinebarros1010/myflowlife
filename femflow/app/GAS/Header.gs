@@ -45,3 +45,4 @@ const COL_SESSION_TOKEN  = 23; // col 24
 const COL_SESSION_EXP    = 24; // col 25
 const COL_DATA_INICIO_PROGRAMA = 25; // ajuste conforme posição real
 const COL_ULTIMA_ATIVIDADE     = 26; // ajuste conforme posição real
+
