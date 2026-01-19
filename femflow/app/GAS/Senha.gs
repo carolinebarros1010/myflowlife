@@ -317,8 +317,9 @@ function _loginOuCadastro(data) {
     "",                     // FreeEnfases (AC)
     "",                     // FreeUntil (AD)
     "",                     // acesso_personal (AE)
-    "",                     // ReservadoAG (AG)
-    "",                     // ReservadoAH (AH)
+    "",                     // TreinosSemana (AF)
+    "",                     // AusenciaAtiva (AG)
+    "",                     // AusenciaInicio (AH)
     dataNascimento          // DataNascimento (AI)
 
   ]);
