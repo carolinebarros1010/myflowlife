@@ -3,6 +3,9 @@ function doGet(e) {
   const action = String(params.action || "").toLowerCase().trim();
 
   if (!action) {
+    if (params.id || params.email) {
+      return _json(_validarPerfil_(params));
+    }
     return _json({ status: "ignored", msg: "missing_action" });
   }
 
