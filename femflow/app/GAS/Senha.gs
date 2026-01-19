@@ -160,7 +160,8 @@ function _fazerLogin(data) {
       // assinatura expirada
       if (dataCompra) {
         const diff = (new Date() - new Date(dataCompra)) / 86400000;
-        if (diff > 30) {
+        const produtoDias = produtoNorm === "trial_app" ? 3 : 30;
+        if (diff > produtoDias) {
           sh.getRange(i + 1, 8).setValue(false); // LicencaAtiva
           return { status: "expired", msg: "Sua assinatura expirou.", email: email, id: id };
         }
@@ -291,7 +292,7 @@ function _loginOuCadastro(data) {
     email,                  // Email
     telefone,               // Telefone
     senhaHash,              // SenhaHash
-    "acesso_app",           // Produto
+    "trial_app",            // Produto
     hoje,                   // DataCompra
     true,                   // LicencaAtiva
     nivelDetectado,         // Nivel

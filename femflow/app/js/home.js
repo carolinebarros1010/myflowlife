@@ -275,6 +275,7 @@ function podeAcessar(enfase, perfil) {
 
   const categoria = inferirCategoria(enfase);
   const produto = (perfil.produto || "").toLowerCase();
+  const isTrial = produto === "trial_app";
   const isVip = produto === "vip";
   const ativa = !!perfil.ativa;
  const personal = localStorage.getItem("femflow_has_personal") === "true";
@@ -291,7 +292,7 @@ function podeAcessar(enfase, perfil) {
   }
 
   // 🔹 ACESSO APP
-  if (produto === "acesso_app") {
+  if (produto === "acesso_app" || isTrial) {
     return ["muscular", "esportes", "casa"].includes(categoria);
   }
 
@@ -617,6 +618,13 @@ async function handleCardClick(enfase, locked) {
      🔒 CARD BLOQUEADO (VITRINE COMERCIAL)
   ========================================= */
   if (locked) {
+    const produto = String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+    const isTrial = produto === "trial_app";
+    const categoria = inferirCategoria(enfase);
+    if (isTrial && ["muscular", "esportes", "casa"].includes(categoria)) {
+      window.open(LINK_ACESSO_APP, "_blank");
+      return;
+    }
 
     // 🧠 PERSONAL — CTA dedicado (propaganda)
     if (enfase === "personal" || enfase.startsWith("personal_")) {

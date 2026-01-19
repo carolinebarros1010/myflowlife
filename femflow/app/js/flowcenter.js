@@ -6,6 +6,8 @@
    ✔ Separação ACESSO x MODO PERSONAL
 =========================================================== */
 
+const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
+
 /* ============================================================
    🔄 PERFIL — VALIDAR (fonte da verdade)
 =========================================================== */
@@ -112,6 +114,7 @@ function initFlowCenter() {
   ============================================================ */
   const produtoRaw   = String(perfil.produto || "").toLowerCase();
   const isVip = produtoRaw === "vip";
+  const isTrial = produtoRaw === "trial_app";
   const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
   const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
 
@@ -119,7 +122,7 @@ function initFlowCenter() {
   const personal = hasPersonal && modePersonal;
   const enduranceEnabled = hasPersonal;
 
-  const isApp    = produtoRaw === "acesso_app";
+  const isApp    = produtoRaw === "acesso_app" || isTrial;
   const isFollow = produtoRaw.startsWith("followme_");
 
   const freeEnabled = perfil.free_access?.enabled === true;
@@ -412,6 +415,11 @@ function initFlowCenter() {
     }
 
     const freeOk = freeValido && freeEnfases.includes(enfase);
+
+    if (isTrial && !perfil.ativa) {
+      FEMFLOW.toast("Seu teste grátis terminou. Assine para continuar.");
+      return window.open(LINK_ACESSO_APP, "_blank");
+    }
 
     /* ✨ FOLLOWME */
     if (isVip) {
