@@ -777,7 +777,16 @@ function aplicarIdiomaHome() {
   // Saudação
   const bv = document.getElementById("bvTexto");
   if (bv) {
-    bv.textContent = `${L.bemvinda}, ${primeiroNome}!`;
+    bv.textContent = "";
+    const saudacao = document.createElement("span");
+    saudacao.className = "bemvinda-texto";
+    saudacao.textContent = `${L.bemvinda}, `;
+
+    const nome = document.createElement("span");
+    nome.className = "bemvinda-nome";
+    nome.textContent = `${primeiroNome}!`;
+
+    bv.append(saudacao, nome);
   }
 
   // Títulos das seções
