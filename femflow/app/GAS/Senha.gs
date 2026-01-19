@@ -137,6 +137,8 @@ function _fazerLogin(data) {
     const emailDB    = String(row[2] || "").toLowerCase().trim();
     const senhaHash  = String(row[4] || "").trim();
     const produto    = row[5];
+    const produtoNorm = String(produto || "").toLowerCase().trim();
+    const isVip = produtoNorm === "vip";
     const dataCompra = row[6];
     const ativa      = !!row[7];
     const nivel      = row[8];
@@ -153,17 +155,20 @@ function _fazerLogin(data) {
       return { status: "error", msg: "Senha incorreta." };
     }
 
-    // assinatura expirada
-    if (dataCompra) {
-      const diff = (new Date() - new Date(dataCompra)) / 86400000;
-      if (diff > 30) {
-        sh.getRange(i + 1, 8).setValue(false); // LicencaAtiva
-        return { status: "expired", msg: "Sua assinatura expirou.", email: email, id: id };
+    if (!isVip) {
+      // assinatura expirada
+      if (dataCompra) {
+        const diff = (new Date() - new Date(dataCompra)) / 86400000;
+        const produtoDias = produtoNorm === "trial_app" ? 3 : 30;
+        if (diff > produtoDias) {
+          sh.getRange(i + 1, 8).setValue(false); // LicencaAtiva
+          return { status: "expired", msg: "Sua assinatura expirou.", email: email, id: id };
+        }
       }
-    }
 
-    if (!ativa) {
-      return { status: "inactive", msg: "Assinatura inativa.", email: email, id: id };
+      if (!ativa) {
+        return { status: "inactive", msg: "Assinatura inativa.", email: email, id: id };
+      }
     }
 
     // 🔒 DEVICE LOCK
@@ -205,7 +210,7 @@ function _fazerLogin(data) {
       diaCiclo: syncResult && syncResult.diaCiclo ? syncResult.diaCiclo : diaCiclo,
       perfilHormonal: perfilHormonal,
       produto: produto,
-      personal: row[COL_ACESSO_PERSONAL] === true,
+      personal: row[COL_ACESSO_PERSONAL] === true || isVip,
       ciclo_duracao: ciclo,
       data_inicio: inicio,
 
@@ -279,7 +284,7 @@ function _loginOuCadastro(data) {
     email,                  // Email
     telefone,               // Telefone
     senhaHash,              // SenhaHash
-    "acesso_app",           // Produto
+    "trial_app",            // Produto
     hoje,                   // DataCompra
     true,                   // LicencaAtiva
     nivelDetectado,         // Nivel

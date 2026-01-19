@@ -6,6 +6,8 @@
    ✔ Separação ACESSO x MODO PERSONAL
 =========================================================== */
 
+const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
+
 /* ============================================================
    🔄 PERFIL — VALIDAR (fonte da verdade)
 =========================================================== */
@@ -45,9 +47,11 @@ function flowcenterPersistPerfil(perfil) {
      🔒 DIREITO PERSONAL (backend)
   ============================================================ */
   const acessos = perfil.acessos || {};
+  const produto = String(perfil.produto || "").toLowerCase();
+  const isVip = produto === "vip";
   localStorage.setItem(
     "femflow_has_personal",
-    acessos.personal === true ? "true" : "false"
+    acessos.personal === true || isVip ? "true" : "false"
   );
 }
 
@@ -109,6 +113,8 @@ function initFlowCenter() {
      4) PRODUTO / ACESSOS (CORRETO)
   ============================================================ */
   const produtoRaw   = String(perfil.produto || "").toLowerCase();
+  const isVip = produtoRaw === "vip";
+  const isTrial = produtoRaw === "trial_app";
   const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
   const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
 
@@ -116,7 +122,7 @@ function initFlowCenter() {
   const personal = hasPersonal && modePersonal;
   const enduranceEnabled = hasPersonal;
 
-  const isApp    = produtoRaw === "acesso_app";
+  const isApp    = produtoRaw === "acesso_app" || isTrial;
   const isFollow = produtoRaw.startsWith("followme_");
 
   const freeEnabled = perfil.free_access?.enabled === true;
@@ -410,7 +416,19 @@ function initFlowCenter() {
 
     const freeOk = freeValido && freeEnfases.includes(enfase);
 
+    if (isTrial && !perfil.ativa) {
+      FEMFLOW.toast("Seu teste grátis terminou. Assine para continuar.");
+      return window.open(LINK_ACESSO_APP, "_blank");
+    }
+
     /* ✨ FOLLOWME */
+    if (isVip) {
+      if (enfase.startsWith("followme_")) {
+        return FEMFLOW.router(`followme/${enfase}.html`);
+      }
+      return FEMFLOW.router("treino.html");
+    }
+
     if (isFollow) {
       if (produtoRaw !== enfase && !freeOk) {
         FEMFLOW.toast("Seu plano libera apenas este FollowMe.");
