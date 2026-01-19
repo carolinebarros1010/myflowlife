@@ -941,6 +941,11 @@ font-size: 0.9rem !important;
   margin-bottom: 14px;
 }
 
+.pse-slider-wrapper {
+  position: relative;
+  padding-top: 36px;
+}
+
 .pse-display {
   display: flex;
   align-items: center;
@@ -966,7 +971,7 @@ font-size: 0.9rem !important;
 
 .modal-slider {
   width: 100%;
-  margin: 10px 0 20px;
+  margin: 0 0 20px;
   accent-color: #cc6a5a;
 }
 
@@ -976,13 +981,17 @@ font-size: 0.9rem !important;
   align-items: center;
   gap: 10px;
   font-size: 2.2rem;
-  margin: 6px 0 18px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin: 0;
   color: #cc6a5a;
+  transform: translateX(-50%);
   transition: transform 0.15s ease;
 }
 
 .pse-emoji.pse-emoji-bounce {
-  transform: scale(1.08);
+  transform: translateX(-50%) scale(1.08);
 }
 
 .pse-emoji-value {

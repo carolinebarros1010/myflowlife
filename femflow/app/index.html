@@ -35,7 +35,7 @@
       <h2 id="tLoginBemVinda">Bem-vinda</h2>
       <p class="subtitle" id="tLoginSub">Acesse ou crie sua conta para iniciar seu ciclo</p>
 
-      <button id="btnLoginLang" class="login-lang-btn">🌐 Idioma</button>
+      <button id="btnLoginLang" class="login-lang-btn">🌐 Português</button>
 
       <input id="loginEmail" type="email" placeholder="Seu e-mail"/>
 
@@ -111,6 +111,16 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ============================================================
      LOGIN NORMAL — FINAL
   ============================================================ */
+  async function syncCiclo(id) {
+    if (!id) return null;
+    try {
+      return await postGAS({ action: "sync", id });
+    } catch (err) {
+      console.warn("Falha ao sincronizar ciclo:", err);
+      return null;
+    }
+  }
+
   async function entrar(){
     const email = $("#loginEmail").value.trim().toLowerCase();
     const senha = $("#loginSenha").value.trim();
@@ -169,6 +179,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (res.sessionToken) {
       FEMFLOW.setSessionToken(res.sessionToken);
     }
+
+    await syncCiclo(res.id);
     
 // 🧠 NOVO — reconciliação silenciosa
 if (res.deviceUpdated) {
@@ -253,6 +265,8 @@ if (res.deviceUpdated) {
         FEMFLOW.setSessionToken(res.sessionToken);
       }
 
+      await syncCiclo(res.id);
+
       setTimeout(() => location.href = "home.html", 500);
 
     } catch (e) {
@@ -326,6 +340,8 @@ if (res.deviceUpdated) {
         FEMFLOW.setSessionToken(res.sessionToken);
       }
 
+      await syncCiclo(res.id);
+
       setMsg("Acesso liberado ✨", true);
       setTimeout(() => location.href = "home.html", 600);
 
@@ -379,6 +395,11 @@ if (res.deviceUpdated) {
       en:{ bem:"Welcome", sub:"Access or create your account to start your cycle", email:"Your email", senha:"Your password", entrar:"Login", cad:"Don’t have an account? Sign up", esq:"Forgot my password" },
       fr:{ bem:"Bienvenue", sub:"Accédez ou créez votre compte pour commencer votre cycle", email:"Votre e-mail", senha:"Votre mot de passe", entrar:"Entrer", cad:"Pas de compte ? S'inscrire", esq:"J’ai oublié mon mot de passe" }
     }[lang] || T.pt;
+    const labels = {
+      pt: "Português",
+      en: "English",
+      fr: "Français"
+    };
 
     $("#tLoginBemVinda").textContent = T.bem;
     $("#tLoginSub").textContent      = T.sub;
@@ -387,6 +408,7 @@ if (res.deviceUpdated) {
     $("#btnEntrar").textContent      = T.entrar;
     $("#linkCadastro").textContent   = T.cad;
     $("#goRecuperar").textContent    = T.esq;
+    btnLang.textContent              = `🌐 ${labels[lang] || labels.pt}`;
   }
 
   window.setLoginLang = lang => {
