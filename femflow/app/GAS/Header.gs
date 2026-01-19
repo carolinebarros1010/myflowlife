@@ -23,6 +23,7 @@ const COL_ACESSO_PERSONAL   = 30; // 🔥 AJUSTE PARA AE REAL
 const COL_TREINOS_SEMANA    = 31; // AF
 const COL_AUSENCIA_ATIVA    = 32; // AG
 const COL_AUSENCIA_INICIO   = 33; // AH
+const COL_DATA_NASCIMENTO   = 34; // AI
 
 /**
  * ✅ HEADER OFICIAL (corrigido)
@@ -34,7 +35,7 @@ const HEADER_ALUNAS = [
   "Pontuacao","AnamneseJSON","TokenReset","TokenExpira","PerfilHormonal",
   "CicloStartDateManual","DiaPrograma","DeviceId","SessionToken","SessionExpira",
   "DataInicioPrograma","UltimaAtividade", "FreeEnabled" , "FreeEnfases", "FreeUntil", "acesso_personal",
-  "TreinosSemana","AusenciaAtiva","AusenciaInicio"
+  "TreinosSemana","AusenciaAtiva","AusenciaInicio","DataNascimento"
 ];
 
 // índices (0-based) para leitura rápida

@@ -338,9 +338,15 @@ const loginResp = await FEMFLOW.post({
 });
 
 if (loginResp?.status === "ok") {
-  localStorage.setItem("femflow_deviceId", loginResp.deviceId);
-  localStorage.setItem("femflow_sessionToken", loginResp.sessionToken);
-  localStorage.setItem("femflow_sessionExpira", String(loginResp.sessionExpira));
+  if (loginResp.deviceId) {
+    localStorage.setItem("femflow_device_id", loginResp.deviceId);
+  }
+  if (loginResp.sessionToken) {
+    localStorage.setItem("femflow_session_token", loginResp.sessionToken);
+  }
+  if (loginResp.sessionExpira) {
+    localStorage.setItem("femflow_session_expira", String(loginResp.sessionExpira));
+  }
 } else {
   // fallback: mandar para login / mostrar erro
 }
