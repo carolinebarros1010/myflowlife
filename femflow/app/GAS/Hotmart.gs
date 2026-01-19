@@ -65,6 +65,7 @@ function _processarHotmart(data) {
 
   const evento = String(eventoRaw || "").trim();
   const eventoNorm = _norm(evento);
+  const eventoCanon = _canonicalizarEventoHotmart(eventoNorm);
 
   Logger.log("📬 Hotmart evento: " + evento);
   Logger.log("📦 Payload keys: " + Object.keys(data || {}).join(","));
@@ -153,7 +154,7 @@ function _processarHotmart(data) {
   /* ======================================================
      5) COMPRA APROVADA
   ====================================================== */
-  if (eventoNorm === _norm("Compra aprovada")) {
+  if (eventoCanon === "compra_aprovada") {
 
     const row = findRowByEmail(email);
     let idAluno = "";
@@ -208,7 +209,7 @@ function _processarHotmart(data) {
   /* ======================================================
      6) RENOVAÇÃO / ATUALIZAÇÃO COBRANÇA
   ====================================================== */
-  if (eventoNorm === _norm("Atualização de Data de Cobrança de Assinatura")) {
+  if (eventoCanon === "atualizacao_cobranca_assinatura") {
     const row = findRowByEmail(email);
     if (row <= 0) {
       return { status: "notfound", email, evento };
@@ -226,10 +227,10 @@ function _processarHotmart(data) {
      7) CANCELAMENTO / REEMBOLSO / CHARGEBACK
   ====================================================== */
   if (
-    eventoNorm === _norm("Compra cancelada") ||
-    eventoNorm === _norm("Cancelamento de Assinatura") ||
-    eventoNorm === _norm("Compra reembolsada") ||
-    eventoNorm === _norm("Chargeback")
+    eventoCanon === "compra_cancelada" ||
+    eventoCanon === "cancelamento_assinatura" ||
+    eventoCanon === "compra_reembolsada" ||
+    eventoCanon === "chargeback"
   ) {
 
     const row = findRowByEmail(email);
@@ -276,4 +277,30 @@ function _pareceHotmart_(data) {
     data.buyer || data.product ||
     data["data.event_name"] || data["buyer[email]"] || data["buyer.email"]
   );
+}
+
+function _canonicalizarEventoHotmart(eventoNorm) {
+  const map = {
+    "compra aprovada": "compra_aprovada",
+    "purchase.approved": "compra_aprovada",
+    "purchase_approved": "compra_aprovada",
+    "subscription.purchase.approved": "compra_aprovada",
+    "subscription_purchase_approved": "compra_aprovada",
+    "compra cancelada": "compra_cancelada",
+    "purchase.canceled": "compra_cancelada",
+    "purchase_canceled": "compra_cancelada",
+    "compra reembolsada": "compra_reembolsada",
+    "purchase.refunded": "compra_reembolsada",
+    "purchase_refunded": "compra_reembolsada",
+    "chargeback": "chargeback",
+    "cancelamento de assinatura": "cancelamento_assinatura",
+    "subscription.canceled": "cancelamento_assinatura",
+    "subscription_canceled": "cancelamento_assinatura",
+    "atualizacao de data de cobranca de assinatura": "atualizacao_cobranca_assinatura",
+    "subscription.charge.date.updated": "atualizacao_cobranca_assinatura",
+    "subscription_charge_date_updated": "atualizacao_cobranca_assinatura"
+  };
+
+  if (!eventoNorm) return "";
+  return map[eventoNorm] || "";
 }
