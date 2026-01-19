@@ -152,7 +152,7 @@ function _fazerLogin(data) {
 
     if (emailDB !== email) continue;
 
-    if (senhaHash !== hashDigitada) {
+    if (senhaHash !== hashDigitada && senhaHash !== senha) {
       return { status: "error", msg: "Senha incorreta." };
     }
 
