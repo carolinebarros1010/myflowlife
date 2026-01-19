@@ -30,20 +30,6 @@ const COACHES = [
       en: "30 days with Karoline",
       fr: "30 jours avec Karoline"
     }
-  },
-  {
-    enfase: "followme_thalita",
-    img: "img/thalita.jpg",
-    titulo: {
-      pt: "Treine com Thalita Prates",
-      en: "Train with Thalita Prates",
-      fr: "Entraînez-vous avec Thalita Prates"
-    },
-    desc: {
-      pt: "30 dias com Thalita",
-      en: "30 days with Thalita",
-      fr: "30 jours avec Thalita"
-    }
   }
 ];
 
