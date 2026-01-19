@@ -156,6 +156,8 @@ function _fazerLogin(data) {
       return { status: "error", msg: "Senha incorreta." };
     }
 
+    const isTrial = produtoNorm === "trial_app";
+
     if (!isVip) {
       // assinatura expirada
       if (dataCompra) {
@@ -167,7 +169,7 @@ function _fazerLogin(data) {
         }
       }
 
-      if (!ativa) {
+      if (!ativa && !isTrial) {
         return { status: "inactive", msg: "Assinatura inativa.", email: email, id: id };
       }
     }
