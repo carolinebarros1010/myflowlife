@@ -350,14 +350,9 @@ home: {
         remo_oceanico: "Remo oceânico",
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jítsu",
-        natacao: "Natação"
-      },
-      treinosSemana: {
-        titulo: "Quantos dias por semana você pretende treinar?",
-        subtitulo: "Isso ajuda a identificar descanso e ausência corretamente.",
-        opcao: "{n}x/semana",
-        salvar: "Salvar",
-        cancelar: "Agora não"
+        natacao: "Natação",
+        surf: "Surf",
+        corrida_curta: "Corrida curta"
       }
     },
   flowcenter: {
@@ -645,14 +640,9 @@ home: {
         remo_oceanico: "Ocean rowing",
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jitsu",
-        natacao: "Swimming"
-      },
-      treinosSemana: {
-        titulo: "How many days per week do you plan to train?",
-        subtitulo: "This helps us identify rest and absence correctly.",
-        opcao: "{n}x/week",
-        salvar: "Save",
-        cancelar: "Not now"
+        natacao: "Swimming",
+        surf: "Surf",
+        corrida_curta: "Short run"
       }
     },
  flowcenter: {
@@ -937,14 +927,9 @@ fr: {
         remo_oceanico: "Aviron océanique",
         beach_tennis: "Beach Tennis",
         jiu_jitsu: "Jiu-jitsu",
-        natacao: "Natation"
-      },
-      treinosSemana: {
-        titulo: "Combien de jours par semaine souhaitez-vous vous entraîner ?",
-        subtitulo: "Cela aide à identifier correctement repos et absence.",
-        opcao: "{n}x/semaine",
-        salvar: "Enregistrer",
-        cancelar: "Pas maintenant"
+        natacao: "Natation",
+        surf: "Surf",
+        corrida_curta: "Course courte"
       }
     },
   flowcenter: {
