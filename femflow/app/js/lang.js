@@ -26,6 +26,15 @@ window.FEMFLOW_LANG = {
       sair: "Sair",
       sac: "Preciso de ajuda"
     },
+    nivelModal: {
+      title: "Selecione seu nível",
+      iniciante: "Iniciante",
+      intermediaria: "Intermediária",
+      avancada: "Avançada",
+      confirmar: "Confirmar nível",
+      fechar: "Fechar",
+      selecione: "Selecione um nível"
+    },
 
     sac: {
       title: "Preciso de ajuda",
@@ -44,6 +53,54 @@ window.FEMFLOW_LANG = {
       erro: "Erro ao enviar. Tente novamente.",
       selecione: "Selecione uma opção",
       enviando: "Enviando…"
+    },
+
+    respiracao: {
+      titulo1: "Respirações",
+      titulo2: "FemFlow",
+      sub: "Escolha o protocolo conforme seu momento 🌿",
+      preparar: "Preparar...",
+      footer: "Inspire equilíbrio. Expire leveza.",
+      tituloModal: "Respiração",
+      grupos: {
+        ciclo: "Respirações do Ciclo",
+        treino: "Respirações para Treinar",
+        universal: "Respirações Universais"
+      },
+      botoes: {
+        iniciar: "Iniciar Respiração",
+        voltarRespiracoes: "← voltar às respirações",
+        voltarTreino: "← voltar ao treino"
+      },
+      fases: {
+        inspire: "Inspire",
+        segure: "Segure",
+        expire: "Expire"
+      },
+      protocolos: {
+        raiz: "Respiração Raiz",
+        clareza: "Respiração Clareza",
+        brilho: "Respiração Brilho",
+        sereno: "Respiração Sereno",
+        wake: "Wake Flow",
+        charge: "Charge Flow",
+        release: "Release Flow",
+        restore: "Restore Flow",
+        equilibrio: "Respiração Equilíbrio",
+        transparencia: "Respiração Transparência"
+      },
+      descricoes: {
+        raiz: "Acalma o corpo, reduz tensões e ajuda você a retornar ao eixo interno.",
+        clareza: "Traz foco, leveza mental e sensação de reorganização.",
+        brilho: "Eleva sua energia e presença durante fases mais fortes do ciclo.",
+        sereno: "Suaviza irritabilidade, oscilações emocionais e TPM.",
+        wake: "Ativa o corpo sem acelerar demais.",
+        charge: "Energia imediata para treinos fortes.",
+        release: "Dissolve tensões e acalma pós-treino.",
+        restore: "Recupera o sistema nervoso profundamente.",
+        equilibrio: "Centraliza sua mente e emoções.",
+        transparencia: "Traz clareza emocional instantânea."
+      }
     }
   },
 
@@ -60,6 +117,15 @@ window.FEMFLOW_LANG = {
       voltar: "Back",
       sair: "Logout",
       sac: "I need help"
+    },
+    nivelModal: {
+      title: "Select your level",
+      iniciante: "Beginner",
+      intermediaria: "Intermediate",
+      avancada: "Advanced",
+      confirmar: "Confirm level",
+      fechar: "Close",
+      selecione: "Select a level"
     },
 
     sac: {
@@ -79,6 +145,54 @@ window.FEMFLOW_LANG = {
       erro: "Error sending message. Please try again.",
       selecione: "Select an option",
       enviando: "Sending…"
+    },
+
+    respiracao: {
+      titulo1: "Breathing",
+      titulo2: "FemFlow",
+      sub: "Choose the protocol for your moment 🌿",
+      preparar: "Get ready...",
+      footer: "Inhale balance. Exhale lightness.",
+      tituloModal: "Breathing",
+      grupos: {
+        ciclo: "Cycle Breathing",
+        treino: "Training Breathing",
+        universal: "Universal Breathing"
+      },
+      botoes: {
+        iniciar: "Start Breathing",
+        voltarRespiracoes: "← back to breathing",
+        voltarTreino: "← back to training"
+      },
+      fases: {
+        inspire: "Inhale",
+        segure: "Hold",
+        expire: "Exhale"
+      },
+      protocolos: {
+        raiz: "Root Breathing",
+        clareza: "Clarity Breathing",
+        brilho: "Glow Breathing",
+        sereno: "Serene Breathing",
+        wake: "Wake Flow",
+        charge: "Charge Flow",
+        release: "Release Flow",
+        restore: "Restore Flow",
+        equilibrio: "Balance Breathing",
+        transparencia: "Transparency Breathing"
+      },
+      descricoes: {
+        raiz: "Calms the body, reduces tension, and helps you return to your inner center.",
+        clareza: "Brings focus, mental lightness, and a sense of reorganization.",
+        brilho: "Boosts your energy and presence during stronger phases of the cycle.",
+        sereno: "Softens irritability, emotional swings, and PMS.",
+        wake: "Energizes the body without over-accelerating.",
+        charge: "Immediate energy for intense training sessions.",
+        release: "Dissolves tension and calms the body after training.",
+        restore: "Deeply restores the nervous system.",
+        equilibrio: "Centers your mind and emotions.",
+        transparencia: "Brings instant emotional clarity."
+      }
     }
   },
 
@@ -95,6 +209,15 @@ window.FEMFLOW_LANG = {
       voltar: "Retour",
       sair: "Déconnexion",
       sac: "J’ai besoin d’aide"
+    },
+    nivelModal: {
+      title: "Sélectionnez votre niveau",
+      iniciante: "Débutante",
+      intermediaria: "Intermédiaire",
+      avancada: "Avancée",
+      confirmar: "Confirmer le niveau",
+      fechar: "Fermer",
+      selecione: "Sélectionnez un niveau"
     },
 
     sac: {
@@ -114,6 +237,54 @@ window.FEMFLOW_LANG = {
       erro: "Erreur lors de l’envoi. Réessayez.",
       selecione: "Sélectionnez une option",
       enviando: "Envoi…"
+    },
+
+    respiracao: {
+      titulo1: "Respirations",
+      titulo2: "FemFlow",
+      sub: "Choisissez le protocole selon votre moment 🌿",
+      preparar: "Préparez-vous...",
+      footer: "Inspirez l'équilibre. Expirez la légèreté.",
+      tituloModal: "Respiration",
+      grupos: {
+        ciclo: "Respirations du cycle",
+        treino: "Respirations pour s'entraîner",
+        universal: "Respirations universelles"
+      },
+      botoes: {
+        iniciar: "Démarrer la respiration",
+        voltarRespiracoes: "← revenir aux respirations",
+        voltarTreino: "← revenir à l'entraînement"
+      },
+      fases: {
+        inspire: "Inspirez",
+        segure: "Retenez",
+        expire: "Expirez"
+      },
+      protocolos: {
+        raiz: "Respiration Racine",
+        clareza: "Respiration Clarté",
+        brilho: "Respiration Éclat",
+        sereno: "Respiration Serein",
+        wake: "Wake Flow",
+        charge: "Charge Flow",
+        release: "Release Flow",
+        restore: "Restore Flow",
+        equilibrio: "Respiration Équilibre",
+        transparencia: "Respiration Transparence"
+      },
+      descricoes: {
+        raiz: "Apaise le corps, réduit les tensions et vous aide à revenir à votre axe intérieur.",
+        clareza: "Apporte concentration, légèreté mentale et sensation de réorganisation.",
+        brilho: "Renforce votre énergie et votre présence pendant les phases plus fortes du cycle.",
+        sereno: "Adoucit l'irritabilité, les variations émotionnelles et le SPM.",
+        wake: "Active le corps sans l'accélérer excessivement.",
+        charge: "Énergie immédiate pour les entraînements intenses.",
+        release: "Dissout les tensions et calme le corps après l'entraînement.",
+        restore: "Restaure profondément le système nerveux.",
+        equilibrio: "Recentre votre esprit et vos émotions.",
+        transparencia: "Apporte une clarté émotionnelle instantanée."
+      }
     }
   }
 };
@@ -154,7 +325,7 @@ home: {
       bemvinda: "Bem-vinda",
       videoTitulo: "Como funciona o FemFlow",
       videoSub:   "Assista ao vídeo rápido antes de começar.",
-      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_PT",
+      videoUrl:   "https://www.youtube.com/embed/pAifTtNF9sQ",
 
       botaoFlowcenter: "Continue seu treino",
       tituloPersonal:  "Personal",
@@ -202,6 +373,7 @@ home: {
   evolucao: "Evolução",
   respiracao: "Respiração",
   endurance: "Endurance",
+  proximoTreino: "Programa-se",
 
   treinoExtraTitulo: "Treino Extra",
   treinoExtraSub: "Escolha a área que deseja focar hoje.",
@@ -276,18 +448,21 @@ home: {
       mobilidade: "Mobilidade"
     },
     btnSalvar: "💾 Salvar treino",
-    btnDescanso: "🌿 Descanso",
     btnCancelar: "Cancelar",
     pseTitulo: "Como foi o treino?",
     pseLabel: "PSE (0 a 10)",
     pseSalvar: "Salvar",
     pseCancelar: "Cancelar",
+    proximoModal: {
+      titulo: "Hoje: {diaAtual}º dia da fase {fase}",
+      subtitulo: "Amanhã: {proximoDia}º dia da fase {fase}. (Dia do ciclo, não do programa.)",
+      listaTitulo: "Treino de amanhã",
+      vazio: "Estamos preparando o próximo treino."
+    },
     tour: {
       step: "{atual}/{total}",
       salvarTitulo: "Salve seu treino",
       salvarTexto: "Ao finalizar, salve para registrar seu PSE e evolução.",
-      descansoTitulo: "Treino também é descanso",
-      descansoTexto: "Selecione quando for descansar para manter seu ciclo alinhado.",
       cancelarTitulo: "Voltar ao painel",
       cancelarTexto: "Use cancelar para sair do treino e voltar ao FlowCenter.",
       next: "Próximo",
@@ -440,7 +615,7 @@ home: {
       bemvinda: "Welcome",
       videoTitulo: "How FemFlow works",
       videoSub:   "Watch this quick video before you start.",
-      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_EN",
+      videoUrl:   "https://www.youtube.com/embed/tOm9I6eKOj4",
 
       botaoFlowcenter: "Continue your workout",
       tituloPersonal:  "Personal Training",
@@ -485,6 +660,7 @@ home: {
   evolucao: "Progress",
   respiracao: "Breathing",
   endurance: "Endurance",
+  proximoTreino: "See next workout",
 
   treinoExtraTitulo: "Extra Training",
   treinoExtraSub: "Choose the area you want to focus on today.",
@@ -557,18 +733,21 @@ home: {
       mobilidade: "Mobility"
     },
     btnSalvar: "💾 Save workout",
-    btnDescanso: "🌿 Rest",
     btnCancelar: "Cancel",
     pseTitulo: "How was the workout?",
     pseLabel: "RPE (0 to 10)",
     pseSalvar: "Save",
     pseCancelar: "Cancel",
+    proximoModal: {
+      titulo: "Today: Day {diaAtual} of the {fase} phase",
+      subtitulo: "Tomorrow: Day {proximoDia} of the {fase} phase. (Cycle day, not program day.)",
+      listaTitulo: "Tomorrow's workout",
+      vazio: "We are preparing the next workout."
+    },
     tour: {
       step: "{atual}/{total}",
       salvarTitulo: "Save your workout",
       salvarTexto: "When you finish, save it to record your RPE and progress.",
-      descansoTitulo: "Rest is also training",
-      descansoTexto: "Select this when you’re resting to keep your cycle aligned.",
       cancelarTitulo: "Back to the panel",
       cancelarTexto: "Use cancel to leave the workout and return to FlowCenter.",
       next: "Next",
@@ -723,7 +902,7 @@ fr: {
       bemvinda: "Bienvenue",
       videoTitulo: "Comment fonctionne FemFlow",
       videoSub:   "Regardez cette vidéo avant de commencer.",
-      videoUrl:   "https://www.youtube.com/embed/SEU_VIDEO_FR",
+      videoUrl:   "https://www.youtube.com/embed/2N9Lf3dSGpo",
 
       botaoFlowcenter: "Continuez votre entraînement",
       tituloPersonal:  "Personal",
@@ -768,6 +947,7 @@ fr: {
   evolucao: "Évolution",
   respiracao: "Respiration",
   endurance: "Endurance",
+  proximoTreino: "Voir le prochain entraînement",
 
   treinoExtraTitulo: "Entraînement extra",
   treinoExtraSub: "Choisissez la zone que vous souhaitez travailler aujourd’hui.",
@@ -840,18 +1020,21 @@ fr: {
       mobilidade: "Mobilité"
     },
     btnSalvar: "💾 Enregistrer l’entraînement",
-    btnDescanso: "🌿 Repos",
     btnCancelar: "Annuler",
     pseTitulo: "Comment était l'entraînement ?",
     pseLabel: "PSE (0 à 10)",
     pseSalvar: "Enregistrer",
     pseCancelar: "Annuler",
+    proximoModal: {
+      titulo: "Aujourd’hui : {diaAtual}e jour de la phase {fase}",
+      subtitulo: "Demain : {proximoDia}e jour de la phase {fase}. (Jour du cycle, pas du programme.)",
+      listaTitulo: "Entraînement de demain",
+      vazio: "Nous préparons le prochain entraînement."
+    },
     tour: {
       step: "{atual}/{total}",
       salvarTitulo: "Enregistrez votre entraînement",
       salvarTexto: "À la fin, enregistrez pour noter votre PSE et votre progression.",
-      descansoTitulo: "Le repos fait aussi partie de l’entraînement",
-      descansoTexto: "Sélectionnez-le quand vous êtes au repos pour garder votre cycle aligné.",
       cancelarTitulo: "Retour au tableau",
       cancelarTexto: "Utilisez annuler pour quitter l’entraînement et revenir au FlowCenter.",
       next: "Suivant",

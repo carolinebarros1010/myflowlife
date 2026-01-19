@@ -68,7 +68,6 @@
   <!-- Rodapé -->
   <div class="fix-footer">
     <button id="salvarTreinoBtn" class="btn-primary-clean">💾 Salvar treino</button>
-    <button id="descansoBtn" class="btn-secondary-clean">🌿 Descanso</button>
     <button id="cancelarTreinoBtn" class="btn-tertiary-clean">Cancelar</button>
   </div>
 
@@ -78,16 +77,29 @@
       <h3 class="modal-title" id="pseTitulo">Como foi o treino?</h3>
 
       <label class="modal-label" id="pseLabel">PSE (0 a 10)</label>
-      <input type="range" min="0" max="10" value="0" id="pseInput" class="modal-slider"/>
-      <div class="pse-emoji" id="pseEmojiWrap" aria-live="polite">
-        <span id="pseEmoji">😴</span>
-        <span class="pse-emoji-value" id="pseEmojiValue">0</span>
+      <div class="pse-slider-wrapper">
+        <div class="pse-emoji" id="pseEmojiWrap" aria-live="polite">
+          <span id="pseEmoji">😴</span>
+          <span class="pse-emoji-value" id="pseEmojiValue">0</span>
+        </div>
+        <input type="range" min="0" max="10" value="0" id="pseInput" class="modal-slider"/>
       </div>
 
       <div class="modal-actions">
         <button id="btnConfirmarPSE" class="modal-btn-ok">Salvar</button>
         <button id="btnCancelarPSE" class="modal-btn-cancel">Cancelar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL PRÓXIMO TREINO -->
+  <div id="modalProximoTreino" class="modal-proximo-overlay hidden" aria-hidden="true">
+    <div class="modal-proximo-card" role="dialog" aria-modal="true">
+      <h3 class="modal-proximo-title" id="modalProximoTitulo">Próximo treino</h3>
+      <p class="modal-proximo-subtitle" id="modalProximoSub">
+        Veja os exercícios para se programar.
+      </p>
+      <ul class="modal-proximo-list" id="modalProximoLista"></ul>
     </div>
   </div>
 
@@ -143,11 +155,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
   const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
   const personal     = hasPersonal && modePersonal;
+  const acessoValido = Boolean(id && produto);
 
-  if (!id || !produto || !cicloOK || (!personal && !enfase)) {
+  if (!acessoValido) {
     FEMFLOW.toast("Acesse o treino pelo painel do FemFlow.");
     FEMFLOW.router("home.html");
     return;
+  }
+
+  if (!personal) {
+    if (!cicloOK) {
+      FEMFLOW.toast("Configure seu ciclo antes de acessar o treino.");
+      FEMFLOW.router("ciclo.html");
+      return;
+    }
+
+    if (!enfase) {
+      FEMFLOW.toast("Acesse o treino pelo painel do FemFlow.");
+      FEMFLOW.router("home.html");
+      return;
+    }
   }
 
   /* ------------------------------------------------------------
@@ -190,13 +217,26 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("tituloDiaTreino").textContent   = L.treino.diaPrograma;
 
     document.getElementById("salvarTreinoBtn").textContent   = L.treino.btnSalvar;
-    document.getElementById("descansoBtn").textContent       = L.treino.btnDescanso;
     document.getElementById("cancelarTreinoBtn").textContent = L.treino.btnCancelar;
 
     document.getElementById("pseTitulo").textContent         = L.treino.pseTitulo;
     document.getElementById("pseLabel").textContent          = L.treino.pseLabel;
     document.getElementById("btnConfirmarPSE").textContent   = L.treino.pseSalvar;
     document.getElementById("btnCancelarPSE").textContent    = L.treino.pseCancelar;
+    const modalProximoTitulo = document.getElementById("modalProximoTitulo");
+    const modalProximoSub = document.getElementById("modalProximoSub");
+    if (modalProximoTitulo) {
+      const diaAtual = Number(localStorage.getItem("femflow_diaCiclo") || 1);
+      const cicloLength = Number(localStorage.getItem("femflow_cycleLength") || 28);
+      const cicloValido = Number.isFinite(cicloLength) && cicloLength > 0 ? cicloLength : 28;
+      const proximoDia = diaAtual + 1 > cicloValido ? 1 : diaAtual + 1;
+      modalProximoTitulo.textContent = t("treino.proximoModal.titulo", {
+        dia: proximoDia
+      });
+    }
+    if (modalProximoSub) {
+      modalProximoSub.textContent = L.treino.proximoModal.subtitulo;
+    }
   }
 
   /* ============================================================

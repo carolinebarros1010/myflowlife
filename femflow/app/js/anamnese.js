@@ -25,6 +25,7 @@ const Tcad = {
     nome: "Nome completo",
     email: "E-mail",
     telefone: "Telefone (opcional)",
+    dataNascimento: "Data de nascimento",
     senha: "Crie uma senha (mín. 6)",
     confirma: "Confirme a senha",
     iniciar: "Iniciar Anamnese",
@@ -36,6 +37,7 @@ const Tcad = {
     nome: "Full name",
     email: "Email",
     telefone: "Phone (optional)",
+    dataNascimento: "Date of birth",
     senha: "Create password (min. 6)",
     confirma: "Confirm password",
     iniciar: "Start Assessment",
@@ -47,6 +49,7 @@ const Tcad = {
     nome: "Nom complet",
     email: "E-mail",
     telefone: "Téléphone (optionnel)",
+    dataNascimento: "Date de naissance",
     senha: "Créer un mot de passe (min. 6)",
     confirma: "Confirmer le mot de passe",
     iniciar: "Commencer l’anamnèse",
@@ -68,6 +71,7 @@ function aplicarIdiomaCadastro() {
   document.getElementById("nome").placeholder = T.nome;
   document.getElementById("email").placeholder = T.email;
   document.getElementById("telefone").placeholder = T.telefone;
+  document.getElementById("labelDataNascimento").textContent = T.dataNascimento;
   document.getElementById("senha").placeholder = T.senha;
   document.getElementById("confirma").placeholder = T.confirma;
 
@@ -109,9 +113,10 @@ function getPerguntasTraduzidas() {
   const $ = (s) => document.querySelector(s);
 
   const nome = $("#nome"), email = $("#email"), tel = $("#telefone"),
+        dataNascimento = $("#dataNascimento"),
         senha = $("#senha"), conf = $("#confirma"), btn = $("#btnIniciar");
 
-  const eNome = $("#eNome"), eEmail = $("#eEmail"),
+  const eNome = $("#eNome"), eEmail = $("#eEmail"), eDataNascimento = $("#eDataNascimento"),
         eSenha = $("#eSenha"), eConf = $("#eConf");
 
   const reEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -132,20 +137,22 @@ function getPerguntasTraduzidas() {
   function validate() {
     const vNome = (nome.value || "").trim().length >= 2;
     const vEmail = reEmail.test((email.value||"").trim());
+    const vDataNascimento = Boolean((dataNascimento?.value || "").trim());
     const vSenha = (senha.value||"").trim().length >= 6;
     const vConf  = conf.value.trim() === senha.value.trim();
 
     mark(nome,  eNome,  vNome,  "Informe seu nome.");
     mark(email, eEmail, vEmail, "Digite um e-mail válido.");
+    mark(dataNascimento, eDataNascimento, vDataNascimento, "Informe sua data de nascimento.");
     mark(senha, eSenha, vSenha, "Mínimo 6 caracteres.");
     mark(conf,  eConf,  vConf,  "As senhas não coincidem.");
 
-    btn.disabled = !(vNome && vEmail && vSenha && vConf);
+    btn.disabled = !(vNome && vEmail && vDataNascimento && vSenha && vConf);
     return !btn.disabled;
   }
 
   ["input","blur"].forEach(evt => {
-    [nome,email,tel,senha,conf].forEach(el => el.addEventListener(evt, validate));
+    [nome,email,tel,dataNascimento,senha,conf].forEach(el => el.addEventListener(evt, validate));
   });
 
   // ------------------------------------------------------------
@@ -171,10 +178,12 @@ function getPerguntasTraduzidas() {
     const nomeV  = nome.value.trim();
     const emailV = email.value.trim();
     const telV   = tel.value.trim();
+    const dataNascimentoV = dataNascimento.value;
 
     localStorage.setItem("lead_nome", nomeV);
     localStorage.setItem("lead_email", emailV);
     if (telV) localStorage.setItem("lead_telefone", telV);
+    localStorage.setItem("lead_data_nascimento", dataNascimentoV);
 
     leadParcial(nomeV, emailV, telV);
 
@@ -183,7 +192,12 @@ function getPerguntasTraduzidas() {
     $("#cadastro").classList.add("hidden");
     $("#quiz").classList.remove("hidden");
 
-    FEMFLOW._leadCadastro = { nome:nomeV, email:emailV, telefone:telV };
+    FEMFLOW._leadCadastro = {
+      nome: nomeV,
+      email: emailV,
+      telefone: telV,
+      dataNascimento: dataNascimentoV
+    };
 
     // iniciar quiz
     setTimeout(() => { window.iniciarQuizFemFlow?.(); }, 400);
@@ -217,6 +231,7 @@ function getPerguntasTraduzidas() {
       nome:     lead.nome     || localStorage.getItem("lead_nome") || "",
       email:    lead.email    || localStorage.getItem("lead_email") || "",
       telefone: lead.telefone || localStorage.getItem("lead_telefone") || "",
+      dataNascimento: lead.dataNascimento || localStorage.getItem("lead_data_nascimento") || "",
       senha:    $("#senha")?.value || ""
     };
   }
@@ -277,7 +292,7 @@ async function finalizarAnamnese() {
   const respostas = {};
   perguntas.forEach((p, i) => respostas["q" + (i + 1)] = p.escolha || 0);
 
-  const { nome, email, telefone, senha } = pegarDadosLead();
+  const { nome, email, telefone, dataNascimento, senha } = pegarDadosLead();
 
   if (!nome || !email || !senha) {
     FEMFLOW.toast?.("Erro ao finalizar", true);
@@ -296,6 +311,7 @@ async function finalizarAnamnese() {
       nome,
       email,
       telefone,
+      dataNascimento,
       senha,
       anamnese: JSON.stringify(respostas)
     });
@@ -322,9 +338,15 @@ const loginResp = await FEMFLOW.post({
 });
 
 if (loginResp?.status === "ok") {
-  localStorage.setItem("femflow_deviceId", loginResp.deviceId);
-  localStorage.setItem("femflow_sessionToken", loginResp.sessionToken);
-  localStorage.setItem("femflow_sessionExpira", String(loginResp.sessionExpira));
+  if (loginResp.deviceId) {
+    localStorage.setItem("femflow_device_id", loginResp.deviceId);
+  }
+  if (loginResp.sessionToken) {
+    localStorage.setItem("femflow_session_token", loginResp.sessionToken);
+  }
+  if (loginResp.sessionExpira) {
+    localStorage.setItem("femflow_session_expira", String(loginResp.sessionExpira));
+  }
 } else {
   // fallback: mandar para login / mostrar erro
 }

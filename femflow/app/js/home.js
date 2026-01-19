@@ -7,13 +7,101 @@
 /* LINKS */
 const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
 const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
+const EBOOKS_DATA_URL = "ebooks/ebooks.json";
 
 /* FOLLOWME */
 const FOLLOWME_LINKS = {
   livia: "#",
-  karoline: "#",
-  thalita: "#"
+  karoline: "#"
 };
+
+const TREINOS_SEMANA_KEY = "femflow_treinos_semana";
+const TREINOS_SEMANA_PADRAO = 3;
+let treinosSemanaResolve = null;
+let treinosSemanaSelecionado = null;
+
+function atualizarModalTreinosSemana() {
+  const modal = document.getElementById("treinosSemanaModal");
+  if (!modal) return;
+
+  const lang = FEMFLOW.lang || "pt";
+  const L = FEMFLOW.langs?.[lang]?.home?.treinosSemana;
+  const titulo = document.getElementById("treinosSemanaTitulo");
+  const subtitulo = document.getElementById("treinosSemanaSub");
+  const options = document.getElementById("treinosSemanaOptions");
+  const btnSalvar = document.getElementById("treinosSemanaSalvar");
+  const btnCancelar = document.getElementById("treinosSemanaCancelar");
+
+  if (titulo && L?.titulo) titulo.textContent = L.titulo;
+  if (subtitulo && L?.subtitulo) subtitulo.textContent = L.subtitulo;
+  if (btnSalvar && L?.salvar) btnSalvar.textContent = L.salvar;
+  if (btnCancelar && L?.cancelar) btnCancelar.textContent = L.cancelar;
+
+  if (!options) return;
+  options.innerHTML = "";
+  const current = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
+  for (let i = 1; i <= 7; i++) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ff-modal-option";
+    if (i === current) btn.classList.add("is-active");
+    const label = L?.opcao ? L.opcao.replace("{n}", i) : `${i}x/semana`;
+    btn.textContent = label;
+    btn.dataset.valor = String(i);
+    btn.addEventListener("click", () => {
+      treinosSemanaSelecionado = i;
+      options.querySelectorAll(".ff-modal-option").forEach((el) =>
+        el.classList.toggle("is-active", el.dataset.valor === String(i))
+      );
+    });
+    options.appendChild(btn);
+  }
+}
+
+function abrirModalTreinosSemana() {
+  const modal = document.getElementById("treinosSemanaModal");
+  if (!modal) return Promise.resolve(false);
+  treinosSemanaSelecionado = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
+  atualizarModalTreinosSemana();
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+
+  return new Promise((resolve) => {
+    treinosSemanaResolve = resolve;
+  });
+}
+
+function fecharModalTreinosSemana() {
+  const modal = document.getElementById("treinosSemanaModal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+async function salvarTreinosSemana(valor) {
+  localStorage.setItem(TREINOS_SEMANA_KEY, String(valor));
+  const id = localStorage.getItem("femflow_id");
+  if (!id) return;
+
+  await fetch(FEMFLOW.SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "settreinossemana",
+      id,
+      treinosSemana: valor
+    })
+  });
+}
+
+async function garantirTreinosSemana() {
+  const valorRaw = localStorage.getItem(TREINOS_SEMANA_KEY);
+  const valor = Number(valorRaw);
+  if (Number.isFinite(valor) && valor >= 1 && valor <= 7) return true;
+
+  const aprovado = await abrirModalTreinosSemana();
+  return aprovado === true;
+}
 
 /* ============================================================
    🔄 PERFIL: puxar do backend e persistir no localStorage
@@ -42,12 +130,14 @@ function persistPerfil(perfil) {
   localStorage.setItem("femflow_nome", perfil.nome || "");
   localStorage.setItem("femflow_email", perfil.email || "");
   localStorage.setItem("femflow_nivel", String(perfil.nivel || "iniciante").toLowerCase());
-  localStorage.setItem("femflow_produto", String(perfil.produto || "").toLowerCase());
-  localStorage.setItem("femflow_ativa", String(!!perfil.ativa));
+  const produto = String(perfil.produto || "").toLowerCase();
+  const isVip = produto === "vip";
+  localStorage.setItem("femflow_produto", produto);
+  localStorage.setItem("femflow_ativa", String(isVip || !!perfil.ativa));
 
   // ✅ acesso personal = direito (backend), separado do modo personal (front)
   const acessos = perfil.acessos || {};
-  const hasPersonal = acessos.personal === true;
+  const hasPersonal = acessos.personal === true || isVip;
   localStorage.setItem("femflow_has_personal", String(hasPersonal));
   localStorage.removeItem("femflow_personal"); // legado: nunca usar mais
 
@@ -118,6 +208,7 @@ const CARDS_HOME_PRESETS = [
   "avancada_casa_queima_gordura",
   "avancada_casa_fullbody_praia",
   "iniciante_corrida_longa",
+  "iniciante_casa_core_gluteo",
   "iniciante_costas",
   "iniciante_casa_core_gluteo",
   "iniciante_forcaabc",
@@ -186,11 +277,15 @@ function podeAcessar(enfase, perfil) {
 
   const categoria = inferirCategoria(enfase);
   const produto = (perfil.produto || "").toLowerCase();
+  const isTrial = produto === "trial_app";
+  const isVip = produto === "vip";
   const ativa = !!perfil.ativa;
  const personal = localStorage.getItem("femflow_has_personal") === "true";
 
 
-  if (!ativa) return false;
+  if ((!ativa || isTrial) && !isVip) return false;
+
+  if (isVip) return true;
 
   // 🔥 PERSONAL (direito) = acesso_app + personal
   if (personal) {
@@ -199,7 +294,7 @@ function podeAcessar(enfase, perfil) {
   }
 
   // 🔹 ACESSO APP
-  if (produto === "acesso_app") {
+  if (produto === "acesso_app" || isTrial) {
     return ["muscular", "esportes", "casa"].includes(categoria);
   }
 
@@ -370,14 +465,6 @@ const CARDS_FOLLOWME_SIMBOLICOS = [
     color: "#ff9f7f",
     locked: true,
     simbolico: true
-  },
-  {
-    enfase: "followme_thalita",
-    titulo: "Treine com Thalita Prates",
-    desc: "Força e constância no feminino",
-    color: "#cbb1e6",
-    locked: true,
-    simbolico: true
   }
 ];
 
@@ -412,6 +499,76 @@ function getThumbUrl(enfase) {
 }
 
 /* ============================================================
+   EBOOKS — CARDS NETFLIX
+=========================================================== */
+const EBOOKS_FALLBACK_COLOR = "#fceae3";
+
+function resolveEbookUrl(path) {
+  const cleanPath = String(path || "").replace(/^\/+/, "");
+  if (!cleanPath) return "";
+  return new URL(`/femflow/app/ebooks/${cleanPath}`, window.location.origin).toString();
+}
+
+function resolveEbookLink(link) {
+  if (!link) return "";
+  if (String(link).startsWith("http")) return link;
+  return resolveEbookUrl(link);
+}
+
+function formatarPrecoEbook(preco, tipo) {
+  if (tipo === "download" || preco === "0,00") return "Gratuito";
+  if (!preco) return "";
+  return `R$ ${preco}`;
+}
+
+function ebookCardHTML(ebook) {
+  const titulo = ebook.nome || "eBook";
+  const preco = formatarPrecoEbook(ebook.preco, ebook.tipo);
+  const acao = ebook.tipo === "download" ? "Baixar" : "Comprar";
+  const gratuito = ebook.tipo === "download" || ebook.preco === "0,00";
+  const badgeGratuito = gratuito ? '<span class="badge-free">Gratuito</span>' : "";
+  const desc = [preco, acao].filter(Boolean).join(" • ");
+  const capa = ebook.capa ? resolveEbookUrl(ebook.capa) : "";
+  const thumbStyle = `${capa ? `--thumb-url:url('${capa}');` : ""}background-color:${EBOOKS_FALLBACK_COLOR};`;
+  const destino = resolveEbookLink(ebook.link);
+
+  return `
+    <article class="card" data-destino="${destino}">
+      <div class="thumb${capa ? " has-image" : ""}" style="${thumbStyle}">
+        ${badgeGratuito}
+      </div>
+      <div class="info">
+        <h3 class="ttl">${titulo}</h3>
+        <p class="desc">${desc}</p>
+      </div>
+    </article>`;
+}
+
+function renderEbookRail(el, lista) {
+  if (!el) return;
+  el.innerHTML = lista.map(ebookCardHTML).join("");
+  el.querySelectorAll(".card").forEach(card => {
+    card.onclick = () => {
+      if (card.dataset.destino) {
+        window.location.href = card.dataset.destino;
+      }
+    };
+  });
+}
+
+async function carregarEbooks() {
+  try {
+    const resp = await fetch(EBOOKS_DATA_URL, { cache: "no-store" });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.warn("Falha ao carregar ebooks:", err);
+    return [];
+  }
+}
+
+/* ============================================================
    RENDERIZAÇÃO DOS CARDS
 =========================================================== */
 function cardHTML(p) {
@@ -442,19 +599,28 @@ function renderRail(el, lista) {
   if (!el) return;
   el.innerHTML = lista.map(cardHTML).join("");
   el.querySelectorAll(".card").forEach(c =>
-    c.onclick = () => handleCardClick(c.dataset.enfase, c.dataset.locked === "true")
+    c.onclick = () => {
+      void handleCardClick(c.dataset.enfase, c.dataset.locked === "true");
+    }
   );
 }
 
 /* ============================================================
    LÓGICA DE ACESSO POR PRODUTO
 =========================================================== */
-function handleCardClick(enfase, locked) {
+async function handleCardClick(enfase, locked) {
 
   /* =========================================
      🔒 CARD BLOQUEADO (VITRINE COMERCIAL)
   ========================================= */
   if (locked) {
+    const produto = String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+    const isTrial = produto === "trial_app";
+    const categoria = inferirCategoria(enfase);
+    if (isTrial && ["muscular", "esportes", "casa"].includes(categoria)) {
+      window.open(LINK_ACESSO_APP, "_blank");
+      return;
+    }
 
     // 🧠 PERSONAL — CTA dedicado (propaganda)
     if (enfase === "personal" || enfase.startsWith("personal_")) {
@@ -473,6 +639,9 @@ function handleCardClick(enfase, locked) {
     FEMFLOW.toast("Plano necessário para acessar este treino.");
     return;
   }
+
+  const treinosOk = await garantirTreinosSemana();
+  if (!treinosOk) return;
 
   /* =========================================
      🧭 PERSONAL DESBLOQUEADO = ativa modo e vai pro FLOWCENTER
@@ -617,6 +786,7 @@ function aplicarIdiomaHome() {
   const tMuscular = document.getElementById("tituloMuscular");
   const tEsportes = document.getElementById("tituloEsportes");
   const tCasa = document.getElementById("tituloCasa");
+  const tEbooks = document.getElementById("tituloEbooks");
   const btnFlow = document.getElementById("btnFlow");
 
   if (tPersonal) tPersonal.textContent = L.tituloPersonal;
@@ -624,6 +794,7 @@ function aplicarIdiomaHome() {
   if (tMuscular) tMuscular.textContent = L.tituloMuscular;
   if (tEsportes) tEsportes.textContent = L.tituloEsportes;
   if (tCasa) tCasa.textContent = L.tituloCasa;
+  if (tEbooks) tEbooks.textContent = L.tituloEbooks;
   if (btnFlow && L.botaoFlowcenter) btnFlow.textContent = L.botaoFlowcenter;
 
   // 🔥 VÍDEO
@@ -634,6 +805,8 @@ function aplicarIdiomaHome() {
   if (vTitle && L.videoTitulo) vTitle.textContent = L.videoTitulo;
   if (vSub && L.videoSub) vSub.textContent = L.videoSub;
   if (vFrame && L.videoUrl) vFrame.src = L.videoUrl;
+
+  atualizarModalTreinosSemana();
 }
 
 /* ============================================================
@@ -643,6 +816,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   FEMFLOW.loading.show("Carregando…");
 
   try {
+    const treinosStorage = Number(localStorage.getItem(TREINOS_SEMANA_KEY));
+    if (Number.isFinite(treinosStorage)) {
+      treinosSemanaSelecionado = treinosStorage;
+    }
+
+    const modalSalvar = document.getElementById("treinosSemanaSalvar");
+    const modalCancelar = document.getElementById("treinosSemanaCancelar");
+    const modalOverlay = document.getElementById("treinosSemanaModal");
+
+    if (modalSalvar) {
+      modalSalvar.addEventListener("click", async () => {
+        const valor = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
+        await salvarTreinosSemana(valor);
+        fecharModalTreinosSemana();
+        if (treinosSemanaResolve) treinosSemanaResolve(true);
+        treinosSemanaResolve = null;
+      });
+    }
+
+    if (modalCancelar) {
+      modalCancelar.addEventListener("click", () => {
+        fecharModalTreinosSemana();
+        if (treinosSemanaResolve) treinosSemanaResolve(false);
+        treinosSemanaResolve = null;
+      });
+    }
+
+    if (modalOverlay) {
+      modalOverlay.addEventListener("click", (event) => {
+        if (event.target !== modalOverlay) return;
+        fecharModalTreinosSemana();
+        if (treinosSemanaResolve) treinosSemanaResolve(false);
+        treinosSemanaResolve = null;
+      });
+    }
+
     const perfil = await carregarPerfilEAtualizarStorage();
 
     if (perfil.status !== "ok") {
@@ -682,6 +891,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const produto =
       String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+    const isVip = produto === "vip";
 
     // PERSONAL — sempre aparece:
     // - se tem personal → desbloqueado (ativa modo personal)
@@ -698,7 +908,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (catalogo.followme.length === 0) {
       const cards = CARDS_FOLLOWME_SIMBOLICOS.map(c => ({
         ...c,
-        locked: produto !== c.enfase
+        locked: !isVip && produto !== c.enfase
       }));
       catalogo.followme.push(...cards);
     }
@@ -708,6 +918,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderRail(document.getElementById("railEsportes"), catalogo.esportes);
     renderRail(document.getElementById("railCasa"), catalogo.casa);
     renderRail(document.getElementById("railPersonal"), catalogo.personal);
+    renderEbookRail(document.getElementById("railEbooks"), await carregarEbooks());
 
     aplicarIdiomaHome();
   } catch (err) {
