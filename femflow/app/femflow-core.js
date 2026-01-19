@@ -157,6 +157,11 @@ FEMFLOW.getSession = function () {
 ============================================================ */
 
 FEMFLOW.post = async function (payload) {
+  if (!payload || !payload.action) {
+    console.warn("⚠️ FEMFLOW.post sem action:", payload);
+    return { status: "ignored", msg: "missing_action" };
+  }
+
   const session = FEMFLOW.getSession();
 
   const body = {
