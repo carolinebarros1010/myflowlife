@@ -583,6 +583,7 @@ const CARD_THUMBS = {
   jiu_jitsu: "jiu_jitsu.jpg",
   natacao: "natacao.jpg",
   surf: "surf.jpg",
+  personal: "personal_ricardojr.jpg",
   personal_ricardojr: "personal_ricardojr.jpg",
   corrida_curta: "corrida_curta.jpg"
 };
