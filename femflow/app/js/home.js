@@ -12,8 +12,7 @@ const EBOOKS_DATA_URL = "ebooks/ebooks.json";
 /* FOLLOWME */
 const FOLLOWME_LINKS = {
   livia: "#",
-  karoline: "#",
-  thalita: "#"
+  karoline: "#"
 };
 
 const TREINOS_SEMANA_KEY = "femflow_treinos_semana";
@@ -461,14 +460,6 @@ const CARDS_FOLLOWME_SIMBOLICOS = [
     titulo: "Treine com Karoline Bombeira",
     desc: "Rotina intensa e funcional",
     color: "#ff9f7f",
-    locked: true,
-    simbolico: true
-  },
-  {
-    enfase: "followme_thalita",
-    titulo: "Treine com Thalita Prates",
-    desc: "Força e constância no feminino",
-    color: "#cbb1e6",
     locked: true,
     simbolico: true
   }
