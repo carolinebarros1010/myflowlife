@@ -323,8 +323,9 @@ async function finalizarAnamnese() {
   }
 
   if (!r || !(r.status === "ok" || r.status === "created") || !r.id) {
-    FEMFLOW.toast?.("Erro ao finalizar", true);
-    finalMsgEl.textContent = "Erro ao concluir.";
+    const msg = r?.msg || "Erro ao concluir.";
+    FEMFLOW.toast?.(msg, true);
+    finalMsgEl.textContent = msg;
     return;
   }
  
@@ -348,7 +349,10 @@ if (loginResp?.status === "ok") {
     localStorage.setItem("femflow_session_expira", String(loginResp.sessionExpira));
   }
 } else {
-  // fallback: mandar para login / mostrar erro
+  const msg = loginResp?.msg || "Erro ao concluir.";
+  FEMFLOW.toast?.(msg, true);
+  finalMsgEl.textContent = msg;
+  return;
 }
 
 
