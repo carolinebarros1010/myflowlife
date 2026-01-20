@@ -55,6 +55,14 @@ function formatRange(min, max, unit = "min") {
   return `${minRound}–${maxRound} ${unit}`;
 }
 
+function formatTempoValue(minutos) {
+  const rounded = Math.round(minutos * 10) / 10;
+  if (Math.abs(rounded - Math.round(rounded)) < 0.05) {
+    return `${Math.round(rounded)} min`;
+  }
+  return `${rounded.toFixed(1)} min`;
+}
+
 function normalizarNivel(raw) {
   const n = String(raw || "").toLowerCase().trim();
   if (!n) return "iniciante";
@@ -155,6 +163,100 @@ function buildEstrutura(min, max) {
     aquecimento: `Aquecimento: ${formatRange(aquecimentoMin, aquecimentoMax)}`,
     principal: `Parte principal: ${formatRange(principalMin, principalMax)}`,
     desaquecimento: `Desaquecimento: ${formatRange(desaquecMin, desaquecMax)}`,
+  };
+}
+
+function parseTempoTokens(texto) {
+  let total = 0;
+  let restante = texto;
+  const rangeRegex = /(\d+(?:[–-]\d+)+)\s*([\'\"])/g;
+  restante = restante.replace(rangeRegex, (_match, nums, unit) => {
+    const soma = nums.split(/[–-]/).reduce((acc, item) => acc + parseFloat(item.replace(",", ".")), 0);
+    const fator = unit === "\"" ? 1 / 60 : 1;
+    total += soma * fator;
+    return " ";
+  });
+
+  const tokenRegex = /(\d+(?:[.,]\d+)?)\s*([\'\"])/g;
+  let match;
+  while ((match = tokenRegex.exec(restante)) !== null) {
+    const valor = parseFloat(match[1].replace(",", "."));
+    if (Number.isNaN(valor)) continue;
+    total += match[2] === "\"" ? valor / 60 : valor;
+  }
+  return total;
+}
+
+function parseTempoSegmento(texto) {
+  let total = 0;
+  let restante = texto;
+  const repParentesesRegex = /(\d+)\s*[×x]\s*\(([^)]+)\)/g;
+  restante = restante.replace(repParentesesRegex, (_match, rep, conteudo) => {
+    total += parseInt(rep, 10) * parseTempoTokens(conteudo);
+    return " ";
+  });
+
+  const repMatch = restante.match(/(\d+)\s*[×x]\s*(.+)/);
+  if (repMatch) {
+    total += parseInt(repMatch[1], 10) * parseTempoTokens(repMatch[2]);
+    return total;
+  }
+
+  total += parseTempoTokens(restante);
+  return total;
+}
+
+function calcularTempoPorDescricao(desc) {
+  if (!desc) return null;
+  const descLower = desc.toLowerCase();
+  if (/\b\d+(?:[.,]\d+)?\s*(km|m)\b/.test(descLower)) return null;
+
+  const partes = desc.split("+").map(item => item.trim()).filter(Boolean);
+  if (!partes.length) return null;
+
+  const partesInfo = partes.map((texto) => ({
+    texto: texto.toLowerCase(),
+    tempo: parseTempoSegmento(texto)
+  }));
+
+  const total = partesInfo.reduce((acc, item) => acc + item.tempo, 0);
+  if (total <= 0) return null;
+
+  let aquecimento = 0;
+  let principal = 0;
+  let desaquecimento = 0;
+  partesInfo.forEach((item, index) => {
+    if (!item.tempo) return;
+    if (item.texto.includes("aquec")) {
+      aquecimento += item.tempo;
+    } else if (item.texto.includes("desaquec")) {
+      desaquecimento += item.tempo;
+    } else if (item.texto.includes("leve") && index === 0) {
+      aquecimento += item.tempo;
+    } else if (item.texto.includes("leve") && index === partesInfo.length - 1) {
+      desaquecimento += item.tempo;
+    } else {
+      principal += item.tempo;
+    }
+  });
+
+  if (!principal) {
+    principal = Math.max(0, total - aquecimento - desaquecimento);
+  }
+
+  return {
+    total,
+    aquecimento,
+    principal,
+    desaquecimento
+  };
+}
+
+function buildEstruturaFromParts(tempos) {
+  return {
+    aquecimento: `Aquecimento: ${formatTempoValue(tempos.aquecimento)}`,
+    principal: `Parte principal: ${formatTempoValue(tempos.principal)}`,
+    desaquecimento: `Desaquecimento: ${formatTempoValue(tempos.desaquecimento)}`
   };
 }
 
@@ -532,7 +634,8 @@ function gerarMesociclo() {
     const fatorModalidade = getModalidadeConfig(modalidade);
     const tempoMin = tempoCorridaMin * fatorModalidade.min;
     const tempoMax = tempoCorridaMin * fatorModalidade.max;
-    const estrutura = buildEstrutura(tempoMin, tempoMax);
+    const temposPorDesc = calcularTempoPorDescricao(treino.desc);
+    const estrutura = temposPorDesc ? buildEstruturaFromParts(temposPorDesc) : buildEstrutura(tempoMin, tempoMax);
     const distanciaEstimada = formatDistanciaEstimativa(modalidade, alvo);
     const dataLabel = data.toLocaleDateString("pt-BR", {
       day: "2-digit",
@@ -551,7 +654,7 @@ function gerarMesociclo() {
       ritmoLabel: formatRitmoLabel(modalidade, ritmoSessao),
       modalidade,
       zona,
-      tempo: formatRange(tempoMin, tempoMax),
+      tempo: temposPorDesc ? formatTempoValue(temposPorDesc.total) : formatRange(tempoMin, tempoMax),
       distanciaEstimada,
       estrutura,
       desc: treino.desc
