@@ -49,6 +49,7 @@ function gerarDia_(ctx) {
       if (ultimoTipo !== 'treino' || ultimoBox !== boxAtual) {
         ordem = 0;
       }
+      const tempo = ex.tempo || '';
       linhas.push({
         tipo: 'treino',
         box: boxAtual,
@@ -61,9 +62,9 @@ function gerarDia_(ctx) {
         titulo_fr: ex.titulo_fr || '',
         link: ex.link || '',
         series: ex.series || '',
-        reps: ex.reps || '',
+        reps: tempo ? '' : (ex.reps || ''),
         especial: ex.especial || '',
-        tempo: ex.tempo || '',
+        tempo,
         intervalo: ex.intervalo || FEMFLOW.INTERVALO_TREINO,
         forte: '',
         leve: '',
