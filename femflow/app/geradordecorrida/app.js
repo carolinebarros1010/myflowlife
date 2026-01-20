@@ -10,6 +10,21 @@ const byId = (id) => document.getElementById(id);
 const $ = (sel) => document.querySelector(sel);
 const t = (key) => (window.EnduranceI18n?.t ? window.EnduranceI18n.t(key) : key);
 
+function getActiveLanguage() {
+  if (window.EnduranceI18n?.getLanguage) return window.EnduranceI18n.getLanguage();
+  const htmlLang = document.documentElement.lang || "pt";
+  if (htmlLang.startsWith("en")) return "en";
+  if (htmlLang.startsWith("fr")) return "fr";
+  return "pt";
+}
+
+function translateTreinoCampo(treino, campo) {
+  const lang = getActiveLanguage();
+  if (lang === "pt") return treino?.[campo] || "";
+  const key = `${campo}_${lang}`;
+  return treino?.[key] || treino?.[campo] || "";
+}
+
 /* ======= Som (WebAudio) ======= */
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function beep(freq = 880, dur = 120, type = "sine", vol = 0.08) {
@@ -210,7 +225,6 @@ function parseTempoSegmento(texto) {
 function calcularTempoPorDescricao(desc) {
   if (!desc) return null;
   const descLower = desc.toLowerCase();
-  if (/\b\d+(?:[.,]\d+)?\s*(km|m)\b/.test(descLower)) return null;
 
   const partes = desc.split("+").map(item => item.trim()).filter(Boolean);
   if (!partes.length) return null;
@@ -741,6 +755,8 @@ function renderSemana(semana){
     const modalidadeLabel = formatModalidadeLabel(treino.modalidade);
     const tipoLabel = treino.tipoKey ? t(treino.tipoKey) : treino.tipo;
     const distanciaEstimada = formatDistanciaEstimativa(treino.modalidade, treino.distKm);
+    const treinoNome = translateTreinoCampo(treino, "nome");
+    const treinoDesc = translateTreinoCampo(treino, "desc");
     const temposPorDesc = calcularTempoPorDescricao(treino.desc);
     const estruturaLabel = temposPorDesc ? buildEstruturaFromParts(temposPorDesc) : treino.estrutura;
     const tempoLabel = temposPorDesc ? formatTempoValue(temposPorDesc.total) : treino.tempo;
@@ -749,7 +765,7 @@ function renderSemana(semana){
       <div class="thumb"></div>
       <div class="body">
         <span class="badge">${treino.dia}</span>
-        <div class="title">${idx+1}. ${treino.nome}</div>
+        <div class="title">${idx+1}. ${treinoNome || treino.nome}</div>
         <div class="kv">${t("label_type")}: ${tipoLabel} • ${t("label_modality")}: <b>${modalidadeLabel}</b></div>
         <div class="kv">${t("label_total_time")}: <b>${tempoLabel}</b> • ${t("label_zone")}: <b>${treino.zona}</b></div>
         <div class="kv">${t("label_estimated_distance")}: <b>${distanciaEstimada}</b></div>
@@ -757,7 +773,7 @@ function renderSemana(semana){
         <div class="kv">${estruturaLabel.principal}</div>
         <div class="kv">${estruturaLabel.desaquecimento}</div>
         <div class="kv">${ritmoLabel || `${t("label_base_pace_running")} ${treino.ritmo} min/km`}</div>
-        <p class="kv">${treino.desc || ""}</p>
+        <p class="kv">${treinoDesc || treino.desc || ""}</p>
       </div>`;
     grid.appendChild(el);
   });
@@ -839,6 +855,12 @@ function toast(msg){
 /* ======= Eventos ======= */
 window.addEventListener('DOMContentLoaded', ()=>{
   console.log("⚡️ Gerador de Corrida V24 conectado");
+
+  window.refreshEnduranceUI = () => {
+    if (typeof renderSemanaAtiva === "function") {
+      renderSemanaAtiva();
+    }
+  };
 
   (async () => {
     const id = localStorage.getItem("femflow_id");

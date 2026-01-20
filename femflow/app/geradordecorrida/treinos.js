@@ -1,40 +1,40 @@
 window.TREINOS_POR_MODALIDADE = {
   corrida: {
     resistencia: [
-      { nome: "Contínuo progressivo", distKm: 5.0, desc: "10' leve + 20' ritmo estável + 5' leve", tipo: "res_vel" },
-      { nome: "Fartlek leve", distKm: 4.5, desc: "6×(2' moderado/2' leve) + 10' leve", tipo: "res_vel" },
-      { nome: "Tempo run fracionado", distKm: 5.2, desc: "3×6' forte/2' leve + 8' leve", tipo: "res_vel" },
-      { nome: "Intervalado 800m", distKm: 4.8, desc: "5×800m (85–90%) 2' leve + 10' leve", tipo: "res_vel" },
-      { nome: "Rodagem com técnica", distKm: 4.0, desc: "20' leve + 6×60m técnica + 8' leve", tipo: "res_vel" },
-      { nome: "Intervalado 1000m", distKm: 5.0, desc: "4×1000m (85–90%) 2' leve + 8' leve", tipo: "res_vel" },
-      { nome: "Progressivo 30'", distKm: 4.6, desc: "10' leve + 15' progressivo + 5' leve", tipo: "res_vel" },
-      { nome: "Base contínua", distKm: 4.2, desc: "25' Z2 + 5' leve", tipo: "res_vel" },
-      { nome: "Fartlek 3/2", distKm: 4.7, desc: "5×(3' moderado/2' leve) + 8' leve", tipo: "res_vel" },
-      { nome: "Tempo 2×8'", distKm: 5.1, desc: "2×8' forte/3' leve + 8' leve", tipo: "res_vel" }
+      { nome: "Contínuo progressivo", nome_en: "Progressive continuous", nome_fr: "Continu progressif", distKm: 5.0, desc: "10' leve + 20' ritmo estável + 5' leve", desc_en: "10' easy + 20' steady pace + 5' easy", desc_fr: "10' facile + 20' allure stable + 5' facile", tipo: "res_vel" },
+      { nome: "Fartlek leve", nome_en: "Easy fartlek", nome_fr: "Fartlek léger", distKm: 4.5, desc: "6×(2' moderado/2' leve) + 10' leve", desc_en: "6×(2' moderate/2' easy) + 10' easy", desc_fr: "6×(2' modéré/2' facile) + 10' facile", tipo: "res_vel" },
+      { nome: "Tempo run fracionado", nome_en: "Split tempo run", nome_fr: "Tempo fractionné", distKm: 5.2, desc: "3×6' forte/2' leve + 8' leve", desc_en: "3×6' hard/2' easy + 8' easy", desc_fr: "3×6' intense/2' facile + 8' facile", tipo: "res_vel" },
+      { nome: "Intervalado 800m", nome_en: "800m intervals", nome_fr: "Intervalles 800m", distKm: 4.8, desc: "5×800m (85–90%) 2' leve + 10' leve", desc_en: "5×800m (85–90%) 2' easy + 10' easy", desc_fr: "5×800m (85–90%) 2' facile + 10' facile", tipo: "res_vel" },
+      { nome: "Rodagem com técnica", nome_en: "Easy run with drills", nome_fr: "Footing avec technique", distKm: 4.0, desc: "20' leve + 6×60m técnica + 8' leve", desc_en: "20' easy + 6×60m drills + 8' easy", desc_fr: "20' facile + 6×60m technique + 8' facile", tipo: "res_vel" },
+      { nome: "Intervalado 1000m", nome_en: "1000m intervals", nome_fr: "Intervalles 1000m", distKm: 5.0, desc: "4×1000m (85–90%) 2' leve + 8' leve", desc_en: "4×1000m (85–90%) 2' easy + 8' easy", desc_fr: "4×1000m (85–90%) 2' facile + 8' facile", tipo: "res_vel" },
+      { nome: "Progressivo 30'", nome_en: "Progressive 30'", nome_fr: "Progressif 30'", distKm: 4.6, desc: "10' leve + 15' progressivo + 5' leve", desc_en: "10' easy + 15' progressive + 5' easy", desc_fr: "10' facile + 15' progressif + 5' facile", tipo: "res_vel" },
+      { nome: "Base contínua", nome_en: "Steady base", nome_fr: "Base continue", distKm: 4.2, desc: "25' Z2 + 5' leve", desc_en: "25' Z2 + 5' easy", desc_fr: "25' Z2 + 5' facile", tipo: "res_vel" },
+      { nome: "Fartlek 3/2", nome_en: "Fartlek 3/2", nome_fr: "Fartlek 3/2", distKm: 4.7, desc: "5×(3' moderado/2' leve) + 8' leve", desc_en: "5×(3' moderate/2' easy) + 8' easy", desc_fr: "5×(3' modéré/2' facile) + 8' facile", tipo: "res_vel" },
+      { nome: "Tempo 2×8'", nome_en: "Tempo 2×8'", nome_fr: "Tempo 2×8'", distKm: 5.1, desc: "2×8' forte/3' leve + 8' leve", desc_en: "2×8' hard/3' easy + 8' easy", desc_fr: "2×8' intense/3' facile + 8' facile", tipo: "res_vel" }
     ],
     velocidade: [
-      { nome: "Ladeira curta", distKm: 2.4, desc: "10×80m subida + 10' leve", tipo: "potencia" },
-      { nome: "Pliometria + sprint", distKm: 2.0, desc: "3×(6 saltos + 60m forte)", tipo: "potencia" },
-      { nome: "Aceleração 30–60", distKm: 2.2, desc: "8×(30m + 60m) 90% + 8' leve", tipo: "potencia" },
-      { nome: "Circuito força corrida", distKm: 2.1, desc: "3×(agacho 6rep + 40m forte)", tipo: "potencia" },
-      { nome: "Sprint em escada", distKm: 2.0, desc: "6×(escada 20\" + 30m forte)", tipo: "potencia" },
-      { nome: "Aceleração 6×100m", distKm: 2.3, desc: "6×100m forte/2' leve", tipo: "potencia" },
-      { nome: "Subida média", distKm: 2.5, desc: "8×120m subida/2' leve", tipo: "potencia" },
-      { nome: "Sprints 6×60m", distKm: 1.9, desc: "6×60m forte/90\" leve + 10' leve", tipo: "potencia" },
-      { nome: "Circuito potência", distKm: 2.2, desc: "4×(saltos 8 + 40m forte)", tipo: "potencia" },
-      { nome: "Arranques 12×30m", distKm: 2.0, desc: "12×30m forte/60\" leve", tipo: "potencia" }
+      { nome: "Ladeira curta", nome_en: "Short hill", nome_fr: "Côte courte", distKm: 2.4, desc: "10×80m subida + 10' leve", desc_en: "10×80m uphill + 10' easy", desc_fr: "10×80m montée + 10' facile", tipo: "potencia" },
+      { nome: "Pliometria + sprint", nome_en: "Plyometrics + sprint", nome_fr: "Pliométrie + sprint", distKm: 2.0, desc: "3×(6 saltos + 60m forte)", desc_en: "3×(6 jumps + 60m hard)", desc_fr: "3×(6 sauts + 60m intense)", tipo: "potencia" },
+      { nome: "Aceleração 30–60", nome_en: "Acceleration 30–60", nome_fr: "Accélération 30–60", distKm: 2.2, desc: "8×(30m + 60m) 90% + 8' leve", desc_en: "8×(30m + 60m) 90% + 8' easy", desc_fr: "8×(30m + 60m) 90% + 8' facile", tipo: "potencia" },
+      { nome: "Circuito força corrida", nome_en: "Running strength circuit", nome_fr: "Circuit force course", distKm: 2.1, desc: "3×(agacho 6rep + 40m forte)", desc_en: "3×(squat 6 reps + 40m hard)", desc_fr: "3×(squat 6 reps + 40m intense)", tipo: "potencia" },
+      { nome: "Sprint em escada", nome_en: "Stair sprints", nome_fr: "Sprints en escaliers", distKm: 2.0, desc: "6×(escada 20\" + 30m forte)", desc_en: "6×(stairs 20\" + 30m hard)", desc_fr: "6×(escaliers 20\" + 30m intense)", tipo: "potencia" },
+      { nome: "Aceleração 6×100m", nome_en: "Acceleration 6×100m", nome_fr: "Accélération 6×100m", distKm: 2.3, desc: "6×100m forte/2' leve", desc_en: "6×100m hard/2' easy", desc_fr: "6×100m intense/2' facile", tipo: "potencia" },
+      { nome: "Subida média", nome_en: "Medium hill", nome_fr: "Côte moyenne", distKm: 2.5, desc: "8×120m subida/2' leve", desc_en: "8×120m uphill/2' easy", desc_fr: "8×120m montée/2' facile", tipo: "potencia" },
+      { nome: "Sprints 6×60m", nome_en: "Sprints 6×60m", nome_fr: "Sprints 6×60m", distKm: 1.9, desc: "6×60m forte/90\" leve + 10' leve", desc_en: "6×60m hard/90\" easy + 10' easy", desc_fr: "6×60m intense/90\" facile + 10' facile", tipo: "potencia" },
+      { nome: "Circuito potência", nome_en: "Power circuit", nome_fr: "Circuit puissance", distKm: 2.2, desc: "4×(saltos 8 + 40m forte)", desc_en: "4×(8 jumps + 40m hard)", desc_fr: "4×(8 sauts + 40m intense)", tipo: "potencia" },
+      { nome: "Arranques 12×30m", nome_en: "Starts 12×30m", nome_fr: "Départs 12×30m", distKm: 2.0, desc: "12×30m forte/60\" leve", desc_en: "12×30m hard/60\" easy", desc_fr: "12×30m intense/60\" facile", tipo: "potencia" }
     ],
     velocidade_pura: [
-      { nome: "Sprints 100m", distKm: 2.0, desc: "12×100m (95%) 2' pausa + 10' leve", tipo: "intensidade" },
-      { nome: "Pirâmide 60–120", distKm: 1.9, desc: "60–80–100–120–100–80–60 (95%)", tipo: "intensidade" },
-      { nome: "Sprint técnico", distKm: 1.8, desc: "8×80m foco mecânica + 10' leve", tipo: "intensidade" },
-      { nome: "Intervalado 40/20", distKm: 2.6, desc: "3×(6×40\" forte/20\" leve)", tipo: "intensidade" },
-      { nome: "Saídas rápidas", distKm: 1.6, desc: "10×20m reação + 6×60m", tipo: "intensidade" },
-      { nome: "Sprint 6×150m", distKm: 2.3, desc: "6×150m (90–95%) 3' pausa", tipo: "intensidade" },
-      { nome: "Blocos 30/30", distKm: 2.4, desc: "2×(6×30\" forte/30\" leve)", tipo: "intensidade" },
-      { nome: "Sprint 10×60m", distKm: 1.7, desc: "10×60m (90–95%) foco técnica", tipo: "intensidade" },
-      { nome: "Progressivo 80–120m", distKm: 2.2, desc: "4×(80m/100m/120m) 2' pausa", tipo: "intensidade" },
-      { nome: "Sprint 8×120m", distKm: 2.0, desc: "8×120m (90%) 2' pausa", tipo: "intensidade" }
+      { nome: "Sprints 100m", nome_en: "100m sprints", nome_fr: "Sprints 100m", distKm: 2.0, desc: "12×100m (95%) 2' pausa + 10' leve", desc_en: "12×100m (95%) 2' rest + 10' easy", desc_fr: "12×100m (95%) 2' récup + 10' facile", tipo: "intensidade" },
+      { nome: "Pirâmide 60–120", nome_en: "Pyramid 60–120", nome_fr: "Pyramide 60–120", distKm: 1.9, desc: "60–80–100–120–100–80–60 (95%)", desc_en: "60–80–100–120–100–80–60 (95%)", desc_fr: "60–80–100–120–100–80–60 (95%)", tipo: "intensidade" },
+      { nome: "Sprint técnico", nome_en: "Technical sprint", nome_fr: "Sprint technique", distKm: 1.8, desc: "8×80m foco mecânica + 10' leve", desc_en: "8×80m technique focus + 10' easy", desc_fr: "8×80m focus technique + 10' facile", tipo: "intensidade" },
+      { nome: "Intervalado 40/20", nome_en: "Intervals 40/20", nome_fr: "Intervalles 40/20", distKm: 2.6, desc: "3×(6×40\" forte/20\" leve)", desc_en: "3×(6×40\" hard/20\" easy)", desc_fr: "3×(6×40\" intense/20\" facile)", tipo: "intensidade" },
+      { nome: "Saídas rápidas", nome_en: "Fast starts", nome_fr: "Départs rapides", distKm: 1.6, desc: "10×20m reação + 6×60m", desc_en: "10×20m reaction + 6×60m", desc_fr: "10×20m réaction + 6×60m", tipo: "intensidade" },
+      { nome: "Sprint 6×150m", nome_en: "Sprint 6×150m", nome_fr: "Sprint 6×150m", distKm: 2.3, desc: "6×150m (90–95%) 3' pausa", desc_en: "6×150m (90–95%) 3' rest", desc_fr: "6×150m (90–95%) 3' récup", tipo: "intensidade" },
+      { nome: "Blocos 30/30", nome_en: "Blocks 30/30", nome_fr: "Blocs 30/30", distKm: 2.4, desc: "2×(6×30\" forte/30\" leve)", desc_en: "2×(6×30\" hard/30\" easy)", desc_fr: "2×(6×30\" intense/30\" facile)", tipo: "intensidade" },
+      { nome: "Sprint 10×60m", nome_en: "Sprint 10×60m", nome_fr: "Sprint 10×60m", distKm: 1.7, desc: "10×60m (90–95%) foco técnica", desc_en: "10×60m (90–95%) technique focus", desc_fr: "10×60m (90–95%) focus technique", tipo: "intensidade" },
+      { nome: "Progressivo 80–120m", nome_en: "Progressive 80–120m", nome_fr: "Progressif 80–120m", distKm: 2.2, desc: "4×(80m/100m/120m) 2' pausa", desc_en: "4×(80m/100m/120m) 2' rest", desc_fr: "4×(80m/100m/120m) 2' récup", tipo: "intensidade" },
+      { nome: "Sprint 8×120m", nome_en: "Sprint 8×120m", nome_fr: "Sprint 8×120m", distKm: 2.0, desc: "8×120m (90%) 2' pausa", desc_en: "8×120m (90%) 2' rest", desc_fr: "8×120m (90%) 2' récup", tipo: "intensidade" }
     ]
   },
   bike: {

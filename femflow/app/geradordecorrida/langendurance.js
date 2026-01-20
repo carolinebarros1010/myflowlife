@@ -334,6 +334,9 @@
     document.querySelectorAll("[data-i18n-value]").forEach((el) => {
       el.value = t(el.dataset.i18nValue);
     });
+    if (typeof window.refreshEnduranceUI === "function") {
+      window.refreshEnduranceUI();
+    }
   };
 
   window.EnduranceI18n = {
