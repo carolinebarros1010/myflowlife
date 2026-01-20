@@ -117,64 +117,86 @@ function _fazerLogin(data) {
   if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
 
   const email = String(data.email || "").toLowerCase().trim();
-  const senha = String(data.senha || "").trim();
+  const senhaRaw = String(data.senha || ""); // NÃO normalizar aqui
 
-  // ✅ em login, deviceId deve vir do app (não gera aleatório)
+  // 🔒 deviceId deve vir do app
   const deviceId = _ensureDeviceId_(data, { allowGenerate: false });
-  if (!deviceId) return { status: "error", msg: "device_required" };
+  if (!deviceId) {
+    return { status: "error", msg: "device_required" };
+  }
 
-  if (!email || !senha) {
+  if (!email || !senhaRaw) {
     return { status: "error", msg: "E-mail e senha são obrigatórios." };
   }
 
-  const valores = sh.getDataRange().getValues();
-  const hashDigitada = _hashSenha(senha);
+  const rows = sh.getDataRange().getValues();
 
-  for (let i = 1; i < valores.length; i++) {
-    const row = valores[i];
+  // 🔐 todos os padrões históricos de hash
+  const hashAtual  = _hashSenha(senhaRaw.trim());
+  const hashLegacy = _hashSenha(senhaRaw);
+  const hashNorm   = _hashSenha(_norm(senhaRaw));
 
-    const id         = row[0];
-    const nome       = row[1];
-    const emailDB    = String(row[2] || "").toLowerCase().trim();
-    const senhaHash  = String(row[4] || "").trim();
-    const produto    = row[5];
-    const produtoNorm = String(produto || "").toLowerCase().trim();
-    const isVip = produtoNorm === "vip";
-    const dataCompra = row[6];
-    const ativa      = !!row[7];
-    const nivel      = row[8];
-    const ciclo      = row[9];
-    const inicio     = row[10];
-    const enfase     = row[12];
-    const fase       = row[13];
-    const diaCiclo   = row[14];
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+
+    const id             = row[0];
+    const nome           = row[1];
+    const emailDB        = String(row[2] || "").toLowerCase().trim();
+    const senhaHashDB    = String(row[4] || "").trim();
+    const produto        = row[5];
+    const produtoNorm    = String(produto || "").toLowerCase().trim();
+    const isVip          = produtoNorm === "vip";
+    const dataCompra     = row[6];
+    const ativa          = !!row[7];
+    const nivel          = row[8];
+    const ciclo          = row[9];
+    const inicio         = row[10];
+    const enfase         = row[12];
+    const fase           = row[13];
+    const diaCiclo       = row[14];
     const perfilHormonal = row[19] || "regular";
 
     if (emailDB !== email) continue;
 
-    if (senhaHash !== hashDigitada && senhaHash !== senha) {
+    /* ======================================================
+     * 🔑 VALIDAÇÃO DE SENHA (RETROCOMPATÍVEL)
+     * ====================================================== */
+    if (
+      senhaHashDB !== hashAtual &&
+      senhaHashDB !== hashLegacy &&
+      senhaHashDB !== hashNorm
+    ) {
       return { status: "error", msg: "Senha incorreta." };
     }
 
+    // 🔁 migração automática para o padrão atual
+    if (senhaHashDB !== hashAtual) {
+      sh.getRange(i + 1, 5).setValue(hashAtual);
+    }
+
+    /* ======================================================
+     * 🔐 VALIDAÇÃO DE ASSINATURA
+     * ====================================================== */
     const isTrial = produtoNorm === "trial_app";
 
     if (!isVip) {
-      // assinatura expirada
       if (dataCompra) {
-        const diff = (new Date() - new Date(dataCompra)) / 86400000;
-        const produtoDias = produtoNorm === "trial_app" ? 3 : 30;
-        if (diff > produtoDias) {
-          sh.getRange(i + 1, 8).setValue(false); // LicencaAtiva
-          return { status: "expired", msg: "Sua assinatura expirou.", email: email, id: id };
+        const diffDias = (new Date() - new Date(dataCompra)) / 86400000;
+        const limite = isTrial ? 3 : 30;
+        if (diffDias > limite) {
+          sh.getRange(i + 1, 8).setValue(false);
+          return { status: "expired", msg: "Sua assinatura expirou.", email, id };
         }
       }
 
       if (!ativa && !isTrial) {
-        return { status: "inactive", msg: "Assinatura inativa.", email: email, id: id };
+        return { status: "inactive", msg: "Assinatura inativa.", email, id };
       }
     }
 
-    // 🔒 DEVICE LOCK
+    /* ======================================================
+     * 🔒 DEVICE LOCK
+     * ====================================================== */
     const deviceDB = String(row[COL_DEVICE_ID] || "").trim();
     if (!deviceDB) {
       sh.getRange(i + 1, COL_DEVICE_ID + 1).setValue(deviceId);
@@ -186,9 +208,11 @@ function _fazerLogin(data) {
       };
     }
 
-    // 🔐 Sessão única
+    /* ======================================================
+     * 🔐 SESSÃO ÚNICA
+     * ====================================================== */
     const sessionToken = _generateSessionToken_();
-    const sessionExp = Date.now() + (1000 * 60 * 60 * 24 * 30);
+    const sessionExp  = Date.now() + (1000 * 60 * 60 * 24 * 30);
 
     sh.getRange(i + 1, COL_SESSION_TOKEN + 1).setValue(sessionToken);
     sh.getRange(i + 1, COL_SESSION_EXP + 1).setValue(sessionExp);
@@ -200,34 +224,43 @@ function _fazerLogin(data) {
 
     const autoDescanso = aplicarDescansoAutomatico_(sh, i);
 
-    // 🔄 Sync de ciclo no login (atualiza DiaCiclo/Fase se permitido)
+    // 🔄 Sync hormonal no login
     const syncResult = sync(id);
 
     return {
       status: "ok",
-      id: id,
-      nome: nome,
+      id,
+      nome,
       email: emailDB,
       licencaAtiva: true,
-      nivel: nivel,
-      enfase: enfase,
+      nivel,
+      enfase,
       fase: syncResult && syncResult.fase ? syncResult.fase : fase,
       diaCiclo: syncResult && syncResult.diaCiclo ? syncResult.diaCiclo : diaCiclo,
-      perfilHormonal: perfilHormonal,
-      produto: produto,
+      perfilHormonal,
+      produto,
       personal: row[COL_ACESSO_PERSONAL] === true || isVip,
       ciclo_duracao: ciclo,
       data_inicio: inicio,
-
-      deviceId: deviceId,
-      sessionToken: sessionToken,
+      deviceId,
+      sessionToken,
       sessionExpira: sessionExp,
-      autoDescanso: autoDescanso
+      autoDescanso
     };
   }
 
   return { status: "error", msg: "E-mail não encontrado." };
 }
+
+
+
+
+    const id            = row[0];
+    const nome          = row[1];
+    const emailDB       = String(row[2] || "").toLowerCase().trim();
+    const senhaHashDB   = String(row[4] || "").trim();
+    const produto       = r
+
 
 function _loginOuCadastro(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
