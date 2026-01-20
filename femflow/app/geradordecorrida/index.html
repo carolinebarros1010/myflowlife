@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Endurance FemFlow</title>
+  <title data-i18n="page_title">Endurance FemFlow</title>
   <link rel="icon" href="../favicon.ico">
   <!-- PWA: Manifesto -->
   <link rel="manifest" href="manifest.json">
@@ -178,52 +178,60 @@ input:focus, select:focus, textarea:focus {
 
   <!-- Topo fixo com Premium -->
   <div class="topbar">
-    <span class="brand">🏃‍♀️ Endurance FemFlow</span>
-    <a href="../flowcenter.html" id="btnPremium" title="Voltar para o FlowCenter" class="btn-app">🏠 FLOWCENTER</a>
+    <span class="brand" data-i18n="topbar_title">🏃‍♀️ Endurance FemFlow</span>
+    <div class="topbar-actions">
+      <label class="sr-only" for="langSelect" data-i18n="language_label">Idioma</label>
+      <select id="langSelect" class="lang-select" aria-label="Idioma" data-i18n-aria="language_label">
+        <option value="pt" data-i18n="language_pt">Português</option>
+        <option value="en" data-i18n="language_en">English</option>
+        <option value="fr" data-i18n="language_fr">Français</option>
+      </select>
+      <a href="../flowcenter.html" id="btnPremium" title="Voltar para o FlowCenter" class="btn-app" data-i18n-title="flowcenter_title" data-i18n="flowcenter_button">🏠 FLOWCENTER</a>
+    </div>
   </div>
 
   <div class="container">
     <header>
-      <div class="brand">Endurance <span style="color:var(--accent)">FemFlow</span></div>
+      <div class="brand" data-i18n="header_title">Endurance <span style="color:var(--accent)">FemFlow</span></div>
       <div class="profile-summary">
         <span id="perfilNome" class="profile-name">—</span>
         <span id="perfilNivel" class="profile-tag">—</span>
       </div>
     </header>
 
-    <p class="muted">Escolha perfil, distância da prova e disponibilidade. O sistema monta um mesociclo de 30 dias com velocidade, resistência e velocidade pura, ajusta volume/intensidade pelo ciclo e gera PDF e cards.</p>
+    <p class="muted" data-i18n="intro_text">Escolha perfil, distância da prova e disponibilidade. O sistema monta um mesociclo de 30 dias com velocidade, resistência e velocidade pura, ajusta volume/intensidade pelo ciclo e gera PDF e cards.</p>
 
     <!-- ENTRADAS -->
     <section class="panel">
-      <h2>Entradas</h2>
+      <h2 data-i18n="inputs_title">Entradas</h2>
       <div class="panel panel-inner">
         <div class="panel-header">
-          <h3>Teste</h3>
-          <button id="btnInfoTeste" class="btn-icon" type="button" aria-label="Informações do teste">i</button>
+          <h3 data-i18n="test_title">Teste</h3>
+          <button id="btnInfoTeste" class="btn-icon" type="button" aria-label="Informações do teste" data-i18n-aria="test_info_aria">i</button>
         </div>
-        <p class="muted">Realize um teste de 12 min sem parar na modalidade pretendida e insira as informações abaixo (distância em metros e PSE 0 a 10).</p>
+        <p class="muted" data-i18n="test_help">Realize um teste de 12 min sem parar na modalidade pretendida e insira as informações abaixo (distância em metros e PSE 0 a 10).</p>
         <div class="grid">
-          <label>Distância no teste Cooper (12 min, em metros)
+          <label data-i18n="cooper_distance_label">Distância no teste Cooper (12 min, em metros)
             <input id="cooperDist" type="number" min="200" step="10" value="3000">
           </label>
-          <label>Modalidade do teste
+          <label data-i18n="test_modality_label">Modalidade do teste
             <select id="modalidade">
-              <option value="corrida">Corrida</option>
-              <option value="bike">Ciclismo</option>
-              <option value="remo">Remo ergômetro</option>
-              <option value="natacao">Natação (piscina)</option>
-              <option value="natacao_aberta">Natação em águas abertas</option>
-              <option value="eliptico">Elíptico</option>
-              <option value="caminhada">Caminhada</option>
-              <option value="trilha">Trail/Trilha</option>
-              <option value="aqua_run">Aqua run</option>
-              <option value="esqui">Esqui ergômetro</option>
+              <option value="corrida" data-i18n="modality_corrida">Corrida</option>
+              <option value="bike" data-i18n="modality_bike">Ciclismo</option>
+              <option value="remo" data-i18n="modality_remo">Remo ergômetro</option>
+              <option value="natacao" data-i18n="modality_natacao">Natação (piscina)</option>
+              <option value="natacao_aberta" data-i18n="modality_natacao_aberta">Natação em águas abertas</option>
+              <option value="eliptico" data-i18n="modality_eliptico">Elíptico</option>
+              <option value="caminhada" data-i18n="modality_caminhada">Caminhada</option>
+              <option value="trilha" data-i18n="modality_trilha">Trail/Trilha</option>
+              <option value="aqua_run" data-i18n="modality_aqua_run">Aqua run</option>
+              <option value="esqui" data-i18n="modality_esqui">Esqui ergômetro</option>
             </select>
           </label>
-          <label>Zona do teste / PSE principal
+          <label data-i18n="test_zone_label">Zona do teste / PSE principal
             <input id="zona" value="Z2 / PSE 5-6">
           </label>
-          <label>PSE do teste Cooper (0–10)
+          <label data-i18n="test_pse_label">PSE do teste Cooper (0–10)
             <input id="cooperPse" type="number" min="0" max="10" step="1" value="8">
           </label>
         </div>
@@ -231,76 +239,76 @@ input:focus, select:focus, textarea:focus {
 
       <div class="panel panel-inner">
         <div class="panel-header">
-          <h3>Prova objetivo</h3>
+          <h3 data-i18n="goal_title">Prova objetivo</h3>
         </div>
         <div class="grid">
-          <label>Perfil
-            <input id="perfilNivelInput" type="text" value="Iniciante" readonly>
+          <label data-i18n="profile_label">Perfil
+            <input id="perfilNivelInput" type="text" value="Iniciante" readonly data-i18n-value="level_beginner">
           </label>
-          <label>Distância da prova (km)
+          <label data-i18n="race_distance_label">Distância da prova (km)
             <input id="distProva" type="number" min="3" value="10">
           </label>
-          <label>Dias da semana
-            <input id="dias" value="ter,qui,sab,dom">
+          <label data-i18n="days_label">Dias da semana
+            <input id="dias" value="ter,qui,sab,dom" data-i18n-placeholder="days_placeholder">
           </label>
-          <label>Treinos por semana
+          <label data-i18n="sessions_per_week_label">Treinos por semana
             <input id="semanal" type="number" min="3" max="5" value="4">
           </label>
-          <label>Início
+          <label data-i18n="start_label">Início
             <input id="inicio" type="date">
           </label>
         </div>
       </div>
 
       <div class="actions" style="margin-top:1rem;">
-        <button id="btnGerarPlano" class="btn primary">Gerar mesociclo (30 dias)</button>
+        <button id="btnGerarPlano" class="btn primary" data-i18n="generate_button">Gerar mesociclo (30 dias)</button>
       </div>
     </section>
 
     <div id="modalTeste" class="modal" aria-hidden="true">
       <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTesteTitulo">
         <div class="modal-header">
-          <h3 id="modalTesteTitulo">Como realizar o teste</h3>
-          <button class="btn-icon" id="btnFecharModal" type="button" aria-label="Fechar">×</button>
-        </div>
-        <p>Faça 12 minutos contínuos na modalidade escolhida, mantendo o melhor ritmo sustentável. Ao final, registre a distância em metros e a percepção de esforço (PSE 0–10).</p>
+        <h3 id="modalTesteTitulo" data-i18n="test_modal_title">Como realizar o teste</h3>
+        <button class="btn-icon" id="btnFecharModal" type="button" aria-label="Fechar" data-i18n-aria="close_modal_aria">×</button>
       </div>
+      <p data-i18n="test_modal_body">Faça 12 minutos contínuos na modalidade escolhida, mantendo o melhor ritmo sustentável. Ao final, registre a distância em metros e a percepção de esforço (PSE 0–10).</p>
+    </div>
     </div>
 
     <div id="modalEnduranceInfo" class="modal" aria-hidden="true">
       <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalEnduranceInfoTitulo">
         <div class="modal-header">
-          <h3 id="modalEnduranceInfoTitulo">Como funciona o Endurance</h3>
-          <button class="btn-icon" id="btnFecharEnduranceInfo" type="button" aria-label="Fechar">×</button>
-        </div>
-        <p>Gere seu treino de endurance com apenas um clique e tenha 30 dias de treino periodizado. Preencha as informações nos respectivos campos, escolha a quantidade de treinos e os dias disponíveis e acompanhe semana a semana os treinos.</p>
+        <h3 id="modalEnduranceInfoTitulo" data-i18n="endurance_modal_title">Como funciona o Endurance</h3>
+        <button class="btn-icon" id="btnFecharEnduranceInfo" type="button" aria-label="Fechar" data-i18n-aria="close_modal_aria">×</button>
       </div>
+      <p data-i18n="endurance_modal_body">Gere seu treino de endurance com apenas um clique e tenha 30 dias de treino periodizado. Preencha as informações nos respectivos campos, escolha a quantidade de treinos e os dias disponíveis e acompanhe semana a semana os treinos.</p>
+    </div>
     </div>
 
     <!-- RESULTADOS -->
     <section class="panel">
-      <h2>Plano 30 dias</h2>
+      <h2 data-i18n="plan_title">Plano 30 dias</h2>
       <div class="week-tabs" role="tablist" aria-label="Semanas do mesociclo">
-        <button class="week-tab" type="button" data-week="0" aria-pressed="true">Semana 1</button>
-        <button class="week-tab" type="button" data-week="1" aria-pressed="false">Semana 2</button>
-        <button class="week-tab" type="button" data-week="2" aria-pressed="false">Semana 3</button>
-        <button class="week-tab" type="button" data-week="3" aria-pressed="false">Semana 4</button>
-        <button class="week-tab" type="button" data-week="4" aria-pressed="false">Semana 5</button>
+        <button class="week-tab" type="button" data-week="0" aria-pressed="true" data-i18n="week_1">Semana 1</button>
+        <button class="week-tab" type="button" data-week="1" aria-pressed="false" data-i18n="week_2">Semana 2</button>
+        <button class="week-tab" type="button" data-week="2" aria-pressed="false" data-i18n="week_3">Semana 3</button>
+        <button class="week-tab" type="button" data-week="3" aria-pressed="false" data-i18n="week_4">Semana 4</button>
+        <button class="week-tab" type="button" data-week="4" aria-pressed="false" data-i18n="week_5">Semana 5</button>
       </div>
       <div id="card-grid" class="grid-cards"></div>
     </section>
 
     <!-- GRÁFICO -->
     <section class="panel">
-      <h2>Resumo semanal</h2>
+      <h2 data-i18n="weekly_summary_title">Resumo semanal</h2>
       <canvas id="chart"></canvas>
     </section>
 
     <!-- AÇÕES -->
     <div class="actions">
-      <button id="btnExportarPDF" class="btn">📄 Exportar PDF</button>
-      <button id="btnGerarCards" class="btn">🖼️ Gerar Cards</button>
-      <button id="btnResetar" class="btn danger">🔁 Resetar</button>
+      <button id="btnExportarPDF" class="btn" data-i18n="export_pdf_button">📄 Exportar PDF</button>
+      <button id="btnGerarCards" class="btn" data-i18n="generate_cards_button">🖼️ Gerar Cards</button>
+      <button id="btnResetar" class="btn danger" data-i18n="reset_button">🔁 Resetar</button>
     </div>
   </div>
 
@@ -308,6 +316,7 @@ input:focus, select:focus, textarea:focus {
   <div id="toast" class="toast"></div>
 
   <script src="../femflow-core.js"></script>
+  <script src="./langendurance.js"></script>
   <script src="./treinos.js"></script>
   <script src="./app.js" defer></script>
 
