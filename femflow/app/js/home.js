@@ -692,9 +692,14 @@ function cardHTML(p) {
     </article>`;
 }
 
+function ordenarCardsPorGratuito(lista) {
+  return [...lista].sort((a, b) => (b.isFree ? 1 : 0) - (a.isFree ? 1 : 0));
+}
+
 function renderRail(el, lista) {
   if (!el) return;
-  el.innerHTML = lista.map(cardHTML).join("");
+  const ordenada = ordenarCardsPorGratuito(lista);
+  el.innerHTML = ordenada.map(cardHTML).join("");
   el.querySelectorAll(".card").forEach(c =>
     c.onclick = () => {
       void handleCardClick(c.dataset.enfase, c.dataset.locked === "true");
