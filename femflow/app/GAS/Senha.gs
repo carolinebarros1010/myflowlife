@@ -158,10 +158,16 @@ function _fazerLogin(data) {
     /* ======================================================
      * 🔑 VALIDAÇÃO DE SENHA (RETROCOMPATÍVEL)
      * ====================================================== */
+    const senhaPlainMatch =
+      senhaHashDB === senhaRaw.trim() ||
+      senhaHashDB === senhaRaw ||
+      senhaHashDB === _norm(senhaRaw);
+
     if (
       senhaHashDB !== hashAtual &&
       senhaHashDB !== hashLegacy &&
-      senhaHashDB !== hashNorm
+      senhaHashDB !== hashNorm &&
+      !senhaPlainMatch
     ) {
       return { status: "error", msg: "Senha incorreta." };
     }
