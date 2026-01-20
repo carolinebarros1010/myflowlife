@@ -44,8 +44,8 @@ function resolverDiasBaseOvulatoria_(padrao) {
 
 function fasePorDiaCiclo_(dia) {
   if (dia <= 5) return 'menstrual';
-  if (dia <= 12) return 'folicular';
-  if (dia <= 18) return 'ovulatoria';
+  if (dia <= 13) return 'folicular';
+  if (dia <= 17) return 'ovulatoria';
   return 'lutea';
 }
 
@@ -325,6 +325,10 @@ function distribuirBaseOvulatoriaPara30Dias_(p, padrao) {
           copia.box = normalizarBoxSemEspecial(copia.box);
           copia.especial = '';
         }
+      }
+
+      if (String(copia.tempo || '').trim()) {
+        copia.reps = '';
       }
 
       return copia;
