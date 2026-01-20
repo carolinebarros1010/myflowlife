@@ -119,11 +119,8 @@ function _fazerLogin(data) {
   const email = String(data.email || "").toLowerCase().trim();
   const senhaRaw = String(data.senha || ""); // NÃO normalizar aqui
 
-  // 🔒 deviceId deve vir do app
-  const deviceId = _ensureDeviceId_(data, { allowGenerate: false });
-  if (!deviceId) {
-    return { status: "error", msg: "device_required" };
-  }
+  // 🔒 deviceId deve vir do app (gera fallback se ausente)
+  const deviceId = _ensureDeviceId_(data, { allowGenerate: true });
 
   if (!email || !senhaRaw) {
     return { status: "error", msg: "E-mail e senha são obrigatórios." };
