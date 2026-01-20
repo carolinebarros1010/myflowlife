@@ -1164,7 +1164,7 @@
       try {
         const response = await fetch(state.endpoint, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload),
         });
         const contentType = response.headers.get("content-type") || "";
@@ -1172,7 +1172,7 @@
           ? await response.json()
           : await response.text();
         if (!response.ok || (typeof data === "object" && !data.ok)) {
-          const message = typeof data === "object" ? data?.erro : data;
+          const message = typeof data === "object" ? (data?.error || data?.erro) : data;
           throw new Error(message || "Credenciais inválidas.");
         }
         const auth = {
@@ -1223,7 +1223,7 @@
       try {
         const response = await fetch(state.endpoint, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload),
         });
         const contentType = response.headers.get("content-type") || "";
@@ -1231,7 +1231,7 @@
           ? await response.json()
           : await response.text();
         if (!response.ok || (typeof data === "object" && !data.ok)) {
-          const message = typeof data === "object" ? data?.erro : data;
+          const message = typeof data === "object" ? (data?.error || data?.erro) : data;
           throw new Error(message || "Não foi possível cadastrar.");
         }
         const auth = {
