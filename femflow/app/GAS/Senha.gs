@@ -112,6 +112,17 @@ function _hashSenha(senha) {
   return Utilities.base64Encode(digest);
 }
 
+function _hashSenhaHex_(senha) {
+  const digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    senha,
+    Utilities.Charset.UTF_8
+  );
+  return digest
+    .map(byte => ("0" + (byte & 0xff).toString(16)).slice(-2))
+    .join("");
+}
+
 function _fazerLogin(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
@@ -132,6 +143,7 @@ function _fazerLogin(data) {
   const hashAtual  = _hashSenha(senhaRaw.trim());
   const hashLegacy = _hashSenha(senhaRaw);
   const hashNorm   = _hashSenha(_norm(senhaRaw));
+  const hashHex    = _hashSenhaHex_(senhaRaw.trim());
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
@@ -162,12 +174,15 @@ function _fazerLogin(data) {
       senhaHashDB === senhaRaw.trim() ||
       senhaHashDB === senhaRaw ||
       senhaHashDB === _norm(senhaRaw);
+    const senhaHexMatch =
+      String(senhaHashDB || "").toLowerCase() === hashHex.toLowerCase();
 
     if (
       senhaHashDB !== hashAtual &&
       senhaHashDB !== hashLegacy &&
       senhaHashDB !== hashNorm &&
-      !senhaPlainMatch
+      !senhaPlainMatch &&
+      !senhaHexMatch
     ) {
       return { status: "error", msg: "Senha incorreta." };
     }

@@ -179,6 +179,7 @@ function getPerguntasTraduzidas() {
     const emailV = email.value.trim();
     const telV   = tel.value.trim();
     const dataNascimentoV = dataNascimento.value;
+    const senhaV = senha.value;
 
     localStorage.setItem("lead_nome", nomeV);
     localStorage.setItem("lead_email", emailV);
@@ -196,7 +197,8 @@ function getPerguntasTraduzidas() {
       nome: nomeV,
       email: emailV,
       telefone: telV,
-      dataNascimento: dataNascimentoV
+      dataNascimento: dataNascimentoV,
+      senha: senhaV
     };
 
     // iniciar quiz
@@ -232,7 +234,7 @@ function getPerguntasTraduzidas() {
       email:    lead.email    || localStorage.getItem("lead_email") || "",
       telefone: lead.telefone || localStorage.getItem("lead_telefone") || "",
       dataNascimento: lead.dataNascimento || localStorage.getItem("lead_data_nascimento") || "",
-      senha:    $("#senha")?.value || ""
+      senha:    lead.senha || $("#senha")?.value || ""
     };
   }
 
