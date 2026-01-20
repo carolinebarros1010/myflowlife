@@ -109,8 +109,10 @@ function importarTreinosFEMFLOW(opts = {}) {
 
   const project = FIREBASE_AUTH_PROJECT_ID;
   const baseURL = `https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents`;
+  const importId = Utilities.formatDate(new Date(), "UTC", "yyyyMMdd'T'HHmmss'Z'");
 
   Logger.log("🚀 Iniciando importação FEMFLOW 2025...");
+  Logger.log("🧾 importId: " + importId);
   if (abasPermitidas) Logger.log("🎯 Importação dirigida (abasPermitidas): " + JSON.stringify(abasPermitidas));
 
   let totalOk = 0;
@@ -161,7 +163,8 @@ function importarTreinosFEMFLOW(opts = {}) {
       nomeAba,
       isPersonal,
       personalId,
-      isExtra
+      isExtra,
+      importId
     );
     totalOk += stats.ok;
     totalErr += stats.err;
@@ -183,7 +186,7 @@ function importarTreinosFEMFLOW(opts = {}) {
 /* ============================================================
    IMPORTA UMA ABA (core)
 ============================================================ */
-function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, personalId, isExtra) {
+function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, personalId, isExtra, importId) {
   const valsAll = sh.getDataRange().getValues();
   if (!valsAll || valsAll.length < 2) {
     Logger.log("⚠️ Aba vazia/sem dados: " + nomeAba);
@@ -285,16 +288,30 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
       }
     };
 
+    // === FEMFLOW | HISTÓRICO DE BLOCOS PERSONAL ===
+    if (isPersonal) {
+      const getResp = firestoreGET_(url, token);
+      const getCode = getResp.getResponseCode();
+      if (getCode === 200) {
+        const doc = JSON.parse(getResp.getContentText());
+        const historyUrl = `${baseURL}/personal_trainings/${personalId}/${enfase}/${fase}/dias/${diaKey}/history/${importId}/blocos/bloco_${i}`;
+        const historyPayload = {
+          fields: Object.assign({}, doc.fields || {}, {
+            archivedAt: { timestampValue: new Date().toISOString() },
+            archivedBy: { stringValue: "importador_apps_script" },
+            importId: { stringValue: importId }
+          })
+        };
+        firestorePATCH_(historyUrl, token, historyPayload);
+      } else if (getCode !== 404) {
+        Logger.log(`⚠️ GET histórico falhou [${getCode}] → ${nomeAba} | ${fase} | ${diaKey} | linha ${i} | ${getResp.getContentText()}`);
+      }
+    }
+
     // ------------------------------------------------------------
     // ENVIAR PARA FIRESTORE
     // ------------------------------------------------------------
-    const resp = UrlFetchApp.fetch(url, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${token}` },
-      contentType: "application/json",
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
-    });
+    const resp = firestorePATCH_(url, token, payload);
 
     patches++;
 
@@ -314,6 +331,24 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
 /* ============================================================
    FUNÇÕES AUXILIARES
 ============================================================ */
+function firestoreGET_(url, token) {
+  return UrlFetchApp.fetch(url, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+    muteHttpExceptions: true
+  });
+}
+
+function firestorePATCH_(url, token, payloadObj) {
+  return UrlFetchApp.fetch(url, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+    contentType: "application/json",
+    payload: JSON.stringify(payloadObj),
+    muteHttpExceptions: true
+  });
+}
+
 function removerAcentos(t) {
   return String(t || "")
     .normalize("NFD")
