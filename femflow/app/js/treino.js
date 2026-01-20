@@ -393,7 +393,7 @@ const hasPersonal =
     }
 
     /* ================= PERFIL ================= */
-    const nivel    = perfil.nivel;
+    const nivel = perfil.nivel || localStorage.getItem("femflow_nivel");
     let enfaseLocal = localStorage.getItem("femflow_enfase");
     const extraSessaoAtiva = localStorage.getItem("femflow_treino_extra") === "true";
     const enfaseBackendRaw = String(perfil.enfase || "").toLowerCase().trim();
