@@ -124,6 +124,10 @@ function _hashSenhaHex_(senha) {
     .join("");
 }
 
+function _looksLikeSha256Base64_(value) {
+  return /^[A-Za-z0-9+/]{43}=$/.test(String(value || "").trim());
+}
+
 function _fazerLogin(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
@@ -190,7 +194,8 @@ function _fazerLogin(data) {
     }
 
     // 🔁 migração automática para o padrão atual
-    if (senhaHashDB !== hashAtual) {
+    const senhaJaHash = _looksLikeSha256Base64_(senhaHashDB);
+    if (senhaHashDB !== hashAtual && !senhaJaHash) {
       sh.getRange(i + 1, 5).setValue(hashAtual);
     }
 
