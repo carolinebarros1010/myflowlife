@@ -381,6 +381,19 @@
       color: rgba(17, 17, 17, 0.6);
     }
 
+    .auth-toggle {
+      font-size: 12px;
+      color: var(--accent-teal);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .auth-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     .auth-actions {
       display: flex;
       gap: 12px;
@@ -525,19 +538,34 @@
     <div class="auth-card">
       <h2>Entrar no Painel</h2>
       <p>Use o e-mail ou telefone cadastrado na aba <strong>Personal</strong>.</p>
-      <div>
-        <label for="loginIdentificador">Email ou telefone</label>
-        <input id="loginIdentificador" placeholder="ex: nome@email.com ou 11999999999" />
-      </div>
-      <div>
-        <label for="loginSenha">Senha</label>
-        <input id="loginSenha" type="password" placeholder="Digite sua senha" />
+      <div class="auth-fields">
+        <div class="signup-only" id="signupNomeGroup" style="display: none;">
+          <label for="signupNome">Nome</label>
+          <input id="signupNome" placeholder="Seu nome completo" />
+        </div>
+        <div>
+          <label for="loginIdentificador">Email ou telefone</label>
+          <input id="loginIdentificador" placeholder="ex: nome@email.com ou 11999999999" />
+        </div>
+        <div>
+          <label for="loginSenha">Senha</label>
+          <input id="loginSenha" type="password" placeholder="Digite sua senha" />
+        </div>
+        <div class="signup-only" id="signupTelefoneGroup" style="display: none;">
+          <label for="signupTelefone">Telefone</label>
+          <input id="signupTelefone" placeholder="11999999999" />
+        </div>
       </div>
       <div class="helper">As credenciais são validadas com hash SHA-256.</div>
       <div class="auth-actions">
         <button class="button secondary" id="loginConfig">Configurar endpoint</button>
         <button class="button" id="loginSubmit">Entrar</button>
       </div>
+      <div class="auth-actions" id="signupActions" style="display: none;">
+        <button class="button secondary" id="signupCancel">Voltar</button>
+        <button class="button" id="signupSubmit">Criar acesso</button>
+      </div>
+      <div class="auth-toggle" id="signupToggle">Cadastrar novo acesso</div>
       <small id="loginStatus">Configure o endpoint do Apps Script antes de entrar.</small>
     </div>
   </div>
@@ -802,6 +830,7 @@
       mode: localStorage.getItem("femflow_mode") || "fetch-first",
       timeoutMs: Number(localStorage.getItem("femflow_timeout_ms") || 180000),
       response: null,
+      authMode: "login",
     };
 
     const qs = (id) => document.getElementById(id);
@@ -897,6 +926,16 @@
       } else {
         qs("userBadge").textContent = "Visitante";
       }
+    };
+
+    const setAuthMode = (mode) => {
+      state.authMode = mode;
+      const isSignup = mode === "signup";
+      qs("signupNomeGroup").style.display = isSignup ? "block" : "none";
+      qs("signupTelefoneGroup").style.display = isSignup ? "block" : "none";
+      qs("signupActions").style.display = isSignup ? "flex" : "none";
+      qs("signupToggle").style.display = isSignup ? "none" : "block";
+      qs("loginSubmit").style.display = isSignup ? "none" : "inline-flex";
     };
 
     const reportFailure = (action, params, reason) => {
@@ -1146,6 +1185,60 @@
       }
     };
 
+    const handleSignup = async () => {
+      const nome = qs("signupNome").value.trim();
+      const identificador = qs("loginIdentificador").value.trim();
+      const senha = qs("loginSenha").value.trim();
+      const telefoneExtra = qs("signupTelefone").value.trim();
+
+      if (!state.endpoint) {
+        updateLoginStatus("Configure o endpoint antes de cadastrar.", true);
+        return;
+      }
+      if (!nome || !identificador || !senha) {
+        updateLoginStatus("Preencha nome, email/telefone e senha.", true);
+        return;
+      }
+
+      const payload = { action: "signup", nome, senha };
+      if (identificador.includes("@")) {
+        payload.email = identificador.toLowerCase();
+      } else {
+        payload.telefone = normalizePhone(identificador);
+      }
+      if (telefoneExtra) {
+        payload.telefone = normalizePhone(telefoneExtra) || payload.telefone;
+      }
+
+      updateLoginStatus("Criando acesso...", false);
+
+      try {
+        const response = await fetch(state.endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          throw new Error(data?.erro || "Não foi possível cadastrar.");
+        }
+        const auth = {
+          timestamp: Date.now(),
+          user: data.user,
+        };
+        setAuth(auth);
+        applyAuthState(auth);
+        updateLoginStatus("Acesso criado com sucesso!", false);
+        qs("signupNome").value = "";
+        qs("signupTelefone").value = "";
+        qs("loginIdentificador").value = "";
+        qs("loginSenha").value = "";
+        setAuthMode("login");
+      } catch (error) {
+        updateLoginStatus(error.message || "Não foi possível cadastrar.", true);
+      }
+    };
+
     const persistParams = () => {
       const params = collectParams();
       Object.entries(params).forEach(([key, value]) => {
@@ -1213,6 +1306,7 @@
       updatePreview();
       pingEndpoint();
       applyAuthState(getAuth());
+      setAuthMode("login");
       updateLoginStatus(state.endpoint ? "Endpoint configurado. Faça login." : "Configure o endpoint antes de entrar.");
     };
 
@@ -1260,6 +1354,15 @@
         event.preventDefault();
         handleLogin();
       }
+    });
+    qs("signupSubmit").addEventListener("click", handleSignup);
+    qs("signupToggle").addEventListener("click", () => {
+      setAuthMode("signup");
+      updateLoginStatus("Preencha os dados para criar seu acesso.");
+    });
+    qs("signupCancel").addEventListener("click", () => {
+      setAuthMode("login");
+      updateLoginStatus("Faça login para continuar.");
     });
     qs("loginConfig").addEventListener("click", () => {
       qs("configModal").classList.add("open");

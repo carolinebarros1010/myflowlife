@@ -122,6 +122,10 @@ function doPost(e) {
         result = autenticarPersonal_(body);
         return jsonOK_({ step: 'login', user: result });
 
+      case 'signup':
+        result = cadastrarPersonal_(body);
+        return jsonOK_({ step: 'signup', user: result });
+
       case 'full':
         gerarFemFlow30Dias(body.pedidoTexto);
         relinkarAba_(body.destino, body.nivel);
