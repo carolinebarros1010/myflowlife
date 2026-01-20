@@ -337,41 +337,6 @@
       opacity: 0.6;
     }
 
-    .log-filter {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .log-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 260px;
-      overflow-y: auto;
-    }
-
-    .log-item {
-      background: rgba(255, 177, 153, 0.18);
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .log-item.ok {
-      border-left: 4px solid var(--success);
-    }
-
-    .log-item.error {
-      border-left: 4px solid var(--error);
-    }
-
-    .log-item span {
-      font-weight: 700;
-    }
-
     .mini-card {
       background: rgba(255, 177, 153, 0.2);
       border-radius: 16px;
@@ -384,6 +349,59 @@
     .mini-card button {
       width: 100%;
       justify-content: center;
+    }
+
+    .auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: radial-gradient(circle at top, rgba(255, 177, 153, 0.45), transparent 55%), var(--bg);
+    }
+
+    .auth-card {
+      width: min(420px, 100%);
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .auth-card p {
+      font-size: 14px;
+      color: rgba(17, 17, 17, 0.7);
+    }
+
+    .auth-card .helper {
+      font-size: 12px;
+      color: rgba(17, 17, 17, 0.6);
+    }
+
+    .auth-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .auth-actions .button {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .app.is-hidden {
+      display: none;
+    }
+
+    .user-badge {
+      background: rgba(51, 89, 83, 0.12);
+      color: var(--accent-teal);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
     }
 
     .toast {
@@ -470,6 +488,14 @@
         grid-template-columns: 1fr;
       }
 
+      .app {
+        padding: 16px;
+      }
+
+      .card {
+        padding: 18px;
+      }
+
       .topbar {
         flex-direction: column;
         align-items: flex-start;
@@ -479,17 +505,44 @@
       .topbar-actions {
         width: 100%;
         justify-content: space-between;
+        flex-wrap: wrap;
       }
 
       .button {
         width: 100%;
         justify-content: center;
       }
+
+      .actions-row,
+      .auth-actions {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="app">
+  <div class="auth-screen" id="loginScreen">
+    <div class="auth-card">
+      <h2>Entrar no Painel</h2>
+      <p>Use o e-mail ou telefone cadastrado na aba <strong>Personal</strong>.</p>
+      <div>
+        <label for="loginIdentificador">Email ou telefone</label>
+        <input id="loginIdentificador" placeholder="ex: nome@email.com ou 11999999999" />
+      </div>
+      <div>
+        <label for="loginSenha">Senha</label>
+        <input id="loginSenha" type="password" placeholder="Digite sua senha" />
+      </div>
+      <div class="helper">As credenciais são validadas com hash SHA-256.</div>
+      <div class="auth-actions">
+        <button class="button secondary" id="loginConfig">Configurar endpoint</button>
+        <button class="button" id="loginSubmit">Entrar</button>
+      </div>
+      <small id="loginStatus">Configure o endpoint do Apps Script antes de entrar.</small>
+    </div>
+  </div>
+
+  <div class="app is-hidden" id="app">
     <div class="topbar">
       <div class="brand">
         <h1 class="brand-title">FemFlow • Painel Personal</h1>
@@ -500,6 +553,7 @@
           <span class="status-dot"></span>
           <span id="statusText">OFFLINE</span>
         </div>
+        <span class="user-badge" id="userBadge">Visitante</span>
         <button class="button secondary" id="openConfig">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 1v3" />
@@ -514,6 +568,7 @@
           </svg>
           Configurar Endpoint
         </button>
+        <button class="button ghost" id="logout">Sair</button>
         <button class="button ghost drawer-toggle" id="toggleNav">Menu</button>
       </div>
     </div>
@@ -524,7 +579,6 @@
         <a href="#gerar">Gerar 30 dias</a>
         <a href="#relinkar">Relinkar aba</a>
         <a href="#importar">Importar</a>
-        <a href="#logs">Logs</a>
       </nav>
       <div class="mini-card">
         <strong>Atalhos</strong>
@@ -588,10 +642,6 @@
           <div>
             <label for="idAluna">ID Aluna (opcional)</label>
             <input id="idAluna" name="id_aluna" placeholder="123" />
-          </div>
-          <div>
-            <label for="observacao">Observação</label>
-            <textarea id="observacao" name="observacao"></textarea>
           </div>
           <div>
             <label for="serieEspecialAtiva">Série especial</label>
@@ -684,40 +734,6 @@
           <button class="button secondary" id="btnClear">Limpar</button>
         </div>
       </section>
-
-      <section class="card" id="logs">
-        <div class="card-header">
-          <h2 class="card-title">Logs</h2>
-          <span class="chip">America/Sao_Paulo</span>
-        </div>
-        <div class="log-filter">
-          <div>
-            <label for="logFilter">Filtrar por ação</label>
-            <select id="logFilter">
-              <option value="">Todas</option>
-              <option value="gerarbase">Gerar base ovulatória</option>
-              <option value="serieespecial">Aplicar série especial</option>
-              <option value="distribuir30">Distribuir 30 dias</option>
-              <option value="linkar">Relinkar</option>
-              <option value="importar">Importar</option>
-            </select>
-          </div>
-          <div>
-            <label for="logSearch">Buscar texto</label>
-            <input id="logSearch" placeholder="buscar" />
-          </div>
-        </div>
-        <div class="log-list" id="logList"></div>
-      </section>
-      <section class="card">
-        <div class="card-header">
-          <h2 class="card-title">Nota FemFlow</h2>
-        </div>
-        <p>
-          🧬 O FemFlow respeita o ciclo hormonal feminino real e ajusta automaticamente
-          volume, intensidade e distribuição dos treinos ao longo dos 30 dias.
-        </p>
-      </section>
     </main>
   </div>
 
@@ -778,12 +794,14 @@
       },
     };
 
+    const AUTH_KEY = "femflow_personal_auth";
+    const AUTH_TTL = 1000 * 60 * 60 * 12;
+
     const state = {
       endpoint: localStorage.getItem("femflow_endpoint_url") || "",
       mode: localStorage.getItem("femflow_mode") || "fetch-first",
       timeoutMs: Number(localStorage.getItem("femflow_timeout_ms") || 180000),
       response: null,
-      logs: [],
     };
 
     const qs = (id) => document.getElementById(id);
@@ -846,16 +864,42 @@
       };
     };
 
-    const logValidationFailure = (action, params, reason) => {
-      const entry = {
-        time: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
-        action,
-        params: JSON.stringify(params),
-        mode: state.mode === "link-only" ? "LINK" : "FETCH",
-        status: "error",
-        detail: reason,
-      };
-      logEvent(entry);
+    const normalizePhone = (value) => String(value || "").replace(/\D/g, "");
+
+    const getAuth = () => {
+      try {
+        const raw = localStorage.getItem(AUTH_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        return null;
+      }
+    };
+
+    const setAuth = (auth) => {
+      localStorage.setItem(AUTH_KEY, JSON.stringify(auth));
+    };
+
+    const clearAuth = () => {
+      localStorage.removeItem(AUTH_KEY);
+    };
+
+    const isAuthValid = (auth) => {
+      if (!auth || !auth.timestamp) return false;
+      return Date.now() - auth.timestamp < AUTH_TTL;
+    };
+
+    const applyAuthState = (auth) => {
+      const isValid = isAuthValid(auth);
+      qs("loginScreen").style.display = isValid ? "none" : "flex";
+      qs("app").classList.toggle("is-hidden", !isValid);
+      if (isValid) {
+        qs("userBadge").textContent = auth?.user?.nome || "Personal";
+      } else {
+        qs("userBadge").textContent = "Visitante";
+      }
+    };
+
+    const reportFailure = (action, params, reason) => {
       state.response = { error: reason, action, params };
       updateResponse(state.response);
     };
@@ -865,7 +909,7 @@
       if (!state.endpoint) {
         const reason = "Informe o endpoint antes de executar.";
         toast(reason);
-        logValidationFailure(action, params, reason);
+        reportFailure(action, params, reason);
         return false;
       }
 
@@ -873,7 +917,7 @@
         if (!params.destino) {
           const reason = "Preencha o destino ou informe um ID de aluna.";
           toast(reason);
-          logValidationFailure(action, params, reason);
+          reportFailure(action, params, reason);
           return false;
         }
         return true;
@@ -882,7 +926,7 @@
       if (normalizedAction === "distribuir30" && !params.destino) {
         const reason = "Preencha o destino para distribuir.";
         toast(reason);
-        logValidationFailure(action, params, reason);
+        reportFailure(action, params, reason);
         return false;
       }
 
@@ -890,13 +934,13 @@
         if (params.serieEspecialAtiva !== "sim") {
           const reason = "Ative a série especial antes de aplicar.";
           toast(reason);
-          logValidationFailure(action, params, reason);
+          reportFailure(action, params, reason);
           return false;
         }
         if (!params.serieEspecialDiaTipo) {
           const reason = "Informe os dias específicos da série especial.";
           toast(reason);
-          logValidationFailure(action, params, reason);
+          reportFailure(action, params, reason);
           return false;
         }
       }
@@ -904,19 +948,19 @@
       if (normalizedAction !== "serieespecial" && (!params.nivel || !params.enfase)) {
         const reason = "Preencha nivel e enfase.";
         toast(reason);
-        logValidationFailure(action, params, reason);
+        reportFailure(action, params, reason);
         return false;
       }
       if (normalizedAction !== "serieespecial" && !params.padraoCiclo) {
         const reason = "Selecione o padrão do ciclo.";
         toast(reason);
-        logValidationFailure(action, params, reason);
+        reportFailure(action, params, reason);
         return false;
       }
       if (action === "importar" && !params.id_aluna) {
         const reason = "Informe o perfil (ID da aluna) antes de importar.";
         toast(reason);
-        logValidationFailure(action, params, reason);
+        reportFailure(action, params, reason);
         return false;
       }
       if (normalizedAction !== "serieespecial" && params.serieEspecialAtiva === "sim") {
@@ -924,39 +968,11 @@
         if (!temDias && (!params.serieEspecialFase || !params.serieEspecialTipo)) {
           const reason = "Selecione fase e tipo da série especial.";
           toast(reason);
-          logValidationFailure(action, params, reason);
+          reportFailure(action, params, reason);
           return false;
         }
       }
       return true;
-    };
-
-    const logEvent = (entry) => {
-      state.logs.unshift(entry);
-      renderLogs();
-    };
-
-    const renderLogs = () => {
-      const filter = qs("logFilter").value;
-      const search = qs("logSearch").value.toLowerCase();
-      const list = qs("logList");
-      list.innerHTML = "";
-
-      state.logs
-        .filter((log) => (filter ? log.action === filter : true))
-        .filter((log) => (search ? JSON.stringify(log).toLowerCase().includes(search) : true))
-        .forEach((log) => {
-          const item = document.createElement("div");
-          item.className = `log-item ${log.status}`;
-          const detailLine = log.detail ? `<div>detalhe: ${log.detail}</div>` : "";
-          item.innerHTML = `
-            <div><span>${log.time}</span> • <span>${log.action}</span> • ${log.mode}</div>
-            <div>params: ${log.params}</div>
-            ${detailLine}
-            <div>status: ${log.status}</div>
-          `;
-          list.appendChild(item);
-        });
     };
 
     const setButtonState = (button, stateLabel, label) => {
@@ -1024,13 +1040,6 @@
         state.response = data;
         updateResponse(data);
         setButtonState(button, "success", "Concluído");
-        logEvent({
-          time: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
-          action,
-          params: JSON.stringify(params),
-          mode: modeUsed,
-          status: "ok",
-        });
       } catch (error) {
         const hint = buildFetchHint(error.message, error.name);
         if (state.mode !== "link-only") {
@@ -1049,14 +1058,6 @@
         };
         updateResponse(state.response);
         setButtonState(button, "error", "Erro");
-        logEvent({
-          time: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
-          action,
-          params: JSON.stringify(params),
-          mode: modeUsed,
-          status: "error",
-          detail: hint ? `${error.message || "Erro inesperado"} | ${hint}` : error.message || "Erro inesperado",
-        });
       } finally {
         setTimeout(() => {
           const labelMap = {
@@ -1091,6 +1092,58 @@
       }
       statusText.textContent = "OFFLINE";
       dot.style.background = "var(--error)";
+    };
+
+    const updateLoginStatus = (message, isError = false) => {
+      const el = qs("loginStatus");
+      el.textContent = message;
+      el.style.color = isError ? "var(--error)" : "rgba(17, 17, 17, 0.6)";
+    };
+
+    const handleLogin = async () => {
+      const identificador = qs("loginIdentificador").value.trim();
+      const senha = qs("loginSenha").value.trim();
+
+      if (!state.endpoint) {
+        updateLoginStatus("Configure o endpoint antes de entrar.", true);
+        return;
+      }
+      if (!identificador || !senha) {
+        updateLoginStatus("Informe email/telefone e senha.", true);
+        return;
+      }
+
+      const payload = { action: "login", senha };
+      if (identificador.includes("@")) {
+        payload.email = identificador.toLowerCase();
+      } else {
+        payload.telefone = normalizePhone(identificador);
+      }
+
+      updateLoginStatus("Validando acesso...", false);
+
+      try {
+        const response = await fetch(state.endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          throw new Error(data?.erro || "Credenciais inválidas.");
+        }
+        const auth = {
+          timestamp: Date.now(),
+          user: data.user,
+        };
+        setAuth(auth);
+        applyAuthState(auth);
+        updateLoginStatus("Acesso liberado!", false);
+        qs("loginIdentificador").value = "";
+        qs("loginSenha").value = "";
+      } catch (error) {
+        updateLoginStatus(error.message || "Não foi possível entrar.", true);
+      }
     };
 
     const persistParams = () => {
@@ -1159,11 +1212,11 @@
       syncChips();
       updatePreview();
       pingEndpoint();
+      applyAuthState(getAuth());
+      updateLoginStatus(state.endpoint ? "Endpoint configurado. Faça login." : "Configure o endpoint antes de entrar.");
     };
 
     qs("paramForm").addEventListener("input", persistParams);
-    qs("logFilter").addEventListener("change", renderLogs);
-    qs("logSearch").addEventListener("input", renderLogs);
 
     qs("btnGerarBase").addEventListener("click", () => runAction("gerarbase", collectParams(), qs("btnGerarBase")));
     qs("btnSerieEspecial").addEventListener("click", () => runAction("serieespecial", collectParams(), qs("btnSerieEspecial")));
@@ -1201,6 +1254,19 @@
       updateResponse(null);
     });
 
+    qs("loginSubmit").addEventListener("click", handleLogin);
+    qs("loginSenha").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleLogin();
+      }
+    });
+    qs("loginConfig").addEventListener("click", () => {
+      qs("configModal").classList.add("open");
+      qs("endpointUrl").value = state.endpoint;
+      qs("modeSelect").value = state.mode;
+    });
+
     qs("openConfig").addEventListener("click", () => {
       qs("configModal").classList.add("open");
       qs("endpointUrl").value = state.endpoint;
@@ -1218,6 +1284,15 @@
       updatePreview();
       pingEndpoint();
       toast("Configuração salva.");
+      if (!isAuthValid(getAuth())) {
+        updateLoginStatus(state.endpoint ? "Endpoint configurado. Faça login." : "Configure o endpoint antes de entrar.");
+      }
+    });
+
+    qs("logout").addEventListener("click", () => {
+      clearAuth();
+      applyAuthState(null);
+      updateLoginStatus("Sessão encerrada.");
     });
 
     qs("toggleNav").addEventListener("click", () => {

@@ -118,6 +118,10 @@ function doPost(e) {
         result = importarTreinosFEMFLOW_aba(body.destino);
         return jsonOK_({ step: 'importar', result });
 
+      case 'login':
+        result = autenticarPersonal_(body);
+        return jsonOK_({ step: 'login', user: result });
+
       case 'full':
         gerarFemFlow30Dias(body.pedidoTexto);
         relinkarAba_(body.destino, body.nivel);
