@@ -61,6 +61,7 @@ function _assertSession_(id, deviceId, sessionToken) {
   if (!sh) return { ok: false, msg: "sheet_not_found" };
 
   const rows = sh.getDataRange().getValues();
+  let foundEmail = false;
   const idNorm = String(id || "").trim();
   const devIn  = String(deviceId || "").trim();
   const tkIn   = String(sessionToken || "").trim();
@@ -166,6 +167,7 @@ function _fazerLogin(data) {
     const perfilHormonal = row[19] || "regular";
 
     if (emailDB !== email) continue;
+    foundEmail = true;
 
     /* ======================================================
      * 🔑 VALIDAÇÃO DE SENHA (RETROCOMPATÍVEL)
@@ -184,7 +186,7 @@ function _fazerLogin(data) {
       !senhaPlainMatch &&
       !senhaHexMatch
     ) {
-      return { status: "error", msg: "Senha incorreta." };
+      continue;
     }
 
     // 🔁 migração automática para o padrão atual
@@ -267,6 +269,10 @@ function _fazerLogin(data) {
     };
   }
 
+  if (foundEmail) {
+    return { status: "error", msg: "Senha incorreta." };
+  }
+
   return { status: "error", msg: "E-mail não encontrado." };
 }
 
@@ -299,6 +305,11 @@ function _loginOuCadastro(data) {
 
     if (emailDB === email) {
       const linha = i + 1;
+      let id = row[0];
+      if (!id) {
+        id = gerarID();
+        sh.getRange(linha, 1).setValue(id);
+      }
 
       sh.getRange(linha, 2).setValue(nome);
       sh.getRange(linha, 3).setValue(email);
@@ -321,7 +332,7 @@ function _loginOuCadastro(data) {
       // garantir DiaPrograma
       if (!row[COL_DIA_PROGRAMA]) sh.getRange(linha, COL_DIA_PROGRAMA + 1).setValue(1);
 
-      return { status: "ok", id: row[0], email, nivel: nivelDetectado, pontuacao: pont };
+      return { status: "ok", id, email, nivel: nivelDetectado, pontuacao: pont };
     }
   }
 
