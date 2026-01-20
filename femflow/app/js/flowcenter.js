@@ -214,6 +214,7 @@ function initFlowCenter() {
   const produtoRaw   = String(perfil.produto || "").toLowerCase();
   const isVip = produtoRaw === "vip";
   const isTrial = produtoRaw === "trial_app";
+  const ativa = parseBooleanish(perfil.ativa);
   const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
   const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
 
@@ -223,12 +224,16 @@ function initFlowCenter() {
 
   const isApp    = produtoRaw === "acesso_app" || isTrial;
   const isFollow = produtoRaw.startsWith("followme_");
+  const enfaseAtualUI = localStorage.getItem("femflow_enfase");
+  const acessoAtivo = isVip || ativa;
 
   const freeAccess = normalizarFreeAccess(perfil);
   const freeEnabled = freeAccess?.enabled === true;
   const freeUntil   = freeAccess?.until ? new Date(freeAccess.until) : null;
   const freeValido  = freeEnabled && freeUntil && freeUntil >= new Date();
   const freeEnfases = (freeAccess?.enfases || []).map(e => e.toLowerCase());
+  const freeOkUI = Boolean(enfaseAtualUI) && freeValido && freeEnfases.includes(enfaseAtualUI);
+  const treinoAcessoOk = acessoAtivo || freeOkUI;
 
   /* ============================================================
      5) CICLO (UI)
@@ -315,15 +320,18 @@ function initFlowCenter() {
     });
 
     document.getElementById("toBreath").textContent    = `💨 ${L.respiracao}`;
-    document.getElementById("toTrain").textContent     = `🏃 ${L.treino}`;
-    document.getElementById("toExtraTrain").textContent = `✨ ${L.treinoExtra}`;
+    const treinoLabel = treinoAcessoOk ? "🏃" : "🔒";
+    const extraLabel = treinoAcessoOk ? "✨" : "🔒";
+    document.getElementById("toTrain").textContent     = `${treinoLabel} ${L.treino}`;
+    document.getElementById("toExtraTrain").textContent = `${extraLabel} ${L.treinoExtra}`;
     document.getElementById("toEvolution").textContent = `📈 ${L.evolucao}`;
     const enduranceLabel = enduranceEnabled ? "🏃‍♂️" : "🔒";
     document.getElementById("toEndurance").textContent =
       `${enduranceLabel} ${L.endurance}`;
     const nextTreinoBtn = document.getElementById("toNextTreino");
     if (nextTreinoBtn) {
-      nextTreinoBtn.textContent = `🗓️ ${L.proximoTreino}`;
+      const nextLabel = treinoAcessoOk ? "🗓️" : "🔒";
+      nextTreinoBtn.textContent = `${nextLabel} ${L.proximoTreino}`;
     }
 
     const extraTitle = document.getElementById("extraTitle");
@@ -376,7 +384,13 @@ function initFlowCenter() {
   };
 
   if (extraBtn) {
-    extraBtn.onclick = () => modalExtra?.classList.remove("oculto");
+    extraBtn.onclick = () => {
+      if (!treinoAcessoOk) {
+        FEMFLOW.toast("Seu acesso expirou. Assine para continuar.");
+        return window.open(LINK_ACESSO_APP, "_blank");
+      }
+      modalExtra?.classList.remove("oculto");
+    };
   }
 
   if (extraClose) {
@@ -482,12 +496,21 @@ function initFlowCenter() {
   const nextTreinoBtn = document.getElementById("toNextTreino");
   if (nextTreinoBtn) {
     nextTreinoBtn.onclick = () => {
+      if (!treinoAcessoOk) {
+        FEMFLOW.toast("Seu acesso expirou. Assine para continuar.");
+        return window.open(LINK_ACESSO_APP, "_blank");
+      }
       void carregarProximoTreino();
     };
   }
 
   document.querySelectorAll("[data-extra-enfase]").forEach(btn => {
     btn.addEventListener("click", () => {
+      if (!treinoAcessoOk) {
+        FEMFLOW.toast("Seu acesso expirou. Assine para continuar.");
+        window.open(LINK_ACESSO_APP, "_blank");
+        return;
+      }
       const enfase = btn.dataset.extraEnfase;
       if (!enfase) return;
       const enfaseAtual = localStorage.getItem("femflow_enfase");
@@ -516,8 +539,12 @@ function initFlowCenter() {
 
     const freeOk = freeValido && freeEnfases.includes(enfase);
 
-    if (isTrial) {
-      FEMFLOW.toast("Seu teste grátis terminou. Assine para continuar.");
+    if (!acessoAtivo && !freeOk) {
+      if (isTrial) {
+        FEMFLOW.toast("Seu teste grátis terminou. Assine para continuar.");
+      } else {
+        FEMFLOW.toast("Seu acesso expirou. Assine para continuar.");
+      }
       return window.open(LINK_ACESSO_APP, "_blank");
     }
 
