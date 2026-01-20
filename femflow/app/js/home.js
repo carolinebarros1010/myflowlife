@@ -228,6 +228,7 @@ function persistPerfil(perfil) {
   const isVip = produto === "vip";
   localStorage.setItem("femflow_produto", produto);
   localStorage.setItem("femflow_ativa", String(isVip || !!perfil.ativa));
+  FEMFLOW.renderVipBadge?.();
 
   // ✅ acesso personal = direito (backend), separado do modo personal (front)
   const acessos = perfil.acessos || {};
