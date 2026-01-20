@@ -61,6 +61,7 @@ function _assertSession_(id, deviceId, sessionToken) {
   if (!sh) return { ok: false, msg: "sheet_not_found" };
 
   const rows = sh.getDataRange().getValues();
+  let foundEmail = false;
   const idNorm = String(id || "").trim();
   const devIn  = String(deviceId || "").trim();
   const tkIn   = String(sessionToken || "").trim();
@@ -112,6 +113,21 @@ function _hashSenha(senha) {
   return Utilities.base64Encode(digest);
 }
 
+function _hashSenhaHex_(senha) {
+  const digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    senha,
+    Utilities.Charset.UTF_8
+  );
+  return digest
+    .map(byte => ("0" + (byte & 0xff).toString(16)).slice(-2))
+    .join("");
+}
+
+function _looksLikeSha256Base64_(value) {
+  return /^[A-Za-z0-9+/]{43}=$/.test(String(value || "").trim());
+}
+
 function _fazerLogin(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
@@ -119,11 +135,8 @@ function _fazerLogin(data) {
   const email = String(data.email || "").toLowerCase().trim();
   const senhaRaw = String(data.senha || ""); // NÃO normalizar aqui
 
-  // 🔒 deviceId deve vir do app
-  const deviceId = _ensureDeviceId_(data, { allowGenerate: false });
-  if (!deviceId) {
-    return { status: "error", msg: "device_required" };
-  }
+  // 🔒 deviceId deve vir do app (gera fallback se ausente)
+  const deviceId = _ensureDeviceId_(data, { allowGenerate: true });
 
   if (!email || !senhaRaw) {
     return { status: "error", msg: "E-mail e senha são obrigatórios." };
@@ -135,6 +148,7 @@ function _fazerLogin(data) {
   const hashAtual  = _hashSenha(senhaRaw.trim());
   const hashLegacy = _hashSenha(senhaRaw);
   const hashNorm   = _hashSenha(_norm(senhaRaw));
+  const hashHex    = _hashSenhaHex_(senhaRaw.trim());
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
@@ -157,20 +171,31 @@ function _fazerLogin(data) {
     const perfilHormonal = row[19] || "regular";
 
     if (emailDB !== email) continue;
+    foundEmail = true;
 
     /* ======================================================
      * 🔑 VALIDAÇÃO DE SENHA (RETROCOMPATÍVEL)
      * ====================================================== */
+    const senhaPlainMatch =
+      senhaHashDB === senhaRaw.trim() ||
+      senhaHashDB === senhaRaw ||
+      senhaHashDB === _norm(senhaRaw);
+    const senhaHexMatch =
+      String(senhaHashDB || "").toLowerCase() === hashHex.toLowerCase();
+
     if (
       senhaHashDB !== hashAtual &&
       senhaHashDB !== hashLegacy &&
-      senhaHashDB !== hashNorm
+      senhaHashDB !== hashNorm &&
+      !senhaPlainMatch &&
+      !senhaHexMatch
     ) {
-      return { status: "error", msg: "Senha incorreta." };
+      continue;
     }
 
     // 🔁 migração automática para o padrão atual
-    if (senhaHashDB !== hashAtual) {
+    const senhaJaHash = _looksLikeSha256Base64_(senhaHashDB);
+    if (senhaHashDB !== hashAtual && !senhaJaHash) {
       sh.getRange(i + 1, 5).setValue(hashAtual);
     }
 
@@ -249,18 +274,12 @@ function _fazerLogin(data) {
     };
   }
 
+  if (foundEmail) {
+    return { status: "error", msg: "Senha incorreta." };
+  }
+
   return { status: "error", msg: "E-mail não encontrado." };
 }
-
-
-
-
-    const id            = row[0];
-    const nome          = row[1];
-    const emailDB       = String(row[2] || "").toLowerCase().trim();
-    const senhaHashDB   = String(row[4] || "").trim();
-    const produto       = r
-
 
 function _loginOuCadastro(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
@@ -291,6 +310,11 @@ function _loginOuCadastro(data) {
 
     if (emailDB === email) {
       const linha = i + 1;
+      let id = row[0];
+      if (!id) {
+        id = gerarID();
+        sh.getRange(linha, 1).setValue(id);
+      }
 
       sh.getRange(linha, 2).setValue(nome);
       sh.getRange(linha, 3).setValue(email);
@@ -313,7 +337,7 @@ function _loginOuCadastro(data) {
       // garantir DiaPrograma
       if (!row[COL_DIA_PROGRAMA]) sh.getRange(linha, COL_DIA_PROGRAMA + 1).setValue(1);
 
-      return { status: "ok", id: row[0], email, nivel: nivelDetectado, pontuacao: pont };
+      return { status: "ok", id, email, nivel: nivelDetectado, pontuacao: pont };
     }
   }
 
