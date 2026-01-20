@@ -346,12 +346,13 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     const langSelect = document.getElementById("langSelect");
+    const initialLang = getLanguage();
+    setLanguage(initialLang);
     if (langSelect) {
-      langSelect.value = getLanguage();
+      langSelect.value = initialLang;
       langSelect.addEventListener("change", (event) => {
         setLanguage(event.target.value);
       });
     }
-    applyTranslations();
   });
 })();

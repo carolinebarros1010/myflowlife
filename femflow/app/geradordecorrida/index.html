@@ -211,10 +211,12 @@ input:focus, select:focus, textarea:focus {
         </div>
         <p class="muted" data-i18n="test_help">Realize um teste de 12 min sem parar na modalidade pretendida e insira as informações abaixo (distância em metros e PSE 0 a 10).</p>
         <div class="grid">
-          <label data-i18n="cooper_distance_label">Distância no teste Cooper (12 min, em metros)
+          <label>
+            <span data-i18n="cooper_distance_label">Distância no teste Cooper (12 min, em metros)</span>
             <input id="cooperDist" type="number" min="200" step="10" value="3000">
           </label>
-          <label data-i18n="test_modality_label">Modalidade do teste
+          <label>
+            <span data-i18n="test_modality_label">Modalidade do teste</span>
             <select id="modalidade">
               <option value="corrida" data-i18n="modality_corrida">Corrida</option>
               <option value="bike" data-i18n="modality_bike">Ciclismo</option>
@@ -228,10 +230,12 @@ input:focus, select:focus, textarea:focus {
               <option value="esqui" data-i18n="modality_esqui">Esqui ergômetro</option>
             </select>
           </label>
-          <label data-i18n="test_zone_label">Zona do teste / PSE principal
+          <label>
+            <span data-i18n="test_zone_label">Zona do teste / PSE principal</span>
             <input id="zona" value="Z2 / PSE 5-6">
           </label>
-          <label data-i18n="test_pse_label">PSE do teste Cooper (0–10)
+          <label>
+            <span data-i18n="test_pse_label">PSE do teste Cooper (0–10)</span>
             <input id="cooperPse" type="number" min="0" max="10" step="1" value="8">
           </label>
         </div>
@@ -242,19 +246,24 @@ input:focus, select:focus, textarea:focus {
           <h3 data-i18n="goal_title">Prova objetivo</h3>
         </div>
         <div class="grid">
-          <label data-i18n="profile_label">Perfil
+          <label>
+            <span data-i18n="profile_label">Perfil</span>
             <input id="perfilNivelInput" type="text" value="Iniciante" readonly data-i18n-value="level_beginner">
           </label>
-          <label data-i18n="race_distance_label">Distância da prova (km)
+          <label>
+            <span data-i18n="race_distance_label">Distância da prova (km)</span>
             <input id="distProva" type="number" min="3" value="10">
           </label>
-          <label data-i18n="days_label">Dias da semana
+          <label>
+            <span data-i18n="days_label">Dias da semana</span>
             <input id="dias" value="ter,qui,sab,dom" data-i18n-placeholder="days_placeholder">
           </label>
-          <label data-i18n="sessions_per_week_label">Treinos por semana
+          <label>
+            <span data-i18n="sessions_per_week_label">Treinos por semana</span>
             <input id="semanal" type="number" min="3" max="5" value="4">
           </label>
-          <label data-i18n="start_label">Início
+          <label>
+            <span data-i18n="start_label">Início</span>
             <input id="inicio" type="date">
           </label>
         </div>
