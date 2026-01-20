@@ -343,7 +343,7 @@
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .mini-card button {
@@ -1167,13 +1167,17 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        const data = await response.json();
-        if (!response.ok || !data.ok) {
-          throw new Error(data?.erro || "Credenciais inválidas.");
+        const contentType = response.headers.get("content-type") || "";
+        const data = contentType.includes("application/json")
+          ? await response.json()
+          : await response.text();
+        if (!response.ok || (typeof data === "object" && !data.ok)) {
+          const message = typeof data === "object" ? data?.erro : data;
+          throw new Error(message || "Credenciais inválidas.");
         }
         const auth = {
           timestamp: Date.now(),
-          user: data.user,
+          user: data.user || (typeof data === "object" ? data.user : null),
         };
         setAuth(auth);
         applyAuthState(auth);
@@ -1181,7 +1185,11 @@
         qs("loginIdentificador").value = "";
         qs("loginSenha").value = "";
       } catch (error) {
-        updateLoginStatus(error.message || "Não foi possível entrar.", true);
+        const hint = buildFetchHint(error.message, error.name);
+        updateLoginStatus(
+          hint ? `${error.message || "Não foi possível entrar."} ${hint}` : (error.message || "Não foi possível entrar."),
+          true
+        );
       }
     };
 
@@ -1218,13 +1226,17 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        const data = await response.json();
-        if (!response.ok || !data.ok) {
-          throw new Error(data?.erro || "Não foi possível cadastrar.");
+        const contentType = response.headers.get("content-type") || "";
+        const data = contentType.includes("application/json")
+          ? await response.json()
+          : await response.text();
+        if (!response.ok || (typeof data === "object" && !data.ok)) {
+          const message = typeof data === "object" ? data?.erro : data;
+          throw new Error(message || "Não foi possível cadastrar.");
         }
         const auth = {
           timestamp: Date.now(),
-          user: data.user,
+          user: data.user || (typeof data === "object" ? data.user : null),
         };
         setAuth(auth);
         applyAuthState(auth);
@@ -1235,7 +1247,11 @@
         qs("loginSenha").value = "";
         setAuthMode("login");
       } catch (error) {
-        updateLoginStatus(error.message || "Não foi possível cadastrar.", true);
+        const hint = buildFetchHint(error.message, error.name);
+        updateLoginStatus(
+          hint ? `${error.message || "Não foi possível cadastrar."} ${hint}` : (error.message || "Não foi possível cadastrar."),
+          true
+        );
       }
     };
 
