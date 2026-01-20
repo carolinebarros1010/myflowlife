@@ -1,0 +1,480 @@
+/* ========================================================================
+   FEMFLOW — 06_RESOLVER_EXERCICIO.gs  (VERSÃO FINAL — SEM ERRO DE SINTAXE)
+   ------------------------------------------------------------------------
+   Coração do sistema:
+   - Seleção de exercício por intenção (semântica + canônica)
+   - Antirrepetição por histórico recente
+   - Ajustes por nível / fase / estrutura
+   ------------------------------------------------------------------------
+   ⚠️ Não renomear funções (contrato com demais arquivos .gs)
+   ======================================================================== */
+
+
+/** Rank simples por nível (quanto maior, mais avançado) */
+function nivelRank_(nivel) {
+  nivel = String(nivel || '').toLowerCase();
+  return ({ iniciante: 1, intermediaria: 2, avancada: 3 }[nivel] || 1);
+}
+
+
+/**
+ * Extrai IDs de exercícios usados nos últimos 3 dias (anti-repetição).
+ * @param {Array} rows Histórico de linhas (ex: rowsSemana) com campos {tipo,dia,titulo_pt}
+ * @param {Object|Array} base Base canônica (array ou objeto {list:[]})
+ * @param {String} nivel Nível (iniciante/intermediaria/avancada)
+ */
+function extrairHistoricoIds3Dias_(rows, base, nivel) {
+  return extrairHistoricoIdsNDias_(rows, base, nivel, 3);
+}
+
+function extrairHistoricoIdsNDias_(rows, base, nivel, maxDias) {
+  if (!Array.isArray(rows) || !rows.length) return [];
+
+  var baseList = (base && base.list && Array.isArray(base.list)) ? base.list : base;
+  baseList = Array.isArray(baseList) ? baseList : [];
+
+  var historicoIds = [];
+  var ultimosDias = {};
+  var countDias = 0;
+  var limite = Number(maxDias || 3);
+
+  // varre do fim pro começo (mais recente -> antigo)
+  for (var i = rows.length - 1; i >= 0; i--) {
+    var r = rows[i];
+    if (!r || r.tipo !== 'treino') continue;
+
+    var d = r.dia;
+    if (d === undefined || d === null || d === '') continue;
+
+    if (!ultimosDias[d]) {
+      ultimosDias[d] = true;
+      countDias++;
+    }
+
+    // tenta resolver o ID do título antigo
+    var hit = encontrarHitBase_(r.titulo_pt, base, nivel);
+    if (hit && hit.id) historicoIds.push(hit.id);
+
+    if (countDias >= limite) break;
+  }
+
+  return historicoIds;
+}
+
+
+/** Só para debug: retorna lista de dias presentes no histórico (últimos N dias com treino). */
+function resumirHistorico_(rows, maxDias) {
+  if (!Array.isArray(rows) || !rows.length) return [];
+
+  var dias = [];
+  var setDias = {};
+  var limite = Number(maxDias || 3);
+
+  for (var i = rows.length - 1; i >= 0; i--) {
+    var r = rows[i];
+    if (!r || r.tipo !== 'treino') continue;
+
+    if (!setDias[r.dia]) {
+      setDias[r.dia] = true;
+      dias.push(r.dia);
+      if (dias.length >= limite) break;
+    }
+  }
+
+  dias.sort(function (a, b) { return a - b; });
+  return dias;
+}
+
+
+/**
+ * Score semântico (quanto maior, melhor)
+ * OBS: compatível com base que tenha campos:
+ * - grupo_principal OU grupo
+ * - subpadrao_movimento OU subpadrao
+ * - equipamento
+ */
+function calcularScoreSemantico_(hit, intent, ctx) {
+  if (!hit || !intent) return -999;
+  ctx = ctx || {};
+
+  var nivel = String(ctx.nivel || '').toLowerCase();
+  var fase  = String(ctx.fase  || '').toLowerCase();
+
+  // do hit
+  var grupo = String(hit.grupo_principal || hit.grupo || '').toLowerCase();
+  var sub   = String(hit.subpadrao_movimento || hit.subpadrao || '').toLowerCase();
+  var equip = String(hit.equipamento || '').toLowerCase();
+
+  // da intenção
+  var g = String(intent.grupo_principal || '').toLowerCase();
+  var s = String(intent.subpadrao_movimento || '').toLowerCase();
+  var e = String(intent.equipamento_preferencial || '').toLowerCase();
+
+  var score = 0;
+
+  // match grupo principal
+  if (g && grupo) {
+    if (grupo === g) score += 6;
+    else score -= 1;
+  }
+
+  // match subpadrão
+  if (s && sub) {
+    if (sub === s) score += 4;
+    else score -= 0.5;
+  }
+
+  // match equipamento preferencial
+  if (e && equip) {
+    if (equip === e) score += 2.5;
+    else score -= 0.2;
+  }
+
+  // modulador hormonal (bonus/penalidade por equipamento)
+  if (typeof FEMFLOW_FASE_MODULADOR !== 'undefined' && FEMFLOW_FASE_MODULADOR) {
+    var mod = FEMFLOW_FASE_MODULADOR[fase];
+    if (mod) {
+      if (mod.bonus && typeof mod.bonus[equip] === 'number') score += mod.bonus[equip];
+      if (mod.penalidade && typeof mod.penalidade[equip] === 'number') score += mod.penalidade[equip];
+    }
+  }
+
+  // segurança para iniciante
+  if (nivel === 'iniciante') {
+    if (equip === 'barra') score -= 0.8;
+    if (equip === 'halteres') score -= 0.2;
+    if (equip === 'maquina' || equip === 'polia' || equip === 'smith') score += 0.5;
+  }
+
+  // penaliza mobilidade como treino principal
+  if (grupo === 'mobilidade') score -= 3;
+
+  return score;
+}
+
+
+/** Escolhe o melhor dentro do TopK (com opcional randomização controlada) */
+function escolherEntreTopK_(cands, topK) {
+  var arr = Array.isArray(cands) ? cands.slice() : [];
+  if (!arr.length) return null;
+
+  arr.sort(function (a, b) { return (b._score || 0) - (a._score || 0); });
+
+  var k = Math.max(1, Math.min((Number(topK || 1) || 1), arr.length));
+  var slice = arr.slice(0, k);
+
+  // pick aleatório no topK (se habilitado)
+  if (k > 1 && typeof INTENT_RANDOM_PICK_TOPK === 'number' && INTENT_RANDOM_PICK_TOPK > 1) {
+    var kk = Math.max(1, Math.min(INTENT_RANDOM_PICK_TOPK, slice.length));
+    var idx = Math.floor(Math.random() * kk);
+    return slice[idx] || slice[0];
+  }
+
+  return slice[0];
+}
+
+
+/**
+ * Ajusta um exercício conforme nível/fase (substituição de equipamento mais seguro)
+ * hit pode ser objeto base (com grupo/sub/equip etc.)
+ */
+function aplicarSubstituicaoPorNivel_(hit, ctx) {
+  if (!hit) return hit;
+
+  ctx = ctx || {};
+  var nivel = String(ctx.nivel || '').toLowerCase();
+  var fase  = String(ctx.fase  || '').toLowerCase();
+
+  var base = ctx.base;
+  var baseList = (base && base.list && Array.isArray(base.list)) ? base.list : base;
+  baseList = Array.isArray(baseList) ? baseList : [];
+
+  var equip = String(hit.equipamento || '').toLowerCase();
+  var grupo = String(hit.grupo_principal || hit.grupo || '').toLowerCase();
+  var sub   = String(hit.subpadrao_movimento || hit.subpadrao || '').toLowerCase();
+
+  // iniciante: evitar barra quando possível
+  if (nivel === 'iniciante' && equip === 'barra') {
+    var preferidos1 = ['smith', 'maquina', 'polia', 'peso_corporal'];
+    for (var i = 0; i < preferidos1.length; i++) {
+      var eq = preferidos1[i];
+      var alt = baseList.find(function (x) {
+        return String(x.grupo_principal || x.grupo || '').toLowerCase() === grupo &&
+               String(x.subpadrao_movimento || x.subpadrao || '').toLowerCase() === sub &&
+               String(x.equipamento || '').toLowerCase() === eq;
+      });
+      if (alt) return alt;
+    }
+  }
+
+  // menstrual: favorecer máquina/polia/smith
+  if (fase === 'menstrual' && equip === 'barra') {
+    var preferidos2 = ['maquina', 'polia', 'smith'];
+    for (var j = 0; j < preferidos2.length; j++) {
+      var eq2 = preferidos2[j];
+      var alt2 = baseList.find(function (x) {
+        return String(x.grupo_principal || x.grupo || '').toLowerCase() === grupo &&
+               String(x.subpadrao_movimento || x.subpadrao || '').toLowerCase() === sub &&
+               String(x.equipamento || '').toLowerCase() === eq2;
+      });
+      if (alt2) return alt2;
+    }
+  }
+
+  return hit;
+}
+
+
+/** Âncora = quando semântica não resolve, tenta achar um título fallback no banco */
+function resolverExercicioAncora_(ctx, base) {
+  ctx = ctx || {};
+  var titulo = tituloFallbackPorEnfase_(ctx);
+  if (!titulo) return null;
+
+  var hit = encontrarHitBase_(titulo, base, ctx.nivel);
+  return hit || null;
+}
+
+
+/**
+ * Força a escolha de um exercício de um grupo específico
+ * quando a estrutura exige um mínimo obrigatório.
+ */
+function resolverExercicioForcadoPorGrupo_(grupo, ctx, base) {
+  grupo = String(grupo || '').toLowerCase();
+  ctx = ctx || {};
+
+  var baseList = (base && base.list && Array.isArray(base.list)) ? base.list : base;
+  baseList = Array.isArray(baseList) ? baseList : [];
+
+  var nivel = String(ctx.nivel || '').toLowerCase();
+  var fase  = String(ctx.fase  || '').toLowerCase();
+
+  var candidatos = baseList.filter(function (ex) {
+    if (!ex) return false;
+
+    var g = String(ex.grupo_principal || ex.grupo || '').toLowerCase();
+    if (g !== grupo) return false;
+
+    // trava iniciante (se sua base tiver esse campo)
+    if (nivel === 'iniciante' && ex.proibido_iniciante) return false;
+
+    // nunca força mobilidade como exercício
+    if (g === 'mobilidade') return false;
+
+    return true;
+  });
+
+  if (!candidatos.length) return null;
+
+  // score simples
+  var scored = candidatos.map(function (ex) {
+    var score = 1;
+
+    if (fase === 'ovulatoria') score += 1;
+    if (fase === 'menstrual') score -= 0.5;
+
+    if (nivel === 'iniciante' && String(ex.equipamento || '').toLowerCase() === 'maquina') score += 1;
+
+    return { ex: ex, score: score };
+  });
+
+  scored.sort(function (a, b) { return b.score - a.score; });
+
+  var escolhido = scored[0] && scored[0].ex;
+  if (!escolhido) return null;
+
+  // aplica ajustes finais
+  if (typeof aplicarSubstituicaoPorNivel_ === 'function') {
+    var ajustado = aplicarSubstituicaoPorNivel_(escolhido, Object.assign({}, ctx, { base: baseList }));
+    return ajustado || escolhido;
+  }
+
+  return escolhido;
+}
+
+
+/**
+ * RESOLVER PRINCIPAL — por intenção
+ * @param {Object} intent intenção {grupo_principal, subpadrao_movimento, equipamento_preferencial}
+ * @param {Object} ctx contexto do dia (deve conter dia,fase,estrutura,nivel,enfase,qtdExercicios etc.)
+ * @param {Object|Array} base base (array ou {list:[]})
+ * @param {Array} historicoTreinos rows do histórico (ex: rowsSemana) com {tipo,dia,titulo_pt}
+ * @param {Object} opts opções {topK:number}
+ */
+function resolverExercicioPorIntencao_(
+  intent,
+  ctx,
+  base,
+  historicoTreinos,
+  opts
+) {
+  ctx = ctx || {};
+  opts = opts || {};
+  historicoTreinos = Array.isArray(historicoTreinos) ? historicoTreinos : [];
+
+  var nivel     = String(ctx.nivel || '').toLowerCase();
+  var fase      = String(ctx.fase  || '').toLowerCase();
+  var estrutura = String(ctx.estrutura || '').toUpperCase();
+
+  var baseList = (base && base.list && Array.isArray(base.list)) ? base.list : base;
+  baseList = Array.isArray(baseList) ? baseList : [];
+
+  // ======================================================
+  // ESTADO PERSISTENTE DO DIA (para múltiplas chamadas)
+  // ======================================================
+  if (!ctx._contagemGrupoDia) ctx._contagemGrupoDia = {};
+  if (!ctx._padroesUsadosHoje) ctx._padroesUsadosHoje = {};
+  // _padroesUsadosHoje como "set" (obj)
+  var contagemGrupoDia = ctx._contagemGrupoDia;
+  var padroesUsadosHoje = ctx._padroesUsadosHoje;
+
+  // ================================
+  // HISTÓRICO (anti-repetição)
+  // ================================
+  var antirepeatOn = (typeof INTENT_ANTIREPEAT_ENABLED !== 'undefined' && INTENT_ANTIREPEAT_ENABLED);
+  var lenPadrao = Array.isArray(ctx.padraoCiclo) ? ctx.padraoCiclo.length : Number(ctx.padraoCiclo) || 3;
+  var historicoIds = antirepeatOn ? extrairHistoricoIdsNDias_(historicoTreinos, base, nivel, lenPadrao) : [];
+
+  // ================================
+  // REGRAS FIXAS DA ESTRUTURA
+  // ================================
+  var regraEstrutura = null;
+  if (typeof regrasEstruturaPorPadrao_ === 'function' && estrutura) {
+    var enfaseGrupo = normalizarEnfaseParaGrupo_(ctx.enfase);
+    regraEstrutura = regrasEstruturaPorPadrao_(estrutura, ctx.padraoCiclo, enfaseGrupo);
+  }
+
+  // ================================
+  // CANDIDATOS SEMÂNTICOS
+  // ================================
+  var cands = buildCandidatesSemantico_(intent, ctx, base) || [];
+  if (!Array.isArray(cands)) cands = [];
+
+  // ================================
+  // SCORE SEMÂNTICO
+  // ================================
+  var scored = cands.map(function (hit) {
+    var s = calcularScoreSemantico_(hit, intent, ctx);
+    return Object.assign({}, hit, { _score: s });
+  });
+
+  // ================================
+  // FILTRO DE REPETIÇÃO (histórico)
+  // ================================
+  var filtrado = scored;
+
+  if (antirepeatOn && historicoIds.length) {
+    filtrado = scored.filter(function (x) { return historicoIds.indexOf(x.id) === -1; });
+    if (!filtrado.length) filtrado = scored; // nunca quebra
+  }
+
+  // ================================
+  // FILTROS ESTRUTURAIS DUROS
+  // ================================
+  filtrado = filtrado.filter(function (ex) {
+    if (!ex) return false;
+
+    var grupo  = ex.grupo_principal || ex.grupo;
+    var padrao = ex.subpadrao_movimento || ex.subpadrao;
+
+    grupo  = String(grupo || '').toLowerCase();
+    padrao = String(padrao || '').toLowerCase();
+
+    // 1) Mobilidade nunca é principal
+    if (grupo === 'mobilidade') return false;
+
+    // 2) Limite de core
+    if (grupo === 'core' && (contagemGrupoDia.core || 0) >= 1) return false;
+
+    // 3) Anti repetição de padrão no mesmo dia
+    if (padrao && padroesUsadosHoje[padrao]) return false;
+
+    // 4) Permitidos da estrutura
+    if (regraEstrutura && regraEstrutura.permitidos && Array.isArray(regraEstrutura.permitidos)) {
+      if (regraEstrutura.permitidos.indexOf(grupo) === -1) return false;
+    }
+
+    return true;
+  });
+
+  // ================================
+  // ESCOLHA FINAL
+  // ================================
+  var escolhido = escolherEntreTopK_(
+    filtrado,
+    (typeof opts.topK === 'number' ? opts.topK : 1)
+  );
+
+  if (escolhido) {
+    var grupoEscolhido  = String(escolhido.grupo_principal || escolhido.grupo || '').toLowerCase();
+    var padraoEscolhido = String(escolhido.subpadrao_movimento || escolhido.subpadrao || '').toLowerCase();
+
+    contagemGrupoDia[grupoEscolhido] = (contagemGrupoDia[grupoEscolhido] || 0) + 1;
+    if (padraoEscolhido) padroesUsadosHoje[padraoEscolhido] = true;
+
+    var ajustado = aplicarSubstituicaoPorNivel_(
+      escolhido,
+      Object.assign({}, ctx, { base: baseList })
+    );
+
+    return ajustado || escolhido;
+  }
+
+  // ================================
+  // GARANTIA DE MÍNIMO POR ESTRUTURA
+  // ================================
+  if (regraEstrutura && regraEstrutura.min) {
+    for (var g in regraEstrutura.min) {
+      if (!regraEstrutura.min.hasOwnProperty(g)) continue;
+
+      var atual = contagemGrupoDia[g] || 0;
+      var faltam = regraEstrutura.min[g] - atual;
+
+      if (faltam > 0) {
+        var forcado = resolverExercicioForcadoPorGrupo_(g, ctx, base);
+        if (forcado) return forcado;
+      }
+    }
+  }
+
+  // ================================
+  // FALLBACKS (NUNCA QUEBRA)
+  // ================================
+  var anc = resolverExercicioAncora_(ctx, base);
+  if (anc) return anc;
+
+  if (cands.length) return cands[0];
+
+  return baseList.length ? baseList[0] : null;
+}
+
+
+/** Regra de uso (seu gate de OpenAI) — mantida, sem optional chaining */
+function usarOpenAIComoFontePrimaria_(ctx) {
+  ctx = ctx || {};
+  return (
+    OPENAI_ENABLED === true &&
+    Number(ctx.dia) >= Number(OPENAI_DIAS_PICO && OPENAI_DIAS_PICO.inicio) &&
+    Number(ctx.dia) <= Number(OPENAI_DIAS_PICO && OPENAI_DIAS_PICO.fim)
+  );
+}
+
+
+/* ========================================================================
+   RESOLVER CANÔNICO — ID (STUB LOCAL)
+   ------------------------------------------------------------------------
+   Normaliza IDs de exercícios para evitar repetição recente.
+   OpenAI poderá substituir isso futuramente.
+   ======================================================================== */
+function resolverCanonicoIdOpenAI_(exercicio) {
+  if (!exercicio) return null;
+
+  return (
+    exercicio.id ||
+    exercicio.titulo_pt ||
+    exercicio.nome ||
+    exercicio.link ||
+    JSON.stringify(exercicio)
+  );
+}
