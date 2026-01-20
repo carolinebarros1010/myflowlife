@@ -147,10 +147,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (res.status !== "ok") {
-
       if (res.status === "blocked") {
         setErr("Esta conta já está conectada em outro dispositivo.");
         FEMFLOW.clearSession?.();
+        return;
+      }
+
+      if (res.status === "expired") {
+        setErr(res.msg || "Sua assinatura expirou.");
+        return;
+      }
+
+      if (res.status === "inactive") {
+        setErr(res.msg || "Assinatura inativa.");
+        return;
+      }
+
+      if (res.status === "error" && res.msg === "device_required") {
+        setErr("Não foi possível identificar o dispositivo. Tente novamente.");
         return;
       }
 

@@ -252,16 +252,6 @@ function _fazerLogin(data) {
   return { status: "error", msg: "E-mail não encontrado." };
 }
 
-
-
-
-    const id            = row[0];
-    const nome          = row[1];
-    const emailDB       = String(row[2] || "").toLowerCase().trim();
-    const senhaHashDB   = String(row[4] || "").trim();
-    const produto       = r
-
-
 function _loginOuCadastro(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
 
