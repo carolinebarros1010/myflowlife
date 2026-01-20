@@ -396,24 +396,30 @@ const hasPersonal =
     const nivel    = perfil.nivel;
     let enfaseLocal = localStorage.getItem("femflow_enfase");
     const extraSessaoAtiva = localStorage.getItem("femflow_treino_extra") === "true";
-    let enfaseFinal = perfil.enfase || enfaseLocal;
+    const enfaseBackendRaw = String(perfil.enfase || "").toLowerCase().trim();
+    const enfaseLocalRaw = String(enfaseLocal || "").toLowerCase().trim();
+    const isEnfaseValida = value =>
+      Boolean(value) && value !== "nenhuma" && value !== "personal";
+    let enfaseFinal = isEnfaseValida(enfaseBackendRaw)
+      ? enfaseBackendRaw
+      : (isEnfaseValida(enfaseLocalRaw) ? enfaseLocalRaw : null);
     if (extraParamNorm.startsWith("extra_")) {
       enfaseFinal = extraParamNorm;
     }
-    if (extraSessaoAtiva && enfaseLocal) {
-      enfaseFinal = enfaseLocal;
+    if (extraSessaoAtiva) {
+      if (FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocalRaw)) {
+        enfaseFinal = enfaseLocalRaw;
+      } else {
+        localStorage.removeItem("femflow_treino_extra");
+      }
     }
-    if (!extraSessaoAtiva && enfaseLocal && FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocal)) {
+    if (!extraSessaoAtiva && enfaseLocalRaw && FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocalRaw)) {
       localStorage.removeItem("femflow_treino_extra");
-      enfaseFinal = perfil.enfase || null;
+      enfaseFinal = isEnfaseValida(enfaseBackendRaw) ? enfaseBackendRaw : null;
     }
 
     // 🔥 Personal nunca é ênfase
-    if (enfaseFinal === "personal") {
-      enfaseFinal = null;
-    }
-
-    if (!enfaseFinal || enfaseFinal === "nenhuma") {
+    if (!isEnfaseValida(enfaseFinal)) {
       enfaseFinal = null;
     }
 
