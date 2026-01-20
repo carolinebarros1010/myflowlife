@@ -112,6 +112,17 @@ function _hashSenha(senha) {
   return Utilities.base64Encode(digest);
 }
 
+function _hashSenhaHex_(senha) {
+  const digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    senha,
+    Utilities.Charset.UTF_8
+  );
+  return digest
+    .map(byte => ("0" + (byte & 0xff).toString(16)).slice(-2))
+    .join("");
+}
+
 function _fazerLogin(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
@@ -119,11 +130,8 @@ function _fazerLogin(data) {
   const email = String(data.email || "").toLowerCase().trim();
   const senhaRaw = String(data.senha || ""); // NÃO normalizar aqui
 
-  // 🔒 deviceId deve vir do app
-  const deviceId = _ensureDeviceId_(data, { allowGenerate: false });
-  if (!deviceId) {
-    return { status: "error", msg: "device_required" };
-  }
+  // 🔒 deviceId deve vir do app (gera fallback se ausente)
+  const deviceId = _ensureDeviceId_(data, { allowGenerate: true });
 
   if (!email || !senhaRaw) {
     return { status: "error", msg: "E-mail e senha são obrigatórios." };
@@ -135,6 +143,7 @@ function _fazerLogin(data) {
   const hashAtual  = _hashSenha(senhaRaw.trim());
   const hashLegacy = _hashSenha(senhaRaw);
   const hashNorm   = _hashSenha(_norm(senhaRaw));
+  const hashHex    = _hashSenhaHex_(senhaRaw.trim());
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
@@ -161,10 +170,19 @@ function _fazerLogin(data) {
     /* ======================================================
      * 🔑 VALIDAÇÃO DE SENHA (RETROCOMPATÍVEL)
      * ====================================================== */
+    const senhaPlainMatch =
+      senhaHashDB === senhaRaw.trim() ||
+      senhaHashDB === senhaRaw ||
+      senhaHashDB === _norm(senhaRaw);
+    const senhaHexMatch =
+      String(senhaHashDB || "").toLowerCase() === hashHex.toLowerCase();
+
     if (
       senhaHashDB !== hashAtual &&
       senhaHashDB !== hashLegacy &&
-      senhaHashDB !== hashNorm
+      senhaHashDB !== hashNorm &&
+      !senhaPlainMatch &&
+      !senhaHexMatch
     ) {
       return { status: "error", msg: "Senha incorreta." };
     }
@@ -251,16 +269,6 @@ function _fazerLogin(data) {
 
   return { status: "error", msg: "E-mail não encontrado." };
 }
-
-
-
-
-    const id            = row[0];
-    const nome          = row[1];
-    const emailDB       = String(row[2] || "").toLowerCase().trim();
-    const senhaHashDB   = String(row[4] || "").trim();
-    const produto       = r
-
 
 function _loginOuCadastro(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
