@@ -8,6 +8,7 @@ console.log("🚀 app.js carregado com sucesso!");
 
 const byId = (id) => document.getElementById(id);
 const $ = (sel) => document.querySelector(sel);
+const t = (key) => (window.EnduranceI18n?.t ? window.EnduranceI18n.t(key) : key);
 
 /* ======= Som (WebAudio) ======= */
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -53,6 +54,14 @@ function formatRange(min, max, unit = "min") {
   const maxRound = Math.round(max);
   if (minRound === maxRound) return `${minRound} ${unit}`;
   return `${minRound}–${maxRound} ${unit}`;
+}
+
+function formatTempoValue(minutos) {
+  const rounded = Math.round(minutos * 10) / 10;
+  if (Math.abs(rounded - Math.round(rounded)) < 0.05) {
+    return `${Math.round(rounded)} min`;
+  }
+  return `${rounded.toFixed(1)} min`;
 }
 
 function normalizarNivel(raw) {
@@ -152,10 +161,132 @@ function buildEstrutura(min, max) {
   const desaquecMin = min * 0.2;
   const desaquecMax = max * 0.2;
   return {
-    aquecimento: `Aquecimento: ${formatRange(aquecimentoMin, aquecimentoMax)}`,
-    principal: `Parte principal: ${formatRange(principalMin, principalMax)}`,
-    desaquecimento: `Desaquecimento: ${formatRange(desaquecMin, desaquecMax)}`,
+    aquecimento: `${t("label_warmup")}: ${formatRange(aquecimentoMin, aquecimentoMax)}`,
+    principal: `${t("label_main")}: ${formatRange(principalMin, principalMax)}`,
+    desaquecimento: `${t("label_cooldown")}: ${formatRange(desaquecMin, desaquecMax)}`,
   };
+}
+
+function parseTempoTokens(texto) {
+  let total = 0;
+  let restante = texto;
+  const rangeRegex = /(\d+(?:[–-]\d+)+)\s*([\'\"])/g;
+  restante = restante.replace(rangeRegex, (_match, nums, unit) => {
+    const soma = nums.split(/[–-]/).reduce((acc, item) => acc + parseFloat(item.replace(",", ".")), 0);
+    const fator = unit === "\"" ? 1 / 60 : 1;
+    total += soma * fator;
+    return " ";
+  });
+
+  const tokenRegex = /(\d+(?:[.,]\d+)?)\s*([\'\"])/g;
+  let match;
+  while ((match = tokenRegex.exec(restante)) !== null) {
+    const valor = parseFloat(match[1].replace(",", "."));
+    if (Number.isNaN(valor)) continue;
+    total += match[2] === "\"" ? valor / 60 : valor;
+  }
+  return total;
+}
+
+function parseTempoSegmento(texto) {
+  let total = 0;
+  let restante = texto;
+  const repParentesesRegex = /(\d+)\s*[×x]\s*\(([^)]+)\)/g;
+  restante = restante.replace(repParentesesRegex, (_match, rep, conteudo) => {
+    total += parseInt(rep, 10) * parseTempoTokens(conteudo);
+    return " ";
+  });
+
+  const repMatch = restante.match(/(\d+)\s*[×x]\s*(.+)/);
+  if (repMatch) {
+    total += parseInt(repMatch[1], 10) * parseTempoTokens(repMatch[2]);
+    return total;
+  }
+
+  total += parseTempoTokens(restante);
+  return total;
+}
+
+function calcularTempoPorDescricao(desc) {
+  if (!desc) return null;
+  const descLower = desc.toLowerCase();
+  if (/\b\d+(?:[.,]\d+)?\s*(km|m)\b/.test(descLower)) return null;
+
+  const partes = desc.split("+").map(item => item.trim()).filter(Boolean);
+  if (!partes.length) return null;
+
+  const partesInfo = partes.map((texto) => ({
+    texto: texto.toLowerCase(),
+    tempo: parseTempoSegmento(texto)
+  }));
+
+  const total = partesInfo.reduce((acc, item) => acc + item.tempo, 0);
+  if (total <= 0) return null;
+
+  let aquecimento = 0;
+  let principal = 0;
+  let desaquecimento = 0;
+  partesInfo.forEach((item, index) => {
+    if (!item.tempo) return;
+    if (item.texto.includes("aquec")) {
+      aquecimento += item.tempo;
+    } else if (item.texto.includes("desaquec")) {
+      desaquecimento += item.tempo;
+    } else if (item.texto.includes("leve") && index === 0) {
+      aquecimento += item.tempo;
+    } else if (item.texto.includes("leve") && index === partesInfo.length - 1) {
+      desaquecimento += item.tempo;
+    } else {
+      principal += item.tempo;
+    }
+  });
+
+  if (!principal) {
+    principal = Math.max(0, total - aquecimento - desaquecimento);
+  }
+
+  return {
+    total,
+    aquecimento,
+    principal,
+    desaquecimento
+  };
+}
+
+function buildEstruturaFromParts(tempos) {
+  return {
+    aquecimento: `${t("label_warmup")}: ${formatTempoValue(tempos.aquecimento)}`,
+    principal: `${t("label_main")}: ${formatTempoValue(tempos.principal)}`,
+    desaquecimento: `${t("label_cooldown")}: ${formatTempoValue(tempos.desaquecimento)}`
+  };
+}
+
+function normalizeDiaAbrev(dia) {
+  const key = String(dia || "").trim().toLowerCase().slice(0, 3);
+  const map = {
+    dom: "dom",
+    seg: "seg",
+    ter: "ter",
+    qua: "qua",
+    qui: "qui",
+    sex: "sex",
+    sab: "sab",
+    sun: "dom",
+    mon: "seg",
+    tue: "ter",
+    wed: "qua",
+    thu: "qui",
+    fri: "sex",
+    sat: "sab",
+    dim: "dom",
+    lun: "seg",
+    mar: "ter",
+    mer: "qua",
+    jeu: "qui",
+    ven: "sex",
+    sam: "sab"
+  };
+  return map[key] || key;
 }
 
 function getModalidadeConfig(modalidade) {
@@ -172,48 +303,49 @@ function getModalidadeConfig(modalidade) {
 }
 
 function formatDistanciaEstimativa(modalidade, distKm) {
+  const estimatedSuffix = ` ${t("label_estimated_suffix")}`;
   if (modalidade === "bike") {
-    return `${round2(distKm * 3.5)} km (estimado)`;
+    return `${round2(distKm * 3.5)} km${estimatedSuffix}`;
   }
   if (modalidade === "remo") {
-    return `${Math.round(distKm * 0.9 * 1000)} m (estimado)`;
+    return `${Math.round(distKm * 0.9 * 1000)} m${estimatedSuffix}`;
   }
   if (modalidade === "natacao") {
-    return `${Math.round(distKm * 0.9 * 1000)} m (estimado)`;
+    return `${Math.round(distKm * 0.9 * 1000)} m${estimatedSuffix}`;
   }
   if (modalidade === "natacao_aberta") {
-    return `${round2(distKm * 0.8)} km (estimado)`;
+    return `${round2(distKm * 0.8)} km${estimatedSuffix}`;
   }
   if (modalidade === "eliptico") {
-    return `${round2(distKm * 1.6)} km (estimado)`;
+    return `${round2(distKm * 1.6)} km${estimatedSuffix}`;
   }
   if (modalidade === "caminhada") {
-    return `${round2(distKm * 0.85)} km (estimado)`;
+    return `${round2(distKm * 0.85)} km${estimatedSuffix}`;
   }
   if (modalidade === "trilha") {
-    return `${round2(distKm * 0.9)} km (estimado)`;
+    return `${round2(distKm * 0.9)} km${estimatedSuffix}`;
   }
   if (modalidade === "aqua_run") {
-    return `${formatRange(distKm * 0.8, distKm)} km (estimado)`;
+    return `${formatRange(distKm * 0.8, distKm)} km${estimatedSuffix}`;
   }
   if (modalidade === "esqui") {
-    return `${round2(distKm * 2.8)} km (estimado)`;
+    return `${round2(distKm * 2.8)} km${estimatedSuffix}`;
   }
   return `${round2(distKm)} km`;
 }
 
 function formatRitmoLabel(modalidade, ritmoSessao) {
   const labelMap = {
-    corrida: "Ritmo base (corrida):",
-    bike: "Ritmo base (ciclismo):",
-    remo: "Ritmo base (remo):",
-    natacao: "Ritmo base (natação):",
-    natacao_aberta: "Ritmo base (natação em águas abertas):",
-    eliptico: "Ritmo base (elíptico):",
-    caminhada: "Ritmo base (caminhada):",
-    trilha: "Ritmo base (trilha):",
-    aqua_run: "Ritmo base (aqua run):",
-    esqui: "Ritmo base (esqui ergômetro):"
+    corrida: "label_base_pace_running",
+    bike: "label_base_pace_bike",
+    remo: "label_base_pace_row",
+    natacao: "label_base_pace_swim",
+    natacao_aberta: "label_base_pace_open_swim",
+    eliptico: "label_base_pace_elliptical",
+    caminhada: "label_base_pace_walk",
+    trilha: "label_base_pace_trail",
+    aqua_run: "label_base_pace_aqua",
+    esqui: "label_base_pace_ski"
   };
   const unitMap = {
     corrida: "min/km",
@@ -221,18 +353,37 @@ function formatRitmoLabel(modalidade, ritmoSessao) {
     remo: "min/500 m",
     natacao: "min/100 m",
     natacao_aberta: "min/100 m",
-    eliptico: "tempo / PSE / RPM",
+    eliptico: "unit_base_pace_elliptical",
     caminhada: "min/km",
-    trilha: "min/km + PSE",
-    aqua_run: "tempo / PSE",
+    trilha: "unit_base_pace_trail",
+    aqua_run: "unit_base_pace_aqua",
     esqui: "min/500 m"
   };
-  const label = labelMap[modalidade] || "Ritmo base:";
+  const labelKey = labelMap[modalidade] || "label_base_pace_running";
   const unit = unitMap[modalidade] || "min/km";
-  if (unit.includes("tempo")) {
-    return `${label} ${unit}`;
+  const unitLabel = unit.includes("unit_") ? t(unit) : unit;
+  const label = t(labelKey);
+  if (unitLabel.includes("tempo") || unitLabel.includes("time") || unitLabel.includes("temps")) {
+    return `${label} ${unitLabel}`;
   }
-  return `${label} ${ritmoSessao} ${unit}`;
+  return `${label} ${ritmoSessao} ${unitLabel}`;
+}
+
+function formatModalidadeLabel(modalidade) {
+  const labelMap = {
+    corrida: "modality_corrida",
+    bike: "modality_bike",
+    remo: "modality_remo",
+    natacao: "modality_natacao",
+    natacao_aberta: "modality_natacao_aberta",
+    eliptico: "modality_eliptico",
+    caminhada: "modality_caminhada",
+    trilha: "modality_trilha",
+    aqua_run: "modality_aqua_run",
+    esqui: "modality_esqui"
+  };
+  const labelKey = labelMap[modalidade] || "modality_corrida";
+  return t(labelKey);
 }
 
 const seq = {};
@@ -245,9 +396,9 @@ const ajusteFaseCiclo = {
 };
 
 const treinoLabels = {
-  resistencia: "resistência",
-  velocidade: "velocidade",
-  velocidade_pura: "velocidade pura"
+  resistencia: "label_resistance",
+  velocidade: "label_speed",
+  velocidade_pura: "label_speed_pure"
 };
 
 const tipoPorCategoria = {
@@ -328,13 +479,13 @@ function hidratarCamposDoPerfil(perfil = null) {
   const cicloDuracaoStorage = parseInt(perfil?.ciclo_duracao || localStorage.getItem("femflow_cycleLength") || "28", 10);
   const faseStorage = normalizarFase(perfil?.fase || localStorage.getItem("femflow_fase"));
   const inicioStorage = localStorage.getItem("femflow_training_start") || "";
-  const nomeStorage = perfil?.nome || localStorage.getItem("femflow_nome") || "Aluna";
+  const nomeStorage = perfil?.nome || localStorage.getItem("femflow_nome") || t("default_student_name");
 
   if (nivelEl && nivelStorage) {
     const map = {
-      iniciante: "Iniciante",
-      intermediario: "Intermediária",
-      avancado: "Avançada"
+      iniciante: t("level_beginner"),
+      intermediario: t("level_intermediate"),
+      avancado: t("level_advanced")
     };
     nivelEl.value = map[nivelStorage] || nivelStorage;
   }
@@ -345,17 +496,17 @@ function hidratarCamposDoPerfil(perfil = null) {
       ? calcularFasePorDia(diaCicloStorage, cicloDuracaoStorage).fase
       : faseStorage;
     const faseLabel = {
-      follicular: "Folicular",
-      ovulatoria: "Ovulatória",
-      lutea: "Lútea",
-      menstrual: "Menstrual"
+      follicular: t("phase_follicular"),
+      ovulatoria: t("phase_ovulatory"),
+      lutea: t("phase_luteal"),
+      menstrual: t("phase_menstrual")
     }[faseCalc] || faseCalc;
     const nivelLabel = {
-      iniciante: "Iniciante",
-      intermediario: "Intermediária",
-      avancado: "Avançada"
+      iniciante: t("level_beginner"),
+      intermediario: t("level_intermediate"),
+      avancado: t("level_advanced")
     }[nivelStorage] || nivelStorage;
-    nivelTagEl.textContent = `${nivelLabel} • ${faseLabel} • Dia ${diaCicloStorage}`;
+    nivelTagEl.textContent = `${nivelLabel} • ${faseLabel} • ${t("label_day")} ${diaCicloStorage}`;
   }
 
   if (inicioEl && inicioStorage) {
@@ -418,7 +569,7 @@ function gerarMesociclo() {
 
   if (!provaKmEl || !nivelEl || !nTreinosEl || !cooperDistEl || !cooperPseEl || !diasEl || !modalidadeEl || !zonaEl || !inicioEl) {
     console.error("❌ Um ou mais campos de entrada não foram encontrados no HTML!");
-    toast("Erro: campo não encontrado no formulário.");
+    toast(t("toast_field_missing"));
     playFeedback("error");
     return;
   }
@@ -430,7 +581,7 @@ function gerarMesociclo() {
   const cooperPse = parseInt(cooperPseEl.value || 8, 10);
   const dias = diasEl.value
     .split(",")
-    .map((d) => d.trim())
+    .map((d) => normalizeDiaAbrev(d))
     .filter(Boolean);
   const faseCiclo = normalizarFase(localStorage.getItem("femflow_fase"));
   const diaCiclo = parseInt(localStorage.getItem("femflow_diaCiclo") || "1", 10);
@@ -443,13 +594,13 @@ function gerarMesociclo() {
   }
 
   if (nTreinos > 5) {
-    toast("Máximo de 5 treinos por semana para respeitar a recuperação.");
+    toast(t("toast_max_sessions"));
     playFeedback("error");
     return;
   }
 
   if (!cooperDist || cooperDist <= 0) {
-    toast("Informe a distância do teste Cooper (12 min).");
+    toast(t("toast_invalid_cooper"));
     playFeedback("error");
     return;
   }
@@ -532,26 +683,29 @@ function gerarMesociclo() {
     const fatorModalidade = getModalidadeConfig(modalidade);
     const tempoMin = tempoCorridaMin * fatorModalidade.min;
     const tempoMax = tempoCorridaMin * fatorModalidade.max;
-    const estrutura = buildEstrutura(tempoMin, tempoMax);
+    const temposPorDesc = calcularTempoPorDescricao(treino.desc);
+    const estrutura = temposPorDesc ? buildEstruturaFromParts(temposPorDesc) : buildEstrutura(tempoMin, tempoMax);
     const distanciaEstimada = formatDistanciaEstimativa(modalidade, alvo);
     const dataLabel = data.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit"
     });
 
+    const tipoKey = treinoLabels[categoria] || treino.tipo;
     plano.push({
       dia: `${diaAbrev.toUpperCase()} • ${dataLabel}`,
       semana: weekIndex,
       dataISO: data.toISOString().slice(0, 10),
       nome: treino.nome,
-      tipo: treinoLabels[categoria] || treino.tipo,
+      tipo: tipoKey,
+      tipoKey,
       fase: faseInfo.fase,
       distKm: round2(alvo),
       ritmo: ritmoSessao,
       ritmoLabel: formatRitmoLabel(modalidade, ritmoSessao),
       modalidade,
       zona,
-      tempo: formatRange(tempoMin, tempoMax),
+      tempo: temposPorDesc ? formatTempoValue(temposPorDesc.total) : formatRange(tempoMin, tempoMax),
       distanciaEstimada,
       estrutura,
       desc: treino.desc
@@ -565,7 +719,7 @@ function gerarMesociclo() {
   semanaAtiva = 0;
   renderSemanaAtiva();
   persistMesociclo();
-  toast("Mesociclo gerado com sucesso!");
+  toast(t("toast_plan_generated"));
   playFeedback("success");
 
   console.log("✅ Mesociclo gerado:");
@@ -581,22 +735,29 @@ function renderSemana(semana){
     return;
   }
   grid.innerHTML = "";
-  semana.forEach((t, idx)=>{
+  semana.forEach((treino, idx)=>{
     const el = document.createElement('article');
     el.className = "card";
+    const modalidadeLabel = formatModalidadeLabel(treino.modalidade);
+    const tipoLabel = treino.tipoKey ? t(treino.tipoKey) : treino.tipo;
+    const distanciaEstimada = formatDistanciaEstimativa(treino.modalidade, treino.distKm);
+    const temposPorDesc = calcularTempoPorDescricao(treino.desc);
+    const estruturaLabel = temposPorDesc ? buildEstruturaFromParts(temposPorDesc) : treino.estrutura;
+    const tempoLabel = temposPorDesc ? formatTempoValue(temposPorDesc.total) : treino.tempo;
+    const ritmoLabel = treino.ritmo ? formatRitmoLabel(treino.modalidade, treino.ritmo) : treino.ritmoLabel;
     el.innerHTML = `
       <div class="thumb"></div>
       <div class="body">
-        <span class="badge">${t.dia}</span>
-        <div class="title">${idx+1}. ${t.nome}</div>
-        <div class="kv">Tipo: ${t.tipo} • Modalidade: <b>${t.modalidade}</b></div>
-        <div class="kv">Tempo total: <b>${t.tempo}</b> • Zona/PSE: <b>${t.zona}</b></div>
-        <div class="kv">Distância estimada: <b>${t.distanciaEstimada}</b></div>
-        <div class="kv">${t.estrutura.aquecimento}</div>
-        <div class="kv">${t.estrutura.principal}</div>
-        <div class="kv">${t.estrutura.desaquecimento}</div>
-        <div class="kv">${t.ritmoLabel || `Ritmo base (corrida): ${t.ritmo} min/km`}</div>
-        <p class="kv">${t.desc || ""}</p>
+        <span class="badge">${treino.dia}</span>
+        <div class="title">${idx+1}. ${treino.nome}</div>
+        <div class="kv">${t("label_type")}: ${tipoLabel} • ${t("label_modality")}: <b>${modalidadeLabel}</b></div>
+        <div class="kv">${t("label_total_time")}: <b>${tempoLabel}</b> • ${t("label_zone")}: <b>${treino.zona}</b></div>
+        <div class="kv">${t("label_estimated_distance")}: <b>${distanciaEstimada}</b></div>
+        <div class="kv">${estruturaLabel.aquecimento}</div>
+        <div class="kv">${estruturaLabel.principal}</div>
+        <div class="kv">${estruturaLabel.desaquecimento}</div>
+        <div class="kv">${ritmoLabel || `${t("label_base_pace_running")} ${treino.ritmo} min/km`}</div>
+        <p class="kv">${treino.desc || ""}</p>
       </div>`;
     grid.appendChild(el);
   });
@@ -643,10 +804,10 @@ function runTests(){
   });
   
   if (fails.length) {
-    toast("❌ Testes falharam: " + fails.map(f => f[0]).join(", "));
+    toast(t("toast_tests_failed") + fails.map(f => f[0]).join(", "));
     playFeedback("error");
   } else {
-    toast("✅ Testes OK (" + tests.length + ")");
+    toast(`${t("toast_tests_ok")} (${tests.length})`);
     playFeedback("success");
   }
   console.log("🧪 Testes executados. Falhas:", fails.length);
@@ -654,12 +815,12 @@ function runTests(){
 
 /* ======= Exportações ======= */
 async function exportPDF(){
-  toast("📄 PDF exportado (simulado)");
+  toast(t("toast_pdf_exported"));
   playFeedback("success");
 }
 
 async function screenshotCard(){
-  toast("📸 Card gerado (simulado)");
+  toast(t("toast_card_generated"));
   playFeedback("success");
 }
 
@@ -788,7 +949,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
       semanaAtiva = 0;
       localStorage.removeItem("femflow_mesociclo_plan");
       localStorage.removeItem("femflow_mesociclo_week");
-      toast("🗑️ Tudo limpo"); 
+      toast(t("toast_reset_done")); 
     });
     console.log("✅ Evento conectado: btnResetar");
   }
