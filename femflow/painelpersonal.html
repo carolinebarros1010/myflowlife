@@ -893,6 +893,14 @@
     };
 
     const normalizePhone = (value) => String(value || "").replace(/\D/g, "");
+    
+const sha256Hex = async (text) => {
+  const enc = new TextEncoder();
+  const data = enc.encode(String(text));
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+};
 
     const getAuth = () => {
       try {
@@ -1151,7 +1159,9 @@
         return;
       }
 
-      const payload = { action: "login", senha };
+      const senha_hash = await sha256Hex(senha);
+const payload = { action: "login", senha_hash };
+
       if (identificador.includes("@")) {
         payload.email = identificador.toLowerCase();
       } else {
@@ -1213,7 +1223,9 @@
         return;
       }
 
-      const payload = { action: "signup", nome, senha };
+      const senha_hash = await sha256Hex(senha);
+const payload = { action: "signup", nome, senha_hash };
+
       if (identificador.includes("@")) {
         payload.email = identificador.toLowerCase();
       } else {
@@ -1433,5 +1445,6 @@
   </script>
 </body>
 </html>
+
 
 
