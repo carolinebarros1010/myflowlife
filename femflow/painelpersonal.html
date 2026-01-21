@@ -1162,6 +1162,7 @@
       updateLoginStatus("Validando acesso...", false);
 
       try {
+        console.info("Login payload", { endpoint: state.endpoint, payload });
         const response = await fetch(state.endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1172,7 +1173,10 @@
           ? await response.json()
           : await response.text();
         if (!response.ok || (typeof data === "object" && !data.ok)) {
-          const message = typeof data === "object" ? data?.erro : data;
+          const message = typeof data === "object"
+            ? (data?.error || data?.erro || data?.message || data?.mensagem)
+            : data;
+          console.error("Login falhou", { status: response.status, data });
           throw new Error(message || "Credenciais inválidas.");
         }
         const auth = {
@@ -1221,6 +1225,7 @@
       updateLoginStatus("Criando acesso...", false);
 
       try {
+        console.info("Cadastro payload", { endpoint: state.endpoint, payload });
         const response = await fetch(state.endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1231,7 +1236,10 @@
           ? await response.json()
           : await response.text();
         if (!response.ok || (typeof data === "object" && !data.ok)) {
-          const message = typeof data === "object" ? data?.erro : data;
+          const message = typeof data === "object"
+            ? (data?.error || data?.erro || data?.message || data?.mensagem)
+            : data;
+          console.error("Cadastro falhou", { status: response.status, data });
           throw new Error(message || "Não foi possível cadastrar.");
         }
         const auth = {
