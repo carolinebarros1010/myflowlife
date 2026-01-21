@@ -1162,9 +1162,12 @@
       updateLoginStatus("Validando acesso...", false);
 
       try {
-        const response = await fetch(state.endpoint, {
+        console.info("Login payload", { endpoint: state.endpoint, payload });
+        const authUrl = new URL(state.endpoint);
+        authUrl.searchParams.set("action", "login");
+        const response = await fetch(authUrl.toString(), {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload),
         });
         const contentType = response.headers.get("content-type") || "";
@@ -1172,7 +1175,10 @@
           ? await response.json()
           : await response.text();
         if (!response.ok || (typeof data === "object" && !data.ok)) {
-          const message = typeof data === "object" ? data?.erro : data;
+          const message = typeof data === "object"
+            ? (data?.error || data?.erro || data?.message || data?.mensagem)
+            : data;
+          console.error("Login falhou", { status: response.status, data });
           throw new Error(message || "Credenciais inválidas.");
         }
         const auth = {
@@ -1221,9 +1227,12 @@
       updateLoginStatus("Criando acesso...", false);
 
       try {
-        const response = await fetch(state.endpoint, {
+        console.info("Cadastro payload", { endpoint: state.endpoint, payload });
+        const authUrl = new URL(state.endpoint);
+        authUrl.searchParams.set("action", "signup");
+        const response = await fetch(authUrl.toString(), {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload),
         });
         const contentType = response.headers.get("content-type") || "";
@@ -1231,7 +1240,10 @@
           ? await response.json()
           : await response.text();
         if (!response.ok || (typeof data === "object" && !data.ok)) {
-          const message = typeof data === "object" ? data?.erro : data;
+          const message = typeof data === "object"
+            ? (data?.error || data?.erro || data?.message || data?.mensagem)
+            : data;
+          console.error("Cadastro falhou", { status: response.status, data });
           throw new Error(message || "Não foi possível cadastrar.");
         }
         const auth = {
