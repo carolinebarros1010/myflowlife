@@ -1165,7 +1165,7 @@
         console.info("Login payload", { endpoint: state.endpoint, payload });
         const response = await fetch(state.endpoint, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload),
         });
         const contentType = response.headers.get("content-type") || "";
@@ -1228,7 +1228,7 @@
         console.info("Cadastro payload", { endpoint: state.endpoint, payload });
         const response = await fetch(state.endpoint, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload),
         });
         const contentType = response.headers.get("content-type") || "";
