@@ -1162,9 +1162,10 @@
       updateLoginStatus("Validando acesso...", false);
 
       try {
+        console.info("Login payload", { endpoint: state.endpoint, payload });
         const response = await fetch(state.endpoint, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
         const contentType = response.headers.get("content-type") || "";
@@ -1224,9 +1225,10 @@
       updateLoginStatus("Criando acesso...", false);
 
       try {
+        console.info("Cadastro payload", { endpoint: state.endpoint, payload });
         const response = await fetch(state.endpoint, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
         const contentType = response.headers.get("content-type") || "";
