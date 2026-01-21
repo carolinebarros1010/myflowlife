@@ -1183,13 +1183,22 @@ const payload = { action: "login", senha_hash };
         const data = contentType.includes("application/json")
           ? await response.json()
           : await response.text();
-        if (!response.ok || (typeof data === "object" && !data.ok)) {
-          const message = typeof data === "object"
-            ? (data?.error || data?.erro || data?.message || data?.mensagem)
-            : data;
-          console.error("Login falhou", { status: response.status, data });
-          throw new Error(message || "Credenciais inválidas.");
-        }
+        if (!response.ok || (typeof data === "object" && data && data.ok !== true)) {
+  // log completo e legível
+  console.error("Cadastro falhou (HTTP ok, mas ok=false)", {
+    httpStatus: response.status,
+    contentType,
+    rawData: data,
+    stringified: (typeof data === "object" ? JSON.stringify(data, null, 2) : String(data))
+  });
+
+  const message = (typeof data === "object" && data)
+    ? (data.error || data.erro || data.message || data.mensagem || "Não foi possível cadastrar.")
+    : String(data || "Não foi possível cadastrar.");
+
+  throw new Error(message);
+}
+
         const auth = {
           timestamp: Date.now(),
           user: data.user || (typeof data === "object" ? data.user : null),
@@ -1445,6 +1454,7 @@ const payload = { action: "signup", nome, senha_hash };
   </script>
 </body>
 </html>
+
 
 
 
