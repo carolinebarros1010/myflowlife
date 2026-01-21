@@ -1249,7 +1249,6 @@ const payload = { action: "signup", nome, senha_hash };
       try {
         console.info("Cadastro payload", { endpoint: state.endpoint, payload });
         const authUrl = new URL(state.endpoint);
-        authUrl.searchParams.set("action", "signup");
         const response = await fetch(authUrl.toString(), {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -1454,6 +1453,7 @@ const payload = { action: "signup", nome, senha_hash };
   </script>
 </body>
 </html>
+
 
 
 
