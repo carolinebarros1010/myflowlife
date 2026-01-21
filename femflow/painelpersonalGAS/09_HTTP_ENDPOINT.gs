@@ -83,11 +83,8 @@ function doGet(e) {
  * ================================ */
 function doPost(e) {
   try {
-    const body = e?.postData?.contents
-      ? JSON.parse(e.postData.contents)
-      : {};
-
-    const action = String(body.action || '').toLowerCase();
+    const body = parsePostBody_(e);
+    const action = String(body.action || e?.parameter?.action || '').toLowerCase();
     let result;
 
     switch (action) {
@@ -142,6 +139,32 @@ function doPost(e) {
   } catch (err) {
     return jsonERR_(err);
   }
+}
+
+function parsePostBody_(e) {
+  const raw = e?.postData?.contents;
+  if (!raw) return e?.parameter ? { ...e.parameter } : {};
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    return parseQueryString_(raw, e?.parameter);
+  }
+}
+
+function parseQueryString_(raw, fallback) {
+  const output = {};
+  String(raw || '')
+    .split('&')
+    .map(part => part.trim())
+    .filter(Boolean)
+    .forEach((part) => {
+      const [key, value] = part.split('=');
+      if (!key) return;
+      const decodedKey = decodeURIComponent(key);
+      const decodedValue = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
+      output[decodedKey] = decodedValue;
+    });
+  return Object.keys(output).length ? output : (fallback ? { ...fallback } : {});
 }
 
 
