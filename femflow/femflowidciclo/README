@@ -125,11 +125,10 @@
 
   <section class="section">
     <h2>Planos FemFlow</h2>
-    <p>Você pode começar gratuitamente ou escolher um plano completo com tudo o que precisa para transformar seu treino.</p>
+    <p>Escolha o acesso ao app ou o plano personal mensal para transformar seu treino.</p>
     <div class="cta-buttons">
-      <a href="#">🔓 Gratuito – 7 dias com eBook + Guia</a>
-      <a href="#">🚀 Ciclo Completo – 12 semanas com ajustes hormonais</a>
-      <a href="#">👑 Premium – Treino, Nutrição e Acompanhamento</a>
+      <a href="#">📲 App FemFlow – Treinos alinhados ao ciclo hormonal</a>
+      <a href="#">👩‍💻 Personal mensal – Treino personalizado com base no seu ciclo</a>
     </div>
   </section>
 
@@ -138,4 +137,3 @@
   </div>
 </body>
 </html>
-

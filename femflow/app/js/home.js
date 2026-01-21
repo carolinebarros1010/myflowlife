@@ -5,8 +5,8 @@
 =========================================================== */
 
 /* LINKS */
-const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
-const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
+const LINK_ACESSO_APP = "https://pay.hotmart.com/T103984580L?off=ifcs6h6n";
+const LINK_PERSONAL   = "https://pay.hotmart.com/T103984580L?off=sybtfokt";
 const EBOOKS_DATA_URL = "ebooks/ebooks.json";
 
 /* FOLLOWME */
@@ -707,6 +707,15 @@ function renderRail(el, lista) {
   );
 }
 
+function getFollowmeEmBreveMessage() {
+  const lang = FEMFLOW.lang || "pt";
+  const mensagem = FEMFLOW.langs?.[lang]?.home?.followmeEmBreve;
+  if (mensagem) return mensagem;
+  if (lang === "en") return "Coming soon...";
+  if (lang === "fr") return "Bientôt...";
+  return "Em breve...";
+}
+
 /* ============================================================
    LÓGICA DE ACESSO POR PRODUTO
 =========================================================== */
@@ -733,7 +742,7 @@ async function handleCardClick(enfase, locked) {
 
     // ✨ FOLLOWME — programa especial
     if (enfase.startsWith("followme_")) {
-      FEMFLOW.toast("✨ Programa especial de 30 dias com coach.");
+      FEMFLOW.toast(getFollowmeEmBreveMessage());
       return;
     }
 

@@ -6,7 +6,7 @@
    ✔ Separação ACESSO x MODO PERSONAL
 =========================================================== */
 
-const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
+const LINK_ACESSO_APP = "https://pay.hotmart.com/T103984580L?off=ifcs6h6n";
 
 function parseBooleanish(value) {
   if (typeof value === "boolean") return value;
