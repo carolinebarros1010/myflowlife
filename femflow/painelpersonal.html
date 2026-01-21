@@ -1163,7 +1163,9 @@
 
       try {
         console.info("Login payload", { endpoint: state.endpoint, payload });
-        const response = await fetch(state.endpoint, {
+        const authUrl = new URL(state.endpoint);
+        authUrl.searchParams.set("action", "login");
+        const response = await fetch(authUrl.toString(), {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload),
@@ -1226,7 +1228,9 @@
 
       try {
         console.info("Cadastro payload", { endpoint: state.endpoint, payload });
-        const response = await fetch(state.endpoint, {
+        const authUrl = new URL(state.endpoint);
+        authUrl.searchParams.set("action", "signup");
+        const response = await fetch(authUrl.toString(), {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload),
