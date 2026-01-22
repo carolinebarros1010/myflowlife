@@ -6,6 +6,7 @@ const ASSETS = [
   "./",
   "./index.html",
   "./home.html",
+  "./painel-admin.html",
   "./ciclo.html",
   "./treino.html",
   "./evolucao.html",
@@ -21,6 +22,7 @@ const ASSETS = [
   "./js/ciclo.js",
   "./js/treino.js",
   "./js/anamnese.js",
+  "./js/painel-admin.js",
  
   // Logos / ícones
   "./assets/logofemflowterracota.png",
