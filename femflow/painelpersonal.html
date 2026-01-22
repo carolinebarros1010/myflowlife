@@ -328,12 +328,64 @@
       min-height: 220px;
       font-family: "Courier New", monospace;
       font-size: 13px;
-      overflow-y: auto;
+      overflow: auto;
       white-space: pre-wrap;
     }
 
     .console.empty {
       opacity: 0.6;
+    }
+
+    .console .response-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 12px;
+      color: rgba(253, 246, 241, 0.8);
+    }
+
+    .console .response-meta span {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+    }
+
+    .console .table-wrapper {
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      overflow: auto;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .console table {
+      width: max(100%, 720px);
+      border-collapse: collapse;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 12px;
+      color: #fdf6f1;
+    }
+
+    .console th,
+    .console td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      vertical-align: top;
+    }
+
+    .console th {
+      position: sticky;
+      top: 0;
+      background: #1a1a1a;
+      font-weight: 700;
+      z-index: 1;
+    }
+
+    .console tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
     }
 
     .mini-card {
@@ -842,6 +894,85 @@
 
     const formatJson = (data) => JSON.stringify(data, null, 2);
 
+    const escapeHtml = (value) =>
+      String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;")
+        .replaceAll("'", "&#39;");
+
+    const parseCsvLine = (line) => {
+      const cells = [];
+      let current = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i += 1) {
+        const char = line[i];
+        if (char === "\"") {
+          if (inQuotes && line[i + 1] === "\"") {
+            current += "\"";
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+          continue;
+        }
+        if (char === "," && !inQuotes) {
+          cells.push(current);
+          current = "";
+          continue;
+        }
+        current += char;
+      }
+      cells.push(current);
+      return cells.map((cell) => cell.trim());
+    };
+
+    const parseCsvTable = (text) => {
+      const lines = text
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+      if (lines.length === 0) return null;
+      const [headerLine, ...rowLines] = lines;
+      const headers = parseCsvLine(headerLine);
+      const rows = rowLines.map((line) => parseCsvLine(line));
+      return { headers, rows };
+    };
+
+    const buildResultTable = (data) => {
+      if (!data || typeof data.result !== "string") return null;
+      const table = parseCsvTable(data.result);
+      if (!table) return null;
+      const headerHtml = table.headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("");
+      const bodyHtml = table.rows
+        .map(
+          (row) =>
+            `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`
+        )
+        .join("");
+      const metaParts = [];
+      if (Object.prototype.hasOwnProperty.call(data, "ok")) {
+        metaParts.push(`<span>Status: ${escapeHtml(data.ok ? "ok" : "erro")}</span>`);
+      }
+      if (data.action) {
+        metaParts.push(`<span>Ação: ${escapeHtml(data.action)}</span>`);
+      }
+      const metaHtml = metaParts.length
+        ? `<div class="response-meta">${metaParts.join("")}</div>`
+        : "";
+      return `${metaHtml}<div class="table-wrapper"><table><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`;
+    };
+
+    const formatResponse = (data) => {
+      const tableHtml = buildResultTable(data);
+      if (tableHtml) {
+        return { html: tableHtml, isHtml: true };
+      }
+      return { html: formatJson(data), isHtml: false };
+    };
+
     const buildUrl = (action, params = {}) => {
       if (!state.endpoint) return "";
       const url = new URL(state.endpoint);
@@ -1040,7 +1171,12 @@ const sha256Hex = async (text) => {
         consoleEl.classList.add("empty");
         return;
       }
-      consoleEl.textContent = formatJson(data);
+      const formatted = formatResponse(data);
+      if (formatted.isHtml) {
+        consoleEl.innerHTML = formatted.html;
+      } else {
+        consoleEl.textContent = formatted.html;
+      }
       consoleEl.classList.remove("empty");
     };
 
