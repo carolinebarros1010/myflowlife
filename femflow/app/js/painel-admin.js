@@ -22,8 +22,21 @@
     return String(raw).slice(0, 10);
   };
 
+  const resolveBaseUrl = () => {
+    if (!BASE) return null;
+    try {
+      return new URL(BASE).toString();
+    } catch (error) {
+      return null;
+    }
+  };
+
   const apiGet = async (action, params = {}) => {
-    const url = new URL(BASE);
+    const baseUrl = resolveBaseUrl();
+    if (!baseUrl) {
+      return { status: "error", msg: "missing_base_url" };
+    }
+    const url = new URL(baseUrl);
     url.searchParams.set("action", action);
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
@@ -35,7 +48,11 @@
   };
 
   const apiPost = async (action, payload = {}) => {
-    const response = await fetch(BASE, {
+    const baseUrl = resolveBaseUrl();
+    if (!baseUrl) {
+      return { status: "error", msg: "missing_base_url" };
+    }
+    const response = await fetch(baseUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action, ...payload })
