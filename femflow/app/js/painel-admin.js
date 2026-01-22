@@ -161,7 +161,8 @@
     setStatus("Carregando lista...");
     const token = collectToken();
     const sinceDays = el("sinceDays").value;
-    const resp = await apiGet("admin_list_alunas", { token, sinceDays });
+    const includeSemData = el("includeSemData").checked;
+    const resp = await apiGet("admin_list_alunas", { token, sinceDays, includeSemData });
     if (resp.status !== "ok") {
       setStatus(resp.msg || "Erro ao carregar");
       return;

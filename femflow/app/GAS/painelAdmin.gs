@@ -68,6 +68,9 @@ function adminListAlunas_(params) {
   if (!sh) return { status: "error", msg: "sheet_not_found" };
 
   const sinceDays = Number(params.sinceDays || 0);
+  const includeSemData = params.includeSemData !== undefined
+    ? _parseBoolean_(params.includeSemData)
+    : true;
   const values = sh.getDataRange().getValues();
   const rows = values.slice(1);
 
@@ -85,7 +88,11 @@ function adminListAlunas_(params) {
     if (sinceDate) {
       const rawDate = row[6];
       const parsed = _parseDateInput_(rawDate);
-      if (!parsed || parsed < sinceDate) return;
+      if (!parsed) {
+        if (!includeSemData) return;
+      } else if (parsed < sinceDate) {
+        return;
+      }
     }
     items.push(mapped);
   });

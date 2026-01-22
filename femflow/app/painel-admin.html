@@ -234,10 +234,16 @@
           <label>Período (dias)</label>
           <select id="sinceDays">
             <option value="7">Últimos 7 dias</option>
-            <option value="14" selected>Últimos 14 dias</option>
+            <option value="14">Últimos 14 dias</option>
             <option value="30">Últimos 30 dias</option>
-            <option value="0">Todas</option>
+            <option value="0" selected>Todas</option>
           </select>
+        </div>
+        <div>
+          <label>
+            <input id="includeSemData" type="checkbox" checked />
+            Incluir sem data de compra
+          </label>
         </div>
         <button id="carregarNovas">Carregar</button>
       </div>
