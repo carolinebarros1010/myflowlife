@@ -581,6 +581,10 @@ series: {
   AE: {
     titulo: "👑 Advanced Elite",
     texto: "Execução livre, técnica avançada e estímulo máximo."
+  },
+  SM: {
+    titulo: "🟢 Submáxima",
+    texto: "Descanso curto para estimular o músculo em ênfase."
   }
 }
 },
@@ -868,6 +872,10 @@ series: {
   AE: {
     titulo: "👑 Advanced Elite",
     texto: "Free execution, advanced technique and maximum stimulus."
+  },
+  SM: {
+    titulo: "🟢 Submaximal",
+    texto: "Short rest intervals to emphasize the target muscle."
   }
 }
    
@@ -1156,6 +1164,10 @@ resp: {
   AE: {
     titulo: "👑 Advanced Elite",
     texto: "Exécution libre, technique avancée et stimulus maximal."
+  },
+  SM: {
+    titulo: "🟢 Submaximale",
+    texto: "Repos courts pour stimuler le muscle ciblé."
   }
 }
  }
