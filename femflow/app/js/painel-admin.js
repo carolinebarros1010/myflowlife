@@ -1,5 +1,8 @@
 (() => {
-  const BASE = window.FEMFLOW_ADMIN_BASE || "";
+  const BASE =
+    window.FEMFLOW_ADMIN_BASE ||
+    localStorage.getItem("femflow_script") ||
+    "";
   const TOKEN_KEY = "femflow_admin_token";
 
   const el = (id) => document.getElementById(id);
@@ -34,6 +37,7 @@
   const apiGet = async (action, params = {}) => {
     const baseUrl = resolveBaseUrl();
     if (!baseUrl) {
+      setStatus("Abra este painel via WebApp do Apps Script para carregar as alunas");
       return { status: "error", msg: "missing_base_url" };
     }
     const url = new URL(baseUrl);
@@ -50,6 +54,7 @@
   const apiPost = async (action, payload = {}) => {
     const baseUrl = resolveBaseUrl();
     if (!baseUrl) {
+      setStatus("Abra este painel via WebApp do Apps Script para carregar as alunas");
       return { status: "error", msg: "missing_base_url" };
     }
     const response = await fetch(baseUrl, {
