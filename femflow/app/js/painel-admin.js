@@ -10,6 +10,11 @@
     const status = el("status");
     status.textContent = text;
   };
+  const setBaseWarning = (visible) => {
+    const warning = el("baseWarning");
+    if (!warning) return;
+    warning.style.display = visible ? "block" : "none";
+  };
 
   const getToken = () => localStorage.getItem(TOKEN_KEY) || "";
   const setToken = (value) => localStorage.setItem(TOKEN_KEY, value);
@@ -40,6 +45,7 @@
       setStatus("Abra este painel via WebApp do Apps Script para carregar as alunas");
       return { status: "error", msg: "missing_base_url" };
     }
+    setBaseWarning(false);
     const url = new URL(baseUrl);
     url.searchParams.set("action", action);
     Object.entries(params).forEach(([key, value]) => {
@@ -57,6 +63,7 @@
       setStatus("Abra este painel via WebApp do Apps Script para carregar as alunas");
       return { status: "error", msg: "missing_base_url" };
     }
+    setBaseWarning(false);
     const response = await fetch(baseUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
