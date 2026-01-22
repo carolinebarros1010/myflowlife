@@ -717,6 +717,41 @@ function getFollowmeEmBreveMessage() {
 }
 
 /* ============================================================
+   MODAL — CONFIRMAÇÃO DE NOVO PROGRAMA
+=========================================================== */
+let novoProgramaEnfase = null;
+let novoProgramaModal;
+let novoProgramaConfirmar;
+let novoProgramaCancelar;
+
+function abrirModalNovoPrograma(enfase) {
+  if (!novoProgramaModal) return;
+  novoProgramaEnfase = enfase;
+  novoProgramaModal.classList.remove("hidden");
+  novoProgramaModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("ff-modal-open");
+}
+
+function fecharModalNovoPrograma() {
+  if (!novoProgramaModal) return;
+  novoProgramaEnfase = null;
+  novoProgramaModal.classList.add("hidden");
+  novoProgramaModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("ff-modal-open");
+}
+
+function confirmarNovoPrograma() {
+  const enfase = novoProgramaEnfase;
+  fecharModalNovoPrograma();
+  if (!enfase) return;
+  if (inferirCategoria(enfase) === "followme") {
+    void selecionarCoach(enfase);
+    return;
+  }
+  void selecionarEnfase(enfase);
+}
+
+/* ============================================================
    LÓGICA DE ACESSO POR PRODUTO
 =========================================================== */
 async function handleCardClick(enfase, locked) {
@@ -798,13 +833,14 @@ async function handleCardClick(enfase, locked) {
      ✨ FOLLOWME ATIVO
   ========================================= */
   if (inferirCategoria(enfase) === "followme") {
-    return selecionarCoach(enfase);
+    abrirModalNovoPrograma(enfase);
+    return;
   }
 
   /* =========================================
      🔥 TREINO NORMAL
   ========================================= */
-  return selecionarEnfase(enfase);
+  abrirModalNovoPrograma(enfase);
 }
 
 /* ============================================================
@@ -969,6 +1005,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         fecharModalTreinosSemana();
         if (treinosSemanaResolve) treinosSemanaResolve(false);
         treinosSemanaResolve = null;
+      });
+    }
+
+    novoProgramaModal = document.getElementById("novoProgramaModal");
+    novoProgramaConfirmar = document.getElementById("novoProgramaConfirmar");
+    novoProgramaCancelar = document.getElementById("novoProgramaCancelar");
+
+    if (novoProgramaConfirmar) {
+      novoProgramaConfirmar.addEventListener("click", confirmarNovoPrograma);
+    }
+
+    if (novoProgramaCancelar) {
+      novoProgramaCancelar.addEventListener("click", fecharModalNovoPrograma);
+    }
+
+    if (novoProgramaModal) {
+      novoProgramaModal.addEventListener("click", (event) => {
+        if (event.target !== novoProgramaModal) return;
+        fecharModalNovoPrograma();
       });
     }
 
