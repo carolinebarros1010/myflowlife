@@ -78,16 +78,16 @@ window.FEMFLOW_LANG = {
         expire: "Expire"
       },
       protocolos: {
-        raiz: "Respiração Raiz",
-        clareza: "Respiração Clareza",
-        brilho: "Respiração Brilho",
-        sereno: "Respiração Sereno",
+        raiz: "Respiração Força",
+        clareza: "Respiração Foco",
+        brilho: "Respiração Potência",
+        sereno: "Respiração Controle",
         wake: "Wake Flow",
         charge: "Charge Flow",
         release: "Release Flow",
         restore: "Restore Flow",
-        equilibrio: "Respiração Equilíbrio",
-        transparencia: "Respiração Transparência"
+        equilibrio: "Respiração Resistência",
+        transparencia: "Respiração Disciplina"
       },
       descricoes: {
         raiz: "Acalma o corpo, reduz tensões e ajuda você a retornar ao eixo interno.",
@@ -170,16 +170,16 @@ window.FEMFLOW_LANG = {
         expire: "Exhale"
       },
       protocolos: {
-        raiz: "Root Breathing",
-        clareza: "Clarity Breathing",
-        brilho: "Glow Breathing",
-        sereno: "Serene Breathing",
+        raiz: "Strength Breathing",
+        clareza: "Focus Breathing",
+        brilho: "Power Breathing",
+        sereno: "Control Breathing",
         wake: "Wake Flow",
         charge: "Charge Flow",
         release: "Release Flow",
         restore: "Restore Flow",
-        equilibrio: "Balance Breathing",
-        transparencia: "Transparency Breathing"
+        equilibrio: "Endurance Breathing",
+        transparencia: "Discipline Breathing"
       },
       descricoes: {
         raiz: "Calms the body, reduces tension, and helps you return to your inner center.",
@@ -262,16 +262,16 @@ window.FEMFLOW_LANG = {
         expire: "Expirez"
       },
       protocolos: {
-        raiz: "Respiration Racine",
-        clareza: "Respiration Clarté",
-        brilho: "Respiration Éclat",
-        sereno: "Respiration Serein",
+        raiz: "Respiration Force",
+        clareza: "Respiration Focus",
+        brilho: "Respiration Puissance",
+        sereno: "Respiration Contrôle",
         wake: "Wake Flow",
         charge: "Charge Flow",
         release: "Release Flow",
         restore: "Restore Flow",
-        equilibrio: "Respiration Équilibre",
-        transparencia: "Respiration Transparence"
+        equilibrio: "Respiration Endurance",
+        transparencia: "Respiration Discipline"
       },
       descricoes: {
         raiz: "Apaise le corps, réduit les tensions et vous aide à revenir à votre axe intérieur.",
@@ -456,10 +456,10 @@ resp: {
   grupoUniversal: "Protocolos Universais",
 
   /* Protocolos — Grupo Ciclo */
-  raiz: "Respiração Raiz",
-  clareza: "Clareza Mental",
-  brilho: "Brilho Interno",
-  sereno: "Serenidade",
+  raiz: "Respiração Força",
+  clareza: "Respiração Foco",
+  brilho: "Respiração Potência",
+  sereno: "Respiração Controle",
 
   /* Protocolos — Grupo Treino */
   wake: "Acordar",
@@ -468,8 +468,8 @@ resp: {
   restore: "Restaurar",
 
   /* Protocolos — Universais */
-  equilibrio: "Equilíbrio",
-  transparencia: "Transparência",
+  equilibrio: "Resistência",
+  transparencia: "Disciplina",
 
   /* Controles */
   preparar: "Prepare-se",
@@ -700,10 +700,10 @@ resp: {
   grupoUniversal: "Universal Protocols",
 
   /* Cycle Protocols */
-  raiz: "Root Breath",
-  clareza: "Mental Clarity",
-  brilho: "Inner Shine",
-  sereno: "Serenity",
+  raiz: "Strength Breath",
+  clareza: "Focus Breath",
+  brilho: "Power Breath",
+  sereno: "Control Breath",
 
   /* Training Protocols */
   wake: "Wake Up",
@@ -712,8 +712,8 @@ resp: {
   restore: "Restore",
 
   /* Universal */
-  equilibrio: "Balance",
-  transparencia: "Transparency",
+  equilibrio: "Endurance",
+  transparencia: "Discipline",
 
   /* Controls */
   preparar: "Get Ready",
@@ -947,10 +947,10 @@ resp: {
   grupoUniversal: "Protocoles universels",
 
   /* Protocoles – Cycle */
-  raiz: "Respiration Racine",
-  clareza: "Clarté Mentale",
-  brilho: "Éclat Intérieur",
-  sereno: "Sérénité",
+  raiz: "Respiration Force",
+  clareza: "Respiration Focus",
+  brilho: "Respiration Puissance",
+  sereno: "Respiration Contrôle",
 
   /* Protocoles – Entraînement */
   wake: "Réveil",
@@ -959,8 +959,8 @@ resp: {
   restore: "Restaurer",
 
   /* Protocoles universels */
-  equilibrio: "Équilibre",
-  transparencia: "Transparence",
+  equilibrio: "Endurance",
+  transparencia: "Discipline",
 
   /* Contrôles */
   preparar: "Préparez-vous",
