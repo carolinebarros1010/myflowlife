@@ -12,12 +12,12 @@
   left: 0;
   right: 0;
   height: 56px;
-  background: #fff5ef;
+  background: #335953;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(107,107,107,0.4);
   z-index: 9999;
 }
 
@@ -51,7 +51,7 @@
   font-size: 28px !important;
   font-weight: 700 !important;
   line-height: 1 !important;
-  color: var(--teal) !important;
+  color: #E5E5E5 !important;
 
   display: flex !important;
   align-items: center !important;
@@ -120,7 +120,7 @@ body.dark .ff-menu-btn {
   width: 78%;
   max-width: 330px;
   height: 100%;
-  background: #fff;
+  background: #E5E5E5;
   padding: 26px;
   box-shadow: -4px 0 20px rgba(0,0,0,0.2);
   transform: translateX(100%);
@@ -136,21 +136,21 @@ body.dark .ff-menu-btn {
   margin-top: 12px;
   padding: 14px;
   border-radius: 12px;
-  background: #fff5ef;
-  border: 1px solid #e2d5cc;
-  color: var(--teal);
+  background: #E5E5E5;
+  border: 1px solid #6B6B6B;
+  color: #2E2E2E;
   font-weight: 600;
   text-align: left;
 }
 
 .ff-menu-box button:active {
-  background: #f6dcd2;
+  background: #6B6B6B;
 }
 
 .ff-logout {
   margin-top: 30px !important;
-  background: #ffe6e6 !important;
-  color: #a12828 !important;
+  background: #d6c1c1 !important;
+  color: #6b2e2e !important;
 }
 
 /* ----------------------------------------

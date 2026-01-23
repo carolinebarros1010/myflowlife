@@ -7,10 +7,10 @@
 /* Paleta já definida em themes.css
    mas deixo redundância mínima para segurança */
 :root {
-  --terracota: #CC6A5A;
-  --pessego:   #F4D4C8;
+  --terracota: #4F6F68;
+  --pessego:   #6B6B6B;
   --teal:      #335953;
-  --bege:      #FFF5EF;
+  --bege:      #E5E5E5;
 }
 
 /* ============================

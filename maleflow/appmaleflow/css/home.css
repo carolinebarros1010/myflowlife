@@ -6,10 +6,10 @@
 /* ------------------- PALETA BASE ------------------- */
 :root {
   --teal: #335953;
-  --terracota: #cc6a5a;
-  --pessego: #fceae3;
-  --bege: #fff7f2;
-  --texto: #4d3f3a;
+  --terracota: #4F6F68;
+  --pessego: #6B6B6B;
+  --bege: #E5E5E5;
+  --texto: #2E2E2E;
 }
 
 /* ------------------- RESET ------------------- */
@@ -19,7 +19,7 @@
 
 body {
   margin: 0;
-  background: linear-gradient(180deg, #fffdfb 0%, #f3ece6 100%);
+  background: linear-gradient(180deg, #E5E5E5 0%, #6B6B6B 100%);
   color: var(--texto);
   font-family: "Lato", system-ui, Segoe UI, Arial, sans-serif;
   padding-top: 60px !important; /* garante header fixo */
@@ -41,7 +41,7 @@ body {
 }
 
 /* ============================================================
-   0) SAUDAÇÃO — "Bem-vinda, Aluna"
+   0) SAUDAÇÃO — "Bem-vindo, Aluno"
 ============================================================ */
 .bemvinda {
   font-family: "Playfair Display", serif;
@@ -58,7 +58,7 @@ body {
 
 .bemvinda-nome {
   color: var(--terracota);
-  background: rgba(204, 106, 90, 0.15);
+  background: rgba(79, 111, 104, 0.18);
   padding: 2px 10px;
   border-radius: 999px;
   box-decoration-break: clone;

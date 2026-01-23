@@ -86,10 +86,7 @@ function doPost(e) {
          🧬 PERFIL HORMONAL
       ============================ */
       case "setperfilhormonal":
-        resposta = setPerfilHormonal(
-          data.id,
-          data.perfilHormonal || data.perfil
-        );
+        resposta = { status: "ignored", msg: "perfil_hormonal_removido" };
         break;
 
       /* ===========================
@@ -131,14 +128,14 @@ function doPost(e) {
          📆 START MANUAL DO CICLO
       ============================ */
       case "setmanualstart":
-        resposta = setmanualstart(data.id, data.startDate);
+        resposta = { status: "ignored", msg: "manual_start_removido" };
         break;
 
       /* ===========================
          📆 CICLO START (antigo)
       ============================ */
       case "setciclostart":
-        resposta = atualizarCicloStart(data.id, data.startDate);
+        resposta = { status: "ignored", msg: "manual_start_removido" };
         break;
 
       /* ===========================

@@ -184,7 +184,7 @@ body.login-page {
   width: 56px;
   height: 56px;
   border-radius: 18px;
-  background: linear-gradient(145deg, #f7e9e3, #f3d7cb, #f6ece5);
+  background: linear-gradient(145deg, #E5E5E5, #6B6B6B, #335953);
   border: 1px solid rgba(204, 106, 90, 0.25);
   display: flex;
   align-items: center;
@@ -267,5 +267,3 @@ body.login-page {
   border-radius: 4px;
   transition: width 0.3s ease, background 0.3s ease;
 }
-
-

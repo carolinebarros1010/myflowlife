@@ -56,13 +56,13 @@ function doGet(e) {
 
       case 'importar':
         if (!p.destino) throw new Error('destino obrigatório');
-        result = importarTreinosFEMFLOW_aba(p.destino);
+        result = importarTreinosFEMFLOW_aba(p.destino, { modelo: p.modelo });
         return respostaGet_({ action, result });
 
       case 'full':
         gerarFemFlow30Dias(pedidoTexto);
         relinkarAba_(p.destino, p.nivel);
-        importarTreinosFEMFLOW_aba(p.destino);
+        importarTreinosFEMFLOW_aba(p.destino, { modelo: p.modelo });
         return respostaGet_({
           action,
           result: 'Pipeline completo executado: ' + p.destino
@@ -112,7 +112,7 @@ function doPost(e) {
 
       case 'importar':
         if (!body.destino) throw new Error('destino obrigatório');
-        result = importarTreinosFEMFLOW_aba(body.destino);
+        result = importarTreinosFEMFLOW_aba(body.destino, { modelo: body.modelo });
         return jsonOK_({ step: 'importar', result });
 
       case 'login':
@@ -126,7 +126,7 @@ function doPost(e) {
       case 'full':
         gerarFemFlow30Dias(body.pedidoTexto);
         relinkarAba_(body.destino, body.nivel);
-        importarTreinosFEMFLOW_aba(body.destino);
+        importarTreinosFEMFLOW_aba(body.destino, { modelo: body.modelo });
         return jsonOK_({
           step: 'full',
           result: 'Pipeline completo executado'

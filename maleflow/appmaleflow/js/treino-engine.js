@@ -1,6 +1,6 @@
 /* ============================================================
    FEMFLOW • TREINO ENGINE v4.2 — PREMIUM 2025
-   🔥 FONTE DA VERDADE: DIA DO CICLO HORMONAL
+   🔥 FONTE DA VERDADE: CICLO DE TREINO (AB/ABC/ABCD/ABCDE)
 ============================================================ */
 
 window.FEMFLOW = window.FEMFLOW || {};
@@ -12,24 +12,12 @@ FEMFLOW.engineTreino = {};
 FEMFLOW.engineTreino.isExtraEnfase = enfase =>
   String(enfase || "").toLowerCase().trim().startsWith("extra_");
 
-FEMFLOW.engineTreino.normalizarFase = raw => {
-  const f = String(raw || "").toLowerCase().trim();
-  if (!f) return "";
-  return {
-    ovulatória: "ovulatoria",
-    ovulatoria: "ovulatoria",
-    ovulação: "ovulatoria",
-    ovulation: "ovulatoria",
-    follicular: "follicular",
-    folicular: "follicular",
-    lútea: "lutea",
-    lutea: "lutea",
-    luteal: "lutea",
-    menstrual: "menstrual",
-    menstruação: "menstrual",
-    menstruacao: "menstrual",
-    menstruation: "menstrual"
-  }[f] || f;
+FEMFLOW.engineTreino.normalizarCicloTreino = raw => {
+  const ciclo = String(raw || "")
+    .toUpperCase()
+    .replace(/[^A-E]/g, "");
+  if (!ciclo) return "";
+  return Array.from(new Set(ciclo.split(""))).join("").slice(0, 5);
 };
 
 FEMFLOW.engineTreino.normalizarNivel = raw => {
@@ -79,18 +67,20 @@ FEMFLOW.engineTreino.carregarBlocosNormais = async ({
   nivel, enfase, fase, diaCiclo
 }) => {
 
- const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
+ const cicloTreino = FEMFLOW.engineTreino.normalizarCicloTreino(
+  fase || FEMFLOW.getCicloTreino?.()
+ );
 const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
 const authUid = firebase?.auth?.()?.currentUser?.uid || null;
 console.log("🔍 [NORMAL] Firebase auth status:", authUid ? "logado" : "sem login", {
   uid: authUid
 });
 
-if (!faseNorm || !nivelNorm) {
-  console.error("❌ Dados inválidos para consulta Firebase (fase ou nível):", {
+if (!cicloTreino || !nivelNorm) {
+  console.error("❌ Dados inválidos para consulta Firebase (ciclo ou nível):", {
     nivel,
     fase,
-    faseNorm,
+    cicloTreino,
     nivelNorm
   });
   return [];
@@ -99,47 +89,58 @@ if (!faseNorm || !nivelNorm) {
 if (!enfase) {
   FEMFLOW.warn("⚠️ Ênfase ausente — consulta Firebase abortada:", {
     nivel: nivelNorm,
-    fase: faseNorm,
+    cicloTreino,
     diaCiclo
   });
   return [];
 }
 
 
-  console.log("🧠 DIA FISIOLÓGICO RECEBIDO:", diaCiclo);
+  console.log("🧠 DIA DO CICLO DE TREINO:", diaCiclo);
   const diaNum = Number(diaCiclo);
   if (!Number.isFinite(diaNum) || diaNum < 1) {
     console.error("❌ diaCiclo inválido. Abortando consulta Firebase:", diaCiclo);
     return [];
   }
   const diaKey    = `dia_${diaNum}`;
-  const path = `/exercicios/${nivelNorm}_${enfase}/fases/${faseNorm}/dias/${diaKey}/blocos`;
+  const path = `/exercicios/${nivelNorm}_${enfase}/ciclos/${cicloTreino}/dias/${diaKey}/blocos`;
 
   console.log("🔥 FIREBASE PATH (ÊNFASE):", {
     nivel: nivelNorm,
     enfase,
-    fase: faseNorm,
+    cicloTreino,
     diaKey
   });
   console.log("🔎 [NORMAL] Coleção/Doc:", {
     collection: "exercicios",
     doc: `${nivelNorm}_${enfase}`,
-    fase: faseNorm,
+    cicloTreino,
     diaKey
   });
   FEMFLOW.log("🔥 [NORMAL] Firebase por diaCiclo:", diaKey);
 
   let snap;
   try {
-    snap = await firebase.firestore()
+    const docRef = firebase.firestore()
       .collection("exercicios")
-      .doc(`${nivelNorm}_${enfase}`)
-      .collection("fases")
-      .doc(faseNorm)
+      .doc(`${nivelNorm}_${enfase}`);
+    snap = await docRef
+      .collection("ciclos")
+      .doc(cicloTreino)
       .collection("dias")
       .doc(diaKey)
       .collection("blocos")
       .get();
+
+    if (snap.empty) {
+      snap = await docRef
+        .collection("fases")
+        .doc(cicloTreino)
+        .collection("dias")
+        .doc(diaKey)
+        .collection("blocos")
+        .get();
+    }
   } catch (err) {
     console.error("❌ [NORMAL] Erro ao buscar no Firebase:", err);
     return [];
@@ -150,7 +151,7 @@ if (!enfase) {
       path,
       nivel: nivelNorm,
       enfase,
-      fase: faseNorm,
+      cicloTreino,
       diaKey
     });
     console.log("🧪 [NORMAL] Documentos retornados:", snap.size);
@@ -235,31 +236,33 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
   id, fase, diaCiclo
 }) => {
 
-  const faseNorm = FEMFLOW.engineTreino.normalizarFase(fase);
+  const cicloTreino = FEMFLOW.engineTreino.normalizarCicloTreino(
+    fase || FEMFLOW.getCicloTreino?.()
+  );
   const authUid = firebase?.auth?.()?.currentUser?.uid || null;
   console.log("🔍 [PERSONAL] Firebase auth status:", authUid ? "logado" : "sem login", {
     uid: authUid
   });
-   if (!faseNorm || !id) {
+   if (!cicloTreino || !id) {
   console.error("❌ Dados inválidos para consulta Firebase:", {
     id,
     fase,
-    faseNorm
+    cicloTreino
   });
   return [];
 }
-  console.log("🧠 DIA FISIOLÓGICO RECEBIDO:", diaCiclo);
+  console.log("🧠 DIA DO CICLO DE TREINO:", diaCiclo);
   const diaNum = Number(diaCiclo);
   if (!Number.isFinite(diaNum) || diaNum < 1) {
     console.error("❌ diaCiclo inválido. Abortando consulta Firebase:", diaCiclo);
     return [];
   }
   const diaKey   = `dia_${diaNum}`;
-  const path = `/personal_trainings/${id}/personal/${faseNorm}/dias/${diaKey}/blocos`;
+  const path = `/personal_trainings/${id}/personal/${cicloTreino}/dias/${diaKey}/blocos`;
 
   console.log("🔥 FIREBASE PATH (PERSONAL):", {
   id,
-  fase: faseNorm,
+  cicloTreino,
   diaKey
 });
 
@@ -271,7 +274,7 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
       .collection("personal_trainings")
       .doc(id)
       .collection("personal")
-      .doc(faseNorm)
+      .doc(cicloTreino)
       .collection("dias")
       .doc(diaKey)
       .collection("blocos")
@@ -285,7 +288,7 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
     FEMFLOW.error("❌ Nenhum treino PERSONAL encontrado no Firebase:", {
       path,
       id,
-      fase: faseNorm,
+      cicloTreino,
       diaKey
     });
     console.log("🧪 [PERSONAL] Documentos retornados:", snap.size);

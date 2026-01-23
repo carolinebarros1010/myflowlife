@@ -117,7 +117,6 @@ function _validarPerfil_(params) {
         enfase: String(row[12] || "nenhuma").toLowerCase(),
         fase: String(faseSync || "follicular").toLowerCase(),
         diaCiclo: Number(diaCicloSync || 1),
-        perfilHormonal: String(row[19] || "regular").toLowerCase(),
         ciclo_duracao: Number(row[9] || 28),
         data_inicio: row[10] || "",
         diaPrograma: Number(row[COL_DIA_PROGRAMA] || 1),

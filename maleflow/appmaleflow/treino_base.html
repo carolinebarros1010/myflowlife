@@ -13,8 +13,8 @@
 
   <!-- Seção de introdução ao treino -->
   <section class="intro">
-    <h1 id="tituloTreino">🌸 Treino do Dia</h1>
-    <p id="faseInfo">Fase: <b>Folicular</b> · Nível: <b>Intermediário</b></p>
+    <h1 id="tituloTreino">Treino do Dia</h1>
+    <p id="faseInfo">Ciclo: <b>ABC</b> · Nível: <b>Intermediário</b></p>
   </section>
 
   <!-- Container principal para boxes estilo Netflix -->
@@ -34,7 +34,7 @@
     // Simulação de carregamento: no futuro, os dados virão do Apps Script ou JSON
     document.addEventListener("DOMContentLoaded", async () => {
       const exemploTreino = {
-        fase: "Folicular",
+        fase: "ABC",
         nivel: "Intermediário",
         exercicios: [
           {
@@ -83,7 +83,7 @@
     function abrirPSEModal() {
       FEMFLOW.abrirPSE((valor) => FEMFLOW.salvarTreino({
         id: "FF001",
-        fase: "Folicular",
+        fase: "ABC",
         treino: "A",
         tipo_dia: "treino",
         pse: valor

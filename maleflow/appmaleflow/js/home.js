@@ -243,9 +243,13 @@ function persistPerfil(perfil) {
   );
 
   // ciclo + programa (CRÍTICO)
-  localStorage.setItem("femflow_perfilHormonal", String(perfil.perfilHormonal || "regular").toLowerCase());
-  localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao || 28));
-  localStorage.setItem("femflow_fase", String(perfil.fase || "follicular").toLowerCase());
+  const cicloTreino = FEMFLOW.normalizarCicloTreino(perfil.ciclo_treino || perfil.fase || "");
+  if (cicloTreino) {
+    localStorage.setItem("femflow_training_cycle", cicloTreino);
+    localStorage.setItem("femflow_fase", cicloTreino);
+    localStorage.setItem("femflow_cycle_configured", "yes");
+  }
+  localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao || (cicloTreino ? cicloTreino.length : 3)));
   localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
   localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
   localStorage.setItem("femflow_dataInicioPrograma", perfil.dataInicioPrograma ? String(perfil.dataInicioPrograma) : "");
@@ -759,7 +763,7 @@ async function handleCardClick(enfase, locked) {
   localStorage.setItem("femflow_mode_personal", "false");
 
   /* =========================================
-     🌸 CICLO NÃO CONFIGURADO
+     CICLO DE TREINO NÃO CONFIGURADO
   ========================================= */
   if (localStorage.getItem("femflow_cycle_configured") !== "yes") {
 
@@ -873,7 +877,7 @@ function aplicarIdiomaHome() {
   const L = FEMFLOW.langs?.[lang]?.home;
   if (!L) return;
 
-  const nomeRaw = localStorage.getItem("femflow_nome") || "Aluna";
+  const nomeRaw = localStorage.getItem("femflow_nome") || "Aluno";
   const primeiroNome = nomeRaw.split(" ")[0];
 
   // Saudação
@@ -987,7 +991,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!localStorage.getItem("femflow_cycle_configured")) {
       FEMFLOW.loading.hide?.();
-      FEMFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
+      FEMFLOW.toast("Configure seu ciclo de treino antes de escolher o treino.");
       FEMFLOW.router("ciclo");
       return;
     }
