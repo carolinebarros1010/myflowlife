@@ -254,7 +254,7 @@ function dashboardMetrics_() {
 
   const ss = SpreadsheetApp.getActive();
 
-  const shAlunas   = ss.getSheetByName("Alunas");
+  const shAlunos   = ss.getSheetByName(SHEET_ALUNAS);
   const shSacLog   = ss.getSheetByName("SAC_LOG");
   const shMetrics  = ss.getSheetByName("SAC_METRICS");
 
@@ -264,14 +264,14 @@ function dashboardMetrics_() {
   /* ===============================
      👤 ALUNAS
   =============================== */
-  let totalAlunas = 0;
+  let totalAlunos = 0;
   let ativas = 0;
   let inativas = 0;
 
-  if (shAlunas) {
-    const rows = shAlunas.getDataRange().getValues();
+  if (shAlunos) {
+    const rows = shAlunos.getDataRange().getValues();
     for (let i = 1; i < rows.length; i++) {
-      totalAlunas++;
+      totalAlunos++;
       const ativa = rows[i][7] === true; // coluna ATIVA
       ativa ? ativas++ : inativas++;
     }
@@ -341,7 +341,7 @@ function dashboardMetrics_() {
     status: "ok",
 
     alunos: {
-      total: totalAlunas,
+      total: totalAlunos,
       ativos: ativas,
       inativos: inativas
     },

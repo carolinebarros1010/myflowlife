@@ -8,8 +8,8 @@
   "scope": "/femflow/app/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#0F172A",
-  "background_color": "#E2E8F0",
+  "theme_color": "#335953",
+  "background_color": "#E5E5E5",
   "categories": ["health", "fitness", "education", "lifestyle"],
   "icons": [
     {

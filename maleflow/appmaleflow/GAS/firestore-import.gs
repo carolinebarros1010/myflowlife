@@ -194,6 +194,13 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
   const vals = valsAll.slice(1);
 
   const col = (name) => header.indexOf(name);
+  const colAny = (...names) => {
+    for (const name of names) {
+      const idx = col(name);
+      if (idx !== -1) return idx;
+    }
+    return -1;
+  };
 
   const idx = {
     id: col("id"), // opcional
@@ -201,7 +208,7 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
     box: col("box"),
     ordem: col("ordem"),
     enfase: col("enfase"),
-    fase: col("fase"),
+    ciclo: colAny("ciclo", "ciclo_treino", "cicloTreino", "fase"),
     dia: col("dia"),
 
     titulo_pt: col("titulo_pt"),
@@ -223,7 +230,7 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
   // validações mínimas
   const obrigatorias = isExtra
     ? ["tipo", "enfase", "titulo_pt", "box", "ordem"]
-    : ["tipo", "dia", "fase", "enfase", "titulo_pt", "link", "box", "ordem"];
+    : ["tipo", "dia", "ciclo", "enfase", "titulo_pt", "link", "box", "ordem"];
   const faltando = obrigatorias.filter(k => idx[k] === -1);
   if (faltando.length) {
     throw new Error(`Aba "${nomeAba}" sem colunas obrigatórias: ${faltando.join(", ")}`);
@@ -238,20 +245,26 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
 
     const tipo = String(r[idx.tipo]).toLowerCase().trim();
     const enfase = removerAcentos(String(r[idx.enfase] || "geral")).toLowerCase();
-    const fase = r[idx.fase] ? normalizarFase(r[idx.fase]) : "";
+    const cicloRaw = idx.ciclo !== -1 ? r[idx.ciclo] : "";
+    const ciclo = normalizarCicloTreino(cicloRaw);
     const diaKey = r[idx.dia] ? `dia_${r[idx.dia]}` : "";
+    if (!isExtra && !ciclo) {
+      errCount++;
+      Logger.log(`❌ ERRO → ciclo inválido (${cicloRaw}) | ${nomeAba} | linha ${i}`);
+      return;
+    }
 
     // ------------------------------------------------------------
     // DEFINIR URL FINAL (NORMAL x PERSONAL)
     // ------------------------------------------------------------
     let url = "";
     if (isPersonal) {
-      url = `${baseURL}/personal_trainings/${personalId}/${enfase}/${fase}/dias/${diaKey}/blocos/bloco_${i}`;
+      url = `${baseURL}/personal_trainings/${personalId}/${enfase}/ciclos/${ciclo}/dias/${diaKey}/blocos/bloco_${i}`;
     } else if (isExtra) {
       url = `${baseURL}/exercicios_extra/${enfase}/blocos/bloco_${i}`;
     } else {
       const nivel = nomeAba.toLowerCase(); // iniciante/intermediaria/avancada
-      url = `${baseURL}/exercicios/${nivel}_${enfase}/fases/${fase}/dias/${diaKey}/blocos/bloco_${i}`;
+      url = `${baseURL}/exercicios/${nivel}_${enfase}/ciclos/${ciclo}/dias/${diaKey}/blocos/bloco_${i}`;
     }
 
     // ------------------------------------------------------------
@@ -264,7 +277,8 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
         ordem: { integerValue: Number(r[idx.ordem] || 0) },
 
         enfase: { stringValue: enfase },
-        fase: { stringValue: fase },
+        fase: { stringValue: ciclo },
+        ciclo: { stringValue: ciclo },
         dia: { integerValue: Number(r[idx.dia] || 0) },
 
         titulo_pt: { stringValue: String(r[idx.titulo_pt] || "") },
@@ -301,10 +315,10 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
     const code = resp.getResponseCode();
     if (code === 200) {
       okCount++;
-      Logger.log(`✅ OK → ${nomeAba} | ${fase} | ${diaKey} | linha ${i}`);
+      Logger.log(`✅ OK → ${nomeAba} | ${ciclo} | ${diaKey} | linha ${i}`);
     } else {
       errCount++;
-      Logger.log(`❌ ERRO [${code}] → ${nomeAba} | ${fase} | ${diaKey} | linha ${i} | ${resp.getContentText()}`);
+      Logger.log(`❌ ERRO [${code}] → ${nomeAba} | ${ciclo} | ${diaKey} | linha ${i} | ${resp.getContentText()}`);
     }
   });
 
@@ -321,26 +335,14 @@ function removerAcentos(t) {
     .trim();
 }
 
-function normalizarFase(f) {
-  if (!f) return "follicular";
-
-  f = String(f).toLowerCase().trim();
-  const mapa = {
-    ovulatory: "ovulatoria",
-    ovulatoria: "ovulatoria",
-    "ovulatório": "ovulatoria",
-
-    follicular: "follicular",
-    folicular: "follicular",
-
-    luteal: "lutea",
-    lutea: "lutea",
-
-    menstrual: "menstrual",
-    menstruacao: "menstrual"
-  };
-
-  return mapa[f] || "follicular";
+function normalizarCicloTreino(raw) {
+  if (!raw) return "";
+  const ciclo = String(raw)
+    .toUpperCase()
+    .replace(/[^A-E]/g, "");
+  if (!ciclo) return "";
+  const letters = Array.from(new Set(ciclo.split("")));
+  return letters.join("").slice(0, 5);
 }
 
 /* ============================================================

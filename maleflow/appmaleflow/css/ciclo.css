@@ -4,18 +4,18 @@
 ========================================================== */
 
 :root {
-  --mf-navy: #0f172a;
-  --mf-slate: #1e293b;
-  --mf-steel: #334155;
-  --mf-ice: #e2e8f0;
-  --mf-accent: #2563eb;
-  --mf-accent-soft: rgba(37, 99, 235, 0.12);
-  --mf-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+  --mf-navy: #335953;
+  --mf-slate: #2E2E2E;
+  --mf-steel: #6B6B6B;
+  --mf-ice: #E5E5E5;
+  --mf-accent: #4F6F68;
+  --mf-accent-soft: rgba(79, 111, 104, 0.2);
+  --mf-shadow: 0 12px 30px rgba(46, 46, 46, 0.12);
   --mf-radius: 16px;
 }
 
 body {
-  background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+  background: linear-gradient(180deg, #2E2E2E 0%, #335953 100%);
   margin: 0;
   padding: 20px;
   font-family: "Lato", sans-serif;
@@ -31,8 +31,8 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at 25% 20%, rgba(59, 130, 246, 0.28) 0%, transparent 60%),
-    radial-gradient(circle at 80% 80%, rgba(15, 118, 110, 0.2) 0%, transparent 70%);
+    radial-gradient(circle at 25% 20%, rgba(79, 111, 104, 0.28) 0%, transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(51, 89, 83, 0.2) 0%, transparent 70%);
   filter: blur(46px);
   z-index: -1;
 }
@@ -57,7 +57,7 @@ p.sub {
 }
 
 .card {
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(46, 46, 46, 0.72);
   backdrop-filter: blur(14px);
   border-radius: var(--mf-radius);
   padding: 26px 22px;
@@ -65,7 +65,7 @@ p.sub {
   max-width: 460px;
   text-align: left;
   box-shadow: var(--mf-shadow);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border: 1px solid rgba(107, 107, 107, 0.25);
   animation: fadeIn .5s ease;
 }
 
@@ -84,8 +84,8 @@ p.sub {
 
 .perfil-btn {
   flex: 1 1 45%;
-  background: rgba(148, 163, 184, 0.12);
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(107, 107, 107, 0.12);
+  border: 1px solid rgba(107, 107, 107, 0.35);
   padding: 12px;
   border-radius: 14px;
   color: var(--mf-ice);
@@ -105,7 +105,7 @@ p.sub {
   background: var(--mf-accent);
   border-color: var(--mf-accent);
   color: #fff;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 8px 18px rgba(79, 111, 104, 0.35);
 }
 
 .perfil-btn .perfil-label {
@@ -122,8 +122,8 @@ p.sub {
 }
 
 .cycle-info-box {
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(46, 46, 46, 0.8);
+  border: 1px solid rgba(107, 107, 107, 0.25);
   border-radius: 14px;
   padding: 14px 16px;
   margin-bottom: 18px;
@@ -140,7 +140,7 @@ p.sub {
   padding: 12px 14px;
   border: none;
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--mf-accent), #1d4ed8);
+  background: linear-gradient(135deg, var(--mf-accent), #335953);
   color: #fff;
   font-weight: 700;
   cursor: pointer;
@@ -149,12 +149,12 @@ p.sub {
 
 .cycle-confirm:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 10px 22px rgba(79, 111, 104, 0.3);
 }
 
 .cycle-footer {
   font-size: .9rem;
-  color: rgba(226, 232, 240, 0.65);
+  color: rgba(229, 229, 229, 0.65);
   margin-top: 12px;
 }
 

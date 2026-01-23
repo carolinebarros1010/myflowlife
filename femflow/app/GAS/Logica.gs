@@ -114,8 +114,6 @@ return { fase: faseSalva || "follicular", dia: diaCicloSalvo || 1 };
  *   • DiaCiclo (O)
  *
  * Decisões:
- * ✅ PerfilHormonal sempre "regular"
- * ✅ ManualStart SEMPRE limpo
  * ✅ VALIDAR passa a ser corretivo, não primário
  * ====================================================== */
 function setCiclo_(data) {
@@ -125,12 +123,6 @@ function setCiclo_(data) {
 
   const id = String(data.id || "").trim();
   if (!id) return { status: "error", msg: "missing_id" };
-
-   // ✅ 1) SALVAR PERFIL HORMONAL (se veio do front)
-  const perfil = (data.perfilHormonal || data.perfil || "").toString().toLowerCase().trim();
-  if (perfil) {
-    setPerfilHormonal(id, perfil); // escreve coluna T (19)
-  }
 
   const values = sh.getDataRange().getValues();
 
@@ -212,18 +204,13 @@ function setCiclo_(data) {
     =============================== */
     sh.getRange(linha, 15).setValue(diaCicloFinal);
 
-        /* ===============================
-       7) Limpar ManualStart (U)
+    /* ===============================
+       7) DiaPrograma
     =============================== */
-    sh.getRange(linha, 21).clearContent();
+    sh.getRange(linha, COL_DIA_PROGRAMA + 1).setValue(Number(data.diaPrograma) || 1);
 
     /* ===============================
-       8) DiaPrograma (V)
-    =============================== */
-    sh.getRange(linha, 22).setValue(Number(data.diaPrograma) || 1);
-
-    /* ===============================
-       9) DataInicioPrograma
+       8) DataInicioPrograma
     =============================== */
     if (!r[COL_DATA_INICIO_PROGRAMA]) {
       sh.getRange(linha, COL_DATA_INICIO_PROGRAMA + 1).setValue(new Date());
@@ -238,10 +225,7 @@ function setCiclo_(data) {
       cicloDuracao,
       dataInicio: dataInicioFinal ? dataInicioFinal.toISOString() : null,
       fase: faseFinal,
-      diaCiclo: diaCicloFinal,
-      perfilHormonal: perfil || r[19] || null,
-
-      manualCleared: true
+      diaCiclo: diaCicloFinal
     };
   }
 
@@ -307,48 +291,12 @@ function resolverDiaTreino(params) {
 }
 
 /* ======================================================
- * 🧬 Perfil Hormonal — (estava faltando)
- * Coluna 20 (T) = índice 19 no array
+ * 🧬 Perfil Hormonal — removido da planilha
  * ====================================================== */
 function setPerfilHormonal(id, perfil) {
-  const sh = _sheet(SHEET_ALUNAS);
-  if (!sh) return { status: "error", msg: "sheet_not_found" };
-
-  const idNorm = String(id || "").trim();
-  const p = String(perfil || "").toLowerCase().trim();
-
-  if (!idNorm) return { status: "error", msg: "missing_id" };
-  if (!p) return { status: "error", msg: "missing_perfil" };
-
-  // ✅ PRIMEIRO declarar vals
-  const vals = sh.getDataRange().getValues();
-
-  for (let i = 1; i < vals.length; i++) {
-    if (String(vals[i][0]).trim() !== idNorm) continue;
-
-    const perfilAtual = String(vals[i][19] || "").toLowerCase();
-
-    // 🛡️ BLINDAGEM ANTI-RESET
-    if (perfilAtual && perfilAtual !== "regular" && p === "regular") {
-      return {
-        status: "ignored",
-        motivo: "anti_reset_regressivo",
-        perfilMantido: perfilAtual
-      };
-    }
-
-    // ✅ grava perfil corretamente
-    sh.getRange(i + 1, 20).setValue(p);
-
-    // regra: se virou regular, limpa manual start
-    if (p === "regular") {
-      sh.getRange(i + 1, 21).clearContent();
-    }
-
-    return { status: "ok", id: idNorm, perfilHormonal: p };
-  }
-
-  return { status: "notfound", id: idNorm };
+  if (!id) return { status: "error", msg: "missing_id" };
+  if (!perfil) return { status: "error", msg: "missing_perfil" };
+  return { status: "ignored", msg: "perfil_hormonal_removido" };
 }
 
 
@@ -376,56 +324,16 @@ function calcularEFixarFase_(id) {
   for (let i = 1; i < vals.length; i++) {
     if (String(vals[i][0]).trim() !== idNorm) continue;
 
-    /* ============================
-       🔎 ESTADO HORMONAL
-    ============================ */
-    const perfilHormonal = String(vals[i][19] || "").toLowerCase(); // T
-    const diaCiclo       = Number(vals[i][14] || 1);               // O
-    const cicloDuracao   = Number(vals[i][9]  || 28);              // J
-    const manualStart    = vals[i][20];                            // U
-    const nivel          = String(vals[i][8]  || "").toLowerCase();// I
+    const diaCiclo       = Number(vals[i][14] || 1); // O
+    const cicloDuracao   = Number(vals[i][9]  || 28); // J
 
-    let fase = "menstrual"; // fallback seguro
+    const d = Math.max(1, Math.min(diaCiclo, cicloDuracao));
 
-    /* ============================
-       🧬 PERFIL REGULAR / DIU
-    ============================ */
-    if (perfilHormonal === "regular" || perfilHormonal === "diu") {
-      const d = Math.max(1, Math.min(diaCiclo, cicloDuracao));
-
-      if (d <= 5) fase = "menstrual";
-      else if (d <= 13) fase = "follicular";
-      else if (d <= 17) fase = "ovulatoria";
-      else fase = "lutea";
-    }
-
-    /* ============================
-       🔀 PERFIL IRREGULAR
-    ============================ */
-    else if (perfilHormonal === "irregular") {
-      // aqui a fase já foi induzida no onboarding
-      if (diaCiclo <= 5) fase = "menstrual";
-      else if (diaCiclo <= 13) fase = "follicular";
-      else if (diaCiclo <= 17) fase = "ovulatoria";
-      else fase = "lutea";
-    }
-
-    /* ============================
-       🔋 PERFIL ENERGÉTICO / MENOPAUSA
-    ============================ */
-  // regra única por dia para TODOS os perfis
-if (diaCiclo <= 5) fase = "menstrual";
-else if (diaCiclo <= 13) fase = "follicular";
-else if (diaCiclo <= 17) fase = "ovulatoria";
-else fase = "lutea";
-
-
-    /* ============================
-       ✋ MANUAL START (override)
-    ============================ */
-    if (manualStart instanceof Date) {
-      fase = vals[i][13] || fase; // mantém fase manual já definida
-    }
+    let fase = "menstrual";
+    if (d <= 5) fase = "menstrual";
+    else if (d <= 13) fase = "follicular";
+    else if (d <= 17) fase = "ovulatoria";
+    else fase = "lutea";
 
     /* ============================
        ✍️ ESCREVER FASE
@@ -440,7 +348,6 @@ else fase = "lutea";
 
 /**
  * 🔄 SYNC — Atualiza DiaCiclo/Fase com base em DataInicio
- * - Respeita ManualStart (col 21)
  * - Usa cálculo oficial de fase
  * - Retorna estado atualizado para o front
  */
@@ -460,21 +367,12 @@ function sync(id) {
 
     const dataInicio = vals[i][10]; // col 11
     const cicloDuracao = Number(vals[i][9] || 28); // col 10
-    const manualStart = vals[i][20]; // col 21
-    const perfilHormonal = String(vals[i][19] || "regular").toLowerCase();
-    const nivel = String(vals[i][8] || "iniciante").toLowerCase();
-
     const dataInicioDate =
       dataInicio instanceof Date ? dataInicio : new Date(dataInicio);
-    const manualStartDate =
-      manualStart instanceof Date ? manualStart : new Date(manualStart);
-
-    const hasManualStart =
-      manualStart instanceof Date && !isNaN(manualStart.getTime());
     const hasDataInicio =
       dataInicio instanceof Date && !isNaN(dataInicio.getTime());
 
-    const startBase = hasManualStart ? manualStartDate : dataInicioDate;
+    const startBase = dataInicioDate;
 
     if (!(startBase instanceof Date) || isNaN(startBase.getTime())) {
       return { status: "error", msg: "invalid_data_inicio" };
@@ -483,8 +381,6 @@ function sync(id) {
     const ciclo = calcularCicloReal({
       startDate: startBase,
       cicloDuracao,
-      perfilHormonal,
-      nivel,
       faseSalva: vals[i][13],
       diaCicloSalvo: vals[i][14]
     });
@@ -496,7 +392,7 @@ function sync(id) {
 
     return {
       status: "ok",
-      modo: hasManualStart ? "manual" : "auto",
+      modo: "auto",
       diaCiclo: ciclo.dia,
       fase: faseAtual,
       dataInicio: hasDataInicio ? dataInicio : startBase

@@ -97,8 +97,6 @@ function _loginOuCadastro(data) {
     anamnese,               // AnamneseJSON
     "",                     // TokenReset
     "",                     // TokenExpira
-    (data.perfilHormonal || "regular"), // PerfilHormonal
-    "",                     // CicloStartDateManual
     1,                      // DiaPrograma
     "",                     // DeviceId
     "",                     // SessionToken

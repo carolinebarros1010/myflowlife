@@ -6,11 +6,11 @@
 
 /* ---------- Paleta FemFlow ---------- */
 :root {
-  --terracota: #CC6A5A;
-  --bege: #FFF5EF;
+  --terracota: #4F6F68;
+  --bege: #E5E5E5;
   --verde: #335953;
-  --texto: #5B4F49;
-  --cinza-btn: #F1ECE8;
+  --texto: #2E2E2E;
+  --cinza-btn: #E5E5E5;
 }
 
 /* ---------- Layout Base ---------- */
@@ -263,7 +263,7 @@ footer {
 }
 
 /* CLASSES DE COR (se ainda estiver usando) */
-.pagina-respiracao .box   { background: #CC6A5A; color: #fff; }
+.pagina-respiracao .box   { background: #4F6F68; color: #fff; }
 .pagina-respiracao .moon  { background: #E2B5A5; color: #5A4032; }
 .pagina-respiracao .energy{ background: #335953; color: #fff; }
 .pagina-respiracao .calm  { background: #EAD5C8; color: #5A4032; }

@@ -17,6 +17,8 @@ function doPost(e) {
   console.log("📥 perfilHormonal:", data.perfilHormonal);
   console.log("📥 perfilInterno:", data.perfilInterno);
 
+  setAppContext_(data.app || data.modelo || data.produto);
+
   const action = (data.action || "").toString().toLowerCase();
   let resposta = { status: "ignored" };
 
@@ -86,10 +88,7 @@ function doPost(e) {
          🧬 PERFIL HORMONAL
       ============================ */
       case "setperfilhormonal":
-        resposta = setPerfilHormonal(
-          data.id,
-          data.perfilHormonal || data.perfil
-        );
+        resposta = { status: "ignored", msg: "perfil_hormonal_removido" };
         break;
 
       /* ===========================
@@ -131,14 +130,14 @@ function doPost(e) {
          📆 START MANUAL DO CICLO
       ============================ */
       case "setmanualstart":
-        resposta = setmanualstart(data.id, data.startDate);
+        resposta = { status: "ignored", msg: "manual_start_removido" };
         break;
 
       /* ===========================
          📆 CICLO START (antigo)
       ============================ */
       case "setciclostart":
-        resposta = atualizarCicloStart(data.id, data.startDate);
+        resposta = { status: "ignored", msg: "manual_start_removido" };
         break;
 
       /* ===========================

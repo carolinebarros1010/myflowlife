@@ -290,8 +290,13 @@ FEMFLOW.getCicloTreino = function () {
 
   const treinosSemana = Number(localStorage.getItem("femflow_treinos_semana"));
   if (Number.isFinite(treinosSemana) && treinosSemana >= 1) {
-    const map = ["A", "AB", "ABC", "ABCD", "ABCDE"];
-    return map[Math.min(Math.max(treinosSemana, 1), 5) - 1];
+    if (treinosSemana === 1) return "A";
+    if (treinosSemana === 2) return "AB";
+    if (treinosSemana === 3) return "ABC";
+    if (treinosSemana === 4) return "ABCD";
+    if (treinosSemana === 5) return "ABCDE";
+    if (treinosSemana === 6) return "ABC";
+    return "ABCDE";
   }
 
   return "ABC";
@@ -909,7 +914,7 @@ FEMFLOW.carregarPerfil = async function () {
     const r = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`).then(r => r.json());
     if (r.status !== "ok") return null;
 
-    localStorage.setItem("femflow_nome", r.nome || "Aluna");
+    localStorage.setItem("femflow_nome", r.nome || "Aluno");
     localStorage.setItem("femflow_fase", r.fase);
     const enfaseAtual = localStorage.getItem("femflow_enfase");
     const extraAtivo = localStorage.getItem("femflow_treino_extra") === "true";

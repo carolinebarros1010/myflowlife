@@ -270,7 +270,7 @@ function salvarEvolucao_(data) {
 function setmanualstart(id, startDate) {
   try {
     const sh = _sheet(SHEET_ALUNAS);
-    if (!sh) return { status: "error", msg: "Sheet Alunas não encontrada" };
+    if (!sh) return { status: "error", msg: "Sheet Alunos não encontrada" };
 
     const rows = sh.getDataRange().getValues();
 
@@ -301,7 +301,7 @@ function setmanualstart(id, startDate) {
 function atualizarCicloStart(id, startDate) {
   try {
     const sh = _sheet(SHEET_ALUNAS);
-    if (!sh) return { status: "error", msg: "Sheet Alunas não encontrada" };
+    if (!sh) return { status: "error", msg: "Sheet Alunos não encontrada" };
 
     const rows = sh.getDataRange().getValues();
 
@@ -344,10 +344,10 @@ function limpezaCicloManualEnergetico() {
 
   const sh = SpreadsheetApp
     .getActive()
-    .getSheetByName("Alunas"); // ajuste se necessário
+    .getSheetByName(SHEET_ALUNAS);
 
   if (!sh) {
-    Logger.log("❌ Aba Alunas não encontrada");
+    Logger.log("❌ Aba Alunos não encontrada");
     return;
   }
 

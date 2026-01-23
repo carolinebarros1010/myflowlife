@@ -2,11 +2,11 @@
 
 /* Colour palette based on FemFlow brand */
 :root {
-  --creme: #F4E1D7;
-  --pessego: #EFBDA6;
-  --terracota: #CC6A5A;
+  --creme: #E5E5E5;
+  --pessego: #6B6B6B;
+  --terracota: #4F6F68;
   --teal: #335953;
-  --grafite: #2A2D2C;
+  --grafite: #2E2E2E;
   --radius: 14px;
 }
 
@@ -15,7 +15,7 @@ html, body {
   padding: 0;
   font-family: 'Lato', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   body {
-  background: linear-gradient(180deg, #F4E1D7 0%, #FBE9E1 100%);
+  background: linear-gradient(180deg, #E5E5E5 0%, #6B6B6B 100%);
 }
   color: var(--grafite);
   min-height: 100vh;
@@ -97,7 +97,7 @@ label {
   color: var(--grafite);
 }
 .btn-hotmart {
-  background-color: #CC6A5A;
+  background-color: #4F6F68;
   color: #fff;
   font-weight: bold;
   border: none;
@@ -270,7 +270,7 @@ label {
 
 /* 🌿 Box de configuração de ciclo */
 #cicloSection {
-  background: #FBE9E1;           /* pêssego bem claro */
+  background: #E5E5E5;           /* pêssego bem claro */
   border-radius: 14px;
   padding: 1rem 1.2rem;
   margin-top: 0.8rem;            /* aproxima do título */
@@ -295,7 +295,7 @@ label {
 
 
 .btn-hotmart {
-  background-color: #CC6A5A;
+  background-color: #4F6F68;
   color: #fff;
   font-weight: bold;
   border: none;
@@ -348,7 +348,7 @@ label {
 .quiz-respostas button {
   display: block;
   margin: 0.5rem auto;
-  background: #EFBDA6; /* pêssego */
+  background: #6B6B6B; /* pêssego */
   border: none;
   border-radius: 8px;
   padding: 0.6rem 1rem;
@@ -359,7 +359,7 @@ label {
 }
 
 .quiz-respostas button:hover {
-  background: #CC6A5A; /* terracota */
+  background: #4F6F68; /* terracota */
   color: white;
 }
 .btn-novo-ciclo {
@@ -419,7 +419,7 @@ label {
 }
 /* === FEMFLOW DESIGN EVOLUÍDO — 2025 === */
 body {
-  background: linear-gradient(180deg, #F4E1D7 0%, #FBE9E1 100%);
+  background: linear-gradient(180deg, #E5E5E5 0%, #E5E5E5 100%);
   backdrop-filter: blur(3px);
 }
 
@@ -451,7 +451,7 @@ input:focus {
 
 /* Botões de condição menores */
 .btn-mini {
-  background: linear-gradient(135deg, #EFBDA6, #F4E1D7);
+  background: linear-gradient(135deg, #6B6B6B, #E5E5E5);
   color: var(--teal);
   border: none;
   border-radius: 10px;
@@ -471,7 +471,7 @@ input:focus {
 /* === FEMFLOW — NOVO VISUAL CICLO.HTML (Layout Imagem 25) === */
 /* Fundo com efeito da imagem 25 — gradiente quente e camada de brilho suave */
 body {
-  background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+  background: linear-gradient(180deg, #E5E5E5 0%, #6B6B6B 100%);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
@@ -517,7 +517,7 @@ body::before {
 
 .subtitulo-ciclo {
   font-size: 1rem;
-  color: #CC6A5A;
+  color: #4F6F68;
   font-weight: 500;
   margin-top: 0;
 }
@@ -572,7 +572,7 @@ input[type="text"] {
 
 /* Cores individuais */
 #btnValidar {
-  background: #CC6A5A;
+  background: #4F6F68;
 }
 
 #btnIniciar:hover {
@@ -657,7 +657,7 @@ input[type="text"] {
 }
 /* === FEMFLOW — CADASTRO ESTILO IMAGEM 25 === */
 body {
-  background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+  background: linear-gradient(180deg, #E5E5E5 0%, #6B6B6B 100%);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
@@ -731,7 +731,7 @@ body::before {
 }
 
 #btnVoltar {
-  background: #CC6A5A;
+  background: #4F6F68;
   color: white;
 }
 
@@ -741,7 +741,7 @@ body::before {
 }
 /* === FEMFLOW — TREINO (Imagem 25) === */
 body {
-  background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+  background: linear-gradient(180deg, #E5E5E5 0%, #6B6B6B 100%);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
@@ -778,7 +778,7 @@ header h1 {
 }
 
 .subtitle {
-  color: #CC6A5A;
+  color: #4F6F68;
   font-weight: 500;
   font-size: 1rem;
 }
@@ -806,7 +806,7 @@ header h1 {
 /* Controle de PSE */
 .pse-box input[type="range"] {
   width: 100%;
-  accent-color: #CC6A5A;
+  accent-color: #4F6F68;
   margin: 0.8rem 0;
 }
 
@@ -846,7 +846,7 @@ header h1 {
 }
 
 #proximoTreinoBtn.secundario {
-  background: #CC6A5A;
+  background: #4F6F68;
   color: white;
 }
 
@@ -874,7 +874,7 @@ header h1 {
 
 /* === FEMFLOW — EVOLUÇÃO (Imagem 25) === */
 body {
-  background: linear-gradient(180deg,#FCE3D5 0%,#EFBDA6 100%);
+  background: linear-gradient(180deg,#E5E5E5 0%,#6B6B6B 100%);
   background-attachment: fixed;
   font-family: "Helvetica Rounded","Arial Rounded MT Bold",sans-serif;
   color:#335953;
@@ -916,7 +916,7 @@ body::before{
   height:100%;
   width:0%;
   border-radius:20px;
-  background:linear-gradient(90deg,#CC6A5A,#EFBDA6,#335953);
+  background:linear-gradient(90deg,#4F6F68,#6B6B6B,#335953);
   box-shadow:0 0 10px rgba(204,106,90,0.4);
   transition:width 1.2s ease-in-out;
 }
@@ -946,7 +946,7 @@ body::before{
 /* Mensagem final */
 .mensagem-final{
   background:rgba(239,189,166,0.25);
-  border-left:4px solid var(--terracota,#CC6A5A);
+  border-left:4px solid var(--terracota,#4F6F68);
   color:#335953;
   padding:1rem;
   border-radius:12px;
@@ -971,7 +971,7 @@ body::before{
   animation:pulsar 3s ease-in-out infinite;
   transition:background 0.3s ease;
 }
-.btn-novo-ciclo:hover{background:#CC6A5A;}
+.btn-novo-ciclo:hover{background:#4F6F68;}
 @keyframes pulsar{
   0%{box-shadow:0 0 0 0 rgba(51,89,83,0.4);}
   50%{box-shadow:0 0 12px 6px rgba(239,189,166,0.3);}
@@ -996,7 +996,7 @@ body::before{
 }
 /* === FEMFLOW — INDEX (Imagem 25) === */
 body {
-  background: linear-gradient(180deg,#FCE3D5 0%,#EFBDA6 100%);
+  background: linear-gradient(180deg,#E5E5E5 0%,#6B6B6B 100%);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
@@ -1029,7 +1029,7 @@ header h1 {
   font-weight:700;
 }
 .subtitle {
-  color:#CC6A5A;
+  color:#4F6F68;
   font-weight:500;
   font-size:1rem;
   margin-top:0.3rem;
@@ -1056,7 +1056,7 @@ video {
 /* PSE */
 #pseInput {
   width:100%;
-  accent-color:#CC6A5A;
+  accent-color:#4F6F68;
   margin:0.8rem 0;
 }
 #pseValor {
@@ -1088,7 +1088,7 @@ video {
   transform:translateY(-2px);
 }
 #btnProximo {
-  background:#CC6A5A;
+  background:#4F6F68;
   color:white;
 }
 #btnProximo:hover {
@@ -1139,7 +1139,7 @@ video {
 }
 
 .btn-install {
-  background:linear-gradient(135deg,#335953,#CC6A5A);
+  background:linear-gradient(135deg,#335953,#4F6F68);
   color:white;
   font-weight:600;
   border:none;
@@ -1228,7 +1228,7 @@ video {
   left: 0;
   width: 100%;
   height: 54px;
-  background: #fff5ef;
+  background: #E5E5E5;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1312,7 +1312,7 @@ video {
   margin-top: 12px;
   padding: 14px;
   border-radius: 12px;
-  background: #fff5ef;
+  background: #E5E5E5;
   color: #335953;
   border: 1px solid #e2d5cc;
   font-weight: 700;
@@ -1338,7 +1338,6 @@ body {
 body.ff-menu-open {
   overflow: hidden;
 }
-
 
 
 

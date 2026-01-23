@@ -5,11 +5,11 @@
 
 /* ---------- VARIÁVEIS ---------- */
 :root {
-  --creme: #E2E8F0;
-  --pessego: #94A3B8;
-  --terracota: #2563EB;
-  --teal: #0F172A;
-  --grafite: #0F172A;
+  --creme: #E5E5E5;
+  --pessego: #6B6B6B;
+  --terracota: #4F6F68;
+  --teal: #335953;
+  --grafite: #2E2E2E;
 
   --radius: 14px;
   --radius-lg: 18px;
@@ -72,7 +72,7 @@ h1, h2, h3 {
   border: none;
   border-radius: 18px;
   font-weight: 600;
-  background: linear-gradient(135deg, var(--teal), #1E293B);
+  background: linear-gradient(135deg, var(--teal), #2F4B46);
   color: white;
   cursor: pointer;
   transition: transform .2s, background .3s;
@@ -80,7 +80,7 @@ h1, h2, h3 {
 
 .btn:hover {
   transform: scale(1.02);
-  background: linear-gradient(135deg, var(--terracota), #1D4ED8);
+  background: linear-gradient(135deg, var(--terracota), #335953);
 }
 
 .btn-secondary {
@@ -186,7 +186,7 @@ input, select {
 
 /* Toast de erro */
 .toast-box.error {
-  background: #DC2626 !important; /* erro */
+  background: #8B3A3A !important; /* erro */
   color: #ffffff !important;      /* texto branco */
 }
 /* ============================================================
@@ -284,5 +284,4 @@ input, select {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 

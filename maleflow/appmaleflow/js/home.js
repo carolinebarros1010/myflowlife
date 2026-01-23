@@ -877,7 +877,7 @@ function aplicarIdiomaHome() {
   const L = FEMFLOW.langs?.[lang]?.home;
   if (!L) return;
 
-  const nomeRaw = localStorage.getItem("femflow_nome") || "Aluna";
+  const nomeRaw = localStorage.getItem("femflow_nome") || "Aluno";
   const primeiroNome = nomeRaw.split(" ")[0];
 
   // Saudação
