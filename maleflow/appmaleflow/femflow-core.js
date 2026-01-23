@@ -267,6 +267,55 @@ FEMFLOW.reiniciarDiaPrograma = async function () {
   return 1;
 };
 
+/* ===========================================================
+   CICLO DE TREINO (AB/ABC/ABCD/ABCDE)
+=========================================================== */
+FEMFLOW.normalizarCicloTreino = function (raw) {
+  if (!raw) return "";
+  const normalized = String(raw)
+    .toUpperCase()
+    .replace(/[^A-E]/g, "");
+  if (!normalized) return "";
+  const letters = Array.from(new Set(normalized.split("")));
+  return letters.join("").slice(0, 5);
+};
+
+FEMFLOW.getCicloTreino = function () {
+  const stored = FEMFLOW.normalizarCicloTreino(
+    localStorage.getItem("femflow_training_cycle") ||
+    localStorage.getItem("femflow_fase") ||
+    ""
+  );
+  if (stored) return stored;
+
+  const treinosSemana = Number(localStorage.getItem("femflow_treinos_semana"));
+  if (Number.isFinite(treinosSemana) && treinosSemana >= 1) {
+    const map = ["A", "AB", "ABC", "ABCD", "ABCDE"];
+    return map[Math.min(Math.max(treinosSemana, 1), 5) - 1];
+  }
+
+  return "ABC";
+};
+
+FEMFLOW.getCicloTreinoInfo = function (diaPrograma) {
+  const ciclo = FEMFLOW.getCicloTreino();
+  const letras = ciclo.split("");
+  const tamanho = letras.length || 1;
+  const diaBase = Number(diaPrograma) || 1;
+  const diaIndex = ((diaBase - 1) % tamanho) + 1;
+  const letra = letras[diaIndex - 1] || letras[0] || "A";
+  return { ciclo, letras, tamanho, diaIndex, letra };
+};
+
+FEMFLOW.setCicloTreino = function (ciclo) {
+  const normalizado = FEMFLOW.normalizarCicloTreino(ciclo) || "ABC";
+  localStorage.setItem("femflow_training_cycle", normalizado);
+  localStorage.setItem("femflow_fase", normalizado);
+  localStorage.setItem("femflow_cycleLength", String(normalizado.length));
+  localStorage.setItem("femflow_cycle_configured", "yes");
+  return normalizado;
+};
+
 
 /* ===========================================================
    2. ROUTER
@@ -456,12 +505,19 @@ FEMFLOW.carregarCicloBackend = async function () {
     const resp = await fetch(`${FEMFLOW.SCRIPT_URL}?action=sync&id=${id}`).then(r => r.json());
     FEMFLOW.log("📌 SYNC:", resp);
 
-    if (!resp || !resp.fase) return null;
+    if (!resp) return null;
 
-    // Dados hormonais — sem alterar produto/ativa/personal
-    localStorage.setItem("femflow_fase", resp.fase);
-    localStorage.setItem("femflow_diaCiclo", resp.diaCiclo);
-    localStorage.setItem("femflow_perfilHormonal", resp.perfilHormonal);
+    const cicloTreino = FEMFLOW.normalizarCicloTreino(resp.ciclo_treino || resp.fase);
+    if (!cicloTreino) return null;
+
+    // Dados de treino — sem alterar produto/ativa/personal
+    localStorage.setItem("femflow_fase", cicloTreino);
+    localStorage.setItem("femflow_training_cycle", cicloTreino);
+    localStorage.setItem("femflow_diaCiclo", String(resp.diaCiclo || 1));
+    localStorage.setItem("femflow_cycle_configured", "yes");
+    if (resp.perfilHormonal) {
+      localStorage.setItem("femflow_perfilHormonal", resp.perfilHormonal);
+    }
     if (resp.nivel) {
       localStorage.setItem("femflow_nivel", resp.nivel);
     }
@@ -477,7 +533,9 @@ FEMFLOW.carregarCicloBackend = async function () {
     } else if (enfaseValida) {
       localStorage.setItem("femflow_enfase", enfaseBackend);
     }
-    localStorage.setItem("femflow_cycleLength", resp.ciclo_duracao);
+    if (resp.ciclo_duracao) {
+      localStorage.setItem("femflow_cycleLength", resp.ciclo_duracao);
+    }
     localStorage.setItem("femflow_startDate", resp.data_inicio);
 
     return resp;
@@ -919,14 +977,14 @@ document.addEventListener("femflow:stateChanged", e => {
   if (impact === "none") return;
 
   if (impact === "fisiologico") {
-    FEMFLOW.toast("Ajustes aplicados 🌸");
+    FEMFLOW.toast("Ajustes aplicados.");
     FEMFLOW.router(source);
     return;
   }
 
   if (impact === "estrutural") {
     FEMFLOW.resetProgramaAtual?.();
-    FEMFLOW.toast("Estrutura atualizada 🌱");
+    FEMFLOW.toast("Estrutura atualizada.");
     FEMFLOW.router(source);
   }
 });

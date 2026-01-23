@@ -10,29 +10,29 @@ body::before {
   pointer-events: none;
   z-index: -1;
 
-  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4) 0%, transparent 60%),
-              radial-gradient(circle at 80% 80%, rgba(255,240,230,0.35) 0%, transparent 70%);
+  background: radial-gradient(circle at 30% 20%, rgba(148,163,184,0.25) 0%, transparent 60%),
+              radial-gradient(circle at 80% 80%, rgba(37,99,235,0.2) 0%, transparent 70%);
   filter: blur(32px);
 }
 
 /* ---------- TEMA GERAL ---------- */
 body.page-default {
-  background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+  background: linear-gradient(180deg, #0F172A 0%, #111827 100%);
 }
 
 /* ---------- TEMA DA PÁGINA CICLO ---------- */
 body.page-ciclo {
-  background: linear-gradient(180deg, #FBE9E1 0%, #EFBDA6 100%);
+  background: linear-gradient(180deg, #0B1120 0%, #111827 100%);
 }
 
 /* ---------- TEMA DA PÁGINA TREINO ---------- */
 body.page-treino {
-  background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
+  background: linear-gradient(180deg, #0B1120 0%, #111827 100%);
 }
 
 /* ---------- TEMA DA PÁGINA EVOLUÇÃO ---------- */
 body.page-evolucao {
-  background: linear-gradient(180deg, #FCE3D5 0%, #F4E1D7 100%);
+  background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
 }
 
 body.ff-modal-open {
@@ -54,7 +54,7 @@ body.ff-modal-open {
 }
 
 .ff-lang-box {
-  background: #fff;
+  background: #F8FAFC;
   width: 85%;
   max-width: 350px;
   padding: 22px;
@@ -69,7 +69,7 @@ body.ff-modal-open {
   padding: 14px;
   margin: 8px 0;
   border: none;
-  background: var(--teal);
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
   color: #fff;
   border-radius: 14px;
   font-size: 1.1rem;
@@ -89,8 +89,8 @@ body.ff-modal-open {
   inset: 0;
   background: linear-gradient(
     135deg,
-    rgba(15, 15, 15, 0.55),
-    rgba(40, 10, 30, 0.45)
+    rgba(15, 23, 42, 0.65),
+    rgba(30, 41, 59, 0.55)
   );
   backdrop-filter: blur(6px);
   display: flex;
@@ -105,14 +105,14 @@ body.ff-modal-open {
 }
 
 .ff-sac-box {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), #fff);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.98), #F8FAFC);
   width: 90%;
   max-width: 420px;
   padding: 22px;
   border-radius: 24px;
   text-align: left;
-  box-shadow: 0 18px 40px rgba(36, 10, 30, 0.2);
-  border: 1px solid rgba(255, 214, 196, 0.8);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.25);
+  border: 1px solid rgba(148, 163, 184, 0.4);
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -121,13 +121,13 @@ body.ff-modal-open {
   text-align: center;
   margin-bottom: 6px;
   font-size: 1.35rem;
-  color: #3b1f2c;
+  color: #0F172A;
 }
 
 .ff-sac-box p {
   text-align: center;
   margin-bottom: 16px;
-  color: #6d4a57;
+  color: #475569;
 }
 
 .ff-sac-options {
@@ -141,20 +141,20 @@ body.ff-modal-open {
   gap: 10px;
   padding: 10px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(239, 189, 166, 0.6);
-  background: rgba(255, 245, 240, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(248, 250, 252, 0.95);
   font-size: 0.98rem;
-  color: #4b2d3c;
+  color: #1E293B;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .ff-sac-options label:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(80, 30, 50, 0.12);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
 }
 
 .ff-sac-options input[type="radio"] {
-  accent-color: var(--teal);
+  accent-color: #2563EB;
 }
 
 #ff-sac-msg {
@@ -163,9 +163,9 @@ body.ff-modal-open {
   margin-top: 12px;
   padding: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(239, 189, 166, 0.7);
-  background: rgba(255, 252, 250, 0.95);
-  color: #4b2d3c;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(248, 250, 252, 0.98);
+  color: #1E293B;
   resize: vertical;
 }
 
@@ -186,11 +186,11 @@ body.ff-modal-open {
 }
 
 #ff-sac-enviar {
-  background: linear-gradient(135deg, #2bb9a2, #1b9d8a);
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
   color: #fff;
 }
 
 #ff-sac-cancelar {
-  background: #f3e6de;
-  color: #5a3a48;
+  background: #E2E8F0;
+  color: #1E293B;
 }

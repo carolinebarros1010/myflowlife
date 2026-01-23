@@ -5,11 +5,11 @@
 
 /* ---------- VARIÁVEIS ---------- */
 :root {
-  --creme: #F4E1D7;
-  --pessego: #EFBDA6;
-  --terracota: #CC6A5A;
-  --teal: #335953;
-  --grafite: #2A2D2C;
+  --creme: #E2E8F0;
+  --pessego: #94A3B8;
+  --terracota: #2563EB;
+  --teal: #0F172A;
+  --grafite: #0F172A;
 
   --radius: 14px;
   --radius-lg: 18px;
@@ -72,7 +72,7 @@ h1, h2, h3 {
   border: none;
   border-radius: 18px;
   font-weight: 600;
-  background: linear-gradient(135deg, var(--teal), #3b6a61);
+  background: linear-gradient(135deg, var(--teal), #1E293B);
   color: white;
   cursor: pointer;
   transition: transform .2s, background .3s;
@@ -80,7 +80,7 @@ h1, h2, h3 {
 
 .btn:hover {
   transform: scale(1.02);
-  background: linear-gradient(135deg, var(--terracota), #b65a48);
+  background: linear-gradient(135deg, var(--terracota), #1D4ED8);
 }
 
 .btn-secondary {
@@ -118,14 +118,14 @@ input, select {
 }
 
 .retomar-card {
-  background: #fff5ef;
+  background: #F8FAFC;
   padding: 24px;
   width: 90%;
   max-width: 350px;
   border-radius: 16px;
   text-align: center;
   box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-  color: #335953;
+  color: var(--teal);
 }
 
 .retomar-card button {
@@ -138,7 +138,7 @@ input, select {
 }
 
 .recomecar-btn {
-  background: #cc6a5a;
+  background: #2563EB;
   color: white;
 }
 
@@ -172,7 +172,7 @@ input, select {
   font-weight: 700;
   font-size: 1rem;
   border-radius: 14px;
-  background: #335953; /* padrão sucesso */
+  background: var(--teal); /* padrão sucesso */
   box-shadow: 0 6px 16px rgba(0,0,0,0.2);
   opacity: 0;
   pointer-events: none;
@@ -186,7 +186,7 @@ input, select {
 
 /* Toast de erro */
 .toast-box.error {
-  background: #cc6a5a !important; /* terracota */
+  background: #DC2626 !important; /* erro */
   color: #ffffff !important;      /* texto branco */
 }
 /* ============================================================
@@ -208,12 +208,12 @@ input, select {
 }
 
 .modal-nivel-box {
-  background: #fff7f2;
+  background: #F8FAFC;
   padding: 28px;
   border-radius: 22px;
   width: 85%;
   max-width: 360px;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 22px rgba(15,23,42,0.2);
   text-align: center;
   animation: fadeIn .15s ease-out;
 }
@@ -284,6 +284,5 @@ input, select {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 
 

@@ -2,7 +2,7 @@
    FLOWCENTER.JS — FemFlow 2025 • VERSÃO FINAL CANÔNICA
    ✔ Perfil vem de VALIDAR
    ✔ Suporte total a idioma
-   ✔ Círculo hormonal completo
+   ✔ Ciclo de treino completo
    ✔ Separação ACESSO x MODO PERSONAL
 =========================================================== */
 
@@ -120,11 +120,17 @@ function flowcenterSyncPerfil() {
 
 function flowcenterPersistPerfil(perfil) {
   const freeAccess = normalizarFreeAccess(perfil);
-  localStorage.setItem("femflow_fase", String(perfil.fase || "follicular").toLowerCase());
+  const cicloTreino = FEMFLOW.normalizarCicloTreino(perfil.ciclo_treino || perfil.fase || "");
+  if (cicloTreino) {
+    localStorage.setItem("femflow_training_cycle", cicloTreino);
+    localStorage.setItem("femflow_fase", cicloTreino);
+  }
   localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
   localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
   if (perfil.ciclo_duracao) {
     localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao));
+  } else if (cicloTreino) {
+    localStorage.setItem("femflow_cycleLength", String(cicloTreino.length));
   }
   localStorage.setItem(
     "femflow_free_access",
@@ -203,7 +209,7 @@ function initFlowCenter() {
   }
 
   if (!localStorage.getItem("femflow_cycle_configured")) {
-    FEMFLOW.toast("Configure seu ciclo antes 🌸");
+    FEMFLOW.toast("Configure seu ciclo de treino antes.");
     FEMFLOW.dispatch("stateChanged", { type: "ciclo", impact: "estrutural" });
     return;
   }
@@ -238,31 +244,9 @@ function initFlowCenter() {
   /* ============================================================
      5) CICLO (UI)
   ============================================================ */
-  const normalizarFase = (raw) => {
-    const f = String(raw || "").toLowerCase().trim();
-    if (!f) return "follicular";
-    return {
-      ovulatória: "ovulatory",
-      ovulatoria: "ovulatory",
-      ovulação: "ovulatory",
-      ovulation: "ovulatory",
-      folicular: "follicular",
-      follicular: "follicular",
-      lútea: "luteal",
-      lutea: "luteal",
-      luteal: "luteal",
-      menstrual: "menstrual",
-      menstruação: "menstrual",
-      menstruacao: "menstrual",
-      menstruation: "menstrual"
-    }[f] || f;
-  };
-
-  const ciclo = {
-    fase: normalizarFase(perfil.fase),
-    diaCiclo: Number(perfil.diaCiclo || 1),
-    diaPrograma: Number(perfil.diaPrograma || 1)
-  };
+  const ciclo = FEMFLOW.getCicloTreinoInfo(Number(perfil.diaPrograma || 1));
+  ciclo.diaPrograma = Number(perfil.diaPrograma || 1);
+  localStorage.setItem("femflow_diaCiclo", String(ciclo.diaIndex));
 
   /* ============================================================
      6) NÍVEL
@@ -310,14 +294,16 @@ function initFlowCenter() {
     document.getElementById("tituloFlow").textContent = `${nome}, ${L.titulo}`;
     document.getElementById("subFlow").textContent = L.sub;
 
-    const faseLabel = L[normalizarFase(ciclo.fase)] || ciclo.fase;
-    document.getElementById("centerPhase").textContent = faseLabel;
-    document.getElementById("t_current").textContent =
-      `${L.faseAtual}: ${faseLabel}`;
+    const cycleTitle = document.getElementById("cycleTitleLabel");
+    const cycleType = document.getElementById("cycleType");
+    if (cycleTitle) cycleTitle.textContent = L.cicloTreinoTitulo;
+    if (cycleType) cycleType.textContent = ciclo.ciclo;
 
-    ["menstrual","follicular","ovulatory","luteal"].forEach(f => {
-      document.getElementById("lbl-"+f).textContent = L[f];
-    });
+    document.getElementById("t_current").textContent =
+      t("flowcenter.diaTreinoAtual", {
+        letra: ciclo.letra,
+        dia: ciclo.diaIndex
+      });
 
     document.getElementById("toBreath").textContent    = `💨 ${L.respiracao}`;
     const treinoLabel = treinoAcessoOk ? "🏃" : "🔒";
@@ -357,14 +343,19 @@ function initFlowCenter() {
   document.addEventListener("femflow:langChange", aplicarIdioma);
 
   /* ============================================================
-     8) CÍRCULO HORMONAL
+     8) CICLO DE TREINO (UI)
   ============================================================ */
-  ["menstrual","follicular","ovulatory","luteal"].forEach(f => {
-    document.getElementById("seg-"+f)
-      ?.classList.toggle("path-active", f === ciclo.fase);
-    document.getElementById("lbl-"+f)
-      ?.classList.toggle("label-active", f === ciclo.fase);
-  });
+  const cycleTrack = document.getElementById("cycleTrack");
+  if (cycleTrack) {
+    cycleTrack.innerHTML = "";
+    ciclo.letras.forEach((letra, idx) => {
+      const span = document.createElement("div");
+      span.className = "training-cycle-day";
+      span.textContent = letra;
+      if (idx + 1 === ciclo.diaIndex) span.classList.add("is-active");
+      cycleTrack.appendChild(span);
+    });
+  }
 
   /* ============================================================
      9) BOTÕES
@@ -421,20 +412,17 @@ function initFlowCenter() {
     }, 9000);
   };
 
-  const definirModalProximoTextos = ({ diaAtual, proximoDia }) => {
-    const faseLabel =
-      FEMFLOW.langs?.[FEMFLOW.lang || "pt"]?.flowcenter?.[normalizarFase(ciclo.fase)] ||
-      ciclo.fase;
+  const definirModalProximoTextos = ({ diaAtual, proximoDia, letraAtual, letraProxima }) => {
     if (modalProximoTitulo) {
       modalProximoTitulo.textContent = t("treino.proximoModal.titulo", {
         diaAtual,
-        fase: faseLabel
+        letra: letraAtual
       });
     }
     if (modalProximoSub) {
       modalProximoSub.textContent = t("treino.proximoModal.subtitulo", {
         proximoDia,
-        fase: faseLabel
+        letra: letraProxima
       });
     }
     if (modalProximoListaTitulo) {
@@ -447,34 +435,33 @@ function initFlowCenter() {
 
     const enfaseAtual = localStorage.getItem("femflow_enfase");
     if (!personal && !enfaseAtual) {
-      FEMFLOW.toast("Escolha um treino na Home 🌸");
+      FEMFLOW.toast("Escolha um treino na Home.");
       return;
     }
 
-    const diaAtual = Number(ciclo.diaCiclo || 1);
+    const diaAtual = Number(ciclo.diaIndex || 1);
     if (!Number.isFinite(diaAtual) || diaAtual < 1) return;
 
-    const cicloLength = Number(localStorage.getItem("femflow_cycleLength"));
-    const cicloPerfil = Number(perfil.ciclo_duracao || 0);
-    const cicloValido =
-      Number.isFinite(cicloLength) && cicloLength > 0
-        ? cicloLength
-        : Number.isFinite(cicloPerfil) && cicloPerfil > 0
-        ? cicloPerfil
-        : 28;
-    const proximoDia = diaAtual + 1 > cicloValido ? 1 : diaAtual + 1;
+    const proximoDia = diaAtual + 1 > ciclo.tamanho ? 1 : diaAtual + 1;
+    const letraAtual = ciclo.letra;
+    const letraProxima = ciclo.letras[proximoDia - 1] || ciclo.letras[0] || "A";
 
     const exercicios = await FEMFLOW.engineTreino.listarExerciciosDia({
       id: localStorage.getItem("femflow_id"),
       nivel: perfil.nivel,
       enfase: enfaseAtual,
-      fase: perfil.fase,
+      fase: ciclo.ciclo,
       diaCiclo: proximoDia,
       personal
     });
 
     modalProximoLista.innerHTML = "";
-    definirModalProximoTextos({ diaAtual, proximoDia });
+    definirModalProximoTextos({
+      diaAtual,
+      proximoDia,
+      letraAtual,
+      letraProxima
+    });
 
     if (!exercicios.length) {
       const li = document.createElement("li");
@@ -533,7 +520,7 @@ function initFlowCenter() {
     }
 
     if (!enfase) {
-      FEMFLOW.toast("Escolha um treino na Home 🌸");
+      FEMFLOW.toast("Escolha um treino na Home.");
       return FEMFLOW.router("home.html");
     }
 
@@ -573,7 +560,7 @@ function initFlowCenter() {
       return FEMFLOW.router("treino.html");
     }
 
-    FEMFLOW.toast("Escolha um plano 🌱");
+    FEMFLOW.toast("Escolha um plano.");
     FEMFLOW.router("home.html");
   };
 
@@ -582,7 +569,7 @@ function initFlowCenter() {
 
   enduranceBtn.onclick = () => {
     if (!enduranceEnabled) {
-      FEMFLOW.toast("Endurance disponível apenas no Personal 🌸");
+      FEMFLOW.toast("Endurance disponível apenas no Personal.");
       return;
     }
     const id = localStorage.getItem("femflow_id");

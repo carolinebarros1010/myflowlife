@@ -26,31 +26,14 @@
 <p class="subtitle" id="subFlow">—</p>
 
 <!-- ================================
-     CÍRCULO HORMONAL
+     CICLO DE TREINO
 ================================= -->
-<div class="phase-wrapper">
-  <div class="phase-svg">
-      <svg viewBox="0 0 300 300" width="260" height="260">
-        <circle cx="150" cy="150" r="120" fill="#fff5ef"></circle>
-
-        <g stroke="#fff5ef" stroke-width="3">
-          <path id="seg-menstrual"  d="M150,150 L150,30 A120,120 0 0,1 270,150 Z"  fill="#f9e0d8"></path>
-          <path id="seg-follicular" d="M150,150 L270,150 A120,120 0 0,1 150,270 Z" fill="#f9e0d8"></path>
-          <path id="seg-ovulatory"  d="M150,150 L150,270 A120,120 0 0,1 30,150 Z"  fill="#f9e0d8"></path>
-          <path id="seg-luteal"     d="M150,150 L30,150 A120,120 0 0,1 150,30 Z"  fill="#f9e0d8"></path>
-        </g>
-
-        <circle cx="150" cy="150" r="65" fill="none" stroke="#fff5ef" stroke-width="2"></circle>
-        <circle cx="150" cy="150" r="63" fill="#cc6a5a"></circle>
-
-        <text id="lbl-menstrual"  x="215" y="95"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(45,215,95)">—</text>
-        <text id="lbl-follicular" x="215" y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(135,215,215)">—</text>
-        <text id="lbl-ovulatory"  x="85"  y="215" font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(225,85,215)">—</text>
-        <text id="lbl-luteal"     x="85"  y="85"  font-family="Playfair Display" font-size="14" font-weight="700" fill="#cc6a5a" text-anchor="middle" transform="rotate(315,85,85)">—</text>
-
-        <text id="centerPhase" x="150" y="155" text-anchor="middle" font-family="Playfair Display" font-size="18" font-weight="700" fill="#fff">—</text>
-      </svg>
+<div class="training-cycle">
+  <div class="training-cycle-header">
+    <span id="cycleTitleLabel">Ciclo de treino</span>
+    <span id="cycleType">—</span>
   </div>
+  <div class="training-cycle-track" id="cycleTrack"></div>
 </div>
 
 <div class="current-phase" id="t_current">—</div>

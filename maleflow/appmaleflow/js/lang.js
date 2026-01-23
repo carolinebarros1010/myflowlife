@@ -17,7 +17,7 @@ window.FEMFLOW_LANG = {
       title: "Menu",
       fechar: "Fechar",
       idioma: "Idioma",
-      ciclo: "Ajustar ciclo",
+      ciclo: "Ciclo de treino",
       respiracao: "Respiração",
       treinos: "Meus Treinos",
       nivel: "Alterar nível",
@@ -41,7 +41,7 @@ window.FEMFLOW_LANG = {
       subtitle: "O que está acontecendo?",
       options: {
         treino: "Meu treino não está certo",
-        ciclo: "Meu ciclo ou fase parece errado",
+        ciclo: "Meu ciclo de treino parece errado",
         registro: "Não consegui registrar treino",
         acesso: "Problema de acesso",
         outro: "Outro problema"
@@ -109,7 +109,7 @@ window.FEMFLOW_LANG = {
       title: "Menu",
       fechar: "Close",
       idioma: "Language",
-      ciclo: "Adjust cycle",
+      ciclo: "Training cycle",
       respiracao: "Breathing",
       treinos: "My Workouts",
       nivel: "Change level",
@@ -133,7 +133,7 @@ window.FEMFLOW_LANG = {
       subtitle: "What is happening?",
       options: {
         treino: "My workout seems wrong",
-        ciclo: "My cycle or phase seems incorrect",
+        ciclo: "My training cycle seems incorrect",
         registro: "I couldn't log my workout",
         acesso: "Access or login problem",
         outro: "Other issue"
@@ -201,7 +201,7 @@ window.FEMFLOW_LANG = {
       title: "Menu",
       fechar: "Fermer",
       idioma: "Langue",
-      ciclo: "Ajuster le cycle",
+      ciclo: "Cycle d'entraînement",
       respiracao: "Respiration",
       treinos: "Mes entraînements",
       nivel: "Changer de niveau",
@@ -225,7 +225,7 @@ window.FEMFLOW_LANG = {
       subtitle: "Que se passe-t-il ?",
       options: {
         treino: "Mon entraînement ne semble pas correct",
-        ciclo: "Mon cycle ou ma phase semble incorrecte",
+        ciclo: "Mon cycle d'entraînement semble incorrect",
         registro: "Je n’ai pas pu enregistrer l’entraînement",
         acesso: "Problème d’accès",
         outro: "Autre problème"
@@ -305,7 +305,7 @@ pt: {
     salvar: "Salvar",
     cancelar: "Cancelar",
     voltar: "Voltar",
-    faseAtual: "sua fase hormonal",
+    faseAtual: "seu ciclo de treino",
   },
 
   menu: {
@@ -313,7 +313,7 @@ pt: {
     fechar: "Fechar",
     idioma: "Idioma",
     sac: "Preciso de ajuda",
-    ciclo: "Ajustar ciclo",
+    ciclo: "Ciclo de treino",
     respiracao: "Respiração",
     treinos: "Meus Treinos",
     nivel: "Alterar nível",
@@ -357,15 +357,10 @@ home: {
     },
   flowcenter: {
   // TÍTULOS
-  titulo: "Sua fase hormonal",
-  faseAtual: "Sua fase hormonal",
-  sub: "Seu corpo tem um ritmo único. Vamos acompanhar juntas.",
-
-  // FASES
-  menstrual: "Menstrual",
-  follicular: "Folicular",
-  ovulatory: "Ovulatória",
-  luteal: "Lútea",
+  titulo: "Seu ciclo de treino",
+  sub: "Consistência diária para evoluir com foco.",
+  cicloTreinoTitulo: "Ciclo de treino",
+  diaTreinoAtual: "Treino {letra} · Dia {dia}",
 
   // BOTÕES
   treino: "Treino",
@@ -386,54 +381,10 @@ home: {
 ,
 
   ciclo: {
-    titulo: "Identifique seu momento",
-    sub: "Vamos ajustar seus treinos ao seu ciclo atual 🌸",
-
-    regular: "Regular",
-    irregular: "Irregular",
-    contraceptivoHormonal: "Contraceptivo hormonal",
-    contraceptivoHormonalSub: "Implante ou injeção intramuscular trimestral",
-    diu: "Uso DIU",
-    menopausa: "Menopausa",
-
-    qualDiu: "Qual tipo de DIU?",
-    diuCobre: "DIU de Cobre",
-    diuHormonal: "DIU Hormonal",
-
-    ultimaMenstruacao: "Data da última menstruação",
-    duracaoMedia: "Duração média (dias)",
-    confirmar: "Confirmar",
-
-    quizInicio: "Pronta?",
-    sim: "Sim",
-    nao: "Não",
-
-    footer: "Essas informações servem apenas para adaptar seus treinos. 💫",
-
-    /* 🔥 QUIZ DO CICLO */
-    quizCiclo: {
-      irregular: [
-        "Você sentiu mudanças de energia ao longo da semana?",
-        "Percebeu sensibilidade nos seios, inchaço ou retenção?",
-        "Você teve oscilações emocionais sem motivo claro?",
-        "Sentiu cólicas, peso abdominal ou desconforto pélvico?",
-        "Você se sentiu sem vontade de treinar nos últimos dias?"
-      ],
-      menopausa: [
-        "Nos últimos dias, você sentiu sua energia mais instável do que o normal?",
-        "Você teve ondas de calor ou suor noturno?",
-        "Seu humor variou muito?",
-        "Seu sono ficou mais leve ou interrompido?",
-        "Você tem sentido baixa disposição?"
-      ],
-      diuHormonal: [
-        "Sua motivação para treinar caiu?",
-        "Você sentiu cansaço constante?",
-        "Irritabilidade ou sensibilidade emocional aumentou?",
-        "Inchaço ou peso no ventre?",
-        "Seu corpo parece lento ou travado?"
-      ]
-    }, // ← vírgula importante!
+    titulo: "Defina seu ciclo de treino",
+    sub: "Escolha a divisão de treinos que você seguirá.",
+    confirmar: "Confirmar ciclo",
+    footer: "Essa configuração define a ordem dos seus treinos."
   },
 
   treino: {
@@ -456,8 +407,8 @@ home: {
     pseSalvar: "Salvar",
     pseCancelar: "Cancelar",
     proximoModal: {
-      titulo: "Hoje: {diaAtual}º dia da fase {fase}",
-      subtitulo: "Amanhã: {proximoDia}º dia da fase {fase}. (Dia do ciclo, não do programa.)",
+      titulo: "Hoje: Treino {letra} (Dia {diaAtual})",
+      subtitulo: "Amanhã: Treino {letra} (Dia {proximoDia}).",
       listaTitulo: "Treino de amanhã",
       vazio: "Estamos preparando o próximo treino."
     },
@@ -536,11 +487,11 @@ resp: {
   treino: "Treinos",
   descanso: "Dias de descanso",
   pseMedia: "PSE média",
-  faseAtual: "Fase atual",
+  faseAtual: "Ciclo atual",
   nenhumDado: "Nenhum dado registrado ainda."
 },
    sistema: {
-    cicloConfigurado: "✨ Ciclo configurado!",
+    cicloConfigurado: "Ciclo configurado!",
     erroCiclo: "Erro ao carregar o ciclo.",
     sincronizando: "Sincronizando…",
     treinoSalvo: "Treino salvo!",
@@ -601,7 +552,7 @@ en: {
     salvar: "Save",
     cancelar: "Cancel",
     voltar: "Back",
-    faseAtual: "your hormonal phase",
+    faseAtual: "your training cycle",
   },
 
   menu: {
@@ -609,7 +560,7 @@ en: {
     fechar: "Close",
     idioma: "Language",
     sac: "I need help",
-    ciclo: "Adjust cycle",
+    ciclo: "Training cycle",
     respiracao: "Breathing",
     treinos: "My Workouts",
     nivel: "Change level",
@@ -652,14 +603,10 @@ home: {
       }
     },
  flowcenter: {
-  titulo: "Your hormonal phase",
-  faseAtual: "Your hormonal phase",
-  sub: "Your body has its own rhythm. Let's follow it together.",
-
-  menstrual: "Menstrual",
-  follicular: "Follicular",
-  ovulatory: "Ovulatory",
-  luteal: "Luteal",
+  titulo: "Your training cycle",
+  sub: "Consistency with focus, day after day.",
+  cicloTreinoTitulo: "Training cycle",
+  diaTreinoAtual: "Workout {letra} · Day {dia}",
 
   treino: "Training",
   treinoExtra: "Extra training",
@@ -678,53 +625,10 @@ home: {
 },
 
   ciclo: {
-    titulo: "Identify your moment",
-    sub: "Let’s align your training with your current cycle 🌸",
-
-    regular: "Regular",
-    irregular: "Irregular",
-    contraceptivoHormonal: "Hormonal contraceptive",
-    contraceptivoHormonalSub: "Implant or quarterly intramuscular injection",
-    diu: "IUD",
-    menopausa: "Menopause",
-
-    qualDiu: "Which IUD type?",
-    diuCobre: "Copper IUD",
-    diuHormonal: "Hormonal IUD",
-
-    ultimaMenstruacao: "Last menstruation date",
-    duracaoMedia: "Average length (days)",
-    confirmar: "Confirm",
-
-    quizInicio: "Ready?",
-    sim: "Yes",
-    nao: "No",
-
-    footer: "These inputs are used only to adapt your workouts. 💫",
-
-    quizCiclo: {
-      irregular: [
-        "Did you feel energy changes throughout the week?",
-        "Did you notice breast sensitivity, bloating, or water retention?",
-        "Did your emotions fluctuate without a clear reason?",
-        "Did you feel cramps or pelvic discomfort?",
-        "Did you feel unmotivated to train recently?"
-      ],
-      menopausa: [
-        "Has your energy been unstable recently?",
-        "Any hot flashes or night sweats?",
-        "Was your mood unstable?",
-        "Has your sleep been lighter or interrupted?",
-        "Have you felt low disposition?"
-      ],
-      diuHormonal: [
-        "Has your motivation to train dropped?",
-        "Have you felt persistent fatigue?",
-        "Has irritability increased?",
-        "Have you felt bloating or abdominal heaviness?",
-        "Does your body feel slow?"
-      ]
-    }, // ← vírgula CORRIGIDA
+    titulo: "Set your training cycle",
+    sub: "Choose the workout split you will follow.",
+    confirmar: "Confirm cycle",
+    footer: "This setup defines the order of your workouts."
   },
 
   treino: {
@@ -747,8 +651,8 @@ home: {
     pseSalvar: "Save",
     pseCancelar: "Cancel",
     proximoModal: {
-      titulo: "Today: Day {diaAtual} of the {fase} phase",
-      subtitulo: "Tomorrow: Day {proximoDia} of the {fase} phase. (Cycle day, not program day.)",
+      titulo: "Today: Workout {letra} (Day {diaAtual})",
+      subtitulo: "Tomorrow: Workout {letra} (Day {proximoDia}).",
       listaTitulo: "Tomorrow's workout",
       vazio: "We are preparing the next workout."
     },
@@ -827,12 +731,12 @@ resp: {
   treino: "Workouts",
   descanso: "Rest days",
   pseMedia: "Average RPE",
-  faseAtual: "Current phase",
+  faseAtual: "Current cycle",
   nenhumDado: "No data recorded yet."
 },
 
   sistema: {
-    cicloConfigurado: "✨ Cycle configured!",
+    cicloConfigurado: "Cycle configured!",
     erroCiclo: "Error loading cycle.",
     sincronizando: "Synchronizing…",
     treinoSalvo: "Workout saved!",
@@ -894,7 +798,7 @@ fr: {
     salvar: "Enregistrer",
     cancelar: "Annuler",
     voltar: "Retour",
-    faseAtual: "votre phase hormonale",
+    faseAtual: "votre cycle d'entraînement",
   },
 
   menu: {
@@ -902,7 +806,7 @@ fr: {
     fechar: "Fermer",
     idioma: "Langue",
     sac: "J’ai besoin d’aide",
-    ciclo: "Ajuster le cycle",
+    ciclo: "Cycle d'entraînement",
     respiracao: "Respiration",
     treinos: "Mes Entraînements",
     nivel: "Changer de niveau",
@@ -945,14 +849,10 @@ fr: {
       }
     },
   flowcenter: {
-  titulo: "Votre phase hormonale",
-  faseAtual: "Votre phase hormonale",
-  sub: "Votre corps a son propre rythme. Suivons-le ensemble.",
-
-  menstrual: "Menstruelle",
-  follicular: "Folliculaire",
-  ovulatory: "Ovulatoire",
-  luteal: "Lutéale",
+  titulo: "Votre cycle d'entraînement",
+  sub: "De la constance et du focus, chaque jour.",
+  cicloTreinoTitulo: "Cycle d'entraînement",
+  diaTreinoAtual: "Entraînement {letra} · Jour {dia}",
 
   treino: "Entraînement",
   treinoExtra: "Entraînement extra",
@@ -971,53 +871,10 @@ fr: {
 },
 
   ciclo: {
-    titulo: "Identifiez votre moment",
-    sub: "Ajustons vos entraînements à votre cycle 🌸",
-
-    regular: "Régulier",
-    irregular: "Irrégulier",
-    contraceptivoHormonal: "Contraceptif hormonal",
-    contraceptivoHormonalSub: "Implant ou injection intramusculaire trimestrielle",
-    diu: "DIU",
-    menopausa: "Ménopause",
-
-    qualDiu: "Quel type de DIU ?",
-    diuCobre: "DIU au cuivre",
-    diuHormonal: "DIU hormonal",
-
-    ultimaMenstruacao: "Date des dernières règles",
-    duracaoMedia: "Durée moyenne (jours)",
-    confirmar: "Confirmer",
-
-    quizInicio: "Prête ?",
-    sim: "Oui",
-    nao: "Non",
-
-    footer: "Ces informations servent uniquement à adapter vos entraînements. 💫",
-
-    quizCiclo: {
-      irregular: [
-        "Avez-vous ressenti des variations d'énergie cette semaine ?",
-        "Avez-vous remarqué une sensibilité des seins ou une rétention d'eau ?",
-        "Vos émotions ont-elles fluctué sans raison ?",
-        "Avez-vous ressenti des crampes ou un inconfort pelvien ?",
-        "Vous êtes-vous sentie démotivée à vous entraîner ?"
-      ],
-      menopausa: [
-        "Votre énergie a-t-elle été instable ?",
-        "Avez-vous eu des bouffées de chaleur ?",
-        "Votre humeur était-elle instable ?",
-        "Votre sommeil a-t-il été perturbé ?",
-        "Avez-vous ressenti une faible disposition ?"
-      ],
-      diuHormonal: [
-        "Votre motivation a-t-elle diminué ?",
-        "Avez-vous ressenti une fatigue constante ?",
-        "Votre sensibilité émotionnelle a-t-elle augmenté ?",
-        "Avez-vous ressenti un gonflement abdominal ?",
-        "Votre corps semble-t-il lent ?"
-      ]
-    }, // ← vírgula corrigida!
+    titulo: "Définissez votre cycle d'entraînement",
+    sub: "Choisissez la division d'entraînement que vous suivrez.",
+    confirmar: "Confirmer le cycle",
+    footer: "Cette configuration définit l'ordre de vos entraînements."
   },
 
   treino: {
@@ -1040,8 +897,8 @@ fr: {
     pseSalvar: "Enregistrer",
     pseCancelar: "Annuler",
     proximoModal: {
-      titulo: "Aujourd’hui : {diaAtual}e jour de la phase {fase}",
-      subtitulo: "Demain : {proximoDia}e jour de la phase {fase}. (Jour du cycle, pas du programme.)",
+      titulo: "Aujourd’hui : Entraînement {letra} (Jour {diaAtual})",
+      subtitulo: "Demain : Entraînement {letra} (Jour {proximoDia}).",
       listaTitulo: "Entraînement de demain",
       vazio: "Nous préparons le prochain entraînement."
     },
@@ -1121,11 +978,11 @@ resp: {
   treino: "Entraînements",
   descanso: "Jours de repos",
   pseMedia: "PSE moyen",
-  faseAtual: "Phase actuelle",
+  faseAtual: "Cycle actuel",
   nenhumDado: "Aucune donnée enregistrée."
 },
   sistema: {
-    cicloConfigurado: "✨ Cycle configuré !",
+    cicloConfigurado: "Cycle configuré !",
     erroCiclo: "Erreur lors du chargement du cycle.",
     sincronizando: "Synchronisation…",
     treinoSalvo: "Entraînement enregistré !",
