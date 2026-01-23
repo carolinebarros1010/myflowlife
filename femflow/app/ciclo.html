@@ -42,15 +42,6 @@
     <button class="perfil-btn" data-perfil="menopausa">Menopausa</button>
   </div>
 
-  <!-- SUBMENU DIU -->
-  <div id="diuSubmenu" class="card" style="display:none;margin-top:10px;">
-    <h3>Qual tipo de DIU?</h3>
-    <div class="perfil-btns">
-      <button class="perfil-btn" data-diu="cobre">DIU de Cobre</button>
-      <button class="perfil-btn" data-diu="hormonal">DIU Hormonal</button>
-    </div>
-  </div>
-
   <!-- REGULAR -->
   <div id="regularBox" style="display:none;">
     <label>Data da última menstruação</label>
@@ -326,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       regularBox.style.display="none";
       quizBox.style.display="none";
-      diuBox.style.display="none";
+      // sem submenu de DIU no fluxo atual
       
 if (perfilSelecionado === "regular") {
   regularBox.style.display = "block";
@@ -347,30 +338,6 @@ if (perfilSelecionado === "regular") {
       }
      });
   });
-
-// SUBMENU DIU (fecha após seleção)
-document.querySelectorAll("[data-diu]").forEach(btn=>{
-  bindTap(btn, ()=>{
-
-    // remove estado visual dos botões
-    document
-      .querySelectorAll("[data-diu]")
-      .forEach(b=>b.classList.remove("active"));
-
-    btn.classList.add("active");
-
-    // 🔒 FECHA O SUBMENU DIU
-    diuBox.style.display = "none";
-
-    // segue o fluxo correto
-    if (btn.dataset.diu === "cobre") {
-      regularBox.style.display = "block";
-      bindConfirmarRegular();
-    } else {
-      iniciarQuizDiuHormonal();
-    }
-  });
-});
 });
 
 /* ============================================================
