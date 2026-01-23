@@ -23,607 +23,170 @@
 
 <body class="pagina-ciclo">
 
-<h1>Identifique seu momento</h1>
+<h1 id="cycleTitle">Defina seu ciclo de treino</h1>
 <p id="cycleMessage" class="cycle-info"></p>
-<p class="sub">Vamos ajustar seus treinos ao seu ciclo atual</p>
+<p class="sub" id="cycleSubtitle">Escolha a divisão de treinos que você seguirá.</p>
 
 <div class="card">
 
-  <h3 id="tituloPerfil">Seu perfil hormonal</h3>
+  <h3 id="tituloPerfil">Seu ciclo de treino</h3>
 
-  <div class="perfil-btns">
-    <button class="perfil-btn" data-perfil="regular">Regular</button>
-    <button class="perfil-btn" data-perfil="irregular">Irregular</button>
-    <button class="perfil-btn" data-perfil="contraceptivo">
-      <span class="perfil-label">Contraceptivo hormonal</span>
-      <span class="perfil-sub">Implante ou intramuscular trimestral</span>
+  <div class="perfil-btns cycle-btns" id="cycleOptions">
+    <button class="perfil-btn" data-cycle="AB">
+      <span class="perfil-label">AB</span>
+      <span class="perfil-sub">2 treinos diferentes</span>
     </button>
-    <button class="perfil-btn" data-perfil="diu">Uso DIU</button>
-    <button class="perfil-btn" data-perfil="menopausa">Menopausa</button>
+    <button class="perfil-btn" data-cycle="ABC">
+      <span class="perfil-label">ABC</span>
+      <span class="perfil-sub">3 treinos diferentes</span>
+    </button>
+    <button class="perfil-btn" data-cycle="ABCD">
+      <span class="perfil-label">ABCD</span>
+      <span class="perfil-sub">4 treinos diferentes</span>
+    </button>
+    <button class="perfil-btn" data-cycle="ABCDE">
+      <span class="perfil-label">ABCDE</span>
+      <span class="perfil-sub">5 treinos diferentes</span>
+    </button>
   </div>
 
-  <!-- REGULAR -->
-  <div id="regularBox" style="display:none;">
-    <label>Data da última menstruação</label>
-    <input type="date" id="dataUltima">
-
-    <label>Duração média (dias)</label>
-    <input type="number" id="duracao" min="21" max="35" value="28">
-
-    <button id="btnConfirmarRegular">Confirmar</button>
+  <div id="cycleInfo" class="cycle-info-box hidden">
+    <h4 id="cycleInfoTitle">Ciclo selecionado</h4>
+    <p id="cycleInfoText">Você está pronto para seguir a sequência.</p>
   </div>
 
-  <!-- QUIZ PERFIS ENERGÉTICOS -->
-  <div id="quizBox" class="quiz-box" style="display:none;">
-    <p id="quizPergunta">Pronta?</p>
-    <div class="quiz-btns">
-      <button id="btnQuizSim">Sim</button>
-      <button id="btnQuizNao">Não</button>
-    </div>
-    <p id="quizStep" style="color:#94786f;font-size:.9rem;margin-top:8px;"></p>
-  </div>
-
+  <button id="btnConfirmarCiclo" class="cycle-confirm">Confirmar ciclo</button>
 </div>
 
-<p id="cycleFooter" style="font-size:.9rem;color:#9a8077;margin-top:12px;">
-  Essas informações servem apenas para adaptar seus treinos. 💫
+<p id="cycleFooter" class="cycle-footer">
+  Essa configuração define a ordem dos seus treinos.
 </p>
 
-
-
-
-  
 <div id="ff-loading" class="ff-loading hidden">
   <div class="ff-loading-box">
     <div class="ff-spinner"></div>
     <p id="ff-loading-text">Configurando…</p>
   </div>
 </div>
-  
+
 <script src="js/lang.js"></script>
 <script src="femflow-core.js"></script>
 
- 
 <script>
- const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("femflow_id");
 
-// 🔐 guarda mínima — ciclo é parte do onboarding
-if (!id) {
-  FEMFLOW.toast?.("Faça login para continuar 🌸");
-  FEMFLOW.router("index");
-}
-
- 
-function ffShowLoading(msg = "Processando…") {
-  const box = document.getElementById("ff-loading");
-  const text = document.getElementById("ff-loading-text");
-  if (text) text.textContent = msg;
-  if (box) box.classList.remove("hidden");
-}
-
-function ffHideLoading() {
-  const box = document.getElementById("ff-loading");
-  if (box) box.classList.add("hidden");
-}
-
-/* ============================================================
-   0. MENSAGEM DE AJUSTE
-============================================================ */
-const url = new URLSearchParams(location.search);
-if (url.get("continuar") === "1") {
-  const msg = document.getElementById("cycleMessage");
-  if (msg) msg.textContent = "Ajuste sua fase atual para calibrar o treino de hoje.";
-}
-
-/* ============================================================
-   HELPERS
-============================================================ */
-function parseDateLocalYYYYMMDD(s){
-  const [y,m,d]=s.split('-').map(Number);
-  return new Date(y, m-1, d, 12,0,0);
-}
-function bindTap(el, handler){
-  if(!el) return;
-  let fired=false;
-  el.addEventListener("touchstart", ()=>{ fired=true; handler(); }, {passive:true});
-  el.addEventListener("click", e=>{ if(!fired) handler(); fired=false; });
-}
-/* ============================================================
-   🔋 RESOLVER PERFIL ENERGÉTICO (FINAL • FEMFLOW 2025)
-   - Score define ALTA ou BAIXA
-   - BAIXA → menstrual dia 1 (hoje)
-   - ALTA  → depende do nível:
-       iniciante      → lutea 18
-       intermediaria  → folicular 6
-       avancada       → ovulatoria 14
-============================================================ */
-function resolverPerfilEnergetico(quizScore) {
-  const LIMIAR_ALTA = 6;
-  const entraAlta = quizScore >= LIMIAR_ALTA;
-
-  // ===== FASE BAIXA (FIXA, SEGURA)
-  if (!entraAlta) {
-    return {
-      faseEnergetica: "menstrual",
-      diaCicloInicial: 1
-    };
+  // 🔐 guarda mínima — ciclo é parte do onboarding
+  if (!id) {
+    FEMFLOW.toast?.("Faça login para continuar.");
+    FEMFLOW.router("index");
   }
 
-  // ===== FASE ALTA (POR NÍVEL)
-  const faseAltaNivel = faseAltaPorNivel();
-
-  if (faseAltaNivel === "luteal") {
-    return { faseEnergetica: "luteal", diaCicloInicial: 18 };
+  function ffShowLoading(msg = "Processando…") {
+    const box = document.getElementById("ff-loading");
+    const text = document.getElementById("ff-loading-text");
+    if (text) text.textContent = msg;
+    if (box) box.classList.remove("hidden");
   }
 
-  if (faseAltaNivel === "follicular") {
-    return { faseEnergetica: "follicular", diaCicloInicial: 6 };
-  }
-
-  if (faseAltaNivel === "ovulatory") {
-    return { faseEnergetica: "ovulatory", diaCicloInicial: 14 };
-  }
-
-  // fallback defensivo (não deveria acontecer)
-  return {
-    faseEnergetica: "menstrual",
-    diaCicloInicial: 1
-  };
-}
-
-/* ============================================================
-   FASE ALTA POR NÍVEL (ENERGÉTICO)
-============================================================ */
-function faseAltaPorNivel(){
-  const nivel=(localStorage.getItem("femflow_nivel")||"iniciante").toLowerCase();
-  if(nivel==="iniciante") return "luteal";
-  if(nivel==="intermediaria") return "follicular";
-  return "ovulatory";
-}
-
-
-function getPerguntas(tipo) {
-  const langCode = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
-  const ciclo = FEMFLOW.langs[langCode]?.ciclo || FEMFLOW.langs.pt.ciclo;
-  return ciclo.quizCiclo?.[tipo] || [];
-}
-  
-/* ============================================================
-   SALVAR CICLO — FAST MODE (LOCAL FIRST + 1 POST)
-   FemFlow 2025
-============================================================ */
-async function salvarCiclo({ diaCicloInicial, cicloDuracao }) {
-
-  ffShowLoading("Configurando seu ciclo…");
-  await new Promise(requestAnimationFrame);
-
-  const idUser = localStorage.getItem("femflow_id");
-
-  /* ============================================================
-     1) CACHE LOCAL (destrava navegação)
-  ============================================================ */
-  localStorage.setItem("femflow_cycle_configured", "yes");
-  localStorage.setItem("femflow_cycle_changed", "true");
-
-  /* ============================================================
-     2) BACKEND — contrato oficial
-  ============================================================ */
-const resp = await FEMFLOW.post({
-  action: "setciclo",
-  id: idUser,
-  perfilHormonal: cicloState.perfilSelecionado,
-  perfilInterno: cicloState.perfilInterno,
-  cicloDuracao,
-  diaCicloInicial,
-  diaPrograma: 1
-});
-
-if (!resp || resp.status !== "ok") {
-  console.log("❌ setciclo falhou:", resp);
-  FEMFLOW.toast("Erro ao salvar perfil/ciclo. Tente novamente.");
-  FEMFLOW.loading.hide?.();
-  return;
-}
-
-
-  /* ============================================================
-     3) VALIDAR — fonte da verdade
-  ============================================================ */
-  const qs = new URLSearchParams({ action: "validar", id: idUser });
-const perfilFresh = await fetch(`${FEMFLOW.SCRIPT_URL}?${qs.toString()}`)
-  .then(r => r.json())
-  .catch(() => ({ status: "error" }));
-
-
-  if (perfilFresh?.status === "ok") {
-    localStorage.setItem("femflow_fase", perfilFresh.fase);
-    localStorage.setItem("femflow_diaCiclo", String(perfilFresh.diaCiclo));
+  function ffHideLoading() {
+    const box = document.getElementById("ff-loading");
+    if (box) box.classList.add("hidden");
   }
 
   /* ============================================================
-     4) FEEDBACK + NAVEGAÇÃO ÚNICA
+     0. MENSAGEM DE AJUSTE
   ============================================================ */
-  FEMFLOW.toast("✨ Ciclo configurado!");
+  const url = new URLSearchParams(location.search);
+  if (url.get("continuar") === "1") {
+    const msg = document.getElementById("cycleMessage");
+    if (msg) msg.textContent = "Ajuste a sequência do seu treino para hoje.";
+  }
 
-  const ret = (new URLSearchParams(location.search).get("ret") || "").toLowerCase();
-  FEMFLOW.router(ret.includes("flowcenter") ? "flowcenter" : "home");
-}
-/* ============================================================
-   PERFIS E QUIZ
-============================================================ */
-const cicloState = {
-  perfilSelecionado: null,
-  perfilInterno: null
-};
-let perguntasAtuais=[];
-let quizIdx=0, quizScore=0;
+  let cicloSelecionado = FEMFLOW.getCicloTreino();
 
-const quizPerg = document.getElementById("quizPergunta");
-const quizStep = document.getElementById("quizStep");
-const quizBox  = document.getElementById("quizBox");
-const regularBox=document.getElementById("regularBox");
+  const cycleInfo = document.getElementById("cycleInfo");
+  const cycleInfoTitle = document.getElementById("cycleInfoTitle");
+  const cycleInfoText = document.getElementById("cycleInfoText");
 
-function bindConfirmarRegular() {
-  const btn = document.getElementById("btnConfirmarRegular");
-  if (btn && !btn.dataset.bound) {
-    btn.dataset.bound = "true";
+  function atualizarInfo() {
+    if (!cycleInfo) return;
+    if (!cicloSelecionado) {
+      cycleInfo.classList.add("hidden");
+      return;
+    }
 
-    bindTap(btn, async () => {
-      const s = document.getElementById("dataUltima")?.value;
-      const len = parseInt(document.getElementById("duracao")?.value || 28, 10);
+    const letras = cicloSelecionado.split("").join(" / ");
+    cycleInfoTitle.textContent = `Ciclo ${cicloSelecionado}`;
+    cycleInfoText.textContent = `Você seguirá a sequência ${letras} nos treinos.`;
+    cycleInfo.classList.remove("hidden");
+  }
 
-      if (!s || len < 21 || len > 35) {
-        FEMFLOW.toast("Preencha corretamente data e duração 🌸");
-        return;
-      }
-
-      const start = parseDateLocalYYYYMMDD(s);
-      const hoje = new Date();
-      const umDia = 86400000;
-
-      let diff = Math.floor((hoje - start) / umDia);
-      diff = Math.max(0, diff);
-
-      let d = ((diff % len) + len) % len;
-      const diaCicloInicial = d === 0 ? 1 : d + 1;
-
-      await salvarCiclo({
-        diaCicloInicial,
-        cicloDuracao: len
-      });
+  document.querySelectorAll("[data-cycle]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-cycle]").forEach(el =>
+        el.classList.toggle("active", el === btn)
+      );
+      cicloSelecionado = btn.dataset.cycle;
+      atualizarInfo();
     });
-  }
-}
-
-/* ============================================================
-   BOTÕES PRINCIPAIS
-============================================================ */
-document.addEventListener("DOMContentLoaded", () => {
-
-  // 🔥 GARANTIR LIMPEZA DE LOADING AO ENTRAR NO CICLO
-  FEMFLOW.loading.hide?.();
-
-  // PERFIS PRINCIPAIS
-  document.querySelectorAll(".perfil-btn[data-perfil]").forEach(btn=>{
-    bindTap(btn, ()=>{
-        document
-        .querySelectorAll(".perfil-btn[data-perfil]")
-        .forEach(b=>b.classList.remove("active"));
-
-      btn.classList.add("active");
-
-      const perfilSelecionado = btn.dataset.perfil;
-      cicloState.perfilSelecionado = perfilSelecionado === "contraceptivo" ? "diu" : perfilSelecionado;
-
-      regularBox.style.display="none";
-      quizBox.style.display="none";
-      // sem submenu de DIU no fluxo atual
-      
-if (perfilSelecionado === "regular") {
-  regularBox.style.display = "block";
-  bindConfirmarRegular();
-}
-
-      else if (perfilSelecionado==="irregular") {
-        iniciarQuizIrregular();
-      }
-      else if (perfilSelecionado==="menopausa") {
-        iniciarQuizMenopausa();
-      }
-      else if (perfilSelecionado==="diu") {
-        regularBox.style.display = "block";
-        bindConfirmarRegular();
-      }
-      else if (perfilSelecionado === "contraceptivo") {
-        iniciarQuizDiuHormonal();
-      }
-      else if (perfilSelecionado === "contraceptivo") {
-        iniciarQuizDiuHormonal();
-      }
-     });
-  });
-});
-
-/* ============================================================
-   QUIZ — lógicas
-============================================================ */
-function iniciarQuizIrregular(){
-  cicloState.perfilInterno="irregular_quiz";
-  perguntasAtuais = getPerguntas("irregular");
-  abrirQuiz();
-}
-
-function iniciarQuizMenopausa(){
-  cicloState.perfilInterno="menopausa_quiz";
-  perguntasAtuais = getPerguntas("menopausa");
-  abrirQuiz();
-}
-
-function iniciarQuizDiuHormonal(){
-  cicloState.perfilInterno="diuHormonal_quiz";
-  perguntasAtuais = getPerguntas("diuHormonal");
-  abrirQuiz();
-}
-
-function abrirQuiz(){
-  quizIdx = 0;
-  quizScore = 0;
-
-  // pergunta inicial
-  quizPerg.textContent = perguntasAtuais[0];
-
-   // etiqueta traduzida (sem mexer no lang.js)
-  const langCode = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
-  const txtPerg = { pt: "Pergunta", en: "Question", fr: "Question" }[langCode] || "Pergunta";
-  const txtDe   = { pt: "de",        en: "of",       fr: "sur"      }[langCode] || "de";
-
-  quizStep.textContent = `${txtPerg} ${quizIdx + 1} ${txtDe} ${perguntasAtuais.length}`;
-
-
-  quizBox.style.display = "block";
-}
-
-
-bindTap(document.getElementById("btnQuizSim"), ()=>responderQuiz(true));
-bindTap(document.getElementById("btnQuizNao"), ()=>responderQuiz(false));
-
-function responderQuiz(v){
-  quizScore += v?1:0;
-  quizIdx++;
-
-  if(quizIdx < perguntasAtuais.length){
-    quizPerg.textContent = perguntasAtuais[quizIdx];
-    quizStep.textContent = `Pergunta ${quizIdx+1} de ${perguntasAtuais.length}`;
-  } else {
-    finalizarQuiz();
-  }
-}
-
-/* ============================================================
-   FINAL DO QUIZ — PERFIL ENERGÉTICO e PERFIL HORMONAL IRREGULAR
-============================================================ */
-async function finalizarQuiz(){
- // 🔒 FALLBACK FEMFLOW — quiz falhou ou não iniciou
-if (!perguntasAtuais || !perguntasAtuais.length) {
-
-  // fallback fisiologicamente seguro
-  const diaFallback = 1;
-
-  salvarCiclo({ diaCicloInicial: diaFallback, cicloDuracao: 28 });
-
-  return;
-}
-
-  /* ============================================================
-   1) PERFIL IRREGULAR — fase aproximada
-============================================================ */
-if (cicloState.perfilInterno === "irregular_quiz") {
-
-  let faseAprox = "";
-  if (quizScore >= 4) faseAprox = "luteal";
-  else if (quizScore === 3) faseAprox = "ovulatory";
-  else if (quizScore === 2) faseAprox = "follicular";
-  else faseAprox = "menstrual";
-
-  let diaInicial = 1;
-  if (faseAprox === "follicular")  diaInicial = 6;
-  if (faseAprox === "ovulatory") diaInicial = 14;
-  if (faseAprox === "luteal")      diaInicial = 18;
-
-  console.log("🔍 IRREGULAR.DEBUG → faseAprox:", faseAprox);
-  console.log("🔍 IRREGULAR.DEBUG → diaInicial:", diaInicial);
-  console.log("🔍 IRREGULAR.DEBUG → score:", quizScore);
-
-salvarCiclo({
-    diaCicloInicial: diaInicial,
-    cicloDuracao: 28
   });
 
-  return;
-} else {
+  document.getElementById("btnConfirmarCiclo")?.addEventListener("click", async () => {
+    if (!cicloSelecionado) {
+      FEMFLOW.toast("Selecione seu ciclo de treino.");
+      return;
+    }
 
-/* ============================================================
-   FINAL DO QUIZ — PERFIL ENERGÉTICO (MENOPAUSA / DIU HORMONAL)
-============================================================ */
-  // resolve energia + fase + dia de forma CENTRALIZADA
-  const { faseEnergetica, diaCicloInicial } = resolverPerfilEnergetico(quizScore);
+    ffShowLoading("Salvando ciclo…");
+    await new Promise(requestAnimationFrame);
 
-  console.log("🔋 ENERGÉTICO.DEBUG → score:", quizScore);
-  console.log("🔋 ENERGÉTICO.DEBUG → faseEnergetica:", faseEnergetica);
-  console.log("🔋 ENERGÉTICO.DEBUG → diaCicloInicial:", diaCicloInicial);
+    const cicloNormalizado = FEMFLOW.setCicloTreino(cicloSelecionado);
+    localStorage.setItem("femflow_diaCiclo", "1");
+    localStorage.setItem("femflow_diaPrograma", "1");
 
-  salvarCiclo({ diaCicloInicial, cicloDuracao: 28 });
+    const resp = await FEMFLOW.post({
+      action: "setciclo",
+      id,
+      perfilHormonal: cicloNormalizado,
+      perfilInterno: cicloNormalizado,
+      cicloDuracao: cicloNormalizado.length,
+      diaCicloInicial: 1,
+      diaPrograma: 1
+    });
 
-  return;
-}
+    if (!resp || resp.status !== "ok") {
+      ffHideLoading();
+      FEMFLOW.toast("Erro ao salvar ciclo.", true);
+      return;
+    }
 
+    ffHideLoading();
+    FEMFLOW.toast("Ciclo configurado!");
+    FEMFLOW.dispatch("stateChanged", {
+      type: "ciclo",
+      impact: "fisiologico",
+      source: "flowcenter"
+    });
+  });
+
+  atualizarInfo();
 
   /* ============================================================
-   PERFIL REGULAR — FISIOLÓGICO REAL
-============================================================ */
-bindTap(document.getElementById("btnConfirmarRegular"), async () => {
+     TEXTOS MULTI-IDIOMA
+  ============================================================ */
+  const lang = localStorage.getItem("femflow_lang") || "pt";
+  const L = FEMFLOW.langs?.[lang]?.ciclo;
 
-  const s=document.getElementById("dataUltima").value;
-  const len=parseInt(document.getElementById("duracao").value||28,10);
-
-  if(!s||len<21||len>35){
-    alert("Preencha corretamente data e duração.");
-    return;
+  if (L) {
+    const cycleTitle = document.getElementById("cycleTitle");
+    const cycleSubtitle = document.getElementById("cycleSubtitle");
+    if (cycleTitle) cycleTitle.textContent = L.titulo;
+    if (cycleSubtitle) cycleSubtitle.textContent = L.sub;
+    document.getElementById("tituloPerfil").textContent = L.titulo;
+    document.getElementById("btnConfirmarCiclo").textContent = L.confirmar;
+    document.getElementById("cycleFooter").textContent = L.footer;
   }
-
-  salvarCiclo({ diaCicloInicial: 1, cicloDuracao: 28 });
-
-});
-}
-  
- 
-/* ============================================================
-   🔤 TRADUÇÃO — APLICAR IDIOMA NA PÁGINA DE CICLO
-============================================================ */
-function aplicarIdiomaCiclo() {
-  // garante idioma definido
-  if (!FEMFLOW.lang) {
-    FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
-  }
-
-  const langCode = FEMFLOW.lang;
-  const langSet  = FEMFLOW.langs[langCode] || FEMFLOW.langs.pt;
-  const L        = langSet.ciclo;
-
-  if (!L) {
-    console.warn("⚠️ Dicionário 'ciclo' não encontrado para:", langCode);
-    return;
-  }
-
-  // ----- TÍTULOS DO TOPO -----
-  const h1 = document.querySelector("h1");
-  if (h1) h1.textContent = L.titulo;
-
-  const sub = document.querySelector(".sub");
-  if (sub) sub.textContent = L.sub;
-
-  // ----- TÍTULO DO CARD ("Seu perfil hormonal") -----
-  const tituloPerfil = document.getElementById("tituloPerfil") || document.querySelector(".card h3");
-  if (tituloPerfil) {
-    const mapTituloPerfil = {
-      pt: "Seu perfil hormonal",
-      en: "Your hormonal profile",
-      fr: "Votre profil hormonal"
-    };
-    tituloPerfil.textContent = mapTituloPerfil[langCode] || mapTituloPerfil.pt;
-  }
-
-  // ----- BOTÕES DE PERFIL HORMONAL -----
-  const setPerfilText = (btn, label, sublabel) => {
-    if (!btn) return;
-    const labelEl = btn.querySelector(".perfil-label");
-    const subEl = btn.querySelector(".perfil-sub");
-    if (labelEl) {
-      labelEl.textContent = label;
-    } else {
-      btn.textContent = label;
-    }
-    if (subEl) {
-      subEl.textContent = sublabel || "";
-      subEl.style.display = sublabel ? "block" : "none";
-    }
-  };
-
-  setPerfilText(document.querySelector("[data-perfil='regular']"), L.regular);
-  setPerfilText(document.querySelector("[data-perfil='irregular']"), L.irregular);
-  setPerfilText(
-    document.querySelector("[data-perfil='contraceptivo']"),
-    L.contraceptivoHormonal,
-    L.contraceptivoHormonalSub
-  );
-  setPerfilText(document.querySelector("[data-perfil='diu']"), L.diu);
-  setPerfilText(document.querySelector("[data-perfil='menopausa']"), L.menopausa);
-
-  // ----- SUBMENU DIU -----
-  const hDiu = document.querySelector("#diuSubmenu h3");
-  if (hDiu) hDiu.textContent = L.qualDiu;
-
-  const bDiuC = document.querySelector("[data-diu='cobre']");
-  if (bDiuC) bDiuC.textContent = L.diuCobre;
-
-  const bDiuH = document.querySelector("[data-diu='hormonal']");
-  if (bDiuH) bDiuH.textContent = L.diuHormonal;
-
-  // ----- PERFIL REGULAR -----
-  const lbl1 = document.querySelector("#regularBox label:nth-of-type(1)");
-  if (lbl1) lbl1.textContent = L.ultimaMenstruacao;
-
-  const lbl2 = document.querySelector("#regularBox label:nth-of-type(2)");
-  if (lbl2) lbl2.textContent = L.duracaoMedia;
-
-  const btnConf = document.getElementById("btnConfirmarRegular");
-  if (btnConf) btnConf.textContent = L.confirmar;
-
-  // ----- QUIZ ENERGÉTICO -----
-  const quizPergunta = document.getElementById("quizPergunta");
-  if (quizPergunta) quizPergunta.textContent = L.quizInicio;
-
-  const btnSim = document.getElementById("btnQuizSim");
-  if (btnSim) btnSim.textContent = L.sim;
-
-  const btnNao = document.getElementById("btnQuizNao");
-  if (btnNao) btnNao.textContent = L.nao;
-
-  // ----- RODAPÉ -----
-  const footer = document.getElementById("cycleFooter");
-  if (footer) footer.textContent = L.footer;
-}
-
-/* ============================================================
-   🔧 ATIVAR HEADER / MENU / IDIOMA
-============================================================ */
-document.addEventListener("DOMContentLoaded", () => {
-  FEMFLOW.inserirHeaderApp?.();
-  FEMFLOW.inserirMenuLateral?.();
-  FEMFLOW.inserirModalIdioma?.();
-
-  aplicarIdiomaCiclo();
-});
-/* ============================================================
-   🔄 Atualizar textos quando trocar idioma
-============================================================ */
-document.addEventListener("femflow:langChange", () => {
-  aplicarIdiomaCiclo();
-
-  // Se o quiz estiver aberto, reescreve a pergunta + passo
-  if (quizBox && quizBox.style.display !== "none") {
-    const tipo = (cicloState.perfilInterno || "").replace("_quiz", "");
-    perguntasAtuais = getPerguntas(tipo) || [];
-
-    quizPerg.textContent = perguntasAtuais[quizIdx] || "";
-
-    const langCode = FEMFLOW.lang || "pt";
-    const txtPerg = { pt: "Pergunta", en: "Question", fr: "Question" }[langCode] || "Pergunta";
-    const txtDe   = { pt: "de",       en: "of",       fr: "sur"      }[langCode] || "de";
-
-    quizStep.textContent = `${txtPerg} ${quizIdx + 1} ${txtDe} ${perguntasAtuais.length}`;
-  }
-});
 </script>
-  
-<!-- MODAL DE NÍVEL (CICLO) -->
-<div id="modal-nivel" class="modal-nivel oculto">
-  <div class="modal-nivel-box">
-    <h2>📊 Selecione seu nível</h2>
-
-    <button class="nivel-btn" data-nivel="iniciante">Iniciante</button>
-    <button class="nivel-btn" data-nivel="intermediaria">Intermediária</button>
-    <button class="nivel-btn" data-nivel="avancada">Avançada</button>
-
-    <button id="btnConfirmarNivel" class="nivel-confirmar">
-      Confirmar nível
-    </button>
-
-    <button id="fecharNivel" class="nivel-fechar">Fechar</button>
-  </div>
-</div>
-
-
 
 </body>
 </html>

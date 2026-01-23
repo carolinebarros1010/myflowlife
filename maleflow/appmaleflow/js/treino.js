@@ -423,8 +423,11 @@ const hasPersonal =
       enfaseFinal = null;
     }
 
-    const fase     = perfil.fase;
-    const diaCiclo = perfil.diaCiclo;
+    const diaPrograma = await FEMFLOW.getDiaPrograma();
+    FEMFLOW.diaProgramaAtual = diaPrograma;
+    const cicloInfo = FEMFLOW.getCicloTreinoInfo(diaPrograma);
+    const fase = cicloInfo.ciclo;
+    const diaCiclo = cicloInfo.diaIndex;
     const isExtraTreino = FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseFinal);
     treinoExtraAtivo = Boolean(extraSessaoAtiva);
     if (!extraSessaoAtiva && isExtraTreino) {
@@ -435,7 +438,7 @@ const hasPersonal =
     FEMFLOW.enfaseAtual = enfaseFinal;
 
     if (!personalFinal && !enfaseFinal) {
-      FEMFLOW.toast("Escolha um treino na Home 🌸");
+      FEMFLOW.toast("Escolha um treino na Home.");
       FEMFLOW.router("home.html");
       return;
     }
@@ -448,7 +451,6 @@ const hasPersonal =
     };
 
     if (isExtraTreino) {
-      FEMFLOW.diaProgramaAtual = Number(localStorage.getItem("femflow_diaPrograma") || 1);
       if (tituloTopo) {
         tituloTopo.textContent = t("treino.tituloExtra");
       }
@@ -457,9 +459,6 @@ const hasPersonal =
         tituloDia.textContent = t("treino.extraTitulo", { tipo: extraLabel });
       }
     } else {
-      const diaPrograma = await FEMFLOW.getDiaPrograma();
-      FEMFLOW.diaProgramaAtual = diaPrograma;
-
       if (tituloDia) {
         tituloDia.textContent = t("treino.diaProgramaLabel", { dia: diaPrograma });
       }
@@ -482,7 +481,8 @@ const hasPersonal =
     });
 
     localStorage.setItem("femflow_fase", fase);
-    localStorage.setItem("femflow_diaCiclo", diaCiclo);
+    localStorage.setItem("femflow_training_cycle", fase);
+    localStorage.setItem("femflow_diaCiclo", String(diaCiclo));
   });
 
   /* ============================================================

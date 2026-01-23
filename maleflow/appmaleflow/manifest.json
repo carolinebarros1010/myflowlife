@@ -2,14 +2,14 @@
   "id": "/femflow/app/home.html",
   "name": "FemFlow – Ciclo Inteligente",
   "short_name": "FemFlow",
-  "description": "Treine em harmonia com o seu ciclo. Programa de 30 dias sincronizado ao seu corpo, energia e fases hormonais.",
+  "description": "Treine com foco e consistência. Ciclos AB/ABC/ABCD/ABCDE para evoluir na ordem certa.",
   "lang": "pt-BR",
   "start_url": "/femflow/app/index.html",
   "scope": "/femflow/app/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#335953",
-  "background_color": "#FCE3D5",
+  "theme_color": "#0F172A",
+  "background_color": "#E2E8F0",
   "categories": ["health", "fitness", "education", "lifestyle"],
   "icons": [
     {
