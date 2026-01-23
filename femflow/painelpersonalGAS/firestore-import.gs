@@ -80,7 +80,7 @@ function getFirebaseAccessToken() {
 /* ============================================================
    IMPORTAÇÃO DIRIGIDA POR ABA
 ============================================================ */
-function importarTreinosFEMFLOW_aba(nomeAba, opts = {}) {
+function importarTreinosFEMFLOW_aba(nomeAba) {
   if (!nomeAba) {
     throw new Error('Nome da aba é obrigatório para importação dirigida');
   }
@@ -92,7 +92,7 @@ function importarTreinosFEMFLOW_aba(nomeAba, opts = {}) {
     throw new Error('Aba não encontrada para importação: ' + nomeAba);
   }
 
-  return importarTreinosFEMFLOW({ abasPermitidas: [nomeAba], modelo: opts.modelo });
+  return importarTreinosFEMFLOW({ abasPermitidas: [nomeAba] });
 }
 
 /* =======================================================================
@@ -102,7 +102,6 @@ function importarTreinosFEMFLOW_aba(nomeAba, opts = {}) {
 ======================================================================= */
 function importarTreinosFEMFLOW(opts = {}) {
   const abasPermitidas = Array.isArray(opts.abasPermitidas) ? opts.abasPermitidas : null;
-  const modelo = normalizarModeloImportacao_(opts.modelo);
 
   const token = getFirebaseAccessToken();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -114,7 +113,6 @@ function importarTreinosFEMFLOW(opts = {}) {
 
   Logger.log("🚀 Iniciando importação FEMFLOW 2025...");
   Logger.log("🧾 importId: " + importId);
-  Logger.log("🧭 modelo: " + modelo);
   if (abasPermitidas) Logger.log("🎯 Importação dirigida (abasPermitidas): " + JSON.stringify(abasPermitidas));
 
   let totalOk = 0;
@@ -166,8 +164,7 @@ function importarTreinosFEMFLOW(opts = {}) {
       isPersonal,
       personalId,
       isExtra,
-      importId,
-      modelo
+      importId
     );
     totalOk += stats.ok;
     totalErr += stats.err;
@@ -189,7 +186,7 @@ function importarTreinosFEMFLOW(opts = {}) {
 /* ============================================================
    IMPORTA UMA ABA (core)
 ============================================================ */
-function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, personalId, isExtra, importId, modelo) {
+function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, personalId, isExtra, importId) {
   const valsAll = sh.getDataRange().getValues();
   if (!valsAll || valsAll.length < 2) {
     Logger.log("⚠️ Aba vazia/sem dados: " + nomeAba);
@@ -200,13 +197,6 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
   const vals = valsAll.slice(1);
 
   const col = (name) => header.indexOf(name);
-  const colAny = (...names) => {
-    for (const name of names) {
-      const idx = col(name);
-      if (idx !== -1) return idx;
-    }
-    return -1;
-  };
 
   const idx = {
     id: col("id"), // opcional
@@ -215,7 +205,6 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
     ordem: col("ordem"),
     enfase: col("enfase"),
     fase: col("fase"),
-    ciclo: colAny("ciclo", "ciclo_treino", "cicloTreino", "fase"),
     dia: col("dia"),
 
     titulo_pt: col("titulo_pt"),
@@ -235,12 +224,9 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
   };
 
   // validações mínimas
-  const usarCicloTreino = modelo === "maleflow";
   const obrigatorias = isExtra
     ? ["tipo", "enfase", "titulo_pt", "box", "ordem"]
-    : usarCicloTreino
-      ? ["tipo", "dia", "ciclo", "enfase", "titulo_pt", "link", "box", "ordem"]
-      : ["tipo", "dia", "fase", "enfase", "titulo_pt", "link", "box", "ordem"];
+    : ["tipo", "dia", "fase", "enfase", "titulo_pt", "link", "box", "ordem"];
   const faltando = obrigatorias.filter(k => idx[k] === -1);
   if (faltando.length) {
     throw new Error(`Aba "${nomeAba}" sem colunas obrigatórias: ${faltando.join(", ")}`);
@@ -255,32 +241,20 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
 
     const tipo = String(r[idx.tipo]).toLowerCase().trim();
     const enfase = removerAcentos(String(r[idx.enfase] || "geral")).toLowerCase();
-    const cicloRaw = usarCicloTreino && idx.ciclo !== -1 ? r[idx.ciclo] : "";
-    const ciclo = usarCicloTreino ? normalizarCicloTreino(cicloRaw) : "";
-    const fase = usarCicloTreino ? ciclo : (r[idx.fase] ? normalizarFase(r[idx.fase]) : "");
+    const fase = r[idx.fase] ? normalizarFase(r[idx.fase]) : "";
     const diaKey = r[idx.dia] ? `dia_${r[idx.dia]}` : "";
-    const labelFase = fase || "sem_fase";
-    if (usarCicloTreino && !ciclo) {
-      errCount++;
-      Logger.log(`❌ ERRO → ciclo inválido (${cicloRaw}) | ${nomeAba} | linha ${i}`);
-      return;
-    }
 
     // ------------------------------------------------------------
     // DEFINIR URL FINAL (NORMAL x PERSONAL)
     // ------------------------------------------------------------
     let url = "";
     if (isPersonal) {
-      url = usarCicloTreino
-        ? `${baseURL}/personal_trainings/${personalId}/${enfase}/ciclos/${ciclo}/dias/${diaKey}/blocos/bloco_${i}`
-        : `${baseURL}/personal_trainings/${personalId}/${enfase}/${fase}/dias/${diaKey}/blocos/bloco_${i}`;
+      url = `${baseURL}/personal_trainings/${personalId}/${enfase}/${fase}/dias/${diaKey}/blocos/bloco_${i}`;
     } else if (isExtra) {
       url = `${baseURL}/exercicios_extra/${enfase}/blocos/bloco_${i}`;
     } else {
       const nivel = nomeAba.toLowerCase(); // iniciante/intermediaria/avancada
-      url = usarCicloTreino
-        ? `${baseURL}/exercicios/${nivel}_${enfase}/ciclos/${ciclo}/dias/${diaKey}/blocos/bloco_${i}`
-        : `${baseURL}/exercicios/${nivel}_${enfase}/fases/${fase}/dias/${diaKey}/blocos/bloco_${i}`;
+      url = `${baseURL}/exercicios/${nivel}_${enfase}/fases/${fase}/dias/${diaKey}/blocos/bloco_${i}`;
     }
 
     // ------------------------------------------------------------
@@ -315,18 +289,12 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
     };
 
     // === FEMFLOW | HISTÓRICO DE BLOCOS PERSONAL ===
-    if (usarCicloTreino) {
-      payload.fields.ciclo = { stringValue: ciclo };
-    }
-
     if (isPersonal) {
       const getResp = firestoreGET_(url, token);
       const getCode = getResp.getResponseCode();
       if (getCode === 200) {
         const doc = JSON.parse(getResp.getContentText());
-        const historyUrl = usarCicloTreino
-          ? `${baseURL}/personal_trainings/${personalId}/${enfase}/ciclos/${ciclo}/dias/${diaKey}/history/${importId}/blocos/bloco_${i}`
-          : `${baseURL}/personal_trainings/${personalId}/${enfase}/${fase}/dias/${diaKey}/history/${importId}/blocos/bloco_${i}`;
+        const historyUrl = `${baseURL}/personal_trainings/${personalId}/${enfase}/${fase}/dias/${diaKey}/history/${importId}/blocos/bloco_${i}`;
         const historyPayload = {
           fields: Object.assign({}, doc.fields || {}, {
             archivedAt: { timestampValue: new Date().toISOString() },
@@ -336,7 +304,7 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
         };
         firestorePATCH_(historyUrl, token, historyPayload);
       } else if (getCode !== 404) {
-        Logger.log(`⚠️ GET histórico falhou [${getCode}] → ${nomeAba} | ${labelFase} | ${diaKey} | linha ${i} | ${getResp.getContentText()}`);
+        Logger.log(`⚠️ GET histórico falhou [${getCode}] → ${nomeAba} | ${fase} | ${diaKey} | linha ${i} | ${getResp.getContentText()}`);
       }
     }
 
@@ -350,10 +318,10 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
     const code = resp.getResponseCode();
     if (code === 200) {
       okCount++;
-      Logger.log(`✅ OK → ${nomeAba} | ${labelFase} | ${diaKey} | linha ${i}`);
+      Logger.log(`✅ OK → ${nomeAba} | ${fase} | ${diaKey} | linha ${i}`);
     } else {
       errCount++;
-      Logger.log(`❌ ERRO [${code}] → ${nomeAba} | ${labelFase} | ${diaKey} | linha ${i} | ${resp.getContentText()}`);
+      Logger.log(`❌ ERRO [${code}] → ${nomeAba} | ${fase} | ${diaKey} | linha ${i} | ${resp.getContentText()}`);
     }
   });
 
@@ -408,21 +376,6 @@ function normalizarFase(f) {
   };
 
   return mapa[f] || "follicular";
-}
-
-function normalizarCicloTreino(raw) {
-  if (!raw) return "";
-  const ciclo = String(raw)
-    .toUpperCase()
-    .replace(/[^A-E]/g, "");
-  if (!ciclo) return "";
-  const letters = Array.from(new Set(ciclo.split("")));
-  return letters.join("").slice(0, 5);
-}
-
-function normalizarModeloImportacao_(raw) {
-  const modelo = String(raw || "").toLowerCase().trim();
-  return modelo === "maleflow" ? "maleflow" : "femflow";
 }
 
 /* ============================================================

@@ -674,13 +674,6 @@
         </div>
         <form id="paramForm" class="field-grid">
           <div>
-            <label for="modelo">Modelo</label>
-            <select id="modelo" name="modelo">
-              <option value="femflow">FemFlow • fases hormonais</option>
-              <option value="maleflow">MaleFlow • ciclos AB/ABC/ABCD/ABCDE</option>
-            </select>
-          </div>
-          <div>
             <label for="nivel">Nível</label>
             <select id="nivel" name="nivel" required>
               <option value="">Selecione</option>
@@ -1005,7 +998,6 @@
     };
 
     const collectParams = () => {
-      const modelo = qs("modelo").value.trim();
       const nivel = qs("nivel").value.trim();
       const padraoCiclo = qs("padraoCiclo").value.trim();
       const fase = "ovulatoria";
@@ -1022,7 +1014,6 @@
         padraoCiclo,
         fase,
         enfase,
-        modelo,
         destino,
         id_aluna: idAluna,
         serieEspecialAtiva,
@@ -1131,14 +1122,13 @@ const sha256Hex = async (text) => {
         }
       }
 
-      const requiresBaseParams = ["gerarbase", "distribuir30", "gerar30", "full"].includes(normalizedAction);
-      if (requiresBaseParams && (!params.nivel || !params.enfase)) {
+      if (normalizedAction !== "serieespecial" && (!params.nivel || !params.enfase)) {
         const reason = "Preencha nivel e enfase.";
         toast(reason);
         reportFailure(action, params, reason);
         return false;
       }
-      if (requiresBaseParams && !params.padraoCiclo) {
+      if (normalizedAction !== "serieespecial" && !params.padraoCiclo) {
         const reason = "Selecione o padrão do ciclo.";
         toast(reason);
         reportFailure(action, params, reason);
@@ -1442,7 +1432,6 @@ const payload = { action: "signup", nome, senha_hash };
     };
 
     const loadParams = () => {
-      qs("modelo").value = localStorage.getItem("femflow_modelo") || "femflow";
       qs("nivel").value = localStorage.getItem("femflow_nivel") || "";
       qs("padraoCiclo").value = localStorage.getItem("femflow_padraoCiclo") || "";
       qs("enfase").value = localStorage.getItem("femflow_enfase") || "";
@@ -1483,7 +1472,6 @@ const payload = { action: "signup", nome, senha_hash };
       document.querySelectorAll("[data-preset]").forEach((button) => {
         button.addEventListener("click", () => {
           const preset = defaultPreset[button.dataset.preset];
-          qs("modelo").value = "femflow";
           qs("nivel").value = preset.nivel;
           qs("enfase").value = preset.enfase;
           qs("destino").value = preset.destino;
