@@ -393,7 +393,7 @@ home: {
     regular: "Regular",
     irregular: "Irregular",
     contraceptivoHormonal: "Contraceptivo hormonal",
-    contraceptivoHormonalSub: "Implante ou injeção intramuscular trimestral",
+    contraceptivoHormonalSub: "Implante ou intramuscular trimestral",
     diu: "Uso DIU",
     menopausa: "Menopausa",
 
@@ -686,7 +686,7 @@ home: {
     regular: "Regular",
     irregular: "Irregular",
     contraceptivoHormonal: "Hormonal contraceptive",
-    contraceptivoHormonalSub: "Implant or quarterly intramuscular injection",
+    contraceptivoHormonalSub: "Implant or quarterly intramuscular",
     diu: "IUD",
     menopausa: "Menopause",
 
@@ -980,7 +980,7 @@ fr: {
     regular: "Régulier",
     irregular: "Irrégulier",
     contraceptivoHormonal: "Contraceptif hormonal",
-    contraceptivoHormonalSub: "Implant ou injection intramusculaire trimestrielle",
+    contraceptivoHormonalSub: "Implant ou intramusculaire trimestrielle",
     diu: "DIU",
     menopausa: "Ménopause",
 
