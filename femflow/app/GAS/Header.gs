@@ -1,5 +1,6 @@
 /* Nome padrão da aba principal */
 const SHEET_ALUNAS = "Alunas";
+const SHEET_ALUNOS = "Alunos";
 
 /* Token de upgrade seguro */
 const SECURITY_TOKEN = "Bmc082849$";

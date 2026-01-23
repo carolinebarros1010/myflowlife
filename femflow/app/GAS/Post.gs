@@ -17,6 +17,8 @@ function doPost(e) {
   console.log("📥 perfilHormonal:", data.perfilHormonal);
   console.log("📥 perfilInterno:", data.perfilInterno);
 
+  setAppContext_(data.app || data.modelo || data.produto);
+
   const action = (data.action || "").toString().toLowerCase();
   let resposta = { status: "ignored" };
 
