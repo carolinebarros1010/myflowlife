@@ -1,6 +1,6 @@
 function _loginOuCadastro(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
-  if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
+  if (!sh) return { status: "error", msg: "Aba Alunos não encontrada." };
 
   const nome            = String(data.nome || "").trim();
   const email           = String(data.email || "").toLowerCase().trim();
