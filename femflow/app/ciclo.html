@@ -34,6 +34,10 @@
   <div class="perfil-btns">
     <button class="perfil-btn" data-perfil="regular">Regular</button>
     <button class="perfil-btn" data-perfil="irregular">Irregular</button>
+    <button class="perfil-btn" data-perfil="contraceptivo">
+      <span class="perfil-label">Contraceptivo hormonal</span>
+      <span class="perfil-sub">Implante ou intramuscular trimestral</span>
+    </button>
     <button class="perfil-btn" data-perfil="diu">Uso DIU</button>
     <button class="perfil-btn" data-perfil="menopausa">Menopausa</button>
   </div>
@@ -267,7 +271,6 @@ const quizPerg = document.getElementById("quizPergunta");
 const quizStep = document.getElementById("quizStep");
 const quizBox  = document.getElementById("quizBox");
 const regularBox=document.getElementById("regularBox");
-const diuBox = document.getElementById("diuSubmenu");
 
 function bindConfirmarRegular() {
   const btn = document.getElementById("btnConfirmarRegular");
@@ -318,25 +321,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
       btn.classList.add("active");
 
-      cicloState.perfilSelecionado = btn.dataset.perfil;
+      const perfilSelecionado = btn.dataset.perfil;
+      cicloState.perfilSelecionado = perfilSelecionado === "contraceptivo" ? "diu" : perfilSelecionado;
 
       regularBox.style.display="none";
       quizBox.style.display="none";
       diuBox.style.display="none";
       
-if (cicloState.perfilSelecionado === "regular") {
+if (perfilSelecionado === "regular") {
   regularBox.style.display = "block";
   bindConfirmarRegular();
 }
 
-      else if (cicloState.perfilSelecionado==="irregular") {
+      else if (perfilSelecionado==="irregular") {
         iniciarQuizIrregular();
       }
-      else if (cicloState.perfilSelecionado==="menopausa") {
+      else if (perfilSelecionado==="menopausa") {
         iniciarQuizMenopausa();
       }
-      else if (cicloState.perfilSelecionado==="diu") {
-        diuBox.style.display="block";
+      else if (perfilSelecionado==="diu") {
+        regularBox.style.display = "block";
+        bindConfirmarRegular();
+      }
+      else if (perfilSelecionado === "contraceptivo") {
+        iniciarQuizDiuHormonal();
       }
      });
   });
@@ -536,17 +544,30 @@ function aplicarIdiomaCiclo() {
   }
 
   // ----- BOTÕES DE PERFIL HORMONAL -----
-  const bReg = document.querySelector("[data-perfil='regular']");
-  if (bReg) bReg.textContent = L.regular;
+  const setPerfilText = (btn, label, sublabel) => {
+    if (!btn) return;
+    const labelEl = btn.querySelector(".perfil-label");
+    const subEl = btn.querySelector(".perfil-sub");
+    if (labelEl) {
+      labelEl.textContent = label;
+    } else {
+      btn.textContent = label;
+    }
+    if (subEl) {
+      subEl.textContent = sublabel || "";
+      subEl.style.display = sublabel ? "block" : "none";
+    }
+  };
 
-  const bIrreg = document.querySelector("[data-perfil='irregular']");
-  if (bIrreg) bIrreg.textContent = L.irregular;
-
-  const bDiu = document.querySelector("[data-perfil='diu']");
-  if (bDiu) bDiu.textContent = L.diu;
-
-  const bMeno = document.querySelector("[data-perfil='menopausa']");
-  if (bMeno) bMeno.textContent = L.menopausa;
+  setPerfilText(document.querySelector("[data-perfil='regular']"), L.regular);
+  setPerfilText(document.querySelector("[data-perfil='irregular']"), L.irregular);
+  setPerfilText(
+    document.querySelector("[data-perfil='contraceptivo']"),
+    L.contraceptivoHormonal,
+    L.contraceptivoHormonalSub
+  );
+  setPerfilText(document.querySelector("[data-perfil='diu']"), L.diu);
+  setPerfilText(document.querySelector("[data-perfil='menopausa']"), L.menopausa);
 
   // ----- SUBMENU DIU -----
   const hDiu = document.querySelector("#diuSubmenu h3");

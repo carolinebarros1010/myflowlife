@@ -154,6 +154,7 @@ button:hover {
   cursor: pointer;
   transition: .25s ease;
   text-align: center;
+  line-height: 1.2;
 }
 
 .perfil-btn:hover {
@@ -165,6 +166,19 @@ button:hover {
   border-color: var(--verde);
   color: #fff;
   box-shadow: 0 4px 10px rgba(51,89,83,0.25);
+}
+
+.perfil-btn .perfil-label {
+  display: block;
+  font-weight: 700;
+}
+
+.perfil-btn .perfil-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.85;
 }
 
 /* ==========================================================
