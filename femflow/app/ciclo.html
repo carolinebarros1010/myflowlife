@@ -36,7 +36,7 @@
     <button class="perfil-btn" data-perfil="irregular">Irregular</button>
     <button class="perfil-btn" data-perfil="contraceptivo">
       <span class="perfil-label">Contraceptivo hormonal</span>
-      <span class="perfil-sub">Implante ou injeção intramuscular trimestral</span>
+      <span class="perfil-sub">Implante ou intramuscular trimestral</span>
     </button>
     <button class="perfil-btn" data-perfil="diu">Uso DIU</button>
     <button class="perfil-btn" data-perfil="menopausa">Menopausa</button>
@@ -331,7 +331,11 @@ if (perfilSelecionado === "regular") {
         iniciarQuizMenopausa();
       }
       else if (perfilSelecionado==="diu") {
-        diuBox.style.display="block";
+        regularBox.style.display = "block";
+        bindConfirmarRegular();
+      }
+      else if (perfilSelecionado === "contraceptivo") {
+        iniciarQuizDiuHormonal();
       }
       else if (perfilSelecionado === "contraceptivo") {
         iniciarQuizDiuHormonal();
