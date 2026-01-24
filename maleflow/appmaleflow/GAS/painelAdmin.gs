@@ -55,7 +55,6 @@ function _mapAlunaRow_(row) {
     nivel: row[8] || "",
     fase: row[13] || "",
     diaCiclo: row[14] || "",
-    perfilHormonal: row[19] || "",
     acessoPersonal: row[COL_ACESSO_PERSONAL] === true || String(row[COL_ACESSO_PERSONAL] || "").toLowerCase() === "true"
   };
 }
@@ -217,7 +216,6 @@ function adminCreateAluna_(data) {
   row[12] = String(data.enfase || "nenhuma").toLowerCase();
   row[13] = "follicular";
   row[14] = 1;
-  row[19] = String(data.perfilHormonal || "regular").toLowerCase();
   row[COL_ACESSO_PERSONAL] = _parseBoolean_(data.acessoPersonal);
 
   sh.appendRow(row);

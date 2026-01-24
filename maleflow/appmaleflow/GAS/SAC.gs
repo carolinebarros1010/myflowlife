@@ -185,7 +185,6 @@ function sacAbrir_(data) {
     nivel: data.nivel || contexto.nivel,
     fase: data.fase || contexto.fase,
     diaPrograma: data.diaPrograma || contexto.diaPrograma,
-    perfilHormonal: data.perfilHormonal || contexto.perfilHormonal,
     origem: data.origem || "app",
     pagina: data.pagina || contexto.pagina
   });

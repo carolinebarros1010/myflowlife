@@ -36,7 +36,7 @@ treinoAcessoOk = acessoAtivo OU freeOkUI
 
 Onde:
 - `acessoAtivo` = `perfil.ativa === true` **ou** `vip`.
-- `freeOkUI` = existe `free_access` válido e a ênfase atual (`femflow_enfase`) está dentro da lista de `enfases`.
+- `freeOkUI` = existe `free_access` válido e a ênfase atual (`maleflow_enfase`) está dentro da lista de `enfases`.
 
 ### Resultado prático
 - **Licença ativa** (`ativa = true`) → libera treino e treino extra.

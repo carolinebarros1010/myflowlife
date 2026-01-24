@@ -44,8 +44,8 @@
       <span class="perfil-label">ABCD</span>
       <span class="perfil-sub">4 treinos diferentes</span>
     </button>
-    <button class="perfil-btn" data-cycle="ABCDE">
-      <span class="perfil-label">ABCDE</span>
+    <button class="perfil-btn" data-cycle="ABCED">
+      <span class="perfil-label">ABCED</span>
       <span class="perfil-sub">5 treinos diferentes</span>
     </button>
   </div>
@@ -70,10 +70,10 @@
 </div>
 
 <script src="js/lang.js"></script>
-<script src="femflow-core.js"></script>
+<script src="maleflow-core.js"></script>
 
 <script>
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
 
   // 🔐 guarda mínima — ciclo é parte do onboarding
   if (!id) {
@@ -141,16 +141,14 @@
     await new Promise(requestAnimationFrame);
 
     const cicloNormalizado = FEMFLOW.setCicloTreino(cicloSelecionado);
-    localStorage.setItem("femflow_diaCiclo", "1");
-    localStorage.setItem("femflow_diaPrograma", "1");
+    localStorage.setItem("maleflow_diaCiclo", "1");
+    localStorage.setItem("maleflow_diaPrograma", "1");
 
     const resp = await FEMFLOW.post({
       action: "setciclo",
       id,
-      perfilHormonal: cicloNormalizado,
-      perfilInterno: cicloNormalizado,
+      cicloTreino: cicloNormalizado,
       cicloDuracao: cicloNormalizado.length,
-      diaCicloInicial: 1,
       diaPrograma: 1
     });
 
@@ -174,7 +172,7 @@
   /* ============================================================
      TEXTOS MULTI-IDIOMA
   ============================================================ */
-  const lang = localStorage.getItem("femflow_lang") || "pt";
+  const lang = localStorage.getItem("maleflow_lang") || "pt";
   const L = FEMFLOW.langs?.[lang]?.ciclo;
 
   if (L) {

@@ -31,11 +31,13 @@ function setDiaPrograma_(id, dia) {
 
 function setTreinosSemana_(data) {
   const id = String(data.id || "").trim();
-  const treinosSemana = Number(data.treinosSemana);
+  const treinosSemana = Number(
+    data.frequencia != null ? data.frequencia : data.treinosSemana
+  );
 
   if (!id) return { status: "error", msg: "missing_id" };
-  if (!Number.isFinite(treinosSemana) || treinosSemana < 1 || treinosSemana > 7) {
-    return { status: "error", msg: "invalid_treinos_semana" };
+  if (!Number.isFinite(treinosSemana) || treinosSemana < 2 || treinosSemana > 5) {
+    return { status: "error", msg: "invalid_frequencia" };
   }
 
   const sh = _sheet(SHEET_ALUNAS);
@@ -45,7 +47,7 @@ function setTreinosSemana_(data) {
   for (let i = 1; i < rows.length; i++) {
     if (String(rows[i][0]).trim() === id) {
       sh.getRange(i + 1, COL_TREINOS_SEMANA + 1).setValue(treinosSemana);
-      return { status: "ok", treinosSemana };
+      return { status: "ok", frequencia: treinosSemana };
     }
   }
 

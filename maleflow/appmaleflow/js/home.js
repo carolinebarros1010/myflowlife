@@ -15,10 +15,12 @@ const FOLLOWME_LINKS = {
   karoline: "#"
 };
 
-const TREINOS_SEMANA_KEY = "femflow_treinos_semana";
-const TREINOS_SEMANA_PADRAO = 3;
+const FREQUENCIA_KEY = "maleflow_frequencia";
+const FREQUENCIA_PADRAO = 3;
+const TREINOS_SEMANA_KEY = "maleflow_treinos_semana";
 let treinosSemanaResolve = null;
 let treinosSemanaSelecionado = null;
+let resetTreinoResolve = null;
 
 function atualizarModalTreinosSemana() {
   const modal = document.getElementById("treinosSemanaModal");
@@ -39,8 +41,8 @@ function atualizarModalTreinosSemana() {
 
   if (!options) return;
   options.innerHTML = "";
-  const current = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
-  for (let i = 1; i <= 7; i++) {
+  const current = treinosSemanaSelecionado ?? FREQUENCIA_PADRAO;
+  for (let i = 2; i <= 5; i++) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "ff-modal-option";
@@ -61,7 +63,7 @@ function atualizarModalTreinosSemana() {
 function abrirModalTreinosSemana() {
   const modal = document.getElementById("treinosSemanaModal");
   if (!modal) return Promise.resolve(false);
-  treinosSemanaSelecionado = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
+  treinosSemanaSelecionado = treinosSemanaSelecionado ?? FREQUENCIA_PADRAO;
   atualizarModalTreinosSemana();
   modal.classList.remove("hidden");
   modal.setAttribute("aria-hidden", "false");
@@ -78,37 +80,65 @@ function fecharModalTreinosSemana() {
   modal.setAttribute("aria-hidden", "true");
 }
 
-async function salvarTreinosSemana(valor) {
+function cicloPorFrequencia(valor) {
+  if (valor === 2) return "AB";
+  if (valor === 3) return "ABC";
+  if (valor === 4) return "ABCD";
+  if (valor === 5) return "ABCED";
+  return "ABC";
+}
+
+async function salvarFrequencia(valor) {
+  localStorage.setItem(FREQUENCIA_KEY, String(valor));
   localStorage.setItem(TREINOS_SEMANA_KEY, String(valor));
-  const id = localStorage.getItem("femflow_id");
+  FEMFLOW.setCicloTreino(cicloPorFrequencia(valor));
+  const id = localStorage.getItem("maleflow_id");
   if (!id) return;
 
   await fetch(FEMFLOW.SCRIPT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      action: "settreinossemana",
+      action: "setfrequencia",
       id,
-      treinosSemana: valor
+      frequencia: valor
     })
   });
 }
 
-async function garantirTreinosSemana() {
-  const valorRaw = localStorage.getItem(TREINOS_SEMANA_KEY);
+async function garantirFrequencia() {
+  const valorRaw = localStorage.getItem(FREQUENCIA_KEY) || localStorage.getItem(TREINOS_SEMANA_KEY);
   const valor = Number(valorRaw);
-  if (Number.isFinite(valor) && valor >= 1 && valor <= 7) return true;
+  if (Number.isFinite(valor) && valor >= 2 && valor <= 5) return true;
 
   const aprovado = await abrirModalTreinosSemana();
   return aprovado === true;
+}
+
+function abrirModalResetTreino() {
+  const modal = document.getElementById("resetTreinoModal");
+  if (!modal) return Promise.resolve(false);
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+
+  return new Promise((resolve) => {
+    resetTreinoResolve = resolve;
+  });
+}
+
+function fecharModalResetTreino() {
+  const modal = document.getElementById("resetTreinoModal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
 }
 
 /* ============================================================
    🔄 PERFIL: puxar do backend e persistir no localStorage
 ============================================================ */
 async function carregarPerfilEAtualizarStorage() {
-  const id = localStorage.getItem("femflow_id") || "";
-  const email = localStorage.getItem("femflow_email") || "";
+  const id = localStorage.getItem("maleflow_id") || "";
+  const email = localStorage.getItem("maleflow_email") || "";
 
   // sem identificador -> volta pro login
   if (!id && !email) return { status: "no_auth" };
@@ -220,52 +250,52 @@ function normalizarFreeAccess(perfil) {
 
 function persistPerfil(perfil) {
   // essenciais
-  localStorage.setItem("femflow_id", perfil.id || "");
-  localStorage.setItem("femflow_nome", perfil.nome || "");
-  localStorage.setItem("femflow_email", perfil.email || "");
-  localStorage.setItem("femflow_nivel", String(perfil.nivel || "iniciante").toLowerCase());
+  localStorage.setItem("maleflow_id", perfil.id || "");
+  localStorage.setItem("maleflow_nome", perfil.nome || "");
+  localStorage.setItem("maleflow_email", perfil.email || "");
+  localStorage.setItem("maleflow_nivel", String(perfil.nivel || "iniciante").toLowerCase());
   const produto = String(perfil.produto || "").toLowerCase();
   const isVip = produto === "vip";
-  localStorage.setItem("femflow_produto", produto);
-  localStorage.setItem("femflow_ativa", String(isVip || !!perfil.ativa));
+  localStorage.setItem("maleflow_produto", produto);
+  localStorage.setItem("maleflow_ativa", String(isVip || !!perfil.ativa));
   FEMFLOW.renderVipBadge?.();
 
   // ✅ acesso personal = direito (backend), separado do modo personal (front)
   const acessos = perfil.acessos || {};
   const hasPersonal = acessos.personal === true || isVip;
-  localStorage.setItem("femflow_has_personal", String(hasPersonal));
-  localStorage.removeItem("femflow_personal"); // legado: nunca usar mais
+  localStorage.setItem("maleflow_has_personal", String(hasPersonal));
+  localStorage.removeItem("maleflow_personal"); // legado: nunca usar mais
 
   const freeAccess = normalizarFreeAccess(perfil);
   localStorage.setItem(
-    "femflow_free_access",
+    "maleflow_free_access",
     freeAccess ? JSON.stringify(freeAccess) : ""
   );
 
   // ciclo + programa (CRÍTICO)
   const cicloTreino = FEMFLOW.normalizarCicloTreino(perfil.ciclo_treino || perfil.fase || "");
   if (cicloTreino) {
-    localStorage.setItem("femflow_training_cycle", cicloTreino);
-    localStorage.setItem("femflow_fase", cicloTreino);
-    localStorage.setItem("femflow_cycle_configured", "yes");
+    localStorage.setItem("maleflow_training_cycle", cicloTreino);
+    localStorage.setItem("maleflow_fase", cicloTreino);
+    localStorage.setItem("maleflow_cycle_configured", "yes");
   }
-  localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao || (cicloTreino ? cicloTreino.length : 3)));
-  localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
-  localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
-  localStorage.setItem("femflow_dataInicioPrograma", perfil.dataInicioPrograma ? String(perfil.dataInicioPrograma) : "");
+  localStorage.setItem("maleflow_cycleLength", String(perfil.ciclo_duracao || (cicloTreino ? cicloTreino.length : 3)));
+  localStorage.setItem("maleflow_diaCiclo", String(perfil.diaCiclo || 1));
+  localStorage.setItem("maleflow_diaPrograma", String(perfil.diaPrograma || 1));
+  localStorage.setItem("maleflow_dataInicioPrograma", perfil.dataInicioPrograma ? String(perfil.dataInicioPrograma) : "");
 
   localStorage.setItem(
-    "femflow_enfase",
+    "maleflow_enfase",
     String(perfil.enfase || "nenhuma").toLowerCase()
   );
 
   // ✅ segurança: se não tiver personal, não deixa modo personal ficar travado
     if (!hasPersonal) {
-    localStorage.setItem("femflow_mode_personal", "false");
+    localStorage.setItem("maleflow_mode_personal", "false");
   } else {
     // se ainda não existe, inicializa como false (não ativa sozinho)
-    if (localStorage.getItem("femflow_mode_personal") == null) {
-      localStorage.setItem("femflow_mode_personal", "false");
+    if (localStorage.getItem("maleflow_mode_personal") == null) {
+      localStorage.setItem("maleflow_mode_personal", "false");
     }
   }
 }
@@ -380,7 +410,7 @@ function podeAcessar(enfase, perfil) {
   const isTrial = produto === "trial_app";
   const isVip = produto === "vip";
   const ativa = !!perfil.ativa;
- const personal = localStorage.getItem("femflow_has_personal") === "true";
+ const personal = localStorage.getItem("maleflow_has_personal") === "true";
 
 
   if (!ativa && !isVip) return false;
@@ -478,19 +508,19 @@ function injetarCardsPresets(catalogo, perfil, nivelAluno) {
 }
 
 async function carregarCatalogoFirebase() {
-  const nivelAluno = normalizarNivel(localStorage.getItem("femflow_nivel"));
+  const nivelAluno = normalizarNivel(localStorage.getItem("maleflow_nivel"));
 
   let freeAccess = null;
-  const freeAccessRaw = localStorage.getItem("femflow_free_access");
+  const freeAccessRaw = localStorage.getItem("maleflow_free_access");
   if (freeAccessRaw) {
     try { freeAccess = JSON.parse(freeAccessRaw); }
     catch (err) { freeAccess = null; }
   }
 
   const perfil = {
-    produto: localStorage.getItem("femflow_produto"),
-    ativa: localStorage.getItem("femflow_ativa") === "true",
-    personal: localStorage.getItem("femflow_has_personal") === "true",
+    produto: localStorage.getItem("maleflow_produto"),
+    ativa: localStorage.getItem("maleflow_ativa") === "true",
+    personal: localStorage.getItem("maleflow_has_personal") === "true",
     free_access: freeAccess
   };
 
@@ -720,7 +750,7 @@ async function handleCardClick(enfase, locked) {
      🔒 CARD BLOQUEADO (VITRINE COMERCIAL)
   ========================================= */
   if (locked) {
-    const produto = String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+    const produto = String(localStorage.getItem("maleflow_produto") || "").toLowerCase();
     const isTrial = produto === "trial_app";
     const categoria = inferirCategoria(enfase);
     if (isTrial && ["muscular", "esportes", "casa"].includes(categoria)) {
@@ -746,8 +776,20 @@ async function handleCardClick(enfase, locked) {
     return;
   }
 
-  const treinosOk = await garantirTreinosSemana();
-  if (!treinosOk) return;
+  const frequenciaOk = await garantirFrequencia();
+  if (!frequenciaOk) return;
+
+  const resetOk = await abrirModalResetTreino();
+  if (!resetOk) return;
+
+  const frequenciaAtual = Number(
+    treinosSemanaSelecionado ??
+    localStorage.getItem(FREQUENCIA_KEY) ??
+    localStorage.getItem(TREINOS_SEMANA_KEY)
+  );
+  if (Number.isFinite(frequenciaAtual)) {
+    FEMFLOW.setCicloTreino(cicloPorFrequencia(frequenciaAtual));
+  }
 
   /* =========================================
      🧭 PERSONAL DESBLOQUEADO = ativa modo e vai pro FLOWCENTER
@@ -755,21 +797,21 @@ async function handleCardClick(enfase, locked) {
   ========================================= */
   if (enfase === "personal") {
     FEMFLOW.toast("🌟 Modo Personal ativado!");
-    localStorage.setItem("femflow_mode_personal", "true");
+    localStorage.setItem("maleflow_mode_personal", "true");
     return FEMFLOW.router("flowcenter.html");
   }
 
   // qualquer card normal desativa o modo personal
-  localStorage.setItem("femflow_mode_personal", "false");
+  localStorage.setItem("maleflow_mode_personal", "false");
 
   /* =========================================
      CICLO DE TREINO NÃO CONFIGURADO
   ========================================= */
-  if (localStorage.getItem("femflow_cycle_configured") !== "yes") {
+  if (localStorage.getItem("maleflow_cycle_configured") !== "yes") {
 
     FEMFLOW.loading.show("Configurando seu ciclo…");
 
-    localStorage.setItem("femflow_enfase", enfase);
+    localStorage.setItem("maleflow_enfase", enfase);
 
     FEMFLOW.dispatch("stateChanged", {
       type: "ciclo",
@@ -783,10 +825,10 @@ async function handleCardClick(enfase, locked) {
   /* =========================================
      ✅ GARANTIA DE ESTADO MÍNIMO
   ========================================= */
-  const diaProgramaRaw = localStorage.getItem("femflow_diaPrograma");
+  const diaProgramaRaw = localStorage.getItem("maleflow_diaPrograma");
   const diaPrograma = Number(diaProgramaRaw);
   if (!diaProgramaRaw || Number.isNaN(diaPrograma) || diaPrograma < 1) {
-    localStorage.setItem("femflow_diaPrograma", "1");
+    localStorage.setItem("maleflow_diaPrograma", "1");
   }
 
   /* =========================================
@@ -806,7 +848,7 @@ async function handleCardClick(enfase, locked) {
    SALVAR ENFASE NORMAL
 =========================================================== */
 async function selecionarEnfase(enfase) {
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
 
   if (!enfase || enfase === "nenhuma" || enfase === "personal") {
     console.warn("Ênfase inválida bloqueada:", enfase);
@@ -816,10 +858,10 @@ async function selecionarEnfase(enfase) {
   FEMFLOW.loading.show("Preparando novo programa…");
 
   // 1) salvar nova ênfase
-  localStorage.setItem("femflow_enfase", enfase);
+  localStorage.setItem("maleflow_enfase", enfase);
 
   // 2) reset explícito do programa (REGRA FEMFLOW)
-  localStorage.setItem("femflow_diaPrograma", "1");
+  localStorage.setItem("maleflow_diaPrograma", "1");
 
   if (id) {
     // 3) backend: salvar ênfase
@@ -852,10 +894,10 @@ async function selecionarEnfase(enfase) {
    FOLLOWME
 =========================================================== */
 async function selecionarCoach(coach) {
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
 
-  localStorage.setItem("femflow_mode_personal", "false");
-  localStorage.setItem("femflow_enfase", coach);
+  localStorage.setItem("maleflow_mode_personal", "false");
+  localStorage.setItem("maleflow_enfase", coach);
 
   if (id) {
     await fetch(FEMFLOW.SCRIPT_URL, {
@@ -877,7 +919,7 @@ function aplicarIdiomaHome() {
   const L = FEMFLOW.langs?.[lang]?.home;
   if (!L) return;
 
-  const nomeRaw = localStorage.getItem("femflow_nome") || "Aluno";
+  const nomeRaw = localStorage.getItem("maleflow_nome") || "Aluno";
   const primeiroNome = nomeRaw.split(" ")[0];
 
   // Saudação
@@ -931,7 +973,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   FEMFLOW.loading.show("Carregando…");
 
   try {
-    const treinosStorage = Number(localStorage.getItem(TREINOS_SEMANA_KEY));
+    const treinosStorage = Number(
+      localStorage.getItem(FREQUENCIA_KEY) || localStorage.getItem(TREINOS_SEMANA_KEY)
+    );
     if (Number.isFinite(treinosStorage)) {
       treinosSemanaSelecionado = treinosStorage;
     }
@@ -942,8 +986,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (modalSalvar) {
       modalSalvar.addEventListener("click", async () => {
-        const valor = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
-        await salvarTreinosSemana(valor);
+        const valor = treinosSemanaSelecionado ?? FREQUENCIA_PADRAO;
+        await salvarFrequencia(valor);
         fecharModalTreinosSemana();
         if (treinosSemanaResolve) treinosSemanaResolve(true);
         treinosSemanaResolve = null;
@@ -967,6 +1011,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
+    const resetConfirmar = document.getElementById("resetTreinoConfirmar");
+    const resetCancelar = document.getElementById("resetTreinoCancelar");
+    const resetOverlay = document.getElementById("resetTreinoModal");
+
+    if (resetConfirmar) {
+      resetConfirmar.addEventListener("click", () => {
+        fecharModalResetTreino();
+        if (resetTreinoResolve) resetTreinoResolve(true);
+        resetTreinoResolve = null;
+      });
+    }
+
+    if (resetCancelar) {
+      resetCancelar.addEventListener("click", () => {
+        fecharModalResetTreino();
+        if (resetTreinoResolve) resetTreinoResolve(false);
+        resetTreinoResolve = null;
+      });
+    }
+
+    if (resetOverlay) {
+      resetOverlay.addEventListener("click", (event) => {
+        if (event.target !== resetOverlay) return;
+        fecharModalResetTreino();
+        if (resetTreinoResolve) resetTreinoResolve(false);
+        resetTreinoResolve = null;
+      });
+    }
+
     const perfil = await carregarPerfilEAtualizarStorage();
 
     if (perfil.status !== "ok") {
@@ -986,10 +1059,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // ✅ ciclo configurado vem do VALIDAR
     if (perfil.fase && perfil.diaCiclo) {
-      localStorage.setItem("femflow_cycle_configured", "yes");
+      localStorage.setItem("maleflow_cycle_configured", "yes");
     }
 
-    if (!localStorage.getItem("femflow_cycle_configured")) {
+    if (!localStorage.getItem("maleflow_cycle_configured")) {
       FEMFLOW.loading.hide?.();
       FEMFLOW.toast("Configure seu ciclo de treino antes de escolher o treino.");
       FEMFLOW.router("ciclo");
@@ -1002,10 +1075,10 @@ document.addEventListener("DOMContentLoaded", async () => {
        🧩 INJETAR VITRINE COMERCIAL (LOCAL CORRETO)
     ============================================================ */
     const perfilTemPersonal =
-      localStorage.getItem("femflow_has_personal") === "true";
+      localStorage.getItem("maleflow_has_personal") === "true";
 
     const produto =
-      String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+      String(localStorage.getItem("maleflow_produto") || "").toLowerCase();
     const isVip = produto === "vip";
 
     // PERSONAL — sempre aparece:
