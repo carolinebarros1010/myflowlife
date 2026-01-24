@@ -288,7 +288,10 @@ FEMFLOW.getCicloTreino = function () {
   );
   if (stored) return stored;
 
-  const treinosSemana = Number(localStorage.getItem("maleflow_treinos_semana"));
+  const treinosSemana = Number(
+    localStorage.getItem("maleflow_frequencia") ||
+    localStorage.getItem("maleflow_treinos_semana")
+  );
   if (Number.isFinite(treinosSemana) && treinosSemana >= 1) {
     if (treinosSemana === 1) return "A";
     if (treinosSemana === 2) return "AB";

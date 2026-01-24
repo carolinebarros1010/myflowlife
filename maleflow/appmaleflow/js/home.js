@@ -15,10 +15,12 @@ const FOLLOWME_LINKS = {
   karoline: "#"
 };
 
+const FREQUENCIA_KEY = "maleflow_frequencia";
+const FREQUENCIA_PADRAO = 3;
 const TREINOS_SEMANA_KEY = "maleflow_treinos_semana";
-const TREINOS_SEMANA_PADRAO = 3;
 let treinosSemanaResolve = null;
 let treinosSemanaSelecionado = null;
+let resetTreinoResolve = null;
 
 function atualizarModalTreinosSemana() {
   const modal = document.getElementById("treinosSemanaModal");
@@ -39,8 +41,8 @@ function atualizarModalTreinosSemana() {
 
   if (!options) return;
   options.innerHTML = "";
-  const current = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
-  for (let i = 1; i <= 7; i++) {
+  const current = treinosSemanaSelecionado ?? FREQUENCIA_PADRAO;
+  for (let i = 2; i <= 5; i++) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "ff-modal-option";
@@ -61,7 +63,7 @@ function atualizarModalTreinosSemana() {
 function abrirModalTreinosSemana() {
   const modal = document.getElementById("treinosSemanaModal");
   if (!modal) return Promise.resolve(false);
-  treinosSemanaSelecionado = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
+  treinosSemanaSelecionado = treinosSemanaSelecionado ?? FREQUENCIA_PADRAO;
   atualizarModalTreinosSemana();
   modal.classList.remove("hidden");
   modal.setAttribute("aria-hidden", "false");
@@ -78,8 +80,18 @@ function fecharModalTreinosSemana() {
   modal.setAttribute("aria-hidden", "true");
 }
 
-async function salvarTreinosSemana(valor) {
+function cicloPorFrequencia(valor) {
+  if (valor === 2) return "AB";
+  if (valor === 3) return "ABC";
+  if (valor === 4) return "ABCD";
+  if (valor === 5) return "ABCED";
+  return "ABC";
+}
+
+async function salvarFrequencia(valor) {
+  localStorage.setItem(FREQUENCIA_KEY, String(valor));
   localStorage.setItem(TREINOS_SEMANA_KEY, String(valor));
+  FEMFLOW.setCicloTreino(cicloPorFrequencia(valor));
   const id = localStorage.getItem("maleflow_id");
   if (!id) return;
 
@@ -87,20 +99,38 @@ async function salvarTreinosSemana(valor) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      action: "settreinossemana",
+      action: "setfrequencia",
       id,
-      treinosSemana: valor
+      frequencia: valor
     })
   });
 }
 
-async function garantirTreinosSemana() {
-  const valorRaw = localStorage.getItem(TREINOS_SEMANA_KEY);
+async function garantirFrequencia() {
+  const valorRaw = localStorage.getItem(FREQUENCIA_KEY) || localStorage.getItem(TREINOS_SEMANA_KEY);
   const valor = Number(valorRaw);
-  if (Number.isFinite(valor) && valor >= 1 && valor <= 7) return true;
+  if (Number.isFinite(valor) && valor >= 2 && valor <= 5) return true;
 
   const aprovado = await abrirModalTreinosSemana();
   return aprovado === true;
+}
+
+function abrirModalResetTreino() {
+  const modal = document.getElementById("resetTreinoModal");
+  if (!modal) return Promise.resolve(false);
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+
+  return new Promise((resolve) => {
+    resetTreinoResolve = resolve;
+  });
+}
+
+function fecharModalResetTreino() {
+  const modal = document.getElementById("resetTreinoModal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
 }
 
 /* ============================================================
@@ -746,8 +776,20 @@ async function handleCardClick(enfase, locked) {
     return;
   }
 
-  const treinosOk = await garantirTreinosSemana();
-  if (!treinosOk) return;
+  const frequenciaOk = await garantirFrequencia();
+  if (!frequenciaOk) return;
+
+  const resetOk = await abrirModalResetTreino();
+  if (!resetOk) return;
+
+  const frequenciaAtual = Number(
+    treinosSemanaSelecionado ??
+    localStorage.getItem(FREQUENCIA_KEY) ??
+    localStorage.getItem(TREINOS_SEMANA_KEY)
+  );
+  if (Number.isFinite(frequenciaAtual)) {
+    FEMFLOW.setCicloTreino(cicloPorFrequencia(frequenciaAtual));
+  }
 
   /* =========================================
      🧭 PERSONAL DESBLOQUEADO = ativa modo e vai pro FLOWCENTER
@@ -931,7 +973,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   FEMFLOW.loading.show("Carregando…");
 
   try {
-    const treinosStorage = Number(localStorage.getItem(TREINOS_SEMANA_KEY));
+    const treinosStorage = Number(
+      localStorage.getItem(FREQUENCIA_KEY) || localStorage.getItem(TREINOS_SEMANA_KEY)
+    );
     if (Number.isFinite(treinosStorage)) {
       treinosSemanaSelecionado = treinosStorage;
     }
@@ -942,8 +986,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (modalSalvar) {
       modalSalvar.addEventListener("click", async () => {
-        const valor = treinosSemanaSelecionado ?? TREINOS_SEMANA_PADRAO;
-        await salvarTreinosSemana(valor);
+        const valor = treinosSemanaSelecionado ?? FREQUENCIA_PADRAO;
+        await salvarFrequencia(valor);
         fecharModalTreinosSemana();
         if (treinosSemanaResolve) treinosSemanaResolve(true);
         treinosSemanaResolve = null;
@@ -964,6 +1008,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         fecharModalTreinosSemana();
         if (treinosSemanaResolve) treinosSemanaResolve(false);
         treinosSemanaResolve = null;
+      });
+    }
+
+    const resetConfirmar = document.getElementById("resetTreinoConfirmar");
+    const resetCancelar = document.getElementById("resetTreinoCancelar");
+    const resetOverlay = document.getElementById("resetTreinoModal");
+
+    if (resetConfirmar) {
+      resetConfirmar.addEventListener("click", () => {
+        fecharModalResetTreino();
+        if (resetTreinoResolve) resetTreinoResolve(true);
+        resetTreinoResolve = null;
+      });
+    }
+
+    if (resetCancelar) {
+      resetCancelar.addEventListener("click", () => {
+        fecharModalResetTreino();
+        if (resetTreinoResolve) resetTreinoResolve(false);
+        resetTreinoResolve = null;
+      });
+    }
+
+    if (resetOverlay) {
+      resetOverlay.addEventListener("click", (event) => {
+        if (event.target !== resetOverlay) return;
+        fecharModalResetTreino();
+        if (resetTreinoResolve) resetTreinoResolve(false);
+        resetTreinoResolve = null;
       });
     }
 

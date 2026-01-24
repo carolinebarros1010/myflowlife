@@ -89,9 +89,23 @@
     </div>
   </div>
 
+  <div id="resetTreinoModal" class="ff-modal-overlay hidden" aria-hidden="true">
+    <div class="ff-modal-card" role="dialog" aria-modal="true">
+      <h3 class="ff-modal-title">Reiniciar treino anterior?</h3>
+      <p class="ff-modal-subtitle">
+        Ao confirmar, o treino anterior será resetado para iniciar um novo ciclo.
+      </p>
+      <div class="ff-modal-actions">
+        <button class="ff-modal-btn ghost" id="resetTreinoCancelar">Cancelar</button>
+        <button class="ff-modal-btn" id="resetTreinoConfirmar">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   
  <script src="js/lang.js"></script>
 <script src="maleflow-core.js"></script>
+<script type="module" src="js/firebase.js"></script>
 
 <!-- Só agora o home -->
 <script src="js/home.js"></script>
