@@ -1,7 +1,7 @@
-📘 README OFICIAL — PLANILHA DE TREINOS FEMFLOW
+📘 README OFICIAL — PLANILHA DE TREINOS MALEFLOW
 1️⃣ Objetivo da Planilha
 
-Esta planilha é a fonte estrutural dos treinos do FemFlow, utilizada para alimentar o sistema (Firebase + App) com treinos organizados por:
+Esta planilha é a fonte estrutural dos treinos do MaleFlow, utilizada para alimentar o sistema (Firebase + App) com treinos organizados por:
 
 fase do ciclo hormonal
 
@@ -44,7 +44,7 @@ box = 0
 
 Séries, reps, tempo e intervalo não são utilizados
 
-O app converte automaticamente para o Aquecimento Premium FemFlow
+O app converte automaticamente para o Aquecimento Premium MaleFlow
 
 🔹 Treino (Exercícios)
 tipo = treino
@@ -85,7 +85,7 @@ box = 999   ✅ PADRÃO OFICIAL
 
 Séries, reps e tempo não são utilizados
 
-Convertido automaticamente para Resfriamento Premium FemFlow
+Convertido automaticamente para Resfriamento Premium MaleFlow
 
 4️⃣ Séries Especiais (Resumo)
 Código	Nome	Observação
@@ -143,7 +143,7 @@ Renderizar Resfriamento Premium
 
 Garantir que aquecimento e resfriamento apareçam apenas uma vez
 
-5️⃣ Princípios FemFlow (regra de ouro)
+5️⃣ Princípios MaleFlow (regra de ouro)
 
 A planilha não pensa
 

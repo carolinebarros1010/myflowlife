@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *   IMPORTADOR OFICIAL FIRESTORE → FEMFLOW 2025 (VERSÃO FINAL)
+ *   IMPORTADOR OFICIAL FIRESTORE → MALEFLOW 2025 (VERSÃO FINAL)
  * ============================================================
  * ✅ Sem credenciais hardcoded (usa Script Properties)
  * ✅ Suporta importação TOTAL ou dirigida por aba
@@ -14,7 +14,7 @@
  * ============================================================
  */
 
-var FIREBASE_AUTH_PROJECT_ID = "femflow-ebec2";
+var FIREBASE_AUTH_PROJECT_ID = "male-flow";
 
 /* ============================================================
    SERVICE ACCOUNT (Script Properties)
@@ -80,7 +80,7 @@ function getFirebaseAccessToken() {
 /* ============================================================
    IMPORTAÇÃO DIRIGIDA POR ABA
 ============================================================ */
-function importarTreinosFEMFLOW_aba(nomeAba) {
+function importarTreinosMALEFLOW_aba(nomeAba) {
   if (!nomeAba) {
     throw new Error('Nome da aba é obrigatório para importação dirigida');
   }
@@ -92,7 +92,7 @@ function importarTreinosFEMFLOW_aba(nomeAba) {
     throw new Error('Aba não encontrada para importação: ' + nomeAba);
   }
 
-  return importarTreinosFEMFLOW({ abasPermitidas: [nomeAba] });
+  return importarTreinosMALEFLOW({ abasPermitidas: [nomeAba] });
 }
 
 /* =======================================================================
@@ -100,7 +100,7 @@ function importarTreinosFEMFLOW_aba(nomeAba) {
    opts:
      - abasPermitidas: ["Iniciante", "personal_FF-1234", ...] (opcional)
 ======================================================================= */
-function importarTreinosFEMFLOW(opts = {}) {
+function importarTreinosMALEFLOW(opts = {}) {
   const abasPermitidas = Array.isArray(opts.abasPermitidas) ? opts.abasPermitidas : null;
 
   const token = getFirebaseAccessToken();
@@ -110,7 +110,7 @@ function importarTreinosFEMFLOW(opts = {}) {
   const project = FIREBASE_AUTH_PROJECT_ID;
   const baseURL = `https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents`;
 
-  Logger.log("🚀 Iniciando importação FEMFLOW 2025...");
+  Logger.log("🚀 Iniciando importação MALEFLOW 2025...");
   if (abasPermitidas) Logger.log("🎯 Importação dirigida (abasPermitidas): " + JSON.stringify(abasPermitidas));
 
   let totalOk = 0;
@@ -170,7 +170,7 @@ function importarTreinosFEMFLOW(opts = {}) {
 
   const resumo = {
     ok: true,
-    message: "🎉 Importação FEMFLOW 2025 concluída!",
+    message: "🎉 Importação MALEFLOW 2025 concluída!",
     total_patches: totalPatches,
     total_ok: totalOk,
     total_err: totalErr
@@ -347,24 +347,24 @@ function normalizarFase(f) {
    TESTES RÁPIDOS (rodar manualmente)
 ============================================================ */
 function TEST_importar_tudo() {
-  const r = importarTreinosFEMFLOW();
+  const r = importarTreinosMALEFLOW();
   Logger.log(JSON.stringify(r, null, 2));
 }
 
 function TEST_importar_iniciante() {
-  const r = importarTreinosFEMFLOW_aba("Iniciante");
+  const r = importarTreinosMALEFLOW_aba("Iniciante");
   Logger.log(JSON.stringify(r, null, 2));
 }
 function TEST_importar_intermediaria() {
-  const r = importarTreinosFEMFLOW_aba("Intermediaria");
+  const r = importarTreinosMALEFLOW_aba("Intermediaria");
   Logger.log(JSON.stringify(r, null, 2));
 }
 function TEST_importar_avancada() {
-  const r = importarTreinosFEMFLOW_aba("Avancada");
+  const r = importarTreinosMALEFLOW_aba("Avancada");
   Logger.log(JSON.stringify(r, null, 2));
 }
 function TEST_importar_personal() {
-  const r = importarTreinosFEMFLOW_aba("personal_FF-TESTE");
+  const r = importarTreinosMALEFLOW_aba("personal_FF-TESTE");
   Logger.log(JSON.stringify(r, null, 2));
 }
 function TEST_token() {

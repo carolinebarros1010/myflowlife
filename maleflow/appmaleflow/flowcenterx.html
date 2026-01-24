@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>FemFlow • Flow Center</title>
+  <title>MaleFlow • Flow Center</title>
 
   <link rel="manifest" href="manifest.json" />
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -115,7 +115,7 @@
 </head>
 
 <body>
-<h1 id="flowTitle">FemFlow</h1>
+<h1 id="flowTitle">MaleFlow</h1>
 <h3 id="flowSubtitle">Fase Hormonal</h3>
 <p id="flowDesc">Seu corpo tem um ritmo. Vamos segui-lo juntas.</p>
 
@@ -145,16 +145,16 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="./femflow-core.js"></script>
+<script src="./maleflow-core.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   console.log("🌸 FlowCenter v25 carregado e sincronizando com Core");
 
-  const lang = localStorage.getItem("femflow_lang") || "pt";
+  const lang = localStorage.getItem("maleflow_lang") || "pt";
   const T = {
     pt: {
-      title: "FemFlow",
+      title: "MaleFlow",
       subtitle: "Fase Hormonal",
       desc: "Seu corpo tem um ritmo. Vamos segui-lo juntas.",
       status: "🌸 Você está na fase",
@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
     en: {
-      title: "FemFlow",
+      title: "MaleFlow",
       subtitle: "Hormonal Phase",
       desc: "Your body has a rhythm. Let's follow it together.",
       status: "🌸 You are in the",
@@ -197,9 +197,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("flowDesc").textContent = L.desc;
 
   // === Determina a fase atual ===
-  const perfil = localStorage.getItem("femflow_perfilHormonal") || "regular";
-  const ciclo  = parseInt(localStorage.getItem("femflow_cycleLength") || 28);
-  const inicio = new Date(localStorage.getItem("femflow_startDate") || new Date());
+  const perfil = localStorage.getItem("maleflow_perfilHormonal") || "regular";
+  const ciclo  = parseInt(localStorage.getItem("maleflow_cycleLength") || 28);
+  const inicio = new Date(localStorage.getItem("maleflow_startDate") || new Date());
   const faseSugerida = localStorage.getItem("fase_sugerida");
 
   let fase = "menstrual";
@@ -229,10 +229,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("centerCircle").classList.add("center-active");
 
   // === Botões ===
-  document.getElementById("toBreath")?.addEventListener("click", () => FEMFLOW.router("respiracao"));
-  document.getElementById("toTrain")?.addEventListener("click", () => FEMFLOW.router("treino"));
+  document.getElementById("toBreath")?.addEventListener("click", () => MALEFLOW.router("respiracao"));
+  document.getElementById("toTrain")?.addEventListener("click", () => MALEFLOW.router("treino"));
 
-  window.addEventListener("femflow:langchange", () => location.reload());
+  window.addEventListener("maleflow:langChange", () => location.reload());
 });
 </script>
   <script>
@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const atualizarUI = (lang) => {
     const T = {
       pt: {
-        title: "FemFlow",
+        title: "MaleFlow",
         subtitle: "Fase Hormonal",
         desc: "Seu corpo tem um ritmo. Vamos segui-lo juntas.",
         status: "🌸 Você está na fase",
@@ -259,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btns: { breath: "💨 Respiração", train: "🏃 Treino" }
       },
       en: {
-        title: "FemFlow",
+        title: "MaleFlow",
         subtitle: "Hormonal Phase",
         desc: "Your body has a rhythm. Let's follow it together.",
         status: "🌸 You are in the",
@@ -293,8 +293,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // 🔁 Detecta troca de idioma emitida pelo core
-  window.addEventListener("femflow:langchange", () => {
-    const newLang = localStorage.getItem("femflow_lang") || "pt";
+  window.addEventListener("maleflow:langChange", () => {
+    const newLang = localStorage.getItem("maleflow_lang") || "pt";
     atualizarUI(newLang);
   });
 });
@@ -308,38 +308,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =======================================================================
-   FemFlow v05 — Treino Diário 2025
+   MaleFlow v05 — Treino Diário 2025
    ENGINE HORMONAL 3.1 • TURNOVER • FIREBASE • SNAPSHOT OFFLINE
 ======================================================================= */
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  const OFFLINE_KEY_TREINO = "femflow_offline_treino_v1";
+  const OFFLINE_KEY_TREINO = "maleflow_offline_treino_v1";
 
   /* -----------------------------------------------------------
    * 1. LOGIN + CICLO
    * ----------------------------------------------------------- */
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
   if (!id) {
-    FEMFLOW.toast("⚠️ Faça login novamente.");
+    MALEFLOW.toast("⚠️ Faça login novamente.");
     return location.href = "index.html?ret=treino.html";
   }
 
   const cicloOK =
-    localStorage.getItem("femflow_cycle_configured") === "yes" &&
-    localStorage.getItem("femflow_startDate") &&
-    localStorage.getItem("femflow_cycleLength");
+    localStorage.getItem("maleflow_cycle_configured") === "yes" &&
+    localStorage.getItem("maleflow_startDate") &&
+    localStorage.getItem("maleflow_cycleLength");
 
   if (!cicloOK) {
-    FEMFLOW.toast("⚠️ Configure seu ciclo.");
+    MALEFLOW.toast("⚠️ Configure seu ciclo.");
     return location.href = "ciclo.html";
   }
 
   /* -----------------------------------------------------------
    * 2. ESTADO BASE
    * ----------------------------------------------------------- */
-  const estado = (window.FEMFLOW && typeof FEMFLOW.getEstadoTreino === "function")
-    ? FEMFLOW.getEstadoTreino()
+  const estado = (window.MALEFLOW && typeof MALEFLOW.getEstadoTreino === "function")
+    ? MALEFLOW.getEstadoTreino()
     : {
         enfase: "geral",
         nivel: "iniciante",
@@ -354,14 +354,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const bar   = document.querySelector("#progressBar");
 
   if (!track || !bar) {
-    FEMFLOW.toast("❌ Estrutura interna ausente.");
+    MALEFLOW.toast("❌ Estrutura interna ausente.");
     return;
   }
 
   let boxes   = [];
   let current = 0;
 
-  const diaPrograma = Number(localStorage.getItem("femflow_dia_treino") || 1);
+  const diaPrograma = Number(localStorage.getItem("maleflow_dia_treino") || 1);
   document.querySelector("#tituloDiaTreino").textContent =
     `Dia ${diaPrograma} do Programa`;
 
@@ -461,13 +461,13 @@ document.addEventListener("DOMContentLoaded", async () => {
    * ============================================================ */
   // Função para calcular o ciclo hormonal, agora baseada no backend
   async function calcularEngineHormonal() {
-    const id = localStorage.getItem("femflow_id");
+    const id = localStorage.getItem("maleflow_id");
 
     const response = await fetch(`${SCRIPT_URL}?action=status&id=${id}`);
     const data = await response.json();
 
     if (data.status !== "ok") {
-      FEMFLOW.toast("⚠️ Não foi possível recuperar o ciclo da aluna.");
+      MALEFLOW.toast("⚠️ Não foi possível recuperar o ciclo da aluna.");
       return null;
     }
 
@@ -485,13 +485,13 @@ document.addEventListener("DOMContentLoaded", async () => {
    * 7. ENGINE ENERGÉTICA
    * ============================================================ */
   function engineEnergeticaAvancar() {
-    let dia = Number(localStorage.getItem("femflow_dia_energetico") || 1);
-    localStorage.setItem("femflow_dia_energetico", dia + 1);
+    let dia = Number(localStorage.getItem("maleflow_dia_energetico") || 1);
+    localStorage.setItem("maleflow_dia_energetico", dia + 1);
   }
 
   function engineEnergeticaRetroalimentar() {
-    let dia = Number(localStorage.getItem("femflow_dia_energetico") || 1);
-    if (dia > 1) localStorage.setItem("femflow_dia_energetico", dia - 1);
+    let dia = Number(localStorage.getItem("maleflow_dia_energetico") || 1);
+    if (dia > 1) localStorage.setItem("maleflow_dia_energetico", dia - 1);
   }
 
   /* ============================================================
@@ -499,17 +499,17 @@ document.addEventListener("DOMContentLoaded", async () => {
    * ============================================================ */
   async function executarTreinoDia() {
 
-    const id = localStorage.getItem("femflow_id");
+    const id = localStorage.getItem("maleflow_id");
 
     if (!id) {
-      FEMFLOW.toast("⚠️ Refaça o login.");
+      MALEFLOW.toast("⚠️ Refaça o login.");
       return location.href = "index.html?ret=treino.html";
     }
 
     const cicloData = await calcularEngineHormonal();
 
     if (!cicloData) {
-      FEMFLOW.toast("⚠️ Não foi possível calcular o ciclo.");
+      MALEFLOW.toast("⚠️ Não foi possível calcular o ciclo.");
       return;
     }
 
@@ -526,9 +526,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       `&fase=${encodeURIComponent(faseFirebase)}` +
       `&diaFirebase=${encodeURIComponent(diaFirebase)}` +
       `&diaKey=${encodeURIComponent(diaKey)}` +
-      `&nivel=${encodeURIComponent(localStorage.getItem("femflow_nivel") || "")}` +
-      `&enfase=${encodeURIComponent(localStorage.getItem("femflow_enfase") || "")}` +
-      `&diaCiclo=${encodeURIComponent(localStorage.getItem("femflow_diaCiclo"))}`;
+      `&nivel=${encodeURIComponent(localStorage.getItem("maleflow_nivel") || "")}` +
+      `&enfase=${encodeURIComponent(localStorage.getItem("maleflow_enfase") || "")}` +
+      `&diaCiclo=${encodeURIComponent(localStorage.getItem("maleflow_diaCiclo"))}`;
 
     let j = null;
 
@@ -540,14 +540,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (!j || j.status !== "ok") {
-      FEMFLOW.toast("❌ Falha ao carregar treino.");
+      MALEFLOW.toast("❌ Falha ao carregar treino.");
       return;
     }
 
     console.log("🔥 DiaCiclo recebido do backend:", j.diaCiclo);
 
     // Atualizando o valor de DiaCiclo no frontend (se necessário)
-    localStorage.setItem("femflow_diaCiclo", j.diaCiclo);
+    localStorage.setItem("maleflow_diaCiclo", j.diaCiclo);
 
     const box0 = j.boxes?.find(b => b.tipo === "texto") || null;
     const boxFinal = j.boxes?.find(b => b.tipo === "resfriamento") || null;
@@ -557,7 +557,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const listaFinal = await gerarBoxesFinais(firebaseQuery, hiitCardio, box0, boxFinal);
 
     if (!listaFinal.length) {
-      FEMFLOW.toast("Nenhum exercício encontrado.");
+      MALEFLOW.toast("Nenhum exercício encontrado.");
     }
 
     aplicarPerformanceView(faseFirebase);

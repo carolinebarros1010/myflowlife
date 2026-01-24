@@ -1,5 +1,5 @@
 /* ==========================================================
-   FemFlow – flowcenter.css
+   MaleFlow – flowcenter.css
    Evolução visual 2025: leve, elegante e 100% responsivo
    ========================================================== */
 
@@ -372,7 +372,7 @@ h1 {
     flex: 1 1 45%;
   }
 }
-/* ===== LOADING FEMFLOW ===== */
+/* ===== LOADING MALEFLOW ===== */
 
 .ff-loading {
   position: fixed;
@@ -430,7 +430,7 @@ h1 {
 }
 
 #tituloApp #nivelTag {
-  color: var(--teal);   /* verde femflow */
+  color: var(--teal);   /* verde maleflow */
  font-size: 1.4rem !important;   /* antes herdava tamanho maior */
   font-weight: 600;
   opacity: .85;

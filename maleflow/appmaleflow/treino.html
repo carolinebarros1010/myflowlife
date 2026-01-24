@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-  <title>FemFlow — Treino Diário</title>
+  <title>MaleFlow — Treino Diário</title>
 
   <link rel="icon" href="favicon.ico">
   <link rel="manifest" href="manifest.json">
 
-  <!-- CSS base FemFlow -->
+  <!-- CSS base MaleFlow -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/core.css">
   <link rel="stylesheet" href="css/header.css">
@@ -128,51 +128,51 @@
 <script>
   if (firebase.auth) {
     firebase.auth().signInAnonymously().catch((err) => {
-      console.warn("[FemFlow] Auth anônimo falhou:", err);
+      console.warn("[MaleFlow] Auth anônimo falhou:", err);
     });
   }
 </script>
 
-<!-- SCRIPTS FEMFLOW -->
+<!-- SCRIPTS MALEFLOW -->
 <script src="js/lang.js"></script>
-<script src="femflow-core.js"></script>
+<script src="maleflow-core.js"></script>
 <script src="./js/treino-engine.js"></script>
 <script src="./js/treino.js"></script>
 
 <script>
 /* ============================================================
-   1) DOM READY + FEMFLOW INIT + MIDDLEWARE DE ACESSO
+   1) DOM READY + MALEFLOW INIT + MIDDLEWARE DE ACESSO
 ============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
 
   /* ------------------------------------------------------------
      🔐 MIDDLEWARE — Impede acesso direto por URL
   ------------------------------------------------------------ */
-  const id       = localStorage.getItem("femflow_id");
-  const produto  = localStorage.getItem("femflow_produto");
-  const cicloOK  = localStorage.getItem("femflow_cycle_configured") === "yes";
-  const enfase   = localStorage.getItem("femflow_enfase");
-  const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
-  const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
+  const id       = localStorage.getItem("maleflow_id");
+  const produto  = localStorage.getItem("maleflow_produto");
+  const cicloOK  = localStorage.getItem("maleflow_cycle_configured") === "yes";
+  const enfase   = localStorage.getItem("maleflow_enfase");
+  const hasPersonal  = localStorage.getItem("maleflow_has_personal") === "true";
+  const modePersonal = localStorage.getItem("maleflow_mode_personal") === "true";
   const personal     = hasPersonal && modePersonal;
   const acessoValido = Boolean(id && produto);
 
   if (!acessoValido) {
-    FEMFLOW.toast("Acesse o treino pelo painel do FemFlow.");
-    FEMFLOW.router("home.html");
+    MALEFLOW.toast("Acesse o treino pelo painel do MaleFlow.");
+    MALEFLOW.router("home.html");
     return;
   }
 
   if (!personal) {
     if (!cicloOK) {
-      FEMFLOW.toast("Configure seu ciclo antes de acessar o treino.");
-      FEMFLOW.router("ciclo.html");
+      MALEFLOW.toast("Configure seu ciclo antes de acessar o treino.");
+      MALEFLOW.router("ciclo.html");
       return;
     }
 
     if (!enfase) {
-      FEMFLOW.toast("Acesse o treino pelo painel do FemFlow.");
-      FEMFLOW.router("home.html");
+      MALEFLOW.toast("Acesse o treino pelo painel do MaleFlow.");
+      MALEFLOW.router("home.html");
       return;
     }
   }
@@ -180,30 +180,30 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ------------------------------------------------------------
      Inicialização do núcleo
   ------------------------------------------------------------ */
-  if (window.FEMFLOW && typeof FEMFLOW.init === "function") {
-    FEMFLOW.init();
+  if (window.MALEFLOW && typeof MALEFLOW.init === "function") {
+    MALEFLOW.init();
   }
 
   aplicarIdioma();
 
-  document.addEventListener("femflow:langChange", aplicarIdioma);
+  document.addEventListener("maleflow:langChange", aplicarIdioma);
 
   /* ============================================================
      ATUALIZAR NÍVEL AUTOMATICAMENTE
   ============================================================ */
-  document.addEventListener("femflow:ready", (ev) => {
+  document.addEventListener("maleflow:ready", (ev) => {
     const resp = ev.detail;
     if (!resp) return;
 
     if (resp.nivel) {
-      localStorage.setItem("femflow_nivel", resp.nivel);
+      localStorage.setItem("maleflow_nivel", resp.nivel);
     }
   });
 
-  document.addEventListener("femflow:nivelAtualizado", (ev) => {
+  document.addEventListener("maleflow:nivelAtualizado", (ev) => {
     const nivel = ev.detail;
     if (nivel) {
-      localStorage.setItem("femflow_nivel", nivel);
+      localStorage.setItem("maleflow_nivel", nivel);
     }
   });
 
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
      2) FUNÇÃO DE IDIOMA — Treino Diário
   ============================================================ */
   function aplicarIdioma() {
-    const L = FEMFLOW?.langs?.[FEMFLOW.lang] || FEMFLOW.langs.pt;
+    const L = MALEFLOW?.langs?.[MALEFLOW.lang] || MALEFLOW.langs.pt;
 
     document.getElementById("tituloTreinoTopo").textContent = L.treino.tituloTopo;
     document.getElementById("tituloDiaTreino").textContent   = L.treino.diaPrograma;
@@ -226,8 +226,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalProximoTitulo = document.getElementById("modalProximoTitulo");
     const modalProximoSub = document.getElementById("modalProximoSub");
     if (modalProximoTitulo) {
-      const diaAtual = Number(localStorage.getItem("femflow_diaCiclo") || 1);
-      const cicloLength = Number(localStorage.getItem("femflow_cycleLength") || 28);
+      const diaAtual = Number(localStorage.getItem("maleflow_diaCiclo") || 1);
+      const cicloLength = Number(localStorage.getItem("maleflow_cycleLength") || 28);
       const cicloValido = Number.isFinite(cicloLength) && cicloLength > 0 ? cicloLength : 28;
       const proximoDia = diaAtual + 1 > cicloValido ? 1 : diaAtual + 1;
       modalProximoTitulo.textContent = t("treino.proximoModal.titulo", {
@@ -243,7 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
      3) BOTÃO CANCELAR — volta para FlowCenter
   ============================================================ */
   document.getElementById("cancelarTreinoBtn").onclick = () => {
-    FEMFLOW.router("flowcenter.html");
+    MALEFLOW.router("flowcenter.html");
   };
 
 });

@@ -1,5 +1,5 @@
 /* ============================================================
- * 🌙 STARGATE — CÁLCULO REAL DO CICLO FEMFLOW 2025
+ * 🌙 STARGATE — CÁLCULO REAL DO CICLO MALEFLOW 2025
  * ============================================================ */
 function calcularCicloReal(params) {
   params = params || {};
@@ -61,7 +61,7 @@ if (perfil === "energetico" || perfil === "menopausa" || perfil === "diu_hormona
 
 
 /**
- * PERFIL IRREGULAR — REGRA FEMFLOW
+ * PERFIL IRREGULAR — REGRA MALEFLOW
  * --------------------------------
  * DiaCiclo NÃO é cronológico.
  * É ancorado no início fisiológico da fase:

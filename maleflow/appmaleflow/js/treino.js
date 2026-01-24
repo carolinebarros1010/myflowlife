@@ -1,10 +1,10 @@
 /* ============================================================
-   FEMFLOW — treino.js v4.0 FINAL (2025)
+   MALEFLOW — treino.js v4.0 FINAL (2025)
 ============================================================ */
 console.log("🔥 treino.js carregou");
 
-if (!window.FEMFLOW_TOUR_KEY) {
-  window.FEMFLOW_TOUR_KEY = "femflow_treino_tour_v1";
+if (!window.MALEFLOW_TOUR_KEY) {
+  window.MALEFLOW_TOUR_KEY = "maleflow_treino_tour_v1";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -15,19 +15,19 @@ document.addEventListener("DOMContentLoaded", () => {
   ============================================================ */
 
   const hasPersonalStorage =
-    localStorage.getItem("femflow_has_personal") === "true";
+    localStorage.getItem("maleflow_has_personal") === "true";
   const modePersonalStorage =
-    localStorage.getItem("femflow_mode_personal") === "true";
+    localStorage.getItem("maleflow_mode_personal") === "true";
   let isPersonal = hasPersonalStorage && modePersonalStorage;
 
   if (isPersonal) {
     document.body.classList.add("personal-mode");
-    FEMFLOW.log("🎨 Layout PERSONAL aplicado");
+    MALEFLOW.log("🎨 Layout PERSONAL aplicado");
   }
 
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
   if (!id) {
-    FEMFLOW.toast("⚠️ Faça login novamente.", true);
+    MALEFLOW.toast("⚠️ Faça login novamente.", true);
     location.href = "index.html";
     return;
   }
@@ -63,8 +63,8 @@ document.addEventListener("DOMContentLoaded", () => {
     .split("?")[0]
     .replace(/\.html.*$/, "");
   if (extraParamNorm.startsWith("extra_")) {
-    localStorage.setItem("femflow_treino_extra", "true");
-    localStorage.setItem("femflow_enfase", extraParamNorm);
+    localStorage.setItem("maleflow_treino_extra", "true");
+    localStorage.setItem("maleflow_enfase", extraParamNorm);
   }
 
   function getPseEmoji(valor) {
@@ -86,12 +86,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function encerrarTreino() {
     if (treinoExtraAtivo) {
-      localStorage.removeItem("femflow_treino_extra");
+      localStorage.removeItem("maleflow_treino_extra");
     }
-    FEMFLOW.router("flowcenter.html");
+    MALEFLOW.router("flowcenter.html");
   }
 
-  const tourKey = window.FEMFLOW_TOUR_KEY;
+  const tourKey = window.MALEFLOW_TOUR_KEY;
   const tourReset = new URLSearchParams(window.location.search).get("tour");
   if (tourReset === "1") {
     localStorage.removeItem(tourKey);
@@ -184,12 +184,12 @@ document.addEventListener("DOMContentLoaded", () => {
     limparDestaquesTour();
     tourOverlay.classList.add("is-hidden");
     tourOverlay.setAttribute("aria-hidden", "true");
-    localStorage.setItem(window.FEMFLOW_TOUR_KEY, "done");
+    localStorage.setItem(window.MALEFLOW_TOUR_KEY, "done");
   }
 
   function iniciarTourTreino() {
     if (!tourOverlay) return;
-    if (localStorage.getItem(window.FEMFLOW_TOUR_KEY) === "done") return;
+    if (localStorage.getItem(window.MALEFLOW_TOUR_KEY) === "done") return;
     if (!btnSalvar || !btnCancelar) return;
     tourIndex = 0;
     tourOverlay.classList.remove("is-hidden");
@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function registrarEvolucao({ pse, diaPrograma }) {
-    const histRaw = localStorage.getItem("femflow_hist") || "[]";
+    const histRaw = localStorage.getItem("maleflow_hist") || "[]";
     let hist;
 
     try {
@@ -215,10 +215,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     hist.push(entry);
     hist = hist.slice(-40);
-    localStorage.setItem("femflow_hist", JSON.stringify(hist));
+    localStorage.setItem("maleflow_hist", JSON.stringify(hist));
 
     if (diaPrograma) {
-      localStorage.setItem("femflow_dia_treino", String(diaPrograma));
+      localStorage.setItem("maleflow_dia_treino", String(diaPrograma));
     }
   }
 
@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   if (!track) {
-    FEMFLOW.error("❌ #carouselTrack não encontrado!");
+    MALEFLOW.error("❌ #carouselTrack não encontrado!");
     return;
   }
 
@@ -354,36 +354,36 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ============================================================
      1️⃣ LISTENER ÚNICO — PERFIL PRONTO
   ============================================================ */
-  window.addEventListener("femflow:ready", async (ev) => {
+  window.addEventListener("maleflow:ready", async (ev) => {
 
     const perfil = ev.detail;
-    console.log("🔥 femflow:ready recebido", perfil);
+    console.log("🔥 maleflow:ready recebido", perfil);
 
     if (!perfil) {
-      FEMFLOW.toast("Erro ao carregar perfil.", true);
+      MALEFLOW.toast("Erro ao carregar perfil.", true);
       return;
     }
 
     /* ================= CICLO ================= */
-    const cicloOK = localStorage.getItem("femflow_cycle_configured");
+    const cicloOK = localStorage.getItem("maleflow_cycle_configured");
     if (!cicloOK) {
-      FEMFLOW.toast("⚠️ Configure seu ciclo antes de treinar.");
+      MALEFLOW.toast("⚠️ Configure seu ciclo antes de treinar.");
       location.href = "ciclo.html";
       return;
     }
 
-    FEMFLOW.log("🚀 treino.js v4.0 iniciado!");
+    MALEFLOW.log("🚀 treino.js v4.0 iniciado!");
 
     /* ================= PERSONAL FINAL ================= */
    // ❌ treino.js NÃO redefine direito
-// localStorage.setItem("femflow_has_personal", ...);
+// localStorage.setItem("maleflow_has_personal", ...);
 
 // ✅ apenas lê
 const hasPersonal =
-  localStorage.getItem("femflow_has_personal") === "true";
+  localStorage.getItem("maleflow_has_personal") === "true";
 
     const modePersonal =
-      localStorage.getItem("femflow_mode_personal") === "true";
+      localStorage.getItem("maleflow_mode_personal") === "true";
     const personalFinal = hasPersonal && modePersonal;
 
     if (personalFinal) {
@@ -393,9 +393,9 @@ const hasPersonal =
     }
 
     /* ================= PERFIL ================= */
-    const nivel = perfil.nivel || localStorage.getItem("femflow_nivel");
-    let enfaseLocal = localStorage.getItem("femflow_enfase");
-    const extraSessaoAtiva = localStorage.getItem("femflow_treino_extra") === "true";
+    const nivel = perfil.nivel || localStorage.getItem("maleflow_nivel");
+    let enfaseLocal = localStorage.getItem("maleflow_enfase");
+    const extraSessaoAtiva = localStorage.getItem("maleflow_treino_extra") === "true";
     const enfaseBackendRaw = String(perfil.enfase || "").toLowerCase().trim();
     const enfaseLocalRaw = String(enfaseLocal || "").toLowerCase().trim();
     const isEnfaseValida = value =>
@@ -407,14 +407,14 @@ const hasPersonal =
       enfaseFinal = extraParamNorm;
     }
     if (extraSessaoAtiva) {
-      if (FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocalRaw)) {
+      if (MALEFLOW.engineTreino?.isExtraEnfase?.(enfaseLocalRaw)) {
         enfaseFinal = enfaseLocalRaw;
       } else {
-        localStorage.removeItem("femflow_treino_extra");
+        localStorage.removeItem("maleflow_treino_extra");
       }
     }
-    if (!extraSessaoAtiva && enfaseLocalRaw && FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseLocalRaw)) {
-      localStorage.removeItem("femflow_treino_extra");
+    if (!extraSessaoAtiva && enfaseLocalRaw && MALEFLOW.engineTreino?.isExtraEnfase?.(enfaseLocalRaw)) {
+      localStorage.removeItem("maleflow_treino_extra");
       enfaseFinal = isEnfaseValida(enfaseBackendRaw) ? enfaseBackendRaw : null;
     }
 
@@ -425,18 +425,18 @@ const hasPersonal =
 
     const fase     = perfil.fase;
     const diaCiclo = perfil.diaCiclo;
-    const isExtraTreino = FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseFinal);
+    const isExtraTreino = MALEFLOW.engineTreino?.isExtraEnfase?.(enfaseFinal);
     treinoExtraAtivo = Boolean(extraSessaoAtiva);
     if (!extraSessaoAtiva && isExtraTreino) {
-      localStorage.removeItem("femflow_treino_extra");
+      localStorage.removeItem("maleflow_treino_extra");
     }
 
     console.log("🧠 ÊNFASE RECEBIDA DO BACKEND:", perfil.enfase);
-    FEMFLOW.enfaseAtual = enfaseFinal;
+    MALEFLOW.enfaseAtual = enfaseFinal;
 
     if (!personalFinal && !enfaseFinal) {
-      FEMFLOW.toast("Escolha um treino na Home 🌸");
-      FEMFLOW.router("home.html");
+      MALEFLOW.toast("Escolha um treino na Home 🌸");
+      MALEFLOW.router("home.html");
       return;
     }
 
@@ -448,7 +448,7 @@ const hasPersonal =
     };
 
     if (isExtraTreino) {
-      FEMFLOW.diaProgramaAtual = Number(localStorage.getItem("femflow_diaPrograma") || 1);
+      MALEFLOW.diaProgramaAtual = Number(localStorage.getItem("maleflow_diaPrograma") || 1);
       if (tituloTopo) {
         tituloTopo.textContent = t("treino.tituloExtra");
       }
@@ -457,8 +457,8 @@ const hasPersonal =
         tituloDia.textContent = t("treino.extraTitulo", { tipo: extraLabel });
       }
     } else {
-      const diaPrograma = await FEMFLOW.getDiaPrograma();
-      FEMFLOW.diaProgramaAtual = diaPrograma;
+      const diaPrograma = await MALEFLOW.getDiaPrograma();
+      MALEFLOW.diaProgramaAtual = diaPrograma;
 
       if (tituloDia) {
         tituloDia.textContent = t("treino.diaProgramaLabel", { dia: diaPrograma });
@@ -466,7 +466,7 @@ const hasPersonal =
     }
 
     /* ================= TREINO ================= */
-    const lista = await FEMFLOW.engineTreino.montarTreinoFinal({
+    const lista = await MALEFLOW.engineTreino.montarTreinoFinal({
       id,
       nivel,
       enfase: enfaseFinal,
@@ -481,8 +481,8 @@ const hasPersonal =
       iniciarTourTreino();
     });
 
-    localStorage.setItem("femflow_fase", fase);
-    localStorage.setItem("femflow_diaCiclo", diaCiclo);
+    localStorage.setItem("maleflow_fase", fase);
+    localStorage.setItem("maleflow_diaCiclo", diaCiclo);
   });
 
   /* ============================================================
@@ -567,7 +567,7 @@ console.log("🧪 BOX KEYS ORDENADAS:", boxKeys);
   boxKeys.forEach(boxNum => {
     const bloco = grupos[boxNum];
      if (!Array.isArray(bloco) || bloco.length === 0) {
-  FEMFLOW.warn("⚠️ Box ignorado (vazio ou inválido):", boxNum);
+  MALEFLOW.warn("⚠️ Box ignorado (vazio ou inválido):", boxNum);
   return;
 }
     const html = renderBox(bloco);
@@ -599,7 +599,7 @@ function renderBox(bloco) {
 
    
   if (!Array.isArray(bloco) || bloco.length === 0) {
-    FEMFLOW.warn("⚠️ renderBox recebeu bloco inválido:", bloco);
+    MALEFLOW.warn("⚠️ renderBox recebeu bloco inválido:", bloco);
     return "";
   }
 
@@ -1218,7 +1218,7 @@ function initSeriesProgress() {
      4. HIIT — versão compatível com engine v4.0
   ============================================================ */
   function initHIIT() {
-    if (window.FEMFLOW.desativarHIIT) return;
+    if (window.MALEFLOW.desativarHIIT) return;
 
     document.querySelectorAll(".hiit-circle").forEach(circle => {
       const est = Number(circle.dataset.estimulo) || 40;
@@ -1315,27 +1315,27 @@ function initPeso() {
       const series = card.querySelector(".ff-info-line span:nth-child(1) b")?.textContent || "";
 
       // DiaPrograma já carregado no início do treino.js
-      const diaPrograma = FEMFLOW.diaProgramaAtual || 1;
+      const diaPrograma = MALEFLOW.diaProgramaAtual || 1;
 
       if (!id) {
         console.warn("⚠️ Sem ID no localStorage para salvar evolução");
         return;
       }
-      const diaCiclo = Number(localStorage.getItem("femflow_diaCiclo") || 1);
+      const diaCiclo = Number(localStorage.getItem("maleflow_diaCiclo") || 1);
 const isPersonal =
-  localStorage.getItem("femflow_has_personal") === "true" &&
-  localStorage.getItem("femflow_mode_personal") === "true";
+  localStorage.getItem("maleflow_has_personal") === "true" &&
+  localStorage.getItem("maleflow_mode_personal") === "true";
 
 const treino = isPersonal
   ? `personal_dia_${diaCiclo}`
-  : `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
+  : `${MALEFLOW.enfaseAtual}_dia_${diaCiclo}`;
 
 
 
 
  
       try {
-        const resp = await FEMFLOW.post({
+        const resp = await MALEFLOW.post({
   action: "salvarevolucao",
   id,
   treino,
@@ -1351,11 +1351,11 @@ const treino = isPersonal
        console.log("📈 EVOLUÇÃO AUTOMÁTICA:", resp);
 
 
-        FEMFLOW.toast("Peso registrado!");
+        MALEFLOW.toast("Peso registrado!");
 
       } catch (err) {
         console.error("❌ Erro ao salvar evolução automática:", err);
-        FEMFLOW.toast("Erro ao salvar evolução", "error");
+        MALEFLOW.toast("Erro ao salvar evolução", "error");
       }
 
     }); // fim do change listener
@@ -1395,26 +1395,26 @@ if (btnCancelarPSE) {
 if (btnConfirmarPSE) {
   btnConfirmarPSE.onclick = async () => {
 
-    const fase        = localStorage.getItem("femflow_fase");
-    const diaCiclo    = Number(localStorage.getItem("femflow_diaCiclo") || 1);
-    const diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
+    const fase        = localStorage.getItem("maleflow_fase");
+    const diaCiclo    = Number(localStorage.getItem("maleflow_diaCiclo") || 1);
+    const diaPrograma = Number(localStorage.getItem("maleflow_diaPrograma") || 1);
     const pse         = Number(pseInput.value || 0);
 
     if (!id) {
-      FEMFLOW.toast("Erro: sessão inválida.", true);
+      MALEFLOW.toast("Erro: sessão inválida.", true);
       return;
     }
 
     try {
       const isPersonal =
-  localStorage.getItem("femflow_has_personal") === "true" &&
-  localStorage.getItem("femflow_mode_personal") === "true";
+  localStorage.getItem("maleflow_has_personal") === "true" &&
+  localStorage.getItem("maleflow_mode_personal") === "true";
 
 const treino = isPersonal
   ? `personal_dia_${diaCiclo}`
-  : `${FEMFLOW.enfaseAtual}_dia_${diaCiclo}`;
+  : `${MALEFLOW.enfaseAtual}_dia_${diaCiclo}`;
 
-        const resp = await FEMFLOW.post({
+        const resp = await MALEFLOW.post({
       action: "salvartreino",
 id,
 diaPrograma,
@@ -1422,38 +1422,38 @@ diaCiclo,
 pse,
 treino,
 
-        deviceId: FEMFLOW.getDeviceId(),
-        sessionToken: FEMFLOW.getSessionToken()
+        deviceId: MALEFLOW.getDeviceId(),
+        sessionToken: MALEFLOW.getSessionToken()
       });
 
-      FEMFLOW.log("📌 salvarTreino:", resp);
+      MALEFLOW.log("📌 salvarTreino:", resp);
 
       if (resp?.status === "ok") {
 
         // 🔥 BACKEND É A FONTE DA VERDADE
         if (resp.diaPrograma) {
-          localStorage.setItem("femflow_diaPrograma", String(resp.diaPrograma));
+          localStorage.setItem("maleflow_diaPrograma", String(resp.diaPrograma));
         }
 
         if (resp.novaFase) {
-          localStorage.setItem("femflow_fase", resp.novaFase);
+          localStorage.setItem("maleflow_fase", resp.novaFase);
         }
 
         if (resp.novoDiaCiclo) {
-          localStorage.setItem("femflow_diaCiclo", String(resp.novoDiaCiclo));
+          localStorage.setItem("maleflow_diaCiclo", String(resp.novoDiaCiclo));
         }
 
-        FEMFLOW.toast("Treino salvo com sucesso! 💪");
+        MALEFLOW.toast("Treino salvo com sucesso! 💪");
         registrarEvolucao({ pse, diaPrograma: resp.diaPrograma || diaPrograma });
         encerrarTreino();
 
       } else {
-        FEMFLOW.toast("Erro ao salvar treino.", true);
+        MALEFLOW.toast("Erro ao salvar treino.", true);
       }
 
     } catch (err) {
-      FEMFLOW.error("Erro salvar treino:", err);
-      FEMFLOW.toast("Erro de conexão.", true);
+      MALEFLOW.error("Erro salvar treino:", err);
+      MALEFLOW.toast("Erro de conexão.", true);
     }
 
     modalPSE.classList.add("hidden");
@@ -1466,7 +1466,7 @@ treino,
 ============================================================ */
 async function getUltimoPeso(id, exercicio) {
   try {
-   const resp = await FEMFLOW.post({
+   const resp = await MALEFLOW.post({
   action: "getultimopeso",
   id,
   exercicio
@@ -1495,11 +1495,11 @@ async function salvarEvolucaoFront(exercicioSlug) {
   const peso    = document.querySelector("#input-peso")?.value || "";
   const reps    = document.querySelector("#input-reps")?.value || "";
   const series  = document.querySelector("#input-series")?.value || "";
-  const pse     = FEMFLOW.estadoPSE || 0;
-  const diaProg = FEMFLOW.diaProgramaAtual || 1;
+  const pse     = MALEFLOW.estadoPSE || 0;
+  const diaProg = MALEFLOW.diaProgramaAtual || 1;
 
   try {
-  const resp = await FEMFLOW.post({
+  const resp = await MALEFLOW.post({
   action: "salvarEvolucao",
   id,
   exercicio: exercicioSlug,
@@ -1514,11 +1514,11 @@ async function salvarEvolucaoFront(exercicioSlug) {
     const json = await resp.json();
     console.log("📈 Evolução salva:", json);
 
-    FEMFLOW.toast("Evolução registrada!");
+    MALEFLOW.toast("Evolução registrada!");
 
   } catch (err) {
     console.error("Erro ao salvar evolução:", err);
-    FEMFLOW.toast("Erro ao salvar evolução", "error");
+    MALEFLOW.toast("Erro ao salvar evolução", "error");
   }
 }
  
@@ -1527,14 +1527,14 @@ async function salvarEvolucaoFront(exercicioSlug) {
 window.getSerieEspecialInfo = function (codigo) {
   if (!codigo) return null;
 
-  const lang = FEMFLOW.lang || "pt";
-  const series = FEMFLOW.langs?.[lang]?.series;
+  const lang = MALEFLOW.lang || "pt";
+  const series = MALEFLOW.langs?.[lang]?.series;
 
   return series?.[codigo] || null;
 };
 window.getHiitInfo = function ({ forte, leve, ciclos }) {
-  const lang = FEMFLOW.lang || "pt";
-  const hiit = FEMFLOW.langs?.[lang]?.treino?.hiit;
+  const lang = MALEFLOW.lang || "pt";
+  const hiit = MALEFLOW.langs?.[lang]?.treino?.hiit;
   if (!hiit) return null;
 
   return {
@@ -1554,9 +1554,9 @@ window.getHiitInfo = function ({ forte, leve, ciclos }) {
   };
 };
 window.getTreinoText = function (path, fallback = "") {
-  const lang = FEMFLOW.lang || "pt";
+  const lang = MALEFLOW.lang || "pt";
   const parts = String(path || "").split(".");
-  let cur = FEMFLOW.langs?.[lang];
+  let cur = MALEFLOW.langs?.[lang];
 
   for (const p of parts) {
     cur = cur?.[p];
@@ -1587,10 +1587,10 @@ window.getResfriamentoUI = function () {
   };
 };
 window.t = function (path, vars = {}) {
-  const lang = FEMFLOW.lang || "pt";
+  const lang = MALEFLOW.lang || "pt";
   const parts = path.split(".");
   
-  let text = FEMFLOW.langs?.[lang];
+  let text = MALEFLOW.langs?.[lang];
   for (const p of parts) {
     text = text?.[p];
   }
@@ -1615,24 +1615,24 @@ window.t = function (path, vars = {}) {
   (async function bootstrapPerfilTreino() {
 
     // evita duplicar evento
-    if (window.FEMFLOW?.perfilAtual) {
+    if (window.MALEFLOW?.perfilAtual) {
       console.log("♻️ Perfil já em memória, redispatch");
-      FEMFLOW.dispatch("femflow:ready", FEMFLOW.perfilAtual);
+      MALEFLOW.dispatch("ready", MALEFLOW.perfilAtual);
       return;
     }
 
     console.log("🚀 carregando perfil para treino…");
 
-    const perfil = await FEMFLOW.carregarPerfil();
+    const perfil = await MALEFLOW.carregarPerfil();
     if (!perfil || perfil.status !== "ok") {
-      FEMFLOW.toast("Sessão inválida");
+      MALEFLOW.toast("Sessão inválida");
       location.href = "index.html";
       return;
     }
 
-    FEMFLOW.perfilAtual = perfil;
+    MALEFLOW.perfilAtual = perfil;
 
-    console.log("🚀 disparando femflow:ready", perfil);
-    FEMFLOW.dispatch("femflow:ready", perfil);
+    console.log("🚀 disparando maleflow:ready", perfil);
+    MALEFLOW.dispatch("ready", perfil);
 
   })();

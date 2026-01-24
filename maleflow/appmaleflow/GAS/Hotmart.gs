@@ -17,7 +17,7 @@ function mapearProduto(productName) {
   };
 }
 
-  if (prodNorm === "femflow_premium") {
+  if (prodNorm === "maleflow_premium") {
     return { slug: "premium", nivel: "iniciante", fase: "follicular", enfase: "geral" };
   }
   if (prodNorm === "acesso_app") {
@@ -129,14 +129,14 @@ function _processarHotmart(data) {
   if (prodNorm.includes("personal")) {
     productName = "treino_personal";
   } else if (prodNorm.includes("premium")) {
-    productName = "femflow_premium";
+    productName = "maleflow_premium";
   } else if (prodNorm.includes("acesso") || prodNorm.includes("assinatura")) {
     productName = "acesso_app";
   }
 
   const isAddonPersonal = productName === "treino_personal";
   const isPlanoBase =
-    productName === "acesso_app" || productName === "femflow_premium";
+    productName === "acesso_app" || productName === "maleflow_premium";
 
   /* ======================================================
      4) PLANILHA

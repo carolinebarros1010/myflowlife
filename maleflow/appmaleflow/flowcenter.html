@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>FemFlow • Flow Center</title>
+  <title>MaleFlow • Flow Center</title>
 
   <link rel="icon" href="favicon.ico">
   <link rel="manifest" href="manifest.json">
@@ -19,7 +19,7 @@
 <body>
 
 <h1 id="tituloApp">
-  FemFlow <span id="nivelTag"></span>
+  MaleFlow <span id="nivelTag"></span>
 </h1>
 
 <h3 id="tituloFlow">—</h3>
@@ -128,13 +128,13 @@
 <script>
   if (firebase.auth) {
     firebase.auth().signInAnonymously().catch((err) => {
-      console.warn("[FemFlow] Auth anônimo falhou:", err);
+      console.warn("[MaleFlow] Auth anônimo falhou:", err);
     });
   }
 </script>
 
 <script src="js/lang.js"></script>
-<script src="femflow-core.js"></script>
+<script src="maleflow-core.js"></script>
 <script src="js/treino-engine.js"></script>
 <script src="js/flowcenter.js"></script>
 

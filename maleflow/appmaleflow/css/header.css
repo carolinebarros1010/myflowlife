@@ -1,12 +1,12 @@
 /* ===========================================================
-   FEMFLOW — HEADER.CSS (Versão Final 2025)
+   MALEFLOW — HEADER.CSS (Versão Final 2025)
    Cabeçalho fixo + Menu lateral otimizado e responsivo
 =========================================================== */
 
 /* ----------------------------------------
    HEADER BASE
 ---------------------------------------- */
-#femflowHeader {
+#maleflowHeader {
   position: fixed;
   top: 0;
   left: 0;
@@ -21,12 +21,12 @@
   z-index: 9999;
 }
 
-#femflowHeader .ff-logo {
+#maleflowHeader .ff-logo {
   height: 28px;
 }
 
 /* ============================================================
-   🔥 FEMFLOW — BOTÃO DO MENU (VERSÃO FINAL ALINHADO NO HEADER)
+   🔥 MALEFLOW — BOTÃO DO MENU (VERSÃO FINAL ALINHADO NO HEADER)
 ============================================================ */
 
 .ff-menu-btn,
@@ -161,7 +161,7 @@ body.dark {
   color: #eee;
 }
 
-body.dark #femflowHeader {
+body.dark #maleflowHeader {
   background: #333;
 }
 

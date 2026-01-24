@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Redefinir senha • FemFlow</title>
+  <title>Redefinir senha • MaleFlow</title>
 
   <link rel="stylesheet" href="css/style.css"/>
 
@@ -114,7 +114,7 @@
 </head>
 <body>
   <div class="card">
-    <img src="assets/logofemflowterracotasf.png" alt="FemFlow" class="logo"/>
+    <img src="/maleflow/assets/logo-maleflow.png" alt="MaleFlow" class="logo"/>
     <h2>Redefinir senha</h2>
     <p class="subtitle">Informe sua nova senha para continuar 💫</p>
 
@@ -139,9 +139,9 @@
 
   <script>
   // Desliga logo e botão Voltar nesta página
-  window.FEMFLOW_SUPPRESS_UI = true;
+  window.MALEFLOW_SUPPRESS_UI = true;
   </script>
-  <script src="./femflow-core.js"></script>
+  <script src="./maleflow-core.js"></script>
  <script>
 const $ = s => document.querySelector(s);
 const msg = $("#mensagem");
@@ -179,7 +179,7 @@ async function salvar() {
   $("#btnSalvar").disabled = true;
 
   try {
-    const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+    const resp = await fetch(MALEFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

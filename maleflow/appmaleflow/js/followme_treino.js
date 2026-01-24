@@ -4,10 +4,10 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  const id = localStorage.getItem("femflow_id");
-const coachRaw = localStorage.getItem("femflow_followme_coach");
+  const id = localStorage.getItem("maleflow_id");
+const coachRaw = localStorage.getItem("maleflow_followme_coach");
 const coach = coachRaw?.replace("followme_", "");
-const sync = await FEMFLOW.post({
+const sync = await MALEFLOW.post({
   action: "validar",
   id
 });
@@ -17,8 +17,8 @@ const diaPrograma = sync.diaPrograma;
 
 
 if (!id || !coach) {
-  FEMFLOW.toast("Erro: dados do FollowMe ausentes.");
-  return FEMFLOW.router("flowcenter.html");
+  MALEFLOW.toast("Erro: dados do FollowMe ausentes.");
+  return MALEFLOW.router("flowcenter.html");
 }
 
 
@@ -42,8 +42,8 @@ function atualizarProgresso() {
 atualizarProgresso();
 
 if (diaPrograma > 30) {
-  FEMFLOW.toast("🎉 FollowMe concluído!");
-  FEMFLOW.router("flowcenter.html");
+  MALEFLOW.toast("🎉 FollowMe concluído!");
+  MALEFLOW.router("flowcenter.html");
 }
 
 
@@ -83,7 +83,7 @@ if (diaPrograma > 30) {
 ============================================================ */
 async function salvarTreinoFollowMe(pse) {
   try {
-    const resp = await FEMFLOW.post({
+    const resp = await MALEFLOW.post({
       action: "salvartreino",
 
       id,
@@ -101,26 +101,26 @@ async function salvarTreinoFollowMe(pse) {
       pse,
 
       // 🔐 SEGURANÇA
-      deviceId: FEMFLOW.getDeviceId(),
-      sessionToken: FEMFLOW.getSessionToken()
+      deviceId: MALEFLOW.getDeviceId(),
+      sessionToken: MALEFLOW.getSessionToken()
     });
 
     if (resp.status !== "ok") {
-      FEMFLOW.toast("Erro ao salvar treino.", true);
+      MALEFLOW.toast("Erro ao salvar treino.", true);
       return;
     }
 
     // atualiza diaPrograma
     if (resp.diaPrograma) {
-      localStorage.setItem("femflow_diaPrograma", String(resp.diaPrograma));
+      localStorage.setItem("maleflow_diaPrograma", String(resp.diaPrograma));
     }
 
-    FEMFLOW.toast("Treino salvo! 🙌");
-    FEMFLOW.router("flowcenter.html");
+    MALEFLOW.toast("Treino salvo! 🙌");
+    MALEFLOW.router("flowcenter.html");
 
   } catch (e) {
-    FEMFLOW.error("Erro FollowMe:", e);
-    FEMFLOW.toast("Erro de conexão.", true);
+    MALEFLOW.error("Erro FollowMe:", e);
+    MALEFLOW.toast("Erro de conexão.", true);
   }
 }
 

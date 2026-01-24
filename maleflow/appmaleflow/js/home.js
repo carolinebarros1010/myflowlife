@@ -1,5 +1,5 @@
 /* ============================================================
-   FemFlow • HOME.JS — VERSÃO FINAL 2025 2(CORRIGIDA)
+   MaleFlow • HOME.JS — VERSÃO FINAL 2025 2(CORRIGIDA)
    Home usa VALIDAR — NUNCA usa SYNC
    ✅ separa ACESSO (has_personal) de MODO (mode_personal)
 =========================================================== */
@@ -15,7 +15,7 @@ const FOLLOWME_LINKS = {
   karoline: "#"
 };
 
-const TREINOS_SEMANA_KEY = "femflow_treinos_semana";
+const TREINOS_SEMANA_KEY = "maleflow_treinos_semana";
 const TREINOS_SEMANA_PADRAO = 3;
 let treinosSemanaResolve = null;
 let treinosSemanaSelecionado = null;
@@ -24,8 +24,8 @@ function atualizarModalTreinosSemana() {
   const modal = document.getElementById("treinosSemanaModal");
   if (!modal) return;
 
-  const lang = FEMFLOW.lang || "pt";
-  const L = FEMFLOW.langs?.[lang]?.home?.treinosSemana;
+  const lang = MALEFLOW.lang || "pt";
+  const L = MALEFLOW.langs?.[lang]?.home?.treinosSemana;
   const titulo = document.getElementById("treinosSemanaTitulo");
   const subtitulo = document.getElementById("treinosSemanaSub");
   const options = document.getElementById("treinosSemanaOptions");
@@ -80,10 +80,10 @@ function fecharModalTreinosSemana() {
 
 async function salvarTreinosSemana(valor) {
   localStorage.setItem(TREINOS_SEMANA_KEY, String(valor));
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
   if (!id) return;
 
-  await fetch(FEMFLOW.SCRIPT_URL, {
+  await fetch(MALEFLOW.SCRIPT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -107,8 +107,8 @@ async function garantirTreinosSemana() {
    🔄 PERFIL: puxar do backend e persistir no localStorage
 ============================================================ */
 async function carregarPerfilEAtualizarStorage() {
-  const id = localStorage.getItem("femflow_id") || "";
-  const email = localStorage.getItem("femflow_email") || "";
+  const id = localStorage.getItem("maleflow_id") || "";
+  const email = localStorage.getItem("maleflow_email") || "";
 
   // sem identificador -> volta pro login
   if (!id && !email) return { status: "no_auth" };
@@ -118,7 +118,7 @@ async function carregarPerfilEAtualizarStorage() {
   if (id) qs.set("id", id);
   else qs.set("email", email);
 
-  const url = `${FEMFLOW.SCRIPT_URL}?${qs.toString()}`;
+  const url = `${MALEFLOW.SCRIPT_URL}?${qs.toString()}`;
   const perfil = await fetch(url).then(r => r.json()).catch(() => ({ status: "error" }));
 
   return perfil;
@@ -220,48 +220,48 @@ function normalizarFreeAccess(perfil) {
 
 function persistPerfil(perfil) {
   // essenciais
-  localStorage.setItem("femflow_id", perfil.id || "");
-  localStorage.setItem("femflow_nome", perfil.nome || "");
-  localStorage.setItem("femflow_email", perfil.email || "");
-  localStorage.setItem("femflow_nivel", String(perfil.nivel || "iniciante").toLowerCase());
+  localStorage.setItem("maleflow_id", perfil.id || "");
+  localStorage.setItem("maleflow_nome", perfil.nome || "");
+  localStorage.setItem("maleflow_email", perfil.email || "");
+  localStorage.setItem("maleflow_nivel", String(perfil.nivel || "iniciante").toLowerCase());
   const produto = String(perfil.produto || "").toLowerCase();
   const isVip = produto === "vip";
-  localStorage.setItem("femflow_produto", produto);
-  localStorage.setItem("femflow_ativa", String(isVip || !!perfil.ativa));
-  FEMFLOW.renderVipBadge?.();
+  localStorage.setItem("maleflow_produto", produto);
+  localStorage.setItem("maleflow_ativa", String(isVip || !!perfil.ativa));
+  MALEFLOW.renderVipBadge?.();
 
   // ✅ acesso personal = direito (backend), separado do modo personal (front)
   const acessos = perfil.acessos || {};
   const hasPersonal = acessos.personal === true || isVip;
-  localStorage.setItem("femflow_has_personal", String(hasPersonal));
-  localStorage.removeItem("femflow_personal"); // legado: nunca usar mais
+  localStorage.setItem("maleflow_has_personal", String(hasPersonal));
+  localStorage.removeItem("maleflow_personal"); // legado: nunca usar mais
 
   const freeAccess = normalizarFreeAccess(perfil);
   localStorage.setItem(
-    "femflow_free_access",
+    "maleflow_free_access",
     freeAccess ? JSON.stringify(freeAccess) : ""
   );
 
   // ciclo + programa (CRÍTICO)
-  localStorage.setItem("femflow_perfilHormonal", String(perfil.perfilHormonal || "regular").toLowerCase());
-  localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao || 28));
-  localStorage.setItem("femflow_fase", String(perfil.fase || "follicular").toLowerCase());
-  localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
-  localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
-  localStorage.setItem("femflow_dataInicioPrograma", perfil.dataInicioPrograma ? String(perfil.dataInicioPrograma) : "");
+  localStorage.setItem("maleflow_perfilHormonal", String(perfil.perfilHormonal || "regular").toLowerCase());
+  localStorage.setItem("maleflow_cycleLength", String(perfil.ciclo_duracao || 28));
+  localStorage.setItem("maleflow_fase", String(perfil.fase || "follicular").toLowerCase());
+  localStorage.setItem("maleflow_diaCiclo", String(perfil.diaCiclo || 1));
+  localStorage.setItem("maleflow_diaPrograma", String(perfil.diaPrograma || 1));
+  localStorage.setItem("maleflow_dataInicioPrograma", perfil.dataInicioPrograma ? String(perfil.dataInicioPrograma) : "");
 
   localStorage.setItem(
-    "femflow_enfase",
+    "maleflow_enfase",
     String(perfil.enfase || "nenhuma").toLowerCase()
   );
 
   // ✅ segurança: se não tiver personal, não deixa modo personal ficar travado
     if (!hasPersonal) {
-    localStorage.setItem("femflow_mode_personal", "false");
+    localStorage.setItem("maleflow_mode_personal", "false");
   } else {
     // se ainda não existe, inicializa como false (não ativa sozinho)
-    if (localStorage.getItem("femflow_mode_personal") == null) {
-      localStorage.setItem("femflow_mode_personal", "false");
+    if (localStorage.getItem("maleflow_mode_personal") == null) {
+      localStorage.setItem("maleflow_mode_personal", "false");
     }
   }
 }
@@ -376,7 +376,7 @@ function podeAcessar(enfase, perfil) {
   const isTrial = produto === "trial_app";
   const isVip = produto === "vip";
   const ativa = !!perfil.ativa;
- const personal = localStorage.getItem("femflow_has_personal") === "true";
+ const personal = localStorage.getItem("maleflow_has_personal") === "true";
 
 
   if (!ativa && !isVip) return false;
@@ -404,8 +404,8 @@ function podeAcessar(enfase, perfil) {
 
 function formatarTitulo(enfase) {
   if (!enfase) return "Treino";
-  const lang = FEMFLOW.lang || "pt";
-  const tituloLang = FEMFLOW.langs?.[lang]?.home?.cards?.[enfase];
+  const lang = MALEFLOW.lang || "pt";
+  const tituloLang = MALEFLOW.langs?.[lang]?.home?.cards?.[enfase];
   if (tituloLang) return tituloLang;
 
   const limpo = enfase
@@ -474,19 +474,19 @@ function injetarCardsPresets(catalogo, perfil, nivelAluno) {
 }
 
 async function carregarCatalogoFirebase() {
-  const nivelAluno = normalizarNivel(localStorage.getItem("femflow_nivel"));
+  const nivelAluno = normalizarNivel(localStorage.getItem("maleflow_nivel"));
 
   let freeAccess = null;
-  const freeAccessRaw = localStorage.getItem("femflow_free_access");
+  const freeAccessRaw = localStorage.getItem("maleflow_free_access");
   if (freeAccessRaw) {
     try { freeAccess = JSON.parse(freeAccessRaw); }
     catch (err) { freeAccess = null; }
   }
 
   const perfil = {
-    produto: localStorage.getItem("femflow_produto"),
-    ativa: localStorage.getItem("femflow_ativa") === "true",
-    personal: localStorage.getItem("femflow_has_personal") === "true",
+    produto: localStorage.getItem("maleflow_produto"),
+    ativa: localStorage.getItem("maleflow_ativa") === "true",
+    personal: localStorage.getItem("maleflow_has_personal") === "true",
     free_access: freeAccess
   };
 
@@ -592,7 +592,7 @@ const CARD_THUMBS = {
 function getThumbUrl(enfase) {
   const file = CARD_THUMBS[enfase];
   if (!file) return "";
-  return new URL(`/femflow/app/css/cards/${file}`, window.location.origin).toString();
+  return new URL(`/maleflow/appmaleflow/css/cards/${file}`, window.location.origin).toString();
 }
 
 /* ============================================================
@@ -603,7 +603,7 @@ const EBOOKS_FALLBACK_COLOR = "#fceae3";
 function resolveEbookUrl(path) {
   const cleanPath = String(path || "").replace(/^\/+/, "");
   if (!cleanPath) return "";
-  return new URL(`/femflow/app/ebooks/${cleanPath}`, window.location.origin).toString();
+  return new URL(`/maleflow/appmaleflow/ebooks/${cleanPath}`, window.location.origin).toString();
 }
 
 function resolveEbookLink(link) {
@@ -669,7 +669,7 @@ async function carregarEbooks() {
    RENDERIZAÇÃO DOS CARDS
 =========================================================== */
 function cardHTML(p) {
-  const lang = FEMFLOW.lang || "pt";
+  const lang = MALEFLOW.lang || "pt";
   const titulo = typeof p.titulo === "object" ? p.titulo[lang] : p.titulo;
   const desc = typeof p.desc === "object" ? p.desc[lang] : p.desc;
   const lockedClass = p.locked ? " locked" : "";
@@ -716,7 +716,7 @@ async function handleCardClick(enfase, locked) {
      🔒 CARD BLOQUEADO (VITRINE COMERCIAL)
   ========================================= */
   if (locked) {
-    const produto = String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+    const produto = String(localStorage.getItem("maleflow_produto") || "").toLowerCase();
     const isTrial = produto === "trial_app";
     const categoria = inferirCategoria(enfase);
     if (isTrial && ["muscular", "esportes", "casa"].includes(categoria)) {
@@ -726,19 +726,19 @@ async function handleCardClick(enfase, locked) {
 
     // 🧠 PERSONAL — CTA dedicado (propaganda)
     if (enfase === "personal" || enfase.startsWith("personal_")) {
-      FEMFLOW.toast("🔒 Treino Personal é um plano exclusivo.");
+      MALEFLOW.toast("🔒 Treino Personal é um plano exclusivo.");
       window.open(LINK_PERSONAL, "_blank");
       return;
     }
 
     // ✨ FOLLOWME — programa especial
     if (enfase.startsWith("followme_")) {
-      FEMFLOW.toast("✨ Programa especial de 30 dias com coach.");
+      MALEFLOW.toast("✨ Programa especial de 30 dias com coach.");
       return;
     }
 
     // 🔹 BLOQUEIO PADRÃO
-    FEMFLOW.toast("Plano necessário para acessar este treino.");
+    MALEFLOW.toast("Plano necessário para acessar este treino.");
     return;
   }
 
@@ -750,24 +750,24 @@ async function handleCardClick(enfase, locked) {
      (NUNCA vai direto para treino)
   ========================================= */
   if (enfase === "personal") {
-    FEMFLOW.toast("🌟 Modo Personal ativado!");
-    localStorage.setItem("femflow_mode_personal", "true");
-    return FEMFLOW.router("flowcenter.html");
+    MALEFLOW.toast("🌟 Modo Personal ativado!");
+    localStorage.setItem("maleflow_mode_personal", "true");
+    return MALEFLOW.router("flowcenter.html");
   }
 
   // qualquer card normal desativa o modo personal
-  localStorage.setItem("femflow_mode_personal", "false");
+  localStorage.setItem("maleflow_mode_personal", "false");
 
   /* =========================================
      🌸 CICLO NÃO CONFIGURADO
   ========================================= */
-  if (localStorage.getItem("femflow_cycle_configured") !== "yes") {
+  if (localStorage.getItem("maleflow_cycle_configured") !== "yes") {
 
-    FEMFLOW.loading.show("Configurando seu ciclo…");
+    MALEFLOW.loading.show("Configurando seu ciclo…");
 
-    localStorage.setItem("femflow_enfase", enfase);
+    localStorage.setItem("maleflow_enfase", enfase);
 
-    FEMFLOW.dispatch("stateChanged", {
+    MALEFLOW.dispatch("stateChanged", {
       type: "ciclo",
       impact: "fisiologico",
       source: "home"
@@ -779,10 +779,10 @@ async function handleCardClick(enfase, locked) {
   /* =========================================
      ✅ GARANTIA DE ESTADO MÍNIMO
   ========================================= */
-  const diaProgramaRaw = localStorage.getItem("femflow_diaPrograma");
+  const diaProgramaRaw = localStorage.getItem("maleflow_diaPrograma");
   const diaPrograma = Number(diaProgramaRaw);
   if (!diaProgramaRaw || Number.isNaN(diaPrograma) || diaPrograma < 1) {
-    localStorage.setItem("femflow_diaPrograma", "1");
+    localStorage.setItem("maleflow_diaPrograma", "1");
   }
 
   /* =========================================
@@ -802,24 +802,24 @@ async function handleCardClick(enfase, locked) {
    SALVAR ENFASE NORMAL
 =========================================================== */
 async function selecionarEnfase(enfase) {
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
 
   if (!enfase || enfase === "nenhuma" || enfase === "personal") {
     console.warn("Ênfase inválida bloqueada:", enfase);
     return;
   }
 
-  FEMFLOW.loading.show("Preparando novo programa…");
+  MALEFLOW.loading.show("Preparando novo programa…");
 
   // 1) salvar nova ênfase
-  localStorage.setItem("femflow_enfase", enfase);
+  localStorage.setItem("maleflow_enfase", enfase);
 
-  // 2) reset explícito do programa (REGRA FEMFLOW)
-  localStorage.setItem("femflow_diaPrograma", "1");
+  // 2) reset explícito do programa (REGRA MALEFLOW)
+  localStorage.setItem("maleflow_diaPrograma", "1");
 
   if (id) {
     // 3) backend: salvar ênfase
-    await fetch(FEMFLOW.SCRIPT_URL, {
+    await fetch(MALEFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -830,7 +830,7 @@ async function selecionarEnfase(enfase) {
     });
 
     // 4) backend: resetar programa
-    await fetch(FEMFLOW.SCRIPT_URL, {
+    await fetch(MALEFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -841,39 +841,39 @@ async function selecionarEnfase(enfase) {
   }
 
   // 5) seguir fluxo normal
-  FEMFLOW.router("flowcenter");
+  MALEFLOW.router("flowcenter");
 }
 
 /* ============================================================
    FOLLOWME
 =========================================================== */
 async function selecionarCoach(coach) {
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
 
-  localStorage.setItem("femflow_mode_personal", "false");
-  localStorage.setItem("femflow_enfase", coach);
+  localStorage.setItem("maleflow_mode_personal", "false");
+  localStorage.setItem("maleflow_enfase", coach);
 
   if (id) {
-    await fetch(FEMFLOW.SCRIPT_URL, {
+    await fetch(MALEFLOW.SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "setenfase", id, enfase: coach })
     });
-    await FEMFLOW.reiniciarDiaPrograma();
+    await MALEFLOW.reiniciarDiaPrograma();
   }
 
-  FEMFLOW.router("flowcenter");
+  MALEFLOW.router("flowcenter");
 }
 
 /* ============================================================
    APLICAR IDIOMA NA HOME (inclui VÍDEO)
 =========================================================== */
 function aplicarIdiomaHome() {
-  const lang = FEMFLOW.lang || "pt";
-  const L = FEMFLOW.langs?.[lang]?.home;
+  const lang = MALEFLOW.lang || "pt";
+  const L = MALEFLOW.langs?.[lang]?.home;
   if (!L) return;
 
-  const nomeRaw = localStorage.getItem("femflow_nome") || "Aluna";
+  const nomeRaw = localStorage.getItem("maleflow_nome") || "Aluna";
   const primeiroNome = nomeRaw.split(" ")[0];
 
   // Saudação
@@ -924,7 +924,7 @@ function aplicarIdiomaHome() {
    HOME — AGORA USANDO SOMENTE VALIDAR (SEM SYNC)
 =========================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
-  FEMFLOW.loading.show("Carregando…");
+  MALEFLOW.loading.show("Carregando…");
 
   try {
     const treinosStorage = Number(localStorage.getItem(TREINOS_SEMANA_KEY));
@@ -966,29 +966,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     const perfil = await carregarPerfilEAtualizarStorage();
 
     if (perfil.status !== "ok") {
-      FEMFLOW.toast("Erro ao atualizar dados. Tente novamente.");
-      FEMFLOW.loading.hide();
+      MALEFLOW.toast("Erro ao atualizar dados. Tente novamente.");
+      MALEFLOW.loading.hide();
       return;
     }
 
     if (perfil.status === "blocked" || perfil.status === "denied") {
-      FEMFLOW.toast("Sessão inválida. Faça login novamente.");
-      FEMFLOW.clearSession?.();
-      FEMFLOW.loading.hide();
-      return FEMFLOW.router("index.html");
+      MALEFLOW.toast("Sessão inválida. Faça login novamente.");
+      MALEFLOW.clearSession?.();
+      MALEFLOW.loading.hide();
+      return MALEFLOW.router("index.html");
     }
 
     persistPerfil(perfil);
 
     // ✅ ciclo configurado vem do VALIDAR
     if (perfil.fase && perfil.diaCiclo) {
-      localStorage.setItem("femflow_cycle_configured", "yes");
+      localStorage.setItem("maleflow_cycle_configured", "yes");
     }
 
-    if (!localStorage.getItem("femflow_cycle_configured")) {
-      FEMFLOW.loading.hide?.();
-      FEMFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
-      FEMFLOW.router("ciclo");
+    if (!localStorage.getItem("maleflow_cycle_configured")) {
+      MALEFLOW.loading.hide?.();
+      MALEFLOW.toast("Configure seu ciclo antes de escolher o treino 🌸");
+      MALEFLOW.router("ciclo");
       return;
     }
 
@@ -998,10 +998,10 @@ document.addEventListener("DOMContentLoaded", async () => {
        🧩 INJETAR VITRINE COMERCIAL (LOCAL CORRETO)
     ============================================================ */
     const perfilTemPersonal =
-      localStorage.getItem("femflow_has_personal") === "true";
+      localStorage.getItem("maleflow_has_personal") === "true";
 
     const produto =
-      String(localStorage.getItem("femflow_produto") || "").toLowerCase();
+      String(localStorage.getItem("maleflow_produto") || "").toLowerCase();
     const isVip = produto === "vip";
 
     // PERSONAL — sempre aparece:
@@ -1034,13 +1034,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     aplicarIdiomaHome();
   } catch (err) {
     console.error("HOME init erro:", err);
-    FEMFLOW.toast("Falha ao carregar. Verifique internet.");
+    MALEFLOW.toast("Falha ao carregar. Verifique internet.");
   } finally {
-    FEMFLOW.loading.hide();
+    MALEFLOW.loading.hide();
   }
 });
 
 /* ============================================================
    🔥 Quando o idioma mudar → traduz de novo a home
 =========================================================== */
-document.addEventListener("femflow:langChange", aplicarIdiomaHome);
+document.addEventListener("maleflow:langChange", aplicarIdiomaHome);

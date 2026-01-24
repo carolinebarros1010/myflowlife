@@ -1,5 +1,5 @@
 /* ======================================================
- *  SALVAR EVOLUÇÃO — FEMFLOW (VERSÃO FINAL ESTÁVEL)
+ *  SALVAR EVOLUÇÃO — MALEFLOW (VERSÃO FINAL ESTÁVEL)
  * ------------------------------------------------------
  * Finalidade:
  * - Registrar evolução de carga (peso, reps, séries, PSE)
@@ -25,7 +25,7 @@
  * - Perfil irregular
  * - Perfil energético / DIU / menopausa
  *
- * FemFlow Cycle Engine • 2025
+ * MaleFlow Cycle Engine • 2025
  * ====================================================== */
 
 /* ============================================================
@@ -166,7 +166,7 @@ function parseBody_(e) {
 
 
 /* ======================================================
- * 🟦 CADASTRO FEMFLOW 2025 — com pontuação de anamnese
+ * 🟦 CADASTRO MALEFLOW 2025 — com pontuação de anamnese
  * ====================================================== */
 function _calcularPontuacaoAnamnese(anamneseJSON) {
   if (!anamneseJSON) return 0;
@@ -201,7 +201,7 @@ function _registrarLead(data) {
     data.nome || "",
     data.email || "",
     data.telefone || "",
-    data.origem || "Anamnese FemFlow"
+    data.origem || "Anamnese MaleFlow"
   ]);
 
   return { status: "ok", msg: "Lead parcial salvo", email: data.email };
@@ -318,7 +318,7 @@ function setnivel(id, nivel) {
   return { status: "notfound", id: id };
 }
 /* ======================================================
- * 🧾 LOG DO CICLO — FEMFLOW
+ * 🧾 LOG DO CICLO — MALEFLOW
  * ====================================================== */
 function logCiclo_(id, evento, origem, antes, depois, obs) {
   const sh = _sheet("LogsCiclo");

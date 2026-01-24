@@ -35,7 +35,7 @@ function decidirSAC(ctx) {
 }
 /**
  * =========================================================
- * 🧠 SAC DECISION MATRIX — FEMFLOW (v1 FINAL)
+ * 🧠 SAC DECISION MATRIX — MALEFLOW (v1 FINAL)
  * ---------------------------------------------------------
  * Responsabilidade:
  * - Classificar o chamado
@@ -211,7 +211,7 @@ function sacAbrir_(data) {
 
 /**
  * =========================================================
- * 🧠 SAC ORQUESTRADOR — FemFlow 2025
+ * 🧠 SAC ORQUESTRADOR — MaleFlow 2025
  * ---------------------------------------------------------
  * Função central de orquestração do SAC.
  *
@@ -440,7 +440,7 @@ function getOpenAIKey_() {
 
 function buildPromptLowCost_(ctx) {
   return `
-Você é o suporte do app FemFlow.
+Você é o suporte do app MaleFlow.
 Responda de forma curta, clara e prática.
 
 Categoria: ${ctx.categoria}
@@ -543,7 +543,7 @@ const idiomaMap = {
 };
 
 const prompt = `
-You are the technical support assistant for the FemFlow app.
+You are the technical support assistant for the MaleFlow app.
 
 Context:
 - Category: ${ctx.categoria}

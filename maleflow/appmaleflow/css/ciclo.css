@@ -1,5 +1,5 @@
 /* ==========================================================
-   FemFlow – ciclo.css
+   MaleFlow – ciclo.css
    Migração do CSS inline → padronização 2025
    Visual: vidro quente + terracota + teal
    ========================================================== */
@@ -290,7 +290,7 @@ button:hover {
   transform: scale(0.98);
 }
 
-/* LOADING FEMFLOW */
+/* LOADING MALEFLOW */
 
 .ff-loading {
   position: fixed;
@@ -338,7 +338,7 @@ button:hover {
   font-weight: 600;
 }
 /* ================================
-   FEMFLOW • CICLO — ESPAÇO HEADER
+   MALEFLOW • CICLO — ESPAÇO HEADER
 ==================================*/
 .pagina-ciclo {
   background: #fff5ef;
@@ -359,9 +359,9 @@ button:hover {
   font-family: "Playfair Display", serif;
 }
 /* ============================================================
-   🌸 FemFlow – Rodapé informativo do Ciclo (cycleFooter)
+   🌸 MaleFlow – Rodapé informativo do Ciclo (cycleFooter)
    ------------------------------------------------------------
-   • Estilo elegante, limpo e consistente com o visual FemFlow
+   • Estilo elegante, limpo e consistente com o visual MaleFlow
    • Mantém identidade mesmo com troca de idioma
 ============================================================ */
 

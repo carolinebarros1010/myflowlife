@@ -1,4 +1,4 @@
-# Fluxo do card gratuito no app FemFlow
+# Fluxo do card gratuito no app MaleFlow
 
 Este documento descreve o fluxo interno do **card gratuito** dentro do app (home + flowcenter), desde a leitura do perfil até a liberação do card e a validação de validade.
 
@@ -14,13 +14,13 @@ Este documento descreve o fluxo interno do **card gratuito** dentro do app (home
 
 ## 1) Persistência do `free_access`
 
-Quando o app sincroniza o perfil, ele grava o objeto `free_access` (vindo do backend) no `localStorage` como `femflow_free_access`.
+Quando o app sincroniza o perfil, ele grava o objeto `free_access` (vindo do backend) no `localStorage` como `maleflow_free_access`.
 
-**Onde acontece:** `femflow/app/js/home.js` na função `persistPerfil`.
+**Onde acontece:** `maleflow/app/js/home.js` na função `persistPerfil`.
 
 ```js
 localStorage.setItem(
-  "femflow_free_access",
+  "maleflow_free_access",
   perfil.free_access ? JSON.stringify(perfil.free_access) : ""
 );
 ```
@@ -47,7 +47,7 @@ Resumo do fluxo:
 Se o card gratuito não liberar, confirme se o `free_access` realmente foi gravado no navegador.
 
 1. Abra o DevTools → Application/Storage → Local Storage.
-2. Verifique se **`femflow_free_access`** está preenchido (não vazio).
+2. Verifique se **`maleflow_free_access`** está preenchido (não vazio).
 3. Se estiver vazio, faça **reload na Home** para forçar a sincronização.
 
 Exemplo esperado (em `localStorage`):
@@ -64,7 +64,7 @@ Se estiver vazio (`""`), o app não recebeu `free_access` e manterá os cards **
 
 Ao montar o catálogo, o app:
 
-- Lê `femflow_free_access` do `localStorage`.
+- Lê `maleflow_free_access` do `localStorage`.
 - Constrói um objeto `perfil` com `free_access`.
 - Para cada card, calcula se o usuário acessa por produto pago **ou** por `free_access`.
 

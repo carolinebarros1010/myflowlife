@@ -1,6 +1,6 @@
 <?php
 // ===============================
-// FemFlow Proxy — Versão Oficial
+// MaleFlow Proxy — Versão Oficial
 // ===============================
 
 // CORS
@@ -44,7 +44,7 @@ if ($method === "POST" && !empty($body)) {
 
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
   "Content-Type: application/json",
-  "X-FemFlow-Proxy: php",
+  "X-MaleFlow-Proxy: php",
 ]);
 
 $response = curl_exec($ch);

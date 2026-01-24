@@ -1,5 +1,5 @@
 /* ============================================================
-   FLOWCENTER.JS — FemFlow 2025 • VERSÃO FINAL CANÔNICA
+   FLOWCENTER.JS — MaleFlow 2025 • VERSÃO FINAL CANÔNICA
    ✔ Perfil vem de VALIDAR
    ✔ Suporte total a idioma
    ✔ Círculo hormonal completo
@@ -106,28 +106,28 @@ function normalizarFreeAccess(perfil) {
    🔄 PERFIL — VALIDAR (fonte da verdade)
 =========================================================== */
 function flowcenterSyncPerfil() {
-  const id = localStorage.getItem("femflow_id") || "";
-  const email = localStorage.getItem("femflow_email") || "";
+  const id = localStorage.getItem("maleflow_id") || "";
+  const email = localStorage.getItem("maleflow_email") || "";
   if (!id && !email) return { status: "no_auth" };
 
   const qs = new URLSearchParams({ action: "validar" });
   if (id) qs.set("id", id);
   else qs.set("email", email);
 
-  const url = `${FEMFLOW.SCRIPT_URL}?${qs.toString()}`;
+  const url = `${MALEFLOW.SCRIPT_URL}?${qs.toString()}`;
   return fetch(url).then(r => r.json()).catch(() => ({ status: "error" }));
 }
 
 function flowcenterPersistPerfil(perfil) {
   const freeAccess = normalizarFreeAccess(perfil);
-  localStorage.setItem("femflow_fase", String(perfil.fase || "follicular").toLowerCase());
-  localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
-  localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
+  localStorage.setItem("maleflow_fase", String(perfil.fase || "follicular").toLowerCase());
+  localStorage.setItem("maleflow_diaCiclo", String(perfil.diaCiclo || 1));
+  localStorage.setItem("maleflow_diaPrograma", String(perfil.diaPrograma || 1));
   if (perfil.ciclo_duracao) {
-    localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao));
+    localStorage.setItem("maleflow_cycleLength", String(perfil.ciclo_duracao));
   }
   localStorage.setItem(
-    "femflow_free_access",
+    "maleflow_free_access",
     freeAccess ? JSON.stringify(freeAccess) : ""
   );
 
@@ -138,7 +138,7 @@ function flowcenterPersistPerfil(perfil) {
   const enfaseBackend = String(perfil.enfase || "").toLowerCase();
 
   if (enfaseBackend && enfaseBackend !== "nenhuma") {
-    localStorage.setItem("femflow_enfase", enfaseBackend);
+    localStorage.setItem("maleflow_enfase", enfaseBackend);
   }
   // ❗ caso contrário, mantém a enfase atual do front
 
@@ -149,7 +149,7 @@ function flowcenterPersistPerfil(perfil) {
   const produto = String(perfil.produto || "").toLowerCase();
   const isVip = produto === "vip";
   localStorage.setItem(
-    "femflow_has_personal",
+    "maleflow_has_personal",
     acessos.personal === true || isVip ? "true" : "false"
   );
 }
@@ -162,29 +162,29 @@ document.addEventListener("DOMContentLoaded", initFlowCenter);
 
 function initFlowCenter() {
 
-  FEMFLOW.loading.show("Preparando seu painel…");
+  MALEFLOW.loading.show("Preparando seu painel…");
 
-  FEMFLOW.inserirHeaderApp?.();
-  FEMFLOW.inserirMenuLateral?.();
-  FEMFLOW.inserirModalIdioma?.();
+  MALEFLOW.inserirHeaderApp?.();
+  MALEFLOW.inserirMenuLateral?.();
+  MALEFLOW.inserirModalIdioma?.();
 
   /* ============================================================
      1) PERFIL BASE (auth)
   ============================================================ */
-  FEMFLOW.carregarPerfil()
+  MALEFLOW.carregarPerfil()
     .then((perfilBase) => {
       if (!perfilBase || perfilBase.status === "blocked") {
-        FEMFLOW.toast("Sessão inválida.");
-        FEMFLOW.clearSession();
-        FEMFLOW.dispatch("stateChanged", { type: "auth", impact: "estrutural" });
+        MALEFLOW.toast("Sessão inválida.");
+        MALEFLOW.clearSession();
+        MALEFLOW.dispatch("stateChanged", { type: "auth", impact: "estrutural" });
         return null;
       }
 
       return flowcenterSyncPerfil().then((perfilFresh) => {
         if (!perfilFresh || perfilFresh.status !== "ok") {
-          FEMFLOW.toast("Erro ao atualizar dados.");
-          FEMFLOW.clearSession();
-          FEMFLOW.dispatch("stateChanged", { type: "auth", impact: "estrutural" });
+          MALEFLOW.toast("Erro ao atualizar dados.");
+          MALEFLOW.clearSession();
+          MALEFLOW.dispatch("stateChanged", { type: "auth", impact: "estrutural" });
           return null;
         }
 
@@ -199,12 +199,12 @@ function initFlowCenter() {
      3) CICLO
   ============================================================ */
   if (perfil.fase && perfil.diaCiclo) {
-    localStorage.setItem("femflow_cycle_configured", "yes");
+    localStorage.setItem("maleflow_cycle_configured", "yes");
   }
 
-  if (!localStorage.getItem("femflow_cycle_configured")) {
-    FEMFLOW.toast("Configure seu ciclo antes 🌸");
-    FEMFLOW.dispatch("stateChanged", { type: "ciclo", impact: "estrutural" });
+  if (!localStorage.getItem("maleflow_cycle_configured")) {
+    MALEFLOW.toast("Configure seu ciclo antes 🌸");
+    MALEFLOW.dispatch("stateChanged", { type: "ciclo", impact: "estrutural" });
     return;
   }
 
@@ -215,8 +215,8 @@ function initFlowCenter() {
   const isVip = produtoRaw === "vip";
   const isTrial = produtoRaw === "trial_app";
   const ativa = parseBooleanish(perfil.ativa);
-  const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
-  const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
+  const hasPersonal  = localStorage.getItem("maleflow_has_personal") === "true";
+  const modePersonal = localStorage.getItem("maleflow_mode_personal") === "true";
 
   // 🔥 regra canônica
   const personal = hasPersonal && modePersonal;
@@ -224,7 +224,7 @@ function initFlowCenter() {
 
   const isApp    = produtoRaw === "acesso_app" || isTrial;
   const isFollow = produtoRaw.startsWith("followme_");
-  const enfaseAtualUI = localStorage.getItem("femflow_enfase");
+  const enfaseAtualUI = localStorage.getItem("maleflow_enfase");
   const acessoAtivo = isVip || ativa;
 
   const freeAccess = normalizarFreeAccess(perfil);
@@ -274,17 +274,17 @@ function initFlowCenter() {
       intermediaria:{pt:"Intermediária",en:"Intermediate",fr:"Intermédiaire"},
       avancada:{pt:"Avançada",en:"Advanced",fr:"Avancée"}
     };
-    const lang = FEMFLOW.lang || "pt";
+    const lang = MALEFLOW.lang || "pt";
     document.getElementById("nivelTag").textContent =
       `— ${map[nivel]?.[lang] || map[nivel].pt}`;
   }
   aplicarNivel();
-  document.addEventListener("femflow:langChange", aplicarNivel);
+  document.addEventListener("maleflow:langChange", aplicarNivel);
 
   const t = (path, vars = {}) => {
-    const lang = FEMFLOW.lang || "pt";
+    const lang = MALEFLOW.lang || "pt";
     const parts = path.split(".");
-    let text = FEMFLOW.langs?.[lang];
+    let text = MALEFLOW.langs?.[lang];
     for (const p of parts) {
       text = text?.[p];
     }
@@ -302,8 +302,8 @@ function initFlowCenter() {
      7) IDIOMA
   ============================================================ */
   function aplicarIdioma() {
-    const lang = FEMFLOW.lang || "pt";
-    const L = FEMFLOW.langs?.[lang]?.flowcenter;
+    const lang = MALEFLOW.lang || "pt";
+    const L = MALEFLOW.langs?.[lang]?.flowcenter;
     if (!L) return;
 
     const nome = perfil.nome?.split(" ")[0] || "";
@@ -354,7 +354,7 @@ function initFlowCenter() {
     if (extraClose) extraClose.textContent = L.treinoExtraFechar;
   }
   aplicarIdioma();
-  document.addEventListener("femflow:langChange", aplicarIdioma);
+  document.addEventListener("maleflow:langChange", aplicarIdioma);
 
   /* ============================================================
      8) CÍRCULO HORMONAL
@@ -370,10 +370,10 @@ function initFlowCenter() {
      9) BOTÕES
   ============================================================ */
   document.getElementById("toBreath").onclick =
-    () => FEMFLOW.router("respiracao.html");
+    () => MALEFLOW.router("respiracao.html");
 
   document.getElementById("toEvolution").onclick =
-    () => FEMFLOW.router("evolucao.html");
+    () => MALEFLOW.router("evolucao.html");
 
   const modalExtra = document.getElementById("modal-extra");
   const extraBtn = document.getElementById("toExtraTrain");
@@ -386,7 +386,7 @@ function initFlowCenter() {
   if (extraBtn) {
     extraBtn.onclick = () => {
       if (!treinoAcessoOk) {
-        FEMFLOW.toast("Seu acesso expirou. Assine para continuar.");
+        MALEFLOW.toast("Seu acesso expirou. Assine para continuar.");
         return window.open(LINK_ACESSO_APP, "_blank");
       }
       modalExtra?.classList.remove("oculto");
@@ -423,7 +423,7 @@ function initFlowCenter() {
 
   const definirModalProximoTextos = ({ diaAtual, proximoDia }) => {
     const faseLabel =
-      FEMFLOW.langs?.[FEMFLOW.lang || "pt"]?.flowcenter?.[normalizarFase(ciclo.fase)] ||
+      MALEFLOW.langs?.[MALEFLOW.lang || "pt"]?.flowcenter?.[normalizarFase(ciclo.fase)] ||
       ciclo.fase;
     if (modalProximoTitulo) {
       modalProximoTitulo.textContent = t("treino.proximoModal.titulo", {
@@ -443,18 +443,18 @@ function initFlowCenter() {
   };
 
   const carregarProximoTreino = async () => {
-    if (!modalProximoLista || !FEMFLOW.engineTreino?.listarExerciciosDia) return;
+    if (!modalProximoLista || !MALEFLOW.engineTreino?.listarExerciciosDia) return;
 
-    const enfaseAtual = localStorage.getItem("femflow_enfase");
+    const enfaseAtual = localStorage.getItem("maleflow_enfase");
     if (!personal && !enfaseAtual) {
-      FEMFLOW.toast("Escolha um treino na Home 🌸");
+      MALEFLOW.toast("Escolha um treino na Home 🌸");
       return;
     }
 
     const diaAtual = Number(ciclo.diaCiclo || 1);
     if (!Number.isFinite(diaAtual) || diaAtual < 1) return;
 
-    const cicloLength = Number(localStorage.getItem("femflow_cycleLength"));
+    const cicloLength = Number(localStorage.getItem("maleflow_cycleLength"));
     const cicloPerfil = Number(perfil.ciclo_duracao || 0);
     const cicloValido =
       Number.isFinite(cicloLength) && cicloLength > 0
@@ -464,8 +464,8 @@ function initFlowCenter() {
         : 28;
     const proximoDia = diaAtual + 1 > cicloValido ? 1 : diaAtual + 1;
 
-    const exercicios = await FEMFLOW.engineTreino.listarExerciciosDia({
-      id: localStorage.getItem("femflow_id"),
+    const exercicios = await MALEFLOW.engineTreino.listarExerciciosDia({
+      id: localStorage.getItem("maleflow_id"),
       nivel: perfil.nivel,
       enfase: enfaseAtual,
       fase: perfil.fase,
@@ -497,7 +497,7 @@ function initFlowCenter() {
   if (nextTreinoBtn) {
     nextTreinoBtn.onclick = () => {
       if (!treinoAcessoOk) {
-        FEMFLOW.toast("Seu acesso expirou. Assine para continuar.");
+        MALEFLOW.toast("Seu acesso expirou. Assine para continuar.");
         return window.open(LINK_ACESSO_APP, "_blank");
       }
       void carregarProximoTreino();
@@ -507,43 +507,43 @@ function initFlowCenter() {
   document.querySelectorAll("[data-extra-enfase]").forEach(btn => {
     btn.addEventListener("click", () => {
       if (!treinoAcessoOk) {
-        FEMFLOW.toast("Seu acesso expirou. Assine para continuar.");
+        MALEFLOW.toast("Seu acesso expirou. Assine para continuar.");
         window.open(LINK_ACESSO_APP, "_blank");
         return;
       }
       const enfase = btn.dataset.extraEnfase;
       if (!enfase) return;
-      const enfaseAtual = localStorage.getItem("femflow_enfase");
-      if (enfaseAtual && !FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseAtual)) {
-        localStorage.setItem("femflow_enfase_base", enfaseAtual);
+      const enfaseAtual = localStorage.getItem("maleflow_enfase");
+      if (enfaseAtual && !MALEFLOW.engineTreino?.isExtraEnfase?.(enfaseAtual)) {
+        localStorage.setItem("maleflow_enfase_base", enfaseAtual);
       }
-      localStorage.setItem("femflow_treino_extra", "true");
-      localStorage.setItem("femflow_enfase", enfase);
+      localStorage.setItem("maleflow_treino_extra", "true");
+      localStorage.setItem("maleflow_enfase", enfase);
       fecharModalExtra();
-      FEMFLOW.router(`treino.html?extra=${encodeURIComponent(enfase)}`);
+      MALEFLOW.router(`treino.html?extra=${encodeURIComponent(enfase)}`);
     });
   });
 
   document.getElementById("toTrain").onclick = () => {
-    const enfase = localStorage.getItem("femflow_enfase");
+    const enfase = localStorage.getItem("maleflow_enfase");
 
     /* 🧭 PRIORIDADE ABSOLUTA — MODO PERSONAL */
     if (personal) {
-      return FEMFLOW.router("treino.html");
+      return MALEFLOW.router("treino.html");
     }
 
     if (!enfase) {
-      FEMFLOW.toast("Escolha um treino na Home 🌸");
-      return FEMFLOW.router("home.html");
+      MALEFLOW.toast("Escolha um treino na Home 🌸");
+      return MALEFLOW.router("home.html");
     }
 
     const freeOk = freeValido && freeEnfases.includes(enfase);
 
     if (!acessoAtivo && !freeOk) {
       if (isTrial) {
-        FEMFLOW.toast("Seu teste grátis terminou. Assine para continuar.");
+        MALEFLOW.toast("Seu teste grátis terminou. Assine para continuar.");
       } else {
-        FEMFLOW.toast("Seu acesso expirou. Assine para continuar.");
+        MALEFLOW.toast("Seu acesso expirou. Assine para continuar.");
       }
       return window.open(LINK_ACESSO_APP, "_blank");
     }
@@ -551,30 +551,30 @@ function initFlowCenter() {
     /* ✨ FOLLOWME */
     if (isVip) {
       if (enfase.startsWith("followme_")) {
-        return FEMFLOW.router(`followme/${enfase}.html`);
+        return MALEFLOW.router(`followme/${enfase}.html`);
       }
-      return FEMFLOW.router("treino.html");
+      return MALEFLOW.router("treino.html");
     }
 
     if (isFollow) {
       if (produtoRaw !== enfase && !freeOk) {
-        FEMFLOW.toast("Seu plano libera apenas este FollowMe.");
-        return FEMFLOW.router("home.html");
+        MALEFLOW.toast("Seu plano libera apenas este FollowMe.");
+        return MALEFLOW.router("home.html");
       }
-      return FEMFLOW.router(`followme/${enfase}.html`);
+      return MALEFLOW.router(`followme/${enfase}.html`);
     }
 
     /* 🔥 ACESSO APP */
     if (isApp) {
       if (enfase.startsWith("followme_") && !freeOk) {
-        FEMFLOW.toast("Programa especial com coach.");
-        return FEMFLOW.router("home.html");
+        MALEFLOW.toast("Programa especial com coach.");
+        return MALEFLOW.router("home.html");
       }
-      return FEMFLOW.router("treino.html");
+      return MALEFLOW.router("treino.html");
     }
 
-    FEMFLOW.toast("Escolha um plano 🌱");
-    FEMFLOW.router("home.html");
+    MALEFLOW.toast("Escolha um plano 🌱");
+    MALEFLOW.router("home.html");
   };
 
   const enduranceBtn = document.getElementById("toEndurance");
@@ -582,14 +582,14 @@ function initFlowCenter() {
 
   enduranceBtn.onclick = () => {
     if (!enduranceEnabled) {
-      FEMFLOW.toast("Endurance disponível apenas no Personal 🌸");
+      MALEFLOW.toast("Endurance disponível apenas no Personal 🌸");
       return;
     }
-    const id = localStorage.getItem("femflow_id");
-    if (id) FEMFLOW.router("geradordecorrida/index.html");
+    const id = localStorage.getItem("maleflow_id");
+    if (id) MALEFLOW.router("geradordecorrida/index.html");
     else location.href = "https://www.myflowlife.com.br/#ofertas";
   };
 
-      FEMFLOW.loading.hide();
+      MALEFLOW.loading.hide();
     });
 }

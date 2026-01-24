@@ -37,7 +37,7 @@ const COACHES = [
    RENDERIZAÇÃO DOS CARDS
 ============================================================ */
 function renderCoaches(){
-  const lang = FEMFLOW?.lang || "pt";
+  const lang = MALEFLOW?.lang || "pt";
   const grid = document.getElementById("coachGrid");
 
   grid.innerHTML = COACHES.map(c => `
@@ -57,26 +57,26 @@ function renderCoaches(){
 ============================================================ */
 window.iniciarFollowMe = function(enfase){
 
-  const produto = (localStorage.getItem("femflow_produto") || "").toLowerCase();
+  const produto = (localStorage.getItem("maleflow_produto") || "").toLowerCase();
   const isVip = produto === "vip";
-  const ativa   = isVip || localStorage.getItem("femflow_ativa") === "true";
+  const ativa   = isVip || localStorage.getItem("maleflow_ativa") === "true";
 
   // restrição de acesso
   if (!ativa || (!isVip && !produto.startsWith("followme_"))){
-    FEMFLOW.toast("Seu plano não inclui o Treino Junto por 30 dias.");
+    MALEFLOW.toast("Seu plano não inclui o Treino Junto por 30 dias.");
     return;
   }
 
   // salva coach
-  localStorage.setItem("femflow_enfase", enfase);
-  localStorage.setItem("femflow_followme_coach", enfase);
+  localStorage.setItem("maleflow_enfase", enfase);
+  localStorage.setItem("maleflow_followme_coach", enfase);
 
   // se não existir ainda → inicia no dia 1
-  const dia = Number(localStorage.getItem("femflow_followme_dia") || 1);
-  localStorage.setItem("femflow_followme_dia", String(dia));
+  const dia = Number(localStorage.getItem("maleflow_followme_dia") || 1);
+  localStorage.setItem("maleflow_followme_dia", String(dia));
 
   // redireciona para treino
-  FEMFLOW.router("treino.html");
+  MALEFLOW.router("treino.html");
 };
 
 /* INIT */

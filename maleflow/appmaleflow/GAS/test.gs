@@ -1,5 +1,5 @@
 /* ======================================================
- * 🧪 FEMFLOW — TESTE AUTOMATIZADO DO BACKEND (SAFE)
+ * 🧪 MALEFLOW — TESTE AUTOMATIZADO DO BACKEND (SAFE)
  * ------------------------------------------------------
  * - NÃO altera dados
  * - NÃO escreve em produção
@@ -7,14 +7,14 @@
  * - Executa funções em modo protegido
  * ====================================================== */
 
-function testarSistemaFemFlow() {
+function testarSistemaMaleFlow() {
 
   const TESTE_ID = "TEST_" + Utilities.getUuid().slice(0, 8);
   const inicioGeral = new Date();
 
   const resultados = [];
 
-  Logger.log("🧪 Iniciando testes FemFlow | ID:", TESTE_ID);
+  Logger.log("🧪 Iniciando testes MaleFlow | ID:", TESTE_ID);
 
   /* ======================================================
      🔎 LISTA CANÔNICA DE FUNÇÕES A TESTAR

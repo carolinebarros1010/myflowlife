@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Respiração • FemFlow</title>
+  <title>Respiração • MaleFlow</title>
 
   <link rel="icon" href="favicon.ico">
 
@@ -41,7 +41,7 @@
 
 <h1 id="respTituloTopo">
   <span id="respTitulo1">Respirações</span>
-  <span id="respTitulo2">FemFlow</span>
+  <span id="respTitulo2">MaleFlow</span>
 </h1>
 <p class="sub" id="respSub">Escolha o protocolo conforme seu momento 🌿</p>
 
@@ -93,10 +93,10 @@
 <footer id="respFooter">Inspire equilíbrio. Expire leveza.</footer>
 
 <!-- ============================= -->
-<!-- SCRIPTS FEMFLOW
+<!-- SCRIPTS MALEFLOW
 <!-- ============================= -->
 <script src="js/lang.js"></script>
-<script src="femflow-core.js"></script>
+<script src="maleflow-core.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
@@ -104,22 +104,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ============================================================
      🔥 PROTEÇÃO DE ACESSO → Se não tiver login ou produto, volta para HOME
   ============================================================ */
-  const produto = localStorage.getItem("femflow_produto");
+  const produto = localStorage.getItem("maleflow_produto");
   const produtoNorm = String(produto || "").toLowerCase();
   const isVip = produtoNorm === "vip";
-  const ativa   = isVip || localStorage.getItem("femflow_ativa") === "true";
+  const ativa   = isVip || localStorage.getItem("maleflow_ativa") === "true";
 
   if (!produto || !ativa) {
-    FEMFLOW.toast("Acesse a Home para continuar 🌸");
-    return FEMFLOW.router("home");
+    MALEFLOW.toast("Acesse a Home para continuar 🌸");
+    return MALEFLOW.router("home");
   }
 
   /* ============================================================
      HEADER / MENU / IDIOMA
   ============================================================ */
-  FEMFLOW.inserirHeaderApp?.();
-  FEMFLOW.inserirMenuLateral?.();
-  FEMFLOW.inserirModalIdioma?.();
+  MALEFLOW.inserirHeaderApp?.();
+  MALEFLOW.inserirMenuLateral?.();
+  MALEFLOW.inserirModalIdioma?.();
 
   let cicloAtivo = false;
   let protocoloAtual = null;
@@ -151,51 +151,51 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function obterTextosRespiracao(){
     return {
-      titulo1: FEMFLOW.t("respiracao.titulo1"),
-      titulo2: FEMFLOW.t("respiracao.titulo2"),
-      sub: FEMFLOW.t("respiracao.sub"),
-      preparar: FEMFLOW.t("respiracao.preparar"),
-      footer: FEMFLOW.t("respiracao.footer"),
-      tituloModal: FEMFLOW.t("respiracao.tituloModal"),
+      titulo1: MALEFLOW.t("respiracao.titulo1"),
+      titulo2: MALEFLOW.t("respiracao.titulo2"),
+      sub: MALEFLOW.t("respiracao.sub"),
+      preparar: MALEFLOW.t("respiracao.preparar"),
+      footer: MALEFLOW.t("respiracao.footer"),
+      tituloModal: MALEFLOW.t("respiracao.tituloModal"),
       fases: [
-        FEMFLOW.t("respiracao.fases.inspire"),
-        FEMFLOW.t("respiracao.fases.segure"),
-        FEMFLOW.t("respiracao.fases.expire"),
-        FEMFLOW.t("respiracao.fases.segure")
+        MALEFLOW.t("respiracao.fases.inspire"),
+        MALEFLOW.t("respiracao.fases.segure"),
+        MALEFLOW.t("respiracao.fases.expire"),
+        MALEFLOW.t("respiracao.fases.segure")
       ],
       grupos: {
-        ciclo: FEMFLOW.t("respiracao.grupos.ciclo"),
-        treino: FEMFLOW.t("respiracao.grupos.treino"),
-        universal: FEMFLOW.t("respiracao.grupos.universal")
+        ciclo: MALEFLOW.t("respiracao.grupos.ciclo"),
+        treino: MALEFLOW.t("respiracao.grupos.treino"),
+        universal: MALEFLOW.t("respiracao.grupos.universal")
       },
       botoes: {
-        iniciar: FEMFLOW.t("respiracao.botoes.iniciar"),
-        voltarRespiracoes: FEMFLOW.t("respiracao.botoes.voltarRespiracoes"),
-        voltarTreino: FEMFLOW.t("respiracao.botoes.voltarTreino")
+        iniciar: MALEFLOW.t("respiracao.botoes.iniciar"),
+        voltarRespiracoes: MALEFLOW.t("respiracao.botoes.voltarRespiracoes"),
+        voltarTreino: MALEFLOW.t("respiracao.botoes.voltarTreino")
       },
       protocolos: {
-        raiz: FEMFLOW.t("respiracao.protocolos.raiz"),
-        clareza: FEMFLOW.t("respiracao.protocolos.clareza"),
-        brilho: FEMFLOW.t("respiracao.protocolos.brilho"),
-        sereno: FEMFLOW.t("respiracao.protocolos.sereno"),
-        wake: FEMFLOW.t("respiracao.protocolos.wake"),
-        charge: FEMFLOW.t("respiracao.protocolos.charge"),
-        release: FEMFLOW.t("respiracao.protocolos.release"),
-        restore: FEMFLOW.t("respiracao.protocolos.restore"),
-        equilibrio: FEMFLOW.t("respiracao.protocolos.equilibrio"),
-        transparencia: FEMFLOW.t("respiracao.protocolos.transparencia")
+        raiz: MALEFLOW.t("respiracao.protocolos.raiz"),
+        clareza: MALEFLOW.t("respiracao.protocolos.clareza"),
+        brilho: MALEFLOW.t("respiracao.protocolos.brilho"),
+        sereno: MALEFLOW.t("respiracao.protocolos.sereno"),
+        wake: MALEFLOW.t("respiracao.protocolos.wake"),
+        charge: MALEFLOW.t("respiracao.protocolos.charge"),
+        release: MALEFLOW.t("respiracao.protocolos.release"),
+        restore: MALEFLOW.t("respiracao.protocolos.restore"),
+        equilibrio: MALEFLOW.t("respiracao.protocolos.equilibrio"),
+        transparencia: MALEFLOW.t("respiracao.protocolos.transparencia")
       },
       descricoes: {
-        raiz: FEMFLOW.t("respiracao.descricoes.raiz"),
-        clareza: FEMFLOW.t("respiracao.descricoes.clareza"),
-        brilho: FEMFLOW.t("respiracao.descricoes.brilho"),
-        sereno: FEMFLOW.t("respiracao.descricoes.sereno"),
-        wake: FEMFLOW.t("respiracao.descricoes.wake"),
-        charge: FEMFLOW.t("respiracao.descricoes.charge"),
-        release: FEMFLOW.t("respiracao.descricoes.release"),
-        restore: FEMFLOW.t("respiracao.descricoes.restore"),
-        equilibrio: FEMFLOW.t("respiracao.descricoes.equilibrio"),
-        transparencia: FEMFLOW.t("respiracao.descricoes.transparencia")
+        raiz: MALEFLOW.t("respiracao.descricoes.raiz"),
+        clareza: MALEFLOW.t("respiracao.descricoes.clareza"),
+        brilho: MALEFLOW.t("respiracao.descricoes.brilho"),
+        sereno: MALEFLOW.t("respiracao.descricoes.sereno"),
+        wake: MALEFLOW.t("respiracao.descricoes.wake"),
+        charge: MALEFLOW.t("respiracao.descricoes.charge"),
+        release: MALEFLOW.t("respiracao.descricoes.release"),
+        restore: MALEFLOW.t("respiracao.descricoes.restore"),
+        equilibrio: MALEFLOW.t("respiracao.descricoes.equilibrio"),
+        transparencia: MALEFLOW.t("respiracao.descricoes.transparencia")
       }
     };
   }
@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  document.addEventListener("femflow:langChange", aplicarTextosRespiracao);
+  document.addEventListener("maleflow:langChange", aplicarTextosRespiracao);
   aplicarTextosRespiracao();
 
   /* ============================================================
@@ -310,7 +310,7 @@ document.addEventListener("DOMContentLoaded", async () => {
      🔙 VOLTAR AO FLOWCENTER
   ============================================================ */
   document.getElementById("btnVoltarTreino").onclick =
-    () => FEMFLOW.router("flowcenter");
+    () => MALEFLOW.router("flowcenter");
 
   /* ============================================================
      CONTAGEM E CICLOS

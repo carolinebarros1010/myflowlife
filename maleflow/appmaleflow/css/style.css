@@ -1,6 +1,6 @@
-/* FemFlow App Style Sheet */
+/* MaleFlow App Style Sheet */
 
-/* Colour palette based on FemFlow brand */
+/* Colour palette based on MaleFlow brand */
 :root {
   --creme: #F4E1D7;
   --pessego: #EFBDA6;
@@ -417,7 +417,7 @@ label {
   border-color: var(--pessego);
   box-shadow: 0 0 0 2px rgba(239,189,166,0.3);
 }
-/* === FEMFLOW DESIGN EVOLUÍDO — 2025 === */
+/* === MALEFLOW DESIGN EVOLUÍDO — 2025 === */
 body {
   background: linear-gradient(180deg, #F4E1D7 0%, #FBE9E1 100%);
   backdrop-filter: blur(3px);
@@ -468,7 +468,7 @@ input:focus {
   background: var(--terracota);
   color: #fff;
 }
-/* === FEMFLOW — NOVO VISUAL CICLO.HTML (Layout Imagem 25) === */
+/* === MALEFLOW — NOVO VISUAL CICLO.HTML (Layout Imagem 25) === */
 /* Fundo com efeito da imagem 25 — gradiente quente e camada de brilho suave */
 body {
   background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
@@ -655,7 +655,7 @@ input[type="text"] {
     filter: blur(25px) saturate(120%);
   }
 }
-/* === FEMFLOW — CADASTRO ESTILO IMAGEM 25 === */
+/* === MALEFLOW — CADASTRO ESTILO IMAGEM 25 === */
 body {
   background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
   background-attachment: fixed;
@@ -739,7 +739,7 @@ body::before {
   background: #b65a48;
   transform: translateY(-2px);
 }
-/* === FEMFLOW — TREINO (Imagem 25) === */
+/* === MALEFLOW — TREINO (Imagem 25) === */
 body {
   background: linear-gradient(180deg, #FCE3D5 0%, #EFBDA6 100%);
   background-attachment: fixed;
@@ -872,7 +872,7 @@ header h1 {
   color: white;
 }
 
-/* === FEMFLOW — EVOLUÇÃO (Imagem 25) === */
+/* === MALEFLOW — EVOLUÇÃO (Imagem 25) === */
 body {
   background: linear-gradient(180deg,#FCE3D5 0%,#EFBDA6 100%);
   background-attachment: fixed;
@@ -994,7 +994,7 @@ body::before{
   background:#335953;
   color:white;
 }
-/* === FEMFLOW — INDEX (Imagem 25) === */
+/* === MALEFLOW — INDEX (Imagem 25) === */
 body {
   background: linear-gradient(180deg,#FCE3D5 0%,#EFBDA6 100%);
   background-attachment: fixed;
@@ -1112,7 +1112,7 @@ video {
   background:#335953;
   color:white;
 }
-/* === FEMFLOW — BOTÃO DE INSTALAÇÃO PWA === */
+/* === MALEFLOW — BOTÃO DE INSTALAÇÃO PWA === */
 .instalar-app {
   text-align:center;
   background:rgba(255,255,255,0.6);
@@ -1221,8 +1221,8 @@ video {
 .quiz-modal {
   pointer-events: none; /* só recoloque para auto quando realmente abrir */
 }
-/* HEADER FEMFLOW FIXO */
-#femflowHeader {
+/* HEADER MALEFLOW FIXO */
+#maleflowHeader {
   position: fixed;
   top: 0;
   left: 0;
@@ -1238,12 +1238,12 @@ video {
   z-index: 9999;
 }
 
-#femflowHeader .ff-logo {
+#maleflowHeader .ff-logo {
   height: 40px;
   object-fit: contain;
 }
 
-#femflowHeader .ff-menu-btn {
+#maleflowHeader .ff-menu-btn {
   background: none;
   border: none;
   font-size: 26px;
@@ -1254,7 +1254,7 @@ video {
   transition: background .15s;
 }
 
-#femflowHeader .ff-menu-btn:active {
+#maleflowHeader .ff-menu-btn:active {
   background: rgba(0,0,0,0.08);
 }
 

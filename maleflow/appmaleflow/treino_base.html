@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FemFlow · Treino Base</title>
+  <title>MaleFlow · Treino Base</title>
   <link rel="stylesheet" href="../../css/style.css" />
-  <script src="../../scripts/femflow-core.js" defer></script>
+  <script src="../../scripts/maleflow-core.js" defer></script>
 </head>
 
 <body>
-  <!-- Cabeçalho dinâmico FemFlow (logo e botão de voltar) serão inseridos via script -->
+  <!-- Cabeçalho dinâmico MaleFlow (logo e botão de voltar) serão inseridos via script -->
 
   <!-- Seção de introdução ao treino -->
   <section class="intro">
@@ -24,9 +24,9 @@
 
   <!-- Rodapé fixo com ações do usuário -->
   <footer class="footerActions">
-    <button class="btn-hiit" onclick="FEMFLOW.iniciarHIIT(30,30,6)">🔥 HIIT</button>
+    <button class="btn-hiit" onclick="MALEFLOW.iniciarHIIT(30,30,6)">🔥 HIIT</button>
     <button class="btn-save" onclick="abrirPSEModal()">💾 Salvar</button>
-    <button class="btn-descanso" onclick="FEMFLOW.salvarDescanso()">🩶 Descanso</button>
+    <button class="btn-descanso" onclick="MALEFLOW.salvarDescanso()">🩶 Descanso</button>
   </footer>
 
   <!-- Script para carregar dados do treino dinamicamente -->
@@ -81,7 +81,7 @@
 
     // Envolve a função PSE do script global para salvar o treino
     function abrirPSEModal() {
-      FEMFLOW.abrirPSE((valor) => FEMFLOW.salvarTreino({
+      MALEFLOW.abrirPSE((valor) => MALEFLOW.salvarTreino({
         id: "FF001",
         fase: "Folicular",
         treino: "A",

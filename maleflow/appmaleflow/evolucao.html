@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>FemFlow • Minha Evolução</title>
+  <title>MaleFlow • Minha Evolução</title>
 
   <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="favicon.ico">
@@ -63,7 +63,7 @@
 </div>
 
 <script src="js/lang.js"></script>
-<script src="femflow-core.js"></script>
+<script src="maleflow-core.js"></script>
 
 <script>
 /* ============================================================
@@ -71,10 +71,10 @@
 ============================================================ */
 function aplicarIdioma() {
 
-  if (!FEMFLOW.lang)
-    FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+  if (!MALEFLOW.lang)
+    MALEFLOW.lang = localStorage.getItem("maleflow_lang") || "pt";
 
-  const langSet = FEMFLOW.langs[FEMFLOW.lang] || FEMFLOW.langs.pt;
+  const langSet = MALEFLOW.langs[MALEFLOW.lang] || MALEFLOW.langs.pt;
   const L = langSet.evolucao;
 
   if (!L) {
@@ -104,7 +104,7 @@ function aplicarIdioma() {
   }
 }
 
-document.addEventListener("femflow:langChange", aplicarIdioma);
+document.addEventListener("maleflow:langChange", aplicarIdioma);
 document.addEventListener("DOMContentLoaded", aplicarIdioma);
 
 
@@ -113,23 +113,23 @@ document.addEventListener("DOMContentLoaded", aplicarIdioma);
 ============================================================ */
 document.addEventListener("DOMContentLoaded", async () => {
 
-  FEMFLOW.inserirHeaderApp?.();
+  MALEFLOW.inserirHeaderApp?.();
 
   /* 🔐 Proteção de acesso */
-  const id = localStorage.getItem("femflow_id");
-  const produto = localStorage.getItem("femflow_produto");
+  const id = localStorage.getItem("maleflow_id");
+  const produto = localStorage.getItem("maleflow_produto");
   const produtoNorm = String(produto || "").toLowerCase();
   const isVip = produtoNorm === "vip";
-  const ativa   = isVip || localStorage.getItem("femflow_ativa") === "true";
+  const ativa   = isVip || localStorage.getItem("maleflow_ativa") === "true";
 
   if (!id || !produto || !ativa) {
-    FEMFLOW.toast("Acesse pela Home para continuar 🌸");
-    return FEMFLOW.router("home");
+    MALEFLOW.toast("Acesse pela Home para continuar 🌸");
+    return MALEFLOW.router("home");
   }
 
   async function carregarEvolucaoBackend() {
     try {
-      const resp = await FEMFLOW.post({
+      const resp = await MALEFLOW.post({
         action: "getevolucao",
         id
       });
@@ -166,11 +166,11 @@ document.addEventListener("DOMContentLoaded", async () => {
      PROGRESSO 30 DIAS
   ============================================================ */
   const diaTreinoBackend = backend?.diaPrograma;
-  const diaTreinoLocal = Number(localStorage.getItem("femflow_dia_treino") || 1);
+  const diaTreinoLocal = Number(localStorage.getItem("maleflow_dia_treino") || 1);
   const dia = diaTreinoBackend || diaTreinoLocal || 1;
 
   if (diaTreinoBackend) {
-    localStorage.setItem("femflow_dia_treino", String(diaTreinoBackend));
+    localStorage.setItem("maleflow_dia_treino", String(diaTreinoBackend));
   }
 
   const prog = Math.min(100, Math.round(((dia - 1) / 30) * 100));
@@ -189,8 +189,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnNovo = document.getElementById("novoCicloBtn");
     if (btnNovo) {
       btnNovo.onclick = () => {
-        localStorage.setItem("femflow_dia_treino", "1");
-        FEMFLOW.router("ciclo.html");
+        localStorage.setItem("maleflow_dia_treino", "1");
+        MALEFLOW.router("ciclo.html");
       };
     }
   }
@@ -202,19 +202,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!Array.isArray(hist)) {
     try {
-      hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
+      hist = JSON.parse(localStorage.getItem("maleflow_hist") || "[]");
     } catch {
       hist = [];
     }
   } else {
-    localStorage.setItem("femflow_hist", JSON.stringify(hist));
+    localStorage.setItem("maleflow_hist", JSON.stringify(hist));
   }
 
   hist = hist.slice(-40);
 
-  const L = (FEMFLOW.langs[FEMFLOW.lang] || FEMFLOW.langs.pt).evolucao;
+  const L = (MALEFLOW.langs[MALEFLOW.lang] || MALEFLOW.langs.pt).evolucao;
   if (!hist.length && L && L.nenhumDado) {
-    FEMFLOW.toast(L.nenhumDado);
+    MALEFLOW.toast(L.nenhumDado);
   }
 
   /* ============================================================
@@ -244,7 +244,7 @@ document.addEventListener("DOMContentLoaded", async () => {
      BOTÃO VOLTAR
   ============================================================ */
   const voltar = document.getElementById("voltarFlow");
-  if (voltar) voltar.onclick = () => FEMFLOW.router("flowcenter.html");
+  if (voltar) voltar.onclick = () => MALEFLOW.router("flowcenter.html");
 
 });
 </script>

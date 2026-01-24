@@ -1,17 +1,17 @@
 /* ============================================================
-   🌐 FEMFLOW — Sistema de Idiomas (PT + EN + FR)
+   🌐 MALEFLOW — Sistema de Idiomas (PT + EN + FR)
    Arquivo oficial: lang.js — versão corrigida 2025
 ============================================================ */
 
-window.FEMFLOW = window.FEMFLOW || {};
+window.MALEFLOW = window.MALEFLOW || {};
 
 /* idioma inicial */
-FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+MALEFLOW.lang = localStorage.getItem("maleflow_lang") || "pt";
 
 /* ============================================================
    🔤 DICIONÁRIO CORE (MENU + SAC)
 ============================================================ */
-window.FEMFLOW_LANG = {
+window.MALEFLOW_LANG = {
   pt: {
     menu: {
       title: "Menu",
@@ -57,7 +57,7 @@ window.FEMFLOW_LANG = {
 
     respiracao: {
       titulo1: "Respirações",
-      titulo2: "FemFlow",
+      titulo2: "MaleFlow",
       sub: "Escolha o protocolo conforme seu momento 🌿",
       preparar: "Preparar...",
       footer: "Inspire equilíbrio. Expire leveza.",
@@ -149,7 +149,7 @@ window.FEMFLOW_LANG = {
 
     respiracao: {
       titulo1: "Breathing",
-      titulo2: "FemFlow",
+      titulo2: "MaleFlow",
       sub: "Choose the protocol for your moment 🌿",
       preparar: "Get ready...",
       footer: "Inhale balance. Exhale lightness.",
@@ -241,7 +241,7 @@ window.FEMFLOW_LANG = {
 
     respiracao: {
       titulo1: "Respirations",
-      titulo2: "FemFlow",
+      titulo2: "MaleFlow",
       sub: "Choisissez le protocole selon votre moment 🌿",
       preparar: "Préparez-vous...",
       footer: "Inspirez l'équilibre. Expirez la légèreté.",
@@ -292,7 +292,7 @@ window.FEMFLOW_LANG = {
 /* ============================================================
    🔤 DICIONÁRIO MULTILINGUE
 ============================================================ */
-FEMFLOW.langs = {
+MALEFLOW.langs = {
 
 /* ============================================================
    🇧🇷 PORTUGUÊS
@@ -323,7 +323,7 @@ pt: {
   },
 home: {
       bemvinda: "Bem-vinda",
-      videoTitulo: "Como funciona o FemFlow",
+      videoTitulo: "Como funciona o MaleFlow",
       videoSub:   "Assista ao vídeo rápido antes de começar.",
       videoUrl:   "https://www.youtube.com/embed/pAifTtNF9sQ",
 
@@ -527,7 +527,7 @@ resp: {
   voltarTreino: "Voltar ao treino",
 
   /* Footer */
-  footer: "FemFlow • Respiração Consciente"
+  footer: "MaleFlow • Respiração Consciente"
 },
 
    evolucao: {
@@ -619,7 +619,7 @@ en: {
   },
 home: {
       bemvinda: "Welcome",
-      videoTitulo: "How FemFlow works",
+      videoTitulo: "How MaleFlow works",
       videoSub:   "Watch this quick video before you start.",
       videoUrl:   "https://www.youtube.com/embed/tOm9I6eKOj4",
 
@@ -818,7 +818,7 @@ resp: {
   voltarTreino: "Back to Workout",
 
   /* Footer */
-  footer: "FemFlow • Conscious Breathing"
+  footer: "MaleFlow • Conscious Breathing"
 },
 
    evolucao: {
@@ -912,7 +912,7 @@ fr: {
   },
  home: {
       bemvinda: "Bienvenue",
-      videoTitulo: "Comment fonctionne FemFlow",
+      videoTitulo: "Comment fonctionne MaleFlow",
       videoSub:   "Regardez cette vidéo avant de commencer.",
       videoUrl:   "https://www.youtube.com/embed/2N9Lf3dSGpo",
 
@@ -1112,7 +1112,7 @@ resp: {
   voltarTreino: "Retour à l'entraînement",
 
   /* Footer */
-  footer: "FemFlow • Respiration Consciente"
+  footer: "MaleFlow • Respiration Consciente"
 },
 
  evolucao: {
@@ -1183,5 +1183,5 @@ resp: {
 ============================================================ */
 // Disparar após garantir carregamento completo
 window.addEventListener("DOMContentLoaded", () => {
-    document.dispatchEvent(new CustomEvent("femflow:langReady"));
+    document.dispatchEvent(new CustomEvent("maleflow:langReady"));
 });

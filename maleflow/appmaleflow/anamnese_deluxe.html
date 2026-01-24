@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>FemFlow • Anamnese Deluxe</title>
+  <title>MaleFlow • Anamnese Deluxe</title>
 
   <!-- Favicons -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -19,8 +19,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
   <!-- Core disabled (somente backend/infra) -->
-  <script>window.FEMFLOW_DISABLE_UI = true;</script>
-  <script defer src="femflow-core.js"></script>
+  <script>window.MALEFLOW_DISABLE_UI = true;</script>
+  <script defer src="maleflow-core.js"></script>
 
   <!-- Styles internas -->
   <style>
@@ -110,13 +110,13 @@
   </style>
 
   <!-- Pré-load logo -->
-  <link rel="preload" href="./assets/logofemflowterracota.png" as="image">
+  <link rel="preload" href="/maleflow/assets/logo-maleflow.png" as="image">
 </head>
 
 <body>
 
   <!-- Logo -->
-  <img src="./assets/logofemflowterracota.png" alt="FemFlow" style="width:120px;margin-top:10px;">
+  <img src="/maleflow/assets/logo-maleflow.png" alt="MaleFlow" style="width:120px;margin-top:10px;">
 
   <!-- Título multilíngue -->
   <h1 id="tituloAnamnese">Anamnese</h1>
@@ -186,17 +186,17 @@
 
       <h3 style="margin:0 0 12px;color:#335953;">Selecione o idioma</h3>
 
-      <button onclick="FEMFLOW.setLang('pt'); this.closest('#ff-lang-modal').classList.add('hidden');"
+      <button onclick="MALEFLOW.setLang('pt'); this.closest('#ff-lang-modal').classList.add('hidden');"
         style="margin:6px 0; padding:12px; width:100%; border-radius:12px; background:#335953; color:#fff;">
         Português
       </button>
 
-      <button onclick="FEMFLOW.setLang('en'); this.closest('#ff-lang-modal').classList.add('hidden');"
+      <button onclick="MALEFLOW.setLang('en'); this.closest('#ff-lang-modal').classList.add('hidden');"
         style="margin:6px 0; padding:12px; width:100%; border-radius:12px; background:#cc6a5a; color:#fff;">
         English
       </button>
 
-      <button onclick="FEMFLOW.setLang('fr'); this.closest('#ff-lang-modal').classList.add('hidden');"
+      <button onclick="MALEFLOW.setLang('fr'); this.closest('#ff-lang-modal').classList.add('hidden');"
         style="margin:6px 0; padding:12px; width:100%; border-radius:12px; background:#e2b5a5; color:#573b2e;">
         Français
       </button>

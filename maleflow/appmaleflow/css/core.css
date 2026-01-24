@@ -1,5 +1,5 @@
 /* ===========================================================
-   FEMFLOW — CORE.CSS (GLOBAL FOUNDATION)
+   MALEFLOW — CORE.CSS (GLOBAL FOUNDATION)
    Estrutura otimizada para PWA/TWA — 2025
 =========================================================== */
 
@@ -160,7 +160,7 @@ input, select {
   background: #ddd;
 }
 /* ============================================================
-   TOAST FEMFLOW — VISIBILIDADE 2025
+   TOAST MALEFLOW — VISIBILIDADE 2025
 ============================================================ */
 .toast-box {
   position: fixed;
@@ -190,7 +190,7 @@ input, select {
   color: #ffffff !important;      /* texto branco */
 }
 /* ============================================================
-   MODAL NÍVEL — FemFlow Style
+   MODAL NÍVEL — MaleFlow Style
 ============================================================ */
 
 .modal-nivel {

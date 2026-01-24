@@ -1,18 +1,18 @@
 /* ============================================================
-   FEMFLOW • TREINO ENGINE v4.2 — PREMIUM 2025
+   MALEFLOW • TREINO ENGINE v4.2 — PREMIUM 2025
    🔥 FONTE DA VERDADE: DIA DO CICLO HORMONAL
 ============================================================ */
 
-window.FEMFLOW = window.FEMFLOW || {};
-FEMFLOW.engineTreino = {};
+window.MALEFLOW = window.MALEFLOW || {};
+MALEFLOW.engineTreino = {};
 
 /* ============================================================
    1) NORMALIZAÇÕES
 ============================================================ */
-FEMFLOW.engineTreino.isExtraEnfase = enfase =>
+MALEFLOW.engineTreino.isExtraEnfase = enfase =>
   String(enfase || "").toLowerCase().trim().startsWith("extra_");
 
-FEMFLOW.engineTreino.normalizarFase = raw => {
+MALEFLOW.engineTreino.normalizarFase = raw => {
   const f = String(raw || "").toLowerCase().trim();
   if (!f) return "";
   return {
@@ -32,7 +32,7 @@ FEMFLOW.engineTreino.normalizarFase = raw => {
   }[f] || f;
 };
 
-FEMFLOW.engineTreino.normalizarNivel = raw => {
+MALEFLOW.engineTreino.normalizarNivel = raw => {
   const n = String(raw || "").toLowerCase().trim();
   if (!n) return null;
   if (n.startsWith("inic")) return "iniciante";
@@ -45,7 +45,7 @@ FEMFLOW.engineTreino.normalizarNivel = raw => {
 /* ============================================================
    2) SÉRIE ESPECIAL
 ============================================================ */
-FEMFLOW.engineTreino.detectarSerieEspecial = label => {
+MALEFLOW.engineTreino.detectarSerieEspecial = label => {
   if (!label) return null;
 
   const s = label.toLowerCase().replace(/\s+/g, "");
@@ -75,12 +75,12 @@ FEMFLOW.engineTreino.detectarSerieEspecial = label => {
    3) FIREBASE — BLOCO NORMAL
    🔥 PRIORIDADE ABSOLUTA: diaCiclo
 ============================================================ */
-FEMFLOW.engineTreino.carregarBlocosNormais = async ({
+MALEFLOW.engineTreino.carregarBlocosNormais = async ({
   nivel, enfase, fase, diaCiclo
 }) => {
 
- const faseNorm  = FEMFLOW.engineTreino.normalizarFase(fase);
-const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
+ const faseNorm  = MALEFLOW.engineTreino.normalizarFase(fase);
+const nivelNorm = MALEFLOW.engineTreino.normalizarNivel(nivel);
 const authUid = firebase?.auth?.()?.currentUser?.uid || null;
 console.log("🔍 [NORMAL] Firebase auth status:", authUid ? "logado" : "sem login", {
   uid: authUid
@@ -97,7 +97,7 @@ if (!faseNorm || !nivelNorm) {
 }
 
 if (!enfase) {
-  FEMFLOW.warn("⚠️ Ênfase ausente — consulta Firebase abortada:", {
+  MALEFLOW.warn("⚠️ Ênfase ausente — consulta Firebase abortada:", {
     nivel: nivelNorm,
     fase: faseNorm,
     diaCiclo
@@ -127,7 +127,7 @@ if (!enfase) {
     fase: faseNorm,
     diaKey
   });
-  FEMFLOW.log("🔥 [NORMAL] Firebase por diaCiclo:", diaKey);
+  MALEFLOW.log("🔥 [NORMAL] Firebase por diaCiclo:", diaKey);
 
   let snap;
   try {
@@ -146,7 +146,7 @@ if (!enfase) {
   }
 
   if (snap.empty) {
-    FEMFLOW.error("❌ Nenhum treino encontrado no Firebase:", {
+    MALEFLOW.error("❌ Nenhum treino encontrado no Firebase:", {
       path,
       nivel: nivelNorm,
       enfase,
@@ -170,18 +170,18 @@ if (!enfase) {
 /* ============================================================
    4) FIREBASE — BLOCO EXTRA (fixo)
 ============================================================ */
-FEMFLOW.engineTreino.carregarBlocosExtras = async ({
+MALEFLOW.engineTreino.carregarBlocosExtras = async ({
   nivel, enfase
 }) => {
   const enfaseNorm = String(enfase || "").toLowerCase().trim();
-  const nivelNorm = FEMFLOW.engineTreino.normalizarNivel(nivel);
+  const nivelNorm = MALEFLOW.engineTreino.normalizarNivel(nivel);
   const authUid = firebase?.auth?.()?.currentUser?.uid || null;
   console.log("🔍 [EXTRA] Firebase auth status:", authUid ? "logado" : "sem login", {
     uid: authUid
   });
 
   if (!enfaseNorm) {
-    FEMFLOW.warn("⚠️ Ênfase extra ausente — consulta Firebase abortada.");
+    MALEFLOW.warn("⚠️ Ênfase extra ausente — consulta Firebase abortada.");
     return [];
   }
 
@@ -220,7 +220,7 @@ FEMFLOW.engineTreino.carregarBlocosExtras = async ({
     return blocos.sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
   }
 
-  FEMFLOW.error("❌ Nenhum treino EXTRA encontrado no Firebase:", {
+  MALEFLOW.error("❌ Nenhum treino EXTRA encontrado no Firebase:", {
     enfase: enfaseNorm
   });
   console.log("🧪 [EXTRA] Documentos retornados:", flatSnap.size);
@@ -231,11 +231,11 @@ FEMFLOW.engineTreino.carregarBlocosExtras = async ({
    5) FIREBASE — BLOCO PERSONAL
    🔥 PRIORIDADE ABSOLUTA: diaCiclo
 ============================================================ */
-FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
+MALEFLOW.engineTreino.carregarBlocosPersonal = async ({
   id, fase, diaCiclo
 }) => {
 
-  const faseNorm = FEMFLOW.engineTreino.normalizarFase(fase);
+  const faseNorm = MALEFLOW.engineTreino.normalizarFase(fase);
   const authUid = firebase?.auth?.()?.currentUser?.uid || null;
   console.log("🔍 [PERSONAL] Firebase auth status:", authUid ? "logado" : "sem login", {
     uid: authUid
@@ -263,7 +263,7 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
   diaKey
 });
 
-  FEMFLOW.log("🔥 [PERSONAL] Firebase por diaCiclo:", diaKey);
+  MALEFLOW.log("🔥 [PERSONAL] Firebase por diaCiclo:", diaKey);
 
   let snap;
   try {
@@ -282,7 +282,7 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
   }
 
   if (snap.empty) {
-    FEMFLOW.error("❌ Nenhum treino PERSONAL encontrado no Firebase:", {
+    MALEFLOW.error("❌ Nenhum treino PERSONAL encontrado no Firebase:", {
       path,
       id,
       fase: faseNorm,
@@ -300,7 +300,7 @@ FEMFLOW.engineTreino.carregarBlocosPersonal = async ({
 /* ============================================================
    6) ORGANIZAÇÃO + HIIT
 ============================================================ */
-FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
+MALEFLOW.engineTreino.organizarBlocosSimples = brutos => {
 
   const boxesComTreino = new Set(
     brutos
@@ -318,7 +318,7 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
       let boxNum = parseInt(rawLabel.replace(/\D/g, ""));
 
       // 🧬 série especial (T, D, AE, C…)
-      const serieCodigo = FEMFLOW.engineTreino.detectarSerieEspecial(rawLabel);
+      const serieCodigo = MALEFLOW.engineTreino.detectarSerieEspecial(rawLabel);
 
       // Aquecimento
       if (b.tipo === "aquecimento") boxNum = -100;
@@ -356,7 +356,7 @@ FEMFLOW.engineTreino.organizarBlocosSimples = brutos => {
 
 
 
-FEMFLOW.engineTreino.intercalarHIIT = blocos => {
+MALEFLOW.engineTreino.intercalarHIIT = blocos => {
   const out = [];
   let buffer = [];
   let currentBox = null;
@@ -388,9 +388,9 @@ FEMFLOW.engineTreino.intercalarHIIT = blocos => {
 };
 
 /* ============================================================
-   6) CONVERSÃO PARA FRONT — VERSÃO FINAL FEMFLOW
+   6) CONVERSÃO PARA FRONT — VERSÃO FINAL MALEFLOW
 ============================================================ */
-FEMFLOW.engineTreino.converterParaFront = function (blocos) {
+MALEFLOW.engineTreino.converterParaFront = function (blocos) {
   const out = [];
 
   for (const b of blocos) {
@@ -495,11 +495,11 @@ out.forEach(o => {
 /* ============================================================
    7) MONTAR TREINO FINAL
 ============================================================ */
-FEMFLOW.engineTreino.montarTreinoFinal = async ({
+MALEFLOW.engineTreino.montarTreinoFinal = async ({
   id, nivel, enfase, fase, diaCiclo, personal=false
 }) => {
 
-  const isExtra = FEMFLOW.engineTreino.isExtraEnfase(enfase);
+  const isExtra = MALEFLOW.engineTreino.isExtraEnfase(enfase);
 
   // 🔒 Personal ignora completamente ênfase
   if (personal === true && !isExtra) {
@@ -508,18 +508,18 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
 
   // 🔒 Treino normal exige ênfase válida
   if (!personal && !isExtra && (!enfase || enfase === "nenhuma" || enfase === "personal")) {
-    FEMFLOW.warn("⚠️ Treino normal sem ênfase válida.");
+    MALEFLOW.warn("⚠️ Treino normal sem ênfase válida.");
     return [];
   }
 
 
   let blocosRaw = [];
   if (isExtra) {
-    blocosRaw = await FEMFLOW.engineTreino.carregarBlocosExtras({ nivel, enfase });
+    blocosRaw = await MALEFLOW.engineTreino.carregarBlocosExtras({ nivel, enfase });
   } else if (personal) {
-    blocosRaw = await FEMFLOW.engineTreino.carregarBlocosPersonal({ id, fase, diaCiclo });
+    blocosRaw = await MALEFLOW.engineTreino.carregarBlocosPersonal({ id, fase, diaCiclo });
    } else {
-    blocosRaw = await FEMFLOW.engineTreino.carregarBlocosNormais({
+    blocosRaw = await MALEFLOW.engineTreino.carregarBlocosNormais({
       nivel,
       enfase,
       fase,
@@ -529,8 +529,8 @@ FEMFLOW.engineTreino.montarTreinoFinal = async ({
 
   if (!blocosRaw.length) return [];
 
- const ordenados = FEMFLOW.engineTreino.organizarBlocosSimples(blocosRaw);
-const comHIIT   = FEMFLOW.engineTreino.intercalarHIIT(ordenados);
+ const ordenados = MALEFLOW.engineTreino.organizarBlocosSimples(blocosRaw);
+const comHIIT   = MALEFLOW.engineTreino.intercalarHIIT(ordenados);
 
 /* 🔒 GARANTIR AQUECIMENTO E RESFRIAMENTO ÚNICOS */
 let aquecimentoInserido = false;
@@ -552,17 +552,17 @@ const filtrados = comHIIT.filter(b => {
   return true;
 });
 
-return FEMFLOW.engineTreino.converterParaFront(filtrados);
+return MALEFLOW.engineTreino.converterParaFront(filtrados);
 
 };
 
 /* ============================================================
    8) LISTAR EXERCÍCIOS POR DIA (USO EM MODAL)
 ============================================================ */
-FEMFLOW.engineTreino.listarExerciciosDia = async ({
+MALEFLOW.engineTreino.listarExerciciosDia = async ({
   id, nivel, enfase, fase, diaCiclo, personal = false
 }) => {
-  const isExtra = FEMFLOW.engineTreino.isExtraEnfase(enfase);
+  const isExtra = MALEFLOW.engineTreino.isExtraEnfase(enfase);
 
   if (isExtra) {
     return [];
@@ -573,15 +573,15 @@ FEMFLOW.engineTreino.listarExerciciosDia = async ({
   }
 
   if (!personal && !isExtra && (!enfase || enfase === "nenhuma" || enfase === "personal")) {
-    FEMFLOW.warn("⚠️ Lista do próximo treino sem ênfase válida.");
+    MALEFLOW.warn("⚠️ Lista do próximo treino sem ênfase válida.");
     return [];
   }
 
   let blocosRaw = [];
   if (personal) {
-    blocosRaw = await FEMFLOW.engineTreino.carregarBlocosPersonal({ id, fase, diaCiclo });
+    blocosRaw = await MALEFLOW.engineTreino.carregarBlocosPersonal({ id, fase, diaCiclo });
   } else {
-    blocosRaw = await FEMFLOW.engineTreino.carregarBlocosNormais({
+    blocosRaw = await MALEFLOW.engineTreino.carregarBlocosNormais({
       nivel,
       enfase,
       fase,
@@ -591,8 +591,8 @@ FEMFLOW.engineTreino.listarExerciciosDia = async ({
 
   if (!blocosRaw.length) return [];
 
-  const ordenados = FEMFLOW.engineTreino.organizarBlocosSimples(blocosRaw);
-  const comHIIT = FEMFLOW.engineTreino.intercalarHIIT(ordenados);
+  const ordenados = MALEFLOW.engineTreino.organizarBlocosSimples(blocosRaw);
+  const comHIIT = MALEFLOW.engineTreino.intercalarHIIT(ordenados);
   const nomes = [];
   const vistos = new Set();
 

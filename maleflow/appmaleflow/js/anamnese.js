@@ -1,5 +1,5 @@
 // ============================================================
-//  FEMFLOW • ANAMNESE DELUXE 2025
+//  MALEFLOW • ANAMNESE DELUXE 2025
 //  Arquivo JS total — substitui TODO JS inline do HTML
 // ============================================================
 
@@ -61,7 +61,7 @@ const Tcad = {
 //  Aplicar idioma ao cadastro
 // ------------------------------------------------------------
 function aplicarIdiomaCadastro() {
-  const lang = FEMFLOW.lang || "pt";
+  const lang = MALEFLOW.lang || "pt";
   const T = Tcad[lang];
 
   document.getElementById("tituloAnamnese").textContent = T.titulo;
@@ -78,8 +78,8 @@ function aplicarIdiomaCadastro() {
   document.getElementById("btnIniciar").textContent = T.iniciar;
 }
 
-document.addEventListener("femflow:langReady", aplicarIdiomaCadastro);
-document.addEventListener("femflow:langChange", aplicarIdiomaCadastro);
+document.addEventListener("maleflow:langReady", aplicarIdiomaCadastro);
+document.addEventListener("maleflow:langChange", aplicarIdiomaCadastro);
 
 document.getElementById("btnLang").onclick = () => {
   document.getElementById("ff-lang-modal")?.classList.remove("hidden");
@@ -90,11 +90,11 @@ document.getElementById("btnLang").onclick = () => {
 // ============================================================
 function getPerguntasTraduzidas() {
   const lang =
-    FEMFLOW?.lang ||
-    localStorage.getItem("femflow_lang") ||
+    MALEFLOW?.lang ||
+    localStorage.getItem("maleflow_lang") ||
     "pt";
 
-  const base = FEMFLOW?.anamneseLang;
+  const base = MALEFLOW?.anamneseLang;
   const perguntas =
     base?.[lang]?.perguntas ||
     base?.pt?.perguntas ||
@@ -122,8 +122,8 @@ function getPerguntasTraduzidas() {
   const reEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const SCRIPT_URL =
-    FEMFLOW?.SCRIPT_URL ||
-    localStorage.getItem("femflow_script") ||
+    MALEFLOW?.SCRIPT_URL ||
+    localStorage.getItem("maleflow_script") ||
     "https://api-myflowlife.falling-wildflower-a8c0.workers.dev/";
 
   // ------------------------------------------------------------
@@ -162,7 +162,7 @@ function getPerguntasTraduzidas() {
     try{
       const qs = new URLSearchParams({
         action:"leadparcial", nome,email,telefone,
-        origem:"Anamnese Deluxe FemFlow"
+        origem:"Anamnese Deluxe MaleFlow"
       }).toString();
       await fetch(SCRIPT_URL+"?"+qs);
     }catch(_){}
@@ -188,12 +188,12 @@ function getPerguntasTraduzidas() {
 
     leadParcial(nomeV, emailV, telV);
 
-    try { FEMFLOW.toast?.("✨ Anamnese iniciada!"); } catch {}
+    try { MALEFLOW.toast?.("✨ Anamnese iniciada!"); } catch {}
 
     $("#cadastro").classList.add("hidden");
     $("#quiz").classList.remove("hidden");
 
-    FEMFLOW._leadCadastro = {
+    MALEFLOW._leadCadastro = {
       nome: nomeV,
       email: emailV,
       telefone: telV,
@@ -202,7 +202,7 @@ function getPerguntasTraduzidas() {
     };
 
     // iniciar quiz
-    setTimeout(() => { window.iniciarQuizFemFlow?.(); }, 400);
+    setTimeout(() => { window.iniciarQuizMaleFlow?.(); }, 400);
   });
 
 })();
@@ -228,7 +228,7 @@ function getPerguntasTraduzidas() {
   //  Pegar dados da etapa 1
   // ------------------------------------------------------------
   function pegarDadosLead() {
-    const lead = FEMFLOW?._leadCadastro || {};
+    const lead = MALEFLOW?._leadCadastro || {};
     return {
       nome:     lead.nome     || localStorage.getItem("lead_nome") || "",
       email:    lead.email    || localStorage.getItem("lead_email") || "",
@@ -273,7 +273,7 @@ async function finalizarAnamnese() {
   cardQuiz.classList.add("hidden");
   cardFinal.classList.remove("hidden");
 
-  const lang = FEMFLOW?.lang || "pt";
+  const lang = MALEFLOW?.lang || "pt";
 
   finalMsgEl.textContent = {
     pt: "Analisando seu perfil…",
@@ -297,18 +297,18 @@ async function finalizarAnamnese() {
   const { nome, email, telefone, dataNascimento, senha } = pegarDadosLead();
 
   if (!nome || !email || !senha) {
-    FEMFLOW.toast?.("Erro ao finalizar", true);
+    MALEFLOW.toast?.("Erro ao finalizar", true);
     return;
   }
 
-  FEMFLOW.toast?.("Sincronizando…");
+  MALEFLOW.toast?.("Sincronizando…");
 
   // --------------------------------------------------------
   // 3) LOGIN OU CADASTRO (HOTMART + NOVA ALUNA)
   // --------------------------------------------------------
   let r;
   try {
-    r = await FEMFLOW.post({
+    r = await MALEFLOW.post({
       action: "loginOuCadastro",
       nome,
       email,
@@ -320,21 +320,21 @@ async function finalizarAnamnese() {
     });
   } catch (e) {
     console.error(e);
-    FEMFLOW.toast?.("Erro de comunicação", true);
+    MALEFLOW.toast?.("Erro de comunicação", true);
     finalMsgEl.textContent = "Erro ao concluir.";
     return;
   }
 
   if (!r || !(r.status === "ok" || r.status === "created") || !r.id) {
     const msg = r?.msg || "Erro ao concluir.";
-    FEMFLOW.toast?.(msg, true);
+    MALEFLOW.toast?.(msg, true);
     finalMsgEl.textContent = msg;
     return;
   }
  
-const deviceId = FEMFLOW.getDeviceId(); // precisa ser estável (não aleatório por request)
+const deviceId = MALEFLOW.getDeviceId(); // precisa ser estável (não aleatório por request)
 
-const loginResp = await FEMFLOW.post({
+const loginResp = await MALEFLOW.post({
   action: "login",
   email,
   senha,
@@ -343,17 +343,17 @@ const loginResp = await FEMFLOW.post({
 
 if (loginResp?.status === "ok") {
   if (loginResp.deviceId) {
-    localStorage.setItem("femflow_device_id", loginResp.deviceId);
+    localStorage.setItem("maleflow_device_id", loginResp.deviceId);
   }
   if (loginResp.sessionToken) {
-    localStorage.setItem("femflow_session_token", loginResp.sessionToken);
+    localStorage.setItem("maleflow_session_token", loginResp.sessionToken);
   }
   if (loginResp.sessionExpira) {
-    localStorage.setItem("femflow_session_expira", String(loginResp.sessionExpira));
+    localStorage.setItem("maleflow_session_expira", String(loginResp.sessionExpira));
   }
 } else {
   const msg = loginResp?.msg || "Erro ao concluir.";
-  FEMFLOW.toast?.(msg, true);
+  MALEFLOW.toast?.(msg, true);
   finalMsgEl.textContent = msg;
   return;
 }
@@ -362,15 +362,15 @@ if (loginResp?.status === "ok") {
   // --------------------------------------------------------
   // 4) SALVAR IDENTIDADE LOCAL
   // --------------------------------------------------------
-  localStorage.setItem("femflow_id", r.id);
-  localStorage.setItem("femflow_email", email);
+  localStorage.setItem("maleflow_id", r.id);
+  localStorage.setItem("maleflow_email", email);
   const nivelBackend = String(r.nivel || loginResp?.nivel || nivel || "").toLowerCase();
   if (nivelBackend) {
-    localStorage.setItem("femflow_nivel", nivelBackend);
+    localStorage.setItem("maleflow_nivel", nivelBackend);
   }
   const diaCicloBackend = r.diaCiclo ?? loginResp?.diaCiclo;
   if (diaCicloBackend !== undefined && diaCicloBackend !== null) {
-    localStorage.setItem("femflow_diaCiclo", String(diaCicloBackend));
+    localStorage.setItem("maleflow_diaCiclo", String(diaCicloBackend));
   }
 
   // --------------------------------------------------------
@@ -396,14 +396,14 @@ if (loginResp?.status === "ok") {
   document.addEventListener("DOMContentLoaded", () => {
     perguntas = getPerguntasTraduzidas();
 
-    window.iniciarQuizFemFlow = function(){
+    window.iniciarQuizMaleFlow = function(){
       idx=0;
       score=0;
       perguntas = getPerguntasTraduzidas();
 
 if (!perguntas.length) {
-  FEMFLOW.toast?.("Carregando perguntas…");
-  setTimeout(() => window.iniciarQuizFemFlow?.(), 250);
+  MALEFLOW.toast?.("Carregando perguntas…");
+  setTimeout(() => window.iniciarQuizMaleFlow?.(), 250);
   return;
 }
 
@@ -413,7 +413,7 @@ mostrarPergunta();
 
     if (!cardQuiz.classList.contains("hidden")) mostrarPergunta();
 
-    document.addEventListener("femflow:langChange", () => {
+    document.addEventListener("maleflow:langChange", () => {
       perguntas = getPerguntasTraduzidas();
       if (!cardQuiz.classList.contains("hidden")) mostrarPergunta();
     });

@@ -1,4 +1,4 @@
-FemFlow Animated Illustrations (terracotta • beige • teal)
+MaleFlow Animated Illustrations (terracotta • beige • teal)
 ==============================================================
 Dimensions: 800x800 • Background: beige • Style: flat minimal
 
@@ -18,4 +18,4 @@ app/assets/gifs/
 Example HTML usage:
 <img src="../assets/gifs/profile_form.webp" class="q-media" alt="profile form" />
 
-— FemFlow Visual Kit
+— MaleFlow Visual Kit

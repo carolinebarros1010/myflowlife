@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Seu Momento • FemFlow</title>
+  <title>Seu Momento • MaleFlow</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -80,16 +80,16 @@
 </div>
   
 <script src="js/lang.js"></script>
-<script src="femflow-core.js"></script>
+<script src="maleflow-core.js"></script>
 
  
 <script>
- const id = localStorage.getItem("femflow_id");
+ const id = localStorage.getItem("maleflow_id");
 
 // 🔐 guarda mínima — ciclo é parte do onboarding
 if (!id) {
-  FEMFLOW.toast?.("Faça login para continuar 🌸");
-  FEMFLOW.router("index");
+  MALEFLOW.toast?.("Faça login para continuar 🌸");
+  MALEFLOW.router("index");
 }
 
  
@@ -128,7 +128,7 @@ function bindTap(el, handler){
   el.addEventListener("click", e=>{ if(!fired) handler(); fired=false; });
 }
 /* ============================================================
-   🔋 RESOLVER PERFIL ENERGÉTICO (FINAL • FEMFLOW 2025)
+   🔋 RESOLVER PERFIL ENERGÉTICO (FINAL • MALEFLOW 2025)
    - Score define ALTA ou BAIXA
    - BAIXA → menstrual dia 1 (hoje)
    - ALTA  → depende do nível:
@@ -174,7 +174,7 @@ function resolverPerfilEnergetico(quizScore) {
    FASE ALTA POR NÍVEL (ENERGÉTICO)
 ============================================================ */
 function faseAltaPorNivel(){
-  const nivel=(localStorage.getItem("femflow_nivel")||"iniciante").toLowerCase();
+  const nivel=(localStorage.getItem("maleflow_nivel")||"iniciante").toLowerCase();
   if(nivel==="iniciante") return "luteal";
   if(nivel==="intermediaria") return "follicular";
   return "ovulatory";
@@ -182,32 +182,32 @@ function faseAltaPorNivel(){
 
 
 function getPerguntas(tipo) {
-  const langCode = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
-  const ciclo = FEMFLOW.langs[langCode]?.ciclo || FEMFLOW.langs.pt.ciclo;
+  const langCode = MALEFLOW.lang || localStorage.getItem("maleflow_lang") || "pt";
+  const ciclo = MALEFLOW.langs[langCode]?.ciclo || MALEFLOW.langs.pt.ciclo;
   return ciclo.quizCiclo?.[tipo] || [];
 }
   
 /* ============================================================
    SALVAR CICLO — FAST MODE (LOCAL FIRST + 1 POST)
-   FemFlow 2025
+   MaleFlow 2025
 ============================================================ */
 async function salvarCiclo({ diaCicloInicial, cicloDuracao }) {
 
   ffShowLoading("Configurando seu ciclo…");
   await new Promise(requestAnimationFrame);
 
-  const idUser = localStorage.getItem("femflow_id");
+  const idUser = localStorage.getItem("maleflow_id");
 
   /* ============================================================
      1) CACHE LOCAL (destrava navegação)
   ============================================================ */
-  localStorage.setItem("femflow_cycle_configured", "yes");
-  localStorage.setItem("femflow_cycle_changed", "true");
+  localStorage.setItem("maleflow_cycle_configured", "yes");
+  localStorage.setItem("maleflow_cycle_changed", "true");
 
   /* ============================================================
      2) BACKEND — contrato oficial
   ============================================================ */
-const resp = await FEMFLOW.post({
+const resp = await MALEFLOW.post({
   action: "setciclo",
   id: idUser,
   perfilHormonal: cicloState.perfilSelecionado,
@@ -219,8 +219,8 @@ const resp = await FEMFLOW.post({
 
 if (!resp || resp.status !== "ok") {
   console.log("❌ setciclo falhou:", resp);
-  FEMFLOW.toast("Erro ao salvar perfil/ciclo. Tente novamente.");
-  FEMFLOW.loading.hide?.();
+  MALEFLOW.toast("Erro ao salvar perfil/ciclo. Tente novamente.");
+  MALEFLOW.loading.hide?.();
   return;
 }
 
@@ -229,23 +229,23 @@ if (!resp || resp.status !== "ok") {
      3) VALIDAR — fonte da verdade
   ============================================================ */
   const qs = new URLSearchParams({ action: "validar", id: idUser });
-const perfilFresh = await fetch(`${FEMFLOW.SCRIPT_URL}?${qs.toString()}`)
+const perfilFresh = await fetch(`${MALEFLOW.SCRIPT_URL}?${qs.toString()}`)
   .then(r => r.json())
   .catch(() => ({ status: "error" }));
 
 
   if (perfilFresh?.status === "ok") {
-    localStorage.setItem("femflow_fase", perfilFresh.fase);
-    localStorage.setItem("femflow_diaCiclo", String(perfilFresh.diaCiclo));
+    localStorage.setItem("maleflow_fase", perfilFresh.fase);
+    localStorage.setItem("maleflow_diaCiclo", String(perfilFresh.diaCiclo));
   }
 
   /* ============================================================
      4) FEEDBACK + NAVEGAÇÃO ÚNICA
   ============================================================ */
-  FEMFLOW.toast("✨ Ciclo configurado!");
+  MALEFLOW.toast("✨ Ciclo configurado!");
 
   const ret = (new URLSearchParams(location.search).get("ret") || "").toLowerCase();
-  FEMFLOW.router(ret.includes("flowcenter") ? "flowcenter" : "home");
+  MALEFLOW.router(ret.includes("flowcenter") ? "flowcenter" : "home");
 }
 /* ============================================================
    PERFIS E QUIZ
@@ -272,7 +272,7 @@ function bindConfirmarRegular() {
       const len = parseInt(document.getElementById("duracao")?.value || 28, 10);
 
       if (!s || len < 21 || len > 35) {
-        FEMFLOW.toast("Preencha corretamente data e duração 🌸");
+        MALEFLOW.toast("Preencha corretamente data e duração 🌸");
         return;
       }
 
@@ -300,7 +300,7 @@ function bindConfirmarRegular() {
 document.addEventListener("DOMContentLoaded", () => {
 
   // 🔥 GARANTIR LIMPEZA DE LOADING AO ENTRAR NO CICLO
-  FEMFLOW.loading.hide?.();
+  MALEFLOW.loading.hide?.();
 
   // PERFIS PRINCIPAIS
   document.querySelectorAll(".perfil-btn[data-perfil]").forEach(btn=>{
@@ -368,7 +368,7 @@ function abrirQuiz(){
   quizPerg.textContent = perguntasAtuais[0];
 
    // etiqueta traduzida (sem mexer no lang.js)
-  const langCode = FEMFLOW.lang || localStorage.getItem("femflow_lang") || "pt";
+  const langCode = MALEFLOW.lang || localStorage.getItem("maleflow_lang") || "pt";
   const txtPerg = { pt: "Pergunta", en: "Question", fr: "Question" }[langCode] || "Pergunta";
   const txtDe   = { pt: "de",        en: "of",       fr: "sur"      }[langCode] || "de";
 
@@ -398,7 +398,7 @@ function responderQuiz(v){
    FINAL DO QUIZ — PERFIL ENERGÉTICO e PERFIL HORMONAL IRREGULAR
 ============================================================ */
 async function finalizarQuiz(){
- // 🔒 FALLBACK FEMFLOW — quiz falhou ou não iniciou
+ // 🔒 FALLBACK MALEFLOW — quiz falhou ou não iniciou
 if (!perguntasAtuais || !perguntasAtuais.length) {
 
   // fallback fisiologicamente seguro
@@ -477,12 +477,12 @@ bindTap(document.getElementById("btnConfirmarRegular"), async () => {
 ============================================================ */
 function aplicarIdiomaCiclo() {
   // garante idioma definido
-  if (!FEMFLOW.lang) {
-    FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+  if (!MALEFLOW.lang) {
+    MALEFLOW.lang = localStorage.getItem("maleflow_lang") || "pt";
   }
 
-  const langCode = FEMFLOW.lang;
-  const langSet  = FEMFLOW.langs[langCode] || FEMFLOW.langs.pt;
+  const langCode = MALEFLOW.lang;
+  const langSet  = MALEFLOW.langs[langCode] || MALEFLOW.langs.pt;
   const L        = langSet.ciclo;
 
   if (!L) {
@@ -573,16 +573,16 @@ function aplicarIdiomaCiclo() {
    🔧 ATIVAR HEADER / MENU / IDIOMA
 ============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
-  FEMFLOW.inserirHeaderApp?.();
-  FEMFLOW.inserirMenuLateral?.();
-  FEMFLOW.inserirModalIdioma?.();
+  MALEFLOW.inserirHeaderApp?.();
+  MALEFLOW.inserirMenuLateral?.();
+  MALEFLOW.inserirModalIdioma?.();
 
   aplicarIdiomaCiclo();
 });
 /* ============================================================
    🔄 Atualizar textos quando trocar idioma
 ============================================================ */
-document.addEventListener("femflow:langChange", () => {
+document.addEventListener("maleflow:langChange", () => {
   aplicarIdiomaCiclo();
 
   // Se o quiz estiver aberto, reescreve a pergunta + passo
@@ -592,7 +592,7 @@ document.addEventListener("femflow:langChange", () => {
 
     quizPerg.textContent = perguntasAtuais[quizIdx] || "";
 
-    const langCode = FEMFLOW.lang || "pt";
+    const langCode = MALEFLOW.lang || "pt";
     const txtPerg = { pt: "Pergunta", en: "Question", fr: "Question" }[langCode] || "Pergunta";
     const txtDe   = { pt: "de",       en: "of",       fr: "sur"      }[langCode] || "de";
 

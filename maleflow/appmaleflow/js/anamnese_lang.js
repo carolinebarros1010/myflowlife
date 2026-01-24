@@ -1,11 +1,11 @@
 /* ============================================================
-   🌸 FEMFLOW — ANAMNESE DELUXE 2025 (PT • EN • FR)
+   🌸 MALEFLOW — ANAMNESE DELUXE 2025 (PT • EN • FR)
    Arquivo oficial: anamnese_lang.js
 ============================================================ */
 
-window.FEMFLOW = window.FEMFLOW || {};
+window.MALEFLOW = window.MALEFLOW || {};
 
-FEMFLOW.anamneseLang = {
+MALEFLOW.anamneseLang = {
 
   /* ============================================================
      🇧🇷 PORTUGUÊS — Versão Deluxe 2025
