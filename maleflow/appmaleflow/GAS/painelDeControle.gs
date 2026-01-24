@@ -93,7 +93,6 @@ function dashboardAluna_(id) {
     cicloDuracao: row[9],
     fase: row[13],
     diaCiclo: row[14],
-    perfilHormonal: row[19],
 
     diaPrograma: row[COL_DIA_PROGRAMA] || 1,
     dataInicioPrograma: row[COL_DATA_INICIO_PROGRAMA] || null,

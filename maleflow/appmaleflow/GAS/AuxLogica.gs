@@ -180,28 +180,18 @@ function salvarEvolucao_(data) {
   for (let i = 1; i < rows.length; i++) {
     if (String(rows[i][0]).trim() !== id) continue;
 
-    const dataInicio = rows[i][10];
-    const cicloDuracao = Number(rows[i][9]) || 28;
-    const perfilHormonal = String(rows[i][19] || "regular").toLowerCase();
-    const nivel = String(rows[i][8] || "iniciante").toLowerCase();
+    const cicloDuracao = Number(rows[i][9]) || 3;
+    const diaPrograma = Number(rows[i][COL_DIA_PROGRAMA] || 1);
+    const cicloTreino = String(rows[i][13] || "").toUpperCase();
 
-    const manualStart = rows[i][20];
-    const startBase =
-      manualStart instanceof Date && !isNaN(manualStart)
-        ? new Date(manualStart)
-        : new Date(dataInicio);
-
-    const ciclo = calcularCicloReal({
-      startDate: startBase,
+    const ciclo = calcularCicloTreino_({
       cicloDuracao,
-      perfilHormonal,
-      nivel,
-      faseSalva: rows[i][13],
-      diaCicloSalvo: rows[i][14]
+      diaPrograma,
+      cicloTreino
     });
 
-    faseAtual = ciclo.fase;
-    diaProgramaAtual = Number(rows[i][COL_DIA_PROGRAMA] || 1);
+    faseAtual = cicloTreino || ciclo.fase || "";
+    diaProgramaAtual = diaPrograma;
     break;
   }
 
@@ -268,62 +258,14 @@ function salvarEvolucao_(data) {
  * 🌸 setmanualstart — Salvar DATA MANUAL do ciclo (coluna U)
  * ============================================================ */
 function setmanualstart(id, startDate) {
-  try {
-    const sh = _sheet(SHEET_ALUNAS);
-    if (!sh) return { status: "error", msg: "Sheet Alunos não encontrada" };
-
-    const rows = sh.getDataRange().getValues();
-
-    for (let i = 1; i < rows.length; i++) {
-      if (String(rows[i][0]).trim() === String(id).trim()) {
-        const perfilHormonal = String(rows[i][19] || "regular").toLowerCase();
-        const colManual = 21; // coluna U (1-based)
-
-        if (perfilHormonal !== "regular") {
-          sh.getRange(i + 1, colManual).setValue(new Date(startDate));
-        } else {
-          sh.getRange(i + 1, colManual).setValue("");
-        }
-
-        return { status: "ok", id: id, manualAtivo: perfilHormonal !== "regular" };
-      }
-    }
-
-    return { status: "notfound", id: id };
-  } catch (err) {
-    return { status: "error", msg: err.toString() };
-  }
+  return { status: "ignored", msg: "ciclo_hormonal_desativado" };
 }
 
 /* ============================================================
  * atualizarCicloStart — compatível com versões antigas do app
  * ============================================================ */
 function atualizarCicloStart(id, startDate) {
-  try {
-    const sh = _sheet(SHEET_ALUNAS);
-    if (!sh) return { status: "error", msg: "Sheet Alunos não encontrada" };
-
-    const rows = sh.getDataRange().getValues();
-
-    for (let i = 1; i < rows.length; i++) {
-      if (String(rows[i][0]).trim() === String(id).trim()) {
-        const perfil = String(rows[i][19] || "regular").toLowerCase();
-        const colManual = 21;
-
-        if (perfil !== "regular") {
-          sh.getRange(i + 1, colManual).setValue(new Date(startDate));
-        } else {
-          sh.getRange(i + 1, colManual).setValue("");
-        }
-
-        return { status: "ok", id: id };
-      }
-    }
-
-    return { status: "notfound" };
-  } catch (err) {
-    return { status: "error", msg: err.toString() };
-  }
+  return { status: "ignored", msg: "ciclo_hormonal_desativado" };
 }
 
 
@@ -335,46 +277,11 @@ function atualizarCicloStart(id, startDate) {
  * 🧹 LIMPEZA DE CICLO MANUAL — PERFIL ENERGÉTICO
  * ------------------------------------------------------
  * - Remove CicloStartDateManual (col U)
- * - Apenas para perfilHormonal === "energetico"
+ * - (desativado no MaleFlow)
  * - NÃO recalcula ciclo
  * - NÃO altera diaCiclo nem dataInicio
  * ======================================================
  */
 function limpezaCicloManualEnergetico() {
-
-  const sh = SpreadsheetApp
-    .getActive()
-    .getSheetByName(SHEET_ALUNAS);
-
-  if (!sh) {
-    Logger.log("❌ Aba Alunos não encontrada");
-    return;
-  }
-
-  const data = sh.getDataRange().getValues();
-  let limpos = 0;
-
-  for (let i = 1; i < data.length; i++) {
-    const r = data[i];
-
-    const id              = r[0];
-    const nome            = r[1];
-    const perfilHormonal  = String(r[19] || "").toLowerCase();
-    const cicloManual     = r[20]; // coluna U
-
-    if (
-      perfilHormonal === "energetico" &&
-      cicloManual instanceof Date &&
-      !isNaN(cicloManual)
-    ) {
-      sh.getRange(i + 1, 21).clearContent(); // coluna U
-      limpos++;
-
-      Logger.log(
-        `🧹 LIMPO | ${id} | ${nome} | CicloManual removido`
-      );
-    }
-  }
-
-  Logger.log(`✅ Limpeza concluída. Registros afetados: ${limpos}`);
+  Logger.log("ℹ️ Ciclo hormonal desativado no MaleFlow.");
 }

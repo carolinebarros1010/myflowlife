@@ -154,39 +154,43 @@ document.addEventListener("DOMContentLoaded", () => {
   const lang = localStorage.getItem("maleflow_lang") || "pt";
   const T = {
     pt: {
-      title: "FemFlow",
-      subtitle: "Fase Hormonal",
-      desc: "Seu corpo tem um ritmo. Vamos segui-lo juntas.",
-      status: "🌸 Você está na fase",
+      title: "MaleFlow",
+      subtitle: "Ciclo de Treino",
+      desc: "Seu treino segue uma sequência A/B/C/D/E conforme sua frequência.",
+      status: "🏋️ Treino do dia:",
       phases: {
-        menstrual: "Menstrual",
-        follicular: "Folicular",
-        ovulatory: "Ovulatória",
-        luteal: "Lútea"
+        A: "Treino A",
+        B: "Treino B",
+        C: "Treino C",
+        D: "Treino D",
+        E: "Treino E"
       },
       descs: {
-        menstrual: "Momento de recolhimento e escuta. Movimentos suaves e autocuidado.",
-        follicular: "Energia crescente. Aumente carga e potência.",
-        ovulatory: "Pico de energia e confiança. Ideal para treinos intensos.",
-        luteal: "Introspecção e estabilidade. Priorize controle e recuperação."
+        A: "Sessão A do seu ciclo de treino.",
+        B: "Sessão B do seu ciclo de treino.",
+        C: "Sessão C do seu ciclo de treino.",
+        D: "Sessão D do seu ciclo de treino.",
+        E: "Sessão E do seu ciclo de treino."
       }
     },
     en: {
-      title: "FemFlow",
-      subtitle: "Hormonal Phase",
-      desc: "Your body has a rhythm. Let's follow it together.",
-      status: "🌸 You are in the",
+      title: "MaleFlow",
+      subtitle: "Training Cycle",
+      desc: "Your workout follows an A/B/C/D/E sequence based on your frequency.",
+      status: "🏋️ Today's workout:",
       phases: {
-        menstrual: "Menstrual",
-        follicular: "Follicular",
-        ovulatory: "Ovulatory",
-        luteal: "Luteal"
+        A: "Workout A",
+        B: "Workout B",
+        C: "Workout C",
+        D: "Workout D",
+        E: "Workout E"
       },
       descs: {
-        menstrual: "Time for rest and reflection.",
-        follicular: "Rising energy — increase load and focus.",
-        ovulatory: "Peak energy and confidence. Go intense.",
-        luteal: "Calm phase — balance and recovery."
+        A: "Session A of your training cycle.",
+        B: "Session B of your training cycle.",
+        C: "Session C of your training cycle.",
+        D: "Session D of your training cycle.",
+        E: "Session E of your training cycle."
       }
     }
   };
@@ -196,35 +200,19 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("flowSubtitle").textContent = L.subtitle;
   document.getElementById("flowDesc").textContent = L.desc;
 
-  // === Determina a fase atual ===
-  const perfil = localStorage.getItem("maleflow_perfilHormonal") || "regular";
-  const ciclo  = parseInt(localStorage.getItem("maleflow_cycleLength") || 28);
-  const inicio = new Date(localStorage.getItem("maleflow_startDate") || new Date());
-  const faseSugerida = localStorage.getItem("fase_sugerida");
-
-  let fase = "menstrual";
-  if (perfil === "regular") {
-    const diff = Math.floor((new Date() - inicio)/(1000*60*60*24));
-    const dia = (diff % ciclo) + 1;
-    if (dia>5 && dia<=13) fase="follicular";
-    else if (dia<=17) fase="ovulatory";
-    else fase="luteal";
-  } else if (faseSugerida) {
-    fase = faseSugerida.toLowerCase();
-  }
+  // === Determina o treino atual ===
+  const cicloTreino = (localStorage.getItem("maleflow_training_cycle") || "ABC").toUpperCase();
+  const diaPrograma = Number(localStorage.getItem("maleflow_diaPrograma") || 1);
+  const letras = cicloTreino.split("");
+  const indice = ((diaPrograma - 1) % letras.length);
+  const fase = letras[indice] || "A";
 
   localStorage.setItem("fase_atual", fase);
 
   // === Atualiza UI ===
-  document.getElementById("centerPhase").textContent = L.phases[fase];
-  document.getElementById("flowStatus").textContent = `${L.status} ${L.phases[fase]}`;
-  document.getElementById("faseDescricao").textContent = L.descs[fase];
-
-  ["menstrual","follicular","ovulatory","luteal"].forEach(s=>{
-    const el=document.getElementById(`seg-${s}`);
-    if (!el) return;
-    el.classList.toggle("phase-active", s===fase);
-  });
+  document.getElementById("centerPhase").textContent = L.phases[fase] || `Treino ${fase}`;
+  document.getElementById("flowStatus").textContent = `${L.status} ${L.phases[fase] || fase}`;
+  document.getElementById("faseDescricao").textContent = L.descs[fase] || "";
 
   document.getElementById("centerCircle").classList.add("center-active");
 

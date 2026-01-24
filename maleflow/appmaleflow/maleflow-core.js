@@ -297,9 +297,8 @@ FEMFLOW.getCicloTreino = function () {
     if (treinosSemana === 2) return "AB";
     if (treinosSemana === 3) return "ABC";
     if (treinosSemana === 4) return "ABCD";
-    if (treinosSemana === 5) return "ABCDE";
-    if (treinosSemana === 6) return "ABC";
-    return "ABCDE";
+    if (treinosSemana === 5) return "ABCED";
+    return "ABC";
   }
 
   return "ABC";
@@ -458,35 +457,12 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
     // 🌙 MUDANÇA DE CICLO
     // ----------------------------
     if (tipo === "ciclo") {
-      if (payload.perfilHormonal) {
-        await FEMFLOW.post({
-          action: "setperfilhormonal",
-          id,
-          perfil: payload.perfilHormonal
-        });
-      }
-
-      if (payload.startDate) {
-        await FEMFLOW.post({
-          action: "setciclostart",
-          id,
-          startDate: payload.startDate
-        });
-      }
 
       // sempre resetar programa
       await FEMFLOW.post({
         action: "resetprograma",
         id
       });
-
-      if (payload.perfilHormonal) {
-        localStorage.setItem("maleflow_perfilHormonal", payload.perfilHormonal);
-      }
-
-      if (payload.startDate) {
-        localStorage.setItem("maleflow_startDate", payload.startDate);
-      }
 
       localStorage.removeItem("maleflow_diaPrograma");
     }
@@ -523,9 +499,6 @@ FEMFLOW.carregarCicloBackend = async function () {
     localStorage.setItem("maleflow_training_cycle", cicloTreino);
     localStorage.setItem("maleflow_diaCiclo", String(resp.diaCiclo || 1));
     localStorage.setItem("maleflow_cycle_configured", "yes");
-    if (resp.perfilHormonal) {
-      localStorage.setItem("maleflow_perfilHormonal", resp.perfilHormonal);
-    }
     if (resp.nivel) {
       localStorage.setItem("maleflow_nivel", resp.nivel);
     }
@@ -544,7 +517,9 @@ FEMFLOW.carregarCicloBackend = async function () {
     if (resp.ciclo_duracao) {
       localStorage.setItem("maleflow_cycleLength", resp.ciclo_duracao);
     }
-    localStorage.setItem("maleflow_startDate", resp.data_inicio);
+    if (resp.data_inicio) {
+      localStorage.setItem("maleflow_startDate", resp.data_inicio);
+    }
 
     return resp;
 
@@ -736,7 +711,6 @@ FEMFLOW.enviarSAC = async function () {
       fase: localStorage.getItem("maleflow_fase"),
       diaCiclo: Number(localStorage.getItem("maleflow_diaCiclo") || 0),
       diaPrograma: Number(localStorage.getItem("maleflow_diaPrograma") || 0),
-      perfilHormonal: localStorage.getItem("maleflow_perfilHormonal"),
       nivel: localStorage.getItem("maleflow_nivel"),
       enfase: localStorage.getItem("maleflow_enfase")
     }
@@ -937,7 +911,6 @@ FEMFLOW.carregarPerfil = async function () {
     }
     localStorage.setItem("maleflow_startDate", r.data_inicio);
     localStorage.setItem("maleflow_cycleLength", r.ciclo_duracao);
-    localStorage.setItem("maleflow_perfilHormonal", r.perfilHormonal);
 
     const produtoRaw = (r.produto || "").toLowerCase().trim();
     const isVip = produtoRaw === "vip";

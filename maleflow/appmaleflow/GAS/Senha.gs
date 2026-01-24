@@ -87,7 +87,7 @@ function _loginOuCadastro(data) {
     hoje,                   // DataCompra
     false,                  // LicencaAtiva
     nivelDetectado,         // Nivel
-    Number(data.cicloDuracao) || 28, // CicloDuracao
+    Number(data.cicloDuracao) || 3, // CicloDuracao
     hoje,                   // DataInicio
     "",                     // LinkPlanilha
     "nenhuma",              // Enfase
@@ -97,7 +97,7 @@ function _loginOuCadastro(data) {
     anamnese,               // AnamneseJSON
     "",                     // TokenReset
     "",                     // TokenExpira
-    (data.perfilHormonal || "regular"), // PerfilHormonal
+    "",                     // PerfilHormonal (desativado)
     "",                     // CicloStartDateManual
     1,                      // DiaPrograma
     "",                     // DeviceId

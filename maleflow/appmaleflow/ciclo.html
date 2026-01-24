@@ -44,8 +44,8 @@
       <span class="perfil-label">ABCD</span>
       <span class="perfil-sub">4 treinos diferentes</span>
     </button>
-    <button class="perfil-btn" data-cycle="ABCDE">
-      <span class="perfil-label">ABCDE</span>
+    <button class="perfil-btn" data-cycle="ABCED">
+      <span class="perfil-label">ABCED</span>
       <span class="perfil-sub">5 treinos diferentes</span>
     </button>
   </div>
@@ -147,10 +147,8 @@
     const resp = await FEMFLOW.post({
       action: "setciclo",
       id,
-      perfilHormonal: cicloNormalizado,
-      perfilInterno: cicloNormalizado,
+      cicloTreino: cicloNormalizado,
       cicloDuracao: cicloNormalizado.length,
-      diaCicloInicial: 1,
       diaPrograma: 1
     });
 

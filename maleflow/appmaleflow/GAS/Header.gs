@@ -10,9 +10,9 @@ const HYBRID_EXERCISES = true;
 const SCRIPT_URL = ScriptApp.getService().getUrl();
 
 /**
- * IMPORTANTE:
- * - PerfilHormonal fica no índice 19 (0-based)
- * - CicloStartDateManual fica no índice 20 (0-based)
+ * LEGADO (desativado no MaleFlow):
+ * - PerfilHormonal (índice 19)
+ * - CicloStartDateManual (índice 20)
  */
 const COLUNA_PERFIL_HORMONAL = 19;
 const COL_CICLO_DEFINIDO_MANUAL = 20;

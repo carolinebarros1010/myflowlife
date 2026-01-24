@@ -14,8 +14,7 @@ function doPost(e) {
 
   // 🧪 DEBUG CONFIÁVEL (WebApp)
   console.log("📥 ACTION:", data.action);
-  console.log("📥 perfilHormonal:", data.perfilHormonal);
-  console.log("📥 perfilInterno:", data.perfilInterno);
+  console.log("📥 payload keys:", Object.keys(data || {}));
 
   const action = (data.action || "").toString().toLowerCase();
   let resposta = { status: "ignored" };
@@ -83,20 +82,12 @@ function doPost(e) {
         break;
 
       /* ===========================
-         🧬 PERFIL HORMONAL
+         🧬 PERFIL HORMONAL (desativado no MaleFlow)
       ============================ */
       case "setperfilhormonal":
-        resposta = setPerfilHormonal(
-          data.id,
-          data.perfilHormonal || data.perfil
-        );
-        break;
-
-      /* ===========================
-         🔢 DIA DO CICLO @deprecated
-      ============================ */
       case "setdiaciclo":
-        resposta = atualizarDiaCiclo(data.id, data.dia);
+      case "setciclostart":
+        resposta = { status: "ignored", msg: "ciclo_hormonal_desativado" };
         break;
 
       /* ===========================
@@ -128,17 +119,10 @@ function doPost(e) {
         break;
 
       /* ===========================
-         📆 START MANUAL DO CICLO
+         📆 START MANUAL DO CICLO (desativado)
       ============================ */
       case "setmanualstart":
-        resposta = setmanualstart(data.id, data.startDate);
-        break;
-
-      /* ===========================
-         📆 CICLO START (antigo)
-      ============================ */
-      case "setciclostart":
-        resposta = atualizarCicloStart(data.id, data.startDate);
+        resposta = { status: "ignored", msg: "ciclo_hormonal_desativado" };
         break;
 
       /* ===========================
