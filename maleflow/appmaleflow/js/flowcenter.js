@@ -106,8 +106,8 @@ function normalizarFreeAccess(perfil) {
    🔄 PERFIL — VALIDAR (fonte da verdade)
 =========================================================== */
 function flowcenterSyncPerfil() {
-  const id = localStorage.getItem("femflow_id") || "";
-  const email = localStorage.getItem("femflow_email") || "";
+  const id = localStorage.getItem("maleflow_id") || "";
+  const email = localStorage.getItem("maleflow_email") || "";
   if (!id && !email) return { status: "no_auth" };
 
   const qs = new URLSearchParams({ action: "validar" });
@@ -122,18 +122,18 @@ function flowcenterPersistPerfil(perfil) {
   const freeAccess = normalizarFreeAccess(perfil);
   const cicloTreino = FEMFLOW.normalizarCicloTreino(perfil.ciclo_treino || perfil.fase || "");
   if (cicloTreino) {
-    localStorage.setItem("femflow_training_cycle", cicloTreino);
-    localStorage.setItem("femflow_fase", cicloTreino);
+    localStorage.setItem("maleflow_training_cycle", cicloTreino);
+    localStorage.setItem("maleflow_fase", cicloTreino);
   }
-  localStorage.setItem("femflow_diaCiclo", String(perfil.diaCiclo || 1));
-  localStorage.setItem("femflow_diaPrograma", String(perfil.diaPrograma || 1));
+  localStorage.setItem("maleflow_diaCiclo", String(perfil.diaCiclo || 1));
+  localStorage.setItem("maleflow_diaPrograma", String(perfil.diaPrograma || 1));
   if (perfil.ciclo_duracao) {
-    localStorage.setItem("femflow_cycleLength", String(perfil.ciclo_duracao));
+    localStorage.setItem("maleflow_cycleLength", String(perfil.ciclo_duracao));
   } else if (cicloTreino) {
-    localStorage.setItem("femflow_cycleLength", String(cicloTreino.length));
+    localStorage.setItem("maleflow_cycleLength", String(cicloTreino.length));
   }
   localStorage.setItem(
-    "femflow_free_access",
+    "maleflow_free_access",
     freeAccess ? JSON.stringify(freeAccess) : ""
   );
 
@@ -144,7 +144,7 @@ function flowcenterPersistPerfil(perfil) {
   const enfaseBackend = String(perfil.enfase || "").toLowerCase();
 
   if (enfaseBackend && enfaseBackend !== "nenhuma") {
-    localStorage.setItem("femflow_enfase", enfaseBackend);
+    localStorage.setItem("maleflow_enfase", enfaseBackend);
   }
   // ❗ caso contrário, mantém a enfase atual do front
 
@@ -155,7 +155,7 @@ function flowcenterPersistPerfil(perfil) {
   const produto = String(perfil.produto || "").toLowerCase();
   const isVip = produto === "vip";
   localStorage.setItem(
-    "femflow_has_personal",
+    "maleflow_has_personal",
     acessos.personal === true || isVip ? "true" : "false"
   );
 }
@@ -205,10 +205,10 @@ function initFlowCenter() {
      3) CICLO
   ============================================================ */
   if (perfil.fase && perfil.diaCiclo) {
-    localStorage.setItem("femflow_cycle_configured", "yes");
+    localStorage.setItem("maleflow_cycle_configured", "yes");
   }
 
-  if (!localStorage.getItem("femflow_cycle_configured")) {
+  if (!localStorage.getItem("maleflow_cycle_configured")) {
     FEMFLOW.toast("Configure seu ciclo de treino antes.");
     FEMFLOW.dispatch("stateChanged", { type: "ciclo", impact: "estrutural" });
     return;
@@ -221,8 +221,8 @@ function initFlowCenter() {
   const isVip = produtoRaw === "vip";
   const isTrial = produtoRaw === "trial_app";
   const ativa = parseBooleanish(perfil.ativa);
-  const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
-  const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
+  const hasPersonal  = localStorage.getItem("maleflow_has_personal") === "true";
+  const modePersonal = localStorage.getItem("maleflow_mode_personal") === "true";
 
   // 🔥 regra canônica
   const personal = hasPersonal && modePersonal;
@@ -230,7 +230,7 @@ function initFlowCenter() {
 
   const isApp    = produtoRaw === "acesso_app" || isTrial;
   const isFollow = produtoRaw.startsWith("followme_");
-  const enfaseAtualUI = localStorage.getItem("femflow_enfase");
+  const enfaseAtualUI = localStorage.getItem("maleflow_enfase");
   const acessoAtivo = isVip || ativa;
 
   const freeAccess = normalizarFreeAccess(perfil);
@@ -246,7 +246,7 @@ function initFlowCenter() {
   ============================================================ */
   const ciclo = FEMFLOW.getCicloTreinoInfo(Number(perfil.diaPrograma || 1));
   ciclo.diaPrograma = Number(perfil.diaPrograma || 1);
-  localStorage.setItem("femflow_diaCiclo", String(ciclo.diaIndex));
+  localStorage.setItem("maleflow_diaCiclo", String(ciclo.diaIndex));
 
   /* ============================================================
      6) NÍVEL
@@ -433,7 +433,7 @@ function initFlowCenter() {
   const carregarProximoTreino = async () => {
     if (!modalProximoLista || !FEMFLOW.engineTreino?.listarExerciciosDia) return;
 
-    const enfaseAtual = localStorage.getItem("femflow_enfase");
+    const enfaseAtual = localStorage.getItem("maleflow_enfase");
     if (!personal && !enfaseAtual) {
       FEMFLOW.toast("Escolha um treino na Home.");
       return;
@@ -447,7 +447,7 @@ function initFlowCenter() {
     const letraProxima = ciclo.letras[proximoDia - 1] || ciclo.letras[0] || "A";
 
     const exercicios = await FEMFLOW.engineTreino.listarExerciciosDia({
-      id: localStorage.getItem("femflow_id"),
+      id: localStorage.getItem("maleflow_id"),
       nivel: perfil.nivel,
       enfase: enfaseAtual,
       fase: ciclo.ciclo,
@@ -500,19 +500,19 @@ function initFlowCenter() {
       }
       const enfase = btn.dataset.extraEnfase;
       if (!enfase) return;
-      const enfaseAtual = localStorage.getItem("femflow_enfase");
+      const enfaseAtual = localStorage.getItem("maleflow_enfase");
       if (enfaseAtual && !FEMFLOW.engineTreino?.isExtraEnfase?.(enfaseAtual)) {
-        localStorage.setItem("femflow_enfase_base", enfaseAtual);
+        localStorage.setItem("maleflow_enfase_base", enfaseAtual);
       }
-      localStorage.setItem("femflow_treino_extra", "true");
-      localStorage.setItem("femflow_enfase", enfase);
+      localStorage.setItem("maleflow_treino_extra", "true");
+      localStorage.setItem("maleflow_enfase", enfase);
       fecharModalExtra();
       FEMFLOW.router(`treino.html?extra=${encodeURIComponent(enfase)}`);
     });
   });
 
   document.getElementById("toTrain").onclick = () => {
-    const enfase = localStorage.getItem("femflow_enfase");
+    const enfase = localStorage.getItem("maleflow_enfase");
 
     /* 🧭 PRIORIDADE ABSOLUTA — MODO PERSONAL */
     if (personal) {
@@ -572,7 +572,7 @@ function initFlowCenter() {
       FEMFLOW.toast("Endurance disponível apenas no Personal.");
       return;
     }
-    const id = localStorage.getItem("femflow_id");
+    const id = localStorage.getItem("maleflow_id");
     if (id) FEMFLOW.router("geradordecorrida/index.html");
     else location.href = "https://www.myflowlife.com.br/#ofertas";
   };
