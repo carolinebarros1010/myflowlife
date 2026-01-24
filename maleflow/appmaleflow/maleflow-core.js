@@ -297,8 +297,9 @@ FEMFLOW.getCicloTreino = function () {
     if (treinosSemana === 2) return "AB";
     if (treinosSemana === 3) return "ABC";
     if (treinosSemana === 4) return "ABCD";
-    if (treinosSemana === 5) return "ABCED";
-    return "ABC";
+    if (treinosSemana === 5) return "ABCDE";
+    if (treinosSemana === 6) return "ABC";
+    return "ABCDE";
   }
 
   return "ABC";
