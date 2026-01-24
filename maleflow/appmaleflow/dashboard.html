@@ -137,7 +137,7 @@
     });
   }
 
-  function renderAluna(r){
+  function renderAluno(r){
     // aqui você vai evoluir depois pra cards completos (status pagamento, produto, anamnese etc)
     el("result").innerHTML = `
       <div><b>ID:</b> ${r?.id||"-"}</div>
@@ -173,7 +173,7 @@
     if (resp.status !== "ok"){ setPill("Não encontrado", "bad"); return; }
 
     setPill("OK", "ok");
-    renderAluna(resp);
+    renderAluno(resp);
     el("lastBox").textContent = `Última busca: ${id}`;
   }
 

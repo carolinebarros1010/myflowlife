@@ -322,7 +322,7 @@ pt: {
     sair: "Sair"
   },
 home: {
-      bemvinda: "Bem-vinda",
+      bemvinda: "Bem-vindo",
       videoTitulo: "Como funciona o MaleFlow",
       videoSub:   "Assista ao vídeo rápido antes de começar.",
       videoUrl:   "https://www.youtube.com/embed/pAifTtNF9sQ",

@@ -851,7 +851,7 @@ MALEFLOW.carregarPerfil = async function () {
     const r = await fetch(`${MALEFLOW.SCRIPT_URL}?action=validar&id=${id}`).then(r => r.json());
     if (r.status !== "ok") return null;
 
-    localStorage.setItem("maleflow_nome", r.nome || "Aluna");
+    localStorage.setItem("maleflow_nome", r.nome || "Aluno");
     localStorage.setItem("maleflow_fase", r.fase);
     const enfaseAtual = localStorage.getItem("maleflow_enfase");
     const extraAtivo = localStorage.getItem("maleflow_treino_extra") === "true";

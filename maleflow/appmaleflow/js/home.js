@@ -873,7 +873,7 @@ function aplicarIdiomaHome() {
   const L = MALEFLOW.langs?.[lang]?.home;
   if (!L) return;
 
-  const nomeRaw = localStorage.getItem("maleflow_nome") || "Aluna";
+  const nomeRaw = localStorage.getItem("maleflow_nome") || "Aluno";
   const primeiroNome = nomeRaw.split(" ")[0];
 
   // Saudação
