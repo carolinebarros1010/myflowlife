@@ -17,7 +17,7 @@ const ASSETS = [
 
   "./css/style.css",
 
-  "./femflow-core.js",
+  "./maleflow-core.js",
   "./js/ciclo.js",
   "./js/treino.js",
   "./js/anamnese.js",

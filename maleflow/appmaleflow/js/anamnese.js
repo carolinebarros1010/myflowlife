@@ -91,7 +91,7 @@ document.getElementById("btnLang").onclick = () => {
 function getPerguntasTraduzidas() {
   const lang =
     FEMFLOW?.lang ||
-    localStorage.getItem("femflow_lang") ||
+    localStorage.getItem("maleflow_lang") ||
     "pt";
 
   const base = FEMFLOW?.anamneseLang;
@@ -123,8 +123,8 @@ function getPerguntasTraduzidas() {
 
   const SCRIPT_URL =
     FEMFLOW?.SCRIPT_URL ||
-    localStorage.getItem("femflow_script") ||
-    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev/";
+    localStorage.getItem("maleflow_script") ||
+    "https://script.google.com/macros/s/AKfycbxPwSQqmrJiDX5299PdgXHd97r1tqvig2jgLP65EXXviKT0YwTL8CcxXsEzQTZTCepV/exec";
 
   // ------------------------------------------------------------
   //  VALIDAÇÃO
@@ -343,13 +343,13 @@ const loginResp = await FEMFLOW.post({
 
 if (loginResp?.status === "ok") {
   if (loginResp.deviceId) {
-    localStorage.setItem("femflow_device_id", loginResp.deviceId);
+    localStorage.setItem("maleflow_device_id", loginResp.deviceId);
   }
   if (loginResp.sessionToken) {
-    localStorage.setItem("femflow_session_token", loginResp.sessionToken);
+    localStorage.setItem("maleflow_session_token", loginResp.sessionToken);
   }
   if (loginResp.sessionExpira) {
-    localStorage.setItem("femflow_session_expira", String(loginResp.sessionExpira));
+    localStorage.setItem("maleflow_session_expira", String(loginResp.sessionExpira));
   }
 } else {
   const msg = loginResp?.msg || "Erro ao concluir.";
@@ -362,15 +362,15 @@ if (loginResp?.status === "ok") {
   // --------------------------------------------------------
   // 4) SALVAR IDENTIDADE LOCAL
   // --------------------------------------------------------
-  localStorage.setItem("femflow_id", r.id);
-  localStorage.setItem("femflow_email", email);
+  localStorage.setItem("maleflow_id", r.id);
+  localStorage.setItem("maleflow_email", email);
   const nivelBackend = String(r.nivel || loginResp?.nivel || nivel || "").toLowerCase();
   if (nivelBackend) {
-    localStorage.setItem("femflow_nivel", nivelBackend);
+    localStorage.setItem("maleflow_nivel", nivelBackend);
   }
   const diaCicloBackend = r.diaCiclo ?? loginResp?.diaCiclo;
   if (diaCicloBackend !== undefined && diaCicloBackend !== null) {
-    localStorage.setItem("femflow_diaCiclo", String(diaCicloBackend));
+    localStorage.setItem("maleflow_diaCiclo", String(diaCicloBackend));
   }
 
   // --------------------------------------------------------

@@ -4,8 +4,8 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  const id = localStorage.getItem("femflow_id");
-const coachRaw = localStorage.getItem("femflow_followme_coach");
+  const id = localStorage.getItem("maleflow_id");
+const coachRaw = localStorage.getItem("maleflow_followme_coach");
 const coach = coachRaw?.replace("followme_", "");
 const sync = await FEMFLOW.post({
   action: "validar",
@@ -112,7 +112,7 @@ async function salvarTreinoFollowMe(pse) {
 
     // atualiza diaPrograma
     if (resp.diaPrograma) {
-      localStorage.setItem("femflow_diaPrograma", String(resp.diaPrograma));
+      localStorage.setItem("maleflow_diaPrograma", String(resp.diaPrograma));
     }
 
     FEMFLOW.toast("Treino salvo! 🙌");
