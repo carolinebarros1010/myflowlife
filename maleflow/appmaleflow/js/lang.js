@@ -6,7 +6,7 @@
 window.FEMFLOW = window.FEMFLOW || {};
 
 /* idioma inicial */
-FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+FEMFLOW.lang = localStorage.getItem("maleflow_lang") || "pt";
 
 /* ============================================================
    🔤 DICIONÁRIO CORE (MENU + SAC)

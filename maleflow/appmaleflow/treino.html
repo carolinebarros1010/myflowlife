@@ -135,7 +135,7 @@
 
 <!-- SCRIPTS FEMFLOW -->
 <script src="js/lang.js"></script>
-<script src="femflow-core.js"></script>
+<script src="maleflow-core.js"></script>
 <script src="./js/treino-engine.js"></script>
 <script src="./js/treino.js"></script>
 
@@ -148,12 +148,12 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ------------------------------------------------------------
      🔐 MIDDLEWARE — Impede acesso direto por URL
   ------------------------------------------------------------ */
-  const id       = localStorage.getItem("femflow_id");
-  const produto  = localStorage.getItem("femflow_produto");
-  const cicloOK  = localStorage.getItem("femflow_cycle_configured") === "yes";
-  const enfase   = localStorage.getItem("femflow_enfase");
-  const hasPersonal  = localStorage.getItem("femflow_has_personal") === "true";
-  const modePersonal = localStorage.getItem("femflow_mode_personal") === "true";
+  const id       = localStorage.getItem("maleflow_id");
+  const produto  = localStorage.getItem("maleflow_produto");
+  const cicloOK  = localStorage.getItem("maleflow_cycle_configured") === "yes";
+  const enfase   = localStorage.getItem("maleflow_enfase");
+  const hasPersonal  = localStorage.getItem("maleflow_has_personal") === "true";
+  const modePersonal = localStorage.getItem("maleflow_mode_personal") === "true";
   const personal     = hasPersonal && modePersonal;
   const acessoValido = Boolean(id && produto);
 
@@ -196,14 +196,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!resp) return;
 
     if (resp.nivel) {
-      localStorage.setItem("femflow_nivel", resp.nivel);
+      localStorage.setItem("maleflow_nivel", resp.nivel);
     }
   });
 
   document.addEventListener("femflow:nivelAtualizado", (ev) => {
     const nivel = ev.detail;
     if (nivel) {
-      localStorage.setItem("femflow_nivel", nivel);
+      localStorage.setItem("maleflow_nivel", nivel);
     }
   });
 
@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalProximoTitulo = document.getElementById("modalProximoTitulo");
     const modalProximoSub = document.getElementById("modalProximoSub");
     if (modalProximoTitulo) {
-      const diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
+      const diaPrograma = Number(localStorage.getItem("maleflow_diaPrograma") || 1);
       const cicloInfo = FEMFLOW.getCicloTreinoInfo(diaPrograma);
       const proximoDia = cicloInfo.diaIndex + 1 > cicloInfo.tamanho ? 1 : cicloInfo.diaIndex + 1;
       const letraAtual = cicloInfo.letra;
@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
     if (modalProximoSub) {
-      const diaPrograma = Number(localStorage.getItem("femflow_diaPrograma") || 1);
+      const diaPrograma = Number(localStorage.getItem("maleflow_diaPrograma") || 1);
       const cicloInfo = FEMFLOW.getCicloTreinoInfo(diaPrograma);
       const proximoDia = cicloInfo.diaIndex + 1 > cicloInfo.tamanho ? 1 : cicloInfo.diaIndex + 1;
       const letraProxima = cicloInfo.letras[proximoDia - 1] || cicloInfo.letras[0] || "A";
