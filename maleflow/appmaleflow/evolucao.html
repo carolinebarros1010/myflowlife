@@ -63,7 +63,7 @@
 </div>
 
 <script src="js/lang.js"></script>
-<script src="femflow-core.js"></script>
+<script src="maleflow-core.js"></script>
 
 <script>
 /* ============================================================
@@ -72,7 +72,7 @@
 function aplicarIdioma() {
 
   if (!FEMFLOW.lang)
-    FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+    FEMFLOW.lang = localStorage.getItem("maleflow_lang") || "pt";
 
   const langSet = FEMFLOW.langs[FEMFLOW.lang] || FEMFLOW.langs.pt;
   const L = langSet.evolucao;
@@ -116,11 +116,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   FEMFLOW.inserirHeaderApp?.();
 
   /* 🔐 Proteção de acesso */
-  const id = localStorage.getItem("femflow_id");
-  const produto = localStorage.getItem("femflow_produto");
+  const id = localStorage.getItem("maleflow_id");
+  const produto = localStorage.getItem("maleflow_produto");
   const produtoNorm = String(produto || "").toLowerCase();
   const isVip = produtoNorm === "vip";
-  const ativa   = isVip || localStorage.getItem("femflow_ativa") === "true";
+  const ativa   = isVip || localStorage.getItem("maleflow_ativa") === "true";
 
   if (!id || !produto || !ativa) {
     FEMFLOW.toast("Acesse pela Home para continuar 🌸");
@@ -166,11 +166,11 @@ document.addEventListener("DOMContentLoaded", async () => {
      PROGRESSO 30 DIAS
   ============================================================ */
   const diaTreinoBackend = backend?.diaPrograma;
-  const diaTreinoLocal = Number(localStorage.getItem("femflow_dia_treino") || 1);
+  const diaTreinoLocal = Number(localStorage.getItem("maleflow_dia_treino") || 1);
   const dia = diaTreinoBackend || diaTreinoLocal || 1;
 
   if (diaTreinoBackend) {
-    localStorage.setItem("femflow_dia_treino", String(diaTreinoBackend));
+    localStorage.setItem("maleflow_dia_treino", String(diaTreinoBackend));
   }
 
   const prog = Math.min(100, Math.round(((dia - 1) / 30) * 100));
@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnNovo = document.getElementById("novoCicloBtn");
     if (btnNovo) {
       btnNovo.onclick = () => {
-        localStorage.setItem("femflow_dia_treino", "1");
+        localStorage.setItem("maleflow_dia_treino", "1");
         FEMFLOW.router("ciclo.html");
       };
     }
@@ -202,12 +202,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!Array.isArray(hist)) {
     try {
-      hist = JSON.parse(localStorage.getItem("femflow_hist") || "[]");
+      hist = JSON.parse(localStorage.getItem("maleflow_hist") || "[]");
     } catch {
       hist = [];
     }
   } else {
-    localStorage.setItem("femflow_hist", JSON.stringify(hist));
+    localStorage.setItem("maleflow_hist", JSON.stringify(hist));
   }
 
   hist = hist.slice(-40);

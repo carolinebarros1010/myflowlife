@@ -17,7 +17,7 @@ function mapearProduto(productName) {
   };
 }
 
-  if (prodNorm === "femflow_premium") {
+  if (prodNorm === "maleflow_premium") {
     return { slug: "premium", nivel: "iniciante", fase: "follicular", enfase: "geral" };
   }
   if (prodNorm === "acesso_app") {

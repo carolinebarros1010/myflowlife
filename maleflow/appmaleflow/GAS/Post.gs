@@ -182,6 +182,9 @@ function doPost(e) {
       case "settreinossemana":
         resposta = setTreinosSemana_(data);
         break;
+      case "setfrequencia":
+        resposta = setTreinosSemana_(data);
+        break;
 
       /* ===========================
          🧭 ADMIN — PAINEL

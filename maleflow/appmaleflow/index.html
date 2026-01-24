@@ -12,7 +12,8 @@
   <meta name="msapplication-TileImage" content="favicon.ico">
 
   <script>window.FEMFLOW_DISABLE_UI = true;</script>
-  <script defer src="./femflow-core.js"></script>
+  <script defer src="./maleflow-core.js"></script>
+  <script type="module" defer src="./js/firebase.js"></script>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
@@ -75,8 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const scriptURL =
     FEMFLOW.SCRIPT_URL ||
-    localStorage.getItem("femflow_script") ||
-    "https://api-myflowlife.falling-wildflower-a8c0.workers.dev/";
+    localStorage.getItem("maleflow_script") ||
+    "https://script.google.com/macros/s/AKfycbxPwSQqmrJiDX5299PdgXHd97r1tqvig2jgLP65EXXviKT0YwTL8CcxXsEzQTZTCepV/exec";
 
   const $ = sel => document.querySelector(sel);
   const msg = $("#mensagem");
@@ -179,13 +180,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* ===== SESSÃO MÍNIMA ===== */
-    localStorage.setItem("femflow_auth", "yes");
-    localStorage.setItem("femflow_id", res.id);
-    localStorage.setItem("femflow_email", res.email || email);
+    localStorage.setItem("maleflow_auth", "yes");
+    localStorage.setItem("maleflow_id", res.id);
+    localStorage.setItem("maleflow_email", res.email || email);
 
     if (res.deviceId) {
       localStorage.setItem(
-  "femflow_device_id",
+  "maleflow_device_id",
   res.deviceId || FEMFLOW.getDeviceId()
 );
     }
@@ -264,13 +265,13 @@ if (res.deviceUpdated) {
         return;
       }
 
-      localStorage.setItem("femflow_auth", "yes");
-      localStorage.setItem("femflow_id", res.id);
-      localStorage.setItem("femflow_email", res.email || data.email);
+      localStorage.setItem("maleflow_auth", "yes");
+      localStorage.setItem("maleflow_id", res.id);
+      localStorage.setItem("maleflow_email", res.email || data.email);
 
       if (res.deviceId) {
         localStorage.setItem(
-  "femflow_device_id",
+  "maleflow_device_id",
   res.deviceId || FEMFLOW.getDeviceId()
 );
       }
@@ -338,13 +339,13 @@ if (res.deviceUpdated) {
 
       if (res.status !== "ok") return;
 
-      localStorage.setItem("femflow_auth", "yes");
-      localStorage.setItem("femflow_id", res.id);
-      localStorage.setItem("femflow_email", res.email || email);
+      localStorage.setItem("maleflow_auth", "yes");
+      localStorage.setItem("maleflow_id", res.id);
+      localStorage.setItem("maleflow_email", res.email || email);
 
       if (res.deviceId) {
         localStorage.setItem(
-  "femflow_device_id",
+  "maleflow_device_id",
   res.deviceId || FEMFLOW.getDeviceId()
 );
 
@@ -427,12 +428,12 @@ if (res.deviceUpdated) {
 
   window.setLoginLang = lang => {
     FEMFLOW.setLang?.(lang);
-    localStorage.setItem("femflow_lang", lang);
+    localStorage.setItem("maleflow_lang", lang);
     modalLang.classList.add("hidden");
     aplicarIdiomaLogin(lang);
   };
 
-  aplicarIdiomaLogin(localStorage.getItem("femflow_lang") || "pt");
+  aplicarIdiomaLogin(localStorage.getItem("maleflow_lang") || "pt");
 
 });
 </script>

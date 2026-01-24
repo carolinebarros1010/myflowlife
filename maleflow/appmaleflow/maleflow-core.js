@@ -9,13 +9,13 @@ window.FEMFLOW = window.FEMFLOW || {};
    1. CONFIG GLOBAL
 =========================================================== */
 
-FEMFLOW.SCRIPT_URL = "https://api-myflowlife.falling-wildflower-a8c0.workers.dev/";
+FEMFLOW.SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPwSQqmrJiDX5299PdgXHd97r1tqvig2jgLP65EXXviKT0YwTL8CcxXsEzQTZTCepV/exec";
 FEMFLOW.API_URL = FEMFLOW.SCRIPT_URL;
 
-FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
+FEMFLOW.lang = localStorage.getItem("maleflow_lang") || "pt";
 FEMFLOW.setLang = function (lang) {
   FEMFLOW.lang = lang;
-  localStorage.setItem("femflow_lang", lang);
+  localStorage.setItem("maleflow_lang", lang);
   document.dispatchEvent(new Event("femflow:langChange"));
 };
 
@@ -43,14 +43,14 @@ FEMFLOW.dispatch = function(type, detail = {}) {
 
 FEMFLOW.getDeviceId = function () {
   // 1️⃣ tenta localStorage
-  let d = localStorage.getItem("femflow_device_id");
+  let d = localStorage.getItem("maleflow_device_id");
   if (d) return d;
 
   // 2️⃣ tenta cookie persistente
-  const m = document.cookie.match(/(?:^|;)\s*ff_device=([^;]+)/);
+  const m = document.cookie.match(/(?:^|;)\s*mf_device=([^;]+)/);
   if (m && m[1]) {
     d = decodeURIComponent(m[1]);
-    localStorage.setItem("femflow_device_id", d);
+    localStorage.setItem("maleflow_device_id", d);
     return d;
   }
 
@@ -60,9 +60,9 @@ FEMFLOW.getDeviceId = function () {
     ("dev-" + Date.now() + "-" + Math.random().toString(36).slice(2));
 
   // salva nos dois
-  localStorage.setItem("femflow_device_id", d);
+  localStorage.setItem("maleflow_device_id", d);
   document.cookie =
-    "ff_device=" +
+    "mf_device=" +
     encodeURIComponent(d) +
     "; path=/; max-age=31536000; SameSite=Lax";
 
@@ -71,21 +71,21 @@ FEMFLOW.getDeviceId = function () {
 
 
 FEMFLOW.getSessionToken = function () {
-  return localStorage.getItem("femflow_session_token") || "";
+  return localStorage.getItem("maleflow_session_token") || "";
 };
 
 FEMFLOW.setSessionToken = function (token) {
   if (token) {
-    localStorage.setItem("femflow_session_token", token);
+    localStorage.setItem("maleflow_session_token", token);
   }
 };
 
 FEMFLOW.clearSession = function () {
-  localStorage.removeItem("femflow_session_token");
+  localStorage.removeItem("maleflow_session_token");
 };
 
 
-FEMFLOW.dev = () => localStorage.getItem("femflow_dev") === "on";
+FEMFLOW.dev = () => localStorage.getItem("maleflow_dev") === "on";
 FEMFLOW.log   = (...a) => FEMFLOW.dev() && console.log("%c[FEMFLOW]", "color:#cc6a5a", ...a);
 FEMFLOW.warn  = (...a) => FEMFLOW.dev() && console.warn("%c[FEMFLOW ⚠]", "color:#e07f67", ...a);
 FEMFLOW.error = (...a) => FEMFLOW.dev() && console.error("%c[FEMFLOW ❌]", "color:#b74333", ...a);
@@ -139,7 +139,7 @@ FEMFLOW.loading.hide = function () {
 };
 
 FEMFLOW.log = function (...args) {
-  if (localStorage.getItem("femflow_dev") === "true") {
+  if (localStorage.getItem("maleflow_dev") === "true") {
     console.log("[FemFlow]", ...args);
   }
 };
@@ -180,10 +180,10 @@ FEMFLOW.post = async function (payload) {
     FEMFLOW.toast?.("Sessão inválida. Faça login novamente.", true);
     FEMFLOW.clearSession();
 
-localStorage.removeItem("femflow_auth");
-localStorage.removeItem("femflow_id");
-localStorage.removeItem("femflow_email");
-// ❗ NÃO remover femflow_device_id
+localStorage.removeItem("maleflow_auth");
+localStorage.removeItem("maleflow_id");
+localStorage.removeItem("maleflow_email");
+// ❗ NÃO remover maleflow_device_id
     location.href = "index.html";
     throw new Error("Sessão inválida");
   }
@@ -198,14 +198,14 @@ localStorage.removeItem("femflow_email");
 FEMFLOW.getDiaPrograma = async function () {
 
   // 1) tentar ler do localStorage
-  let d = Number(localStorage.getItem("femflow_diaPrograma"));
+  let d = Number(localStorage.getItem("maleflow_diaPrograma"));
 
   if (d && !isNaN(d) && d > 0) {
     return d; // retorno imediato
   }
 
   // 2) fallback → buscar no backend
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
   if (!id) return 1;
 
   try {
@@ -216,7 +216,7 @@ FEMFLOW.getDiaPrograma = async function () {
 
 
     if (resp?.diaPrograma > 0) {
-      localStorage.setItem("femflow_diaPrograma", resp.diaPrograma);
+      localStorage.setItem("maleflow_diaPrograma", resp.diaPrograma);
       return resp.diaPrograma;
     }
   } catch (e) {
@@ -224,7 +224,7 @@ FEMFLOW.getDiaPrograma = async function () {
   }
 
   // fallback final
-  localStorage.setItem("femflow_diaPrograma", "1");
+  localStorage.setItem("maleflow_diaPrograma", "1");
   return 1;
 };
 
@@ -233,10 +233,10 @@ FEMFLOW.setDiaPrograma = async function (novoValor) {
   novoValor = Number(novoValor) || 1;
 
   // Local
-  localStorage.setItem("femflow_diaPrograma", String(novoValor));
+  localStorage.setItem("maleflow_diaPrograma", String(novoValor));
 
   // Backend
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
   if (!id) return;
 
   try {
@@ -253,7 +253,7 @@ FEMFLOW.setDiaPrograma = async function (novoValor) {
 
 
 FEMFLOW.incrementarDiaPrograma = async function () {
-  let d = Number(localStorage.getItem("femflow_diaPrograma")) || 1;
+  let d = Number(localStorage.getItem("maleflow_diaPrograma")) || 1;
   d++;
 
   await FEMFLOW.setDiaPrograma(d);
@@ -282,21 +282,23 @@ FEMFLOW.normalizarCicloTreino = function (raw) {
 
 FEMFLOW.getCicloTreino = function () {
   const stored = FEMFLOW.normalizarCicloTreino(
-    localStorage.getItem("femflow_training_cycle") ||
-    localStorage.getItem("femflow_fase") ||
+    localStorage.getItem("maleflow_training_cycle") ||
+    localStorage.getItem("maleflow_fase") ||
     ""
   );
   if (stored) return stored;
 
-  const treinosSemana = Number(localStorage.getItem("femflow_treinos_semana"));
+  const treinosSemana = Number(
+    localStorage.getItem("maleflow_frequencia") ||
+    localStorage.getItem("maleflow_treinos_semana")
+  );
   if (Number.isFinite(treinosSemana) && treinosSemana >= 1) {
     if (treinosSemana === 1) return "A";
     if (treinosSemana === 2) return "AB";
     if (treinosSemana === 3) return "ABC";
     if (treinosSemana === 4) return "ABCD";
-    if (treinosSemana === 5) return "ABCDE";
-    if (treinosSemana === 6) return "ABC";
-    return "ABCDE";
+    if (treinosSemana === 5) return "ABCED";
+    return "ABC";
   }
 
   return "ABC";
@@ -314,10 +316,10 @@ FEMFLOW.getCicloTreinoInfo = function (diaPrograma) {
 
 FEMFLOW.setCicloTreino = function (ciclo) {
   const normalizado = FEMFLOW.normalizarCicloTreino(ciclo) || "ABC";
-  localStorage.setItem("femflow_training_cycle", normalizado);
-  localStorage.setItem("femflow_fase", normalizado);
-  localStorage.setItem("femflow_cycleLength", String(normalizado.length));
-  localStorage.setItem("femflow_cycle_configured", "yes");
+  localStorage.setItem("maleflow_training_cycle", normalizado);
+  localStorage.setItem("maleflow_fase", normalizado);
+  localStorage.setItem("maleflow_cycleLength", String(normalizado.length));
+  localStorage.setItem("maleflow_cycle_configured", "yes");
   return normalizado;
 };
 
@@ -329,7 +331,7 @@ FEMFLOW.setCicloTreino = function (ciclo) {
 FEMFLOW.router = pag => {
   const destino = pag.endsWith(".html") ? pag : pag + ".html";
 
-  if (localStorage.getItem("femflow_mode_personal") === "true") {
+  if (localStorage.getItem("maleflow_mode_personal") === "true") {
     location.href = `${destino}?personal=1`;
   } else {
     location.href = destino;
@@ -342,8 +344,8 @@ FEMFLOW.router = pag => {
 =========================================================== */
 
 FEMFLOW.renderVipBadge = function () {
-  const id = localStorage.getItem("femflow_id");
-  const produto = localStorage.getItem("femflow_produto");
+  const id = localStorage.getItem("maleflow_id");
+  const produto = localStorage.getItem("maleflow_produto");
   const isVip = Boolean(id) && String(produto || "").toLowerCase() === "vip";
   const existing = document.getElementById("ffVipBadge");
 
@@ -421,7 +423,7 @@ FEMFLOW.inserirHeaderApp = function () {
    Fonte da verdade: BACKEND
 =========================================================== */
 FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
   if (!id) return;
 
   FEMFLOW.log?.("Commit mudança:", tipo, payload);
@@ -447,8 +449,8 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
         id
       });
 
-      localStorage.setItem("femflow_nivel", nivelNorm);
-      localStorage.removeItem("femflow_diaPrograma");
+      localStorage.setItem("maleflow_nivel", nivelNorm);
+      localStorage.removeItem("maleflow_diaPrograma");
     }
 
     // ----------------------------
@@ -478,14 +480,14 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
       });
 
       if (payload.perfilHormonal) {
-        localStorage.setItem("femflow_perfilHormonal", payload.perfilHormonal);
+        localStorage.setItem("maleflow_perfilHormonal", payload.perfilHormonal);
       }
 
       if (payload.startDate) {
-        localStorage.setItem("femflow_startDate", payload.startDate);
+        localStorage.setItem("maleflow_startDate", payload.startDate);
       }
 
-      localStorage.removeItem("femflow_diaPrograma");
+      localStorage.removeItem("maleflow_diaPrograma");
     }
 
   } catch (err) {
@@ -503,7 +505,7 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
 FEMFLOW.carregarCicloBackend = async function () {
   FEMFLOW.log("🔄 SYNC ciclo…");
 
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
   if (!id) return null;
 
   try {
@@ -516,32 +518,32 @@ FEMFLOW.carregarCicloBackend = async function () {
     if (!cicloTreino) return null;
 
     // Dados de treino — sem alterar produto/ativa/personal
-    localStorage.setItem("femflow_fase", cicloTreino);
-    localStorage.setItem("femflow_training_cycle", cicloTreino);
-    localStorage.setItem("femflow_diaCiclo", String(resp.diaCiclo || 1));
-    localStorage.setItem("femflow_cycle_configured", "yes");
+    localStorage.setItem("maleflow_fase", cicloTreino);
+    localStorage.setItem("maleflow_training_cycle", cicloTreino);
+    localStorage.setItem("maleflow_diaCiclo", String(resp.diaCiclo || 1));
+    localStorage.setItem("maleflow_cycle_configured", "yes");
     if (resp.perfilHormonal) {
-      localStorage.setItem("femflow_perfilHormonal", resp.perfilHormonal);
+      localStorage.setItem("maleflow_perfilHormonal", resp.perfilHormonal);
     }
     if (resp.nivel) {
-      localStorage.setItem("femflow_nivel", resp.nivel);
+      localStorage.setItem("maleflow_nivel", resp.nivel);
     }
-    const enfaseAtual = localStorage.getItem("femflow_enfase");
-    const extraAtivo = localStorage.getItem("femflow_treino_extra") === "true";
+    const enfaseAtual = localStorage.getItem("maleflow_enfase");
+    const extraAtivo = localStorage.getItem("maleflow_treino_extra") === "true";
     const enfaseAtualExtra = String(enfaseAtual || "").toLowerCase().startsWith("extra_");
     const enfaseBackend = String(resp.enfase || "").toLowerCase().trim();
     const enfaseValida = Boolean(enfaseBackend && enfaseBackend !== "nenhuma");
     if (extraAtivo && enfaseAtualExtra) {
-      if (enfaseValida && !localStorage.getItem("femflow_enfase_base")) {
-        localStorage.setItem("femflow_enfase_base", enfaseBackend);
+      if (enfaseValida && !localStorage.getItem("maleflow_enfase_base")) {
+        localStorage.setItem("maleflow_enfase_base", enfaseBackend);
       }
     } else if (enfaseValida) {
-      localStorage.setItem("femflow_enfase", enfaseBackend);
+      localStorage.setItem("maleflow_enfase", enfaseBackend);
     }
     if (resp.ciclo_duracao) {
-      localStorage.setItem("femflow_cycleLength", resp.ciclo_duracao);
+      localStorage.setItem("maleflow_cycleLength", resp.ciclo_duracao);
     }
-    localStorage.setItem("femflow_startDate", resp.data_inicio);
+    localStorage.setItem("maleflow_startDate", resp.data_inicio);
 
     return resp;
 
@@ -637,7 +639,7 @@ FEMFLOW.inserirModalIdioma = function () {
   modal.querySelectorAll(".ff-lang-btn").forEach(btn => {
     btn.onclick = () => {
       const lang = btn.dataset.lang;
-      localStorage.setItem("femflow_lang", lang);
+      localStorage.setItem("maleflow_lang", lang);
       FEMFLOW.toast("Idioma atualizado!");
       setTimeout(() => location.reload(), 500);
     };
@@ -724,18 +726,18 @@ FEMFLOW.enviarSAC = async function () {
 
   const payload = {
     action: "sac_abrir",
-    id: localStorage.getItem("femflow_id"),
+    id: localStorage.getItem("maleflow_id"),
     categoria_ui: cat,
     mensagem,
     lang: FEMFLOW.lang,
     contexto: {
       pagina: location.pathname.split("/").pop(),
-      fase: localStorage.getItem("femflow_fase"),
-      diaCiclo: Number(localStorage.getItem("femflow_diaCiclo") || 0),
-      diaPrograma: Number(localStorage.getItem("femflow_diaPrograma") || 0),
-      perfilHormonal: localStorage.getItem("femflow_perfilHormonal"),
-      nivel: localStorage.getItem("femflow_nivel"),
-      enfase: localStorage.getItem("femflow_enfase")
+      fase: localStorage.getItem("maleflow_fase"),
+      diaCiclo: Number(localStorage.getItem("maleflow_diaCiclo") || 0),
+      diaPrograma: Number(localStorage.getItem("maleflow_diaPrograma") || 0),
+      perfilHormonal: localStorage.getItem("maleflow_perfilHormonal"),
+      nivel: localStorage.getItem("maleflow_nivel"),
+      enfase: localStorage.getItem("maleflow_enfase")
     }
   };
 
@@ -799,16 +801,16 @@ FEMFLOW.dispatch("stateChanged", {
     case "tema":
       document.body.classList.toggle("dark");
       localStorage.setItem(
-        "femflow_theme",
+        "maleflow_theme",
         document.body.classList.contains("dark") ? "dark" : "light"
       );
       break;
 
     case "logout":
       FEMFLOW.clearSession();
-      localStorage.removeItem("femflow_id");
-      localStorage.removeItem("femflow_auth");
-      localStorage.removeItem("femflow_email");
+      localStorage.removeItem("maleflow_id");
+      localStorage.removeItem("maleflow_auth");
+      localStorage.removeItem("maleflow_email");
       location.href = "index.html";
       break;
 
@@ -829,9 +831,9 @@ FEMFLOW.dispatch("stateChanged", {
 
 
 FEMFLOW.resetProgramaAtual = function () {
-  localStorage.removeItem("femflow_diaPrograma");
-  localStorage.removeItem("femflow_enfase");
-  localStorage.removeItem("femflow_treinoAtual");
+  localStorage.removeItem("maleflow_diaPrograma");
+  localStorage.removeItem("maleflow_enfase");
+  localStorage.removeItem("maleflow_treinoAtual");
 };
 
 FEMFLOW.renderNivelModal = function () {
@@ -882,11 +884,11 @@ FEMFLOW.initNivelHandler = function () {
     const nivelNorm = String(nivel || "").toLowerCase().trim();
     if (!nivelNorm) return FEMFLOW.toast(FEMFLOW.t("nivelModal.selecione"));
 
-    localStorage.setItem("femflow_nivel", nivelNorm);
+    localStorage.setItem("maleflow_nivel", nivelNorm);
 
     await FEMFLOW.post({
       action: "setnivel",
-      id: localStorage.getItem("femflow_id"),
+      id: localStorage.getItem("maleflow_id"),
       nivel: nivelNorm
     });
 
@@ -907,47 +909,47 @@ FEMFLOW.initNivelHandler = function () {
 =========================================================== */
 
 FEMFLOW.carregarPerfil = async function () {
-  const id = localStorage.getItem("femflow_id");
+  const id = localStorage.getItem("maleflow_id");
   if (!id) return null;
 
   try {
     const r = await fetch(`${FEMFLOW.SCRIPT_URL}?action=validar&id=${id}`).then(r => r.json());
     if (r.status !== "ok") return null;
 
-    localStorage.setItem("femflow_nome", r.nome || "Aluno");
-    localStorage.setItem("femflow_fase", r.fase);
-    const enfaseAtual = localStorage.getItem("femflow_enfase");
-    const extraAtivo = localStorage.getItem("femflow_treino_extra") === "true";
+    localStorage.setItem("maleflow_nome", r.nome || "Aluno");
+    localStorage.setItem("maleflow_fase", r.fase);
+    const enfaseAtual = localStorage.getItem("maleflow_enfase");
+    const extraAtivo = localStorage.getItem("maleflow_treino_extra") === "true";
     const enfaseAtualExtra = String(enfaseAtual || "").toLowerCase().startsWith("extra_");
     const enfaseBackend = String(r.enfase || "").toLowerCase().trim();
     const enfaseValida = Boolean(enfaseBackend && enfaseBackend !== "nenhuma");
     if (extraAtivo && enfaseAtualExtra) {
-      if (enfaseValida && !localStorage.getItem("femflow_enfase_base")) {
-        localStorage.setItem("femflow_enfase_base", enfaseBackend);
+      if (enfaseValida && !localStorage.getItem("maleflow_enfase_base")) {
+        localStorage.setItem("maleflow_enfase_base", enfaseBackend);
       }
     } else if (enfaseValida) {
-      localStorage.setItem("femflow_enfase", enfaseBackend);
+      localStorage.setItem("maleflow_enfase", enfaseBackend);
     }
-    localStorage.setItem("femflow_diaCiclo", r.diaCiclo);
+    localStorage.setItem("maleflow_diaCiclo", r.diaCiclo);
     if (r.nivel) {
-      localStorage.setItem("femflow_nivel", r.nivel);
+      localStorage.setItem("maleflow_nivel", r.nivel);
     }
-    localStorage.setItem("femflow_startDate", r.data_inicio);
-    localStorage.setItem("femflow_cycleLength", r.ciclo_duracao);
-    localStorage.setItem("femflow_perfilHormonal", r.perfilHormonal);
+    localStorage.setItem("maleflow_startDate", r.data_inicio);
+    localStorage.setItem("maleflow_cycleLength", r.ciclo_duracao);
+    localStorage.setItem("maleflow_perfilHormonal", r.perfilHormonal);
 
     const produtoRaw = (r.produto || "").toLowerCase().trim();
     const isVip = produtoRaw === "vip";
     const ativaRaw   = isVip || r.ativa === true || r.ativa === "true";
 
-    localStorage.setItem("femflow_produto", produtoRaw);
-    localStorage.setItem("femflow_ativa", ativaRaw ? "true" : "false");
+    localStorage.setItem("maleflow_produto", produtoRaw);
+    localStorage.setItem("maleflow_ativa", ativaRaw ? "true" : "false");
 
     localStorage.setItem(
-      "femflow_has_personal",
+      "maleflow_has_personal",
       r.personal || isVip ? "true" : "false"
     );
-    localStorage.removeItem("femflow_personal");
+    localStorage.removeItem("maleflow_personal");
     FEMFLOW.renderVipBadge?.();
 
     return r;
@@ -1037,7 +1039,7 @@ FEMFLOW.init = async function () {
       FEMFLOW.initNivelHandler();
     });
 
-    if (!localStorage.getItem("femflow_cycle_configured")) {
+    if (!localStorage.getItem("maleflow_cycle_configured")) {
       location.href = "ciclo.html";
       return;
     }
