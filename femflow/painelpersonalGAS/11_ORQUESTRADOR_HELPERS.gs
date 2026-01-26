@@ -1,10 +1,13 @@
 /* ========================================================================
-   FEMFLOW — 11_ORQUESTRADOR_HELPERS.gs
+   FEMFLOW — 11_ORQUESTRADOR_HELPERS.gs (VERSÃO FINAL)
    ------------------------------------------------------------------------
    Responsabilidade ÚNICA:
    - Helpers faltantes do orquestrador
    ------------------------------------------------------------------------
    ⚠️ Não renomear funções.
+   ------------------------------------------------------------------------
+   ✅ Ajuste cirúrgico: suporte header/CSV FemFlow + MaleFlow
+   ✅ Proteção: aplicarSerieEspecialBaseOvulatoria_ apenas FemFlow
    ======================================================================== */
 
 function planejarFaseComOpenAI_(fase, nivel, enfaseRaw) {
@@ -159,13 +162,53 @@ function linkerAplicarBase_(rows) {
   return Array.isArray(rows) ? rows : [];
 }
 
+/* ============================================================
+   ✅ NOVO: detectar header FemFlow vs MaleFlow
+   - Se a aba tiver "ciclo" ou "diatreino", usa header MaleFlow
+   - Caso contrário, usa FEMFLOW.CSV_COLS
+============================================================ */
+function getCSVHeaderForSheet_(sheetOrName) {
+  const ss = SpreadsheetApp.getActive();
+  const sh = (typeof sheetOrName === 'string')
+    ? ss.getSheetByName(String(sheetOrName || '').trim())
+    : sheetOrName;
+
+  // default FemFlow
+  const fem = (typeof FEMFLOW !== 'undefined' && Array.isArray(FEMFLOW.CSV_COLS)) ? FEMFLOW.CSV_COLS : [];
+
+  if (!sh) return fem;
+
+  // se existir header na planilha, detecta colunas
+  const vals = sh.getDataRange().getValues();
+  const header = (vals && vals.length) ? vals[0].map(h => String(h || '').trim()) : [];
+  const headerLower = header.map(h => h.toLowerCase());
+
+  const hasMale = headerLower.includes('ciclo') || headerLower.includes('diatreino');
+
+  // tenta MALEFLOW.CSV_COLS se existir
+  const male = (typeof MALEFLOW !== 'undefined' && Array.isArray(MALEFLOW.CSV_COLS)) ? MALEFLOW.CSV_COLS : null;
+
+  if (hasMale) {
+    if (male && male.length) return male;
+
+    // fallback: se não existe MALEFLOW.CSV_COLS, cria baseado no FEMFLOW.CSV_COLS
+    // e acrescenta ciclo/diatreino quando necessário
+    const base = fem.slice();
+    if (!base.includes('ciclo')) base.splice(base.indexOf('enfase') + 1, 0, 'ciclo');
+    if (!base.includes('diatreino')) base.splice(base.indexOf('ciclo') + 1, 0, 'diatreino');
+    // remove fase/dia se estiver operando male puro? (não removo para não quebrar compat)
+    return base;
+  }
+
+  return fem;
+}
+
 function salvarNaAbaTabela_(p, rows) {
   const destino = p?.destino ? String(p.destino).trim() : '';
   if (!destino) throw new Error('destino obrigatório');
   const isPersonalDestino = /^personal_/i.test(destino);
 
   const dados = Array.isArray(rows) ? rows : [];
-  const header = FEMFLOW.CSV_COLS || [];
 
   const ss = SpreadsheetApp.getActive();
   let sh = ss.getSheetByName(destino);
@@ -173,7 +216,9 @@ function salvarNaAbaTabela_(p, rows) {
 
   sh.clearContents();
 
-  if (!header.length) return;
+  // ✅ header dinâmico (FemFlow vs MaleFlow)
+  const header = getCSVHeaderForSheet_(sh);
+  if (!header || !header.length) return;
 
   sh.getRange(1, 1, 1, header.length).setValues([header]);
 
@@ -181,7 +226,10 @@ function salvarNaAbaTabela_(p, rows) {
 
   const values = dados.map(row => header.map(col => {
     const value = row[col];
+
+    // FemFlow: personal enfase vira "personal"
     if (col === 'enfase' && isPersonalDestino) return 'personal';
+
     return value === undefined || value === null ? '' : value;
   }));
 
@@ -189,8 +237,25 @@ function salvarNaAbaTabela_(p, rows) {
 }
 
 function gerarCSV_(rows) {
-  const header = FEMFLOW.CSV_COLS || [];
+  // ✅ tenta detectar header a partir de objeto linha:
+  // - se existir ciclo/diatreino usa header male
+  // - senão usa fem
   const dados = Array.isArray(rows) ? rows : [];
+  const first = dados[0] || {};
+
+  let header = (typeof FEMFLOW !== 'undefined' && Array.isArray(FEMFLOW.CSV_COLS)) ? FEMFLOW.CSV_COLS : [];
+
+  const isMaleRow = (first && (first.ciclo !== undefined || first.diatreino !== undefined));
+  if (isMaleRow) {
+    const male = (typeof MALEFLOW !== 'undefined' && Array.isArray(MALEFLOW.CSV_COLS)) ? MALEFLOW.CSV_COLS : null;
+    if (male && male.length) {
+      header = male;
+    } else {
+      header = header.slice();
+      if (!header.includes('ciclo')) header.splice(header.indexOf('enfase') + 1, 0, 'ciclo');
+      if (!header.includes('diatreino')) header.splice(header.indexOf('ciclo') + 1, 0, 'diatreino');
+    }
+  }
 
   const linhas = [];
   linhas.push(header.join(','));
@@ -420,6 +485,9 @@ function relinkarAba_(nomeAba, nivel) {
   };
 }
 
+/* ============================================================
+   ✅ Proteção: Série especial é FemFlow (BASE_OVULATORIA)
+============================================================ */
 function aplicarSerieEspecialBaseOvulatoria_(params) {
   const payload = params || {};
   const serieEspecialAtiva = normalizarSerieEspecialAtiva_(payload.serieEspecialAtiva);
@@ -458,6 +526,11 @@ function aplicarSerieEspecialBaseOvulatoria_(params) {
     link: col('link'),
     especial: col('especial')
   };
+
+  // ✅ Se não tem fase/dia, essa aba não é FemFlow base
+  if (idx.fase === -1 || idx.dia === -1) {
+    throw new Error('Série especial disponível apenas para BASE_OVULATORIA (FemFlow).');
+  }
 
   const obrigatorias = ['tipo', 'box', 'ordem', 'fase', 'dia', 'titulo_pt', 'link'];
   const faltando = obrigatorias.filter(k => idx[k] === -1);
