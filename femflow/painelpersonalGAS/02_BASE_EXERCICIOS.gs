@@ -274,7 +274,7 @@ function encontrarHitBase_(tituloPt, base, nivel) {
 
   // 5) OPENAI → ID (compat: 1 parâmetro)
   if (typeof resolverCanonicoIdOpenAI_ === 'function') {
-    const idCanonico = resolverCanonicoIdOpenAI_(limpo);
+    const idCanonico = resolverCanonicoIdOpenAI_(limpo, base);
     if (idCanonico && base.byId && base.byId[idCanonico]) {
       const ex = base.byId[idCanonico];
       logCanonResolver_(original, idCanonico, 'OPENAI_ID');
