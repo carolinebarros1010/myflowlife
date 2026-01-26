@@ -4,8 +4,13 @@
    Extraído fielmente de: GAS PAINELPERSONAL.txt
    ⚠️ Não renomear funções.
    ⚠️ Não alterar lógica.
+   ------------------------------------------------------------------------
+   ✅ Adição cirúrgica: suporte MaleFlow (sem quebrar FemFlow)
    ======================================================================== */
 
+/* ============================================================
+   FEMFLOW — PIPELINE ORIGINAL (inalterado)
+============================================================ */
 function gerarFemFlow30Dias(pedidoTexto) {
 
   const p = parsePedido_(pedidoTexto);
@@ -462,4 +467,141 @@ function completarExerciciosMinimo_(ctx, base, exercicios, historico) {
   }
 
   return lista;
+}
+
+/* ========================================================================
+   ✅ ADIÇÃO: MALEFLOW — GERAR BASE ABCDE (5 dias)
+   ------------------------------------------------------------------------
+   - Não altera FemFlow
+   - Reusa resolver/normalização/banco/gerarDia_
+   - Escreve na aba BASE_ABCDE
+   - ctx carrega: ciclo + diatreino
+   - usa fase fixa "ovulatoria" para reaproveitar regras (HIIT/Especial)
+   ======================================================================== */
+
+/**
+ * Gera SOMENTE a base MaleFlow (ABCDE) e salva em BASE_ABCDE
+ * pedidoTexto pode vir com:
+ * - nivel
+ * - enfase
+ * - padraoCiclo (opcional, default ABCDE)
+ * - destino (ignoramos, forçamos BASE_ABCDE)
+ */
+function gerarBaseMaleFlowSomente_(pedidoTexto) {
+  const p = parsePedido_(pedidoTexto);
+  validarPedido_(p);
+
+  const base = carregarBaseExercicios_();
+  const padrao = resolverPadraoCiclo_(p.padraoCiclo); // ABC/ABCD/ABCDE
+  const linked = gerarBaseABCDE_MaleFlow_(p, padrao, base);
+
+  salvarNaAbaTabela_(Object.assign({}, p, { destino: 'BASE_ABCDE' }), linked);
+  return gerarCSV_(linked);
+}
+
+/**
+ * Gera a base ABCDE (5 dias) para MaleFlow.
+ * - ciclo = string do padrao (ex: "ABCDE")
+ * - diatreino = A..E
+ * - fase fixa "ovulatoria" (para reaproveitar infra existente sem hormonal)
+ */
+function gerarBaseABCDE_MaleFlow_(p, padrao, base) {
+  const diasRows = [];
+
+  // ciclo textual (ABC/ABCD/ABCDE)
+  const cicloTxt = Array.isArray(padrao) ? padrao.join('') : String(padrao || 'ABCDE');
+
+  // gera 1..N dias correspondentes ao padrao (A,B,C,D,E)
+  for (let i = 0; i < padrao.length; i++) {
+    const diatreino = padrao[i]; // A..E
+    const estrutura = diatreino; // reaproveita estrutura A–E
+
+    // ctx MaleFlow
+    const ctx = {
+      // FemFlow fields (mantemos preenchidos para compatibilidade de helpers)
+      dia: i + 1,                 // só para ordenação local (não é ciclo de 30)
+      fase: 'ovulatoria',         // fixo
+      nivel: p.nivel,
+      enfase: p.enfase,
+      estrutura,
+
+      // MaleFlow fields (novos)
+      ciclo: cicloTxt,
+      diatreino: diatreino,
+
+      destino: 'BASE_ABCDE',
+      idAluna: p.idAluna,
+
+      // mantém série especial se vier no pedido
+      serieEspecialAtiva: p.serieEspecialAtiva,
+      serieEspecialFase: p.serieEspecialFase,
+      serieEspecialTipo: p.serieEspecialTipo,
+      serieEspecialDiaTipo: p.serieEspecialDiaTipo,
+
+      padraoCiclo: padrao,
+      historico: []
+    };
+    ctx.serieEspecialTipoDia = resolverTipoSerieEspecialDia_(ctx);
+
+    // Intenções: reaproveita a mesma regra estrutural do FemFlow
+    ctx._intencoesDia = [];
+    if (estrutura === 'C') {
+      ctx._intencoesDia.push({
+        grupo_principal: normalizarEnfaseParaGrupo_(ctx.enfase),
+        subpadrao_movimento: null,
+        equipamento_preferencial: null
+      });
+    } else {
+      // no MaleFlow sem plano de fase: usamos intenção "padrão do microciclo" por estrutura
+      // Se não existir helper, cai em vazio e o resolver usa fallback de base.
+      const intencoes = (typeof extrairIntencoesDoPlano_ === 'function')
+        ? extrairIntencoesDoPlano_(null, estrutura, ctx.dia)
+        : [];
+      if (Array.isArray(intencoes) && intencoes.length) ctx._intencoesDia.push(...intencoes);
+    }
+
+    // Quantidade alvo (MaleFlow: mínimo 4/6/8, teto 10 é aplicado no gerarDia_)
+    const qtdBase = qtdExerciciosTreino_(ctx.nivel, ctx.fase, estrutura);
+    ctx.qtdExercicios = ajustarQtdExerciciosPorSerieEspecial_(ctx, qtdBase);
+
+    // Resolver exercícios (sem OpenAI como primária aqui — mas se você quiser manter, respeita flags)
+    let exerciciosResolvidos = [];
+
+    if (usarOpenAIComoFontePrimaria_(ctx)) {
+      const brutos = plannerExerciciosOpenAI_(ctx, ctx.qtdExercicios);
+      salvarExerciciosParaEnfase_(ctx, brutos);
+      exerciciosResolvidos = brutos
+        .map(ex => resolverExercicioPorTitulo_(ex.titulo_pt, ctx))
+        .filter(Boolean);
+    } else {
+      exerciciosResolvidos = ctx._intencoesDia
+        .map(intent =>
+          resolverExercicioPorIntencao_(
+            intent,
+            ctx,
+            base,
+            diasRows
+          )
+        )
+        .filter(Boolean);
+    }
+
+    exerciciosResolvidos = prepararExerciciosParaBase_(exerciciosResolvidos, ctx, base);
+    exerciciosResolvidos = completarExerciciosMinimo_(ctx, base, exerciciosResolvidos, diasRows);
+    ctx.exerciciosResolvidos = exerciciosResolvidos;
+
+    // Gera linhas do dia (07 já inclui ciclo/diatreino no output)
+    const rowsDia = gerarDia_(ctx);
+
+    // Ajuste final: garantir que o "dia" seja o diatreino no output se necessário
+    // (sem quebrar FemFlow; apenas sobrescreve campos quando existirem)
+    rowsDia.forEach(r => {
+      r.ciclo = cicloTxt;
+      r.diatreino = diatreino;
+    });
+
+    diasRows.push(...rowsDia);
+  }
+
+  return linkerAplicarBase_(diasRows);
 }
