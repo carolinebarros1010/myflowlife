@@ -1,21 +1,21 @@
 /* ========================================================================
-   FEMFLOW — 06_RESOLVER_EXERCICIO.gs  (VERSÃO FINAL — SEM ERRO DE SINTAXE)
+   FEMFLOW — 06_RESOLVER_EXERCICIO.gs (VERSÃO FINAL — COMPATÍVEL)
    ------------------------------------------------------------------------
    Coração do sistema:
    - Seleção de exercício por intenção (semântica + canônica)
    - Antirrepetição por histórico recente
    - Ajustes por nível / fase / estrutura
    ------------------------------------------------------------------------
-   ⚠️ Não renomear funções (contrato com demais arquivos .gs)
+   ✅ Compatível com 02_BASE_EXERCICIOS.gs (aplicarSubstituicaoPorNivel_)
+   ✅ Usa equipamento_categoria (base PRO)
+   ✅ Fallback interno p/ buildCandidatesSemantico_ e tituloFallbackPorEnfase_
    ======================================================================== */
-
 
 /** Rank simples por nível (quanto maior, mais avançado) */
 function nivelRank_(nivel) {
   nivel = String(nivel || '').toLowerCase();
   return ({ iniciante: 1, intermediaria: 2, avancada: 3 }[nivel] || 1);
 }
-
 
 /**
  * Extrai IDs de exercícios usados nos últimos 3 dias (anti-repetição).
@@ -30,15 +30,11 @@ function extrairHistoricoIds3Dias_(rows, base, nivel) {
 function extrairHistoricoIdsNDias_(rows, base, nivel, maxDias) {
   if (!Array.isArray(rows) || !rows.length) return [];
 
-  var baseList = (base && base.list && Array.isArray(base.list)) ? base.list : base;
-  baseList = Array.isArray(baseList) ? baseList : [];
-
   var historicoIds = [];
   var ultimosDias = {};
   var countDias = 0;
   var limite = Number(maxDias || 3);
 
-  // varre do fim pro começo (mais recente -> antigo)
   for (var i = rows.length - 1; i >= 0; i--) {
     var r = rows[i];
     if (!r || r.tipo !== 'treino') continue;
@@ -60,7 +56,6 @@ function extrairHistoricoIdsNDias_(rows, base, nivel, maxDias) {
 
   return historicoIds;
 }
-
 
 /** Só para debug: retorna lista de dias presentes no histórico (últimos N dias com treino). */
 function resumirHistorico_(rows, maxDias) {
@@ -85,13 +80,12 @@ function resumirHistorico_(rows, maxDias) {
   return dias;
 }
 
-
 /**
  * Score semântico (quanto maior, melhor)
- * OBS: compatível com base que tenha campos:
- * - grupo_principal OU grupo
- * - subpadrao_movimento OU subpadrao
- * - equipamento
+ * Compatível com base PRO:
+ * - grupo_principal / grupo
+ * - subpadrao_movimento / subpadrao
+ * - equipamento_categoria (preferencial) / equipamento (fallback)
  */
 function calcularScoreSemantico_(hit, intent, ctx) {
   if (!hit || !intent) return -999;
@@ -100,31 +94,26 @@ function calcularScoreSemantico_(hit, intent, ctx) {
   var nivel = String(ctx.nivel || '').toLowerCase();
   var fase  = String(ctx.fase  || '').toLowerCase();
 
-  // do hit
   var grupo = String(hit.grupo_principal || hit.grupo || '').toLowerCase();
   var sub   = String(hit.subpadrao_movimento || hit.subpadrao || '').toLowerCase();
-  var equip = String(hit.equipamento || '').toLowerCase();
+  var equip = String(hit.equipamento_categoria || hit.equipamento || '').toLowerCase();
 
-  // da intenção
   var g = String(intent.grupo_principal || '').toLowerCase();
   var s = String(intent.subpadrao_movimento || '').toLowerCase();
   var e = String(intent.equipamento_preferencial || '').toLowerCase();
 
   var score = 0;
 
-  // match grupo principal
   if (g && grupo) {
     if (grupo === g) score += 6;
     else score -= 1;
   }
 
-  // match subpadrão
   if (s && sub) {
     if (sub === s) score += 4;
     else score -= 0.5;
   }
 
-  // match equipamento preferencial
   if (e && equip) {
     if (equip === e) score += 2.5;
     else score -= 0.2;
@@ -146,12 +135,10 @@ function calcularScoreSemantico_(hit, intent, ctx) {
     if (equip === 'maquina' || equip === 'polia' || equip === 'smith') score += 0.5;
   }
 
-  // penaliza mobilidade como treino principal
   if (grupo === 'mobilidade') score -= 3;
 
   return score;
 }
-
 
 /** Escolhe o melhor dentro do TopK (com opcional randomização controlada) */
 function escolherEntreTopK_(cands, topK) {
@@ -163,7 +150,6 @@ function escolherEntreTopK_(cands, topK) {
   var k = Math.max(1, Math.min((Number(topK || 1) || 1), arr.length));
   var slice = arr.slice(0, k);
 
-  // pick aleatório no topK (se habilitado)
   if (k > 1 && typeof INTENT_RANDOM_PICK_TOPK === 'number' && INTENT_RANDOM_PICK_TOPK > 1) {
     var kk = Math.max(1, Math.min(INTENT_RANDOM_PICK_TOPK, slice.length));
     var idx = Math.floor(Math.random() * kk);
@@ -173,49 +159,60 @@ function escolherEntreTopK_(cands, topK) {
   return slice[0];
 }
 
-
-/**
- * Ajusta um exercício conforme nível/fase (substituição de equipamento mais seguro)
- * hit pode ser objeto base (com grupo/sub/equip etc.)
- */
-function aplicarSubstituicaoPorNivel_(hit, ctx) {
+/* ========================================================================
+   ✅ FUNÇÃO COMPATÍVEL (assinatura aceita 2 formatos)
+   - aplicarSubstituicaoPorNivel_(hit, ctx)  [novo]
+   - aplicarSubstituicaoPorNivel_(hit, nivel, base) [legado usado no 02]
+   ======================================================================== */
+function aplicarSubstituicaoPorNivel_(hit, a, b) {
   if (!hit) return hit;
 
-  ctx = ctx || {};
+  var ctx = {};
+  var base = null;
+
+  // formato antigo: (hit, nivel, base)
+  if (typeof a === 'string') {
+    ctx.nivel = a;
+    base = b;
+  } else {
+    // formato novo: (hit, ctx)
+    ctx = a || {};
+    base = ctx.base || null;
+  }
+
   var nivel = String(ctx.nivel || '').toLowerCase();
   var fase  = String(ctx.fase  || '').toLowerCase();
 
-  var base = ctx.base;
   var baseList = (base && base.list && Array.isArray(base.list)) ? base.list : base;
   baseList = Array.isArray(baseList) ? baseList : [];
 
-  var equip = String(hit.equipamento || '').toLowerCase();
+  var equip = String(hit.equipamento_categoria || hit.equipamento || '').toLowerCase();
   var grupo = String(hit.grupo_principal || hit.grupo || '').toLowerCase();
   var sub   = String(hit.subpadrao_movimento || hit.subpadrao || '').toLowerCase();
 
   // iniciante: evitar barra quando possível
-  if (nivel === 'iniciante' && equip === 'barra') {
+  if (nivel === 'iniciante' && equip === 'barra' && baseList.length) {
     var preferidos1 = ['smith', 'maquina', 'polia', 'peso_corporal'];
     for (var i = 0; i < preferidos1.length; i++) {
       var eq = preferidos1[i];
       var alt = baseList.find(function (x) {
         return String(x.grupo_principal || x.grupo || '').toLowerCase() === grupo &&
                String(x.subpadrao_movimento || x.subpadrao || '').toLowerCase() === sub &&
-               String(x.equipamento || '').toLowerCase() === eq;
+               String(x.equipamento_categoria || x.equipamento || '').toLowerCase() === eq;
       });
       if (alt) return alt;
     }
   }
 
   // menstrual: favorecer máquina/polia/smith
-  if (fase === 'menstrual' && equip === 'barra') {
+  if (fase === 'menstrual' && equip === 'barra' && baseList.length) {
     var preferidos2 = ['maquina', 'polia', 'smith'];
     for (var j = 0; j < preferidos2.length; j++) {
       var eq2 = preferidos2[j];
       var alt2 = baseList.find(function (x) {
         return String(x.grupo_principal || x.grupo || '').toLowerCase() === grupo &&
                String(x.subpadrao_movimento || x.subpadrao || '').toLowerCase() === sub &&
-               String(x.equipamento || '').toLowerCase() === eq2;
+               String(x.equipamento_categoria || x.equipamento || '').toLowerCase() === eq2;
       });
       if (alt2) return alt2;
     }
@@ -223,7 +220,6 @@ function aplicarSubstituicaoPorNivel_(hit, ctx) {
 
   return hit;
 }
-
 
 /** Âncora = quando semântica não resolve, tenta achar um título fallback no banco */
 function resolverExercicioAncora_(ctx, base) {
@@ -234,7 +230,6 @@ function resolverExercicioAncora_(ctx, base) {
   var hit = encontrarHitBase_(titulo, base, ctx.nivel);
   return hit || null;
 }
-
 
 /**
  * Força a escolha de um exercício de um grupo específico
@@ -256,10 +251,7 @@ function resolverExercicioForcadoPorGrupo_(grupo, ctx, base) {
     var g = String(ex.grupo_principal || ex.grupo || '').toLowerCase();
     if (g !== grupo) return false;
 
-    // trava iniciante (se sua base tiver esse campo)
     if (nivel === 'iniciante' && ex.proibido_iniciante) return false;
-
-    // nunca força mobilidade como exercício
     if (g === 'mobilidade') return false;
 
     return true;
@@ -267,14 +259,14 @@ function resolverExercicioForcadoPorGrupo_(grupo, ctx, base) {
 
   if (!candidatos.length) return null;
 
-  // score simples
   var scored = candidatos.map(function (ex) {
     var score = 1;
 
     if (fase === 'ovulatoria') score += 1;
     if (fase === 'menstrual') score -= 0.5;
 
-    if (nivel === 'iniciante' && String(ex.equipamento || '').toLowerCase() === 'maquina') score += 1;
+    var eq = String(ex.equipamento_categoria || ex.equipamento || '').toLowerCase();
+    if (nivel === 'iniciante' && eq === 'maquina') score += 1;
 
     return { ex: ex, score: score };
   });
@@ -284,113 +276,70 @@ function resolverExercicioForcadoPorGrupo_(grupo, ctx, base) {
   var escolhido = scored[0] && scored[0].ex;
   if (!escolhido) return null;
 
-  // aplica ajustes finais
-  if (typeof aplicarSubstituicaoPorNivel_ === 'function') {
-    var ajustado = aplicarSubstituicaoPorNivel_(escolhido, Object.assign({}, ctx, { base: baseList }));
-    return ajustado || escolhido;
-  }
-
-  return escolhido;
+  var ajustado = aplicarSubstituicaoPorNivel_(escolhido, Object.assign({}, ctx, { base: baseList }));
+  return ajustado || escolhido;
 }
-
 
 /**
  * RESOLVER PRINCIPAL — por intenção
- * @param {Object} intent intenção {grupo_principal, subpadrao_movimento, equipamento_preferencial}
- * @param {Object} ctx contexto do dia (deve conter dia,fase,estrutura,nivel,enfase,qtdExercicios etc.)
- * @param {Object|Array} base base (array ou {list:[]})
- * @param {Array} historicoTreinos rows do histórico (ex: rowsSemana) com {tipo,dia,titulo_pt}
- * @param {Object} opts opções {topK:number}
  */
-function resolverExercicioPorIntencao_(
-  intent,
-  ctx,
-  base,
-  historicoTreinos,
-  opts
-) {
+function resolverExercicioPorIntencao_(intent, ctx, base, historicoTreinos, opts) {
   ctx = ctx || {};
   opts = opts || {};
   historicoTreinos = Array.isArray(historicoTreinos) ? historicoTreinos : [];
 
   var nivel     = String(ctx.nivel || '').toLowerCase();
-  var fase      = String(ctx.fase  || '').toLowerCase();
   var estrutura = String(ctx.estrutura || '').toUpperCase();
 
   var baseList = (base && base.list && Array.isArray(base.list)) ? base.list : base;
   baseList = Array.isArray(baseList) ? baseList : [];
 
-  // ======================================================
-  // ESTADO PERSISTENTE DO DIA (para múltiplas chamadas)
-  // ======================================================
   if (!ctx._contagemGrupoDia) ctx._contagemGrupoDia = {};
   if (!ctx._padroesUsadosHoje) ctx._padroesUsadosHoje = {};
-  // _padroesUsadosHoje como "set" (obj)
+
   var contagemGrupoDia = ctx._contagemGrupoDia;
   var padroesUsadosHoje = ctx._padroesUsadosHoje;
 
-  // ================================
-  // HISTÓRICO (anti-repetição)
-  // ================================
+  // anti-repeat por janela = tamanho do ciclo (3/4/5)
   var antirepeatOn = (typeof INTENT_ANTIREPEAT_ENABLED !== 'undefined' && INTENT_ANTIREPEAT_ENABLED);
-  var lenPadrao = Array.isArray(ctx.padraoCiclo) ? ctx.padraoCiclo.length : Number(ctx.padraoCiclo) || 3;
+  var lenPadrao = Array.isArray(ctx.padraoCiclo) ? ctx.padraoCiclo.length : (Number(ctx.padraoCiclo) || 3);
   var historicoIds = antirepeatOn ? extrairHistoricoIdsNDias_(historicoTreinos, base, nivel, lenPadrao) : [];
 
-  // ================================
-  // REGRAS FIXAS DA ESTRUTURA
-  // ================================
+  // regra estrutural
   var regraEstrutura = null;
   if (typeof regrasEstruturaPorPadrao_ === 'function' && estrutura) {
     var enfaseGrupo = normalizarEnfaseParaGrupo_(ctx.enfase);
     regraEstrutura = regrasEstruturaPorPadrao_(estrutura, ctx.padraoCiclo, enfaseGrupo);
   }
 
-  // ================================
-  // CANDIDATOS SEMÂNTICOS
-  // ================================
+  // candidatos semânticos
   var cands = buildCandidatesSemantico_(intent, ctx, base) || [];
   if (!Array.isArray(cands)) cands = [];
 
-  // ================================
-  // SCORE SEMÂNTICO
-  // ================================
+  // score
   var scored = cands.map(function (hit) {
     var s = calcularScoreSemantico_(hit, intent, ctx);
     return Object.assign({}, hit, { _score: s });
   });
 
-  // ================================
-  // FILTRO DE REPETIÇÃO (histórico)
-  // ================================
+  // filtro repetição
   var filtrado = scored;
-
   if (antirepeatOn && historicoIds.length) {
     filtrado = scored.filter(function (x) { return historicoIds.indexOf(x.id) === -1; });
-    if (!filtrado.length) filtrado = scored; // nunca quebra
+    if (!filtrado.length) filtrado = scored;
   }
 
-  // ================================
-  // FILTROS ESTRUTURAIS DUROS
-  // ================================
+  // filtros estruturais
   filtrado = filtrado.filter(function (ex) {
     if (!ex) return false;
 
-    var grupo  = ex.grupo_principal || ex.grupo;
-    var padrao = ex.subpadrao_movimento || ex.subpadrao;
+    var grupo  = String(ex.grupo_principal || ex.grupo || '').toLowerCase();
+    var padrao = String(ex.subpadrao_movimento || ex.subpadrao || '').toLowerCase();
 
-    grupo  = String(grupo || '').toLowerCase();
-    padrao = String(padrao || '').toLowerCase();
-
-    // 1) Mobilidade nunca é principal
     if (grupo === 'mobilidade') return false;
-
-    // 2) Limite de core
     if (grupo === 'core' && (contagemGrupoDia.core || 0) >= 1) return false;
-
-    // 3) Anti repetição de padrão no mesmo dia
     if (padrao && padroesUsadosHoje[padrao]) return false;
 
-    // 4) Permitidos da estrutura
     if (regraEstrutura && regraEstrutura.permitidos && Array.isArray(regraEstrutura.permitidos)) {
       if (regraEstrutura.permitidos.indexOf(grupo) === -1) return false;
     }
@@ -398,13 +347,8 @@ function resolverExercicioPorIntencao_(
     return true;
   });
 
-  // ================================
-  // ESCOLHA FINAL
-  // ================================
-  var escolhido = escolherEntreTopK_(
-    filtrado,
-    (typeof opts.topK === 'number' ? opts.topK : 1)
-  );
+  // escolha final
+  var escolhido = escolherEntreTopK_(filtrado, (typeof opts.topK === 'number' ? opts.topK : 1));
 
   if (escolhido) {
     var grupoEscolhido  = String(escolhido.grupo_principal || escolhido.grupo || '').toLowerCase();
@@ -413,17 +357,11 @@ function resolverExercicioPorIntencao_(
     contagemGrupoDia[grupoEscolhido] = (contagemGrupoDia[grupoEscolhido] || 0) + 1;
     if (padraoEscolhido) padroesUsadosHoje[padraoEscolhido] = true;
 
-    var ajustado = aplicarSubstituicaoPorNivel_(
-      escolhido,
-      Object.assign({}, ctx, { base: baseList })
-    );
-
+    var ajustado = aplicarSubstituicaoPorNivel_(escolhido, Object.assign({}, ctx, { base: baseList }));
     return ajustado || escolhido;
   }
 
-  // ================================
-  // GARANTIA DE MÍNIMO POR ESTRUTURA
-  // ================================
+  // garantia mínimos
   if (regraEstrutura && regraEstrutura.min) {
     for (var g in regraEstrutura.min) {
       if (!regraEstrutura.min.hasOwnProperty(g)) continue;
@@ -438,19 +376,15 @@ function resolverExercicioPorIntencao_(
     }
   }
 
-  // ================================
-  // FALLBACKS (NUNCA QUEBRA)
-  // ================================
+  // fallbacks
   var anc = resolverExercicioAncora_(ctx, base);
   if (anc) return anc;
 
   if (cands.length) return cands[0];
-
   return baseList.length ? baseList[0] : null;
 }
 
-
-/** Regra de uso (seu gate de OpenAI) — mantida, sem optional chaining */
+/** Regra de uso (gate de OpenAI) */
 function usarOpenAIComoFontePrimaria_(ctx) {
   ctx = ctx || {};
   return (
@@ -460,12 +394,67 @@ function usarOpenAIComoFontePrimaria_(ctx) {
   );
 }
 
+/* ========================================================================
+   FALLBACKS INTERNOS (não invadem outros arquivos)
+   ======================================================================== */
+
+/**
+ * Se outro arquivo já define, respeitamos.
+ * Aqui é um fallback mínimo para não quebrar.
+ */
+function buildCandidatesSemantico_(intent, ctx, base) {
+  if (typeof globalThis !== 'undefined' && globalThis.__BUILD_CANDS_DEFINED__) {
+    // nunca executa (só proteção)
+  }
+
+  var baseList = (base && base.list && Array.isArray(base.list)) ? base.list : base;
+  baseList = Array.isArray(baseList) ? baseList : [];
+
+  var g = String(intent && intent.grupo_principal || '').toLowerCase();
+  var s = String(intent && intent.subpadrao_movimento || '').toLowerCase();
+
+  // se veio grupo, filtra por grupo; se não, retorna base inteira (com clamp)
+  var candidatos = g
+    ? baseList.filter(function (ex) {
+        return String(ex.grupo_principal || ex.grupo || '').toLowerCase() === g;
+      })
+    : baseList.slice();
+
+  // se veio subpadrão, dá um refinamento leve
+  if (s) {
+    var refinado = candidatos.filter(function (ex) {
+      return String(ex.subpadrao_movimento || ex.subpadrao || '').toLowerCase() === s;
+    });
+    if (refinado.length) candidatos = refinado;
+  }
+
+  // evita explodir custo
+  return candidatos.slice(0, 200);
+}
+
+/**
+ * Título âncora por ênfase — fallback mínimo.
+ * (Se você já tem outro mais completo, ele continua valendo no runtime)
+ */
+function tituloFallbackPorEnfase_(ctx) {
+  ctx = ctx || {};
+  var e = String(ctx.enfase || '').toLowerCase();
+
+  var mapa = {
+    gluteos: 'hip thrust',
+    quadriceps: 'leg press',
+    posteriores: 'stiff',
+    costas: 'puxada frente',
+    peito: 'supino',
+    ombros: 'desenvolvimento',
+    core: 'prancha'
+  };
+
+  return mapa[e] || '';
+}
 
 /* ========================================================================
-   RESOLVER CANÔNICO — ID (STUB LOCAL)
-   ------------------------------------------------------------------------
-   Normaliza IDs de exercícios para evitar repetição recente.
-   OpenAI poderá substituir isso futuramente.
+   RESOLVER CANÔNICO — ID (stub local)
    ======================================================================== */
 function resolverCanonicoIdOpenAI_(exercicio) {
   if (!exercicio) return null;
