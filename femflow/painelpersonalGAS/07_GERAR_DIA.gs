@@ -1,62 +1,63 @@
 /* ========================================================================
-   FEMFLOW — 07_GERAR_DIA.gs
+   FEMFLOW — 07_GERAR_DIA.gs (VERSÃO FINAL)
    ------------------------------------------------------------------------
    Responsável APENAS por montar o DIA de treino:
    - linhas CSV
    - boxes
    - tempos
    - HIIT
+   ------------------------------------------------------------------------
+   ✅ ordem: 1..N dentro de cada box
+   ✅ limite: máx 10 exercícios tipo "treino" por dia (não conta aquecimento/hiit/resfriamento)
+   ✅ compatível com FemFlow (fase/dia) e MaleFlow (ciclo/diatreino) via ctx (campos extra ignorados)
    ======================================================================== */
+
+const MAX_TREINO_EXERCICIOS_POR_DIA = 10; // MaleFlow regra: teto para 1h20
 
 /**
  * Gera todas as linhas de UM dia de treino
  */
 function gerarDia_(ctx) {
-
   const linhas = [];
-  let ordem = 0;
-  let ultimoTipo = null;
-  let ultimoBox = null;
 
   // ================================
-  // AQUECIMENTO
+  // AQUECIMENTO (box 0, ordem 1)
   // ================================
-  linhas.push(
-    linhaTempo_(
-      'aquecimento',
-      0,
-      1,
-      ctx,
-      FEMFLOW.TEMPO_AQUECIMENTO
-    )
-  );
-  ultimoTipo = 'aquecimento';
-  ultimoBox = 0;
-  ordem = 1;
+  linhas.push(linhaTempo_('aquecimento', 0, 1, ctx, FEMFLOW.TEMPO_AQUECIMENTO));
 
   // ================================
   // EXERCÍCIOS (JÁ RESOLVIDOS)
   // ================================
-  const exercicios = Array.isArray(ctx.exerciciosResolvidos)
-    ? ctx.exerciciosResolvidos
-    : [];
+  const exerciciosAll = Array.isArray(ctx.exerciciosResolvidos) ? ctx.exerciciosResolvidos : [];
+
+  // ✅ Limite para tipo treino: máx 10 por dia
+  // Observação: exerciciosResolvidos aqui já são "treino" (força). Mesmo assim, clamp.
+  const exercicios = exerciciosAll.slice(0, Number(ctx?.maxTreinoExercicios || MAX_TREINO_EXERCICIOS_POR_DIA));
 
   const caixas = montarBoxesComSeriesEspeciais_(exercicios, ctx);
 
+  // Para garantir ordem 1..N dentro de cada box:
+  // boxIdx -> contador (reinicia em cada box)
   caixas.forEach((boxExs, boxIdx) => {
-    boxExs.forEach(ex => {
-      const boxAtual = boxIdx + 1;
-      if (ultimoTipo !== 'treino' || ultimoBox !== boxAtual) {
-        ordem = 0;
-      }
+    const boxAtual = boxIdx + 1; // treino começa em box 1
+    let ordemBox = 0;
+
+    boxExs.forEach((ex) => {
       const tempo = ex.tempo || '';
       linhas.push({
         tipo: 'treino',
         box: boxAtual,
-        ordem: ++ordem,
+        ordem: ++ordemBox, // ✅ 1..N dentro do box
         enfase: ctx.enfase,
+
+        // FemFlow:
         fase: ctx.fase,
         dia: ctx.dia,
+
+        // MaleFlow (se existir no ctx, não atrapalha):
+        ciclo: ctx.ciclo,
+        diatreino: ctx.diatreino,
+
         titulo_pt: ex.titulo_pt || '',
         titulo_en: ex.titulo_en || '',
         titulo_fr: ex.titulo_fr || '',
@@ -70,45 +71,24 @@ function gerarDia_(ctx) {
         leve: '',
         ciclos: ''
       });
-      ultimoTipo = 'treino';
-      ultimoBox = boxAtual;
     });
   });
 
   // ================================
-  // HIIT (BOX 0)
+  // HIIT (box 0) — ordem dentro do box
   // ================================
   if (ctx.hiit && ctx.hiit.permitido) {
-    linhas.push(
-      linhaHiit0_(
-        ctx,
-        ctx.hiit.forte,
-        ctx.hiit.leve,
-        ctx.hiit.ciclos,
-        ++ordem
-      )
-    );
-    ultimoTipo = 'hiit';
-    ultimoBox = 0;
+    // ✅ ordem dentro do box 0: aquecimento já ocupou ordem 1
+    // Se quiser HIIT após treino mas mantendo box 0, usamos ordem 2.
+    linhas.push(linhaHiit0_(ctx, ctx.hiit.forte, ctx.hiit.leve, ctx.hiit.ciclos, 2));
   }
 
   // ================================
-  // RESFRIAMENTO
+  // RESFRIAMENTO (box 0) — ordem dentro do box
   // ================================
-  if (ultimoTipo !== 'resfriamento' || ultimoBox !== 0) {
-    ordem = 0;
-  }
-  linhas.push(
-    linhaTempo_(
-      'resfriamento',
-      0,
-      ++ordem,
-      ctx,
-      FEMFLOW.TEMPO_RESFRIAMENTO
-    )
-  );
-  ultimoTipo = 'resfriamento';
-  ultimoBox = 0;
+  // Se HIIT existe, resfriamento vira ordem 3; senão ordem 2
+  const ordemResfriamento = (ctx.hiit && ctx.hiit.permitido) ? 3 : 2;
+  linhas.push(linhaTempo_('resfriamento', 0, ordemResfriamento, ctx, FEMFLOW.TEMPO_RESFRIAMENTO));
 
   return linhas;
 }
@@ -123,8 +103,15 @@ function linhaTempo_(tipo, box, ordem, ctx, tempoSeg) {
     box,
     ordem,
     enfase: ctx.enfase,
+
+    // FemFlow:
     fase: ctx.fase,
     dia: ctx.dia,
+
+    // MaleFlow (se existir no ctx):
+    ciclo: ctx.ciclo,
+    diatreino: ctx.diatreino,
+
     titulo_pt: '',
     titulo_en: '',
     titulo_fr: '',
@@ -150,8 +137,15 @@ function linhaHiit0_(ctx, forte, leve, ciclos, ordem) {
     box: 0,
     ordem: ordem || 1,
     enfase: ctx.enfase,
+
+    // FemFlow:
     fase: ctx.fase,
     dia: ctx.dia,
+
+    // MaleFlow (se existir no ctx):
+    ciclo: ctx.ciclo,
+    diatreino: ctx.diatreino,
+
     titulo_pt: '',
     titulo_en: '',
     titulo_fr: '',
@@ -170,9 +164,9 @@ function linhaHiit0_(ctx, forte, leve, ciclos, ordem) {
 
 /**
  * Distribui exercícios em boxes
+ * - mantém regra antiga de "boxes de 2-4" focada em ~3 por box
  */
 function distribuirBoxes_(arr, maxPorBox) {
-
   const n = arr.length;
   if (n <= maxPorBox) return [arr];
 
@@ -221,9 +215,7 @@ function montarBoxesComSeriesEspeciais_(exercicios, ctx) {
     const quantidade = quantidadeSerieEspecial_(codigoSelecionado);
     if (codigoSelecionado && quantidade > 0) {
       const especiais = lista.slice(0, quantidade);
-      especiais.forEach(ex => {
-        ex.especial = codigoSelecionado;
-      });
+      especiais.forEach(ex => { ex.especial = codigoSelecionado; });
       const restantes = lista.slice(quantidade);
       const caixasRestantes = distribuirBoxes_(restantes, 3);
       return [especiais, ...caixasRestantes].filter(box => box.length);
@@ -235,9 +227,7 @@ function montarBoxesComSeriesEspeciais_(exercicios, ctx) {
     const quantidade = quantidadeSerieEspecial_(codigoSelecionado);
     if (codigoSelecionado && quantidade > 0) {
       const especiais = lista.slice(0, quantidade);
-      especiais.forEach(ex => {
-        ex.especial = codigoSelecionado;
-      });
+      especiais.forEach(ex => { ex.especial = codigoSelecionado; });
       const restantes = lista.slice(quantidade);
       const caixasRestantes = distribuirBoxes_(restantes, 3);
       return [especiais, ...caixasRestantes].filter(box => box.length);
@@ -277,10 +267,6 @@ function resolverSerieEspecialCodigo_(valor, regras) {
 
 function quantidadeSerieEspecial_(codigo) {
   const tipo = String(codigo || '').toUpperCase();
-  const mapa = {
-    Q: 4,
-    T: 3,
-    B: 2
-  };
+  const mapa = { Q: 4, T: 3, B: 2 };
   return mapa[tipo] || 1;
 }
