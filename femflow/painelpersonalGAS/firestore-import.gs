@@ -143,7 +143,7 @@ function importarTreinosFEMFLOW_aba(nomeAba, opts = {}) {
 
   return importarTreinosFEMFLOW({
     abasPermitidas: [nomeAba],
-    target: opts.target || "femflow",
+    target: opts.target || opts.app || "femflow",
   });
 }
 
@@ -155,7 +155,7 @@ function importarTreinosFEMFLOW_aba(nomeAba, opts = {}) {
 ======================================================================= */
 function importarTreinosFEMFLOW(opts = {}) {
   const abasPermitidas = Array.isArray(opts.abasPermitidas) ? opts.abasPermitidas : null;
-  const target = String(opts.target || "femflow").toLowerCase().trim();
+  const target = normalizarTargetLocal_(opts.target || opts.app || "femflow");
 
   const token = getFirebaseAccessToken(target);
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -173,6 +173,7 @@ function importarTreinosFEMFLOW(opts = {}) {
   let totalOk = 0;
   let totalErr = 0;
   let totalPatches = 0;
+  const maleDias = [];
 
   abas.forEach((sh) => {
     const nomeAba = sh.getName().trim();
@@ -219,6 +220,9 @@ function importarTreinosFEMFLOW(opts = {}) {
     totalOk += stats.ok;
     totalErr += stats.err;
     totalPatches += stats.patches;
+    if (stats.dias && stats.dias.length) {
+      stats.dias.forEach((dia) => maleDias.push(dia));
+    }
   });
 
   const resumo = {
@@ -230,6 +234,9 @@ function importarTreinosFEMFLOW(opts = {}) {
     total_ok: totalOk,
     total_err: totalErr,
   };
+  if (target === "maleflow") {
+    resumo.dias = maleDias;
+  }
 
   Logger.log(JSON.stringify(resumo));
   return resumo;
@@ -239,6 +246,19 @@ function importarTreinosFEMFLOW(opts = {}) {
    IMPORTA UMA ABA (core)
 ============================================================ */
 function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, personalId, isExtra, importId, target) {
+  const targetNorm = normalizarTargetLocal_(target);
+  const isMaleFlowTarget = targetNorm === "maleflow";
+  if (isMaleFlowTarget && !isPersonal && !isExtra) {
+    return importarAbaMaleFlow_(
+      sh,
+      token,
+      baseURL,
+      nomeAba,
+      importId,
+      targetNorm
+    );
+  }
+
   const valsAll = sh.getDataRange().getValues();
   if (!valsAll || valsAll.length < 2) {
     Logger.log("⚠️ Aba vazia/sem dados: " + nomeAba);
@@ -346,12 +366,15 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
     // DEFINIR URL FINAL (NORMAL x PERSONAL x EXTRA) + (FemFlow x MaleFlow)
     // Observação: usamos docId único por linha:
     //   - FemFlow: mantém padrão legado blocos/bloco_{i}
-    //   - MaleFlow: blocos/{box}_{ordem} (ex: bloco_100_01) para não colidir
+    //   - MaleFlow: blocos/bloco_{box*100}_{ordem} (ex: bloco_100_01) para não colidir
     // ------------------------------------------------------------
     const nivel = nomeAba.toLowerCase(); // iniciante/intermediaria/avancada
 
     const docIdFem = `bloco_${i}`;
-    const docIdMale = `${box}_${String(ordem).padStart(2, "0")}`;
+    const boxMatch = String(box).match(/\d+/);
+    const boxNumero = boxMatch ? Number(boxMatch[0]) : 0;
+    const boxBase = boxNumero ? String(boxNumero * 100) : String(box || "0").trim();
+    const docIdMale = `bloco_${boxBase}_${String(ordem).padStart(2, "0")}`;
     const docId = usaCicloDiaTreino ? docIdMale : docIdFem;
 
     let url = "";
@@ -481,8 +504,271 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
 }
 
 /* ============================================================
+   IMPORTA UMA ABA (MaleFlow)
+   - 1 doc por diatreino (docId fixo: bloco_100)
+   - Itens ordenados por box numérico e ordem
+============================================================ */
+function importarAbaMaleFlow_(sh, token, baseURL, nomeAba, importId, target) {
+  const valsAll = sh.getDataRange().getValues();
+  if (!valsAll || valsAll.length < 2) {
+    Logger.log("⚠️ Aba vazia/sem dados: " + nomeAba);
+    return { ok: 0, err: 0, patches: 0, dias: [] };
+  }
+
+  const header = valsAll[0].map((h) => String(h || "").trim());
+  const vals = valsAll.slice(1);
+
+  const col = (name) => header.indexOf(name);
+
+  const idx = {
+    tipo: col("tipo"),
+    box: col("box"),
+    ordem: col("ordem"),
+    enfase: col("enfase"),
+    ciclo: col("ciclo"),
+    diatreino: col("diatreino"),
+    titulo_pt: col("titulo_pt"),
+    titulo_en: col("titulo_en"),
+    titulo_fr: col("titulo_fr"),
+    link: col("link"),
+    series: col("series"),
+    reps: col("reps"),
+    especial: col("especial"),
+    tempo: col("tempo"),
+    intervalo: col("intervalo"),
+    forte: col("forte"),
+    leve: col("leve"),
+    ciclos: col("ciclos"),
+  };
+
+  const obrigatorias = ["tipo", "enfase", "titulo_pt", "box", "ordem", "ciclo", "diatreino"];
+  const faltando = obrigatorias.filter((k) => idx[k] === -1);
+  if (faltando.length) {
+    throw new Error(`Aba "${nomeAba}" sem colunas obrigatórias: ${faltando.join(", ")}`);
+  }
+
+  const nivel = nomeAba.toLowerCase();
+  const grouped = {};
+  const metaByDia = {};
+  const treinoCountPorDia = {};
+
+  vals.forEach((r) => {
+    if (!r[idx.tipo]) return;
+
+    const tipo = String(r[idx.tipo] || "").toLowerCase().trim();
+    const enfase = removerAcentos(String(r[idx.enfase] || "geral")).toLowerCase();
+    const ciclo = normalizarCicloLocal_(r[idx.ciclo]);
+    const diatreino = normalizarDiaTreinoLocal_(r[idx.diatreino]);
+    if (!ciclo || !diatreino) return;
+
+    const dayCounterKey = `ciclo:${ciclo}|dia:${diatreino}`;
+    if (tipo === "treino") {
+      const c = treinoCountPorDia[dayCounterKey] || 0;
+      if (c >= 10) return;
+      treinoCountPorDia[dayCounterKey] = c + 1;
+    }
+
+    const item = buildMaleFlowItemFromRow_(r, idx);
+    if (!grouped[diatreino]) grouped[diatreino] = [];
+    grouped[diatreino].push(item);
+
+    if (!metaByDia[diatreino]) {
+      metaByDia[diatreino] = {
+        nivel: nivel,
+        enfase: enfase,
+        ciclo: ciclo,
+        diatreino: diatreino,
+        target: target
+      };
+    }
+  });
+
+  let okCount = 0;
+  let errCount = 0;
+  let patches = 0;
+  const diasResumo = [];
+
+  Object.keys(grouped).forEach((dia) => {
+    const items = grouped[dia] || [];
+    items.sort((a, b) => {
+      const aBox = boxNumber_(a.box);
+      const bBox = boxNumber_(b.box);
+      if (aBox !== bBox) return aBox - bBox;
+      return Number(a.ordem || 0) - Number(b.ordem || 0);
+    });
+
+    const ctx = metaByDia[dia] || {
+      nivel: nivel,
+      enfase: "geral",
+      ciclo: "",
+      diatreino: dia,
+      target: target
+    };
+
+    const path = buildFirestorePathMaleFlow_(baseURL, ctx);
+    const payload = buildDocPayloadMaleFlow_(ctx, items);
+
+    auditarMaleFlowPaths_(ctx, {
+      path: path,
+      itens: items
+    });
+
+    const resp = firestorePATCH_(path, token, payload);
+    patches++;
+
+    const code = resp.getResponseCode();
+    if (code === 200) {
+      okCount++;
+    } else {
+      errCount++;
+      Logger.log(`❌ ERRO [${code}] → ${nomeAba} | diatreino ${dia} | ${resp.getContentText()}`);
+    }
+
+    diasResumo.push({ diatreino: dia, path: path, itens: items.length });
+  });
+
+  return { ok: okCount, err: errCount, patches: patches, dias: diasResumo };
+}
+
+/* ============================================================
    FUNÇÕES AUXILIARES
 ============================================================ */
+function normalizarTargetLocal_(valor) {
+  if (typeof normalizarTarget_ === "function") {
+    return normalizarTarget_(valor);
+  }
+  const txt = String(valor || "").trim().toLowerCase();
+  if (!txt) return "femflow";
+  if (txt === "male" || txt === "male-flow" || txt === "maleflow") return "maleflow";
+  if (txt === "femflow" || txt === "fem" || txt === "ff") return "femflow";
+  return txt;
+}
+
+function normalizarCicloLocal_(valor) {
+  if (typeof normalizarCiclo_ === "function") {
+    return normalizarCiclo_(valor);
+  }
+  const txt = String(valor || "").trim().toUpperCase();
+  if (!txt) return null;
+  if (txt === "ABC" || txt === "ABCD" || txt === "ABCDE") return txt;
+  if (txt === "3") return "ABC";
+  if (txt === "4") return "ABCD";
+  if (txt === "5") return "ABCDE";
+  return null;
+}
+
+function normalizarDiaTreinoLocal_(valor) {
+  if (typeof normalizarDiaTreino_ === "function") {
+    return normalizarDiaTreino_(valor);
+  }
+  const txt = String(valor || "").trim().toUpperCase();
+  if (!txt) return null;
+  if (["A", "B", "C", "D", "E"].includes(txt)) return txt;
+  return null;
+}
+
+function buildFirestorePathMaleFlow_(baseURL, ctx) {
+  const nivel = String(ctx.nivel || "").trim().toLowerCase();
+  const enfase = String(ctx.enfase || "").trim().toLowerCase();
+  const ciclo = String(ctx.ciclo || "").trim().toUpperCase();
+  const diatreino = String(ctx.diatreino || "").trim().toUpperCase();
+  return (
+    `${baseURL}/exercicios/${nivel}_${enfase}` +
+    `/ciclo/${ciclo}` +
+    `/diatreino/diatreino_${diatreino}` +
+    `/blocos/bloco_100`
+  );
+}
+
+function buildDocPayloadMaleFlow_(ctx, items) {
+  const values = (items || []).map((item) => {
+    return { mapValue: { fields: buildMaleFlowItemFields_(item) } };
+  });
+
+  return {
+    fields: {
+      updated_at: { timestampValue: new Date().toISOString() },
+      target: { stringValue: "maleflow" },
+      nivel: { stringValue: String(ctx.nivel || "").toLowerCase() },
+      enfase: { stringValue: String(ctx.enfase || "").toLowerCase() },
+      ciclo: { stringValue: String(ctx.ciclo || "").toUpperCase() },
+      diatreino: { stringValue: String(ctx.diatreino || "").toUpperCase() },
+      itens: { arrayValue: { values: values } }
+    }
+  };
+}
+
+function buildMaleFlowItemFromRow_(row, idx) {
+  const item = {
+    tipo: String(row[idx.tipo] || "").toLowerCase().trim(),
+    box: String(row[idx.box] || "").trim() || "0",
+    ordem: Number(row[idx.ordem] || 0)
+  };
+
+  if (idx.titulo_pt !== -1) item.titulo_pt = String(row[idx.titulo_pt] || "");
+  if (idx.titulo_en !== -1) item.titulo_en = String(row[idx.titulo_en] || "");
+  if (idx.titulo_fr !== -1) item.titulo_fr = String(row[idx.titulo_fr] || "");
+  if (idx.link !== -1) item.link = String(row[idx.link] || "");
+  if (idx.series !== -1) item.series = String(row[idx.series] || "");
+  if (idx.reps !== -1) item.reps = String(row[idx.reps] || "");
+  if (idx.especial !== -1) item.especial = String(row[idx.especial] || "");
+  if (idx.tempo !== -1) item.tempo = String(row[idx.tempo] || "");
+  if (idx.intervalo !== -1) item.intervalo = String(row[idx.intervalo] || "");
+  if (idx.forte !== -1) item.forte = String(row[idx.forte] || "");
+  if (idx.leve !== -1) item.leve = String(row[idx.leve] || "");
+  if (idx.ciclos !== -1) item.ciclos = String(row[idx.ciclos] || "");
+
+  return item;
+}
+
+function buildMaleFlowItemFields_(item) {
+  const fields = {
+    tipo: { stringValue: String(item.tipo || "") },
+    box: { stringValue: String(item.box || "") },
+    ordem: { integerValue: Number(item.ordem || 0) }
+  };
+
+  if (item.titulo_pt !== undefined) fields.titulo_pt = { stringValue: String(item.titulo_pt || "") };
+  if (item.titulo_en !== undefined) fields.titulo_en = { stringValue: String(item.titulo_en || "") };
+  if (item.titulo_fr !== undefined) fields.titulo_fr = { stringValue: String(item.titulo_fr || "") };
+  if (item.link !== undefined) fields.link = { stringValue: String(item.link || "") };
+  if (item.series !== undefined) fields.series = { stringValue: String(item.series || "") };
+  if (item.reps !== undefined) fields.reps = { stringValue: String(item.reps || "") };
+  if (item.especial !== undefined) fields.especial = { stringValue: String(item.especial || "") };
+  if (item.tempo !== undefined) fields.tempo = { stringValue: String(item.tempo || "") };
+  if (item.intervalo !== undefined) fields.intervalo = { stringValue: String(item.intervalo || "") };
+  if (item.forte !== undefined) fields.forte = { stringValue: String(item.forte || "") };
+  if (item.leve !== undefined) fields.leve = { stringValue: String(item.leve || "") };
+  if (item.ciclos !== undefined) fields.ciclos = { stringValue: String(item.ciclos || "") };
+
+  return fields;
+}
+
+function boxNumber_(box) {
+  const match = String(box || "").match(/\d+/);
+  return match ? Number(match[0]) : 0;
+}
+
+function auditarMaleFlowPaths_(ctx, grouped) {
+  const itens = grouped && grouped.itens ? grouped.itens : [];
+  const amostra = itens.slice(0, 3).map((item) => {
+    return {
+      box: item.box,
+      ordem: item.ordem,
+      titulo_pt: item.titulo_pt
+    };
+  });
+
+  Logger.log(
+    "[MALEFLOW] path=" +
+      String(grouped.path || "") +
+      " itens=" +
+      String(itens.length) +
+      " amostra=" +
+      JSON.stringify(amostra)
+  );
+}
+
 function firestoreGET_(url, token) {
   return UrlFetchApp.fetch(url, {
     method: "GET",

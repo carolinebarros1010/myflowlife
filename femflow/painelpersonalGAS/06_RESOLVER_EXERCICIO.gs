@@ -8,7 +8,7 @@
    ------------------------------------------------------------------------
    ✅ Compatível com 02_BASE_EXERCICIOS.gs (aplicarSubstituicaoPorNivel_)
    ✅ Usa equipamento_categoria (base PRO)
-   ✅ Fallback interno p/ buildCandidatesSemantico_ e tituloFallbackPorEnfase_
+   ✅ Fallback interno p/ buildCandidatesSemanticoLocal_ e tituloFallbackPorEnfaseLocal_
    ======================================================================== */
 
 /** Rank simples por nível (quanto maior, mais avançado) */
@@ -224,7 +224,7 @@ function aplicarSubstituicaoPorNivel_(hit, a, b) {
 /** Âncora = quando semântica não resolve, tenta achar um título fallback no banco */
 function resolverExercicioAncora_(ctx, base) {
   ctx = ctx || {};
-  var titulo = tituloFallbackPorEnfase_(ctx);
+  var titulo = tituloFallbackPorEnfaseLocal_(ctx);
   if (!titulo) return null;
 
   var hit = encontrarHitBase_(titulo, base, ctx.nivel);
@@ -313,7 +313,7 @@ function resolverExercicioPorIntencao_(intent, ctx, base, historicoTreinos, opts
   }
 
   // candidatos semânticos
-  var cands = buildCandidatesSemantico_(intent, ctx, base) || [];
+  var cands = buildCandidatesSemanticoLocal_(intent, ctx, base) || [];
   if (!Array.isArray(cands)) cands = [];
 
   // score
@@ -402,7 +402,7 @@ function usarOpenAIComoFontePrimaria_(ctx) {
  * Se outro arquivo já define, respeitamos.
  * Aqui é um fallback mínimo para não quebrar.
  */
-function buildCandidatesSemantico_(intent, ctx, base) {
+function buildCandidatesSemanticoLocal_(intent, ctx, base) {
   if (typeof globalThis !== 'undefined' && globalThis.__BUILD_CANDS_DEFINED__) {
     // nunca executa (só proteção)
   }
@@ -436,7 +436,7 @@ function buildCandidatesSemantico_(intent, ctx, base) {
  * Título âncora por ênfase — fallback mínimo.
  * (Se você já tem outro mais completo, ele continua valendo no runtime)
  */
-function tituloFallbackPorEnfase_(ctx) {
+function tituloFallbackPorEnfaseLocal_(ctx) {
   ctx = ctx || {};
   var e = String(ctx.enfase || '').toLowerCase();
 
@@ -454,26 +454,15 @@ function tituloFallbackPorEnfase_(ctx) {
 }
 
 /**
- * RESOLVER CANÔNICO — ID (compat)
- * Aceita:
- *  - resolverCanonicoIdOpenAI_(titulo)
- *  - resolverCanonicoIdOpenAI_(titulo, base)
- *
- * Estratégia:
- * 1) tenta alias -> id (ALIASES_EXERCICIOS)
- * 2) tenta resolver direto na base (strict/fuzzy) para pegar id
- * 3) fallback: null (não inventa)
- */
-function resolverCanonicoIdOpenAI_(titulo, base) {
+// Mantido apenas para referência histórica (evita colisão com 03_ALIAS_CANON)
+function resolverCanonicoIdOpenAI_legacy_(titulo, base) {
   if (!titulo) return null;
 
-  // 1) alias sheet -> id
   if (typeof resolverAliasExerciciosId_ === 'function') {
     var aliasId = resolverAliasExerciciosId_(titulo);
     if (aliasId) return aliasId;
   }
 
-  // 2) se base veio, tenta achar id por nome
   var b = base || null;
   if (b && (b.byStrict || b.byFuzzy || b.list)) {
     var limpo = (typeof limparComplementosSemanticos_ === 'function')
@@ -491,7 +480,5 @@ function resolverCanonicoIdOpenAI_(titulo, base) {
     }
   }
 
-  // 3) não inventa id
   return null;
 }
-

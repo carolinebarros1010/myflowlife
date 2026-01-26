@@ -300,24 +300,6 @@ function normalizarTarget_(valor) {
   return txt;
 }
 
-function normalizarCiclo_(valor) {
-  const txt = String(valor || '').trim().toUpperCase();
-  if (!txt) return null;
-  if (txt === 'ABC' || txt === 'ABCD' || txt === 'ABCDE') return txt;
-  // também aceita 3/4/5 e converte
-  if (txt === '3') return 'ABC';
-  if (txt === '4') return 'ABCD';
-  if (txt === '5') return 'ABCDE';
-  return null;
-}
-
-function normalizarDiaTreino_(valor) {
-  const txt = String(valor || '').trim().toUpperCase();
-  if (!txt) return null;
-  if (['A','B','C','D','E'].includes(txt)) return txt;
-  return null;
-}
-
 /* ============================================================
    Série especial — (mantido)
 ============================================================ */
