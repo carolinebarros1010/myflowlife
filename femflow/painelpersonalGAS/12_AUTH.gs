@@ -6,8 +6,8 @@
    ======================================================================== */
 
 function autenticarPersonal_(payload) {
-  const senha = String(payload?.senha || '').trim();
-  if (!senha) throw new Error('Senha obrigatória.');
+  const senhaHash = obterSenhaHash_(payload);
+  if (!senhaHash) throw new Error('Senha obrigatória.');
 
   const email = String(payload?.email || '').trim().toLowerCase();
   const telefone = normalizarTelefone_(payload?.telefone);
@@ -36,7 +36,6 @@ function autenticarPersonal_(payload) {
     throw new Error('Colunas obrigatórias ausentes na aba Personal.');
   }
 
-  const senhaHash = hashSenha_(senha);
   for (let i = 0; i < values.length; i++) {
     const row = values[i];
     const rowId = String(row[idx.id] || '').trim();
@@ -68,11 +67,11 @@ function autenticarPersonal_(payload) {
 
 function cadastrarPersonal_(payload) {
   const nome = String(payload?.nome || '').trim();
-  const senha = String(payload?.senha || '').trim();
+  const senhaHash = obterSenhaHash_(payload);
   const email = String(payload?.email || '').trim().toLowerCase();
   const telefone = normalizarTelefone_(payload?.telefone);
 
-  if (!nome || !senha) throw new Error('Nome e senha são obrigatórios.');
+  if (!nome || !senhaHash) throw new Error('Nome e senha são obrigatórios.');
   if (!email && !telefone) throw new Error('Informe email ou telefone.');
 
   const sheet = SpreadsheetApp.getActive().getSheetByName('Personal');
@@ -92,7 +91,6 @@ function cadastrarPersonal_(payload) {
     throw new Error('Colunas obrigatórias ausentes na aba Personal.');
   }
 
-  const senhaHash = hashSenha_(senha);
   for (let i = 0; i < values.length; i++) {
     const row = values[i];
     const rowEmail = String(row[idx.email] || '').trim().toLowerCase();
@@ -142,6 +140,14 @@ function hashSenha_(senha) {
     const hex = (byte + 256).toString(16).slice(-2);
     return hex;
   }).join('');
+}
+
+function obterSenhaHash_(payload) {
+  const hash = String(payload?.senha_hash || payload?.senhaHash || '').trim().toLowerCase();
+  if (hash) return hash;
+  const senha = String(payload?.senha || '').trim();
+  if (!senha) return '';
+  return hashSenha_(senha);
 }
 
 function gerarPersonalId_() {

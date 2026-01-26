@@ -692,6 +692,13 @@
             </select>
           </div>
           <div>
+            <label for="targetApp">Target (app)</label>
+            <select id="targetApp" name="target">
+              <option value="femflow">FemFlow</option>
+              <option value="maleflow">MaleFlow</option>
+            </select>
+          </div>
+          <div>
             <label for="enfase">Ênfase</label>
             <input id="enfase" name="enfase" list="enfaseList" placeholder="Digite ou selecione" required />
             <datalist id="enfaseList">
@@ -773,7 +780,8 @@
         </div>
         <div class="preview" id="previewUrl">Preview do Request: configure o endpoint.</div>
         <div class="preview" id="previewInfo">
-          Gerar base ovulatória FemFlow
+          <strong id="previewTitle">Gerar base ovulatória FemFlow</strong>
+          <div>Target: <span data-preview="target">—</span></div>
           <div>Nível: <span data-preview="nivel">—</span></div>
           <div>Ênfase: <span data-preview="enfase">—</span></div>
           <div style="margin-top: 10px;">
@@ -985,9 +993,15 @@
       return url.toString();
     };
 
+    const getBaseAction = (params) => {
+      const target = String(params?.target || "").toLowerCase();
+      return target === "maleflow" ? "gerarbase_male" : "gerarbase";
+    };
+
     const updatePreview = () => {
       const params = collectParams();
-      const preview = buildUrl("gerarbase", params);
+      const baseAction = getBaseAction(params);
+      const preview = buildUrl(baseAction, params);
       qs("previewUrl").textContent = preview
         ? `Preview do Request: ${preview}`
         : "Preview do Request: configure o endpoint.";
@@ -995,6 +1009,13 @@
         const key = el.dataset.preview;
         el.textContent = params[key] || "—";
       });
+      const isMale = String(params.target || "femflow").toLowerCase() === "maleflow";
+      qs("previewTitle").textContent = isMale
+        ? "Gerar base MaleFlow"
+        : "Gerar base ovulatória FemFlow";
+      qs("btnGerarBase").textContent = isMale
+        ? "Gerar base MaleFlow"
+        : "Gerar base ovulatória";
     };
 
     const collectParams = () => {
@@ -1002,6 +1023,7 @@
       const padraoCiclo = qs("padraoCiclo").value.trim();
       const fase = "ovulatoria";
       const enfase = qs("enfase").value.trim();
+      const target = qs("targetApp").value.trim() || "femflow";
       const destinoField = qs("destino").value.trim();
       const idAluna = qs("idAluna").value.trim();
       const destino = idAluna ? `personal_${idAluna}` : destinoField;
@@ -1014,6 +1036,7 @@
         padraoCiclo,
         fase,
         enfase,
+        target,
         destino,
         id_aluna: idAluna,
         serieEspecialAtiva,
@@ -1244,6 +1267,7 @@ const sha256Hex = async (text) => {
         setTimeout(() => {
           const labelMap = {
             gerarbase: "Gerar base ovulatória",
+            gerarbase_male: "Gerar base MaleFlow",
             serieespecial: "Aplicar série especial",
             distribuir30: "Distribuir 30 dias",
             linkar: "Relinkar",
@@ -1431,17 +1455,18 @@ const payload = { action: "signup", nome, senha_hash };
       updatePreview();
     };
 
-    const loadParams = () => {
-      qs("nivel").value = localStorage.getItem("femflow_nivel") || "";
-      qs("padraoCiclo").value = localStorage.getItem("femflow_padraoCiclo") || "";
-      qs("enfase").value = localStorage.getItem("femflow_enfase") || "";
-      qs("destino").value = localStorage.getItem("femflow_destino") || "";
-      qs("idAluna").value = localStorage.getItem("femflow_id_aluna") || "";
-      qs("serieEspecialAtiva").value = localStorage.getItem("femflow_serieEspecialAtiva") || "nao";
-      qs("serieEspecialFase").value = localStorage.getItem("femflow_serieEspecialFase") || "";
-      qs("serieEspecialTipo").value = localStorage.getItem("femflow_serieEspecialTipo") || "";
-      qs("serieEspecialDiaTipo").value = localStorage.getItem("femflow_serieEspecialDiaTipo") || "";
-    };
+      const loadParams = () => {
+        qs("nivel").value = localStorage.getItem("femflow_nivel") || "";
+        qs("padraoCiclo").value = localStorage.getItem("femflow_padraoCiclo") || "";
+        qs("enfase").value = localStorage.getItem("femflow_enfase") || "";
+        qs("targetApp").value = localStorage.getItem("femflow_target") || "femflow";
+        qs("destino").value = localStorage.getItem("femflow_destino") || "";
+        qs("idAluna").value = localStorage.getItem("femflow_id_aluna") || "";
+        qs("serieEspecialAtiva").value = localStorage.getItem("femflow_serieEspecialAtiva") || "nao";
+        qs("serieEspecialFase").value = localStorage.getItem("femflow_serieEspecialFase") || "";
+        qs("serieEspecialTipo").value = localStorage.getItem("femflow_serieEspecialTipo") || "";
+        qs("serieEspecialDiaTipo").value = localStorage.getItem("femflow_serieEspecialDiaTipo") || "";
+      };
 
     const setupChips = () => {
       const container = qs("chipContainer");
@@ -1495,7 +1520,10 @@ const payload = { action: "signup", nome, senha_hash };
 
     qs("paramForm").addEventListener("input", persistParams);
 
-    qs("btnGerarBase").addEventListener("click", () => runAction("gerarbase", collectParams(), qs("btnGerarBase")));
+    qs("btnGerarBase").addEventListener("click", () => {
+      const params = collectParams();
+      runAction(getBaseAction(params), params, qs("btnGerarBase"));
+    });
     qs("btnSerieEspecial").addEventListener("click", () => runAction("serieespecial", collectParams(), qs("btnSerieEspecial")));
     qs("btnDistribuir").addEventListener("click", () => runAction("distribuir30", collectParams(), qs("btnDistribuir")));
     qs("btnRelink").addEventListener("click", () => {

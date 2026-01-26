@@ -77,7 +77,7 @@ function resolverGruposPorEstrutura_(estrutura, enfaseGrupo, padraoCiclo) {
  * Constrói candidatos semânticos locais
  * (usado quando não há planner por intenção)
  */
-function buildCandidatesSemantico_(ctx, base) {
+function buildCandidatesSemanticoFallback_(ctx, base) {
 
   base = Array.isArray(base) ? base : [];
 
@@ -156,7 +156,7 @@ function resolverExercicioPorIntencaoFallback_(intencao, base, nivel) {
 /**
  * Título genérico seguro por ênfase e nível
  */
-function tituloFallbackPorEnfase_(enfase, nivel, i) {
+function tituloFallbackPorEnfaseFallback_(enfase, nivel, i) {
 
   const isIni = (String(nivel || '').toLowerCase() === 'iniciante');
 

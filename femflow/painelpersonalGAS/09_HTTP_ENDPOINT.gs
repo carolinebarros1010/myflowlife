@@ -145,6 +145,7 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    const pedido = merged.pedidoTexto || merged;
     let result;
 
     switch (action) {
@@ -153,15 +154,15 @@ function doPost(e) {
       // FemFlow
       // =========================
       case 'gerar30':
-        result = gerarFemFlow30Dias(merged.pedidoTexto);
+        result = gerarFemFlow30Dias(pedido);
         return jsonOK_({ step: 'gerar30', target, result });
 
       case 'gerarbase':
-        result = gerarBaseOvulatoriaSomente_(merged.pedidoTexto);
+        result = gerarBaseOvulatoriaSomente_(pedido);
         return jsonOK_({ step: 'gerarbase', target, result });
 
       case 'distribuir30':
-        result = distribuirBaseOvulatoriaSomente_(merged.pedidoTexto);
+        result = distribuirBaseOvulatoriaSomente_(pedido);
         return jsonOK_({ step: 'distribuir30', target, result });
 
       case 'serieespecial':
@@ -191,7 +192,7 @@ function doPost(e) {
 
       case 'full':
         if (!merged.destino) throw new Error('destino obrigatório para pipeline full');
-        gerarFemFlow30Dias(merged.pedidoTexto);
+        gerarFemFlow30Dias(pedido);
         relinkarAba_(merged.destino, merged.nivel);
         importarTreinosFEMFLOW_aba(merged.destino, { target });
         return jsonOK_({ step: 'full', target, result: 'Pipeline completo executado' });
@@ -200,13 +201,13 @@ function doPost(e) {
       // MaleFlow
       // =========================
       case 'gerarbase_male':
-        result = gerarBaseMaleFlowSomente_(merged.pedidoTexto);
+        result = gerarBaseMaleFlowSomente_(pedido);
         return jsonOK_({ step: 'gerarbase_male', target, result });
 
       case 'full_male':
-        result = gerarBaseMaleFlowSomente_(merged.pedidoTexto);
+        result = gerarBaseMaleFlowSomente_(pedido);
         // valida destino final e importa
-        const p2 = parsePedido_(merged.pedidoTexto);
+        const p2 = parsePedido_(pedido);
         validarPedido_(p2);
         importarTreinosFEMFLOW_aba(p2.destino, { target });
         return jsonOK_({ step: 'full_male', target, result: 'MaleFlow: base gerada e importada: ' + p2.destino });

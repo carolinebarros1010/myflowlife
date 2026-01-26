@@ -346,12 +346,15 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
     // DEFINIR URL FINAL (NORMAL x PERSONAL x EXTRA) + (FemFlow x MaleFlow)
     // Observação: usamos docId único por linha:
     //   - FemFlow: mantém padrão legado blocos/bloco_{i}
-    //   - MaleFlow: blocos/{box}_{ordem} (ex: bloco_100_01) para não colidir
+    //   - MaleFlow: blocos/bloco_{box*100}_{ordem} (ex: bloco_100_01) para não colidir
     // ------------------------------------------------------------
     const nivel = nomeAba.toLowerCase(); // iniciante/intermediaria/avancada
 
     const docIdFem = `bloco_${i}`;
-    const docIdMale = `${box}_${String(ordem).padStart(2, "0")}`;
+    const boxMatch = String(box).match(/\d+/);
+    const boxNumero = boxMatch ? Number(boxMatch[0]) : 0;
+    const boxBase = boxNumero ? String(boxNumero * 100) : String(box || "0").trim();
+    const docIdMale = `bloco_${boxBase}_${String(ordem).padStart(2, "0")}`;
     const docId = usaCicloDiaTreino ? docIdMale : docIdFem;
 
     let url = "";
