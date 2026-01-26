@@ -13,6 +13,9 @@ function normalizar_(v) {
     .replace(/\s+/g, '_');
 }
 
+/**
+ * FemFlow: normaliza fase
+ */
 function normalizarFase_(fase) {
   if (!fase) return null;
 
@@ -35,39 +38,75 @@ function normalizarFase_(fase) {
   return MAP[f] || null;
 }
 
+/**
+ * Mapeia "enfase" para grupo muscular padrão do motor.
+ * (Mantém compatibilidade FemFlow e amplia sinônimos para MaleFlow)
+ */
 function normalizarEnfaseParaGrupo_(enfaseRaw) {
   if (!enfaseRaw) return null;
 
   const e = normalizar_(enfaseRaw);
 
   const MAP = {
+    // glúteos
     gluteo: 'gluteos',
     gluteos: 'gluteos',
 
+    // quadríceps
     quadriceps: 'quadriceps',
     quadricipites: 'quadriceps',
+    quadriceps_femoral: 'quadriceps',
 
+    // posteriores
     posteriores: 'isquiotibiais',
     isquiotibiais: 'isquiotibiais',
+    posterior_de_coxa: 'isquiotibiais',
+    posteriores_de_coxa: 'isquiotibiais',
 
+    // costas
     costas: 'costas',
     dorsal: 'costas',
+    dorsais: 'costas',
 
+    // peito
     peito: 'peito',
     peitoral: 'peito',
+    peitorais: 'peito',
 
+    // superiores
     superiores: 'superiores',
 
+    // ombros
     ombro: 'deltoides',
     ombros: 'deltoides',
+    deltoide: 'deltoides',
+    deltoides: 'deltoides',
 
+    // core
     core: 'core',
-    abdominal: 'core'
+    abdominal: 'core',
+    abdominais: 'core',
+
+    // === adicionais "seguros" (não quebram FemFlow) ===
+    biceps: 'biceps',
+    triceps: 'triceps',
+    antebraco: 'antebraco',
+    antebracos: 'antebraco',
+    trapezio: 'trapezio',
+    panturrilha: 'panturrilha',
+    panturrilhas: 'panturrilha',
+    lombar: 'lombar',
+    adutor: 'adutores',
+    adutores: 'adutores',
+    posterior: 'isquiotibiais'
   };
 
   return MAP[e] || e;
 }
 
+/**
+ * Resolve "ênfase por esporte" (mantido)
+ */
 function resolverEnfasePorEsporte_(enfaseRaw) {
   if (!enfaseRaw) return null;
 
@@ -144,3 +183,42 @@ function limparComplementosSemanticos_(txt) {
     .trim();
 }
 
+/* ============================================================
+   ✅ NOVO: helpers MaleFlow (ciclo / diatreino)
+   - não interfere em FemFlow
+============================================================ */
+
+/**
+ * Normaliza ciclo: aceita "3/4/5", "abc/abcd/abcde", "ABCDE", etc.
+ * Retorna "abc", "abcd" ou "abcde" (string).
+ */
+function normalizarCiclo_(valor) {
+  if (!valor) return null;
+  const v = normalizar_(valor).replace(/[^a-z0-9]/g, '');
+
+  if (v === '3' || v === 'abc') return 'abc';
+  if (v === '4' || v === 'abcd') return 'abcd';
+  if (v === '5' || v === 'abcde') return 'abcde';
+
+  // se vier "ABCDE" (ou "A,B,C,D,E")
+  if (v.includes('a') && v.includes('b') && v.includes('c') && v.includes('d') && v.includes('e')) return 'abcde';
+  if (v.includes('a') && v.includes('b') && v.includes('c') && v.includes('d')) return 'abcd';
+  if (v.includes('a') && v.includes('b') && v.includes('c')) return 'abc';
+
+  return null;
+}
+
+/**
+ * Normaliza diatreino: A/B/C/D/E (aceita "dia A", "diatreino_A", etc.)
+ * Retorna "A".."E"
+ */
+function normalizarDiaTreino_(valor) {
+  if (!valor) return null;
+  const raw = String(valor || '').trim().toUpperCase();
+
+  // pega primeira letra A-E
+  const m = raw.match(/[A-E]/);
+  if (!m) return null;
+
+  return m[0];
+}
