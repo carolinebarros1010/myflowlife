@@ -1,40 +1,56 @@
 /* ============================================================
- * 🔥 MALEFLOW — CÁLCULO DO CICLO DE TREINO (NÃO HORMONAL)
+ * 🔥 MALEFLOW — LÓGICA DE CICLO (MASCULINO)
+ * - CICLO vem do front (AB/ABC/ABCD/ABCDE)
+ * - Backend só armazena/espelha e calcula diaCiclo por módulo
+ * - COL_FASE = cicloTreino (compat)
+ * ============================================================ */
+
+function _normalizarCicloTreino_(raw) {
+  const s = String(raw || "").toUpperCase();
+  const letters = s.match(/[A-E]/g) || [];
+  const out = [];
+  const seen = {};
+  for (let i = 0; i < letters.length && out.length < 5; i++) {
+    const ch = letters[i];
+    if (!seen[ch]) {
+      seen[ch] = true;
+      out.push(ch);
+    }
+  }
+  // MaleFlow: mínimo AB (2)
+  if (out.length < 2) return "";
+  return out.join("");
+}
+
+function _diaCicloFromDiaPrograma_(diaPrograma, ciclo) {
+  const c = String(ciclo || "");
+  const len = c.length || 0;
+  if (!len) return 1;
+  const dp = Number(diaPrograma) || 1;
+  return ((dp - 1) % len) + 1;
+}
+
+/* ============================================================
+ * 🔥 CÁLCULO DO CICLO DE TREINO (NÃO HORMONAL)
+ * - Retorna ciclo + diaCiclo (1..len)
  * ============================================================ */
 function calcularCicloTreino_(params) {
   params = params || {};
-  const {
-    cicloDuracao,
-    diaPrograma,
-    cicloTreino
-  } = params;
-
-  const length = Number(cicloDuracao) > 0 ? Number(cicloDuracao) : 3;
-  const diaBase = Number(diaPrograma) || 1;
-  const diaIndex = ((diaBase - 1) % length) + 1;
+  const ciclo = _normalizarCicloTreino_(params.cicloTreino || params.ciclo || params.fase) || "ABC";
+  const diaPrograma = Number(params.diaPrograma) || 1;
 
   return {
-    fase: String(cicloTreino || "").toLowerCase(),
-    dia: diaIndex
+    ciclo,
+    dia: _diaCicloFromDiaPrograma_(diaPrograma, ciclo)
   };
 }
 
-/* ======================================================
- * 🌸 SET CICLO — OPÇÃO A (STARTDATE RETROATIVO)
- * ------------------------------------------------------
- * Objetivo:
- * - Recebe diaCicloInicial (1..28)
- * - Calcula DataInicio real de forma retroativa
- * - Atualiza IMEDIATAMENTE:
- *   • DataInicio
- *   • Fase (N)
- *   • DiaCiclo (O)
- *
- * Decisões:
- * ✅ PerfilHormonal sempre "regular"
- * ✅ ManualStart SEMPRE limpo
- * ✅ VALIDAR passa a ser corretivo, não primário
- * ====================================================== */
+/* ============================================================
+ * ✅ SET CICLO (salva escolha do front)
+ * - Salva COL_FASE = ciclo (AB/ABC/...)
+ * - Salva COL_CICLO_DURACAO = ciclo.length (coerência)
+ * - Recalcula COL_DIA_CICLO pelo diaPrograma atual
+ * ============================================================ */
 function setCiclo_(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   if (!sh) return { status: "error", msg: "sheet_not_found" };
@@ -42,34 +58,34 @@ function setCiclo_(data) {
   const id = String(data.id || "").trim();
   if (!id) return { status: "error", msg: "missing_id" };
 
-  const values = sh.getDataRange().getValues();
+  const cicloRaw = data.cicloTreino || data.ciclo || data.fase || data.perfilInterno || "";
+  const ciclo = _normalizarCicloTreino_(cicloRaw);
+  if (!ciclo) return { status: "error", msg: "invalid_ciclo" };
 
-  const _clamp = (n, min, max) => Math.max(min, Math.min(max, n));
-  const cicloTreinoRaw =
-    data.cicloTreino || data.ciclo || data.fase || data.perfilInterno || "";
-  const cicloTreino = String(cicloTreinoRaw || "").toUpperCase().trim();
+  const vals = sh.getDataRange().getValues();
 
-  for (let i = 1; i < values.length; i++) {
-    const r = values[i];
-    if (String(r[0]).trim() !== id) continue;
+  for (let i = 1; i < vals.length; i++) {
+    const r = vals[i];
+    if (String(r[COL_ID]).trim() !== id) continue;
 
     const linha = i + 1;
 
-    const cicloDuracao = _clamp(
-      Number(data.cicloDuracao) || Number(r[9]) || (cicloTreino ? cicloTreino.length : 3),
-      2,
-      5
-    );
-    sh.getRange(linha, 10).setValue(cicloDuracao);
+    // diaPrograma: se vier do front, salva; senão mantém/1
+    const diaProgramaFinal =
+      Number(data.diaPrograma) || Number(r[COL_DIA_PROGRAMA]) || 1;
+    sh.getRange(linha, COL_DIA_PROGRAMA + 1).setValue(diaProgramaFinal);
 
-    sh.getRange(linha, 14).setValue(cicloTreino || r[13] || "");
+    // salva ciclo
+    sh.getRange(linha, COL_FASE + 1).setValue(ciclo);
 
-    const diaProgramaFinal = Number(data.diaPrograma) || 1;
-    sh.getRange(linha, 22).setValue(diaProgramaFinal);
+    // coerência: duração derivada do ciclo
+    sh.getRange(linha, COL_CICLO_DURACAO + 1).setValue(ciclo.length);
 
-    const diaCicloFinal = ((diaProgramaFinal - 1) % cicloDuracao) + 1;
-    sh.getRange(linha, 15).setValue(diaCicloFinal);
+    // diaCiclo calculado
+    const diaCicloFinal = _diaCicloFromDiaPrograma_(diaProgramaFinal, ciclo);
+    sh.getRange(linha, COL_DIA_CICLO + 1).setValue(diaCicloFinal);
 
+    // start do programa (se vazio)
     if (!r[COL_DATA_INICIO_PROGRAMA]) {
       sh.getRange(linha, COL_DATA_INICIO_PROGRAMA + 1).setValue(new Date());
     }
@@ -77,65 +93,22 @@ function setCiclo_(data) {
     return {
       status: "ok",
       id,
-      cicloDuracao,
-      fase: cicloTreino || r[13] || "",
-      diaCiclo: diaCicloFinal,
-      diaPrograma: diaProgramaFinal
+      ciclo,
+      cicloDuracao: ciclo.length,
+      diaPrograma: diaProgramaFinal,
+      diaCiclo: diaCicloFinal
     };
   }
 
-  return { status: "notfound" };
+  return { status: "notfound", id };
 }
 
-
-/* ======================================================
- * 🔹 Motor de Treino HÍBRIDO (resumo — usado pelo front)
- * ====================================================== */
+/* ============================================================
+ * 🔹 Resolver Perfil (resumo pro front)
+ * - fase == ciclo (compat)
+ * ============================================================ */
 function _resolverPerfil(id) {
-  const sh = _sheet(SHEET_ALUNAS);
-  if (!sh) return null;
-
-  const vals = sh.getDataRange().getValues();
-  for (let i = 1; i < vals.length; i++) {
-    const r = vals[i];
-    if (String(r[0]).trim() === String(id).trim()) {
-      return {
-        id: r[0],
-        nome: r[1],
-        email: r[2],
-        produto: r[5] || "",
-        ativo: !!r[7],
-        nivel: String(r[8] || "iniciante").toLowerCase(),
-        cicloDuracao: Number(r[9] || 3),
-        dataInicio: r[10] || new Date(),
-        link_planilha: r[11] || "",
-        enfase: _norm(r[12] || "nenhuma"),
-        fase: _norm(r[13] || ""),
-        diaCiclo: Number(r[14] || 1)
-      };
-    }
-  }
-  return null;
-}
-function resolverDiaTreino(params) {
-  params = params || {};
-  const { diaPrograma, cicloDuracao, cicloTreino } = params;
-  const length = Number(cicloDuracao) > 0 ? Number(cicloDuracao) : 3;
-  const diaTreino = ((Number(diaPrograma) || 1) - 1) % length + 1;
-
-  return {
-    fase: String(cicloTreino || "").toLowerCase(),
-    diaTreino,
-    fonte: "programa"
-  };
-}
-
-/* ======================================================
- * 🔄 FASE ATUAL — FONTE ÚNICA
- * Coluna N (Fase) = índice 13
- * ====================================================== */
-function calcularEFixarFase_(id) {
-  const sh = _sheet(SHEET_ALUNAS);
+  const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   if (!sh) return null;
 
   const idNorm = String(id || "").trim();
@@ -144,27 +117,82 @@ function calcularEFixarFase_(id) {
   const vals = sh.getDataRange().getValues();
 
   for (let i = 1; i < vals.length; i++) {
-    if (String(vals[i][0]).trim() !== idNorm) continue;
+    const r = vals[i];
+    if (String(r[COL_ID]).trim() === idNorm) {
+      const ciclo = _normalizarCicloTreino_(r[COL_FASE]) || "ABC";
+      const diaPrograma = Number(r[COL_DIA_PROGRAMA] || 1);
 
-    const cicloTreino = String(vals[i][13] || "").toUpperCase();
-    if (cicloTreino) {
-      sh.getRange(i + 1, 14).setValue(cicloTreino);
+      return {
+        id: r[COL_ID],
+        nome: r[COL_NOME],
+        email: r[COL_EMAIL],
+        produto: r[COL_PRODUTO] || "",
+        ativo: r[COL_LICENCA_ATIVA] === true,
+        nivel: String(r[COL_NIVEL] || "iniciante").toLowerCase(),
+        ciclo: ciclo,
+        fase: ciclo.toLowerCase(), // compat
+        cicloDuracao: ciclo.length,
+        diaPrograma: diaPrograma,
+        diaCiclo: _diaCicloFromDiaPrograma_(diaPrograma, ciclo),
+        dataInicio: r[COL_DATA_INICIO] || new Date(),
+        link_planilha: r[COL_LINK_PLANILHA] || "",
+        enfase: _normFase(r[COL_ENFASE] || "nenhuma")
+      };
     }
+  }
+  return null;
+}
 
-    return cicloTreino || null;
+/* ============================================================
+ * 🔹 Resolver Dia de Treino (para front)
+ * ============================================================ */
+function resolverDiaTreino(params) {
+  params = params || {};
+  const ciclo = _normalizarCicloTreino_(params.cicloTreino || params.ciclo || params.fase) || "ABC";
+  const diaPrograma = Number(params.diaPrograma) || 1;
+
+  return {
+    fase: ciclo.toLowerCase(),     // compat
+    ciclo: ciclo,
+    diaTreino: _diaCicloFromDiaPrograma_(diaPrograma, ciclo),
+    fonte: "programa"
+  };
+}
+
+/* ============================================================
+ * 🔄 Fixar "Fase" (compat) => normaliza e grava o ciclo
+ * ============================================================ */
+function calcularEFixarFase_(id) {
+  const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
+  if (!sh) return null;
+
+  const idNorm = String(id || "").trim();
+  if (!idNorm) return null;
+
+  const vals = sh.getDataRange().getValues();
+
+  for (let i = 1; i < vals.length; i++) {
+    if (String(vals[i][COL_ID]).trim() !== idNorm) continue;
+
+    const ciclo = _normalizarCicloTreino_(vals[i][COL_FASE]) || "";
+    if (ciclo) {
+      sh.getRange(i + 1, COL_FASE + 1).setValue(ciclo);
+      sh.getRange(i + 1, COL_CICLO_DURACAO + 1).setValue(ciclo.length);
+    }
+    return ciclo || null;
   }
 
   return null;
 }
 
-/**
- * 🔄 SYNC — Atualiza DiaCiclo/Fase com base em DataInicio
- * - Respeita ManualStart (col 21)
- * - Usa cálculo oficial de fase
- * - Retorna estado atualizado para o front
- */
+/* ============================================================
+ * 🔄 SYNC (MaleFlow)
+ * - Não “inventa” ciclo: usa COL_FASE
+ * - Se ciclo vazio, retorna ok com warning (front decide)
+ * - Atualiza diaCiclo por módulo e mantém coerência de duração
+ * ============================================================ */
 function sync(id) {
-  const sh = _sheet(SHEET_ALUNAS);
+  const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   if (!sh) return { status: "error", msg: "sheet_not_found" };
 
   const idNorm = String(id || "").trim();
@@ -173,28 +201,38 @@ function sync(id) {
   const vals = sh.getDataRange().getValues();
 
   for (let i = 1; i < vals.length; i++) {
-    if (String(vals[i][0]).trim() !== idNorm) continue;
+    const r = vals[i];
+    if (String(r[COL_ID]).trim() !== idNorm) continue;
 
     const linha = i + 1;
-    const cicloDuracao = Number(vals[i][9] || 3);
-    const diaPrograma = Number(vals[i][COL_DIA_PROGRAMA] || 1);
-    const cicloTreino = String(vals[i][13] || "").toUpperCase();
 
-    const ciclo = calcularCicloTreino_({
-      cicloDuracao,
-      diaPrograma,
-      cicloTreino
-    });
+    const ciclo = _normalizarCicloTreino_(r[COL_FASE]); // pode ser ""
+    const diaPrograma = Number(r[COL_DIA_PROGRAMA] || 1);
 
-    sh.getRange(linha, 15).setValue(ciclo.dia);
-    if (cicloTreino) {
-      sh.getRange(linha, 14).setValue(cicloTreino);
+    if (!ciclo) {
+      // não força padrão aqui: front manda setciclo
+      return {
+        status: "ok",
+        msg: "ciclo_not_set",
+        ciclo: "",
+        fase: "",
+        diaCiclo: Number(r[COL_DIA_CICLO] || 1),
+        diaPrograma
+      };
     }
+
+    const diaCiclo = _diaCicloFromDiaPrograma_(diaPrograma, ciclo);
+
+    // coerência de colunas
+    sh.getRange(linha, COL_DIA_CICLO + 1).setValue(diaCiclo);
+    sh.getRange(linha, COL_CICLO_DURACAO + 1).setValue(ciclo.length);
+    sh.getRange(linha, COL_FASE + 1).setValue(ciclo);
 
     return {
       status: "ok",
-      diaCiclo: ciclo.dia,
-      fase: cicloTreino
+      ciclo,
+      fase: ciclo,     // compat
+      diaCiclo
     };
   }
 
