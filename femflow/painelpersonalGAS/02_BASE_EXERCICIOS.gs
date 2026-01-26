@@ -1,5 +1,5 @@
 /** ================================
- *  BASE DE EXERCÍCIOS — BANCO_PRO_V2
+ *  BASE DE EXERCÍCIOS — BANCO_PRO_V2 (VERSÃO FINAL)
  *  ================================ */
 
 function mapearTituloParaId_(base) {
@@ -11,8 +11,6 @@ function mapearTituloParaId_(base) {
   });
   return map;
 }
-
-
 
 let __CACHE_BASE_PRO__ = null;
 
@@ -31,26 +29,47 @@ function carregarBaseExercicios_() {
 
   const col = (name) => header.indexOf(String(name).trim().toLowerCase());
 
+  // ✅ novo: achar coluna com variações (acentos/nomes alternativos)
+  const colAny_ = (candidates) => {
+    const arr = Array.isArray(candidates) ? candidates : [candidates];
+    for (let i = 0; i < arr.length; i++) {
+      const idx = col(arr[i]);
+      if (idx >= 0) return idx;
+    }
+    return -1;
+  };
+
   const idx = {
     id: col('id'),
-    titulo_pt: col('titulo_pt'),
-    titulo_en: col('titulo_en'),
-    titulo_fr: col('titulo_fr'),
+    titulo_pt: colAny_(['titulo_pt', 'título_pt', 'titulo', 'título']),
+    titulo_en: colAny_(['titulo_en', 'título_en']),
+    titulo_fr: colAny_(['titulo_fr', 'título_fr']),
     link: col('link'),
 
-    nivel_minimo: col('nivel_minimo'),
-    proibido_iniciante: col('proibido_iniciante'),
+    nivel_minimo: colAny_(['nivel_minimo', 'nível_mínimo']),
+    proibido_iniciante: colAny_(['proibido_iniciante', 'proibido iniciante']),
 
-    sub_iniciante_id: col('sub_iniciante_id'),
-    sub_iniciante_titulo_pt: col('sub_iniciante_titulo_pt'),
-    sub_iniciante_link: col('sub_iniciante_link'),
+    sub_iniciante_id: colAny_(['sub_iniciante_id', 'sub_iniciante id']),
+    sub_iniciante_titulo_pt: colAny_(['sub_iniciante_titulo_pt', 'sub_iniciante título_pt', 'sub_iniciante_titulo']),
+    sub_iniciante_link: colAny_(['sub_iniciante_link', 'sub_iniciante link']),
 
-grupo_muscular_principal: col('grupo muscular principal'),
-grupo_muscular_secundario: col('grupo muscular secundário'),
+    // ✅ as duas colunas que vivem com variações (acento e underscore)
+    grupo_muscular_principal: colAny_([
+      'grupo muscular principal',
+      'grupo_muscular_principal',
+      'grupo muscular_principal',
+      'grupomuscularprincipal'
+    ]),
+    grupo_muscular_secundario: colAny_([
+      'grupo muscular secundário',
+      'grupo muscular secundario',
+      'grupo_muscular_secundario',
+      'grupo muscular_secundario',
+      'grupomuscularsecundario'
+    ]),
 
-    equipamento_categoria: col('equipamento_categoria'),
-    subpadrao_movimento: col('subpadrao_movimento')
-
+    equipamento_categoria: colAny_(['equipamento_categoria', 'equipamento categoria']),
+    subpadrao_movimento: colAny_(['subpadrao_movimento', 'subpadrao movimento'])
   };
 
   if (idx.titulo_pt < 0 || idx.link < 0) {
@@ -93,8 +112,226 @@ grupo_muscular_secundario: col('grupo muscular secundário'),
     };
 
     rec.grupo_principal = normalizarGrupoMuscular_(rec.grupo_principal_raw);
-rec.grupo_secundario = normalizarGrupoMuscular_(rec.grupo_secundario_raw);
+    rec.grupo_secundario = normalizarGrupoMuscular_(rec.grupo_secundario_raw);
 
+    const kStrict = normalizaKeyStrict_(pt);
+    const kFuzzy  = normalizaKey_(pt);
+
+    if (kStrict && !byStrict[kStrict]) byStrict[kStrict] = rec;
+    if (kFuzzy  && !byFuzzy[kFuzzy])   byFuzzy[kFuzzy] = rec;
+
+    if (rec.id) byId[rec.id] = rec;
+
+    list.push(rec);
+  });
+
+  __CACHE_BASE_PRO__ = { byStrict, byFuzzy, byId, list };
+  return __CACHE_BASE_PRO__;
+}
+
+/**
+ * Normaliza grupo muscular da base para o "vocabulário do motor".
+ * ✅ padronizado para bater com normalizarEnfaseParaGrupo_ (01_NORMALIZACAO)
+ */
+function normalizarGrupoMuscular_(txt) {
+  if (!txt) return null;
+
+  const t = String(txt || '').toLowerCase();
+
+  // CORE
+  if (t.includes('reto abdominal') || t.includes('obliqu') || t.includes('core'))
+    return 'core';
+
+  // GLÚTEOS
+  if (t.includes('gluteo') || t.includes('glúteo'))
+    return 'gluteos';
+
+  // QUADRÍCEPS
+  if (t.includes('quadr') && t.includes('ceps'))
+    return 'quadriceps';
+
+  // POSTERIOR
+  if (t.includes('isquiotib') || t.includes('posterior de coxa') || t.includes('posteriores'))
+    return 'isquiotibiais';
+
+  // DORSAL / COSTAS
+  if (t.includes('costas') || t.includes('romboide') || t.includes('dorsal') || t.includes('latissimo'))
+    return 'costas';
+
+  // PEITO
+  if (t.includes('peito') || t.includes('peitoral'))
+    return 'peito';
+
+  // OMBROS / DELTÓIDES
+  if (t.includes('delt') || t.includes('ombro'))
+    return 'deltoides';
+
+  // BRAÇOS
+  if (t.includes('bic') || t.includes('bíceps'))
+    return 'biceps';
+  if (t.includes('tric') || t.includes('tríceps'))
+    return 'triceps';
+  if (t.includes('antebr') || t.includes('antebraço'))
+    return 'antebraco';
+
+  // TRAPÉZIO
+  if (t.includes('trapez'))
+    return 'trapezio';
+
+  // PANTURRILHA
+  if (t.includes('gastrocn') || t.includes('soleo') || t.includes('sóleo') || t.includes('panturr'))
+    return 'panturrilha';
+
+  // COLUNA / LOMBAR
+  if (t.includes('coluna') || t.includes('lombar'))
+    return 'lombar';
+
+  // ADUTORES
+  if (t.includes('adutor'))
+    return 'adutores';
+
+  // MOBILIDADE
+  if (t.includes('mobilidade'))
+    return 'mobilidade';
+
+  return 'outros';
+}
+
+function encontrarHitBase_(tituloPt, base, nivel) {
+  const original = String(tituloPt || '').trim();
+  if (!original) return null;
+
+  const limpo = limparComplementosSemanticos_(original);
+
+  // 1️⃣ STRICT → ID
+  const kStrict = normalizaKeyStrict_(limpo);
+  if (kStrict && base.byStrict[kStrict]) {
+    const ex = base.byStrict[kStrict];
+    logCanonResolver_(original, ex.id, 'STRICT_ID');
+    return aplicarSubstituicaoPorNivel_(ex, nivel, base);
+  }
+
+  // 2️⃣ FUZZY → ID
+  const kFuzzy = normalizaKey_(limpo);
+  if (kFuzzy && base.byFuzzy[kFuzzy]) {
+    const ex = base.byFuzzy[kFuzzy];
+    logCanonResolver_(original, ex.id, 'FUZZY_ID');
+    return aplicarSubstituicaoPorNivel_(ex, nivel, base);
+  }
+
+  // 3️⃣ TOKEN MATCH
+  for (const ex of base.list) {
+    const s = tokenMatch_(limpo, ex.pt);
+    if (s >= 0.6) {
+      logCanonResolver_(original, ex.id, 'TOKEN_ID');
+      return aplicarSubstituicaoPorNivel_(ex, nivel, base);
+    }
+  }
+
+  // 4️⃣ TOKEN SCORE
+  let best = null, bestScore = 0;
+  for (const ex of base.list) {
+    const s = tokenScore_(limpo, ex.pt);
+    if (s > bestScore) {
+      bestScore = s;
+      best = ex;
+    }
+  }
+  if (bestScore >= 0.6) {
+    logCanonResolver_(original, best.id, 'TOKEN_SCORE_ID');
+    return aplicarSubstituicaoPorNivel_(best, nivel, base);
+  }
+
+  // 5️⃣ 🔥 OPENAI → ID
+  const idCanonico = resolverCanonicoIdOpenAI_(limpo, base);
+  if (idCanonico && base.byId[idCanonico]) {
+    const ex = base.byId[idCanonico];
+    return aplicarSubstituicaoPorNivel_(ex, nivel, base);
+  }
+
+  // ❌ FINAL
+  logCanonResolver_(original, null, 'NAO_ENCONTRADO');
+  return null;
+}
+
+function encontrarHitBaseSemLog_(tituloPt, base) {
+  const original = String(tituloPt || '').trim();
+  if (!original) return { hit: null, matchType: 'SEM_TITULO', score: 0 };
+
+  const limpo = limparComplementosSemanticos_(original);
+
+  const kStrict = normalizaKeyStrict_(limpo);
+  if (kStrict && base.byStrict[kStrict]) {
+    return { hit: base.byStrict[kStrict], matchType: 'STRICT_ID', score: 1 };
+  }
+
+  const kFuzzy = normalizaKey_(limpo);
+  if (kFuzzy && base.byFuzzy[kFuzzy]) {
+    return { hit: base.byFuzzy[kFuzzy], matchType: 'FUZZY_ID', score: 1 };
+  }
+
+  for (const ex of base.list) {
+    const s = tokenMatch_(limpo, ex.pt);
+    if (s >= 0.6) {
+      return { hit: ex, matchType: 'TOKEN_ID', score: s };
+    }
+  }
+
+  let best = null;
+  let bestScore = 0;
+  for (const ex of base.list) {
+    const s = tokenScore_(limpo, ex.pt);
+    if (s > bestScore) {
+      bestScore = s;
+      best = ex;
+    }
+  }
+  if (bestScore >= 0.6) {
+    return { hit: best, matchType: 'TOKEN_SCORE_ID', score: bestScore };
+  }
+
+  return { hit: null, matchType: 'NAO_ENCONTRADO', score: 0 };
+}
+
+/* ============================================================
+   ✅ Correção: tokenização real (normalizaKey_ troca espaço por "_")
+============================================================ */
+function tokensFrom_(txt) {
+  return String(txt || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9_ ]+/g, ' ')
+    .replace(/_/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .filter(Boolean);
+}
+
+function tokenScore_(a, b) {
+  const A = new Set(tokensFrom_(a));
+  const B = new Set(tokensFrom_(b));
+  if (!A.size || !B.size) return 0;
+
+  let inter = 0;
+  A.forEach(x => { if (B.has(x)) inter++; });
+
+  const uni = A.size + B.size - inter;
+  return uni ? (inter / uni) : 0;
+}
+
+function tokenMatch_(a, b) {
+  const A = new Set(tokensFrom_(a));
+  const B = new Set(tokensFrom_(b));
+  if (!A.size || !B.size) return 0;
+
+  let intersecao = 0;
+  A.forEach(t => { if (B.has(t)) intersecao++; });
+
+  const score = intersecao / Math.max(A.size, B.size);
+  return score;
+}
 
     const kStrict = normalizaKeyStrict_(pt);
     const kFuzzy  = normalizaKey_(pt);
