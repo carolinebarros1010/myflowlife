@@ -1,336 +1,343 @@
 /* ======================================================
- *  SALVAR EVOLUÇÃO — FEMFLOW (VERSÃO FINAL ESTÁVEL)
- * ------------------------------------------------------
- * Finalidade:
- * - Registrar evolução de carga (peso, reps, séries, PSE)
- * - Atualizar último peso por exercício
- *
- * Regras estruturais:
- * ✅ NÃO avança DiaPrograma
- * ✅ NÃO altera Fase ou Dia do Ciclo na planilha
- * ✅ Fase é calculada dinamicamente a partir do startDate
- *    (manual ou fisiológico), usando o motor oficial
- *
- * Fonte da verdade:
- * - Tempo (startDate / manualStart) define fase e dia
- * - Programa só avança em treino ou descanso
- * - Evolução é evento neutro no ciclo
- *
- * Segurança:
- * - Sessão validada (_assertSession_)
- * - Device lock ativo
- *
- * Compatível com:
- * - Perfil regular
- * - Perfil irregular
- * - Perfil energético / DIU / menopausa
- *
- * FemFlow Cycle Engine • 2025
+ * 🔹 PROCESSAR HOTMART • MAPA DE PRODUTOS
  * ====================================================== */
+function mapearProduto(productName) {
+  const fallback = { slug: "geral", nivel: "iniciante", fase: "follicular", enfase: "nenhuma" };
+  if (!productName) return fallback;
 
-/* ============================================================
- * 🌸 BLOCO 1 — INFRAESTRUTURA BASE
- * ============================================================ */
+  const prodNorm = _norm(productName);
 
-
-/* ============================================================
- * 🔹 1) PADRÃO DE RESPOSTA — JSON
- * ============================================================ */
-function _json(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
+  if (prodNorm === "treino_personal") {
+  return {
+    slug: "addon_personal",
+    nivel: null,
+    fase: null,
+    enfase: null,
+    acesso_personal: true
+  };
 }
 
-/* ============================================================
- * 🔹 2) UTILITÁRIOS DE PLANILHA
- * ============================================================ */
-function _sheet(name) {
-  return SpreadsheetApp.getActive().getSheetByName(name);
-}
-
-/**
- * Garante que a aba existe e tem o cabeçalho correto
- * ✅ Atualiza a linha 1 (não insere nova linha)
- * ✅ Expande colunas se precisar
- */
-function ensureSheet(name, header) {
-  const ss = SpreadsheetApp.getActive();
-  let sh = ss.getSheetByName(name);
-
-  if (!sh) {
-    sh = ss.insertSheet(name);
-    sh.getRange(1, 1, 1, header.length).setValues([header]);
-    return sh;
+  if (prodNorm === "maleflow_premium") {
+    return { slug: "premium", nivel: "iniciante", fase: "follicular", enfase: "geral" };
+  }
+  if (prodNorm === "acesso_app") {
+    return { slug: "app", nivel: "iniciante", fase: "follicular", enfase: "nenhuma" };
   }
 
-  // Se existir mas estiver vazia
-  if (sh.getLastRow() === 0) {
-    sh.getRange(1, 1, 1, header.length).setValues([header]);
-    return sh;
-  }
-
-  // Garante que tem colunas suficientes
-  const maxCols = sh.getMaxColumns();
-  if (maxCols < header.length) {
-    sh.insertColumnsAfter(maxCols, header.length - maxCols);
-  }
-
-  // Lê o header atual (linha 1) no tamanho do header novo
-  const firstRow = sh.getRange(1, 1, 1, header.length).getValues()[0];
-
-  // Se for diferente, sobrescreve a linha 1 (sem empurrar dados)
-  const diff = header.some((h, i) => (firstRow[i] || "").toString().trim() !== h);
-
-  if (diff) {
-    sh.getRange(1, 1, 1, header.length).setValues([header]);
-  }
-
-  return sh;
-}
-
-/* ============================================================
- * 🔹 3) GERADOR DE IDs (unificado)
- * ============================================================ */
-function gerarID() {
-  const ts = Utilities.formatDate(new Date(), "GMT-3", "yyMMdd");
-  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return "FF-" + ts + "-" + rand;
-}
-
-/* ============================================================
- * 🔹 4) LOG INTERNO — Upgrade / Eventos
- * ============================================================ */
-function _logUpgrade(entry) {
-  const ss = SpreadsheetApp.getActive();
-  let log = ss.getSheetByName("Logs");
-  if (!log) log = ss.insertSheet("Logs");
-
-  log.appendRow([
-    new Date(),
-    entry.id || "",
-    entry.nivel || "",
-    entry.origem || "",
-    entry.status || "",
-    entry.obs || ""
-  ]);
-}
-
-
-
-/* ============================================================
- * 🔧 parseBody_ — aceita JSON, e.parameter, querystring
- * ============================================================ */
-function parseBody_(e) {
-  const raw  = (e && e.postData && e.postData.contents) ? e.postData.contents : "";
-  const type = (e && e.postData && e.postData.type) ? String(e.postData.type).toLowerCase() : "";
-
-  // 1) tenta JSON
-  try {
-    if (raw && (type.includes("application/json") || raw.trim().startsWith("{"))) {
-      return JSON.parse(raw);
-    }
-  } catch (_) {}
-
-  // 1.1) payload=<json> (alguns serviços mandam assim)
-  try {
-    if (raw && raw.startsWith("payload=")) {
-      const p = decodeURIComponent(raw.substring("payload=".length));
-      if (p.trim().startsWith("{")) return JSON.parse(p);
-    }
-  } catch (_) {}
-
-  // 2) fallback: parâmetros já parseados
-  if (e && e.parameter && Object.keys(e.parameter).length) {
-    return Object.assign({}, e.parameter);
-  }
-
-  // 3) fallback: querystring manual
-  if (raw && raw.includes("=")) {
-    const obj = {};
-    raw.split("&").forEach(kv => {
-      const parts = kv.split("=");
-      const k = decodeURIComponent(parts[0] || "");
-      const v = decodeURIComponent(parts.slice(1).join("=") || "");
-      obj[k] = v;
-    });
-    return obj;
-  }
-
-  return {};
-}
-
-
-
-
-
-
-/* ======================================================
- * 🟦 CADASTRO FEMFLOW 2025 — com pontuação de anamnese
- * ====================================================== */
-function _calcularPontuacaoAnamnese(anamneseJSON) {
-  if (!anamneseJSON) return 0;
-  try {
-    const obj = JSON.parse(anamneseJSON);
-    let score = 0;
-    const keys = Object.keys(obj);
-    for (let i = 0; i < keys.length; i++) {
-      const n = Number(obj[keys[i]]);
-      if (!isNaN(n)) score += n;
-    }
-    return score;
-  } catch (e) {
-    return 0;
-  }
-}
-
-
-/* ======================================================
- * 🟦 LEAD PARCIAL
- * ====================================================== */
-function _registrarLead(data) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName("Leads") || ss.insertSheet("Leads");
-
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["Data", "Nome", "Email", "Telefone", "Origem"]);
-  }
-
-  sheet.appendRow([
-    new Date().toISOString(),
-    data.nome || "",
-    data.email || "",
-    data.telefone || "",
-    data.origem || "Anamnese FemFlow"
-  ]);
-
-  return { status: "ok", msg: "Lead parcial salvo", email: data.email };
-}
-
-
-/* ======================================================
- * 🔹 HISTÓRICO COMPARTILHADO
- * ====================================================== */
-function _historico(id, n) {
-  n = Math.max(1, Math.min(Number(n) || 30, 120));
-  const out = { diario: [], treinos: [] };
-  const ss = SpreadsheetApp.getActive();
-  const diario = ss.getSheetByName("Diario");
-
-  if (diario) {
-    const vals = diario.getDataRange().getValues();
-    for (let i = vals.length - 1; i >= 1 && out.diario.length < n; i--) {
-      if (String(vals[i][0]).trim() === String(id).trim()) {
-        out.diario.push({
-          data: vals[i][1],
-          fase: vals[i][2],
-          semana: vals[i][3],
-          treino: vals[i][4],
-          tipo: vals[i][5],
-          descanso: !!vals[i][6],
-          obs: vals[i][7] || ""
-        });
-      }
-    }
-  }
-
-  const treinos = ss.getSheetByName("Treinos");
-  if (treinos) {
-    const valsT = treinos.getDataRange().getValues();
-    for (let j = valsT.length - 1; j >= 1 && out.treinos.length < n; j--) {
-      if (String(valsT[j][0]).trim() === String(id).trim()) {
-        out.treinos.push({
-          data: valsT[j][1],
-          fase: valsT[j][2],
-          diaPrograma: valsT[j][3],
-          pse: Number(valsT[j][4]) || null
-        });
-      }
-    }
-  }
-
-  out.diario.reverse();
-  out.treinos.reverse();
-  return out;
-}
-
-function _normFase(s) {
-  return String(s || "")
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase().trim();
-}
-
-/* ======================================================
- * 🔹 Atualizações simples
- * ====================================================== */
-function atualizarEnfase(id, enfase) {
-  const sh = _sheet(SHEET_ALUNAS);
-  if (!sh) return { status: "error", msg: "sheet_not_found" };
-
-  const vals = sh.getDataRange().getValues();
-  for (let i = 1; i < vals.length; i++) {
-    if (String(vals[i][0]).trim() === String(id).trim()) {
-      sh.getRange(i + 1, 13).setValue(String(enfase || "").toLowerCase());
-      return { status: "ok", id: id, enfase: enfase };
-    }
-  }
-  return { status: "notfound", id: id };
-}
-
-/* ======================================================
- * 🔹 ÚLTIMO PESO
- * ====================================================== */
-function getUltimoPeso_(data) {
-  const id = String(data.id || "").trim();
-  const exercicio = String(data.exercicio || "").trim();
-  const chave = exercicio.toLowerCase().trim();
-
-  const ss = SpreadsheetApp.getActive();
-  const sh = ss.getSheetByName("UltimosPesos");
-  if (!sh) return { status: "ok", peso: "" };
+  const sh = _sheet("Produtos");
+  if (!sh) return fallback;
 
   const rows = sh.getDataRange().getValues();
   for (let i = 1; i < rows.length; i++) {
-    if (rows[i][0] === id && rows[i][1] === chave) {
-      return { status: "ok", peso: rows[i][2] || "" };
+    const pHot = rows[i][0];
+    const slug = rows[i][1];
+    const nivel = rows[i][2];
+    const fase = rows[i][3];
+    const enfase = rows[i][4];
+    const ativo = rows[i][5];
+
+    if (ativo !== "✅") continue;
+    if (_norm(pHot) === prodNorm) {
+      return {
+        slug: slug || fallback.slug,
+        nivel: _norm(nivel || fallback.nivel),
+        fase: _norm(fase || fallback.fase),
+        enfase: _norm(enfase || fallback.enfase)
+      };
     }
   }
 
-  return { status: "ok", peso: "" };
+  return fallback;
 }
 
 /* ======================================================
- * 🔹 SET NÍVEL
+ * 🔹 HOTMART • MAPA DE PLANOS (ASSINATURA)
  * ====================================================== */
-function setnivel(id, nivel) {
-  const sh = _sheet(SHEET_ALUNAS);
-  if (!sh) return { status: "error", msg: "sheet_not_found" };
+const PLANOS = {
+  ACESSO_APP: [
+    // "PLAN_ID_ACESSO_APP_1",
+    // "PLAN_ID_ACESSO_APP_2"
+  ],
+  PERSONAL: [
+    // "PLAN_ID_PERSONAL_1"
+  ]
+};
 
-  const vals = sh.getDataRange().getValues();
-  for (let i = 1; i < vals.length; i++) {
-    if (String(vals[i][0]).trim() === String(id).trim()) {
-      sh.getRange(i + 1, 9).setValue(String(nivel || "iniciante").toLowerCase());
-      Logger.log("📈 NÍVEL atualizado → " + id + " → " + nivel);
-      return { status: "ok", id: id, nivel: nivel };
-    }
+function getPlanId(payload) {
+  const subscriptionPlanId =
+    payload &&
+    payload.data &&
+    payload.data.subscription &&
+    payload.data.subscription.plan &&
+    payload.data.subscription.plan.id;
+
+  const planIdFromData =
+    payload &&
+    payload.data &&
+    payload.data.plan &&
+    payload.data.plan.id;
+
+  return String(subscriptionPlanId || planIdFromData || "").trim();
+}
+
+function getPlanName(payload) {
+  const subscriptionPlanName =
+    payload &&
+    payload.data &&
+    payload.data.subscription &&
+    payload.data.subscription.plan &&
+    payload.data.subscription.plan.name;
+
+  const planNameFromData =
+    payload &&
+    payload.data &&
+    payload.data.plan &&
+    payload.data.plan.name;
+
+  return String(subscriptionPlanName || planNameFromData || "").trim();
+}
+
+function _resolverPlanoHotmart(planId, planName) {
+  const idNorm = _norm(String(planId || "").trim());
+  const nameNorm = _norm(String(planName || "").trim());
+
+  if (idNorm && PLANOS.PERSONAL.some((id) => _norm(id) === idNorm)) {
+    return { produto: "treino_personal", personal: true, origem: "plan_id" };
   }
 
-  return { status: "notfound", id: id };
-}
-/* ======================================================
- * 🧾 LOG DO CICLO — FEMFLOW
- * ====================================================== */
-function logCiclo_(id, evento, origem, antes, depois, obs) {
-  const sh = _sheet("LogsCiclo");
-  if (!sh) return;
+  if (idNorm && PLANOS.ACESSO_APP.some((id) => _norm(id) === idNorm)) {
+    return { produto: "acesso_app", personal: false, origem: "plan_id" };
+  }
 
-  sh.appendRow([
-    new Date(),               // Data
-    String(id || ""),         // ID
-    String(evento || ""),     // Evento
-    String(origem || ""),     // Origem (setciclo / sync / validar / manual)
-    antes !== undefined ? JSON.stringify(antes) : "",
-    depois !== undefined ? JSON.stringify(depois) : "",
-    String(obs || "")
-  ]);
+  if (nameNorm.includes("personal")) {
+    return { produto: "treino_personal", personal: true, origem: "plan_name" };
+  }
+
+  if (nameNorm.includes("acesso") || nameNorm.includes("assinatura") || nameNorm.includes("app")) {
+    return { produto: "acesso_app", personal: false, origem: "plan_name" };
+  }
+
+  return { produto: "acesso_app", personal: false, origem: "fallback" };
+}
+
+function _processarHotmart(data) {
+
+  /* ======================================================
+     1) EVENTO
+  ====================================================== */
+  let eventoRaw = String(data.event || data.event_name || data.type || "");
+  if (!eventoRaw && data.data && data.data.event_name) {
+    eventoRaw = String(data.data.event_name || "");
+  }
+  if (!eventoRaw && data.Event) {
+    eventoRaw = String(data.Event || "");
+  }
+
+  const evento = String(eventoRaw || "").trim();
+  const eventoNorm = _norm(evento);
+  const eventoCanon = _canonicalizarEventoHotmart(eventoNorm);
+
+  Logger.log("📬 Hotmart evento: " + evento);
+  Logger.log("📦 Payload keys: " + Object.keys(data || {}).join(","));
+
+  /* ======================================================
+     2) BUYER / SUBSCRIBER
+  ====================================================== */
+  let buyer = {};
+  if (data.data && data.data.buyer) buyer = data.data.buyer;
+  else if (data.buyer) buyer = data.buyer;
+
+  let subscriber = {};
+  if (data.data && data.data.subscriber) subscriber = data.data.subscriber;
+  else if (data.subscriber) subscriber = data.subscriber;
+
+  const email = String(
+    buyer.email ||
+    subscriber.email ||
+    data.email ||
+    data["buyer.email"] ||
+    data["buyer[email]"] ||
+    data["subscriber.email"] ||
+    data["subscriber[email]"] ||
+    ""
+  ).toLowerCase().trim();
+
+  if (!email) {
+    return { status: "error", msg: "hotmart_missing_email", evento };
+  }
+
+  const nome = String(
+    buyer.name ||
+    data.name ||
+    data["buyer.name"] ||
+    data["buyer[name]"] ||
+    ""
+  ).trim();
+
+  const telefone = String(
+    buyer.phone_number ||
+    buyer.phone ||
+    data.phone ||
+    data["buyer.phone_number"] ||
+    data["buyer[phone_number]"] ||
+    ""
+  ).trim();
+
+  /* ======================================================
+     3) PLANO (ASSINATURA)
+  ====================================================== */
+  const planId = getPlanId(data);
+  const planName = getPlanName(data);
+  const plano = _resolverPlanoHotmart(planId, planName);
+
+  /* ======================================================
+     4) PLANILHA
+  ====================================================== */
+  const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
+  const values = sh.getDataRange().getValues();
+
+  function findRowByEmail(em) {
+    for (let i = 1; i < values.length; i++) {
+      if (_norm(values[i][2]) === _norm(em)) return i + 1;
+    }
+    return -1;
+  }
+
+  /* ======================================================
+     5) COMPRA APROVADA
+  ====================================================== */
+  if (eventoCanon === "compra_aprovada") {
+
+    const row = findRowByEmail(email);
+    let idAluno = "";
+
+    if (row > 0) {
+      idAluno = values[row - 1][0];
+      if (!idAluno) {
+        idAluno = gerarID();
+        sh.getRange(row, 1).setValue(idAluno);
+      }
+
+      sh.getRange(row, 6).setValue(plano.produto);
+      sh.getRange(row, 7).setValue(new Date());
+      sh.getRange(row, 8).setValue(true);
+      if (typeof COL_ACESSO_PERSONAL === "number") {
+        sh.getRange(row, COL_ACESSO_PERSONAL + 1).setValue(plano.personal);
+      }
+
+      if (telefone) sh.getRange(row, 4).setValue(telefone);
+
+    } else {
+      idAluno = gerarID();
+
+      const rowData = new Array(HEADER_ALUNAS.length).fill("");
+      rowData[0] = idAluno;
+      rowData[1] = nome;
+      rowData[2] = email;
+      rowData[3] = telefone;
+      rowData[5] = plano.produto;
+      rowData[6] = new Date();
+      rowData[7] = true;
+      sh.appendRow(rowData);
+
+      if (typeof COL_ACESSO_PERSONAL === "number") {
+        const newRow = sh.getLastRow();
+        sh.getRange(newRow, COL_ACESSO_PERSONAL + 1).setValue(plano.personal);
+      }
+    }
+
+    return {
+      status: "ok",
+      produto: plano.produto,
+      acesso_personal: plano.personal,
+      evento
+    };
+  }
+
+  /* ======================================================
+     6) EVENTOS SEM ALTERAR ACESSO
+  ====================================================== */
+  if (
+    eventoCanon === "atualizacao_cobranca_assinatura" ||
+    eventoCanon === "boleto_impresso" ||
+    eventoCanon === "compra_atrasada"
+  ) {
+    const row = findRowByEmail(email);
+    if (row <= 0) {
+      return { status: "notfound", email, evento };
+    }
+
+    if (telefone) sh.getRange(row, 4).setValue(telefone);
+
+    return { status: "ok", msg: "evento_sem_alterar_acesso", evento };
+  }
+
+  /* ======================================================
+     7) CANCELAMENTO / REEMBOLSO / EXPIRAÇÃO
+  ====================================================== */
+  if (
+    eventoCanon === "cancelamento_assinatura" ||
+    eventoCanon === "compra_reembolsada" ||
+    eventoCanon === "compra_expirada"
+  ) {
+
+    const row = findRowByEmail(email);
+    if (row <= 0) {
+      return { status: "notfound", email, evento };
+    }
+
+    sh.getRange(row, 8).setValue(false); // LicencaAtiva
+
+    if (typeof COL_ACESSO_PERSONAL === "number") {
+      sh.getRange(row, COL_ACESSO_PERSONAL + 1).setValue(false);
+    }
+
+    const COL_ACESSO_FOLLOWME = 31; // ajuste para a coluna real
+    if (typeof COL_ACESSO_FOLLOWME === "number") {
+      sh.getRange(row, COL_ACESSO_FOLLOWME + 1).setValue("");
+    }
+
+    return { status: "assinatura_inativa", email, evento };
+  }
+
+  /* ======================================================
+     8) FALLBACK
+  ====================================================== */
+  return { status: "ignored", evento };
+}
+
+function _pareceHotmart_(data) {
+  if (!data) return false;
+  return !!(
+    data.event || data.Event || data.event_name || data.type ||
+    (data.data && (data.data.event_name || data.data.buyer || data.data.subscriber)) ||
+    data.buyer || data.subscriber ||
+    data["data.event_name"] ||
+    data["buyer[email]"] ||
+    data["buyer.email"] ||
+    data["subscriber[email]"] ||
+    data["subscriber.email"]
+  );
+}
+
+function _canonicalizarEventoHotmart(eventoNorm) {
+  const map = {
+    "purchase_approved": "compra_aprovada",
+    "purchase approved": "compra_aprovada",
+    "purchase_billet_printed": "boleto_impresso",
+    "purchase billet printed": "boleto_impresso",
+    "purchase_delayed": "compra_atrasada",
+    "purchase delayed": "compra_atrasada",
+    "purchase_expired": "compra_expirada",
+    "purchase expired": "compra_expirada",
+    "purchase_refunded": "compra_reembolsada",
+    "purchase refunded": "compra_reembolsada",
+    "subscription_cancellation": "cancelamento_assinatura",
+    "subscription cancellation": "cancelamento_assinatura",
+    "update_subscription_charge_date": "atualizacao_cobranca_assinatura",
+    "update subscription charge date": "atualizacao_cobranca_assinatura"
+  };
+
+  if (!eventoNorm) return "";
+  return map[eventoNorm] || "";
 }
