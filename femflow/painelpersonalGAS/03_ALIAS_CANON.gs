@@ -1,5 +1,5 @@
 /** ================================
- *  ALIAS + CANONIZAÇÃO SEMÂNTICA
+ *  ALIAS + CANONIZAÇÃO SEMÂNTICA (VERSÃO FINAL)
  *  ================================ */
 
 // ================================
@@ -11,12 +11,7 @@ function logCanonResolver_(tituloOriginal, tituloCanonico, origem) {
     let sh = ss.getSheetByName('CANON_RESOLVER_LOG');
     if (!sh) {
       sh = ss.insertSheet('CANON_RESOLVER_LOG');
-      sh.appendRow([
-        'data',
-        'titulo_original',
-        'titulo_canonico',
-        'origem'
-      ]);
+      sh.appendRow(['data', 'titulo_original', 'titulo_canonico', 'origem']);
     }
 
     sh.appendRow([
@@ -29,10 +24,10 @@ function logCanonResolver_(tituloOriginal, tituloCanonico, origem) {
     Logger.log('[CANON_LOG][ERRO] ' + e.message);
   }
 }
-// ================================
-// BUSCA ALIASES
-// ================================
 
+// ================================
+// SALVAR ALIAS APRENDIDO (sheet local simples)
+// ================================
 function salvarAliasAprendido_(original, canonico) {
   if (!original || !canonico) return;
 
@@ -44,8 +39,6 @@ function salvarAliasAprendido_(original, canonico) {
   }
 
   const aliasKey = normalizaKey_(original);
-  const canonKey = normalizaKey_(canonico);
-
   const vals = sh.getDataRange().getValues().slice(1);
   const existe = vals.some(r => normalizaKey_(r[0]) === aliasKey);
 
@@ -54,6 +47,9 @@ function salvarAliasAprendido_(original, canonico) {
   }
 }
 
+// ================================
+// ALIASES HARDCODE (fallback)
+// ================================
 const EXERCISE_ALIASES = {
   'agachamento': [
     'agachamento livre',
@@ -76,10 +72,13 @@ const EXERCISE_ALIASES = {
     'lat pulldown'
   ]
 };
+
 let ALIAS_LOOKUP = null;
 let ALIASES_EXERCICIOS_LOOKUP = null;
 
-
+// ================================
+// BUILD LOOKUP (hardcode)
+// ================================
 function buildAliasLookup_() {
   if (ALIAS_LOOKUP) return ALIAS_LOOKUP;
 
@@ -89,7 +88,7 @@ function buildAliasLookup_() {
     const baseKey = normalizaKey_(base);
     ALIAS_LOOKUP[baseKey] = base;
 
-    EXERCISE_ALIASES[base].forEach(alt => {
+    (EXERCISE_ALIASES[base] || []).forEach(alt => {
       const altKey = normalizaKey_(alt);
       ALIAS_LOOKUP[altKey] = base;
     });
@@ -98,11 +97,15 @@ function buildAliasLookup_() {
   return ALIAS_LOOKUP;
 }
 
+// ================================
+// BUILD LOOKUP (sheet ALIASES_EXERCICIOS)
+// ================================
 function buildAliasesExerciciosLookup_() {
   if (ALIASES_EXERCICIOS_LOOKUP) return ALIASES_EXERCICIOS_LOOKUP;
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sh = ss.getSheetByName('ALIASES_EXERCICIOS');
+
   ALIASES_EXERCICIOS_LOOKUP = {};
   if (!sh) return ALIASES_EXERCICIOS_LOOKUP;
 
@@ -110,8 +113,19 @@ function buildAliasesExerciciosLookup_() {
   if (!values.length) return ALIASES_EXERCICIOS_LOOKUP;
 
   const header = values[0].map(h => String(h || '').trim().toLowerCase());
-  const idxId = header.indexOf('id');
-  const idxAlias = header.indexOf('alias');
+
+  // ✅ tolerante a variações
+  const colAny_ = (cands) => {
+    const arr = Array.isArray(cands) ? cands : [cands];
+    for (let i = 0; i < arr.length; i++) {
+      const idx = header.indexOf(String(arr[i]).trim().toLowerCase());
+      if (idx >= 0) return idx;
+    }
+    return -1;
+  };
+
+  const idxId = colAny_(['id', 'exercise_id', 'exercicio_id']);
+  const idxAlias = colAny_(['alias', 'apelido', 'titulo', 'título']);
 
   if (idxId < 0 || idxAlias < 0) return ALIASES_EXERCICIOS_LOOKUP;
 
@@ -120,26 +134,39 @@ function buildAliasesExerciciosLookup_() {
     const id = String(row[idxId] || '').trim();
     const alias = String(row[idxAlias] || '').trim();
     if (!id || !alias) continue;
+
     const key = normalizaKey_(alias);
     if (!key) continue;
-    ALIASES_EXERCICIOS_LOOKUP[key] = id;
+
+    // primeira ocorrência vence (evita flapping)
+    if (!ALIASES_EXERCICIOS_LOOKUP[key]) {
+      ALIASES_EXERCICIOS_LOOKUP[key] = id;
+    }
   }
 
   return ALIASES_EXERCICIOS_LOOKUP;
 }
 
+// ✅ helper: resetar cache manualmente (útil em dev)
+function resetAliasesCache_() {
+  ALIAS_LOOKUP = null;
+  ALIASES_EXERCICIOS_LOOKUP = null;
+}
+
 // ================================
-// RESOLUÇÃO DE ALIAS
+// RESOLUÇÃO DE ALIAS (hardcode)
 // ================================
 function resolverAlias_(titulo) {
   if (!titulo) return null;
 
   const key = normalizaKey_(titulo);
   const lookup = buildAliasLookup_();
-
   return lookup[key] || null;
 }
 
+// ================================
+// RESOLUÇÃO DE ALIAS (sheet ALIASES_EXERCICIOS) => id
+// ================================
 function resolverAliasExerciciosId_(titulo) {
   if (!titulo) return null;
   const key = normalizaKey_(titulo);
@@ -154,12 +181,12 @@ function resolverAliasExerciciosId_(titulo) {
 function resolverTituloCanonico_(tituloGerado) {
   if (!tituloGerado) return null;
 
-  // 1️⃣ tenta alias
+  // 1️⃣ tenta alias hardcode (canon por título)
   const alias = resolverAlias_(tituloGerado);
   if (alias) return alias;
 
   // 2️⃣ fallback: normalização leve
-  return tituloGerado.trim();
+  return String(tituloGerado).trim();
 }
 
 // ================================
@@ -167,11 +194,16 @@ function resolverTituloCanonico_(tituloGerado) {
 // ================================
 function importarAliasesDoCanonLog_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+
   const log = ss.getSheetByName('CANON_RESOLVER_LOG');
   if (!log) return;
 
-  const aliasesSh = ss.getSheetByName('EXERCISE_ALIASES')
-    || ss.insertSheet('EXERCISE_ALIASES').appendRow(['alias', 'canonico']);
+  // ✅ fix: insertSheet().appendRow() retorna Range, então fazemos em 2 passos
+  let aliasesSh = ss.getSheetByName('EXERCISE_ALIASES');
+  if (!aliasesSh) {
+    aliasesSh = ss.insertSheet('EXERCISE_ALIASES');
+    aliasesSh.appendRow(['alias', 'canonico']);
+  }
 
   const logVals = log.getDataRange().getValues().slice(1);
   const aliasVals = aliasesSh.getDataRange().getValues().slice(1);
@@ -201,4 +233,9 @@ function importarAliasesDoCanonLog_() {
   });
 
   Logger.log(`[ALIAS_IMPORT] ${novos} novos aliases importados`);
+
+  // (opcional) reseta cache pra refletir mudanças
+  resetAliasesCache_();
+
+  return { ok: true, novos };
 }
