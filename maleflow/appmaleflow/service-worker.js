@@ -148,3 +148,56 @@ self.addEventListener("message", (event) => {
     console.log(`[FemFlow] Cache ativo: ${CACHE_NAME}`);
   }
 });
+
+// --------------------------------------------------
+// 🔔 7. PUSH — notificações
+// --------------------------------------------------
+self.addEventListener("push", (event) => {
+  let payload = {};
+  if (event.data) {
+    try {
+      payload = event.data.json();
+    } catch (err) {
+      payload = { body: event.data.text() };
+    }
+  }
+
+  const title = payload.title || "Maleflow";
+  const options = {
+    body: payload.body || "Você tem uma nova atualização.",
+    icon: payload.icon || "./assets/icons/icon-192.png",
+    badge: payload.badge || "./assets/icons/icon-192.png",
+    data: {
+      url: payload.url || "./home.html"
+    },
+    tag: payload.tag || "maleflow-push",
+    renotify: Boolean(payload.renotify)
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const targetUrl = event.notification?.data?.url || "./home.html";
+
+  event.waitUntil(
+    (async () => {
+      const clientList = await clients.matchAll({
+        type: "window",
+        includeUncontrolled: true
+      });
+
+      for (const client of clientList) {
+        if (client.url.includes(targetUrl) && "focus" in client) {
+          return client.focus();
+        }
+      }
+
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })()
+  );
+});

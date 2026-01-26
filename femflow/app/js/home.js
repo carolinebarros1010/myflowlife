@@ -20,6 +20,129 @@ const TREINOS_SEMANA_PADRAO = 3;
 let treinosSemanaResolve = null;
 let treinosSemanaSelecionado = null;
 
+const PUSH_APP_NAME = "femflow";
+const PUSH_STORAGE_KEY = "femflow_push_subscription";
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+}
+
+async function registrarPushServiceWorker() {
+  if (!("serviceWorker" in navigator)) return null;
+  const registration = await navigator.serviceWorker.register("service-worker.js");
+  await navigator.serviceWorker.ready;
+  return registration;
+}
+
+async function enviarPushSubscription(subscription, action) {
+  if (!subscription) return;
+  const payload = {
+    action,
+    subscription,
+    app: PUSH_APP_NAME
+  };
+
+  const id = localStorage.getItem("femflow_id");
+  if (id) payload.id = id;
+
+  try {
+    await FEMFLOW.post(payload);
+  } catch (err) {
+    console.warn("Falha ao salvar push:", err);
+    localStorage.setItem(PUSH_STORAGE_KEY, JSON.stringify(subscription));
+  }
+}
+
+async function initPushNotifications() {
+  const box = document.getElementById("pushNotifyBox");
+  if (!box) return;
+
+  const statusEl = document.getElementById("pushNotifyStatus");
+  const actionBtn = document.getElementById("pushNotifyAction");
+
+  if (!statusEl || !actionBtn) return;
+
+  const setState = (text, label, disabled = false) => {
+    statusEl.textContent = text;
+    actionBtn.textContent = label;
+    actionBtn.disabled = disabled;
+  };
+
+  if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+    setState("Notificações push não são suportadas neste dispositivo.", "Indisponível", true);
+    return;
+  }
+
+  if (!window.isSecureContext) {
+    setState("Ative o app via HTTPS ou instale na tela inicial para liberar notificações.", "Indisponível", true);
+    return;
+  }
+
+  const publicKey = FEMFLOW.PUSH_PUBLIC_KEY?.trim();
+  if (!publicKey) {
+    setState("Configure a chave pública VAPID para habilitar as notificações.", "Configurar chave", true);
+    return;
+  }
+
+  const registration = await registrarPushServiceWorker();
+  let subscription = registration ? await registration.pushManager.getSubscription() : null;
+
+  const refresh = () => {
+    if (subscription) {
+      setState("Notificações ativadas ✅", "Desativar notificações");
+      return;
+    }
+
+    if (Notification.permission === "denied") {
+      setState("Você bloqueou as notificações neste navegador.", "Bloqueadas", true);
+      return;
+    }
+
+    setState("Ative os avisos para receber lembretes de treino e novidades.", "Ativar notificações");
+  };
+
+  refresh();
+
+  actionBtn.addEventListener("click", async () => {
+    actionBtn.disabled = true;
+
+    if (subscription) {
+      await subscription.unsubscribe();
+      await enviarPushSubscription(subscription, "push_unsubscribe");
+      subscription = null;
+      localStorage.removeItem(PUSH_STORAGE_KEY);
+      refresh();
+      actionBtn.disabled = false;
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      refresh();
+      actionBtn.disabled = false;
+      return;
+    }
+
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey)
+    });
+
+    await enviarPushSubscription(subscription, "push_subscribe");
+    refresh();
+    actionBtn.disabled = false;
+  });
+}
+
 function atualizarModalTreinosSemana() {
   const modal = document.getElementById("treinosSemanaModal");
   if (!modal) return;
@@ -972,6 +1095,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   FEMFLOW.loading.show("Carregando…");
 
   try {
+    initPushNotifications();
+
     const treinosStorage = Number(localStorage.getItem(TREINOS_SEMANA_KEY));
     if (Number.isFinite(treinosStorage)) {
       treinosSemanaSelecionado = treinosStorage;

@@ -159,6 +159,54 @@ body {
 }
 
 /* ============================================================
+   1.5) NOTIFICAÇÕES PUSH
+============================================================ */
+.push-box {
+  margin: 12px auto 18px;
+  max-width: 520px;
+  width: calc(100% - 32px);
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.push-box__content h2 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  color: var(--teal);
+}
+
+.push-box__content p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--texto);
+}
+
+.push-box__button {
+  border: none;
+  background: linear-gradient(135deg, var(--terracota), #e48d7b);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 14px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+.push-box__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.push-box__button:active {
+  transform: scale(0.98);
+}
+
+/* ============================================================
    2) CTA IMEDIATO — FLOW CENTER
 ============================================================ */
 .home-cta {

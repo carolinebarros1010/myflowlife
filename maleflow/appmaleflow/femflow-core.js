@@ -11,6 +11,10 @@ window.FEMFLOW = window.FEMFLOW || {};
 
 FEMFLOW.SCRIPT_URL = "https://api-myflowlife.falling-wildflower-a8c0.workers.dev/";
 FEMFLOW.API_URL = FEMFLOW.SCRIPT_URL;
+FEMFLOW.PUSH_PUBLIC_KEY =
+  FEMFLOW.PUSH_PUBLIC_KEY ||
+  localStorage.getItem("femflow_push_key") ||
+  "";
 
 FEMFLOW.lang = localStorage.getItem("femflow_lang") || "pt";
 FEMFLOW.setLang = function (lang) {
