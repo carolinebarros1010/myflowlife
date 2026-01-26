@@ -453,17 +453,45 @@ function tituloFallbackPorEnfase_(ctx) {
   return mapa[e] || '';
 }
 
-/* ========================================================================
-   RESOLVER CANÔNICO — ID (stub local)
-   ======================================================================== */
-function resolverCanonicoIdOpenAI_(exercicio) {
-  if (!exercicio) return null;
+/**
+ * RESOLVER CANÔNICO — ID (compat)
+ * Aceita:
+ *  - resolverCanonicoIdOpenAI_(titulo)
+ *  - resolverCanonicoIdOpenAI_(titulo, base)
+ *
+ * Estratégia:
+ * 1) tenta alias -> id (ALIASES_EXERCICIOS)
+ * 2) tenta resolver direto na base (strict/fuzzy) para pegar id
+ * 3) fallback: null (não inventa)
+ */
+function resolverCanonicoIdOpenAI_(titulo, base) {
+  if (!titulo) return null;
 
-  return (
-    exercicio.id ||
-    exercicio.titulo_pt ||
-    exercicio.nome ||
-    exercicio.link ||
-    JSON.stringify(exercicio)
-  );
+  // 1) alias sheet -> id
+  if (typeof resolverAliasExerciciosId_ === 'function') {
+    var aliasId = resolverAliasExerciciosId_(titulo);
+    if (aliasId) return aliasId;
+  }
+
+  // 2) se base veio, tenta achar id por nome
+  var b = base || null;
+  if (b && (b.byStrict || b.byFuzzy || b.list)) {
+    var limpo = (typeof limparComplementosSemanticos_ === 'function')
+      ? limparComplementosSemanticos_(titulo)
+      : String(titulo);
+
+    var kStrict = (typeof normalizaKeyStrict_ === 'function') ? normalizaKeyStrict_(limpo) : '';
+    if (kStrict && b.byStrict && b.byStrict[kStrict] && b.byStrict[kStrict].id) {
+      return b.byStrict[kStrict].id;
+    }
+
+    var kFuzzy = (typeof normalizaKey_ === 'function') ? normalizaKey_(limpo) : '';
+    if (kFuzzy && b.byFuzzy && b.byFuzzy[kFuzzy] && b.byFuzzy[kFuzzy].id) {
+      return b.byFuzzy[kFuzzy].id;
+    }
+  }
+
+  // 3) não inventa id
+  return null;
 }
+
