@@ -1,136 +1,264 @@
-function doGet(e) {
-  const params = e && e.parameter ? e.parameter : {};
-  const action = String(params.action || "").toLowerCase().trim();
+/* ======================================================
+ * 🔹 SALVAR TREINO — FINAL (MaleFlow)
+ * - Avança SOMENTE diaPrograma
+ * - "Fase" gravada = ciclo (compat coluna do histórico)
+ * ====================================================== */
+function salvarTreino_(data) {
+  const id          = String(data.id || "").trim();
+  const pse         = Number(data.pse || 0);
+  const treino      = String(data.treino || "");
+  const diaPrograma = Number(data.diaPrograma || 1);
 
-  if (!action) {
-  // GETs vazios (preload, health check, cache, etc)
-  return _json({ status: "ok", noop: true });
-}
+  const deviceId = String(data.deviceId || "").trim();
+  const sessionToken = String(data.sessionToken || "").trim();
 
+  const auth = _assertSession_(id, deviceId, sessionToken);
+  if (!auth.ok) return { status: "denied", msg: auth.msg };
+  if (!id) return { status: "error", msg: "ID inválido" };
 
-  if (action === "validar") {
-    return _json(_validarPerfil_(params));
+  const ss = SpreadsheetApp.getActive();
+  const agora = new Date();
+
+  /* ===== ABA TREINOS ===== */
+  let shT = ss.getSheetByName("Treinos");
+  if (!shT) {
+    shT = ss.insertSheet("Treinos");
+    shT.appendRow([
+      "ID","Data","Fase","DiaPrograma","PSE",
+      "Apelido","Box","Exercício","Séries","Reps","Peso"
+    ]);
   }
 
-  if (action === "sync") {
-    return _json(sync(params.id));
+  /* ===== ABA ALUNOS ===== */
+  const shA = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
+  const rows = shA.getDataRange().getValues();
+
+  let cicloAtual = "";
+  let diaCicloAtual = 1;
+  let diaProgramaAtual = diaPrograma;
+
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][COL_ID]).trim() !== id) continue;
+
+    cicloAtual = _normalizarCicloTreino_(rows[i][COL_FASE]) || "";
+    diaProgramaAtual = Number(rows[i][COL_DIA_PROGRAMA] || diaPrograma);
+
+    // diaCiclo é derivado do diaPrograma + ciclo
+    diaCicloAtual = cicloAtual ? _diaCicloFromDiaPrograma_(diaProgramaAtual, cicloAtual) : Number(rows[i][COL_DIA_CICLO] || 1);
+
+    // ✅ Avança APENAS o dia do programa
+    avancarDiaPrograma_(shA, i, "treino");
+
+    break;
   }
 
-  if (action === "admin_list_alunas") {
-    return _json(adminListAlunas_(params));
-  }
-
-  if (action === "admin_get_aluna") {
-    return _json(adminGetAluna_(params));
-  }
-
-  return _json({ status: "ignored", msg: "unknown_action", action });
-}
-
-function _parseBooleanish_(value) {
-  if (typeof value === "boolean") return value;
-  if (value == null) return false;
-  const normalized = String(value).trim().toLowerCase();
-  return ["true", "1", "yes", "sim", "y"].includes(normalized);
-}
-
-function _parseFreeEnfases_(raw) {
-  if (!raw) return [];
-  if (Array.isArray(raw)) {
-    return raw.map(item => String(item || "").toLowerCase().trim()).filter(Boolean);
-  }
-
-  return String(raw)
-    .split(/[,\n;|]+/)
-    .map(item => item.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-function _parseFreeUntil_(raw) {
-  if (!raw) return null;
-  if (raw instanceof Date && !isNaN(raw.getTime())) {
-    return Utilities.formatDate(raw, "GMT", "yyyy-MM-dd");
-  }
-
-  const text = String(raw).trim();
-  if (!text) return null;
-
-  const match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (match) {
-    const [, dd, mm, yyyy] = match;
-    return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
-  }
-
-  return text;
-}
-
-function _buildFreeAccess_(row) {
-  const enabledRaw = row[COL_FREE_ENABLED];
-  const enfasesRaw = row[COL_FREE_ENFASES];
-  const untilRaw = row[COL_FREE_UNTIL];
-
-  if (enabledRaw == null && enfasesRaw == null && untilRaw == null) {
-    return null;
-  }
+  shT.appendRow([
+    id,
+    agora,
+    String(cicloAtual || "").toLowerCase(), // "fase" no histórico = ciclo
+    diaProgramaAtual,
+    pse,
+    "",
+    "",
+    treino,
+    "",
+    "",
+    ""
+  ]);
 
   return {
-    enabled: _parseBooleanish_(enabledRaw),
-    enfases: _parseFreeEnfases_(enfasesRaw),
-    until: _parseFreeUntil_(untilRaw)
+    status: "ok",
+    salvo: true,
+    ciclo: cicloAtual,
+    fase: String(cicloAtual || "").toLowerCase(), // compat
+    diaCiclo: diaCicloAtual,
+    diaPrograma: diaProgramaAtual + 1
   };
 }
 
-function _validarPerfil_(params) {
-  const sh = _sheet(SHEET_ALUNAS);
-  if (!sh) return { status: "error", msg: "sheet_not_found" };
+/* ======================================================
+ * 🔹 SALVAR DESCANSO — FINAL (MaleFlow)
+ * - Avança SOMENTE o diaPrograma
+ * - "Fase" gravada = ciclo (compat)
+ * ====================================================== */
+function salvarDescanso_(data) {
+  const id = String(data.id || "").trim();
+  const obs = String(data.obs || "");
 
-  const id = String(params.id || "").trim();
-  const email = String(params.email || "").toLowerCase().trim();
-  if (!id && !email) return { status: "error", msg: "missing_id" };
+  const deviceId = String(data.deviceId || "").trim();
+  const sessionToken = String(data.sessionToken || "").trim();
 
-  const rows = sh.getDataRange().getValues();
+  const auth = _assertSession_(id, deviceId, sessionToken);
+  if (!auth.ok) return { status: "denied", msg: auth.msg };
+  if (!id) return { status: "error", msg: "ID inválido" };
+
+  const ss = SpreadsheetApp.getActive();
+  const agora = new Date();
+
+  /* ===== ABA DIARIO ===== */
+  let shD = ss.getSheetByName("Diario");
+  if (!shD) {
+    shD = ss.insertSheet("Diario");
+    shD.appendRow([
+      "ID","Data","Fase","Semana","Treino","Tipo","Descanso","Observação"
+    ]);
+  }
+
+  /* ===== ABA ALUNOS ===== */
+  const shA = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
+  const rows = shA.getDataRange().getValues();
+
+  let cicloAtual = "";
+  let diaCicloAtual = 1;
+  let diaProgramaAtual = 1;
 
   for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    const rowId = String(row[0] || "").trim();
-    const rowEmail = String(row[2] || "").toLowerCase().trim();
+    if (String(rows[i][COL_ID]).trim() !== id) continue;
 
-    if ((id && rowId === id) || (email && rowEmail === email)) {
-      const syncResult = id ? sync(rowId) : null;
-      const faseSync = syncResult && syncResult.status === "ok" ? syncResult.fase : row[13];
-      const diaCicloSync = syncResult && syncResult.status === "ok" ? syncResult.diaCiclo : row[14];
+    cicloAtual = _normalizarCicloTreino_(rows[i][COL_FASE]) || "";
+    diaProgramaAtual = Number(rows[i][COL_DIA_PROGRAMA] || 1);
+    diaCicloAtual = cicloAtual ? _diaCicloFromDiaPrograma_(diaProgramaAtual, cicloAtual) : Number(rows[i][COL_DIA_CICLO] || 1);
 
-      const produtoRaw = String(row[5] || "").toLowerCase().trim();
-      const isVip = produtoRaw === "vip";
-      const ativa = isVip || row[7] === true || String(row[7] || "").toLowerCase() === "true";
+    // ✅ descanso avança SOMENTE o programa
+    avancarDiaPrograma_(shA, i, "descanso");
+    break;
+  }
 
-      const freeAccess = _buildFreeAccess_(row);
+  // Semana aqui vira apenas "semana de programa" (7 dias por semana)
+  const semanaPrograma = Math.ceil(diaProgramaAtual / 7);
 
-      return {
-        status: "ok",
-        id: rowId,
-        nome: row[1] || "",
-        email: rowEmail,
-        produto: row[5] || "",
-        ativa,
-        nivel: String(row[8] || "iniciante").toLowerCase(),
-        enfase: String(row[12] || "nenhuma").toLowerCase(),
-        fase: String(faseSync || "").toLowerCase(),
-        diaCiclo: Number(diaCicloSync || 1),
-        ciclo_duracao: Number(row[9] || 3),
-        data_inicio: row[10] || "",
-        diaPrograma: Number(row[COL_DIA_PROGRAMA] || 1),
-        dataInicioPrograma: row[COL_DATA_INICIO_PROGRAMA] || "",
-        acessos: {
-          personal: row[COL_ACESSO_PERSONAL] === true || isVip
-        },
-        free_access: freeAccess,
-        FreeEnabled: row[COL_FREE_ENABLED],
-        FreeEnfases: row[COL_FREE_ENFASES],
-        FreeUntil: row[COL_FREE_UNTIL]
-      };
+  shD.appendRow([
+    id,
+    agora,
+    String(cicloAtual || "").toLowerCase(),
+    semanaPrograma,
+    "",
+    "descanso",
+    true,
+    obs
+  ]);
+
+  return {
+    status: "ok",
+    descanso: true,
+    ciclo: cicloAtual,
+    fase: String(cicloAtual || "").toLowerCase(), // compat
+    diaCiclo: diaCicloAtual,
+    diaPrograma: diaProgramaAtual + 1
+  };
+}
+
+/* ======================================================
+ * 🔹 SALVAR EVOLUÇÃO — FINAL (MaleFlow)
+ * - NÃO avança programa
+ * - Salva evolução e atualiza UltimosPesos
+ * ====================================================== */
+function salvarEvolucao_(data) {
+  const id = String(data.id || "").trim();
+  const exercicio = String(data.exercicio || "").trim();
+  const peso = data.peso;
+  const reps = data.reps;
+  const series = data.series;
+  const pse = Number(data.pse || 0);
+
+  const deviceId = String(data.deviceId || "").trim();
+  const sessionToken = String(data.sessionToken || "").trim();
+
+  const auth = _assertSession_(id, deviceId, sessionToken);
+  if (!auth.ok) return { status: "denied", msg: auth.msg };
+
+  if (!id || !exercicio) {
+    return { status: "error", msg: "Dados insuficientes." };
+  }
+
+  const ss = SpreadsheetApp.getActive();
+  const agora = new Date();
+
+  /* ===== ABA ALUNOS ===== */
+  const shA = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
+  const rows = shA.getDataRange().getValues();
+
+  let cicloAtual = "";
+  let diaProgramaAtual = 1;
+
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][COL_ID]).trim() !== id) continue;
+    cicloAtual = _normalizarCicloTreino_(rows[i][COL_FASE]) || "";
+    diaProgramaAtual = Number(rows[i][COL_DIA_PROGRAMA] || 1);
+    break;
+  }
+
+  /* ===== ABA TREINOS ===== */
+  let shT = ss.getSheetByName("Treinos");
+  if (!shT) {
+    shT = ss.insertSheet("Treinos");
+    shT.appendRow([
+      "ID","Data","Fase","DiaPrograma","PSE",
+      "Apelido","Box","Exercício","Séries","Reps","Peso"
+    ]);
+  }
+
+  shT.appendRow([
+    id,
+    agora,
+    String(cicloAtual || "").toLowerCase(),
+    diaProgramaAtual,
+    pse,
+    "",
+    "",
+    exercicio,
+    series || "",
+    reps || "",
+    peso || ""
+  ]);
+
+  /* ===== ABA ULTIMOSPESOS ===== */
+  let shU = ss.getSheetByName("UltimosPesos");
+  if (!shU) {
+    shU = ss.insertSheet("UltimosPesos");
+    shU.appendRow(["ID","Exercicio","UltimoPeso"]);
+  }
+
+  const chave = exercicio.toLowerCase().trim();
+  const rowsU = shU.getDataRange().getValues();
+  let found = false;
+
+  for (let i = 1; i < rowsU.length; i++) {
+    if (String(rowsU[i][0]).trim() === id && String(rowsU[i][1]).trim() === chave) {
+      shU.getRange(i + 1, 3).setValue(peso);
+      found = true;
+      break;
     }
   }
 
-  return { status: "notfound" };
+  if (!found) {
+    shU.appendRow([id, chave, peso]);
+  }
+
+  return {
+    status: "ok",
+    evolucao: true,
+    exercicio,
+    peso,
+    reps,
+    series,
+    ciclo: cicloAtual,
+    fase: String(cicloAtual || "").toLowerCase(), // compat
+    diaPrograma: diaProgramaAtual
+  };
+}
+
+/* ============================================================
+ * 🌸 setmanualstart — desativado no MaleFlow
+ * ============================================================ */
+function setmanualstart(id, startDate) {
+  return { status: "ignored", msg: "ciclo_hormonal_desativado" };
+}
+
+function atualizarCicloStart(id, startDate) {
+  return { status: "ignored", msg: "ciclo_hormonal_desativado" };
+}
+
+function limpezaCicloManualEnergetico() {
+  Logger.log("ℹ️ Ciclo hormonal desativado no MaleFlow.");
 }
