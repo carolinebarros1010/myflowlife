@@ -1,6 +1,7 @@
-
 /* ======================================================
- * 🔹 SALVAR TREINO — FINAL (ARQUITETURA CORRETA)
+ * 🔹 SALVAR TREINO — FINAL (MaleFlow)
+ * - Avança SOMENTE diaPrograma
+ * - "Fase" gravada = ciclo (compat coluna do histórico)
  * ====================================================== */
 function salvarTreino_(data) {
   const id          = String(data.id || "").trim();
@@ -13,7 +14,6 @@ function salvarTreino_(data) {
 
   const auth = _assertSession_(id, deviceId, sessionToken);
   if (!auth.ok) return { status: "denied", msg: auth.msg };
-
   if (!id) return { status: "error", msg: "ID inválido" };
 
   const ss = SpreadsheetApp.getActive();
@@ -29,19 +29,22 @@ function salvarTreino_(data) {
     ]);
   }
 
-  /* ===== ABA ALUNAS ===== */
+  /* ===== ABA ALUNOS ===== */
   const shA = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   const rows = shA.getDataRange().getValues();
 
-  let faseAtual = "follicular";
+  let cicloAtual = "";
   let diaCicloAtual = 1;
+  let diaProgramaAtual = diaPrograma;
 
   for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][0]).trim() !== id) continue;
+    if (String(rows[i][COL_ID]).trim() !== id) continue;
 
-    // 🔒 FASE E DIA DO CICLO VÊM DA PLANILHA
-    faseAtual = String(rows[i][13] || "follicular").toLowerCase();
-    diaCicloAtual = Number(rows[i][14] || 1);
+    cicloAtual = _normalizarCicloTreino_(rows[i][COL_FASE]) || "";
+    diaProgramaAtual = Number(rows[i][COL_DIA_PROGRAMA] || diaPrograma);
+
+    // diaCiclo é derivado do diaPrograma + ciclo
+    diaCicloAtual = cicloAtual ? _diaCicloFromDiaPrograma_(diaProgramaAtual, cicloAtual) : Number(rows[i][COL_DIA_CICLO] || 1);
 
     // ✅ Avança APENAS o dia do programa
     avancarDiaPrograma_(shA, i, "treino");
@@ -49,12 +52,11 @@ function salvarTreino_(data) {
     break;
   }
 
-  
   shT.appendRow([
     id,
     agora,
-    faseAtual,
-    diaPrograma,
+    String(cicloAtual || "").toLowerCase(), // "fase" no histórico = ciclo
+    diaProgramaAtual,
     pse,
     "",
     "",
@@ -67,15 +69,17 @@ function salvarTreino_(data) {
   return {
     status: "ok",
     salvo: true,
-    fase: faseAtual,
+    ciclo: cicloAtual,
+    fase: String(cicloAtual || "").toLowerCase(), // compat
     diaCiclo: diaCicloAtual,
-    diaPrograma: diaPrograma + 1
+    diaPrograma: diaProgramaAtual + 1
   };
 }
 
-
 /* ======================================================
- * 🔹 SALVAR DESCANSO — FINAL (ARQUITETURA CORRETA)
+ * 🔹 SALVAR DESCANSO — FINAL (MaleFlow)
+ * - Avança SOMENTE o diaPrograma
+ * - "Fase" gravada = ciclo (compat)
  * ====================================================== */
 function salvarDescanso_(data) {
   const id = String(data.id || "").trim();
@@ -86,7 +90,6 @@ function salvarDescanso_(data) {
 
   const auth = _assertSession_(id, deviceId, sessionToken);
   if (!auth.ok) return { status: "denied", msg: auth.msg };
-
   if (!id) return { status: "error", msg: "ID inválido" };
 
   const ss = SpreadsheetApp.getActive();
@@ -101,35 +104,34 @@ function salvarDescanso_(data) {
     ]);
   }
 
-  /* ===== ABA ALUNAS ===== */
+  /* ===== ABA ALUNOS ===== */
   const shA = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   const rows = shA.getDataRange().getValues();
 
-  let faseAtual = "follicular";
+  let cicloAtual = "";
   let diaCicloAtual = 1;
   let diaProgramaAtual = 1;
 
   for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][0]).trim() !== id) continue;
+    if (String(rows[i][COL_ID]).trim() !== id) continue;
 
-    faseAtual = String(rows[i][13] || "follicular").toLowerCase();
-    diaCicloAtual = Number(rows[i][14] || 1);
+    cicloAtual = _normalizarCicloTreino_(rows[i][COL_FASE]) || "";
     diaProgramaAtual = Number(rows[i][COL_DIA_PROGRAMA] || 1);
+    diaCicloAtual = cicloAtual ? _diaCicloFromDiaPrograma_(diaProgramaAtual, cicloAtual) : Number(rows[i][COL_DIA_CICLO] || 1);
 
     // ✅ descanso avança SOMENTE o programa
     avancarDiaPrograma_(shA, i, "descanso");
-
     break;
   }
 
-  const semana = Math.ceil(diaCicloAtual / 7);
+  // Semana aqui vira apenas "semana de programa" (7 dias por semana)
+  const semanaPrograma = Math.ceil(diaProgramaAtual / 7);
 
-  // 📝 Registra descanso
   shD.appendRow([
     id,
     agora,
-    faseAtual,
-    semana,
+    String(cicloAtual || "").toLowerCase(),
+    semanaPrograma,
     "",
     "descanso",
     true,
@@ -139,15 +141,17 @@ function salvarDescanso_(data) {
   return {
     status: "ok",
     descanso: true,
-    fase: faseAtual,
+    ciclo: cicloAtual,
+    fase: String(cicloAtual || "").toLowerCase(), // compat
     diaCiclo: diaCicloAtual,
     diaPrograma: diaProgramaAtual + 1
   };
 }
 
-
 /* ======================================================
- * 🔹 SALVAR EVOLUÇÃO — FINAL (NÃO AVANÇA PROGRAMA)
+ * 🔹 SALVAR EVOLUÇÃO — FINAL (MaleFlow)
+ * - NÃO avança programa
+ * - Salva evolução e atualiza UltimosPesos
  * ====================================================== */
 function salvarEvolucao_(data) {
   const id = String(data.id || "").trim();
@@ -170,28 +174,17 @@ function salvarEvolucao_(data) {
   const ss = SpreadsheetApp.getActive();
   const agora = new Date();
 
-  /* ===== ABA ALUNAS (fonte da verdade) ===== */
-  const shA = _sheet(SHEET_ALUNAS);
+  /* ===== ABA ALUNOS ===== */
+  const shA = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   const rows = shA.getDataRange().getValues();
 
-  let faseAtual = "follicular";
+  let cicloAtual = "";
   let diaProgramaAtual = 1;
 
   for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][0]).trim() !== id) continue;
-
-    const cicloDuracao = Number(rows[i][9]) || 3;
-    const diaPrograma = Number(rows[i][COL_DIA_PROGRAMA] || 1);
-    const cicloTreino = String(rows[i][13] || "").toUpperCase();
-
-    const ciclo = calcularCicloTreino_({
-      cicloDuracao,
-      diaPrograma,
-      cicloTreino
-    });
-
-    faseAtual = cicloTreino || ciclo.fase || "";
-    diaProgramaAtual = diaPrograma;
+    if (String(rows[i][COL_ID]).trim() !== id) continue;
+    cicloAtual = _normalizarCicloTreino_(rows[i][COL_FASE]) || "";
+    diaProgramaAtual = Number(rows[i][COL_DIA_PROGRAMA] || 1);
     break;
   }
 
@@ -208,7 +201,7 @@ function salvarEvolucao_(data) {
   shT.appendRow([
     id,
     agora,
-    faseAtual,
+    String(cicloAtual || "").toLowerCase(),
     diaProgramaAtual,
     pse,
     "",
@@ -231,7 +224,7 @@ function salvarEvolucao_(data) {
   let found = false;
 
   for (let i = 1; i < rowsU.length; i++) {
-    if (rowsU[i][0] === id && rowsU[i][1] === chave) {
+    if (String(rowsU[i][0]).trim() === id && String(rowsU[i][1]).trim() === chave) {
       shU.getRange(i + 1, 3).setValue(peso);
       found = true;
       break;
@@ -249,39 +242,23 @@ function salvarEvolucao_(data) {
     peso,
     reps,
     series,
-    fase: faseAtual,
+    ciclo: cicloAtual,
+    fase: String(cicloAtual || "").toLowerCase(), // compat
     diaPrograma: diaProgramaAtual
   };
 }
 
 /* ============================================================
- * 🌸 setmanualstart — Salvar DATA MANUAL do ciclo (coluna U)
+ * 🌸 setmanualstart — desativado no MaleFlow
  * ============================================================ */
 function setmanualstart(id, startDate) {
   return { status: "ignored", msg: "ciclo_hormonal_desativado" };
 }
 
-/* ============================================================
- * atualizarCicloStart — compatível com versões antigas do app
- * ============================================================ */
 function atualizarCicloStart(id, startDate) {
   return { status: "ignored", msg: "ciclo_hormonal_desativado" };
 }
 
-
-
-
-
-/**
- * ======================================================
- * 🧹 LIMPEZA DE CICLO MANUAL — PERFIL ENERGÉTICO
- * ------------------------------------------------------
- * - Remove CicloStartDateManual (col U)
- * - (desativado no MaleFlow)
- * - NÃO recalcula ciclo
- * - NÃO altera diaCiclo nem dataInicio
- * ======================================================
- */
 function limpezaCicloManualEnergetico() {
   Logger.log("ℹ️ Ciclo hormonal desativado no MaleFlow.");
 }
