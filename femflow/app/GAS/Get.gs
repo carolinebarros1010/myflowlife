@@ -16,6 +16,14 @@ function doGet(e) {
     return _json(sync(params.id));
   }
 
+  if (action === "admin_list_alunas") {
+    return _json(adminListAlunas_(params));
+  }
+
+  if (action === "admin_get_aluna") {
+    return _json(adminGetAluna_(params));
+  }
+
   return _json({ status: "ignored", msg: "unknown_action", action });
 }
 
@@ -109,7 +117,6 @@ function _validarPerfil_(params) {
         enfase: String(row[12] || "nenhuma").toLowerCase(),
         fase: String(faseSync || "follicular").toLowerCase(),
         diaCiclo: Number(diaCicloSync || 1),
-        perfilHormonal: String(row[19] || "regular").toLowerCase(),
         ciclo_duracao: Number(row[9] || 28),
         data_inicio: row[10] || "",
         diaPrograma: Number(row[COL_DIA_PROGRAMA] || 1),

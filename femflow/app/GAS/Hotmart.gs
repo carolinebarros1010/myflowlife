@@ -50,6 +50,76 @@ function mapearProduto(productName) {
   return fallback;
 }
 
+/* ======================================================
+ * 🔹 HOTMART • MAPA DE PLANOS (ASSINATURA)
+ * ====================================================== */
+const PLANOS = {
+  ACESSO_APP: [
+    // "PLAN_ID_ACESSO_APP_1",
+    // "PLAN_ID_ACESSO_APP_2"
+  ],
+  PERSONAL: [
+    // "PLAN_ID_PERSONAL_1"
+  ]
+};
+
+function getPlanId(payload) {
+  const subscriptionPlanId =
+    payload &&
+    payload.data &&
+    payload.data.subscription &&
+    payload.data.subscription.plan &&
+    payload.data.subscription.plan.id;
+
+  const planIdFromData =
+    payload &&
+    payload.data &&
+    payload.data.plan &&
+    payload.data.plan.id;
+
+  return String(subscriptionPlanId || planIdFromData || "").trim();
+}
+
+function getPlanName(payload) {
+  const subscriptionPlanName =
+    payload &&
+    payload.data &&
+    payload.data.subscription &&
+    payload.data.subscription.plan &&
+    payload.data.subscription.plan.name;
+
+  const planNameFromData =
+    payload &&
+    payload.data &&
+    payload.data.plan &&
+    payload.data.plan.name;
+
+  return String(subscriptionPlanName || planNameFromData || "").trim();
+}
+
+function _resolverPlanoHotmart(planId, planName) {
+  const idNorm = _norm(String(planId || "").trim());
+  const nameNorm = _norm(String(planName || "").trim());
+
+  if (idNorm && PLANOS.PERSONAL.some((id) => _norm(id) === idNorm)) {
+    return { produto: "treino_personal", personal: true, origem: "plan_id" };
+  }
+
+  if (idNorm && PLANOS.ACESSO_APP.some((id) => _norm(id) === idNorm)) {
+    return { produto: "acesso_app", personal: false, origem: "plan_id" };
+  }
+
+  if (nameNorm.includes("personal")) {
+    return { produto: "treino_personal", personal: true, origem: "plan_name" };
+  }
+
+  if (nameNorm.includes("acesso") || nameNorm.includes("assinatura") || nameNorm.includes("app")) {
+    return { produto: "acesso_app", personal: false, origem: "plan_name" };
+  }
+
+  return { produto: "acesso_app", personal: false, origem: "fallback" };
+}
+
 function _processarHotmart(data) {
 
   /* ======================================================
@@ -71,21 +141,24 @@ function _processarHotmart(data) {
   Logger.log("📦 Payload keys: " + Object.keys(data || {}).join(","));
 
   /* ======================================================
-     2) BUYER / PRODUCT
+     2) BUYER / SUBSCRIBER
   ====================================================== */
   let buyer = {};
   if (data.data && data.data.buyer) buyer = data.data.buyer;
   else if (data.buyer) buyer = data.buyer;
 
-  let product = {};
-  if (data.data && data.data.product) product = data.data.product;
-  else if (data.product) product = data.product;
+  let subscriber = {};
+  if (data.data && data.data.subscriber) subscriber = data.data.subscriber;
+  else if (data.subscriber) subscriber = data.subscriber;
 
   const email = String(
     buyer.email ||
+    subscriber.email ||
     data.email ||
     data["buyer.email"] ||
     data["buyer[email]"] ||
+    data["subscriber.email"] ||
+    data["subscriber[email]"] ||
     ""
   ).toLowerCase().trim();
 
@@ -110,33 +183,12 @@ function _processarHotmart(data) {
     ""
   ).trim();
 
-  let productName = String(
-    product.name ||
-    product.product_name ||
-    product.title ||
-    (data.data && data.data.product && data.data.product.name) ||
-    data.product_name ||
-    data["product.name"] ||
-    data["product[name]"] ||
-    ""
-  ).trim();
-
   /* ======================================================
-     3) NORMALIZAÇÃO DE PRODUTO
+     3) PLANO (ASSINATURA)
   ====================================================== */
-  const prodNorm = _norm(productName);
-
-  if (prodNorm.includes("personal")) {
-    productName = "treino_personal";
-  } else if (prodNorm.includes("premium")) {
-    productName = "femflow_premium";
-  } else if (prodNorm.includes("acesso") || prodNorm.includes("assinatura")) {
-    productName = "acesso_app";
-  }
-
-  const isAddonPersonal = productName === "treino_personal";
-  const isPlanoBase =
-    productName === "acesso_app" || productName === "femflow_premium";
+  const planId = getPlanId(data);
+  const planName = getPlanName(data);
+  const plano = _resolverPlanoHotmart(planId, planName);
 
   /* ======================================================
      4) PLANILHA
@@ -161,22 +213,19 @@ function _processarHotmart(data) {
 
     if (row > 0) {
       idAluno = values[row - 1][0];
+      if (!idAluno) {
+        idAluno = gerarID();
+        sh.getRange(row, 1).setValue(idAluno);
+      }
 
-      if (isAddonPersonal) {
-        if (typeof COL_ACESSO_PERSONAL === "number") {
-          sh.getRange(row, COL_ACESSO_PERSONAL + 1).setValue(true);
-        }
-        sh.getRange(row, 8).setValue(true); // LicencaAtiva
-      } else {
-        sh.getRange(row, 6).setValue(productName);
-        sh.getRange(row, 7).setValue(new Date());
-        sh.getRange(row, 8).setValue(true);
+      sh.getRange(row, 6).setValue(plano.produto);
+      sh.getRange(row, 7).setValue(new Date());
+      sh.getRange(row, 8).setValue(true);
+      if (typeof COL_ACESSO_PERSONAL === "number") {
+        sh.getRange(row, COL_ACESSO_PERSONAL + 1).setValue(plano.personal);
       }
 
       if (telefone) sh.getRange(row, 4).setValue(telefone);
-
-      const diaProg = values[row - 1][COL_DIA_PROGRAMA];
-      if (!diaProg) sh.getRange(row, COL_DIA_PROGRAMA + 1).setValue(1);
 
     } else {
       idAluno = gerarID();
@@ -186,51 +235,50 @@ function _processarHotmart(data) {
       rowData[1] = nome;
       rowData[2] = email;
       rowData[3] = telefone;
-      rowData[5] = productName || "acesso_app";
+      rowData[5] = plano.produto;
       rowData[6] = new Date();
       rowData[7] = true;
       sh.appendRow(rowData);
 
-      const newRow = sh.getLastRow();
-
-      if (isAddonPersonal && typeof COL_ACESSO_PERSONAL === "number") {
-        sh.getRange(newRow, COL_ACESSO_PERSONAL + 1).setValue(true);
+      if (typeof COL_ACESSO_PERSONAL === "number") {
+        const newRow = sh.getLastRow();
+        sh.getRange(newRow, COL_ACESSO_PERSONAL + 1).setValue(plano.personal);
       }
     }
 
     return {
       status: "ok",
-      produto: isAddonPersonal ? "addon_personal" : productName,
-      acesso_personal: isAddonPersonal,
+      produto: plano.produto,
+      acesso_personal: plano.personal,
       evento
     };
   }
 
   /* ======================================================
-     6) RENOVAÇÃO / ATUALIZAÇÃO COBRANÇA
+     6) EVENTOS SEM ALTERAR ACESSO
   ====================================================== */
-  if (eventoCanon === "atualizacao_cobranca_assinatura") {
+  if (
+    eventoCanon === "atualizacao_cobranca_assinatura" ||
+    eventoCanon === "boleto_impresso" ||
+    eventoCanon === "compra_atrasada"
+  ) {
     const row = findRowByEmail(email);
     if (row <= 0) {
       return { status: "notfound", email, evento };
     }
 
-    sh.getRange(row, 8).setValue(true); // LicencaAtiva
-    sh.getRange(row, 7).setValue(new Date()); // DataAtualizacao
-
     if (telefone) sh.getRange(row, 4).setValue(telefone);
 
-    return { status: "ok", msg: "renovacao_assinatura", evento };
+    return { status: "ok", msg: "evento_sem_alterar_acesso", evento };
   }
 
   /* ======================================================
-     7) CANCELAMENTO / REEMBOLSO / CHARGEBACK
+     7) CANCELAMENTO / REEMBOLSO / EXPIRAÇÃO
   ====================================================== */
   if (
-    eventoCanon === "compra_cancelada" ||
     eventoCanon === "cancelamento_assinatura" ||
     eventoCanon === "compra_reembolsada" ||
-    eventoCanon === "chargeback"
+    eventoCanon === "compra_expirada"
   ) {
 
     const row = findRowByEmail(email);
@@ -238,29 +286,18 @@ function _processarHotmart(data) {
       return { status: "notfound", email, evento };
     }
 
-    if (isAddonPersonal) {
-      if (typeof COL_ACESSO_PERSONAL === "number") {
-        sh.getRange(row, COL_ACESSO_PERSONAL + 1).setValue(false);
-      }
-      return { status: "personal_inativo", email, evento };
+    sh.getRange(row, 8).setValue(false); // LicencaAtiva
+
+    if (typeof COL_ACESSO_PERSONAL === "number") {
+      sh.getRange(row, COL_ACESSO_PERSONAL + 1).setValue(false);
     }
 
-    if (isPlanoBase) {
-      sh.getRange(row, 8).setValue(false); // LicencaAtiva
-
-      if (typeof COL_ACESSO_PERSONAL === "number") {
-        sh.getRange(row, COL_ACESSO_PERSONAL + 1).setValue(false);
-      }
-
-      const COL_ACESSO_FOLLOWME = 31; // ajuste para a coluna real
-      if (typeof COL_ACESSO_FOLLOWME === "number") {
-        sh.getRange(row, COL_ACESSO_FOLLOWME + 1).setValue("");
-      }
-
-      return { status: "plano_base_inativo", email, evento };
+    const COL_ACESSO_FOLLOWME = 31; // ajuste para a coluna real
+    if (typeof COL_ACESSO_FOLLOWME === "number") {
+      sh.getRange(row, COL_ACESSO_FOLLOWME + 1).setValue("");
     }
 
-    return { status: "cancelamento_ignorado", email, evento };
+    return { status: "assinatura_inativa", email, evento };
   }
 
   /* ======================================================
@@ -273,32 +310,32 @@ function _pareceHotmart_(data) {
   if (!data) return false;
   return !!(
     data.event || data.Event || data.event_name || data.type ||
-    (data.data && (data.data.event_name || data.data.buyer || data.data.product)) ||
-    data.buyer || data.product ||
-    data["data.event_name"] || data["buyer[email]"] || data["buyer.email"]
+    (data.data && (data.data.event_name || data.data.buyer || data.data.subscriber)) ||
+    data.buyer || data.subscriber ||
+    data["data.event_name"] ||
+    data["buyer[email]"] ||
+    data["buyer.email"] ||
+    data["subscriber[email]"] ||
+    data["subscriber.email"]
   );
 }
 
 function _canonicalizarEventoHotmart(eventoNorm) {
   const map = {
-    "compra aprovada": "compra_aprovada",
-    "purchase.approved": "compra_aprovada",
     "purchase_approved": "compra_aprovada",
-    "subscription.purchase.approved": "compra_aprovada",
-    "subscription_purchase_approved": "compra_aprovada",
-    "compra cancelada": "compra_cancelada",
-    "purchase.canceled": "compra_cancelada",
-    "purchase_canceled": "compra_cancelada",
-    "compra reembolsada": "compra_reembolsada",
-    "purchase.refunded": "compra_reembolsada",
+    "purchase approved": "compra_aprovada",
+    "purchase_billet_printed": "boleto_impresso",
+    "purchase billet printed": "boleto_impresso",
+    "purchase_delayed": "compra_atrasada",
+    "purchase delayed": "compra_atrasada",
+    "purchase_expired": "compra_expirada",
+    "purchase expired": "compra_expirada",
     "purchase_refunded": "compra_reembolsada",
-    "chargeback": "chargeback",
-    "cancelamento de assinatura": "cancelamento_assinatura",
-    "subscription.canceled": "cancelamento_assinatura",
-    "subscription_canceled": "cancelamento_assinatura",
-    "atualizacao de data de cobranca de assinatura": "atualizacao_cobranca_assinatura",
-    "subscription.charge.date.updated": "atualizacao_cobranca_assinatura",
-    "subscription_charge_date_updated": "atualizacao_cobranca_assinatura"
+    "purchase refunded": "compra_reembolsada",
+    "subscription_cancellation": "cancelamento_assinatura",
+    "subscription cancellation": "cancelamento_assinatura",
+    "update_subscription_charge_date": "atualizacao_cobranca_assinatura",
+    "update subscription charge date": "atualizacao_cobranca_assinatura"
   };
 
   if (!eventoNorm) return "";

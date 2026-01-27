@@ -330,6 +330,7 @@ home: {
       botaoFlowcenter: "Continue seu treino",
       tituloPersonal:  "Personal",
       tituloFollowMe:  "Treine junto por 30 dias",
+      followmeEmBreve: "Em breve...",
       tituloMuscular:  "Treinos por ênfase",
       tituloEsportes:  "Esportes",
       tituloCasa:      "Treinar em casa",
@@ -392,6 +393,8 @@ home: {
 
     regular: "Regular",
     irregular: "Irregular",
+    contraceptivoHormonal: "Contraceptivo hormonal",
+    contraceptivoHormonalSub: "Implante ou intramuscular trimestral",
     diu: "Uso DIU",
     menopausa: "Menopausa",
 
@@ -581,6 +584,10 @@ series: {
   AE: {
     titulo: "👑 Advanced Elite",
     texto: "Execução livre, técnica avançada e estímulo máximo."
+  },
+  SM: {
+    titulo: "🟢 Submáxima",
+    texto: "Descanso curto para estimular o músculo em ênfase."
   }
 }
 },
@@ -621,6 +628,7 @@ home: {
       botaoFlowcenter: "Continue your workout",
       tituloPersonal:  "Personal Training",
       tituloFollowMe:  "Train together for 30 days",
+      followmeEmBreve: "Coming soon...",
       tituloMuscular:  "Muscle focus training",
       tituloEsportes:  "Sports",
       tituloCasa:      "Home training",
@@ -679,6 +687,8 @@ home: {
 
     regular: "Regular",
     irregular: "Irregular",
+    contraceptivoHormonal: "Hormonal contraceptive",
+    contraceptivoHormonalSub: "Implant or quarterly intramuscular",
     diu: "IUD",
     menopausa: "Menopause",
 
@@ -868,6 +878,10 @@ series: {
   AE: {
     titulo: "👑 Advanced Elite",
     texto: "Free execution, advanced technique and maximum stimulus."
+  },
+  SM: {
+    titulo: "🟢 Submaximal",
+    texto: "Short rest intervals to emphasize the target muscle."
   }
 }
    
@@ -909,6 +923,7 @@ fr: {
       botaoFlowcenter: "Continuez votre entraînement",
       tituloPersonal:  "Personal",
       tituloFollowMe:  "Entraînez-vous pendant 30 jours",
+      followmeEmBreve: "Bientôt...",
       tituloMuscular:  "Entraînements par groupe musculaire",
       tituloEsportes:  "Sports",
       tituloCasa:      "S'entraîner à la maison",
@@ -967,6 +982,8 @@ fr: {
 
     regular: "Régulier",
     irregular: "Irrégulier",
+    contraceptivoHormonal: "Contraceptif hormonal",
+    contraceptivoHormonalSub: "Implant ou intramusculaire trimestrielle",
     diu: "DIU",
     menopausa: "Ménopause",
 
@@ -1156,6 +1173,10 @@ resp: {
   AE: {
     titulo: "👑 Advanced Elite",
     texto: "Exécution libre, technique avancée et stimulus maximal."
+  },
+  SM: {
+    titulo: "🟢 Submaximale",
+    texto: "Repos courts pour stimuler le muscle ciblé."
   }
 }
  }

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Redefinir senha • FemFlow</title>
+
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <style>
+    :root{
+      --terracota:#cc6a5a;
+      --teal:#335953;
+      --pessego:#efbda6;
+      --bege:#f4e1d7;
+      --texto:#5b4f49;
+    }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:"Lato",sans-serif;
+      background:linear-gradient(180deg,var(--bege) 0%,var(--pessego) 100%);
+      color:var(--teal);
+      -webkit-font-smoothing:antialiased;
+    }
+    .card{
+      width:92%;
+      max-width:420px;
+      padding:2.4rem 2rem;
+      border-radius:24px;
+      background:rgba(255,255,255,0.94);
+      backdrop-filter:blur(14px);
+      box-shadow:0 10px 28px rgba(0,0,0,0.08);
+      text-align:center;
+      animation:fadeIn .4s ease;
+      border:1px solid rgba(255,255,255,0.6);
+    }
+    .card img.logo{
+      width:120px;
+      margin-bottom:1rem;
+    }
+    h2{
+      margin:0;
+      font-size:1.55rem;
+      color:var(--terracota);
+      font-family:"Playfair Display",serif;
+    }
+    .subtitle{
+      font-size:.95rem;
+      margin:.5rem 0 1.8rem;
+      color:var(--teal);
+    }
+    .form-group{
+      margin-bottom:1.1rem;
+      text-align:left;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+    .form-group label{
+      font-weight:700;
+      font-size:.9rem;
+      margin-bottom:.3rem;
+      width:78%;
+      max-width:290px;
+      color:var(--texto);
+    }
+    input{
+      width:78%;
+      max-width:290px;
+      padding:.85rem 1rem;
+      border:1px solid #e6ddd8;
+      border-radius:14px;
+      font-size:.95rem;
+      color:var(--teal);
+      background:#fff;
+      outline:none;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    input:focus{
+      border-color:var(--terracota);
+      box-shadow:0 0 0 3px rgba(204,106,90,.2);
+    }
+    button{
+      width:78%;
+      max-width:290px;
+      padding:.95rem;
+      margin-top:.6rem;
+      border:none;
+      border-radius:14px;
+      font-weight:700;
+      font-size:1rem;
+      color:#fff;
+      background:linear-gradient(135deg,var(--teal),var(--terracota));
+      cursor:pointer;
+      transition:transform .25s ease;
+    }
+    button:hover{
+      transform:translateY(-2px);
+    }
+    .message{
+      margin-top:1.4rem;
+      min-height:1.4rem;
+      font-size:.95rem;
+    }
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(10px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="assets/logofemflowterracotasf.png" alt="FemFlow" class="logo"/>
+    <h2>Redefinir senha</h2>
+    <p class="subtitle">Informe sua nova senha para continuar 💫</p>
+
+    <div class="form-group">
+      <label for="email">E-mail</label>
+      <input type="email" id="email" placeholder="seu@email.com"/>
+    </div>
+
+    <div class="form-group">
+      <label for="senha1">Nova senha</label>
+      <input type="password" id="senha1" placeholder="Crie uma senha"/>
+    </div>
+
+    <div class="form-group">
+      <label for="senha2">Confirme a nova senha</label>
+      <input type="password" id="senha2" placeholder="Repita a senha"/>
+    </div>
+
+    <button id="btnSalvar">Salvar nova senha</button>
+    <p id="mensagem" class="message"></p>
+  </div>
+
+  <script>
+  // Desliga logo e botão Voltar nesta página
+  window.FEMFLOW_SUPPRESS_UI = true;
+  </script>
+  <script src="./maleflow-core.js"></script>
+ <script>
+const $ = s => document.querySelector(s);
+const msg = $("#mensagem");
+
+(function init() {
+  const p = new URLSearchParams(location.search);
+
+  window._resetID    = p.get("id") || "";
+  window._resetToken = p.get("token") || "";
+
+  const e = p.get("email");
+  if (e) $("#email").value = decodeURIComponent(e);
+})();
+
+function setMsg(t, ok=false){
+  msg.textContent = t;
+  msg.style.color = ok ? "#2e7d32" : "#335953";
+}
+function setErr(t){
+  msg.textContent = t;
+  msg.style.color = "#cc6a5a";
+}
+
+async function salvar() {
+  const email = $("#email").value.trim().toLowerCase();
+  const s1 = $("#senha1").value.trim();
+  const s2 = $("#senha2").value.trim();
+
+  if (!email || !s1 || !s2) return setErr("Preencha todos os campos.");
+  if (s1.length < 6) return setErr("A senha deve ter ao menos 6 caracteres.");
+  if (s1 !== s2) return setErr("As senhas não coincidem.");
+  if (!window._resetID || !window._resetToken) return setErr("Link inválido ou expirado.");
+
+  setMsg("Atualizando senha…");
+  $("#btnSalvar").disabled = true;
+
+  try {
+    const resp = await fetch(FEMFLOW.SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "resetsenha",
+        id: window._resetID,
+        token: window._resetToken,
+        novaSenha: s1
+      })
+    });
+
+    const data = await resp.json();
+    console.log("BACK RESET:", data);
+
+    if (data.status === "ok") {
+      setMsg("✔️ Senha atualizada! Voltando ao login…", true);
+      setTimeout(() => location.href = "index.html", 1200);
+    } else {
+      setErr(data.msg || "Erro ao redefinir senha.");
+      $("#btnSalvar").disabled = false;
+    }
+  }
+  catch (e) {
+    console.error(e);
+    setErr("❌ Falha na conexão.");
+    $("#btnSalvar").disabled = false;
+  }
+}
+
+// 🚀 AQUI ESTÁ A LINHA QUE FALTAVA!!! 
+$("#btnSalvar").onclick = salvar;
+
+</script>
+
+
+</body>
+</html>

@@ -45,8 +45,27 @@ function _json(obj) {
 /* ============================================================
  * 🔹 2) UTILITÁRIOS DE PLANILHA
  * ============================================================ */
+let APP_CONTEXT = "femflow";
+
+function normalizeAppContext_(raw) {
+  const value = String(raw || "").toLowerCase().trim();
+  if (value === "maleflow" || value === "male") return "maleflow";
+  return "femflow";
+}
+
+function setAppContext_(raw) {
+  APP_CONTEXT = normalizeAppContext_(raw);
+}
+
+function resolveSheetName_(name) {
+  if (name === SHEET_ALUNAS) {
+    return APP_CONTEXT === "maleflow" ? SHEET_ALUNOS : SHEET_ALUNAS;
+  }
+  return name;
+}
+
 function _sheet(name) {
-  return SpreadsheetApp.getActive().getSheetByName(name);
+  return SpreadsheetApp.getActive().getSheetByName(resolveSheetName_(name));
 }
 
 /**
@@ -56,10 +75,11 @@ function _sheet(name) {
  */
 function ensureSheet(name, header) {
   const ss = SpreadsheetApp.getActive();
-  let sh = ss.getSheetByName(name);
+  const resolvedName = resolveSheetName_(name);
+  let sh = ss.getSheetByName(resolvedName);
 
   if (!sh) {
-    sh = ss.insertSheet(name);
+    sh = ss.insertSheet(resolvedName);
     sh.getRange(1, 1, 1, header.length).setValues([header]);
     return sh;
   }

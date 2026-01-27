@@ -399,6 +399,13 @@ body {
 }
 .ff-box.ff-serie-AE .ff-serie-box strong { color: #b28b00; }
 
+/* 🟢 SM — SUBMÁXIMA */
+.ff-box.ff-serie-SM {
+  border-left-color: #1b7f7a;
+  background: linear-gradient(90deg, #eef9f8, #ffffff);
+}
+.ff-box.ff-serie-SM .ff-serie-box strong { color: #1b7f7a; }
+
 /* ============================================================
    SÉRIES ESPECIAIS — ANIMAÇÃO SUTIL
 ============================================================ */

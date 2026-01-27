@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FemFlow · Treino Base</title>
+  <link rel="stylesheet" href="../../css/style.css" />
+  <script src="../../scripts/maleflow-core.js" defer></script>
+</head>
+
+<body>
+  <!-- Cabeçalho dinâmico FemFlow (logo e botão de voltar) serão inseridos via script -->
+
+  <!-- Seção de introdução ao treino -->
+  <section class="intro">
+    <h1 id="tituloTreino">Treino do Dia</h1>
+    <p id="faseInfo">Ciclo: <b>ABC</b> · Nível: <b>Intermediário</b></p>
+  </section>
+
+  <!-- Container principal para boxes estilo Netflix -->
+  <section class="box-scroll" id="boxesContainer">
+    <!-- Os boxes de treino, aquecimento e resfriamento serão inseridos dinamicamente -->
+  </section>
+
+  <!-- Rodapé fixo com ações do usuário -->
+  <footer class="footerActions">
+    <button class="btn-hiit" onclick="FEMFLOW.iniciarHIIT(30,30,6)">🔥 HIIT</button>
+    <button class="btn-save" onclick="abrirPSEModal()">💾 Salvar</button>
+    <button class="btn-descanso" onclick="FEMFLOW.salvarDescanso()">🩶 Descanso</button>
+  </footer>
+
+  <!-- Script para carregar dados do treino dinamicamente -->
+  <script>
+    // Simulação de carregamento: no futuro, os dados virão do Apps Script ou JSON
+    document.addEventListener("DOMContentLoaded", async () => {
+      const exemploTreino = {
+        fase: "ABC",
+        nivel: "Intermediário",
+        exercicios: [
+          {
+            nome: "Agachamento Sumô com Halter (ênfase em glúteo)",
+            link: "https://www.youtube.com/shorts/cK24WR3Cg6c",
+            series: 3,
+            reps: "12–15",
+            descanso: 45
+          },
+          {
+            nome: "Ponte Glúteo",
+            link: "https://www.youtube.com/shorts/E8UAqAY700o",
+            series: 3,
+            reps: "15–20",
+            descanso: 60
+          }
+        ]
+      };
+      carregarTreino(exemploTreino);
+    });
+
+    // Função que gera os boxes de treino com base no objeto recebido
+    function carregarTreino(data) {
+      const container = document.getElementById("boxesContainer");
+      container.innerHTML = "";
+
+      // Exemplo de um único box; no futuro pode haver mais de um
+      const box = document.createElement("div");
+      box.className = "box-treino";
+      box.innerHTML = `
+        <h2>Box 1 · Glúteos</h2>
+        <div class="ex-list">
+          ${data.exercicios.map(ex => `
+            <div class="ex-item">
+              <a href="${ex.link}" target="_blank">${ex.nome}</a>
+              <p>${ex.series} séries · ${ex.reps} reps</p>
+              <span class="timer">⏱️ ${ex.descanso}s descanso</span>
+            </div>
+          `).join("")}
+        </div>
+      `;
+      container.appendChild(box);
+    }
+
+    // Envolve a função PSE do script global para salvar o treino
+    function abrirPSEModal() {
+      FEMFLOW.abrirPSE((valor) => FEMFLOW.salvarTreino({
+        id: "FF001",
+        fase: "ABC",
+        treino: "A",
+        tipo_dia: "treino",
+        pse: valor
+      }));
+    }
+  </script>
+</body>
+</html>

@@ -377,10 +377,14 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
     // 🔁 MUDANÇA DE NÍVEL
     // ----------------------------
     if (tipo === "nivel" && payload.nivel) {
+      const nivelNorm = String(payload.nivel || "").toLowerCase().trim();
+      if (!nivelNorm) {
+        return;
+      }
       await FEMFLOW.post({
         action: "setnivel",
         id,
-        nivel: payload.nivel
+        nivel: nivelNorm
       });
 
       // reset de programa é OBRIGATÓRIO
@@ -389,7 +393,7 @@ FEMFLOW.commitMudanca = async function ({ tipo, payload = {} }) {
         id
       });
 
-      localStorage.setItem("femflow_nivel", payload.nivel);
+      localStorage.setItem("femflow_nivel", nivelNorm);
       localStorage.removeItem("femflow_diaPrograma");
     }
 
@@ -458,7 +462,9 @@ FEMFLOW.carregarCicloBackend = async function () {
     localStorage.setItem("femflow_fase", resp.fase);
     localStorage.setItem("femflow_diaCiclo", resp.diaCiclo);
     localStorage.setItem("femflow_perfilHormonal", resp.perfilHormonal);
-    localStorage.setItem("femflow_nivel", resp.nivel);
+    if (resp.nivel) {
+      localStorage.setItem("femflow_nivel", resp.nivel);
+    }
     const enfaseAtual = localStorage.getItem("femflow_enfase");
     const extraAtivo = localStorage.getItem("femflow_treino_extra") === "true";
     const enfaseAtualExtra = String(enfaseAtual || "").toLowerCase().startsWith("extra_");
@@ -810,14 +816,15 @@ FEMFLOW.initNivelHandler = function () {
 
   btnConfirmar.onclick = async () => {
     const nivel = modal.querySelector(".nivel-btn.active")?.dataset.nivel;
-    if (!nivel) return FEMFLOW.toast(FEMFLOW.t("nivelModal.selecione"));
+    const nivelNorm = String(nivel || "").toLowerCase().trim();
+    if (!nivelNorm) return FEMFLOW.toast(FEMFLOW.t("nivelModal.selecione"));
 
-    localStorage.setItem("femflow_nivel", nivel);
+    localStorage.setItem("femflow_nivel", nivelNorm);
 
     await FEMFLOW.post({
       action: "setnivel",
       id: localStorage.getItem("femflow_id"),
-      nivel
+      nivel: nivelNorm
     });
 
     FEMFLOW.dispatch("stateChanged", {
@@ -859,7 +866,9 @@ FEMFLOW.carregarPerfil = async function () {
       localStorage.setItem("femflow_enfase", enfaseBackend);
     }
     localStorage.setItem("femflow_diaCiclo", r.diaCiclo);
-    localStorage.setItem("femflow_nivel", r.nivel);
+    if (r.nivel) {
+      localStorage.setItem("femflow_nivel", r.nivel);
+    }
     localStorage.setItem("femflow_startDate", r.data_inicio);
     localStorage.setItem("femflow_cycleLength", r.ciclo_duracao);
     localStorage.setItem("femflow_perfilHormonal", r.perfilHormonal);
@@ -871,10 +880,20 @@ FEMFLOW.carregarPerfil = async function () {
     localStorage.setItem("femflow_produto", produtoRaw);
     localStorage.setItem("femflow_ativa", ativaRaw ? "true" : "false");
 
-    localStorage.setItem(
-      "femflow_has_personal",
-      r.personal || isVip ? "true" : "false"
-    );
+    const acessos = r.acessos || {};
+    const personalRaw =
+      acessos.personal ??
+      r.personal ??
+      r.Personal ??
+      r.has_personal ??
+      r.hasPersonal;
+    const hasPersonal =
+      personalRaw === true ||
+      personalRaw === "true" ||
+      personalRaw === 1 ||
+      personalRaw === "1" ||
+      isVip;
+    localStorage.setItem("femflow_has_personal", hasPersonal ? "true" : "false");
     localStorage.removeItem("femflow_personal");
     FEMFLOW.renderVipBadge?.();
 

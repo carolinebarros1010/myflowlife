@@ -51,6 +51,7 @@ FEMFLOW.engineTreino.detectarSerieEspecial = label => {
   const s = label.toLowerCase().replace(/\s+/g, "");
 
   const regras = [
+    { sufixo: "sm",  codigo: "SM" }, // submáxima
     { sufixo: "cc",  codigo: "CC" }, // cadência controlada
     { sufixo: "rp",  codigo: "RP" }, // rest-pause
     { sufixo: "ae",  codigo: "AE" }, // all out
