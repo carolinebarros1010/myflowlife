@@ -571,6 +571,7 @@ const CARD_THUMBS = {
   casa_mobilidade: "casa_mobilidade.jpg",
   casa_queima_gordura: "casa_queima_gordura.jpg",
   casa_fullbody_praia: "casa_fullbody_praia.jpg",
+  "20minemcasa": "20minemcasa.jpg",
   corrida_longa: "corrida_Longa.jpg",
   quadriceps: "quadriceps.jpg",
   costas: "costas.jpg",
