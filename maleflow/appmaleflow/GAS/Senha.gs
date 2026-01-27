@@ -189,7 +189,19 @@ function _fazerLogin(data) {
     const deviceDB = String(row[COL_DEVICE_ID] || "").trim();
     let deviceUpdated = false;
 
-    if (deviceDB && deviceId && deviceDB !== deviceId) return { status: "blocked" };
+    const sessionTokenDB = String(row[COL_SESSION_TOKEN] || "").trim();
+    const expDB = row[COL_SESSION_EXP];
+    const now = new Date();
+    const hasActiveSession =
+      sessionTokenDB &&
+      expDB instanceof Date &&
+      expDB.getTime() > now.getTime();
+
+    if (deviceDB && deviceId && deviceDB !== deviceId) {
+      if (hasActiveSession) return { status: "blocked" };
+      sh.getRange(linha, COL_DEVICE_ID + 1).setValue(deviceId);
+      deviceUpdated = true;
+    }
 
     if (deviceId && !deviceDB) {
       sh.getRange(linha, COL_DEVICE_ID + 1).setValue(deviceId);
