@@ -880,10 +880,20 @@ FEMFLOW.carregarPerfil = async function () {
     localStorage.setItem("femflow_produto", produtoRaw);
     localStorage.setItem("femflow_ativa", ativaRaw ? "true" : "false");
 
-    localStorage.setItem(
-      "femflow_has_personal",
-      r.personal || isVip ? "true" : "false"
-    );
+    const acessos = r.acessos || {};
+    const personalRaw =
+      acessos.personal ??
+      r.personal ??
+      r.Personal ??
+      r.has_personal ??
+      r.hasPersonal;
+    const hasPersonal =
+      personalRaw === true ||
+      personalRaw === "true" ||
+      personalRaw === 1 ||
+      personalRaw === "1" ||
+      isVip;
+    localStorage.setItem("femflow_has_personal", hasPersonal ? "true" : "false");
     localStorage.removeItem("femflow_personal");
     FEMFLOW.renderVipBadge?.();
 
