@@ -363,7 +363,7 @@ function inferirCategoria(enfase) {
   if (!enfase) return "esportes";
   if (enfase.startsWith("followme_")) return "followme";
  if (enfase === "personal") return "personal";
-  if (enfase.startsWith("casa")) return "casa";
+  if (enfase.startsWith("casa") || enfase === "20minemcasa") return "casa";
   if (MUSCULAR_ENFASES.has(enfase)) return "muscular";
   return "esportes";
 }
@@ -500,7 +500,10 @@ async function carregarCatalogoFirebase() {
 
   const snap = await firebase.firestore().collection("exercicios").get();
   snap.forEach(doc => {
-    const parsed = extrairNivelEnfase(doc.id);
+    let parsed = extrairNivelEnfase(doc.id);
+    if (!parsed && doc.id === "20minemcasa") {
+      parsed = { nivel: nivelAluno, enfase: "20minemcasa" };
+    }
     if (!parsed) return;
 
     const { nivel, enfase } = parsed;
