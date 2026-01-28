@@ -17,7 +17,7 @@ const COL_ACESSO_PERSONAL   = 28; // AC
 const COL_TREINOS_SEMANA    = 29; // AD
 const COL_AUSENCIA_ATIVA    = 30; // AE
 const COL_AUSENCIA_INICIO   = 31; // AF
-const COL_DATA_NASCIMENTO   = 32; // AG
+const COL_DATA_NASCIMENTO   = 30; // AE
 
 /**
  * ✅ HEADER OFICIAL (corrigido)
@@ -26,18 +26,18 @@ const COL_DATA_NASCIMENTO   = 32; // AG
 const HEADER_ALUNAS = [
   "ID","Nome","Email","Telefone","SenhaHash","Produto","DataCompra","LicencaAtiva",
   "Nivel","CicloDuracao","DataInicio","LinkPlanilha","Enfase","Fase","DiaCiclo",
-  "Pontuacao","AnamneseJSON","TokenReset","TokenExpira","DiaPrograma",
+  "Pontuacao","AnamneseJSON","DiaPrograma",
   "DeviceId","SessionToken","SessionExpira",
   "DataInicioPrograma","UltimaAtividade", "FreeEnabled" , "FreeEnfases", "FreeUntil", "acesso_personal",
-  "TreinosSemana","AusenciaAtiva","AusenciaInicio","DataNascimento"
+  "TreinosSemana","AusenciaAtiva","AusenciaInicio","DataNascimento","TokenReset","TokenExpira"
 ];
 
 // índices (0-based) para leitura rápida
-const COL_DIA_PROGRAMA   = 19; // col 20 (1-based)
-const COL_TOKEN_RESET   = 17; // col 18 (1-based)
-const COL_TOKEN_EXPIRA  = 18; // col 19 (1-based)
-const COL_DEVICE_ID      = 20; // col 21
-const COL_SESSION_TOKEN  = 21; // col 22
-const COL_SESSION_EXP    = 22; // col 23
-const COL_DATA_INICIO_PROGRAMA = 23; // col 24
-const COL_ULTIMA_ATIVIDADE     = 24; // col 25
+const COL_DIA_PROGRAMA   = 17; // col 18 (1-based)
+const COL_DEVICE_ID      = 18; // col 19
+const COL_SESSION_TOKEN  = 19; // col 20
+const COL_SESSION_EXP    = 20; // col 21
+const COL_DATA_INICIO_PROGRAMA = 21; // col 22
+const COL_ULTIMA_ATIVIDADE     = 22; // col 23
+const COL_TOKEN_RESET   = 31; // col 32
+const COL_TOKEN_EXPIRA  = 32; // col 33
