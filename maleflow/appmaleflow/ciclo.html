@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seu Momento • FemFlow</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="favicon.ico">
+  <meta name="msapplication-TileImage" content="favicon.ico">
+
+  <link rel="manifest" href="manifest.json" />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/core.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/ciclo.css">
+</head>
+
+<body class="pagina-ciclo">
+
+<h1 id="cycleTitle">Defina seu ciclo de treino</h1>
+<p id="cycleMessage" class="cycle-info"></p>
+<p class="sub" id="cycleSubtitle">Escolha a divisão de treinos que você seguirá.</p>
+
+<div class="card">
+
+  <h3 id="tituloPerfil">Seu ciclo de treino</h3>
+
+  <div class="perfil-btns cycle-btns" id="cycleOptions">
+    <button class="perfil-btn" data-cycle="AB">
+      <span class="perfil-label">AB</span>
+      <span class="perfil-sub">2 treinos diferentes</span>
+    </button>
+    <button class="perfil-btn" data-cycle="ABC">
+      <span class="perfil-label">ABC</span>
+      <span class="perfil-sub">3 treinos diferentes</span>
+    </button>
+    <button class="perfil-btn" data-cycle="ABCD">
+      <span class="perfil-label">ABCD</span>
+      <span class="perfil-sub">4 treinos diferentes</span>
+    </button>
+    <button class="perfil-btn" data-cycle="ABCED">
+      <span class="perfil-label">ABCED</span>
+      <span class="perfil-sub">5 treinos diferentes</span>
+    </button>
+  </div>
+
+  <div id="cycleInfo" class="cycle-info-box hidden">
+    <h4 id="cycleInfoTitle">Ciclo selecionado</h4>
+    <p id="cycleInfoText">Você está pronto para seguir a sequência.</p>
+  </div>
+
+  <button id="btnConfirmarCiclo" class="cycle-confirm">Confirmar ciclo</button>
+</div>
+
+<p id="cycleFooter" class="cycle-footer">
+  Essa configuração define a ordem dos seus treinos.
+</p>
+
+<div id="ff-loading" class="ff-loading hidden">
+  <div class="ff-loading-box">
+    <div class="ff-spinner"></div>
+    <p id="ff-loading-text">Configurando…</p>
+  </div>
+</div>
+
+<script src="js/lang.js"></script>
+<script src="maleflow-core.js"></script>
+
+<script>
+  const id = localStorage.getItem("maleflow_id");
+
+  // 🔐 guarda mínima — ciclo é parte do onboarding
+  if (!id) {
+    FEMFLOW.toast?.("Faça login para continuar.");
+    FEMFLOW.router("index");
+  }
+
+  function ffShowLoading(msg = "Processando…") {
+    const box = document.getElementById("ff-loading");
+    const text = document.getElementById("ff-loading-text");
+    if (text) text.textContent = msg;
+    if (box) box.classList.remove("hidden");
+  }
+
+  function ffHideLoading() {
+    const box = document.getElementById("ff-loading");
+    if (box) box.classList.add("hidden");
+  }
+
+  /* ============================================================
+     0. MENSAGEM DE AJUSTE
+  ============================================================ */
+  const url = new URLSearchParams(location.search);
+  if (url.get("continuar") === "1") {
+    const msg = document.getElementById("cycleMessage");
+    if (msg) msg.textContent = "Ajuste a sequência do seu treino para hoje.";
+  }
+
+  let cicloSelecionado = FEMFLOW.getCicloTreino();
+
+  const cycleInfo = document.getElementById("cycleInfo");
+  const cycleInfoTitle = document.getElementById("cycleInfoTitle");
+  const cycleInfoText = document.getElementById("cycleInfoText");
+
+  function atualizarInfo() {
+    if (!cycleInfo) return;
+    if (!cicloSelecionado) {
+      cycleInfo.classList.add("hidden");
+      return;
+    }
+
+    const letras = cicloSelecionado.split("").join(" / ");
+    cycleInfoTitle.textContent = `Ciclo ${cicloSelecionado}`;
+    cycleInfoText.textContent = `Você seguirá a sequência ${letras} nos treinos.`;
+    cycleInfo.classList.remove("hidden");
+  }
+
+  document.querySelectorAll("[data-cycle]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-cycle]").forEach(el =>
+        el.classList.toggle("active", el === btn)
+      );
+      cicloSelecionado = btn.dataset.cycle;
+      atualizarInfo();
+    });
+  });
+
+  document.getElementById("btnConfirmarCiclo")?.addEventListener("click", async () => {
+    if (!cicloSelecionado) {
+      FEMFLOW.toast("Selecione seu ciclo de treino.");
+      return;
+    }
+
+    ffShowLoading("Salvando ciclo…");
+    await new Promise(requestAnimationFrame);
+
+    const cicloNormalizado = FEMFLOW.setCicloTreino(cicloSelecionado);
+    localStorage.setItem("maleflow_diaCiclo", "1");
+    localStorage.setItem("maleflow_diaPrograma", "1");
+
+    const resp = await FEMFLOW.post({
+      action: "setciclo",
+      id,
+      cicloTreino: cicloNormalizado,
+      cicloDuracao: cicloNormalizado.length,
+      diaPrograma: 1
+    });
+
+    if (!resp || resp.status !== "ok") {
+      ffHideLoading();
+      FEMFLOW.toast("Erro ao salvar ciclo.", true);
+      return;
+    }
+
+    ffHideLoading();
+    FEMFLOW.toast("Ciclo configurado!");
+    FEMFLOW.dispatch("stateChanged", {
+      type: "ciclo",
+      impact: "fisiologico",
+      source: "flowcenter"
+    });
+  });
+
+  atualizarInfo();
+
+  /* ============================================================
+     TEXTOS MULTI-IDIOMA
+  ============================================================ */
+  const lang = localStorage.getItem("maleflow_lang") || "pt";
+  const L = FEMFLOW.langs?.[lang]?.ciclo;
+
+  if (L) {
+    const cycleTitle = document.getElementById("cycleTitle");
+    const cycleSubtitle = document.getElementById("cycleSubtitle");
+    if (cycleTitle) cycleTitle.textContent = L.titulo;
+    if (cycleSubtitle) cycleSubtitle.textContent = L.sub;
+    document.getElementById("tituloPerfil").textContent = L.titulo;
+    document.getElementById("btnConfirmarCiclo").textContent = L.confirmar;
+    document.getElementById("cycleFooter").textContent = L.footer;
+  }
+</script>
+
+</body>
+</html>

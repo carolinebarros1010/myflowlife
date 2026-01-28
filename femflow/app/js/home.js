@@ -5,8 +5,8 @@
 =========================================================== */
 
 /* LINKS */
-const LINK_ACESSO_APP = "https://pay.hotmart.com/E102962105N";
-const LINK_PERSONAL   = "https://myflowlife.com.br/#ofertas";
+const LINK_ACESSO_APP = "https://pay.hotmart.com/T103984580L?off=ifcs6h6n";
+const LINK_PERSONAL   = "https://pay.hotmart.com/T103984580L?off=sybtfokt";
 const EBOOKS_DATA_URL = "ebooks/ebooks.json";
 
 /* FOLLOWME */
@@ -724,6 +724,50 @@ function renderRail(el, lista) {
   );
 }
 
+function getFollowmeEmBreveMessage() {
+  const lang = FEMFLOW.lang || "pt";
+  const mensagem = FEMFLOW.langs?.[lang]?.home?.followmeEmBreve;
+  if (mensagem) return mensagem;
+  if (lang === "en") return "Coming soon...";
+  if (lang === "fr") return "Bientôt...";
+  return "Em breve...";
+}
+
+/* ============================================================
+   MODAL — CONFIRMAÇÃO DE NOVO PROGRAMA
+=========================================================== */
+let novoProgramaEnfase = null;
+let novoProgramaModal;
+let novoProgramaConfirmar;
+let novoProgramaCancelar;
+
+function abrirModalNovoPrograma(enfase) {
+  if (!novoProgramaModal) return;
+  novoProgramaEnfase = enfase;
+  novoProgramaModal.classList.remove("hidden");
+  novoProgramaModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("ff-modal-open");
+}
+
+function fecharModalNovoPrograma() {
+  if (!novoProgramaModal) return;
+  novoProgramaEnfase = null;
+  novoProgramaModal.classList.add("hidden");
+  novoProgramaModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("ff-modal-open");
+}
+
+function confirmarNovoPrograma() {
+  const enfase = novoProgramaEnfase;
+  fecharModalNovoPrograma();
+  if (!enfase) return;
+  if (inferirCategoria(enfase) === "followme") {
+    void selecionarCoach(enfase);
+    return;
+  }
+  void selecionarEnfase(enfase);
+}
+
 /* ============================================================
    LÓGICA DE ACESSO POR PRODUTO
 =========================================================== */
@@ -750,7 +794,7 @@ async function handleCardClick(enfase, locked) {
 
     // ✨ FOLLOWME — programa especial
     if (enfase.startsWith("followme_")) {
-      FEMFLOW.toast("✨ Programa especial de 30 dias com coach.");
+      FEMFLOW.toast(getFollowmeEmBreveMessage());
       return;
     }
 
@@ -806,13 +850,14 @@ async function handleCardClick(enfase, locked) {
      ✨ FOLLOWME ATIVO
   ========================================= */
   if (inferirCategoria(enfase) === "followme") {
-    return selecionarCoach(enfase);
+    abrirModalNovoPrograma(enfase);
+    return;
   }
 
   /* =========================================
      🔥 TREINO NORMAL
   ========================================= */
-  return selecionarEnfase(enfase);
+  abrirModalNovoPrograma(enfase);
 }
 
 /* ============================================================
@@ -977,6 +1022,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         fecharModalTreinosSemana();
         if (treinosSemanaResolve) treinosSemanaResolve(false);
         treinosSemanaResolve = null;
+      });
+    }
+
+    novoProgramaModal = document.getElementById("novoProgramaModal");
+    novoProgramaConfirmar = document.getElementById("novoProgramaConfirmar");
+    novoProgramaCancelar = document.getElementById("novoProgramaCancelar");
+
+    if (novoProgramaConfirmar) {
+      novoProgramaConfirmar.addEventListener("click", confirmarNovoPrograma);
+    }
+
+    if (novoProgramaCancelar) {
+      novoProgramaCancelar.addEventListener("click", fecharModalNovoPrograma);
+    }
+
+    if (novoProgramaModal) {
+      novoProgramaModal.addEventListener("click", (event) => {
+        if (event.target !== novoProgramaModal) return;
+        fecharModalNovoPrograma();
       });
     }
 

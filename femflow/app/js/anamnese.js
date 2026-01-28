@@ -315,6 +315,7 @@ async function finalizarAnamnese() {
       telefone,
       dataNascimento,
       senha,
+      nivel,
       anamnese: JSON.stringify(respostas)
     });
   } catch (e) {
@@ -363,7 +364,14 @@ if (loginResp?.status === "ok") {
   // --------------------------------------------------------
   localStorage.setItem("femflow_id", r.id);
   localStorage.setItem("femflow_email", email);
-  localStorage.setItem("femflow_nivel", nivel);
+  const nivelBackend = String(r.nivel || loginResp?.nivel || nivel || "").toLowerCase();
+  if (nivelBackend) {
+    localStorage.setItem("femflow_nivel", nivelBackend);
+  }
+  const diaCicloBackend = r.diaCiclo ?? loginResp?.diaCiclo;
+  if (diaCicloBackend !== undefined && diaCicloBackend !== null) {
+    localStorage.setItem("femflow_diaCiclo", String(diaCicloBackend));
+  }
 
   // --------------------------------------------------------
   // 5) MENSAGEM FINAL

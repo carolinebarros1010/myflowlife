@@ -1,0 +1,163 @@
+/* ==========================================================
+   MaleFlow – ciclo.css
+   Configuração do ciclo de treino
+========================================================== */
+
+:root {
+  --mf-navy: #335953;
+  --mf-slate: #2E2E2E;
+  --mf-steel: #6B6B6B;
+  --mf-ice: #E5E5E5;
+  --mf-accent: #4F6F68;
+  --mf-accent-soft: rgba(79, 111, 104, 0.2);
+  --mf-shadow: 0 12px 30px rgba(46, 46, 46, 0.12);
+  --mf-radius: 16px;
+}
+
+body {
+  background: linear-gradient(180deg, #2E2E2E 0%, #335953 100%);
+  margin: 0;
+  padding: 20px;
+  font-family: "Lato", sans-serif;
+  color: var(--mf-ice);
+  text-align: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(79, 111, 104, 0.28) 0%, transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(51, 89, 83, 0.2) 0%, transparent 70%);
+  filter: blur(46px);
+  z-index: -1;
+}
+
+h1 {
+  font-family: "Playfair Display", serif;
+  color: var(--mf-ice);
+  margin-bottom: 8px;
+  font-size: 1.8rem;
+}
+
+p.sub {
+  color: rgba(226, 232, 240, 0.7);
+  margin-bottom: 28px;
+  font-size: 1rem;
+}
+
+.cycle-info {
+  color: rgba(191, 219, 254, 0.85);
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+}
+
+.card {
+  background: rgba(46, 46, 46, 0.72);
+  backdrop-filter: blur(14px);
+  border-radius: var(--mf-radius);
+  padding: 26px 22px;
+  margin: 0 auto 20px;
+  max-width: 460px;
+  text-align: left;
+  box-shadow: var(--mf-shadow);
+  border: 1px solid rgba(107, 107, 107, 0.25);
+  animation: fadeIn .5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.perfil-btns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.perfil-btn {
+  flex: 1 1 45%;
+  background: rgba(107, 107, 107, 0.12);
+  border: 1px solid rgba(107, 107, 107, 0.35);
+  padding: 12px;
+  border-radius: 14px;
+  color: var(--mf-ice);
+  font-weight: 700;
+  cursor: pointer;
+  transition: .25s ease;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.perfil-btn:hover {
+  background: rgba(148, 163, 184, 0.2);
+  transform: translateY(-1px);
+}
+
+.perfil-btn.active {
+  background: var(--mf-accent);
+  border-color: var(--mf-accent);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(79, 111, 104, 0.35);
+}
+
+.perfil-btn .perfil-label {
+  display: block;
+  font-weight: 700;
+}
+
+.perfil-btn .perfil-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.cycle-info-box {
+  background: rgba(46, 46, 46, 0.8);
+  border: 1px solid rgba(107, 107, 107, 0.25);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.cycle-info-box h4 {
+  margin: 0 0 6px;
+  color: var(--mf-ice);
+}
+
+.cycle-confirm {
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--mf-accent), #335953);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .25s ease;
+}
+
+.cycle-confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(79, 111, 104, 0.3);
+}
+
+.cycle-footer {
+  font-size: .9rem;
+  color: rgba(229, 229, 229, 0.65);
+  margin-top: 12px;
+}
+
+.hidden {
+  display: none !important;
+}

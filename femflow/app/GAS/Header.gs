@@ -1,5 +1,6 @@
 /* Nome padrão da aba principal */
 const SHEET_ALUNAS = "Alunas";
+const SHEET_ALUNOS = "Alunos";
 
 /* Token de upgrade seguro */
 const SECURITY_TOKEN = "Bmc082849$";
@@ -9,21 +10,14 @@ const HYBRID_EXERCISES = true;
 
 const SCRIPT_URL = ScriptApp.getService().getUrl();
 
-/**
- * IMPORTANTE:
- * - PerfilHormonal fica no índice 19 (0-based)
- * - CicloStartDateManual fica no índice 20 (0-based)
- */
-const COLUNA_PERFIL_HORMONAL = 19;
-const COL_CICLO_DEFINIDO_MANUAL = 20;
-const COL_FREE_ENABLED = 27; // AB
-const COL_FREE_ENFASES = 28; // AC
-const COL_FREE_UNTIL   = 29; // AD
-const COL_ACESSO_PERSONAL   = 30; // 🔥 AJUSTE PARA AE REAL
-const COL_TREINOS_SEMANA    = 31; // AF
-const COL_AUSENCIA_ATIVA    = 32; // AG
-const COL_AUSENCIA_INICIO   = 33; // AH
-const COL_DATA_NASCIMENTO   = 34; // AI
+const COL_FREE_ENABLED = 25; // Z
+const COL_FREE_ENFASES = 26; // AA
+const COL_FREE_UNTIL   = 27; // AB
+const COL_ACESSO_PERSONAL   = 28; // AC
+const COL_TREINOS_SEMANA    = 29; // AD
+const COL_AUSENCIA_ATIVA    = 30; // AE
+const COL_AUSENCIA_INICIO   = 31; // AF
+const COL_DATA_NASCIMENTO   = 30; // AE
 
 /**
  * ✅ HEADER OFICIAL (corrigido)
@@ -32,17 +26,18 @@ const COL_DATA_NASCIMENTO   = 34; // AI
 const HEADER_ALUNAS = [
   "ID","Nome","Email","Telefone","SenhaHash","Produto","DataCompra","LicencaAtiva",
   "Nivel","CicloDuracao","DataInicio","LinkPlanilha","Enfase","Fase","DiaCiclo",
-  "Pontuacao","AnamneseJSON","TokenReset","TokenExpira","PerfilHormonal",
-  "CicloStartDateManual","DiaPrograma","DeviceId","SessionToken","SessionExpira",
+  "Pontuacao","AnamneseJSON","DiaPrograma",
+  "DeviceId","SessionToken","SessionExpira",
   "DataInicioPrograma","UltimaAtividade", "FreeEnabled" , "FreeEnfases", "FreeUntil", "acesso_personal",
-  "TreinosSemana","AusenciaAtiva","AusenciaInicio","DataNascimento"
+  "TreinosSemana","AusenciaAtiva","AusenciaInicio","DataNascimento","TokenReset","TokenExpira"
 ];
 
 // índices (0-based) para leitura rápida
-const COL_DIA_PROGRAMA   = 21; // col 22 (1-based)
-const COL_DEVICE_ID      = 22; // col 23
-const COL_SESSION_TOKEN  = 23; // col 24
-const COL_SESSION_EXP    = 24; // col 25
-const COL_DATA_INICIO_PROGRAMA = 25; // ajuste conforme posição real
-const COL_ULTIMA_ATIVIDADE     = 26; // ajuste conforme posição real
-
+const COL_DIA_PROGRAMA   = 17; // col 18 (1-based)
+const COL_DEVICE_ID      = 18; // col 19
+const COL_SESSION_TOKEN  = 19; // col 20
+const COL_SESSION_EXP    = 20; // col 21
+const COL_DATA_INICIO_PROGRAMA = 21; // col 22
+const COL_ULTIMA_ATIVIDADE     = 22; // col 23
+const COL_TOKEN_RESET   = 31; // col 32
+const COL_TOKEN_EXPIRA  = 32; // col 33

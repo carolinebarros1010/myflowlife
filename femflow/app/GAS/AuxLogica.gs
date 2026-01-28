@@ -182,19 +182,12 @@ function salvarEvolucao_(data) {
 
     const dataInicio = rows[i][10];
     const cicloDuracao = Number(rows[i][9]) || 28;
-    const perfilHormonal = String(rows[i][19] || "regular").toLowerCase();
     const nivel = String(rows[i][8] || "iniciante").toLowerCase();
-
-    const manualStart = rows[i][20];
-    const startBase =
-      manualStart instanceof Date && !isNaN(manualStart)
-        ? new Date(manualStart)
-        : new Date(dataInicio);
+    const startBase = new Date(dataInicio);
 
     const ciclo = calcularCicloReal({
       startDate: startBase,
       cicloDuracao,
-      perfilHormonal,
       nivel,
       faseSalva: rows[i][13],
       diaCicloSalvo: rows[i][14]
@@ -265,65 +258,22 @@ function salvarEvolucao_(data) {
 }
 
 /* ============================================================
- * 🌸 setmanualstart — Salvar DATA MANUAL do ciclo (coluna U)
+ * 🌸 setmanualstart — coluna removida
  * ============================================================ */
 function setmanualstart(id, startDate) {
-  try {
-    const sh = _sheet(SHEET_ALUNAS);
-    if (!sh) return { status: "error", msg: "Sheet Alunas não encontrada" };
-
-    const rows = sh.getDataRange().getValues();
-
-    for (let i = 1; i < rows.length; i++) {
-      if (String(rows[i][0]).trim() === String(id).trim()) {
-        const perfilHormonal = String(rows[i][19] || "regular").toLowerCase();
-        const colManual = 21; // coluna U (1-based)
-
-        if (perfilHormonal !== "regular") {
-          sh.getRange(i + 1, colManual).setValue(new Date(startDate));
-        } else {
-          sh.getRange(i + 1, colManual).setValue("");
-        }
-
-        return { status: "ok", id: id, manualAtivo: perfilHormonal !== "regular" };
-      }
-    }
-
-    return { status: "notfound", id: id };
-  } catch (err) {
-    return { status: "error", msg: err.toString() };
-  }
+  if (!id) return { status: "error", msg: "missing_id" };
+  if (!startDate) return { status: "error", msg: "missing_start_date" };
+  return { status: "ignored", msg: "manual_start_removido" };
 }
 
 /* ============================================================
  * atualizarCicloStart — compatível com versões antigas do app
+ * (coluna removida)
  * ============================================================ */
 function atualizarCicloStart(id, startDate) {
-  try {
-    const sh = _sheet(SHEET_ALUNAS);
-    if (!sh) return { status: "error", msg: "Sheet Alunas não encontrada" };
-
-    const rows = sh.getDataRange().getValues();
-
-    for (let i = 1; i < rows.length; i++) {
-      if (String(rows[i][0]).trim() === String(id).trim()) {
-        const perfil = String(rows[i][19] || "regular").toLowerCase();
-        const colManual = 21;
-
-        if (perfil !== "regular") {
-          sh.getRange(i + 1, colManual).setValue(new Date(startDate));
-        } else {
-          sh.getRange(i + 1, colManual).setValue("");
-        }
-
-        return { status: "ok", id: id };
-      }
-    }
-
-    return { status: "notfound" };
-  } catch (err) {
-    return { status: "error", msg: err.toString() };
-  }
+  if (!id) return { status: "error", msg: "missing_id" };
+  if (!startDate) return { status: "error", msg: "missing_start_date" };
+  return { status: "ignored", msg: "manual_start_removido" };
 }
 
 
@@ -334,47 +284,9 @@ function atualizarCicloStart(id, startDate) {
  * ======================================================
  * 🧹 LIMPEZA DE CICLO MANUAL — PERFIL ENERGÉTICO
  * ------------------------------------------------------
- * - Remove CicloStartDateManual (col U)
- * - Apenas para perfilHormonal === "energetico"
- * - NÃO recalcula ciclo
- * - NÃO altera diaCiclo nem dataInicio
+ * - Coluna removida; mantido apenas por compatibilidade
  * ======================================================
  */
 function limpezaCicloManualEnergetico() {
-
-  const sh = SpreadsheetApp
-    .getActive()
-    .getSheetByName("Alunas"); // ajuste se necessário
-
-  if (!sh) {
-    Logger.log("❌ Aba Alunas não encontrada");
-    return;
-  }
-
-  const data = sh.getDataRange().getValues();
-  let limpos = 0;
-
-  for (let i = 1; i < data.length; i++) {
-    const r = data[i];
-
-    const id              = r[0];
-    const nome            = r[1];
-    const perfilHormonal  = String(r[19] || "").toLowerCase();
-    const cicloManual     = r[20]; // coluna U
-
-    if (
-      perfilHormonal === "energetico" &&
-      cicloManual instanceof Date &&
-      !isNaN(cicloManual)
-    ) {
-      sh.getRange(i + 1, 21).clearContent(); // coluna U
-      limpos++;
-
-      Logger.log(
-        `🧹 LIMPO | ${id} | ${nome} | CicloManual removido`
-      );
-    }
-  }
-
-  Logger.log(`✅ Limpeza concluída. Registros afetados: ${limpos}`);
+  Logger.log("ℹ️ Coluna de ciclo manual removida; nenhuma ação executada.");
 }
