@@ -333,6 +333,16 @@ home: {
       tituloMuscular:  "Treinos por ênfase",
       tituloEsportes:  "Esportes",
       tituloCasa:      "Treinar em casa",
+      pwaModal: {
+        titulo: "Bem-vinda ao FemFlow ✨",
+        intro: "Instale o app no seu celular para acessar mais rápido.",
+        iosTitulo: "iOS (Safari)",
+        iosPassos: "Toque em Compartilhar e depois em “Adicionar à Tela de Início”.",
+        androidTitulo: "Android (Chrome)",
+        androidPassos: "Toque em “Instalar” ou no menu ⋮ e escolha “Instalar app”.",
+        fechar: "Fechar",
+        instalar: "Instalar app"
+      },
       cards: {
         forcaabc: "Força",
         quadriceps: "Quadríceps",
@@ -580,6 +590,16 @@ home: {
       tituloMuscular:  "Muscle focus training",
       tituloEsportes:  "Sports",
       tituloCasa:      "Home training",
+      pwaModal: {
+        titulo: "Welcome to FemFlow ✨",
+        intro: "Install the app on your phone for faster access.",
+        iosTitulo: "iOS (Safari)",
+        iosPassos: "Tap Share and then “Add to Home Screen”.",
+        androidTitulo: "Android (Chrome)",
+        androidPassos: "Tap “Install” or open the ⋮ menu and choose “Install app”.",
+        fechar: "Close",
+        instalar: "Install app"
+      },
       cards: {
         forcaabc: "Strength",
         quadriceps: "Quadriceps",
@@ -826,6 +846,16 @@ fr: {
       tituloMuscular:  "Entraînements par groupe musculaire",
       tituloEsportes:  "Sports",
       tituloCasa:      "S'entraîner à la maison",
+      pwaModal: {
+        titulo: "Bienvenue sur FemFlow ✨",
+        intro: "Installez l’app sur votre téléphone pour un accès rapide.",
+        iosTitulo: "iOS (Safari)",
+        iosPassos: "Touchez Partager puis « Ajouter à l’écran d’accueil ».",
+        androidTitulo: "Android (Chrome)",
+        androidPassos: "Touchez « Installer » ou le menu ⋮ puis « Installer l’app ».",
+        fechar: "Fermer",
+        instalar: "Installer l’app"
+      },
       cards: {
         forcaabc: "Force",
         quadriceps: "Quadriceps",
