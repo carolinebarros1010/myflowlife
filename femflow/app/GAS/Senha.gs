@@ -287,17 +287,19 @@ function _getResetBaseUrl_(data) {
     props.getProperty("APP_BASE_URL") ||
     ""
   ).trim();
-  const base = fromData || fromProps || "https://femflow.com.br/app/reset.html";
+  const base = fromData || fromProps || "https://www.myflowlife.com.br/femflow/app/reset.html";
   if (/reset\.html/i.test(base)) return base;
   return base.replace(/\/+$/, "") + "/reset.html";
 }
 
 function _buildResetLink_(data, id, token, email) {
+  const lang = _getResetLang_(data);
   const base = _getResetBaseUrl_(data);
   const params = [
     "id=" + encodeURIComponent(id || ""),
     "token=" + encodeURIComponent(token || ""),
-    "email=" + encodeURIComponent(email || "")
+    "email=" + encodeURIComponent(email || ""),
+    "lang=" + encodeURIComponent(lang)
   ].join("&");
   return base + (base.includes("?") ? "&" : "?") + params;
 }
