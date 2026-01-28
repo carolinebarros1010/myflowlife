@@ -301,6 +301,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function fecharDrawer(){
     cicloAtivo = false;
     vibracaoAtiva = false;
+    pararVibracao();
     drawer.classList.remove("active");
   }
 
@@ -332,7 +333,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     dispararVibracao(faseIndex);
 
     for (let s = segundos; s >= 1; s--){
-      if (!cicloAtivo) return;
+      if (!cicloAtivo) {
+        pararVibracao();
+        return;
+      }
       circle.textContent = s;
       await esperar(1000);
     }
@@ -341,7 +345,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   function dispararVibracao(faseIndex){
     if (!vibracaoAtiva) return;
     if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
-    if (document.hidden) return;
 
     const vibracoes = {
       start: 120,
@@ -355,6 +358,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!duracao) return;
 
     navigator.vibrate(duracao);
+  }
+
+  function pararVibracao(){
+    if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
+    navigator.vibrate(0);
   }
 
   async function startProtocolo(p){
