@@ -145,6 +145,77 @@
  <script>
 const $ = s => document.querySelector(s);
 const msg = $("#mensagem");
+const i18n = {
+  pt: {
+    title: "Redefinir senha",
+    subtitle: "Informe sua nova senha para continuar 💫",
+    emailLabel: "E-mail",
+    emailPlaceholder: "seu@email.com",
+    senha1Label: "Nova senha",
+    senha1Placeholder: "Crie uma senha",
+    senha2Label: "Confirme a nova senha",
+    senha2Placeholder: "Repita a senha",
+    save: "Salvar nova senha",
+    msgFill: "Preencha todos os campos.",
+    msgLength: "A senha deve ter ao menos 6 caracteres.",
+    msgMatch: "As senhas não coincidem.",
+    msgInvalid: "Link inválido ou expirado.",
+    msgUpdating: "Atualizando senha…",
+    msgSuccess: "✔️ Senha atualizada! Voltando ao login…",
+    msgError: "Erro ao redefinir senha.",
+    msgConnection: "❌ Falha na conexão."
+  },
+  en: {
+    title: "Reset password",
+    subtitle: "Enter your new password to continue 💫",
+    emailLabel: "Email",
+    emailPlaceholder: "you@email.com",
+    senha1Label: "New password",
+    senha1Placeholder: "Create a password",
+    senha2Label: "Confirm new password",
+    senha2Placeholder: "Repeat the password",
+    save: "Save new password",
+    msgFill: "Please fill out all fields.",
+    msgLength: "Password must be at least 6 characters.",
+    msgMatch: "Passwords do not match.",
+    msgInvalid: "Invalid or expired link.",
+    msgUpdating: "Updating password…",
+    msgSuccess: "✔️ Password updated! Returning to login…",
+    msgError: "Error resetting password.",
+    msgConnection: "❌ Connection failed."
+  },
+  fr: {
+    title: "Réinitialiser le mot de passe",
+    subtitle: "Saisissez votre nouveau mot de passe pour continuer 💫",
+    emailLabel: "E-mail",
+    emailPlaceholder: "vous@email.com",
+    senha1Label: "Nouveau mot de passe",
+    senha1Placeholder: "Créez un mot de passe",
+    senha2Label: "Confirmez le mot de passe",
+    senha2Placeholder: "Répétez le mot de passe",
+    save: "Enregistrer le nouveau mot de passe",
+    msgFill: "Veuillez remplir tous les champs.",
+    msgLength: "Le mot de passe doit comporter au moins 6 caractères.",
+    msgMatch: "Les mots de passe ne correspondent pas.",
+    msgInvalid: "Lien invalide ou expiré.",
+    msgUpdating: "Mise à jour du mot de passe…",
+    msgSuccess: "✔️ Mot de passe mis à jour ! Retour à la connexion…",
+    msgError: "Erreur lors de la réinitialisation du mot de passe.",
+    msgConnection: "❌ Échec de la connexion."
+  }
+};
+const getLang = () => {
+  const p = new URLSearchParams(location.search);
+  const raw = (p.get("lang") || localStorage.getItem("femflow_lang") || "pt")
+    .toLowerCase()
+    .trim();
+  if (raw.startsWith("en")) return "en";
+  if (raw.startsWith("fr")) return "fr";
+  return "pt";
+};
+const lang = getLang();
+const T = i18n[lang] || i18n.pt;
+const t = key => T[key] || i18n.pt[key] || key;
 
 (function init() {
   const p = new URLSearchParams(location.search);
@@ -154,6 +225,16 @@ const msg = $("#mensagem");
 
   const e = p.get("email");
   if (e) $("#email").value = decodeURIComponent(e);
+
+  document.querySelector("h2").textContent = t("title");
+  document.querySelector(".subtitle").textContent = t("subtitle");
+  document.querySelector("label[for='email']").textContent = t("emailLabel");
+  document.querySelector("label[for='senha1']").textContent = t("senha1Label");
+  document.querySelector("label[for='senha2']").textContent = t("senha2Label");
+  $("#email").placeholder = t("emailPlaceholder");
+  $("#senha1").placeholder = t("senha1Placeholder");
+  $("#senha2").placeholder = t("senha2Placeholder");
+  $("#btnSalvar").textContent = t("save");
 })();
 
 function setMsg(t, ok=false){
@@ -170,12 +251,12 @@ async function salvar() {
   const s1 = $("#senha1").value.trim();
   const s2 = $("#senha2").value.trim();
 
-  if (!email || !s1 || !s2) return setErr("Preencha todos os campos.");
-  if (s1.length < 6) return setErr("A senha deve ter ao menos 6 caracteres.");
-  if (s1 !== s2) return setErr("As senhas não coincidem.");
-  if (!window._resetID || !window._resetToken) return setErr("Link inválido ou expirado.");
+  if (!email || !s1 || !s2) return setErr(t("msgFill"));
+  if (s1.length < 6) return setErr(t("msgLength"));
+  if (s1 !== s2) return setErr(t("msgMatch"));
+  if (!window._resetID || !window._resetToken) return setErr(t("msgInvalid"));
 
-  setMsg("Atualizando senha…");
+  setMsg(t("msgUpdating"));
   $("#btnSalvar").disabled = true;
 
   try {
@@ -194,16 +275,16 @@ async function salvar() {
     console.log("BACK RESET:", data);
 
     if (data.status === "ok") {
-      setMsg("✔️ Senha atualizada! Voltando ao login…", true);
+      setMsg(t("msgSuccess"), true);
       setTimeout(() => location.href = "index.html", 1200);
     } else {
-      setErr(data.msg || "Erro ao redefinir senha.");
+      setErr(data.msg || t("msgError"));
       $("#btnSalvar").disabled = false;
     }
   }
   catch (e) {
     console.error(e);
-    setErr("❌ Falha na conexão.");
+    setErr(t("msgConnection"));
     $("#btnSalvar").disabled = false;
   }
 }
