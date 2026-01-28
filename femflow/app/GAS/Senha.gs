@@ -1,3 +1,37 @@
+/* ============================================================
+   FEMFLOW • SENHA.GS — SEGURANÇA
+   - Hash de senha
+   - Login/cadastro
+   - Sessão/device lock
+============================================================ */
+
+function _hashSenha(raw) {
+  const senha = String(raw || "").trim();
+  if (!senha) return "";
+  const digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    senha,
+    Utilities.Charset.UTF_8
+  );
+  return Utilities.base64Encode(digest);
+}
+
+function _senhaConfereSegura_(senhaDigitada, senhaSalva) {
+  const senha = String(senhaDigitada || "").trim();
+  const salva = String(senhaSalva || "").trim();
+
+  if (!senha) return { ok: false, needsUpgrade: false };
+
+  if (!salva) return { ok: true, needsUpgrade: true };
+
+  const hash = _hashSenha(senha);
+
+  if (salva === hash) return { ok: true, needsUpgrade: false };
+  if (salva === senha) return { ok: true, needsUpgrade: true };
+
+  return { ok: false, needsUpgrade: false };
+}
+
 function _loginOuCadastro(data) {
   const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
   if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
@@ -120,4 +154,208 @@ function _loginOuCadastro(data) {
     nivel: nivelDetectado,
     pontuacao: pont
   };
+}
+
+/* ============================================================
+   LOGIN (corrigido + upgrade automático)
+============================================================ */
+function _fazerLogin(data) {
+  const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
+  if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
+
+  const email = String(data.email || "").trim().toLowerCase();
+  const senha = String(data.senha || "").trim();
+  const deviceId = String(data.deviceId || "").trim();
+
+  if (!email) return { status: "error", msg: "email_required" };
+
+  const rows = sh.getDataRange().getValues();
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const emailDB = String(row[2] || "").trim().toLowerCase();
+    if (emailDB !== email) continue;
+
+    const linha = i + 1;
+
+    // ✅ senha segura
+    const conf = _senhaConfereSegura_(senha, row[4]);
+    if (!conf.ok) return { status: "senha_incorreta" };
+
+    // ✅ upgrade se estava em texto puro / vazio
+    if (conf.needsUpgrade) {
+      sh.getRange(linha, 5).setValue(_hashSenha(senha)); // col 5 (1-based) = row[4]
+    }
+
+    // device lock + tolerância de migração
+    const deviceDB = String(row[COL_DEVICE_ID] || "").trim();
+    const sessionTokenDB = String(row[COL_SESSION_TOKEN] || "").trim();
+    const expDB = row[COL_SESSION_EXP];
+    const now = new Date();
+    const hasActiveSession =
+      sessionTokenDB &&
+      expDB instanceof Date &&
+      expDB.getTime() > now.getTime();
+
+    let deviceUpdated = false;
+
+    if (deviceDB && deviceId && deviceDB !== deviceId) {
+      if (hasActiveSession) return { status: "blocked" };
+      sh.getRange(linha, COL_DEVICE_ID + 1).setValue(deviceId);
+      deviceUpdated = true;
+    }
+
+    if (deviceId && !deviceDB) {
+      sh.getRange(linha, COL_DEVICE_ID + 1).setValue(deviceId);
+      deviceUpdated = true;
+    }
+
+    // session
+    const sessionToken = Utilities.getUuid();
+    const sessionExpira = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+
+    sh.getRange(linha, COL_SESSION_TOKEN + 1).setValue(sessionToken);
+    sh.getRange(linha, COL_SESSION_EXP + 1).setValue(sessionExpira);
+
+    return {
+      status: "ok",
+      id: row[0],
+      email,
+      deviceId: deviceId || deviceDB,
+      sessionToken,
+      sessionExpira,
+      deviceUpdated
+    };
+  }
+
+  return { status: "not_registered" };
+}
+
+function _assertSession_(id, deviceId, sessionToken) {
+  const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
+  if (!sh) return { ok: false, msg: "Aba Alunas não encontrada." };
+
+  const idNorm = String(id || "").trim();
+  const token = String(sessionToken || "").trim();
+  const device = String(deviceId || "").trim();
+
+  if (!idNorm || !token) return { ok: false, msg: "Sessão inválida" };
+
+  const rows = sh.getDataRange().getValues();
+  const now = new Date();
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (String(row[0] || "").trim() !== idNorm) continue;
+
+    const tokenDB = String(row[COL_SESSION_TOKEN] || "").trim();
+    const expDB = row[COL_SESSION_EXP];
+    const deviceDB = String(row[COL_DEVICE_ID] || "").trim();
+
+    if (!tokenDB || tokenDB !== token) return { ok: false, msg: "Sessão inválida" };
+    if (!(expDB instanceof Date) || expDB.getTime() < now.getTime()) {
+      return { ok: false, msg: "Sessão expirada" };
+    }
+
+    if (deviceDB && device && deviceDB !== device) {
+      return { ok: false, msg: "Sessão bloqueada" };
+    }
+
+    return { ok: true };
+  }
+
+  return { ok: false, msg: "Sessão inválida" };
+}
+
+/* ============================================================
+   RESET SENHA (token gravado na planilha)
+============================================================ */
+function _solicitarResetSenha(data) {
+  const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
+  if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
+
+  const email = String(data.email || "").trim().toLowerCase();
+  if (!email) return { status: "error", msg: "email_required" };
+
+  const rows = sh.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (String(row[2] || "").trim().toLowerCase() !== email) continue;
+
+    const linha = i + 1;
+    const token = Utilities.getUuid().replace(/-/g, "");
+    const expira = new Date(Date.now() + 1000 * 60 * 30); // 30 min
+
+    sh.getRange(linha, COL_TOKEN_RESET + 1).setValue(token);
+    sh.getRange(linha, COL_TOKEN_EXPIRA + 1).setValue(expira);
+
+    return { status: "ok", email, token, expira };
+  }
+
+  return { status: "notfound" };
+}
+
+function _resetSenha(data) {
+  const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
+  if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
+
+  const email = String(data.email || "").trim().toLowerCase();
+  const token = String(data.token || "").trim();
+  const novaSenha = String(data.novaSenha || "").trim();
+
+  if (!email || !token || !novaSenha) return { status: "error", msg: "missing_fields" };
+
+  const rows = sh.getDataRange().getValues();
+  const now = new Date();
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (String(row[2] || "").trim().toLowerCase() !== email) continue;
+
+    const tokenDB = String(row[COL_TOKEN_RESET] || "").trim();
+    const expDB = row[COL_TOKEN_EXPIRA];
+
+    if (!tokenDB || tokenDB !== token) return { status: "invalid_token" };
+    if (!(expDB instanceof Date) || expDB.getTime() < now.getTime()) return { status: "expired_token" };
+
+    const linha = i + 1;
+
+    sh.getRange(linha, 5).setValue(_hashSenha(novaSenha)); // senhaHash
+
+    sh.getRange(linha, COL_TOKEN_RESET + 1).setValue("");
+    sh.getRange(linha, COL_TOKEN_EXPIRA + 1).setValue("");
+
+    sh.getRange(linha, COL_SESSION_TOKEN + 1).setValue("");
+    sh.getRange(linha, COL_SESSION_EXP + 1).setValue("");
+
+    return { status: "ok" };
+  }
+
+  return { status: "notfound" };
+}
+
+function resetDevice_(data) {
+  const sh = ensureSheet(SHEET_ALUNAS, HEADER_ALUNAS);
+  if (!sh) return { status: "error", msg: "Aba Alunas não encontrada." };
+
+  if (data && data.securityToken && data.securityToken !== SECURITY_TOKEN) {
+    return { status: "denied" };
+  }
+
+  const email = String(data.email || "").trim().toLowerCase();
+  if (!email) return { status: "error", msg: "email_required" };
+
+  const rows = sh.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (String(row[2] || "").trim().toLowerCase() !== email) continue;
+
+    const linha = i + 1;
+    sh.getRange(linha, COL_DEVICE_ID + 1).setValue("");
+    sh.getRange(linha, COL_SESSION_TOKEN + 1).setValue("");
+    sh.getRange(linha, COL_SESSION_EXP + 1).setValue("");
+    return { status: "ok" };
+  }
+
+  return { status: "notfound" };
 }
