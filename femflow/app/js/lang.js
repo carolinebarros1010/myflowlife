@@ -354,6 +354,7 @@ home: {
         jiu_jitsu: "Jiu-jítsu",
         natacao: "Natação",
         surf: "Surf",
+        voleibol_quadra: "Voleibol de quadra",
         corrida_curta: "Corrida curta"
       }
     },
@@ -652,6 +653,7 @@ home: {
         jiu_jitsu: "Jiu-jitsu",
         natacao: "Swimming",
         surf: "Surf",
+        voleibol_quadra: "Indoor volleyball",
         corrida_curta: "Short run"
       }
     },
@@ -947,6 +949,7 @@ fr: {
         jiu_jitsu: "Jiu-jitsu",
         natacao: "Natation",
         surf: "Surf",
+        voleibol_quadra: "Volley-ball en salle",
         corrida_curta: "Course courte"
       }
     },

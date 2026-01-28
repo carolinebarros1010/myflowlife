@@ -502,6 +502,12 @@ async function carregarCatalogoFirebase() {
   snap.forEach(doc => {
     const data = doc.data();
     let parsed = extrairNivelEnfase(doc.id);
+    if (
+      parsed &&
+      !["iniciante", "intermediaria", "avancada"].includes(parsed.nivel)
+    ) {
+      parsed = { nivel: nivelAluno, enfase: doc.id.toLowerCase().trim() };
+    }
     if (!parsed && doc.id === "20minemcasa") {
       parsed = { nivel: nivelAluno, enfase: "20minemcasa" };
     }
