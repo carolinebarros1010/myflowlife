@@ -285,8 +285,8 @@ async function finalizarAnamnese() {
   // 1) DEFINIR NÍVEL PELO SCORE
   // --------------------------------------------------------
   let nivel = "iniciante";
-  if (score >= 20) nivel = "avancada";
-  else if (score >= 14) nivel = "intermediaria";
+  if (score >= 23) nivel = "avancada";
+  else if (score >= 13) nivel = "intermediaria";
 
   // --------------------------------------------------------
   // 2) COLETAR RESPOSTAS
@@ -376,10 +376,11 @@ if (loginResp?.status === "ok") {
   // --------------------------------------------------------
   // 5) MENSAGEM FINAL
   // --------------------------------------------------------
+  const nivelFinal = (nivelBackend || nivel || "").toLowerCase();
   finalMsgEl.textContent =
     (lang === "pt" ? "Seu nível é: " :
      lang === "en" ? "Your level is: " :
-     "Ton niveau est : ") + nivel.toUpperCase();
+     "Ton niveau est : ") + (nivelFinal || nivel).toUpperCase();
 
   // --------------------------------------------------------
   // 6) REDIRECIONAR PARA CICLO
