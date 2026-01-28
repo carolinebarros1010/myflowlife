@@ -342,6 +342,7 @@ home: {
         casa_queima_gordura: "Queima de Gordura",
         casa_mobilidade: "Mobilidade",
         casa_fullbody_praia: "Fullbody Praia",
+        "20minemcasa": "20 min em casa",
         costas: "Costas",
         ombro: "Ombro",
         peito: "Peito",
@@ -352,6 +353,7 @@ home: {
         jiu_jitsu: "Jiu-jítsu",
         natacao: "Natação",
         surf: "Surf",
+        voleibol_quadra: "Voleibol de quadra",
         corrida_curta: "Corrida curta"
       }
     },
@@ -632,6 +634,7 @@ home: {
         casa_queima_gordura: "Fat Burn",
         casa_mobilidade: "Mobility",
         casa_fullbody_praia: "Beach full body",
+        "20minemcasa": "20 min at home",
         costas: "Back",
         ombro: "Shoulders",
         peito: "Chest",
@@ -642,6 +645,7 @@ home: {
         jiu_jitsu: "Jiu-jitsu",
         natacao: "Swimming",
         surf: "Surf",
+        voleibol_quadra: "Indoor volleyball",
         corrida_curta: "Short run"
       }
     },
@@ -919,6 +923,7 @@ fr: {
         casa_queima_gordura: "Brûle-graisse",
         casa_mobilidade: "Mobilité",
         casa_fullbody_praia: "Full body plage",
+        "20minemcasa": "20 min à la maison",
         costas: "Dos",
         ombro: "Épaules",
         peito: "Poitrine",
@@ -929,6 +934,7 @@ fr: {
         jiu_jitsu: "Jiu-jitsu",
         natacao: "Natation",
         surf: "Surf",
+        voleibol_quadra: "Volley-ball en salle",
         corrida_curta: "Course courte"
       }
     },

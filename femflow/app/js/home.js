@@ -363,7 +363,7 @@ function inferirCategoria(enfase) {
   if (!enfase) return "esportes";
   if (enfase.startsWith("followme_")) return "followme";
  if (enfase === "personal") return "personal";
-  if (enfase.startsWith("casa")) return "casa";
+  if (enfase.startsWith("casa") || enfase === "20minemcasa") return "casa";
   if (MUSCULAR_ENFASES.has(enfase)) return "muscular";
   return "esportes";
 }
@@ -500,7 +500,23 @@ async function carregarCatalogoFirebase() {
 
   const snap = await firebase.firestore().collection("exercicios").get();
   snap.forEach(doc => {
-    const parsed = extrairNivelEnfase(doc.id);
+    const data = doc.data();
+    let parsed = extrairNivelEnfase(doc.id);
+    if (
+      parsed &&
+      !["iniciante", "intermediaria", "avancada"].includes(parsed.nivel)
+    ) {
+      parsed = { nivel: nivelAluno, enfase: doc.id.toLowerCase().trim() };
+    }
+    if (!parsed && doc.id === "20minemcasa") {
+      parsed = { nivel: nivelAluno, enfase: "20minemcasa" };
+    }
+    if (!parsed && data?.enfase) {
+      parsed = {
+        nivel: nivelAluno,
+        enfase: String(data.enfase || "").toLowerCase().trim()
+      };
+    }
     if (!parsed) return;
 
     const { nivel, enfase } = parsed;
@@ -516,7 +532,7 @@ async function carregarCatalogoFirebase() {
 
     if (!incluir) return;
 
-    const card = normalizarCardFirebase(enfase, doc.data());
+    const card = normalizarCardFirebase(enfase, data);
 
     const acesso = avaliarAcessoCard(enfase, perfil);
     card.locked = acesso.locked;
@@ -571,6 +587,7 @@ const CARD_THUMBS = {
   casa_mobilidade: "casa_mobilidade.jpg",
   casa_queima_gordura: "casa_queima_gordura.jpg",
   casa_fullbody_praia: "casa_fullbody_praia.jpg",
+  "20minemcasa": "20minemcasa.jpg",
   corrida_longa: "corrida_Longa.jpg",
   quadriceps: "quadriceps.jpg",
   costas: "costas.jpg",
@@ -692,9 +709,14 @@ function cardHTML(p) {
     </article>`;
 }
 
+function ordenarCardsPorGratuito(lista) {
+  return [...lista].sort((a, b) => (b.isFree ? 1 : 0) - (a.isFree ? 1 : 0));
+}
+
 function renderRail(el, lista) {
   if (!el) return;
-  el.innerHTML = lista.map(cardHTML).join("");
+  const ordenada = ordenarCardsPorGratuito(lista);
+  el.innerHTML = ordenada.map(cardHTML).join("");
   el.querySelectorAll(".card").forEach(c =>
     c.onclick = () => {
       void handleCardClick(c.dataset.enfase, c.dataset.locked === "true");
