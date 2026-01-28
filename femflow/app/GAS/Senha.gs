@@ -287,7 +287,8 @@ function _getResetBaseUrl_(data) {
     props.getProperty("APP_BASE_URL") ||
     ""
   ).trim();
-  const base = fromData || fromProps || "https://www.myflowlife.com.br/femflow/app/reset.html";
+  let base = fromData || fromProps || "https://myflowlife.com.br/femflow/app/reset.html";
+  base = base.replace(/^https?:\/\/(www\.)?femflow\.com\.br/i, "https://myflowlife.com.br/femflow");
   if (/reset\.html/i.test(base)) return base;
   return base.replace(/\/+$/, "") + "/reset.html";
 }
