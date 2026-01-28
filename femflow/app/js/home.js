@@ -500,9 +500,22 @@ async function carregarCatalogoFirebase() {
 
   const snap = await firebase.firestore().collection("exercicios").get();
   snap.forEach(doc => {
+    const data = doc.data();
     let parsed = extrairNivelEnfase(doc.id);
+    if (
+      parsed &&
+      !["iniciante", "intermediaria", "avancada"].includes(parsed.nivel)
+    ) {
+      parsed = { nivel: nivelAluno, enfase: doc.id.toLowerCase().trim() };
+    }
     if (!parsed && doc.id === "20minemcasa") {
       parsed = { nivel: nivelAluno, enfase: "20minemcasa" };
+    }
+    if (!parsed && data?.enfase) {
+      parsed = {
+        nivel: nivelAluno,
+        enfase: String(data.enfase || "").toLowerCase().trim()
+      };
     }
     if (!parsed) return;
 
@@ -519,7 +532,7 @@ async function carregarCatalogoFirebase() {
 
     if (!incluir) return;
 
-    const card = normalizarCardFirebase(enfase, doc.data());
+    const card = normalizarCardFirebase(enfase, data);
 
     const acesso = avaliarAcessoCard(enfase, perfil);
     card.locked = acesso.locked;

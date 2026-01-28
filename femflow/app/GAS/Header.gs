@@ -29,7 +29,7 @@ const HEADER_ALUNAS = [
   "Pontuacao","AnamneseJSON","TokenReset","TokenExpira","Perfil_Hormonal","ciclodate","DiaPrograma",
   "DeviceId","SessionToken","SessionExpira",
   "DataInicioPrograma","UltimaAtividade", "FreeEnabled" , "FreeEnfases", "FreeUntil", "acesso_personal",
-  "TreinosSemana","AusenciaAtiva","AusenciaInicio","DataNascimento"
+  "TreinosSemana","AusenciaAtiva","AusenciaInicio","DataNascimento","TokenReset","TokenExpira"
 ];
 
 // índices (0-based) para leitura rápida
