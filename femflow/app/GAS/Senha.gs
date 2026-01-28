@@ -266,3 +266,6 @@ function _assertSession_(id, deviceId, sessionToken) {
 
   return { ok: false, msg: "Sessão inválida" };
 }
+
+/* ============================================================
+   RESET SENHA (token gravado na planilha)
