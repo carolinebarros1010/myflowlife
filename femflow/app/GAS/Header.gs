@@ -34,6 +34,8 @@ const HEADER_ALUNAS = [
 
 // índices (0-based) para leitura rápida
 const COL_DIA_PROGRAMA   = 19; // col 20 (1-based)
+const COL_TOKEN_RESET   = 17; // col 18 (1-based)
+const COL_TOKEN_EXPIRA  = 18; // col 19 (1-based)
 const COL_DEVICE_ID      = 20; // col 21
 const COL_SESSION_TOKEN  = 21; // col 22
 const COL_SESSION_EXP    = 22; // col 23
