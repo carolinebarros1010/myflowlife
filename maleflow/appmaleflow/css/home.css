@@ -25,6 +25,10 @@ body {
   padding-top: 60px !important; /* garante header fixo */
 }
 
+body.pwa-modal-open {
+  overflow: hidden;
+}
+
 /* ------------------- WRAP ------------------- */
 .wrap {
   max-width: 1160px;
@@ -194,6 +198,90 @@ h1 {
   margin: 18px 2px 10px;
   font-weight: 900;
   color: var(--teal);
+}
+
+/* ============================================================
+   6) MODAL PWA (BOAS-VINDAS)
+============================================================ */
+.pwa-modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(27, 38, 36, 0.35);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  padding: 18px;
+}
+
+.pwa-modal-card {
+  width: min(520px, 100%);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  padding: 22px 20px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(51, 89, 83, 0.12);
+}
+
+.pwa-modal-title {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--teal);
+}
+
+.pwa-modal-subtitle {
+  margin: 0 0 16px;
+  color: #3e4c49;
+  font-size: 0.98rem;
+}
+
+.pwa-modal-section {
+  margin-bottom: 12px;
+}
+
+.pwa-modal-section-title {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2f4c47;
+}
+
+.pwa-modal-section-text {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #4b5c58;
+}
+
+.pwa-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.pwa-modal-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--teal), var(--terracota));
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.pwa-modal-btn.ghost {
+  background: transparent;
+  color: var(--teal);
+  border: 1px solid rgba(51, 89, 83, 0.35);
+  box-shadow: none;
+}
+
+.pwa-modal-btn[hidden] {
+  display: none;
 }
 
 /* ============================================================

@@ -102,6 +102,25 @@
     </div>
   </div>
 
+  <div id="pwaWelcomeModal" class="pwa-modal-overlay hidden" aria-hidden="true">
+    <div class="pwa-modal-card" role="dialog" aria-modal="true" aria-labelledby="pwaWelcomeTitle">
+      <h3 class="pwa-modal-title" id="pwaWelcomeTitle"></h3>
+      <p class="pwa-modal-subtitle" id="pwaWelcomeIntro"></p>
+      <div class="pwa-modal-section">
+        <h4 class="pwa-modal-section-title" id="pwaIosTitle"></h4>
+        <p class="pwa-modal-section-text" id="pwaIosSteps"></p>
+      </div>
+      <div class="pwa-modal-section">
+        <h4 class="pwa-modal-section-title" id="pwaAndroidTitle"></h4>
+        <p class="pwa-modal-section-text" id="pwaAndroidSteps"></p>
+      </div>
+      <div class="pwa-modal-actions">
+        <button class="pwa-modal-btn ghost" id="pwaWelcomeClose"></button>
+        <button class="pwa-modal-btn" id="pwaInstallButton" hidden></button>
+      </div>
+    </div>
+  </div>
+
   
  <script src="js/lang.js"></script>
 <script src="maleflow-core.js"></script>

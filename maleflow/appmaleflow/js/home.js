@@ -134,6 +134,115 @@ function fecharModalResetTreino() {
 }
 
 /* ============================================================
+   PWA: MODAL DE BOAS-VINDAS
+============================================================ */
+const PWA_WELCOME_KEY = "maleflow_pwa_welcome_seen";
+let pwaDeferredPrompt = null;
+let pwaModalInit = false;
+
+function aplicarIdiomaPwaModal() {
+  const lang = FEMFLOW.lang || "pt";
+  const L = FEMFLOW.langs?.[lang]?.home?.pwaModal;
+  if (!L) return;
+
+  const title = document.getElementById("pwaWelcomeTitle");
+  const intro = document.getElementById("pwaWelcomeIntro");
+  const iosTitle = document.getElementById("pwaIosTitle");
+  const iosSteps = document.getElementById("pwaIosSteps");
+  const androidTitle = document.getElementById("pwaAndroidTitle");
+  const androidSteps = document.getElementById("pwaAndroidSteps");
+  const closeBtn = document.getElementById("pwaWelcomeClose");
+  const installBtn = document.getElementById("pwaInstallButton");
+
+  if (title) title.textContent = L.titulo;
+  if (intro) intro.textContent = L.intro;
+  if (iosTitle) iosTitle.textContent = L.iosTitulo;
+  if (iosSteps) iosSteps.textContent = L.iosPassos;
+  if (androidTitle) androidTitle.textContent = L.androidTitulo;
+  if (androidSteps) androidSteps.textContent = L.androidPassos;
+  if (closeBtn) closeBtn.textContent = L.fechar;
+  if (installBtn) installBtn.textContent = L.instalar;
+}
+
+function abrirPwaModal() {
+  const modal = document.getElementById("pwaWelcomeModal");
+  if (!modal) return;
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("pwa-modal-open");
+}
+
+function fecharPwaModal() {
+  const modal = document.getElementById("pwaWelcomeModal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("pwa-modal-open");
+  localStorage.setItem(PWA_WELCOME_KEY, "yes");
+}
+
+function configurarBotaoInstalar() {
+  const installBtn = document.getElementById("pwaInstallButton");
+  if (!installBtn) return;
+
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (isIos || !pwaDeferredPrompt) {
+    installBtn.hidden = true;
+    return;
+  }
+
+  installBtn.hidden = false;
+}
+
+function initPwaModal() {
+  if (pwaModalInit) return;
+  pwaModalInit = true;
+
+  const modal = document.getElementById("pwaWelcomeModal");
+  const closeBtn = document.getElementById("pwaWelcomeClose");
+  const installBtn = document.getElementById("pwaInstallButton");
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", fecharPwaModal);
+  }
+
+  if (modal) {
+    modal.addEventListener("click", (event) => {
+      if (event.target !== modal) return;
+      fecharPwaModal();
+    });
+  }
+
+  if (installBtn) {
+    installBtn.addEventListener("click", async () => {
+      if (!pwaDeferredPrompt) return;
+      pwaDeferredPrompt.prompt();
+      await pwaDeferredPrompt.userChoice;
+      pwaDeferredPrompt = null;
+      configurarBotaoInstalar();
+      fecharPwaModal();
+    });
+  }
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    pwaDeferredPrompt = event;
+    configurarBotaoInstalar();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    pwaDeferredPrompt = null;
+    configurarBotaoInstalar();
+  });
+}
+
+function mostrarPwaModalSePrimeiroAcesso() {
+  const jaViu = localStorage.getItem(PWA_WELCOME_KEY) === "yes";
+  if (jaViu) return;
+  abrirPwaModal();
+}
+
+/* ============================================================
    🔄 PERFIL: puxar do backend e persistir no localStorage
 ============================================================ */
 async function carregarPerfilEAtualizarStorage() {
@@ -963,6 +1072,7 @@ function aplicarIdiomaHome() {
   if (vSub && L.videoSub) vSub.textContent = L.videoSub;
   if (vFrame && L.videoUrl) vFrame.src = L.videoUrl;
 
+  aplicarIdiomaPwaModal();
   atualizarModalTreinosSemana();
 }
 
@@ -1109,6 +1219,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderEbookRail(document.getElementById("railEbooks"), await carregarEbooks());
 
     aplicarIdiomaHome();
+    initPwaModal();
+    mostrarPwaModalSePrimeiroAcesso();
   } catch (err) {
     console.error("HOME init erro:", err);
     FEMFLOW.toast("Falha ao carregar. Verifique internet.");
