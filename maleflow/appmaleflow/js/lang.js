@@ -526,7 +526,7 @@ series: {
   },
   I: {
     titulo: "🧊 Isometria",
-    texto: "Segure a contração máxima por 3 segundos em cada repetição."
+    texto: "Permaneça com o músculo contraído por todo o tempo de execução."
   },
   CC: {
     titulo: "🐢 Cadência Controlada",
@@ -781,7 +781,7 @@ series: {
   },
   I: {
     titulo: "🧊 Isometric",
-    texto: "Hold maximum contraction for 3 seconds on each repetition."
+    texto: "Keep the muscle contracted for the entire execution time."
   },
   CC: {
     titulo: "🐢 Controlled Tempo",
@@ -1037,7 +1037,7 @@ resp: {
   },
   I: {
     titulo: "🧊 Isométrie",
-    texto: "Maintenez la contraction maximale pendant 3 secondes à chaque répétition."
+    texto: "Gardez le muscle contracté pendant toute la durée d'exécution."
   },
   CC: {
     titulo: "🐢 Cadence contrôlée",
