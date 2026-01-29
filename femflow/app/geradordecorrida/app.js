@@ -79,6 +79,42 @@ function formatTempoValue(minutos) {
   return `${rounded.toFixed(1)} min`;
 }
 
+function replaceTempoTokens(texto = "") {
+  return texto
+    .replace(/(\d+(?:[–-]\d+)?(?:[.,]\d+)?)\s*'/g, "$1 min")
+    .replace(/(\d+(?:[–-]\d+)?(?:[.,]\d+)?)\s*\"/g, "$1 s");
+}
+
+function buildStructuredDescricao(desc = "") {
+  const texto = replaceTempoTokens(desc).trim();
+  if (!texto) return "";
+
+  const serieRegex = /(\d+)\s*[×x]\s*\(([^)]+)\)\s*(?:\+\s*(.+))?/;
+  const serieMatch = texto.match(serieRegex);
+  if (serieMatch) {
+    const [, series, conteudo, descanso] = serieMatch;
+    const partes = conteudo.split("/").map((item) => item.trim()).filter(Boolean);
+    const detalhes = [
+      `${t("label_series")}: ${series}`,
+      `${t("label_exercise")}: ${partes[0] || conteudo.trim()}`
+    ];
+    if (partes[1]) detalhes.push(`${t("label_interval")}: ${partes[1]}`);
+    if (descanso) detalhes.push(`${t("label_rest")}: ${descanso.trim()}`);
+    return detalhes.join(" • ");
+  }
+
+  const etapas = texto.split(/\s*\+\s*/).map((item) => item.trim()).filter(Boolean);
+  if (etapas.length > 1) {
+    const detalhes = [`${t("label_stages")}: ${etapas.length}`];
+    etapas.forEach((etapa, idx) => {
+      detalhes.push(`${t("label_stage")} ${idx + 1}: ${etapa}`);
+    });
+    return detalhes.join(" • ");
+  }
+
+  return texto;
+}
+
 function normalizarNivel(raw) {
   const n = String(raw || "").toLowerCase().trim();
   if (!n) return "iniciante";
@@ -757,6 +793,7 @@ function renderSemana(semana){
     const distanciaEstimada = formatDistanciaEstimativa(treino.modalidade, treino.distKm);
     const treinoNome = translateTreinoCampo(treino, "nome");
     const treinoDesc = translateTreinoCampo(treino, "desc");
+    const treinoDescEstruturado = buildStructuredDescricao(treinoDesc);
     const temposPorDesc = calcularTempoPorDescricao(treino.desc);
     const estruturaLabel = temposPorDesc ? buildEstruturaFromParts(temposPorDesc) : treino.estrutura;
     const tempoLabel = temposPorDesc ? formatTempoValue(temposPorDesc.total) : treino.tempo;
@@ -773,7 +810,7 @@ function renderSemana(semana){
         <div class="kv">${estruturaLabel.principal}</div>
         <div class="kv">${estruturaLabel.desaquecimento}</div>
         <div class="kv">${ritmoLabel || `${t("label_base_pace_running")} ${treino.ritmo} min/km`}</div>
-        <p class="kv">${treinoDesc || treino.desc || ""}</p>
+        <p class="kv">${treinoDescEstruturado || treinoDesc || treino.desc || ""}</p>
       </div>`;
     grid.appendChild(el);
   });
