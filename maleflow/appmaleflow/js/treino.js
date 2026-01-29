@@ -821,6 +821,11 @@ function renderExercicio(ex) {
   const intervalo = Number(ex.intervalo) || 0;
 const totalSeries = Number(ex.series) || 1;
    const isRP = ex._isRestPause && ex._isUltimoDoCombo;
+  const isIsometria = Boolean(ex._isometriaTempo || ex._serieCodigo === "I");
+  const execTempoValue = ex.tempo || ex._isometriaTempo || ex.reps || "";
+  const execTempoText = /^\d+(\.\d+)?$/.test(String(execTempoValue).trim())
+    ? `${execTempoValue}s`
+    : execTempoValue;
 
 
 const serieProgressHTML = `
@@ -904,7 +909,7 @@ if (ex._cadenciaExcentrica) {
 if (ex._isometriaTempo) {
   observacoesHTML += `
     <div class="ff-isometria-note">
-      🧊 Segure ${ex._isometriaTempo}s na contração
+      🧊 Permaneça com o músculo contraído por todo o tempo de execução.
     </div>
   `;
 }
@@ -959,7 +964,11 @@ return `
 
     <div class="ff-info-line">
       <span>🌀 <b>${ex.series}</b>x</span>
-      <span>🔁 <b>${ex.reps}</b></span>
+      ${
+        isIsometria
+          ? `<span>⏱️ <b>${execTempoText}</b> execução</span>`
+          : `<span>🔁 <b>${ex.reps}</b></span>`
+      }
       <span>⏱️ <b>${intervalo}s</b></span>
     </div>
 
