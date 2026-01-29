@@ -282,7 +282,9 @@ const MUSCULAR_ENFASES = new Set([
   "braco",
   "core",
   "forcaabc",
-  "militar"
+  "militar",
+  "fullbody_40min",
+  "teen_14_ao_16"
 ]);
 
 const CARDS_HOME_PRESETS = [
