@@ -303,6 +303,7 @@ const CARDS_HOME_PRESETS = [
   "avancada_surf",
   "avancada_muay_thai",
   "avancada_fullbody_40min",
+  "avancada_teen_14_ao_16",
   "avancada_voleibol_quadra",
   "avancada_corrida_curta",
   "avancada_casa_queima_gordura",
@@ -324,6 +325,7 @@ const CARDS_HOME_PRESETS = [
   "iniciante_surf",
   "iniciante_muay_thai",
   "iniciante_fullbody_40min",
+  "iniciante_teen_14_ao_16",
   "iniciante_voleibol_quadra",
   "iniciante_corrida_curta",
   "iniciante_casa_queima_gordura",
@@ -345,6 +347,7 @@ const CARDS_HOME_PRESETS = [
   "intermediaria_surf",
   "intermediaria_muay_thai",
   "intermediaria_fullbody_40min",
+  "intermediaria_teen_14_ao_16",
   "intermediaria_voleibol_quadra",
   "intermediaria_corrida_curta",
   "intermediaria_casa_queima_gordura",
@@ -375,6 +378,7 @@ function inferirCategoria(enfase) {
   if (enfase.startsWith("followme_")) return "followme";
  if (enfase === "personal") return "personal";
   if (enfase === "fullbody_40min") return "muscular";
+  if (enfase === "teen_14_ao_16") return "muscular";
   if (enfase.startsWith("casa") || enfase === "20minemcasa") return "casa";
   if (MUSCULAR_ENFASES.has(enfase)) return "muscular";
   return "esportes";
@@ -615,6 +619,7 @@ const CARD_THUMBS = {
   surf: "surf.jpg",
   muay_thai: "muay_thai.jpg",
   fullbody_40min: "fullbody_40min.jpg",
+  teen_14_ao_16: "teen_14_ao_16.jpg",
   voleibol_quadra: "voleibol_quadra.jpg",
   personal: "personal_ricardojr.jpg",
   personal_ricardojr: "personal_ricardojr.jpg",
