@@ -334,6 +334,7 @@ home: {
       tituloMuscular:  "Treinos por ênfase",
       tituloEsportes:  "Esportes",
       tituloCasa:      "Treinar em casa",
+      tituloEbooks:    "Ebooks",
       cards: {
         forcaabc: "Força",
         quadriceps: "Quadríceps",
@@ -633,6 +634,7 @@ home: {
       tituloMuscular:  "Muscle focus training",
       tituloEsportes:  "Sports",
       tituloCasa:      "Home training",
+      tituloEbooks:    "Ebooks",
       cards: {
         forcaabc: "Strength",
         quadriceps: "Quadriceps",
@@ -929,6 +931,7 @@ fr: {
       tituloMuscular:  "Entraînements par groupe musculaire",
       tituloEsportes:  "Sports",
       tituloCasa:      "S'entraîner à la maison",
+      tituloEbooks:    "Ebooks",
       cards: {
         forcaabc: "Force",
         quadriceps: "Quadriceps",
