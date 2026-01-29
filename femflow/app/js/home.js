@@ -286,6 +286,7 @@ const MUSCULAR_ENFASES = new Set([
 ]);
 
 const CARDS_HOME_PRESETS = [
+  "avancada_20minemcasa",
   "avancada_corrida_longa",
   "avancada_costas",
   "avancada_forcaabc",
@@ -300,13 +301,17 @@ const CARDS_HOME_PRESETS = [
   "avancada_jiu_jitsu",
   "avancada_natacao",
   "avancada_surf",
+  "avancada_muay_thai",
+  "avancada_fullbody_40min",
+  "avancada_teen_14_ao_16",
+  "avancada_voleibol_quadra",
   "avancada_corrida_curta",
   "avancada_casa_queima_gordura",
   "avancada_casa_fullbody_praia",
+  "iniciante_20minemcasa",
   "iniciante_corrida_longa",
   "iniciante_casa_core_gluteo",
   "iniciante_costas",
-  "iniciante_casa_core_gluteo",
   "iniciante_forcaabc",
   "iniciante_gluteos",
   "iniciante_militar",
@@ -318,9 +323,14 @@ const CARDS_HOME_PRESETS = [
   "iniciante_jiu_jitsu",
   "iniciante_natacao",
   "iniciante_surf",
+  "iniciante_muay_thai",
+  "iniciante_fullbody_40min",
+  "iniciante_teen_14_ao_16",
+  "iniciante_voleibol_quadra",
   "iniciante_corrida_curta",
   "iniciante_casa_queima_gordura",
   "iniciante_casa_fullbody_praia",
+  "intermediaria_20minemcasa",
   "intermediaria_corrida_longa",
   "intermediaria_costas",
   "intermediaria_casa_core_gluteo",
@@ -335,6 +345,10 @@ const CARDS_HOME_PRESETS = [
   "intermediaria_jiu_jitsu",
   "intermediaria_natacao",
   "intermediaria_surf",
+  "intermediaria_muay_thai",
+  "intermediaria_fullbody_40min",
+  "intermediaria_teen_14_ao_16",
+  "intermediaria_voleibol_quadra",
   "intermediaria_corrida_curta",
   "intermediaria_casa_queima_gordura",
   "intermediaria_casa_fullbody_praia"
@@ -363,6 +377,8 @@ function inferirCategoria(enfase) {
   if (!enfase) return "esportes";
   if (enfase.startsWith("followme_")) return "followme";
  if (enfase === "personal") return "personal";
+  if (enfase === "fullbody_40min") return "muscular";
+  if (enfase === "teen_14_ao_16") return "muscular";
   if (enfase.startsWith("casa") || enfase === "20minemcasa") return "casa";
   if (MUSCULAR_ENFASES.has(enfase)) return "muscular";
   return "esportes";
@@ -601,6 +617,10 @@ const CARD_THUMBS = {
   jiu_jitsu: "jiu_jitsu.jpg",
   natacao: "natacao.jpg",
   surf: "surf.jpg",
+  muay_thai: "muay_thai.jpg",
+  fullbody_40min: "fullbody_40min.jpg",
+  teen_14_ao_16: "teen_14_ao_16.jpg",
+  voleibol_quadra: "voleibol_quadra.jpg",
   personal: "personal_ricardojr.jpg",
   personal_ricardojr: "personal_ricardojr.jpg",
   corrida_curta: "corrida_curta.jpg"
