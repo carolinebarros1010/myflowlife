@@ -374,6 +374,7 @@ function inferirCategoria(enfase) {
   if (!enfase) return "esportes";
   if (enfase.startsWith("followme_")) return "followme";
  if (enfase === "personal") return "personal";
+  if (enfase === "fullbody_40min") return "muscular";
   if (enfase.startsWith("casa") || enfase === "20minemcasa") return "casa";
   if (MUSCULAR_ENFASES.has(enfase)) return "muscular";
   return "esportes";
