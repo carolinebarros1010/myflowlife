@@ -724,6 +724,7 @@
           <div>
             <label for="destino">Destino (distribuir/importar)</label>
             <input id="destino" name="destino" placeholder="Iniciante" />
+            <small>Para endurance use Endurance_{id} (ex: Endurance_FF-251124-TZKN).</small>
           </div>
           <div>
             <label for="idAluna">ID Aluna (opcional)</label>
@@ -1104,6 +1105,8 @@ const sha256Hex = async (text) => {
       updateResponse(state.response);
     };
 
+    const isEnduranceDestino = (destino) => /^endurance_/i.test(String(destino || ""));
+
     const validate = (params, action = "") => {
       const normalizedAction = String(action || "").toLowerCase().trim();
       if (!state.endpoint) {
@@ -1116,6 +1119,12 @@ const sha256Hex = async (text) => {
       if (["linkar", "importar"].includes(normalizedAction)) {
         if (!params.destino) {
           const reason = "Preencha o destino ou informe um ID de aluna.";
+          toast(reason);
+          reportFailure(action, params, reason);
+          return false;
+        }
+        if (normalizedAction === "importar" && !params.id_aluna && !isEnduranceDestino(params.destino)) {
+          const reason = "Informe o perfil (ID da aluna) ou use Endurance_{id} antes de importar.";
           toast(reason);
           reportFailure(action, params, reason);
           return false;
@@ -1153,12 +1162,6 @@ const sha256Hex = async (text) => {
       }
       if (normalizedAction !== "serieespecial" && !params.padraoCiclo) {
         const reason = "Selecione o padrão do ciclo.";
-        toast(reason);
-        reportFailure(action, params, reason);
-        return false;
-      }
-      if (action === "importar" && !params.id_aluna) {
-        const reason = "Informe o perfil (ID da aluna) antes de importar.";
         toast(reason);
         reportFailure(action, params, reason);
         return false;
