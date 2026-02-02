@@ -177,6 +177,7 @@ function importarTreinosFEMFLOW(opts = {}) {
 
   abas.forEach((sh) => {
     const nomeAba = sh.getName().trim();
+    const nomeAbaLower = nomeAba.toLowerCase();
 
     // ✅ filtro real
     if (abasPermitidas && !abasPermitidas.includes(nomeAba)) return;
@@ -189,22 +190,27 @@ function importarTreinosFEMFLOW(opts = {}) {
     let personalId = "";
     let isExtra = false;
 
-    if (nomeAba.toLowerCase().startsWith("personal_")) {
+    if (nomeAbaLower.startsWith("personal_")) {
       isPersonal = true;
       personalId = nomeAba.replace(/personal_/i, "").trim();
       Logger.log("🎨 Aba PERSONAL detectada → ID = " + personalId);
-    } else if (nomeAba.toLowerCase().startsWith("endurance_")) {
+    } else if (nomeAbaLower.startsWith("endurance_") || nomeAbaLower.startsWith("endurance-")) {
       isEndurance = true;
-      personalId = nomeAba.replace(/endurance_/i, "").trim();
+      personalId = nomeAba.replace(/endurance[_-]/i, "").trim();
       Logger.log("🏃‍♀️ Aba ENDURANCE detectada → ID = " + personalId);
     }
     // ------------------------------------------------------------
     // 2) DETECTAR ABA NORMAL
     // ------------------------------------------------------------
-    else if (nomeAba !== "Iniciante" && nomeAba !== "Intermediaria" && nomeAba !== "Avancada" && nomeAba !== "Extra") {
+    else if (
+      nomeAbaLower !== "iniciante" &&
+      nomeAbaLower !== "intermediaria" &&
+      nomeAbaLower !== "avancada" &&
+      nomeAbaLower !== "extra"
+    ) {
       Logger.log("⏭ Ignorando aba não reconhecida: " + nomeAba);
       return;
-    } else if (nomeAba === "Extra") {
+    } else if (nomeAbaLower === "extra") {
       isExtra = true;
     }
 
