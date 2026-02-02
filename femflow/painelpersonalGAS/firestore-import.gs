@@ -177,6 +177,7 @@ function importarTreinosFEMFLOW(opts = {}) {
 
   abas.forEach((sh) => {
     const nomeAba = sh.getName().trim();
+    const nomeAbaLower = nomeAba.toLowerCase();
 
     // ✅ filtro real
     if (abasPermitidas && !abasPermitidas.includes(nomeAba)) return;
@@ -185,21 +186,31 @@ function importarTreinosFEMFLOW(opts = {}) {
     // 1) DETECTAR ABA PERSONAL
     // ------------------------------------------------------------
     let isPersonal = false;
+    let isEndurance = false;
     let personalId = "";
     let isExtra = false;
 
-    if (nomeAba.toLowerCase().startsWith("personal_")) {
+    if (nomeAbaLower.startsWith("personal_")) {
       isPersonal = true;
       personalId = nomeAba.replace(/personal_/i, "").trim();
       Logger.log("🎨 Aba PERSONAL detectada → ID = " + personalId);
+    } else if (nomeAbaLower.startsWith("endurance_") || nomeAbaLower.startsWith("endurance-")) {
+      isEndurance = true;
+      personalId = nomeAba.replace(/endurance[_-]/i, "").trim();
+      Logger.log("🏃‍♀️ Aba ENDURANCE detectada → ID = " + personalId);
     }
     // ------------------------------------------------------------
     // 2) DETECTAR ABA NORMAL
     // ------------------------------------------------------------
-    else if (nomeAba !== "Iniciante" && nomeAba !== "Intermediaria" && nomeAba !== "Avancada" && nomeAba !== "Extra") {
+    else if (
+      nomeAbaLower !== "iniciante" &&
+      nomeAbaLower !== "intermediaria" &&
+      nomeAbaLower !== "avancada" &&
+      nomeAbaLower !== "extra"
+    ) {
       Logger.log("⏭ Ignorando aba não reconhecida: " + nomeAba);
       return;
-    } else if (nomeAba === "Extra") {
+    } else if (nomeAbaLower === "extra") {
       isExtra = true;
     }
 
@@ -211,6 +222,7 @@ function importarTreinosFEMFLOW(opts = {}) {
       baseURL,
       nomeAba,
       isPersonal,
+      isEndurance,
       personalId,
       isExtra,
       importId,
@@ -245,9 +257,21 @@ function importarTreinosFEMFLOW(opts = {}) {
 /* ============================================================
    IMPORTA UMA ABA (core)
 ============================================================ */
-function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, personalId, isExtra, importId, target) {
+function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, isEndurance, personalId, isExtra, importId, target) {
   const targetNorm = normalizarTargetLocal_(target);
   const isMaleFlowTarget = targetNorm === "maleflow";
+
+  if (isEndurance) {
+    return importarAbaEndurance_(
+      sh,
+      token,
+      baseURL,
+      nomeAba,
+      personalId,
+      importId,
+      targetNorm
+    );
+  }
     // ✅ MaleFlow: SEMPRE usar doc único bloco_100 quando houver colunas ciclo+diatreino
   // (inclui NORMAL, PERSONAL e EXTRA)
   if (isMaleFlowTarget) {
@@ -511,6 +535,190 @@ function importarAbaParaFirestore_(sh, token, baseURL, nomeAba, isPersonal, pers
   });
 
   return { ok: okCount, err: errCount, patches: patches };
+}
+
+/* ============================================================
+   IMPORTA UMA ABA ENDURANCE (Personal)
+============================================================ */
+function importarAbaEndurance_(sh, token, baseURL, nomeAba, personalId, importId, target) {
+  if (!personalId) {
+    throw new Error(`Aba "${nomeAba}" sem ID válido (use Endurance_{id}).`);
+  }
+
+  const valsAll = sh.getDataRange().getValues();
+  if (!valsAll || valsAll.length < 2) {
+    Logger.log("⚠️ Aba vazia/sem dados: " + nomeAba);
+    return { ok: 0, err: 0, patches: 0 };
+  }
+
+  const header = valsAll[0].map((h) => String(h || "").trim());
+  const vals = valsAll.slice(1);
+  const col = (name) => header.indexOf(name);
+
+  const idx = {
+    tipo: col("tipo"),
+    box: col("box"),
+    ordem: col("ordem"),
+    enfase: col("enfase"),
+    semana: col("semana"),
+    dias: col("dias"),
+
+    titulo_pt: col("titulo_pt"),
+    titulo_en: col("titulo_en"),
+    titulo_fr: col("titulo_fr"),
+
+    link: col("link"),
+    series: col("series"),
+    reps: col("reps"),
+    tempo: col("tempo"),
+    distancia: col("distancia"),
+    intervalo: col("intervalo"),
+  };
+
+  const obrigatorias = [
+    "tipo",
+    "box",
+    "ordem",
+    "enfase",
+    "semana",
+    "dias",
+    "titulo_pt",
+    "titulo_en",
+    "titulo_fr",
+    "link",
+    "series",
+    "reps",
+    "tempo",
+    "distancia",
+    "intervalo",
+  ];
+
+  const faltando = obrigatorias.filter((k) => idx[k] === -1);
+  if (faltando.length) {
+    throw new Error(`Aba "${nomeAba}" sem colunas obrigatórias: ${faltando.join(", ")}`);
+  }
+
+  let okCount = 0;
+  let errCount = 0;
+  let patches = 0;
+
+  vals.forEach((r, i) => {
+    if (!r[idx.tipo]) return;
+
+    const tipo = String(r[idx.tipo] || "").toLowerCase().trim();
+    const box = String(r[idx.box] || "").trim() || `bloco_${i}`;
+    const ordem = Number(r[idx.ordem] || 0);
+    const enfase = removerAcentos(String(r[idx.enfase] || "geral")).toLowerCase();
+    const semana = Number(r[idx.semana] || 0);
+    const diaKey = normalizarDiaEndurance_(r[idx.dias]);
+
+    if (!semana || semana < 1 || semana > 5) {
+      Logger.log(`⚠️ Semana inválida (1-5) → ${nomeAba} | linha ${i}`);
+      return;
+    }
+    if (!diaKey) {
+      Logger.log(`⚠️ Dia inválido (seg-dom) → ${nomeAba} | linha ${i}`);
+      return;
+    }
+
+    const docId = `bloco_${i}`;
+    const url =
+      `${baseURL}/personal_trainings/${personalId}/endurance` +
+      `/semana_${semana}/dias/${diaKey}/blocos/${docId}`;
+
+    const payload = {
+      fields: {
+        tipo: { stringValue: tipo },
+        box: { stringValue: box },
+        ordem: { integerValue: ordem },
+        enfase: { stringValue: enfase },
+        semana: { integerValue: semana },
+        dias: { stringValue: diaKey },
+
+        titulo_pt: { stringValue: String(r[idx.titulo_pt] || "") },
+        titulo_en: { stringValue: String(r[idx.titulo_en] || "") },
+        titulo_fr: { stringValue: String(r[idx.titulo_fr] || "") },
+
+        link: { stringValue: String(r[idx.link] || "") },
+        series: { stringValue: String(r[idx.series] || "") },
+        reps: { stringValue: String(r[idx.reps] || "") },
+        tempo: { stringValue: String(r[idx.tempo] || "") },
+        distancia: { stringValue: String(r[idx.distancia] || "") },
+        intervalo: { stringValue: String(r[idx.intervalo] || "") },
+
+        updatedAt: { timestampValue: new Date().toISOString() },
+        importTarget: { stringValue: String(target || "femflow") },
+      },
+    };
+
+    const getResp = firestoreGET_(url, token);
+    const getCode = getResp.getResponseCode();
+    if (getCode === 200) {
+      const doc = JSON.parse(getResp.getContentText());
+      const historyUrl =
+        `${baseURL}/personal_trainings/${personalId}/endurance` +
+        `/semana_${semana}/dias/${diaKey}/history/${importId}/blocos/${docId}`;
+      const historyPayload = {
+        fields: Object.assign({}, doc.fields || {}, {
+          archivedAt: { timestampValue: new Date().toISOString() },
+          archivedBy: { stringValue: "importador_apps_script" },
+          importId: { stringValue: importId },
+        }),
+      };
+      firestorePATCH_(historyUrl, token, historyPayload);
+    } else if (getCode !== 404) {
+      Logger.log(
+        `⚠️ GET histórico falhou [${getCode}] → ${nomeAba} | linha ${i} | ${getResp.getContentText()}`
+      );
+    }
+
+    const resp = firestorePATCH_(url, token, payload);
+    patches++;
+
+    const code = resp.getResponseCode();
+    if (code === 200) {
+      okCount++;
+      Logger.log(`✅ OK → ${nomeAba} | linha ${i}`);
+    } else {
+      errCount++;
+      Logger.log(`❌ ERRO [${code}] → ${nomeAba} | linha ${i} | ${resp.getContentText()}`);
+    }
+  });
+
+  return { ok: okCount, err: errCount, patches: patches };
+}
+
+function normalizarDiaEndurance_(valor) {
+  if (!valor) return "";
+  const key = removerAcentos(String(valor)).toLowerCase().trim();
+  const map = {
+    seg: "segunda",
+    segunda: "segunda",
+    "segunda-feira": "segunda",
+    ter: "terca",
+    terca: "terca",
+    "terca-feira": "terca",
+    terça: "terca",
+    "terça-feira": "terca",
+    qua: "quarta",
+    quarta: "quarta",
+    "quarta-feira": "quarta",
+    qui: "quinta",
+    quinta: "quinta",
+    "quinta-feira": "quinta",
+    sex: "sexta",
+    sexta: "sexta",
+    "sexta-feira": "sexta",
+    sab: "sabado",
+    sabado: "sabado",
+    "sabado-feira": "sabado",
+    sábado: "sabado",
+    "sábado-feira": "sabado",
+    dom: "domingo",
+    domingo: "domingo",
+  };
+
+  return map[key] || "";
 }
 
 /* ============================================================
