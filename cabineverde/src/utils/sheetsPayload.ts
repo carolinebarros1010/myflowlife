@@ -1,9 +1,15 @@
 import type { CasoCompleto, SheetPayload } from '../types/case.js';
 
 const colunasDesaparecidos = [
+  'idCaso',
   'dataHoraRegistro',
+  'dataServico',
+  'turno',
+  'equipe',
+  'operadorResponsavel',
   'municipio',
   'talaoBopm',
+  'statusCaso',
   'nomeCompletoDesaparecido',
   'sexoGenero',
   'idade',
@@ -12,15 +18,18 @@ const colunasDesaparecidos = [
   'rg',
   'nomeMae',
   'dataNascimento',
-  'fotoDisponivel',
-  'linkFoto',
-  'telefoneDesaparecido',
-  'dispositivoLigado',
   'dataHoraUltimaVisualizacao',
   'localUltimaVisualizacao',
   'roupaUltimaVisualizacao',
   'meioTransporte',
   'dadosVeiculo',
+  'fotoDisponivel',
+  'linkFoto',
+  'telefoneDesaparecido',
+  'dispositivoLigado',
+  'camerasResidencia',
+  'camerasUltimoLocal',
+  'aptoCabineVerde',
   'nomeSolicitante',
   'vinculoSolicitante',
   'telefoneSolicitante',
@@ -34,21 +43,37 @@ const colunasDesaparecidos = [
   'suspeitaCrime',
   'locaisHabituais',
   'buscasPreliminares',
-  'camerasResidencia',
-  'camerasUltimoLocal',
   'classificacaoRisco',
   'prioridade',
   'acaoSugerida',
-  'aptoCabineVerde',
-  'observacoesOperacionais',
-  'statusCaso'
+  'localizado',
+  'dataHoraLocalizacao',
+  'formaLocalizacao',
+  'encerrado190',
+  'numeroBo',
+  'observacoesOperacionais'
 ] as const;
+
+const hojeIso = (dataHoraRegistro: string): string => {
+  const data = new Date(dataHoraRegistro || Date.now());
+  if (Number.isNaN(data.getTime())) {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  return data.toISOString().slice(0, 10);
+};
 
 export const gerarPayloadSheets = (caso: CasoCompleto): SheetPayload => {
   const dados = {
+    idCaso: caso.id,
     dataHoraRegistro: caso.dataHoraRegistro,
+    dataServico: hojeIso(caso.dataHoraRegistro),
+    turno: '',
+    equipe: 'Cabine Verde',
+    operadorResponsavel: '',
     municipio: caso.municipio,
     talaoBopm: caso.talaoBopm,
+    statusCaso: caso.statusCaso,
     nomeCompletoDesaparecido: caso.nomeCompletoDesaparecido,
     sexoGenero: caso.sexoGenero,
     idade: caso.idade,
@@ -57,15 +82,18 @@ export const gerarPayloadSheets = (caso: CasoCompleto): SheetPayload => {
     rg: caso.rg,
     nomeMae: caso.nomeMae,
     dataNascimento: caso.dataNascimento,
-    fotoDisponivel: caso.fotoDisponivel,
-    linkFoto: caso.linkFoto,
-    telefoneDesaparecido: caso.telefoneDesaparecido,
-    dispositivoLigado: caso.dispositivoLigado,
     dataHoraUltimaVisualizacao: caso.dataHoraUltimaVisualizacao,
     localUltimaVisualizacao: caso.localUltimaVisualizacao,
     roupaUltimaVisualizacao: caso.roupaUltimaVisualizacao,
     meioTransporte: caso.meioTransporte,
     dadosVeiculo: caso.dadosVeiculo,
+    fotoDisponivel: caso.fotoDisponivel,
+    linkFoto: caso.linkFoto,
+    telefoneDesaparecido: caso.telefoneDesaparecido,
+    dispositivoLigado: caso.dispositivoLigado,
+    camerasResidencia: caso.camerasResidencia,
+    camerasUltimoLocal: caso.camerasUltimoLocal,
+    aptoCabineVerde: caso.aptoCabineVerde,
     nomeSolicitante: caso.nomeSolicitante,
     vinculoSolicitante: caso.vinculoSolicitante,
     telefoneSolicitante: caso.telefoneSolicitante,
@@ -79,14 +107,15 @@ export const gerarPayloadSheets = (caso: CasoCompleto): SheetPayload => {
     suspeitaCrime: caso.suspeitaCrime,
     locaisHabituais: caso.locaisHabituais,
     buscasPreliminares: caso.buscasPreliminares,
-    camerasResidencia: caso.camerasResidencia,
-    camerasUltimoLocal: caso.camerasUltimoLocal,
     classificacaoRisco: caso.classificacaoRisco,
     prioridade: caso.prioridade,
     acaoSugerida: caso.acaoSugerida,
-    aptoCabineVerde: caso.aptoCabineVerde,
-    observacoesOperacionais: caso.observacoesOperacionais,
-    statusCaso: caso.statusCaso
+    localizado: caso.statusCaso === 'Localizado' || caso.statusCaso === 'Encerrado',
+    dataHoraLocalizacao: '',
+    formaLocalizacao: '',
+    encerrado190: caso.statusCaso === 'Encerrado',
+    numeroBo: '',
+    observacoesOperacionais: caso.observacoesOperacionais
   };
 
   return {
