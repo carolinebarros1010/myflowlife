@@ -1,0 +1,25 @@
+:root {
+  --bg: #f3f5f6;
+  --card: #ffffff;
+  --text: #1f2a2d;
+  --brand: #1b5e4b;
+  --danger: #8c1d18;
+  --line: #d5dcdf;
+}
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); }
+.cv-shell { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.cv-header { background: var(--brand); color: white; border-radius: 8px; padding: 16px; }
+.cv-main { display: grid; gap: 12px; margin-top: 12px; }
+.cv-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+.cv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+label { display: flex; flex-direction: column; font-size: 12px; gap: 4px; }
+input, textarea, button { font: inherit; padding: 8px; border: 1px solid #b7c2c7; border-radius: 6px; }
+.cv-check { flex-direction: row; align-items: center; gap: 8px; }
+.cv-actions { margin-top: 12px; display: flex; gap: 8px; }
+button { background: var(--brand); color: #fff; cursor: pointer; border: none; }
+.cv-alert { border-left: 4px solid #d6a900; }
+.cv-alert.danger { border-left-color: var(--danger); }
+.cv-steps { margin: 0; padding-left: 20px; }
+.cv-question-list { margin: 0; padding-left: 20px; }
+.cv-case-list { margin: 0; padding-left: 18px; }
+pre { white-space: pre-wrap; }
