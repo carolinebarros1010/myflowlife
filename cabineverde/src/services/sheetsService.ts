@@ -13,8 +13,8 @@ export interface SheetsService {
 
 const parseResponseMessage = async (resposta: Response): Promise<string> => {
   try {
-    const corpo = (await resposta.json()) as { message?: string; error?: string };
-    return corpo.message || corpo.error || '';
+    const corpo = (await resposta.json()) as { message?: string; error?: string; erro?: string };
+    return corpo.message || corpo.error || corpo.erro || '';
   } catch {
     return '';
   }
