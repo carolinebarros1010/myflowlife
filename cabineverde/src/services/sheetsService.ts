@@ -1,29 +1,65 @@
 import { sheetsConfig } from '../config/env.js';
 import type { SheetPayload } from '../types/case.js';
 
-export interface SheetsService {
-  salvar(payload: SheetPayload): Promise<{ ok: boolean; message: string }>;
+export interface SheetsServiceResponse {
+  ok: boolean;
+  message: string;
+  status?: number;
 }
 
+export interface SheetsService {
+  salvar(payload: SheetPayload): Promise<SheetsServiceResponse>;
+}
+
+const parseResponseMessage = async (resposta: Response): Promise<string> => {
+  try {
+    const corpo = (await resposta.json()) as { message?: string; error?: string };
+    return corpo.message || corpo.error || '';
+  } catch {
+    return '';
+  }
+};
+
 export class GoogleSheetsService implements SheetsService {
-  async salvar(payload: SheetPayload): Promise<{ ok: boolean; message: string }> {
-    if (!sheetsConfig.endpoint || !sheetsConfig.spreadsheetId) {
-      return { ok: false, message: 'Integração não configurada. Defina endpoint e spreadsheetId.' };
+  async salvar(payload: SheetPayload): Promise<SheetsServiceResponse> {
+    if (!sheetsConfig.endpoint) {
+      return { ok: false, message: 'Integração não configurada. Defina CABINE_VERDE_SHEETS_ENDPOINT.' };
     }
 
-    const resposta = await fetch(sheetsConfig.endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(sheetsConfig.apiKey ? { 'x-api-key': sheetsConfig.apiKey } : {})
-      },
-      body: JSON.stringify({ spreadsheetId: sheetsConfig.spreadsheetId, ...payload })
-    });
+    try {
+      const resposta = await fetch(sheetsConfig.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          service: 'cabineverde',
+          aba: payload.aba,
+          spreadsheetId: sheetsConfig.spreadsheetId,
+          colunas: payload.colunas,
+          payload: payload.dados
+        })
+      });
 
-    if (!resposta.ok) {
-      return { ok: false, message: `Falha ao salvar na planilha (${resposta.status}).` };
+      const detail = await parseResponseMessage(resposta);
+      if (!resposta.ok) {
+        return {
+          ok: false,
+          status: resposta.status,
+          message: detail || `Falha ao salvar na planilha (${resposta.status}).`
+        };
+      }
+
+      return {
+        ok: true,
+        status: resposta.status,
+        message: detail || 'Caso salvo com sucesso.'
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        message: `Falha ao salvar: ${error instanceof Error ? error.message : 'erro desconhecido'}.`
+      };
     }
-
-    return { ok: true, message: 'Registro enviado à planilha com sucesso.' };
   }
 }

@@ -19,10 +19,20 @@ cd cabineverde
 npm test
 ```
 
-## Configuração de integração com Sheets
+## Configuração da integração com Google Sheets
 Defina as variáveis globais antes de carregar a página:
-- `CABINE_VERDE_SHEETS_ENDPOINT`
-- `CABINE_VERDE_SPREADSHEET_ID`
-- `CABINE_VERDE_SHEETS_API_KEY` (opcional)
 
-Consulte `docs/integracao-sheets.md`.
+- `CABINE_VERDE_SHEETS_ENDPOINT` (usa endpoint padrão de desenvolvimento caso ausente)
+- `CABINE_VERDE_SPREADSHEET_ID`
+
+### Fluxo de integração
+- `GET` no Apps Script (`doGet`) é somente healthcheck.
+- `POST` no Apps Script (`doPost`) grava na aba `Desaparecidos`.
+- O frontend envia JSON com mapeamento explícito de colunas.
+
+### Script pronto para publicação
+Use os arquivos em:
+- `scripts/google-apps-script/Code.gs`
+- `scripts/google-apps-script/README.md`
+
+Consulte `docs/integracao-sheets.md` para passo a passo completo.
