@@ -12,7 +12,8 @@ A integração da Cabine Verde grava casos da triagem na aba `Desaparecidos` via
 - `src/config/env.ts`: configuração central (`CABINE_VERDE_SHEETS_ENDPOINT`, `CABINE_VERDE_SPREADSHEET_ID`).
 - `src/utils/sheetsPayload.ts`: mapeamento explícito de colunas e valores da aba `Desaparecidos`.
 - `src/services/sheetsService.ts`: envio `POST` com tratamento robusto de sucesso/erro.
-- `scripts/google-apps-script/Code.gs`: script pronto para publicação no Apps Script.
+- `GAS/`: workspace oficial do Apps Script (arquivos `Code.gs`, `SheetsMapping.gs`, `Utils.gs`, `appsscript.json`).
+- `scripts/google-apps-script/Code.gs`: implementação legada (mantida apenas para referência histórica).
 
 ## Variáveis de configuração
 Defina globalmente antes de carregar o frontend:
@@ -99,7 +100,7 @@ A ordem esperada de colunas no Apps Script segue:
 
 ## Publicação do Apps Script
 1. Acesse `script.google.com` e crie um projeto.
-2. Cole o conteúdo de `scripts/google-apps-script/Code.gs`.
+2. Use os arquivos de `GAS/` como base do projeto Apps Script (copiando `Code.gs`, `SheetsMapping.gs`, `Utils.gs` e `appsscript.json`).
 3. Em **Project Settings > Script Properties**, defina:
    - `CABINE_VERDE_SPREADSHEET_ID`
    - (opcional) `CABINE_VERDE_SHEET_NAME` (`Desaparecidos` por padrão)
