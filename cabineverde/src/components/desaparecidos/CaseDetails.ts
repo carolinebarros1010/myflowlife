@@ -1,5 +1,5 @@
 export const renderCaseDetails = (): string => `
 <section class="cv-card">
-  <h3>Detalhes rápidos</h3>
-  <div id="case-details">Selecione um caso na listagem para visualizar.</div>
+  <h3>Detalhe do caso</h3>
+  <article id="case-details" class="cv-case-detail-grid">Selecione um caso para visualizar detalhes operacionais.</article>
 </section>`;
