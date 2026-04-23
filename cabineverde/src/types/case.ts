@@ -55,7 +55,11 @@ export interface CamposCalculados {
 
 export interface CasoCompleto extends CasoDesaparecimento, CamposCalculados {}
 
+export type SheetCellValue = string | number | boolean;
+
 export interface SheetPayload {
   aba: 'Desaparecidos' | 'Listas' | 'Relatorio' | 'Painel';
-  valores: Array<string | number | boolean>;
+  colunas: string[];
+  dados: Record<string, SheetCellValue>;
+  valores: SheetCellValue[];
 }

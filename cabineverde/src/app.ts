@@ -129,7 +129,13 @@ if (form) {
     const payload = gerarPayloadSheets(caso);
     const retorno = await sheetsService.salvar(payload);
     const report = document.getElementById('report-content') as HTMLTextAreaElement | null;
-    if (report && !retorno.ok) report.value = `Aviso de integração: ${retorno.message}`;
+    if (report) {
+      report.value = retorno.ok
+        ? `caso salvo com sucesso
+${retorno.message}`
+        : `falha ao salvar
+${retorno.message}`;
+    }
 
     atualizarLista();
   });

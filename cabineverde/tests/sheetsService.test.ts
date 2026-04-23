@@ -1,0 +1,46 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { GoogleSheetsService } from '../src/services/sheetsService.js';
+import type { SheetPayload } from '../src/types/case.js';
+
+const payloadBase: SheetPayload = {
+  aba: 'Desaparecidos',
+  colunas: ['municipio', 'nomeCompletoDesaparecido'],
+  dados: {
+    municipio: 'Belém',
+    nomeCompletoDesaparecido: 'Teste'
+  },
+  valores: ['Belém', 'Teste']
+};
+
+test('retorna sucesso quando endpoint responde 200', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () =>
+    new Response(JSON.stringify({ ok: true, message: 'Caso salvo com sucesso' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    })) as typeof fetch;
+
+  const service = new GoogleSheetsService();
+  const response = await service.salvar(payloadBase);
+
+  assert.equal(response.ok, true);
+  assert.match(response.message.toLowerCase(), /sucesso/);
+  globalThis.fetch = originalFetch;
+});
+
+test('retorna falha quando endpoint responde erro', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () =>
+    new Response(JSON.stringify({ ok: false, message: 'Falha ao salvar' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })) as typeof fetch;
+
+  const service = new GoogleSheetsService();
+  const response = await service.salvar(payloadBase);
+
+  assert.equal(response.ok, false);
+  assert.match(response.message.toLowerCase(), /falha/);
+  globalThis.fetch = originalFetch;
+});
