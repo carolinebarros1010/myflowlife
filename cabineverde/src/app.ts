@@ -61,7 +61,7 @@ const atualizarBlocosContextuais = (dados: FormData): void => {
 };
 
 const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => ({
-  id: `CV-${Date.now()}`,
+  id: normalizarTexto(String(dados.get('idCaso') || '')) || `CV-${Date.now()}`,
   dataHoraRegistro: String(dados.get('dataHoraRegistro') || new Date().toISOString()),
   municipio: normalizarTexto(String(dados.get('municipio') || '')),
   talaoBopm: normalizarTexto(String(dados.get('talaoBopm') || '')),
@@ -130,8 +130,9 @@ if (form) {
     const retorno = await sheetsService.salvar(payload);
     const report = document.getElementById('report-content') as HTMLTextAreaElement | null;
     if (report) {
+      const tituloSucesso = retorno.action === 'updated' ? 'caso atualizado com sucesso' : 'caso criado com sucesso';
       report.value = retorno.ok
-        ? `caso salvo com sucesso
+        ? `${tituloSucesso}
 ${retorno.message}`
         : `falha ao salvar
 ${retorno.message}`;

@@ -6,7 +6,8 @@ A referência oficial da operação Cabine Verde é:
 `https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4n0116w7VHup3MDk_3TNkfUB_9T-x1kL_a-EKhqtmDdQ/exec`
 
 - `GET /exec`: healthcheck simples (`doGet`).
-- `POST /exec`: gravação de casos na aba `Desaparecidos` (`doPost`).
+- `GET /exec?idCaso=...`: busca de caso por `idCaso`.
+- `POST /exec`: criação/atualização de casos na aba `Desaparecidos` (`doPost`).
 
 ## Estrutura operacional da planilha
 A estrutura é garantida pelo Apps Script (`garantirEstruturaPlanilha`) sempre que ocorre um `POST`.
@@ -141,8 +142,15 @@ Arquivos de referência:
 Regras de integração:
 1. O frontend envia `POST` com `Content-Type: application/json`.
 2. O payload segue os mesmos nomes de coluna da aba `Desaparecidos`.
-3. O Apps Script normaliza valores e grava com `appendRow`.
-4. O retorno JSON padroniza `ok`, `message`, `timestamp` e, em sucesso, `aba` + `linha`.
+3. `idCaso` é obrigatório e funciona como chave primária lógica.
+4. Se `idCaso` ainda não existir, o Apps Script cria a linha (`action: "created"`).
+5. Se `idCaso` já existir, o Apps Script atualiza somente campos operacionais (`action: "updated"`):
+   - `statusCaso`
+   - `localizado`
+   - `dataHoraLocalizacao`
+   - `formaLocalizacao`
+   - `observacoesOperacionais`
+6. O retorno JSON padroniza `ok`, `action`, `idCaso`, `linha` e `timestamp`.
 
 ## Exemplo de requisição (POST)
 ```bash
@@ -151,14 +159,25 @@ curl -X POST 'https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4
   --data @GAS/MockPayload.json
 ```
 
-Resposta esperada (exemplo):
+Resposta esperada ao criar (exemplo):
 ```json
 {
   "ok": true,
-  "service": "cabineverde",
-  "message": "Caso salvo com sucesso",
-  "aba": "Desaparecidos",
-  "linha": 42
+  "action": "created",
+  "idCaso": "CV-2026-0001",
+  "linha": 42,
+  "timestamp": "2026-04-23T12:00:00.000Z"
+}
+```
+
+Resposta esperada ao atualizar (exemplo):
+```json
+{
+  "ok": true,
+  "action": "updated",
+  "idCaso": "CV-2026-0001",
+  "linha": 42,
+  "timestamp": "2026-04-23T12:05:00.000Z"
 }
 ```
 
@@ -176,13 +195,33 @@ Resposta esperada (exemplo):
 }
 ```
 
+## Busca por ID (GET)
+```bash
+curl 'https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4n0116w7VHup3MDk_3TNkfUB_9T-x1kL_a-EKhqtmDdQ/exec?idCaso=CV-2026-0001'
+```
+
+Resposta esperada quando encontrado (exemplo):
+```json
+{
+  "ok": true,
+  "action": "found",
+  "idCaso": "CV-2026-0001",
+  "linha": 42,
+  "data": {
+    "idCaso": "CV-2026-0001",
+    "statusCaso": "Em busca"
+  },
+  "timestamp": "2026-04-23T12:10:00.000Z"
+}
+```
+
 ## Como testar fluxo completo
-1. **Frontend**
-   - Confirmar endpoint em `src/config/env.ts`.
-   - Abrir a interface, preencher a triagem e salvar.
-2. **Endpoint `/exec`**
-   - Validar healthcheck via `GET`.
-   - Enviar payload real via `POST`.
-3. **Planilha `Desaparecidos`**
-   - Verificar linha inserida ao final da aba.
-   - Conferir se colunas e valores estão alinhados com `SheetsMapping.gs`.
+1. **Criar caso**
+   - Não preencher `idCaso` no formulário (frontend gera ID automaticamente) ou enviar ID novo no payload.
+   - Validar retorno `action: "created"`.
+2. **Atualizar caso**
+   - Reenviar o mesmo `idCaso` com novo `statusCaso` e/ou dados operacionais de localização.
+   - Validar retorno `action: "updated"` e ausência de linha duplicada.
+3. **Buscar caso**
+   - Consultar `GET /exec?idCaso=...`.
+   - Confirmar retorno `action: "found"` com dados mapeados por nome de coluna.

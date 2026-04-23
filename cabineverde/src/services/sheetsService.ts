@@ -5,18 +5,26 @@ export interface SheetsServiceResponse {
   ok: boolean;
   message: string;
   status?: number;
+  action?: 'created' | 'updated';
 }
 
 export interface SheetsService {
   salvar(payload: SheetPayload): Promise<SheetsServiceResponse>;
 }
 
-const parseResponseMessage = async (resposta: Response): Promise<string> => {
+interface EndpointResponse {
+  ok?: boolean;
+  message?: string;
+  error?: string;
+  erro?: string;
+  action?: 'created' | 'updated';
+}
+
+const parseResponseBody = async (resposta: Response): Promise<EndpointResponse> => {
   try {
-    const corpo = (await resposta.json()) as { message?: string; error?: string; erro?: string };
-    return corpo.message || corpo.error || corpo.erro || '';
+    return (await resposta.json()) as EndpointResponse;
   } catch {
-    return '';
+    return {};
   }
 };
 
@@ -41,7 +49,8 @@ export class GoogleSheetsService implements SheetsService {
         })
       });
 
-      const detail = await parseResponseMessage(resposta);
+      const body = await parseResponseBody(resposta);
+      const detail = body.message || body.error || body.erro || '';
       if (!resposta.ok) {
         return {
           ok: false,
@@ -50,10 +59,15 @@ export class GoogleSheetsService implements SheetsService {
         };
       }
 
+      const action = body.action;
+      const mensagemSucesso =
+        action === 'updated' ? 'Caso atualizado com sucesso.' : 'Caso criado com sucesso.';
+
       return {
         ok: true,
         status: resposta.status,
-        message: detail || 'Caso salvo com sucesso.'
+        action,
+        message: detail || mensagemSucesso
       };
     } catch (error) {
       return {

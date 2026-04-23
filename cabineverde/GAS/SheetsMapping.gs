@@ -71,3 +71,21 @@ function mapearPayloadParaLinhaDesaparecidos(payload) {
 function obterColunasDesaparecidos() {
   return COLUNAS_DESAPARECIDOS.slice();
 }
+
+function indiceColunaPorNome(nomeColuna) {
+  var nome = limparTexto(nomeColuna);
+  var indice = COLUNAS_DESAPARECIDOS.indexOf(nome);
+  if (indice === -1) {
+    throw new Error('Coluna não mapeada na aba Desaparecidos: ' + nome);
+  }
+
+  return indice;
+}
+
+function mapearLinhaParaObjeto(colunas, linha) {
+  var resultado = {};
+  (colunas || []).forEach(function (coluna, indice) {
+    resultado[coluna] = linha && indice < linha.length ? linha[indice] : '';
+  });
+  return resultado;
+}

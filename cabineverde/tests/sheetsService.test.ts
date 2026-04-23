@@ -25,7 +25,25 @@ test('retorna sucesso quando endpoint responde 200', async () => {
   const response = await service.salvar(payloadBase);
 
   assert.equal(response.ok, true);
-  assert.match(response.message.toLowerCase(), /sucesso/);
+  assert.equal(response.action, 'created');
+  assert.match(response.message.toLowerCase(), /criado|sucesso/);
+  globalThis.fetch = originalFetch;
+});
+
+test('retorna mensagem de atualização quando endpoint informa action updated', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () =>
+    new Response(JSON.stringify({ ok: true, action: 'updated' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    })) as typeof fetch;
+
+  const service = new GoogleSheetsService();
+  const response = await service.salvar(payloadBase);
+
+  assert.equal(response.ok, true);
+  assert.equal(response.action, 'updated');
+  assert.match(response.message.toLowerCase(), /atualizado/);
   globalThis.fetch = originalFetch;
 });
 

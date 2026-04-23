@@ -11,6 +11,7 @@ export const renderTriageForm = (): string => `
   <h2>Triagem dinâmica</h2>
   <form id="triage-form" class="cv-form">
     <div class="cv-grid">
+      ${input('idCaso', 'ID do caso (preencha para atualização)')}
       ${input('dataHoraRegistro', 'Data/hora registro', 'datetime-local')}
       ${input('municipio', 'Município')}
       ${input('talaoBopm', 'Talão BOPM')}

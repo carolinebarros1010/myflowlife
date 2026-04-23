@@ -41,16 +41,58 @@ var ESTRUTURA_PLANILHA = {
   Config: ['chave', 'valor']
 };
 
-function doGet() {
-  return criarRespostaJson({
-    ok: true,
-    service: 'cabineverde',
-    message: 'Cabine Verde Sheets endpoint ativo',
-    endpoint: 'exec',
-    abaPrincipal: ABA_DESAPARECIDOS,
-    versaoEstrutura: '2026-04-23',
-    timestamp: new Date().toISOString()
-  });
+function doGet(e) {
+  try {
+    var params = e && e.parameter ? e.parameter : {};
+    var idCaso = limparTexto(params.idCaso);
+
+    if (idCaso) {
+      var planilhaId = obterSpreadsheetId(params);
+      var planilha = SpreadsheetApp.openById(planilhaId);
+      garantirEstruturaPlanilha(planilha);
+
+      var caso = buscarCasoPorId(idCaso, planilha);
+      if (!caso) {
+        return criarRespostaJson(
+          {
+            ok: false,
+            error: 'Caso não encontrado para o idCaso informado.',
+            idCaso: idCaso,
+            timestamp: new Date().toISOString()
+          },
+          404
+        );
+      }
+
+      return criarRespostaJson({
+        ok: true,
+        action: 'found',
+        idCaso: idCaso,
+        linha: caso.linha,
+        data: caso.dados,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    return criarRespostaJson({
+      ok: true,
+      service: 'cabineverde',
+      message: 'Cabine Verde Sheets endpoint ativo',
+      endpoint: 'exec',
+      abaPrincipal: ABA_DESAPARECIDOS,
+      versaoEstrutura: '2026-04-23',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    return criarRespostaJson(
+      {
+        ok: false,
+        error: error && error.message ? error.message : String(error),
+        timestamp: new Date().toISOString()
+      },
+      400
+    );
+  }
 }
 
 function doPost(e) {
@@ -68,32 +110,112 @@ function doPost(e) {
     }
 
     var payload = body && body.payload && typeof body.payload === 'object' ? body.payload : {};
-    var linha = mapearPayloadParaLinhaDesaparecidos(payload);
+    var idCaso = limparTexto(payload.idCaso);
+    if (!idCaso) {
+      throw new Error('idCaso é obrigatório para criar ou atualizar registros.');
+    }
 
-    aba.appendRow(linha);
-    var numeroLinha = aba.getLastRow();
+    var linhaExistente = encontrarLinhaPorId(aba, idCaso);
+    var numeroLinha;
+    var action;
+
+    if (linhaExistente === -1) {
+      var linhaCompleta = mapearPayloadParaLinhaDesaparecidos(payload);
+      aba.appendRow(linhaCompleta);
+      numeroLinha = aba.getLastRow();
+      action = 'created';
+    } else {
+      atualizarLinha(aba, linhaExistente, payload);
+      numeroLinha = linhaExistente;
+      action = 'updated';
+    }
 
     return criarRespostaJson({
       ok: true,
-      service: 'cabineverde',
-      message: 'Caso salvo com sucesso',
-      aba: nomeAba,
+      action: action,
+      idCaso: idCaso,
       linha: numeroLinha,
-      idCaso: payload.idCaso || '',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
     return criarRespostaJson(
       {
         ok: false,
-        service: 'cabineverde',
-        message: 'Falha ao salvar caso na planilha',
-        erro: error && error.message ? error.message : String(error),
+        error: error && error.message ? error.message : String(error),
         timestamp: new Date().toISOString()
       },
       400
     );
   }
+}
+
+function encontrarLinhaPorId(sheet, idCaso) {
+  var idLimpo = limparTexto(idCaso);
+  if (!sheet || !idLimpo) {
+    return -1;
+  }
+
+  var colunaId = indiceColunaPorNome('idCaso') + 1;
+  var ultimaLinha = sheet.getLastRow();
+  if (ultimaLinha < 2) {
+    return -1;
+  }
+
+  var valoresId = sheet.getRange(2, colunaId, ultimaLinha - 1, 1).getValues();
+  for (var i = 0; i < valoresId.length; i += 1) {
+    if (limparTexto(valoresId[i][0]) === idLimpo) {
+      return i + 2;
+    }
+  }
+
+  return -1;
+}
+
+function atualizarLinha(sheet, linha, payload) {
+  if (!sheet || !linha || linha < 2) {
+    throw new Error('Linha inválida para atualização.');
+  }
+
+  var camposAtualizaveis = [
+    'statusCaso',
+    'localizado',
+    'dataHoraLocalizacao',
+    'formaLocalizacao',
+    'observacoesOperacionais'
+  ];
+
+  camposAtualizaveis.forEach(function (campo) {
+    if (Object.prototype.hasOwnProperty.call(payload, campo)) {
+      var coluna = indiceColunaPorNome(campo) + 1;
+      sheet.getRange(linha, coluna).setValue(normalizarValorPlanilha(payload[campo]));
+    }
+  });
+}
+
+function buscarCasoPorId(idCaso, planilha) {
+  var idLimpo = limparTexto(idCaso);
+  if (!idLimpo) {
+    throw new Error('idCaso é obrigatório para busca.');
+  }
+
+  var planilhaAtual = planilha || SpreadsheetApp.openById(obterSpreadsheetId({}));
+  var aba = planilhaAtual.getSheetByName(ABA_DESAPARECIDOS);
+  if (!aba) {
+    throw new Error('Aba "' + ABA_DESAPARECIDOS + '" não encontrada na planilha.');
+  }
+
+  var linha = encontrarLinhaPorId(aba, idLimpo);
+  if (linha === -1) {
+    return null;
+  }
+
+  var colunas = obterColunasDesaparecidos();
+  var valores = aba.getRange(linha, 1, 1, colunas.length).getValues()[0];
+
+  return {
+    linha: linha,
+    dados: mapearLinhaParaObjeto(colunas, valores)
+  };
 }
 
 function garantirEstruturaPlanilha(planilha) {
