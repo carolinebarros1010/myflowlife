@@ -189,10 +189,15 @@ export const salvarCasoSheets = async (caso) => {
       const mensagem = contemErroDoGet(mensagemBruta)
         ? 'Backend GAS não publicado ou doGet ausente'
         : 'Falha ao salvar caso';
-      return { ok: false, message: mensagem, detalhe: mensagemBruta || undefined, ...body };
+      return { ok: false, status: resposta.status, message: mensagem, detalhe: mensagemBruta || undefined, ...body };
     }
 
-    return { ok: true, message: body.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso', ...body };
+    return {
+      ok: true,
+      status: resposta.status,
+      message: body.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso',
+      ...body
+    };
   } catch {
     return { ok: false, message: 'Falha ao salvar caso' };
   }
