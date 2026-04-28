@@ -9,6 +9,135 @@ export const FaixaEtaria = {
   IDOSO: 'Idoso'
 };
 
+export const OPCOES_SIM_NAO_NI = ['', 'Sim', 'Não', 'Não informado'];
+
+export const ARVORE_DECISAO_CONFIG = {
+  passos: [
+    {
+      id: 'passo1',
+      titulo: 'PASSO 1 – Identificação mínima',
+      perguntas: [
+        { id: 'passo1_emergencia', pergunta: 'Qual é a sua emergência?', tipo: 'texto' },
+        { id: 'passo1_municipio', pergunta: 'Qual o município?', tipo: 'texto' },
+        { id: 'passo1_nome', pergunta: 'Qual o nome da pessoa desaparecida?', tipo: 'texto' },
+        { id: 'passo1_sexo_genero', pergunta: 'Qual o sexo ou gênero?', tipo: 'texto' },
+        { id: 'passo1_idade', pergunta: 'Qual a idade?', tipo: 'texto' },
+        { id: 'passo1_dados_identificacao', pergunta: 'Você possui dados de identificação da pessoa desaparecida?', tipo: 'simNao' },
+        { id: 'passo1_foto_digital', pergunta: 'Você possui foto digital recente da pessoa desaparecida?', tipo: 'simNao', complementoLabel: 'Informar link/forma de acesso da foto' },
+        { id: 'passo1_dispositivo', pergunta: 'Há telefone celular, tablet ou outro dispositivo vinculado à pessoa desaparecida?', tipo: 'simNao', complementoLabel: 'Registrar dispositivo e número/identificação' }
+      ]
+    },
+    {
+      id: 'passo2',
+      titulo: 'PASSO 2 – Última visualização',
+      perguntas: [
+        { id: 'passo2_data_hora', pergunta: 'Você sabe informar o dia e o horário em que a pessoa foi vista pela última vez?', tipo: 'texto' },
+        { id: 'passo2_local', pergunta: 'Você sabe onde a pessoa foi vista pela última vez?', tipo: 'texto' },
+        { id: 'passo2_roupa', pergunta: 'Você sabe qual roupa a pessoa usava quando foi vista pela última vez?', tipo: 'texto' },
+        { id: 'passo2_transporte', pergunta: 'A pessoa desaparecida estava a pé ou utilizava algum meio de transporte?', tipo: 'texto' },
+        { id: 'passo2_caracteristicas_transporte', pergunta: 'Você possui características do veículo ou meio de transporte utilizado?', tipo: 'texto' }
+      ]
+    },
+    {
+      id: 'passo3',
+      titulo: 'PASSO 3 – Vínculo e contexto',
+      perguntas: [
+        { id: 'passo3_vinculo', pergunta: 'Você é familiar, responsável, cuidador ou pessoa próxima da desaparecida?', tipo: 'texto' },
+        { id: 'passo3_acompanhada', pergunta: 'A pessoa desaparecida estava acompanhada antes do desaparecimento?', tipo: 'simNao', complementoLabel: 'Registrar com quem estava' },
+        { id: 'passo3_estudo_trabalho', pergunta: 'Você sabe informar onde essa pessoa estuda, trabalha ou realiza atividade habitual?', tipo: 'texto' },
+        { id: 'passo3_rotina_fixa', pergunta: 'Essa pessoa possui rotina fixa conhecida?', tipo: 'simNao', complementoLabel: 'Descrever rotina fixa conhecida' },
+        { id: 'passo3_locais_frequentes', pergunta: 'Você conhece locais que essa pessoa costuma frequentar?', tipo: 'simNao', complementoLabel: 'Registrar locais habituais' },
+        { id: 'passo3_vinculo_emocional', pergunta: 'Há locais com vínculo emocional relevante para essa pessoa?', tipo: 'simNao', complementoLabel: 'Descrever locais de vínculo emocional' }
+      ]
+    },
+    {
+      id: 'passo4',
+      titulo: 'PASSO 4 – Vulnerabilidade e risco',
+      perguntas: [
+        { id: 'passo4_condicao_mental', pergunta: 'Essa pessoa possui alguma condição de saúde mental, cognitiva ou comportamental que aumente sua vulnerabilidade?', tipo: 'simNao', complementoLabel: 'Descrever condição informada' },
+        { id: 'passo4_limitacao_fisica', pergunta: 'Essa pessoa possui alguma limitação física relevante?', tipo: 'simNao', complementoLabel: 'Descrever limitação física' },
+        { id: 'passo4_depende_supervisao', pergunta: 'Essa pessoa depende de cuidador, responsável ou supervisão frequente?', tipo: 'simNao', complementoLabel: 'Registrar responsável/cuidador' },
+        { id: 'passo4_medicacao', pergunta: 'Essa pessoa faz uso contínuo de medicação essencial?', tipo: 'simNao', complementoLabel: 'Registrar medicação essencial' },
+        { id: 'passo4_alcool_drogas', pergunta: 'Essa pessoa faz uso de álcool ou outras drogas?', tipo: 'simNao' },
+        { id: 'passo4_desapareceu_antes', pergunta: 'Essa pessoa já desapareceu anteriormente?', tipo: 'simNao' },
+        { id: 'passo4_intencao_fuga', pergunta: 'Essa pessoa já comentou que pretendia fugir, desaparecer ou ir para outro local?', tipo: 'simNao' },
+        { id: 'passo4_conflito', pergunta: 'Houve alguma desavença, ameaça, conflito familiar, afetivo ou social antes do desaparecimento?', tipo: 'simNao', complementoLabel: 'Descrever conflito/desavença' },
+        { id: 'passo4_suspeita_crime', pergunta: 'Você acredita que exista possibilidade de sequestro, violência ou outro crime?', tipo: 'simNao', complementoLabel: 'Descrever suspeita de crime' }
+      ]
+    },
+    {
+      id: 'passo5',
+      titulo: 'PASSO 5 – Buscas preliminares e meios disponíveis',
+      perguntas: [
+        { id: 'passo5_procuraram_locais', pergunta: 'Já procuraram essa pessoa nos locais habituais?', tipo: 'simNao' },
+        { id: 'passo5_procuraram_comodos', pergunta: 'Já procuraram em todos os cômodos da residência ou do local de origem?', tipo: 'simNao' },
+        { id: 'passo5_tentativa_contato', pergunta: 'Alguém tentou contato telefônico ou por aplicativo?', tipo: 'simNao' },
+        { id: 'passo5_aparelho_ligado', pergunta: 'O aparelho celular da pessoa está ligado ou recebendo chamadas?', tipo: 'simNao' },
+        { id: 'passo5_cameras_residencia', pergunta: 'Há câmeras na residência da pessoa desaparecida?', tipo: 'simNao' },
+        { id: 'passo5_cameras_ultimo_local', pergunta: 'Há câmeras no último local em que ela foi vista?', tipo: 'simNao' },
+        { id: 'passo5_contatos_apoio', pergunta: 'Existe algum contato de pessoas que já fizeram buscas ou que possam apoiar na localização?', tipo: 'texto' },
+        { id: 'passo5_registro_delegacia', pergunta: 'Foi realizado registro do desaparecimento em Delegacia física ou Delegacia Eletrônica?', tipo: 'simNao', complementoLabel: 'Registrar nº BO / Delegacia / status' }
+      ]
+    }
+  ],
+  subabas: {
+    Criança: {
+      titulo: 'SUBABA – Criança 0–7',
+      perguntas: [
+        { id: 'crianca_supervisao_direta', pergunta: 'A criança desaparecida estava sob supervisão direta de um adulto no momento anterior ao desaparecimento?', tipo: 'simNao', complementoLabel: 'Registrar quem' },
+        { id: 'crianca_informa_dados', pergunta: 'A criança tem condição de informar nome, endereço ou telefone?', tipo: 'simNao' },
+        { id: 'crianca_condicao_comunicacao', pergunta: 'A criança possui transtorno do neurodesenvolvimento, deficiência ou condição que dificulte comunicação/orientação?', tipo: 'simNao', complementoLabel: 'Descrever condição' },
+        { id: 'crianca_guarda_disputa', pergunta: 'Há guarda compartilhada, disputa familiar ou possibilidade de retirada por familiar sem aviso?', tipo: 'simNao', complementoLabel: 'Descrever contexto de guarda/disputa' },
+        { id: 'crianca_local_desaparecimento', pergunta: 'A criança desapareceu de casa, escola, via pública, transporte ou outro local?', tipo: 'texto' },
+        { id: 'crianca_adulto_veiculo_suspeito', pergunta: 'Houve algum adulto desconhecido, veículo suspeito ou situação incomum antes do desaparecimento?', tipo: 'simNao', complementoLabel: 'Descrever situação incomum' }
+      ]
+    },
+    'Pré-adolescente': {
+      titulo: 'SUBABA – Pré-adolescente 8–11',
+      perguntas: [
+        { id: 'preadolescente_contexto_saida', pergunta: 'O desaparecimento ocorreu após saída da escola, atividade esportiva, casa de terceiros ou deslocamento habitual?', tipo: 'simNao', complementoLabel: 'Descrever contexto da saída' },
+        { id: 'preadolescente_historico_sair', pergunta: 'Há histórico de sair sozinho sem autorização?', tipo: 'simNao' },
+        { id: 'preadolescente_aliciamento_virtual', pergunta: 'Há suspeita de aliciamento virtual, contato com desconhecidos ou convite para encontro?', tipo: 'simNao', complementoLabel: 'Descrever indícios de aliciamento' },
+        { id: 'preadolescente_conflito_recente', pergunta: 'Há conflito familiar, escolar ou social recente?', tipo: 'simNao', complementoLabel: 'Descrever conflito recente' },
+        { id: 'preadolescente_guarda_disputa', pergunta: 'Há guarda compartilhada, disputa entre responsáveis ou possibilidade de retirada por conhecido?', tipo: 'simNao', complementoLabel: 'Descrever disputa entre responsáveis' }
+      ]
+    },
+    Adolescente: {
+      titulo: 'SUBABA – Adolescente 12–17',
+      perguntas: [
+        { id: 'adolescente_historico_saida', pergunta: 'O adolescente já saiu de casa anteriormente sem autorização?', tipo: 'simNao' },
+        { id: 'adolescente_discussao_previa', pergunta: 'Houve discussão familiar, afetiva ou escolar antes do desaparecimento?', tipo: 'simNao', complementoLabel: 'Descrever discussão prévia' },
+        { id: 'adolescente_indicios_fuga', pergunta: 'Há indícios de fuga voluntária?', tipo: 'simNao', complementoLabel: 'Descrever indícios de fuga' },
+        { id: 'adolescente_envolvimento_terceiros', pergunta: 'Há suspeita de envolvimento com terceiros, redes sociais, relacionamento afetivo, aliciamento ou ameaça?', tipo: 'simNao', complementoLabel: 'Descrever suspeita com terceiros/redes' },
+        { id: 'adolescente_sofrimento_psiquico', pergunta: 'O adolescente tem histórico de automutilação, ideação suicida, surto, uso abusivo de substâncias ou sofrimento psíquico intenso?', tipo: 'simNao', complementoLabel: 'Descrever histórico de sofrimento psíquico' },
+        { id: 'adolescente_guarda_litigio', pergunta: 'Há guarda compartilhada, litígio familiar ou possibilidade de retenção por responsável?', tipo: 'simNao', complementoLabel: 'Descrever litígio familiar' }
+      ]
+    },
+    Adulto: {
+      titulo: 'SUBABA – Adulto 18–59',
+      perguntas: [
+        { id: 'adulto_mudanca_comportamento', pergunta: 'O adulto apresentou mudança abrupta de comportamento antes do desaparecimento?', tipo: 'simNao', complementoLabel: 'Descrever mudança de comportamento' },
+        { id: 'adulto_transtorno_mental', pergunta: 'Há diagnóstico ou suspeita de transtorno mental, uso de medicação controlada ou crise emocional recente?', tipo: 'simNao', complementoLabel: 'Descrever diagnóstico/suspeita' },
+        { id: 'adulto_historico_fuga', pergunta: 'Há histórico de tentativa de fuga, desaparecimento voluntário ou rompimento de vínculos?', tipo: 'simNao', complementoLabel: 'Descrever histórico de fuga/rompimento' },
+        { id: 'adulto_indicios_violencia', pergunta: 'Há indícios de violência doméstica, ameaça, dívida, perseguição, conflito criminal ou outra situação de risco?', tipo: 'simNao', complementoLabel: 'Descrever indícios de risco' },
+        { id: 'adulto_deslocamento_rotina', pergunta: 'O desaparecimento ocorreu em deslocamento para trabalho, retorno para casa ou local de rotina?', tipo: 'simNao', complementoLabel: 'Descrever deslocamento de rotina' },
+        { id: 'adulto_dependencia_tratamento', pergunta: 'O adulto depende de medicação, tratamento, acompanhamento ou possui limitação funcional relevante?', tipo: 'simNao', complementoLabel: 'Descrever dependência de tratamento' }
+      ]
+    },
+    Idoso: {
+      titulo: 'SUBABA – Idoso 60+',
+      perguntas: [
+        { id: 'idoso_alzheimer_demencia', pergunta: 'O idoso possui diagnóstico de Alzheimer, demência, desorientação, confusão mental ou perda de memória?', tipo: 'simNao', complementoLabel: 'Descrever diagnóstico/suspeita cognitiva' },
+        { id: 'idoso_dificuldade_comunicacao', pergunta: 'O idoso tem dificuldade de locomoção, visão, audição ou comunicação?', tipo: 'simNao', complementoLabel: 'Descrever limitações' },
+        { id: 'idoso_medicacao_continua', pergunta: 'O idoso faz uso de medicação contínua essencial?', tipo: 'simNao', complementoLabel: 'Registrar medicação contínua' },
+        { id: 'idoso_sai_sozinho', pergunta: 'O idoso costuma sair sozinho?', tipo: 'simNao' },
+        { id: 'idoso_desapareceu_deslocamento', pergunta: 'O idoso desapareceu durante caminhada, ida a comércio, consulta, visita ou deslocamento habitual?', tipo: 'simNao', complementoLabel: 'Descrever deslocamento habitual' },
+        { id: 'idoso_historico_desorientacao', pergunta: 'O idoso já apresentou episódio anterior de desorientação ou desaparecimento?', tipo: 'simNao', complementoLabel: 'Registrar episódios anteriores' }
+      ]
+    }
+  }
+};
+
 const COLUNAS_DESAPARECIDOS = [
   'idCaso',
   'dataHoraRegistro',
@@ -75,6 +204,72 @@ export const calcularFaixaEtaria = (idade) => {
   if (idade <= 17) return FaixaEtaria.ADOLESCENTE;
   if (idade <= 59) return FaixaEtaria.ADULTO;
   return FaixaEtaria.IDOSO;
+};
+
+export const avaliarAlertasArvore = (respostas = {}, faixaEtaria = '') => {
+  const alertas = [];
+  if (faixaEtaria === FaixaEtaria.CRIANCA && respostas.crianca_supervisao_direta === 'Não') {
+    alertas.push('Criança sem supervisão direta: vulnerabilidade elevada.');
+  }
+  if (faixaEtaria === FaixaEtaria.CRIANCA && respostas.crianca_adulto_veiculo_suspeito === 'Sim') {
+    alertas.push('Criança com adulto desconhecido/veículo suspeito: alerta crítico.');
+  }
+  if (faixaEtaria === FaixaEtaria.PRE_ADOLESCENTE && respostas.preadolescente_aliciamento_virtual === 'Sim') {
+    alertas.push('Pré-adolescente com suspeita de aliciamento virtual: alerta crítico.');
+  }
+  if (faixaEtaria === FaixaEtaria.ADOLESCENTE && respostas.adolescente_sofrimento_psiquico === 'Sim') {
+    alertas.push('Adolescente com sofrimento psíquico intenso: alta prioridade.');
+  }
+  if (faixaEtaria === FaixaEtaria.ADULTO && respostas.adulto_indicios_violencia === 'Sim') {
+    alertas.push('Adulto com indícios de violência/dívida/ameaça: suspeita de crime.');
+  }
+  if (faixaEtaria === FaixaEtaria.IDOSO && respostas.idoso_alzheimer_demencia === 'Sim') {
+    alertas.push('Idoso com Alzheimer/demência/desorientação: prioridade máxima.');
+  }
+  return alertas;
+};
+
+export const contarPerguntasRespondidas = (respostas = {}, complemento = {}) => {
+  const respondidas = Object.values(respostas).filter((valor) => String(valor || '').trim()).length;
+  const complementos = Object.values(complemento).filter((valor) => String(valor || '').trim()).length;
+  return { respondidas, complementos };
+};
+
+export const gerarObservacoesArvore = ({ respostas = {}, complementos = {}, faixaEtaria = '', observacoesOperador = '' }) => {
+  const secoes = ['[ÁRVORE DE DECISÃO – 190/193]'];
+
+  ARVORE_DECISAO_CONFIG.passos.forEach((passo) => {
+    secoes.push('', passo.titulo);
+    passo.perguntas.forEach(({ id, pergunta }) => {
+      secoes.push(`Pergunta: ${pergunta}`);
+      secoes.push(`Resposta: ${String(respostas[id] || 'Não informado').trim() || 'Não informado'}`);
+      secoes.push(`Complemento: ${String(complementos[id] || '-').trim() || '-'}`);
+      secoes.push('');
+    });
+  });
+
+  const subaba = ARVORE_DECISAO_CONFIG.subabas[faixaEtaria];
+  if (subaba) {
+    secoes.push(subaba.titulo);
+    subaba.perguntas.forEach(({ id, pergunta }) => {
+      secoes.push(`Pergunta: ${pergunta}`);
+      secoes.push(`Resposta: ${String(respostas[id] || 'Não informado').trim() || 'Não informado'}`);
+      secoes.push(`Complemento: ${String(complementos[id] || '-').trim() || '-'}`);
+      secoes.push('');
+    });
+  }
+
+  const alertas = avaliarAlertasArvore(respostas, faixaEtaria);
+  if (alertas.length) {
+    secoes.push('[ALERTAS AUTOMÁTICOS]');
+    alertas.forEach((alerta) => secoes.push(`- ${alerta}`));
+    secoes.push('');
+  }
+
+  secoes.push('[OBSERVAÇÕES DO OPERADOR]');
+  secoes.push(String(observacoesOperador || '').trim() || '-');
+
+  return { texto: secoes.join('\n').replace(/\n{3,}/g, '\n\n').trim(), alertas };
 };
 
 export const calcularRisco = (caso) => {

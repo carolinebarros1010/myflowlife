@@ -6,130 +6,17 @@ import {
   gerarPayloadSheets,
   gerarRelatorioOperacional,
   salvarCasoSheets,
-  healthcheckSheets
+  healthcheckSheets,
+  ARVORE_DECISAO_CONFIG,
+  OPCOES_SIM_NAO_NI,
+  gerarObservacoesArvore,
+  avaliarAlertasArvore,
+  contarPerguntasRespondidas
 } from './core.js';
 
 const app = document.getElementById('app');
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
-const DEBUG_ENVIO_GAS = true;
 const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
-const mensagemCamposMinimos =
-  'Preencha os campos mínimos: nome do desaparecido, município, nome do solicitante e telefone do solicitante.';
-
-const textosFaixa = {
-  Criança: {
-    titulo: 'Bloco Criança (0–7)',
-    motivo: 'Apareceu porque a idade informada está entre 0 e 7 anos.'
-  },
-  'Pré-adolescente': {
-    titulo: 'Bloco Pré-adolescente (8–11)',
-    motivo: 'Apareceu porque a idade informada está entre 8 e 11 anos.'
-  },
-  Adolescente: {
-    titulo: 'Bloco Adolescente (12–17)',
-    motivo: 'Apareceu porque a idade informada está entre 12 e 17 anos.'
-  },
-  Adulto: {
-    titulo: 'Bloco Adulto (18–59)',
-    motivo: 'Apareceu porque a idade informada está entre 18 e 59 anos.'
-  },
-  Idoso: {
-    titulo: 'Bloco Idoso (60+)',
-    motivo: 'Apareceu porque a idade informada é igual ou maior que 60 anos.'
-  }
-};
-
-const OPCOES_RESPOSTAS_DINAMICAS = ['', 'Sim', 'Não', 'Não informado'];
-
-const perguntasDinamicasPorFaixa = {
-  Criança: [
-    { nome: 'criancaSupervisaoDireta', pergunta: 'Estava sob supervisão direta?' },
-    { nome: 'criancaConsegueInformarDados', pergunta: 'Consegue informar dados pessoais/endereço?' },
-    { nome: 'criancaCondicaoNeurodesenvolvimento', pergunta: 'Há condição de neurodesenvolvimento relevante?' },
-    { nome: 'criancaDisputaFamiliar', pergunta: 'Há disputa familiar?' },
-    { nome: 'criancaLocalDesaparecimento', pergunta: 'Desapareceu em local de alta circulação?' },
-    { nome: 'criancaAdultoVeiculoSuspeito', pergunta: 'Há adulto desconhecido ou veículo suspeito?' }
-  ],
-  'Pré-adolescente': [
-    { nome: 'preadolescenteContextoDesaparecimento', pergunta: 'Desaparecimento ocorreu em contexto escolar/retorno?' },
-    { nome: 'preadolescenteHistoricoSairSozinho', pergunta: 'Há histórico de sair sozinho?' },
-    { nome: 'preadolescenteAliciamentoVirtual', pergunta: 'Há indício de aliciamento virtual?' },
-    { nome: 'preadolescenteConflitoRecente', pergunta: 'Houve conflito recente?' },
-    { nome: 'preadolescenteDisputaResponsaveis', pergunta: 'Há disputa entre responsáveis?' }
-  ],
-  Adolescente: [
-    { nome: 'adolescenteHistoricoSairSemAutorizacao', pergunta: 'Há histórico de sair sem autorização?' },
-    { nome: 'adolescenteDiscussaoPrevia', pergunta: 'Houve discussão prévia ao desaparecimento?' },
-    { nome: 'adolescenteIndicioFuga', pergunta: 'Há indício de fuga voluntária?' },
-    { nome: 'adolescenteTerceirosRedesAmeaca', pergunta: 'Há terceiros/redes sociais com ameaça?' },
-    { nome: 'adolescenteSofrimentoPsiquico', pergunta: 'Há sinais de sofrimento psíquico?' },
-    { nome: 'adolescenteLitigioFamiliar', pergunta: 'Há litígio familiar?' }
-  ],
-  Adulto: [
-    { nome: 'adultoMudancaComportamento', pergunta: 'Houve mudança brusca de comportamento?' },
-    { nome: 'adultoCriseEmocionalMedicacao', pergunta: 'Há crise emocional/psíquica ou ajuste de medicação?' },
-    { nome: 'adultoHistoricoDesaparecimentoVoluntario', pergunta: 'Há histórico de desaparecimento voluntário?' },
-    { nome: 'adultoIndiciosViolenciaDividaAmeaca', pergunta: 'Há indícios de violência, dívida ou ameaça?' },
-    { nome: 'adultoDesaparecimentoTrajetoRotina', pergunta: 'Desapareceu em trajeto de rotina?' },
-    { nome: 'adultoDependenciaTratamento', pergunta: 'Depende de tratamento ou medicação contínua?' }
-  ],
-  Idoso: [
-    { nome: 'idosoAlzheimerDemenciaDesorientacao', pergunta: 'Há Alzheimer/demência/desorientação?' },
-    { nome: 'idosoLimitacaoComunicacaoLocomocao', pergunta: 'Há limitação de comunicação/locomoção?' },
-    { nome: 'idosoMedicacaoEssencial', pergunta: 'Faz uso de medicação essencial?' },
-    { nome: 'idosoCostumaSairSozinho', pergunta: 'Costuma sair sozinho?' },
-    { nome: 'idosoDesapareceuEmRotina', pergunta: 'Desapareceu em atividade de rotina?' },
-    { nome: 'idosoHistoricoDesorientacao', pergunta: 'Há histórico de desorientação?' }
-  ]
-};
-
-const alertasDinamicos = {
-  criancaAdultoVeiculoSuspeito: 'Alerta: adulto desconhecido/veículo suspeito informado.',
-  preadolescenteAliciamentoVirtual: 'Alerta: possível aliciamento virtual.',
-  adolescenteTerceirosRedesAmeaca: 'Alerta: ameaça de terceiros/redes sociais.',
-  adolescenteSofrimentoPsiquico: 'Alerta: sofrimento psíquico informado.',
-  adultoIndiciosViolenciaDividaAmeaca: 'Alerta: indícios de violência/dívida/ameaça.',
-  adultoCriseEmocionalMedicacao: 'Alerta: crise emocional/medicação em curso.',
-  idosoAlzheimerDemenciaDesorientacao: 'Alerta: desorientação cognitiva em idoso.',
-  idosoMedicacaoEssencial: 'Alerta: medicação essencial em idoso.'
-};
-
-const obterRespostasPreenchidas = (respostasDinamicas = {}) =>
-  Object.entries(respostasDinamicas).filter(([chave, valor]) => chave !== 'faixaEtaria' && String(valor || '').trim());
-
-const obterAlertasRespostasDinamicas = (respostasDinamicas = {}) =>
-  Object.entries(alertasDinamicos)
-    .filter(([campo]) => respostasDinamicas[campo] === 'Sim')
-    .map(([, alerta]) => alerta);
-
-const montarTextoRespostasDinamicas = (respostasDinamicas = {}) => {
-  const faixaEtaria = respostasDinamicas.faixaEtaria || '';
-  const perguntasFaixa = perguntasDinamicasPorFaixa[faixaEtaria] || [];
-  const respostasPreenchidas = obterRespostasPreenchidas(respostasDinamicas);
-
-  if (!faixaEtaria || respostasPreenchidas.length === 0) return '';
-
-  const mapaPerguntas = perguntasFaixa.reduce((acc, item) => {
-    acc[item.nome] = item.pergunta;
-    return acc;
-  }, {});
-
-  const linhasPerguntas = respostasPreenchidas.map(([campo, resposta]) => `${mapaPerguntas[campo] || campo}: ${resposta}`);
-
-  return ['[RESPOSTAS DINÂMICAS]', `Faixa etária: ${faixaEtaria}`, ...linhasPerguntas].join('\n');
-};
-
-const montarObservacoesOperacionais = (observacaoOperador = '', respostasDinamicas = {}) => {
-  const blocoDinamico = montarTextoRespostasDinamicas(respostasDinamicas);
-  const blocoOperador = String(observacaoOperador || '').trim();
-
-  if (blocoDinamico && blocoOperador) {
-    return `${blocoDinamico}\n\n[OBSERVAÇÕES DO OPERADOR]\n${blocoOperador}`;
-  }
-
-  if (blocoDinamico) return blocoDinamico;
-  return blocoOperador;
-};
 
 const atualizarFeedback = (mensagem, erro = false) => {
   const feedback = document.getElementById('feedback');
@@ -138,373 +25,236 @@ const atualizarFeedback = (mensagem, erro = false) => {
   feedback.classList.toggle('danger', erro);
 };
 
-const atualizarPainelDebug = ({ payload = null, status = '', resposta = null } = {}) => {
-  const payloadEl = document.getElementById('debug-payload');
-  const statusEl = document.getElementById('debug-status');
-  const respostaEl = document.getElementById('debug-response');
+const renderPergunta = (pergunta) => {
+  const nomeResposta = `arvore__${pergunta.id}`;
+  const nomeComplemento = `comp__${pergunta.id}`;
+  const resposta =
+    pergunta.tipo === 'simNao'
+      ? `<select name="${nomeResposta}">${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}</select>`
+      : `<input name="${nomeResposta}" type="text"/>`;
 
-  if (payloadEl && payload) payloadEl.textContent = JSON.stringify(payload, null, 2);
-  if (statusEl && status) statusEl.textContent = status;
-  if (respostaEl && resposta) respostaEl.textContent = JSON.stringify(resposta, null, 2);
+  const complemento = pergunta.complementoLabel
+    ? `<label class="cv-complemento">Complemento (${pergunta.complementoLabel})<input type="text" name="${nomeComplemento}"/></label>`
+    : '';
 
-  if (!DEBUG_ENVIO_GAS) return;
-  if (payload) console.log('[CabineVerde][GAS] payload gerado', payload);
-  if (status) console.log('[CabineVerde][GAS] status envio', status);
-  if (resposta) console.log('[CabineVerde][GAS] resposta GAS', resposta);
+  return `<article class="cv-pergunta"><p>${pergunta.pergunta}</p>${resposta}${complemento}</article>`;
 };
 
-const atualizarCamposCapturados = (campos) => {
-  const camposEl = document.getElementById('captured-fields');
-  if (!camposEl) return;
-  camposEl.textContent = `Campos capturados:\n- Nome desaparecido: ${campos.nomeCompletoDesaparecido || '-'}\n- Município: ${campos.municipio || '-'}\n- Nome solicitante: ${campos.nomeSolicitante || '-'}\n- Telefone solicitante: ${campos.telefoneSolicitante || '-'}`;
-};
-
-const atualizarResumo = (caso = {}) => {
-  const resumo = document.getElementById('resumo');
-  if (!resumo) return;
-  const respostasDinamicas = caso.respostasDinamicas || {};
-  const respostasPreenchidas = obterRespostasPreenchidas(respostasDinamicas);
-  const alertasRespostasDinamicas = obterAlertasRespostasDinamicas(respostasDinamicas);
-
-  const linhas = [
-    ['Nome', caso.nomeCompletoDesaparecido || '-'],
-    ['Idade/Faixa', `${caso.idade || 0} / ${caso.faixaEtaria || calcularFaixaEtaria(Number(caso.idade || 0))}`],
-    ['Solicitante', caso.nomeSolicitante || '-'],
-    ['Telefone solicitante', caso.telefoneSolicitante || '-'],
-    ['Vínculo solicitante', caso.vinculoSolicitante || '-'],
-    ['Risco', caso.classificacaoRisco || calcularRisco(caso)],
-    ['Prioridade', caso.prioridade || calcularPrioridade(caso)],
-    ['Apto Cabine Verde', caso.aptoCabineVerde ? 'Sim' : 'Não'],
-    ['Suspeita de crime', caso.suspeitaCrime ? 'Sim' : 'Não'],
-    ['Foto disponível', caso.fotoDisponivel ? 'Sim' : 'Não'],
-    ['Apoio tecnológico', caso.camerasResidencia || caso.camerasUltimoLocal ? 'Sim' : 'Não'],
-    ['Vulnerabilidade', caso.vulnerabilidade ? 'Sim' : 'Não'],
-    ['Faixa dinâmica', respostasDinamicas.faixaEtaria || caso.faixaEtaria || '-'],
-    ['Respostas dinâmicas', `${respostasPreenchidas.length} preenchidas`],
-    ['Alertas dinâmicos', alertasRespostasDinamicas.join(' | ') || '-']
-  ];
-
-  resumo.innerHTML = linhas
-    .map(([rotulo, valor]) => `<dt>${rotulo}</dt><dd>${valor}</dd>`)
+const renderArvore = () => {
+  const passos = ARVORE_DECISAO_CONFIG.passos
+    .map((passo) => `<section class="cv-form-section"><h3>${passo.titulo}</h3>${passo.perguntas.map(renderPergunta).join('')}</section>`)
     .join('');
+
+  const subabas = Object.entries(ARVORE_DECISAO_CONFIG.subabas)
+    .map(
+      ([faixa, subaba]) =>
+        `<section class="cv-form-section cv-subaba" data-faixa="${faixa}"><h3>${subaba.titulo}</h3>${subaba.perguntas
+          .map(renderPergunta)
+          .join('')}</section>`
+    )
+    .join('');
+
+  return `${passos}<section class="cv-form-section"><h3>Subabas por faixa etária</h3><p>A subaba correta abre automaticamente após preencher a idade.</p>${subabas}</section>`;
 };
 
-const renderBlocosDinamicos = (caso = {}) => {
-  const container = document.getElementById('blocosDinamicos');
-  if (!container) return;
+const obterArvoreFormulario = (form, faixaEtaria) => {
+  const data = new FormData(form);
+  const respostas = {};
+  const complementos = {};
 
-  const faixa = calcularFaixaEtaria(Number(caso.idade || 0));
-  const blocoFaixa = textosFaixa[faixa];
-  const perguntasFaixa = perguntasDinamicasPorFaixa[faixa] || [];
+  ARVORE_DECISAO_CONFIG.passos.forEach((passo) => {
+    passo.perguntas.forEach((pergunta) => {
+      respostas[pergunta.id] = String(data.get(`arvore__${pergunta.id}`) || '').trim();
+      complementos[pergunta.id] = String(data.get(`comp__${pergunta.id}`) || '').trim();
+    });
+  });
 
-  const blocos = [
-    `
-    <section class="cv-dynamic-block" aria-live="polite">
-      <h4>${blocoFaixa.titulo}</h4>
-      <p class="cv-dynamic-reason">${blocoFaixa.motivo}</p>
-      <div class="cv-dynamic-fields">
-        ${perguntasFaixa
-          .map(({ nome, pergunta }) => {
-            const valorAtual = String(caso.respostasDinamicas?.[nome] || '');
-            return `
-              <label class="cv-dynamic-field-row">${pergunta}
-                <select name="${nome}">
-                  ${OPCOES_RESPOSTAS_DINAMICAS.map((opcao) => `<option value="${opcao}" ${valorAtual === opcao ? 'selected' : ''}>${opcao || 'Selecione'}</option>`).join('')}
-                </select>
-              </label>
-            `;
-          })
-          .join('')}
-      </div>
-    </section>
-    `
-  ];
-
-  if (caso.suspeitaCrime) {
-    blocos.push(`
-      <section class="cv-dynamic-block">
-        <h4>Bloco de indícios criminais</h4>
-        <p class="cv-dynamic-reason">Apareceu porque “suspeita de crime” foi marcado como sim.</p>
-        <label>Descreva os indícios observados
-          <textarea name="indiciosCriminais" placeholder="Ex.: ameaça prévia, conflito, local de risco..."></textarea>
-        </label>
-      </section>
-    `);
+  const subabaAtiva = ARVORE_DECISAO_CONFIG.subabas[faixaEtaria];
+  if (subabaAtiva) {
+    subabaAtiva.perguntas.forEach((pergunta) => {
+      respostas[pergunta.id] = String(data.get(`arvore__${pergunta.id}`) || '').trim();
+      complementos[pergunta.id] = String(data.get(`comp__${pergunta.id}`) || '').trim();
+    });
   }
 
-  if (caso.fotoDisponivel) {
-    blocos.push(`
-      <section class="cv-dynamic-block">
-        <h4>Bloco de imagem/foto</h4>
-        <p class="cv-dynamic-reason">Apareceu porque “foto disponível” foi marcado como sim.</p>
-        <label>Link da foto
-          <input name="linkFoto" type="url" placeholder="https://..." value="${caso.linkFoto || ''}"/>
-        </label>
-      </section>
-    `);
-  }
+  return { respostas, complementos };
+};
 
-  if (caso.camerasResidencia || caso.camerasUltimoLocal) {
-    blocos.push(`
-      <section class="cv-dynamic-block">
-        <h4>Bloco de apoio tecnológico</h4>
-        <p class="cv-dynamic-reason">Apareceu porque há câmeras na residência ou no último local.</p>
-        <label>Detalhes do apoio tecnológico
-          <textarea name="detalhesApoioTecnologico" placeholder="Ex.: tipo de câmera, horário, contato de acesso..."></textarea>
-        </label>
-      </section>
-    `);
-  }
-
-  if (caso.vulnerabilidade) {
-    blocos.push(`
-      <section class="cv-dynamic-block">
-        <h4>Bloco de detalhamento de vulnerabilidade</h4>
-        <p class="cv-dynamic-reason">Apareceu porque “vulnerabilidade” foi marcado como sim.</p>
-        <label>Condição mental/cognitiva/comportamental
-          <input name="condicaoMentalCognitivaComportamental" value="${caso.condicaoMentalCognitivaComportamental || ''}" />
-        </label>
-        <label>Limitação física
-          <input name="limitacaoFisica" value="${caso.limitacaoFisica || ''}" />
-        </label>
-        <label class="cv-check"><input type="checkbox" name="usoMedicacaoEssencial" ${caso.usoMedicacaoEssencial ? 'checked' : ''}/> Uso de medicação essencial</label>
-      </section>
-    `);
-  }
-
-  container.innerHTML = blocos.join('');
+const exibirSubabaPorIdade = (idade) => {
+  const faixaEtaria = calcularFaixaEtaria(Number(idade || 0));
+  document.querySelectorAll('.cv-subaba').forEach((subaba) => {
+    subaba.classList.toggle('active', subaba.dataset.faixa === faixaEtaria);
+  });
+  return faixaEtaria;
 };
 
 const obterCasoDoFormulario = () => {
-  const formulario = document.getElementById('f');
-  if (!(formulario instanceof HTMLFormElement)) {
-    throw new Error('Formulário principal não encontrado.');
-  }
-
-  const form = formulario;
+  const form = document.getElementById('f');
   const data = new FormData(form);
-  const nomeCompletoDesaparecido = form.querySelector('[name="nomeCompletoDesaparecido"]')?.value?.trim() || '';
-  const municipio = form.querySelector('[name="municipio"]')?.value?.trim() || '';
-  const nomeSolicitante = form.querySelector('[name="nomeSolicitante"]')?.value?.trim() || '';
-  const telefoneSolicitante = form.querySelector('[name="telefoneSolicitante"]')?.value?.trim() || '';
+  const idade = Number(data.get('idade') || 0);
+  const faixaEtaria = calcularFaixaEtaria(idade);
+  const { respostas, complementos } = obterArvoreFormulario(form, faixaEtaria);
+
+  const observacoesOperador = String(data.get('observacoesOperador') || '').trim();
+  const { texto: observacoesOperacionais, alertas } = gerarObservacoesArvore({
+    respostas,
+    complementos,
+    faixaEtaria,
+    observacoesOperador
+  });
+
+  const suspeitaCrime = respostas.passo4_suspeita_crime === 'Sim' || respostas.adulto_indicios_violencia === 'Sim';
+  const vulnerabilidade =
+    respostas.passo4_condicao_mental === 'Sim' ||
+    respostas.passo4_limitacao_fisica === 'Sim' ||
+    respostas.passo4_depende_supervisao === 'Sim' ||
+    faixaEtaria === 'Criança' ||
+    faixaEtaria === 'Idoso';
+
   const caso = {
-    municipio,
-    nomeCompletoDesaparecido,
-    nomeSolicitante,
-    telefoneSolicitante,
+    nomeCompletoDesaparecido: String(data.get('nomeCompletoDesaparecido') || '').trim(),
+    municipio: String(data.get('municipio') || '').trim(),
+    nomeSolicitante: String(data.get('nomeSolicitante') || '').trim(),
     vinculoSolicitante: String(data.get('vinculoSolicitante') || '').trim(),
-    idade: Number(data.get('idade') || 0),
-    localUltimaVisualizacao: String(data.get('localUltimaVisualizacao') || '').trim(),
+    telefoneSolicitante: String(data.get('telefoneSolicitante') || '').trim(),
+    sexoGenero: String(data.get('sexoGenero') || '').trim(),
+    idade,
+    faixaEtaria,
     statusCaso: String(data.get('statusCaso') || 'Em triagem').trim(),
-    observacoesOperador: String(data.get('observacoesOperador') || '').trim()
+    dataHoraUltimaVisualizacao: String(data.get('dataHoraUltimaVisualizacao') || '').trim(),
+    localUltimaVisualizacao: respostas.passo2_local || '',
+    roupaUltimaVisualizacao: respostas.passo2_roupa || '',
+    meioTransporte: respostas.passo2_transporte || '',
+    dadosVeiculo: respostas.passo2_caracteristicas_transporte || '',
+    fotoDisponivel: respostas.passo1_foto_digital === 'Sim',
+    linkFoto: complementos.passo1_foto_digital || '',
+    dispositivoLigado: respostas.passo5_aparelho_ligado === 'Sim' || respostas.passo1_dispositivo === 'Sim',
+    camerasResidencia: respostas.passo5_cameras_residencia === 'Sim',
+    camerasUltimoLocal: respostas.passo5_cameras_ultimo_local === 'Sim',
+    vulnerabilidade,
+    condicaoMentalCognitivaComportamental: complementos.passo4_condicao_mental || '',
+    limitacaoFisica: complementos.passo4_limitacao_fisica || '',
+    usoMedicacaoEssencial: respostas.passo4_medicacao === 'Sim' || respostas.idoso_medicacao_continua === 'Sim',
+    usoAlcoolOutrasDrogas: respostas.passo4_alcool_drogas === 'Sim',
+    historicoDesaparecimentoAnterior: respostas.passo4_desapareceu_antes === 'Sim',
+    conflitoPrevio: respostas.passo4_conflito === 'Sim',
+    suspeitaCrime,
+    locaisHabituais: [complementos.passo3_locais_frequentes, respostas.passo3_estudo_trabalho].filter(Boolean).join(' | '),
+    buscasPreliminares: [
+      `Locais habituais: ${respostas.passo5_procuraram_locais || 'Não informado'}`,
+      `Cômodos: ${respostas.passo5_procuraram_comodos || 'Não informado'}`,
+      `Tentativa contato: ${respostas.passo5_tentativa_contato || 'Não informado'}`
+    ].join(' | '),
+    numeroBo: complementos.passo5_registro_delegacia || '',
+    observacoesOperacionais,
+    respostasArvore: respostas,
+    complementosArvore: complementos,
+    alertasArvore: alertas
   };
 
-  [
-    'vulnerabilidade',
-    'suspeitaCrime',
-    'fotoDisponivel',
-    'dispositivoLigado',
-    'camerasResidencia',
-    'camerasUltimoLocal',
-    'usoMedicacaoEssencial'
-  ].forEach((k) => (caso[k] = data.get(k) === 'on'));
-
-  caso.faixaEtaria = calcularFaixaEtaria(caso.idade);
-  const perguntasFaixa = perguntasDinamicasPorFaixa[caso.faixaEtaria] || [];
-  const respostasDinamicas = perguntasFaixa.reduce(
-    (acc, { nome }) => {
-      const valor = String(data.get(nome) || '').trim();
-      if (valor) acc[nome] = valor;
-      return acc;
-    },
-    { faixaEtaria: caso.faixaEtaria }
-  );
-
-  caso.respostasDinamicas = respostasDinamicas;
-  caso.observacoesOperacionais = montarObservacoesOperacionais(caso.observacoesOperador, respostasDinamicas);
+  caso.aptoCabineVerde = calcularAptoCabineVerde(caso);
   caso.classificacaoRisco = calcularRisco(caso);
   caso.prioridade = calcularPrioridade(caso);
-  caso.aptoCabineVerde = calcularAptoCabineVerde(caso);
   caso.acaoSugerida = caso.classificacaoRisco === 'Alto risco' ? 'Acionar protocolo prioritário.' : 'Monitorar e atualizar.';
-
-  atualizarCamposCapturados({
-    municipio,
-    nomeCompletoDesaparecido,
-    nomeSolicitante,
-    telefoneSolicitante
-  });
 
   return caso;
 };
 
-const validarEstruturaFormulario = (form) => {
-  if (!(form instanceof HTMLFormElement)) {
-    return { valido: false, erro: 'Formulário principal não encontrado.' };
-  }
+const atualizarResumo = (caso) => {
+  const resumo = document.getElementById('resumo');
+  const { respondidas } = contarPerguntasRespondidas(caso.respostasArvore, caso.complementosArvore);
+  const alertas = avaliarAlertasArvore(caso.respostasArvore, caso.faixaEtaria);
 
-  const camposObrigatorios = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
-  const erros = [];
-
-  camposObrigatorios.forEach((name) => {
-    const encontrados = form.querySelectorAll(`[name="${name}"]`);
-    if (encontrados.length !== 1) {
-      erros.push(`Campo ${name} deve existir exatamente uma vez dentro do formulário (encontrado: ${encontrados.length}).`);
-    }
-  });
-
-  return {
-    valido: erros.length === 0,
-    erro: erros.join(' ')
-  };
+  resumo.innerHTML = [
+    ['Faixa etária', caso.faixaEtaria],
+    ['Subaba ativa', caso.faixaEtaria],
+    ['Perguntas respondidas', String(respondidas)],
+    ['Alertas relevantes', alertas.join(' | ') || '-'],
+    ['Suspeita de crime', caso.suspeitaCrime ? 'Sim' : 'Não'],
+    ['Vulnerabilidade', caso.vulnerabilidade ? 'Sim' : 'Não'],
+    ['Aptidão Cabine Verde', caso.aptoCabineVerde ? 'Sim' : 'Não']
+  ]
+    .map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`)
+    .join('');
 };
 
-const validarCamposMinimos = (caso) => {
-  const pendencias = camposObrigatoriosEnvio.filter((campo) => !String(caso[campo] || '').trim());
-  return {
-    valido: pendencias.length === 0,
-    pendencias
-  };
-};
+const validarCamposMinimos = (caso) => camposObrigatoriosEnvio.every((campo) => String(caso[campo] || '').trim());
 
 const render = () => {
   app.innerHTML = `
   <div class="cv-shell">
-    <header class="cv-header"><h1>Cabine Verde</h1><p>Triagem dinâmica e relatório operacional</p></header>
+    <header class="cv-header"><h1>Cabine Verde</h1><p>Triagem dinâmica de pessoas desaparecidas</p></header>
     <div class="cv-operational-grid">
       <section class="cv-card">
         <form id="f" class="cv-form">
-          <div class="cv-grid">
-            <label>Nome<input name="nomeCompletoDesaparecido" required/></label>
-            <label>Idade<input name="idade" type="number" min="0" required/></label>
-            <label>Município<input name="municipio" required/></label>
-            <label>Último local<input name="localUltimaVisualizacao"/></label>
-            <label>Status<input name="statusCaso" value="Em triagem"/></label>
-          </div>
+          <section class="cv-form-section">
+            <h3>Dados principais</h3>
+            <div class="cv-grid">
+              <label>Nome da pessoa desaparecida<input name="nomeCompletoDesaparecido" required /></label>
+              <label>Sexo ou gênero<input name="sexoGenero" /></label>
+              <label>Idade<input name="idade" type="number" min="0" required /></label>
+              <label>Município<input name="municipio" required /></label>
+              <label>Data/hora última visualização<input name="dataHoraUltimaVisualizacao" type="datetime-local" /></label>
+              <label>Status<input name="statusCaso" value="Em triagem" /></label>
+            </div>
+          </section>
           <section class="cv-form-section">
             <h3>Dados do Solicitante</h3>
             <div class="cv-grid">
-              <label>Nome do solicitante<input name="nomeSolicitante" required/></label>
-              <label>Vínculo do solicitante<input name="vinculoSolicitante"/></label>
-              <label>Telefone do solicitante<input name="telefoneSolicitante" required/></label>
+              <label>Nome do solicitante<input name="nomeSolicitante" required /></label>
+              <label>Vínculo do solicitante<input name="vinculoSolicitante" /></label>
+              <label>Telefone do solicitante<input name="telefoneSolicitante" required /></label>
             </div>
           </section>
-          <div class="cv-grid">
-            <label class="cv-check"><input type="checkbox" name="vulnerabilidade"/> Vulnerabilidade</label>
-            <label class="cv-check"><input type="checkbox" name="suspeitaCrime"/> Suspeita de crime</label>
-            <label class="cv-check"><input type="checkbox" name="fotoDisponivel"/> Foto disponível</label>
-            <label class="cv-check"><input type="checkbox" name="dispositivoLigado"/> Dispositivo ligado</label>
-            <label class="cv-check"><input type="checkbox" name="camerasResidencia"/> Câmeras residência</label>
-            <label class="cv-check"><input type="checkbox" name="camerasUltimoLocal"/> Câmeras último local</label>
-          </div>
-
-          <section class="cv-card cv-conditional">
-            <h3>Blocos dinâmicos da triagem</h3>
-            <p>Os blocos aparecem automaticamente conforme idade e respostas operacionais.</p>
-            <div id="blocosDinamicos"></div>
-          </section>
-
+          ${renderArvore()}
           <section class="cv-form-section">
             <h3>Observações operacionais do operador</h3>
-            <label>Observações
-              <textarea name="observacoesOperador" rows="4" placeholder="Descreva contexto complementar, diligências e informações úteis."></textarea>
-            </label>
+            <label>Observações<textarea name="observacoesOperador" rows="4"></textarea></label>
           </section>
-
-          <button type="submit">Salvar caso</button>
-          <button type="button" id="relatorioBtn">Gerar relatório</button>
+          <div class="cv-action-footer">
+            <button class="cv-button" type="submit">Salvar caso</button>
+            <button class="cv-button cv-button--secondary" type="button" id="relatorioBtn">Gerar relatório</button>
+          </div>
         </form>
       </section>
-
-      <aside class="cv-card cv-live-summary">
-        <h3>Resumo lateral em tempo real</h3>
-        <dl id="resumo"></dl>
-      </aside>
+      <aside class="cv-card cv-live-summary"><h3>Resumo lateral em tempo real</h3><dl id="resumo"></dl></aside>
     </div>
-
     <section class="cv-card"><h3>Feedback</h3><p id="feedback">Pronto para envio.</p></section>
     <section class="cv-card"><h3>Payload Sheets</h3><pre id="payload"></pre></section>
     <section class="cv-card"><h3>Retorno GAS</h3><pre id="gas-response">Aguardando envio.</pre></section>
-    <section class="cv-card">
-      <h3>Debug integração GAS</h3>
-      <p><strong>Status:</strong> <span id="debug-status">Pronto para envio.</span></p>
-      <details>
-        <summary>Payload gerado</summary>
-        <pre id="debug-payload"></pre>
-      </details>
-      <details>
-        <summary>Resposta do GAS</summary>
-        <pre id="debug-response"></pre>
-      </details>
-      <details open>
-        <summary>Campos capturados</summary>
-        <pre id="captured-fields"></pre>
-      </details>
-    </section>
     <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
     <section class="cv-card"><h3>Relatório diário</h3><textarea id="relatorio" rows="10"></textarea></section>
   </div>`;
 
   const form = document.getElementById('f');
-  if (!(form instanceof HTMLFormElement)) return;
-  const validacaoEstrutura = validarEstruturaFormulario(form);
-  if (!validacaoEstrutura.valido) {
-    atualizarFeedback(validacaoEstrutura.erro, true);
-    console.error('FORM STRUCTURE ERROR', validacaoEstrutura.erro);
-    return;
-  }
-
   const atualizarUI = () => {
-    const casoAtual = obterCasoDoFormulario();
-    renderBlocosDinamicos(casoAtual);
-    atualizarResumo(casoAtual);
-    const payload = gerarPayloadSheets(casoAtual);
-    document.getElementById('payload').textContent = JSON.stringify(payload, null, 2);
-    atualizarPainelDebug({ payload, status: 'Payload pronto para envio.' });
+    const idade = form.querySelector('[name="idade"]').value;
+    exibirSubabaPorIdade(idade);
+    const caso = obterCasoDoFormulario();
+    atualizarResumo(caso);
+    document.getElementById('payload').textContent = JSON.stringify(gerarPayloadSheets(caso), null, 2);
   };
 
   form.addEventListener('input', atualizarUI);
+  atualizarUI();
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const caso = obterCasoDoFormulario();
-    const payload = gerarPayloadSheets(caso);
-    const payloadEl = document.getElementById('payload');
-    if (payloadEl) payloadEl.textContent = JSON.stringify(payload, null, 2);
-    const validacaoMinima = validarCamposMinimos(caso);
-    if (!validacaoMinima.valido) {
-      atualizarFeedback(mensagemCamposMinimos, true);
-      atualizarPainelDebug({ payload, status: 'Envio bloqueado por validação de campos mínimos.' });
+    if (!validarCamposMinimos(caso)) {
+      atualizarFeedback('Preencha os campos mínimos: nome do desaparecido, município, nome do solicitante e telefone do solicitante.', true);
       return;
     }
 
-    atualizarPainelDebug({ payload, status: 'Enviando payload para Apps Script...' });
-
     const retorno = await salvarCasoSheets(caso);
-    atualizarPainelDebug({
-      status: retorno.ok ? 'Envio concluído com sucesso.' : 'Falha no envio ao Apps Script.',
-      resposta: retorno
-    });
-    const respostaEl = document.getElementById('gas-response');
-    if (respostaEl) respostaEl.textContent = JSON.stringify(retorno, null, 2);
-    const metadados = [retorno.idCaso ? `idCaso: ${retorno.idCaso}` : '', Number.isFinite(retorno.linha) ? `linha: ${retorno.linha}` : '', retorno.action ? `ação: ${retorno.action}` : '']
-      .filter(Boolean)
-      .join(' | ');
+    document.getElementById('gas-response').textContent = JSON.stringify(retorno, null, 2);
 
     if (retorno.ok) {
-      atualizarFeedback(retorno.message || (retorno.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso'));
+      atualizarFeedback(retorno.message || 'Caso enviado para processamento (modo silencioso)');
       casos.unshift(caso);
       localStorage.setItem('cabine-verde-casos', JSON.stringify(casos));
     } else {
       atualizarFeedback(retorno.message || 'Falha ao salvar caso', true);
-      if (retorno.message === 'Backend GAS não publicado ou doGet ausente') {
-        const ajuda = 'Verifique se foi feito novo deploy do Apps Script';
-        atualizarFeedback(`${retorno.message}. ${ajuda}`, true);
-      }
-    }
-
-    if (metadados) {
-      const feedback = document.getElementById('feedback');
-      feedback.textContent = `${feedback.textContent} (${metadados})`;
     }
 
     render();
@@ -513,21 +263,10 @@ const render = () => {
   document.getElementById('relatorioBtn').addEventListener('click', () => {
     document.getElementById('relatorio').value = gerarRelatorioOperacional(casos);
   });
-
-  atualizarUI();
 };
 
 (async () => {
   render();
   const health = await healthcheckSheets();
-  if (health.ok) {
-    atualizarFeedback('Endpoint ativo');
-    return;
-  }
-
-  atualizarFeedback(health.message || 'Falha ao salvar caso', true);
-  if (health.message === 'Backend GAS não publicado ou doGet ausente') {
-    const feedback = document.getElementById('feedback');
-    feedback.textContent = 'Backend GAS não publicado ou doGet ausente. Verifique se foi feito novo deploy do Apps Script';
-  }
+  atualizarFeedback(health.ok ? 'Endpoint ativo' : health.message || 'Falha ao salvar caso', !health.ok);
 })();
