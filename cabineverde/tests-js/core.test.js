@@ -9,7 +9,11 @@ import {
   healthcheckSheets,
   ENDPOINT_OFICIAL_APPS_SCRIPT,
   gerarObservacoesArvore,
-  avaliarAlertasArvore
+  avaliarAlertasArvore,
+  mapearIndicadoresOperacionais,
+  calcularCriticidadeIndicadores,
+  anexarIndicadoresObservacoes,
+  listarIndicadoresAtivos
 } from '../public/js/core.js';
 
 test('faixa etaria seleciona subaba correta', () => {
@@ -56,6 +60,37 @@ test('alertas automáticos seguem regras por faixa etária', () => {
 
   const alertasIdoso = avaliarAlertasArvore({ idoso_alzheimer_demencia: 'Sim' }, 'Idoso');
   assert.equal(alertasIdoso[0], 'Idoso com Alzheimer/demência/desorientação: prioridade máxima.');
+});
+
+
+test('indicadores operacionais derivam da árvore e elevam criticidade', () => {
+  const respostas = {
+    crianca_supervisao_direta: 'Não',
+    crianca_adulto_veiculo_suspeito: 'Sim',
+    adulto_indicios_violencia: 'Sim'
+  };
+  const indicadores = mapearIndicadoresOperacionais(respostas);
+
+  assert.equal(indicadores.criancaSemSupervisao, true);
+  assert.equal(indicadores.criancaVeiculoSuspeito, true);
+  assert.equal(indicadores.adultoSuspeitaCrime, true);
+  assert.equal(calcularCriticidadeIndicadores(indicadores), 'Crítica');
+  assert.deepEqual(listarIndicadoresAtivos(indicadores).includes('adultoSuspeitaCrime'), true);
+});
+
+test('observacoes operacionais recebem bloco de indicadores sem quebrar estrutura', () => {
+  const texto = anexarIndicadoresObservacoes('[ÁRVORE DE DECISÃO – 190/193]\nConteúdo base', {
+    criancaSemSupervisao: true,
+    criancaVeiculoSuspeito: false,
+    preadolescenteAliciamentoVirtual: false,
+    adolescenteSofrimentoPsiquico: false,
+    adultoSuspeitaCrime: true,
+    idosoDesorientado: false
+  });
+
+  assert.match(texto, /\[INDICADORES OPERACIONAIS\]/);
+  assert.match(texto, /criancaSemSupervisao: SIM/);
+  assert.match(texto, /adultoSuspeitaCrime: SIM/);
 });
 
 test('payload completo com 51 colunas para Desaparecidos', () => {

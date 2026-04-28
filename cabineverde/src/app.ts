@@ -29,6 +29,7 @@ import { carregarRascunhoLocal, exportarRascunhoSessao, gerarSessionId, importar
 import { listarLogs, registrarLog } from './services/auditLogService.js';
 import { renderSessionPanel } from './components/triagem/SessionPanel.js';
 import { renderAuditLogPanel } from './components/desaparecidos/AuditLogPanel.js';
+import { listarIndicadoresAtivos, sugerirAcaoIndicadores } from './modules/triagem/indicadoresOperacionais.js';
 
 const sheetsService = new GoogleSheetsService();
 const chaveEtapaAtual = 'cabine-verde-etapa-atual';
@@ -164,13 +165,18 @@ const sincronizarCondicionais = (): void => {
 
 const renderResumo = (): void => {
   const caso = triagemState.casoCompleto;
+  const indicadoresAtivos = listarIndicadoresAtivos(caso.indicadoresOperacionais);
+  const sugestaoOperacional = sugerirAcaoIndicadores(caso.indicadoresOperacionais);
   const risco = document.getElementById('risk-panel-content');
   if (risco) {
     risco.innerHTML = `<span class="cv-badge">Faixa etária: ${caso.faixaEtaria}</span>
       <span class="cv-badge cv-badge--danger">Risco: ${caso.classificacaoRisco}</span>
       <span class="cv-badge">Prioridade: ${caso.prioridade}</span>
       <span class="cv-badge">Apto Cabine Verde: ${caso.aptoCabineVerde ? 'Sim' : 'Não'}</span>
-      <span class="cv-badge cv-badge--action">Ação sugerida: ${caso.acaoSugerida}</span>`;
+      <span class="cv-badge">Criticidade: ${caso.criticidadeIndicadores}</span>
+      <span class="cv-badge cv-badge--action">Ação sugerida: ${caso.acaoSugerida}</span>
+      <span class="cv-badge">Indicadores ativos: ${indicadoresAtivos.length ? indicadoresAtivos.join(' · ') : 'Nenhum'}</span>
+      <span class="cv-badge">Sugestão operacional: ${sugestaoOperacional}</span>`;
   }
 
   const live = document.getElementById('case-live-summary');
@@ -185,6 +191,9 @@ const renderResumo = (): void => {
       ['Status', caso.statusCaso],
       ['Vulnerabilidade', caso.vulnerabilidade ? 'Sim' : 'Não'],
       ['Suspeita de crime', caso.suspeitaCrime ? 'Sim' : 'Não'],
+      ['Indicadores ativos', indicadoresAtivos.length ? indicadoresAtivos.join('; ') : 'Nenhum'],
+      ['Criticidade indicadores', caso.criticidadeIndicadores],
+      ['Sugestão de ação', sugestaoOperacional],
       ['Apoio tecnológico', caso.aptoCabineVerde ? 'Adequado' : 'Parcial']
     ]
       .map(([chave, valor]) => `<dt>${chave}</dt><dd>${valor}</dd>`)

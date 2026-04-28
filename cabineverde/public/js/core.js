@@ -229,6 +229,55 @@ export const avaliarAlertasArvore = (respostas = {}, faixaEtaria = '') => {
   return alertas;
 };
 
+
+export const mapearIndicadoresOperacionais = (respostas = {}) => ({
+  criancaSemSupervisao: respostas.crianca_supervisao_direta === 'Não',
+  criancaVeiculoSuspeito: respostas.crianca_adulto_veiculo_suspeito === 'Sim',
+  preadolescenteAliciamentoVirtual: respostas.preadolescente_aliciamento_virtual === 'Sim',
+  adolescenteSofrimentoPsiquico: respostas.adolescente_sofrimento_psiquico === 'Sim',
+  adultoSuspeitaCrime: respostas.adulto_indicios_violencia === 'Sim' || respostas.passo4_suspeita_crime === 'Sim',
+  idosoDesorientado: respostas.idoso_alzheimer_demencia === 'Sim' || respostas.idoso_historico_desorientacao === 'Sim'
+});
+
+export const listarIndicadoresAtivos = (indicadores = {}) =>
+  Object.entries(indicadores)
+    .filter(([, ativo]) => Boolean(ativo))
+    .map(([chave]) => chave);
+
+export const calcularCriticidadeIndicadores = (indicadores = {}) => {
+  const pontos =
+    (indicadores.criancaVeiculoSuspeito ? 4 : 0) +
+    (indicadores.preadolescenteAliciamentoVirtual ? 3 : 0) +
+    (indicadores.adolescenteSofrimentoPsiquico ? 3 : 0) +
+    (indicadores.adultoSuspeitaCrime ? 4 : 0) +
+    (indicadores.idosoDesorientado ? 3 : 0) +
+    (indicadores.criancaSemSupervisao ? 2 : 0);
+
+  if (pontos >= 7) return 'Crítica';
+  if (pontos >= 4) return 'Alta';
+  if (pontos >= 2) return 'Moderada';
+  return 'Baixa';
+};
+
+export const sugerirAcaoIndicadores = (indicadores = {}) => {
+  if (indicadores.criancaVeiculoSuspeito || indicadores.adultoSuspeitaCrime) {
+    return 'Acionar despacho imediato com reforço investigativo e varredura de câmeras.';
+  }
+  if (indicadores.preadolescenteAliciamentoVirtual || indicadores.adolescenteSofrimentoPsiquico) {
+    return 'Priorizar busca orientada por rede social, contatos digitais e apoio psicossocial.';
+  }
+  if (indicadores.idosoDesorientado || indicadores.criancaSemSupervisao) {
+    return 'Mobilizar busca territorial de proximidade e rede comunitária imediata.';
+  }
+  return 'Manter monitoramento operacional e reavaliar respostas da árvore periodicamente.';
+};
+
+export const anexarIndicadoresObservacoes = (observacoesOperacionais = '', indicadores = {}) => {
+  const bloco = ['[INDICADORES OPERACIONAIS]', ...Object.entries(indicadores).map(([k, v]) => `${k}: ${v ? 'SIM' : 'NÃO'}`)].join('\n');
+  const base = String(observacoesOperacionais || '').replace(/\[INDICADORES OPERACIONAIS\][\s\S]*$/i, '').trim();
+  return base ? `${base}\n\n${bloco}` : bloco;
+};
+
 export const contarPerguntasRespondidas = (respostas = {}, complemento = {}) => {
   const respondidas = Object.values(respostas).filter((valor) => String(valor || '').trim()).length;
   const complementos = Object.values(complemento).filter((valor) => String(valor || '').trim()).length;
@@ -272,23 +321,28 @@ export const gerarObservacoesArvore = ({ respostas = {}, complementos = {}, faix
   return { texto: secoes.join('\n').replace(/\n{3,}/g, '\n\n').trim(), alertas };
 };
 
-export const calcularRisco = (caso) => {
+export const calcularRisco = (caso, indicadores = caso.indicadoresOperacionais || {}) => {
   const faixa = calcularFaixaEtaria(Number(caso.idade || 0));
-  if (faixa === FaixaEtaria.CRIANCA || caso.suspeitaCrime || caso.vulnerabilidade || caso.usoMedicacaoEssencial) return 'Alto risco';
+  const alertaEstruturado = Object.values(indicadores).some(Boolean);
+  if (faixa === FaixaEtaria.CRIANCA || caso.suspeitaCrime || caso.vulnerabilidade || caso.usoMedicacaoEssencial || alertaEstruturado) return 'Alto risco';
   if (faixa === FaixaEtaria.ADOLESCENTE || caso.usoAlcoolOutrasDrogas || caso.conflitoPrevio) return 'Risco moderado';
   return 'Baixo risco';
 };
 
-export const calcularPrioridade = (caso) => {
-  const risco = calcularRisco(caso);
+export const calcularPrioridade = (caso, indicadores = caso.indicadoresOperacionais || {}) => {
+  const risco = calcularRisco(caso, indicadores);
+  if (indicadores.criancaVeiculoSuspeito || indicadores.adultoSuspeitaCrime) return 'Crítica';
+  if (indicadores.preadolescenteAliciamentoVirtual || indicadores.adolescenteSofrimentoPsiquico || indicadores.idosoDesorientado) return 'Alta';
   if (risco === 'Alto risco') return caso.suspeitaCrime ? 'Crítica' : 'Alta';
   if (risco === 'Risco moderado') return 'Média';
   return 'Baixa';
 };
 
-export const calcularAptoCabineVerde = (caso) => {
+export const calcularAptoCabineVerde = (caso, indicadores = caso.indicadoresOperacionais || {}) => {
   const pontos = [caso.fotoDisponivel, caso.dispositivoLigado, Boolean(caso.localUltimaVisualizacao), caso.camerasResidencia || caso.camerasUltimoLocal];
-  return pontos.filter(Boolean).length >= 3;
+  const baseApta = pontos.filter(Boolean).length >= 3;
+  const criticidadeSemSuporte = (indicadores.criancaVeiculoSuspeito || indicadores.adultoSuspeitaCrime || indicadores.preadolescenteAliciamentoVirtual) && !(caso.dispositivoLigado || caso.camerasResidencia || caso.camerasUltimoLocal);
+  return baseApta && !criticidadeSemSuporte;
 };
 
 export const gerarPayloadSheets = (caso) => {

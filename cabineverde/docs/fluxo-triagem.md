@@ -72,3 +72,24 @@ Foi adicionado log de auditoria local com:
 - Mantida compatibilidade com `env.ts`, `sheetsService.ts` e `sheetsPayload.ts`.
 - Payload de integração com Google Sheets não teve quebra de contrato.
 - Apps Script em `cabineverde/GAS/` permanece compatível.
+
+## Camada de indicadores operacionais estruturados
+
+A triagem agora deriva um objeto interno `indicadoresOperacionais` a partir das respostas da árvore e do subfluxo etário, mantendo compatibilidade total com o payload atual de 51 colunas.
+
+### Indicadores base
+- `criancaSemSupervisao`
+- `criancaVeiculoSuspeito`
+- `preadolescenteAliciamentoVirtual`
+- `adolescenteSofrimentoPsiquico`
+- `adultoSuspeitaCrime`
+- `idosoDesorientado`
+
+### Aplicações operacionais da camada
+- realimentação automática de `classificacaoRisco`, `prioridade` e `aptoCabineVerde`;
+- cálculo de criticidade (`Crítica`, `Alta`, `Moderada`, `Baixa`);
+- sugestão de ação operacional no resumo lateral;
+- inclusão automática de bloco `[INDICADORES OPERACIONAIS]` em `observacoesOperacionais` para auditoria e futura indexação.
+
+### Base para painel futuro
+A estrutura foi mantida somente no front-end neste ciclo, pronta para filtros e painéis sem dependência imediata de alteração de endpoint, GAS ou colunas existentes.

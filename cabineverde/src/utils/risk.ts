@@ -1,15 +1,26 @@
 import type { CasoDesaparecimento } from '../types/case.js';
 import { ClassificacaoRisco, FaixaEtaria } from '../types/enums.js';
 import { calcularFaixaEtaria } from './age.js';
+import type { IndicadoresOperacionais } from '../modules/triagem/indicadoresOperacionais.js';
 
-export const calcularRisco = (caso: CasoDesaparecimento): ClassificacaoRisco => {
+export const calcularRisco = (caso: CasoDesaparecimento, indicadores?: IndicadoresOperacionais): ClassificacaoRisco => {
   const faixa = calcularFaixaEtaria(caso.idade);
+  const alertaEstruturadoAlto = Boolean(
+    indicadores?.criancaVeiculoSuspeito ||
+      indicadores?.preadolescenteAliciamentoVirtual ||
+      indicadores?.adolescenteSofrimentoPsiquico ||
+      indicadores?.adultoSuspeitaCrime ||
+      indicadores?.idosoDesorientado ||
+      indicadores?.criancaSemSupervisao
+  );
+
   const altoRisco =
     faixa === FaixaEtaria.CRIANCA ||
     (faixa === FaixaEtaria.IDOSO && caso.condicaoMentalCognitivaComportamental.length > 0) ||
     caso.suspeitaCrime ||
     caso.vulnerabilidade ||
-    caso.usoMedicacaoEssencial;
+    caso.usoMedicacaoEssencial ||
+    alertaEstruturadoAlto;
 
   if (altoRisco) return ClassificacaoRisco.ALTO;
 
