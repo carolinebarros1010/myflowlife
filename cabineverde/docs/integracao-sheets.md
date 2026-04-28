@@ -66,7 +66,7 @@ Como diagnosticar:
 4. Se há `persistencia_desaparecidos` com `ok=Sim`, a gravação ocorreu e deve existir linha em `Desaparecidos` para o `payloadIdCaso`.
 
 ## Estrutura operacional da aba `Desaparecidos`
-Ordem oficial (51 colunas):
+Ordem oficial: 51 colunas-base + colunas da árvore de decisão (anexadas ao final).
 
 1. idCaso
 2. dataHoraRegistro
@@ -119,6 +119,7 @@ Ordem oficial (51 colunas):
 49. encerrado190
 50. numeroBo
 51. observacoesOperacionais
+52+. colunas `arv_*` (respostas e complementos por pergunta da árvore)
 
 ## Árvore de decisão no frontend (Cabine Verde)
 - A árvore oficial (`Arvore de decisão.docx`) é renderizada no formulário em cinco passos fixos e subabas por faixa etária.
@@ -129,33 +130,10 @@ Ordem oficial (51 colunas):
   - `12–17`: Adolescente
   - `18–59`: Adulto
   - `60+`: Idoso
-- Não há criação de novas colunas: todas as respostas são consolidadas na coluna `observacoesOperacionais`.
-- Formato obrigatório persistido no payload:
-
-```text
-[ÁRVORE DE DECISÃO – 190/193]
-
-PASSO 1 – Identificação mínima
-Pergunta: ...
-Resposta: ...
-Complemento: ...
-
-...
-
-SUBABA – <Faixa>
-Pergunta: ...
-Resposta: ...
-Complemento: ...
-
-[ALERTAS AUTOMÁTICOS]
-- ...
-
-[OBSERVAÇÕES DO OPERADOR]
-...
-```
-
-- O texto livre do operador é preservado integralmente no bloco `[OBSERVAÇÕES DO OPERADOR]`.
-- Alertas automáticos visuais também entram no texto estruturado de `observacoesOperacionais`.
+- As respostas da árvore agora são distribuídas em colunas dedicadas `arv_*_resp` e os complementos em `arv_*_comp`.
+- Campos `*_resp` aceitam `Sim`, `Não`, `Não informado` ou valor textual (quando a pergunta for aberta).
+- Campos `*_comp` recebem complemento textual ou vazio.
+- `observacoesOperacionais` permanece ativa para observações livres, resumo narrativo opcional e alertas consolidados, sem centralizar todas as respostas da árvore.
 - O envio `POST` com `mode: 'no-cors'`, endpoint e aba `Desaparecidos` permanecem inalterados.
 
 ## Respostas esperadas do backend
@@ -239,7 +217,7 @@ Sempre que disponível, exibir também:
 1. Abrir endpoint no navegador.
 2. Confirmar JSON de healthcheck.
 3. Enviar `POST` com `MockPayload.json`.
-4. Confirmar nova linha na aba `Desaparecidos`.
+4. Confirmar nova linha na aba `Desaparecidos` com distribuição das respostas nas colunas `arv_*`.
 
 ### 1) Healthcheck (GET)
 ```bash

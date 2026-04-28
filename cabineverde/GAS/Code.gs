@@ -79,8 +79,9 @@ function doPost(e) {
       throw new Error('data.valores não é array');
     }
 
-    if (data.valores.length !== 51) {
-      throw new Error('Quantidade inválida de colunas: ' + data.valores.length);
+    var totalColunasDesaparecidos = COLUNAS_DESAPARECIDOS.length;
+    if (data.valores.length !== totalColunasDesaparecidos) {
+      throw new Error('Quantidade inválida de colunas: ' + data.valores.length + '. Esperado: ' + totalColunasDesaparecidos);
     }
 
     var idCaso = data && data.payload ? data.payload.idCaso : '';

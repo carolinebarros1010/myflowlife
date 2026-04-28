@@ -93,13 +93,17 @@ test('observacoes operacionais recebem bloco de indicadores sem quebrar estrutur
   assert.match(texto, /adultoSuspeitaCrime: SIM/);
 });
 
-test('payload completo com 51 colunas para Desaparecidos', () => {
+test('payload completo com colunas base + arvore para Desaparecidos', () => {
   const payload = gerarPayloadSheets({ nomeCompletoDesaparecido: 'x', idade: 30 });
   assert.equal(payload.aba, 'Desaparecidos');
-  assert.equal(payload.colunas.length, 51);
-  assert.equal(payload.valores.length, 51);
+  assert.equal(payload.colunas.length, payload.valores.length);
+  assert.equal(payload.colunas.length > 51, true);
   assert.equal(payload.colunas[0], 'idCaso');
   assert.equal(payload.colunas[50], 'observacoesOperacionais');
+  assert.equal(payload.colunas.includes('arv_p1_emergencia_resp'), true);
+  assert.equal(payload.colunas.includes('arv_p4_suspeita_crime_resp'), true);
+  assert.equal(payload.colunas.includes('arv_adulto_violencia_divida_ameaca_resp'), true);
+  assert.equal(payload.payload.arv_p1_emergencia_resp, 'Não informado');
 });
 
 test('salvarCasoSheets usa POST no-cors + endpoint oficial', async () => {
