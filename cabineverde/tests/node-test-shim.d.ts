@@ -1,3 +1,7 @@
+// ⚠️ Shim mínimo para evitar dependência de @types/node.
+// Não cobre toda a API de node:test / assert.
+// Evitar uso avançado dessas libs neste projeto.
+
 declare module 'node:test' {
   export interface TestContext {}
 
