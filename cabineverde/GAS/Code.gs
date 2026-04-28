@@ -8,6 +8,7 @@
 
 var ESTRUTURA_PLANILHA = {
   Desaparecidos: COLUNAS_DESAPARECIDOS,
+  Logs_GAS: ['timestamp', 'etapa', 'ok', 'mensagem', 'rawPostData', 'payloadIdCaso'],
   Listas: ['tipoLista', 'valor'],
   Relatorio_Diario: [
     'dataServico',
@@ -50,8 +51,29 @@ function doGet() {
 }
 
 function doPost(e) {
+  var rawPostData = extrairRawPostData(e);
+  var planilhaLogs = obterPlanilhaLogs();
+  registrarLogTecnico(planilhaLogs, {
+    etapa: 'inicio_post',
+    ok: true,
+    mensagem: 'doPost recebido',
+    rawPostData: rawPostData,
+    payloadIdCaso: ''
+  });
+
   try {
-    var body = parseJsonSeguro(e);
+    var body = parsePayload(e);
+    var payload = body && body.payload && typeof body.payload === 'object' ? body.payload : body;
+    var idCaso = validarIdCasoPayload(payload);
+
+    registrarLogTecnico(planilhaLogs, {
+      etapa: 'parse_payload',
+      ok: true,
+      mensagem: 'Payload parseado com sucesso',
+      rawPostData: rawPostData,
+      payloadIdCaso: idCaso
+    });
+
     var planilhaId = obterSpreadsheetId(body);
     var nomeAba = obterNomeAba(body);
     var planilha = SpreadsheetApp.openById(planilhaId);
@@ -61,12 +83,6 @@ function doPost(e) {
     var aba = planilha.getSheetByName(nomeAba);
     if (!aba) {
       throw new Error('Aba "' + nomeAba + '" não encontrada na planilha.');
-    }
-
-    var payload = body && body.payload && typeof body.payload === 'object' ? body.payload : {};
-    var idCaso = limparTexto(payload.idCaso);
-    if (!idCaso) {
-      throw new Error('idCaso é obrigatório para criar ou atualizar registros.');
     }
 
     var linhaExistente = encontrarLinhaPorId(aba, idCaso);
@@ -84,6 +100,14 @@ function doPost(e) {
       action = 'updated';
     }
 
+    registrarLogTecnico(planilha, {
+      etapa: 'persistencia_desaparecidos',
+      ok: true,
+      mensagem: 'Registro ' + action + ' na linha ' + numeroLinha,
+      rawPostData: rawPostData,
+      payloadIdCaso: idCaso
+    });
+
     return criarRespostaJson({
       ok: true,
       action: action,
@@ -92,10 +116,19 @@ function doPost(e) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
+    var mensagemErro = error && error.message ? error.message : String(error);
+    registrarLogTecnico(planilhaLogs, {
+      etapa: 'erro_post',
+      ok: false,
+      mensagem: mensagemErro,
+      rawPostData: rawPostData,
+      payloadIdCaso: extrairIdCasoBruto(e)
+    });
+
     return criarRespostaJson(
       {
         ok: false,
-        error: error && error.message ? error.message : String(error),
+        error: mensagemErro,
         timestamp: new Date().toISOString()
       },
       400
@@ -174,6 +207,7 @@ function buscarCasoPorId(idCaso, planilha) {
 
 function garantirEstruturaPlanilha(planilha) {
   garantirAbaComCabecalho(planilha, 'Desaparecidos', ESTRUTURA_PLANILHA.Desaparecidos);
+  garantirAbaComCabecalho(planilha, 'Logs_GAS', ESTRUTURA_PLANILHA.Logs_GAS);
   garantirAbaComCabecalho(planilha, 'Listas', ESTRUTURA_PLANILHA.Listas);
   garantirAbaComCabecalho(planilha, 'Relatorio_Diario', ESTRUTURA_PLANILHA.Relatorio_Diario);
   garantirAbaComCabecalho(planilha, 'Painel', ESTRUTURA_PLANILHA.Painel);

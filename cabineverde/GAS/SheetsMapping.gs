@@ -89,3 +89,14 @@ function mapearLinhaParaObjeto(colunas, linha) {
   });
   return resultado;
 }
+
+
+function validarIdCasoPayload(payload) {
+  var dados = payload && typeof payload === 'object' ? payload : {};
+  var idCaso = limparTexto(dados.idCaso);
+  if (!idCaso) {
+    throw new Error('idCaso é obrigatório para criar ou atualizar registros.');
+  }
+
+  return idCaso;
+}
