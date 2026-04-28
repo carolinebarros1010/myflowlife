@@ -171,17 +171,22 @@ const renderBlocosDinamicos = (caso = {}) => {
   container.innerHTML = blocos.join('');
 };
 
-const obterCasoDoFormulario = (form) => {
-  const data = new FormData(form);
+const obterCasoDoFormulario = () => {
+  const formulario = document.getElementById('f');
+  if (!(formulario instanceof HTMLFormElement)) {
+    throw new Error('Formulário principal não encontrado.');
+  }
+
+  const data = new FormData(document.getElementById('f'));
   const municipio = String(data.get('municipio') || '').trim();
   const nomeCompletoDesaparecido = String(data.get('nomeCompletoDesaparecido') || '').trim();
   const nomeSolicitante = String(data.get('nomeSolicitante') || '').trim();
   const telefoneSolicitante = String(data.get('telefoneSolicitante') || '').trim();
   const caso = {
-    municipio,
-    nomeCompletoDesaparecido,
-    nomeSolicitante,
-    telefoneSolicitante,
+    municipio: municipio,
+    nomeCompletoDesaparecido: nomeCompletoDesaparecido,
+    nomeSolicitante: nomeSolicitante,
+    telefoneSolicitante: telefoneSolicitante,
     vinculoSolicitante: String(data.get('vinculoSolicitante') || '').trim(),
     idade: Number(data.get('idade') || 0),
     localUltimaVisualizacao: String(data.get('localUltimaVisualizacao') || '').trim(),
@@ -301,7 +306,7 @@ const render = () => {
   if (!(form instanceof HTMLFormElement)) return;
 
   const atualizarUI = () => {
-    const casoAtual = obterCasoDoFormulario(form);
+    const casoAtual = obterCasoDoFormulario();
     renderBlocosDinamicos(casoAtual);
     atualizarResumo(casoAtual);
     const payload = gerarPayloadSheets(casoAtual);
@@ -313,8 +318,10 @@ const render = () => {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const caso = obterCasoDoFormulario(form);
+    const caso = obterCasoDoFormulario();
     const payload = gerarPayloadSheets(caso);
+    const payloadEl = document.getElementById('payload');
+    if (payloadEl) payloadEl.textContent = JSON.stringify(payload, null, 2);
     const validacaoMinima = validarCamposMinimos(caso);
     if (!validacaoMinima.valido) {
       atualizarFeedback(mensagemCamposMinimos, true);
