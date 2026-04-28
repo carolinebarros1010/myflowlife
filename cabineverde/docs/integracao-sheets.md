@@ -25,8 +25,9 @@ Sem esse fluxo, a URL publicada pode continuar apontando para uma versão antiga
 ```js
 fetch(ENDPOINT, {
   method: 'POST',
+  mode: 'no-cors',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'text/plain;charset=utf-8'
   },
   body: JSON.stringify(payload)
 })
@@ -34,6 +35,35 @@ fetch(ENDPOINT, {
 
 3. Apps Script valida e persiste na aba `Desaparecidos`.
 4. Resposta retorna JSON operacional com `ok`, `action`, `idCaso`, `linha`, `aba`, `timestamp`.
+
+
+## Envio em `no-cors`: comportamento esperado
+- O frontend oficial envia `POST` com `mode: 'no-cors'` para evitar bloqueio de CORS sem backend intermediário.
+- Nesse modo, o navegador não expõe `status`, `headers` e `body` da resposta (resposta opaca).
+- Portanto, a confirmação operacional deve ser feita direto na planilha, não no retorno HTTP do browser.
+
+## Parse robusto no Apps Script
+O backend aceita três formatos de entrada, na ordem:
+1. `e.postData.contents` com JSON serializado no corpo (formato adotado pelo frontend).
+2. `e.parameter.payload` com JSON string.
+3. `e.parameters.payload[0]` com JSON string.
+
+Se o payload estiver vazio ou inválido, o GAS grava erro técnico e retorna: `Payload ausente ou inválido. Verifique body JSON ou campo payload.`
+
+## Aba técnica `Logs_GAS`
+A planilha passa a incluir a aba `Logs_GAS` com colunas:
+- `timestamp`
+- `etapa`
+- `ok`
+- `mensagem`
+- `rawPostData`
+- `payloadIdCaso`
+
+Como diagnosticar:
+1. Se há linha em `Logs_GAS`, o `POST` chegou ao Apps Script.
+2. Se existe `erro_post`, ler `mensagem` para causa raiz.
+3. Se há `parse_payload` com `ok=Sim` mas não há linha em `Desaparecidos`, o problema está na persistência/mapeamento.
+4. Se há `persistencia_desaparecidos` com `ok=Sim`, a gravação ocorreu e deve existir linha em `Desaparecidos` para o `payloadIdCaso`.
 
 ## Estrutura operacional da aba `Desaparecidos`
 Ordem oficial (51 colunas):
@@ -181,7 +211,7 @@ curl 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckw
 ### 2) Gravação/atualização (POST)
 ```bash
 curl -X POST 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec' \
-  -H 'Content-Type: application/json' \
+  -H 'Content-Type: text/plain;charset=utf-8' \
   --data @GAS/MockPayload.json
 ```
 

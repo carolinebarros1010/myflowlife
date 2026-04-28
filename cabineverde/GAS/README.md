@@ -23,6 +23,7 @@ Quando um `POST` é recebido, o script garante as abas:
 4. `Painel`
 5. `Ocorrencias_Relevancia`
 6. `Config`
+7. `Logs_GAS`
 
 Além do cabeçalho da linha 1, o script também semeia dados iniciais em:
 - `Listas` (listas padronizadas);
@@ -43,11 +44,38 @@ Deploy > Manage deployments > Edit > New version > Deploy
 
 Se esse passo não for executado, a URL pública pode permanecer em versão anterior e retornar erro de `doGet` ausente.
 
+## Fluxo no-cors e diagnóstico
+No frontend oficial, o `POST` usa `mode: "no-cors"`. Nesse modo, o navegador retorna uma resposta opaca e o operador não consegue ler o JSON de retorno do GAS.
+
+Por isso, o Apps Script agora registra trilha técnica na aba `Logs_GAS` com as colunas:
+- `timestamp`
+- `etapa`
+- `ok`
+- `mensagem`
+- `rawPostData`
+- `payloadIdCaso`
+
+Etapas registradas no `doPost`:
+1. `inicio_post`
+2. `parse_payload`
+3. `persistencia_desaparecidos` (sucesso) **ou** `erro_post` (falha)
+
+## Formato de body adotado
+Para maior compatibilidade com Web App do Google Apps Script + `no-cors`, o frontend envia `Content-Type: text/plain;charset=utf-8` com `body` em JSON serializado.
+
+O parser no GAS aceita, nesta ordem:
+1. `e.postData.contents` (JSON)
+2. `e.parameter.payload` (JSON string)
+3. `e.parameters.payload[0]` (JSON string)
+
+Se nenhum formato válido for encontrado, retorna erro claro: `Payload ausente ou inválido. Verifique body JSON ou campo payload.`
+
 ## Checklist operacional de validação
 1. Abrir o endpoint no navegador.
 2. Confirmar retorno JSON de healthcheck (`ok: true` e `message: "Endpoint ativo"`).
 3. Executar `POST` com `MockPayload.json`.
-4. Confirmar nova linha na aba `Desaparecidos`.
+4. Confirmar registro na aba `Logs_GAS`.
+5. Confirmar criação/atualização na aba `Desaparecidos`.
 
 ## Testes rápidos
 ### Healthcheck
@@ -58,7 +86,7 @@ curl 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckw
 ### Gravação
 ```bash
 curl -X POST 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec' \
-  -H 'Content-Type: application/json' \
+  -H 'Content-Type: text/plain;charset=utf-8' \
   --data @MockPayload.json
 ```
 
