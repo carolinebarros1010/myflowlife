@@ -66,6 +66,16 @@ const atualizarPainelDebug = ({ payload = null, status = '', resposta = null } =
   if (resposta) console.log('[CabineVerde][GAS] resposta GAS', resposta);
 };
 
+const atualizarCamposCapturados = (campos) => {
+  const camposEl = document.getElementById('captured-fields');
+  if (!camposEl) return;
+  camposEl.textContent = `Campos capturados:
+- Nome desaparecido: ${campos.nomeCompletoDesaparecido || '-'}
+- Município: ${campos.municipio || '-'}
+- Nome solicitante: ${campos.nomeSolicitante || '-'}
+- Telefone solicitante: ${campos.telefoneSolicitante || '-'}`;
+};
+
 const atualizarResumo = (caso = {}) => {
   const resumo = document.getElementById('resumo');
   if (!resumo) return;
@@ -163,7 +173,20 @@ const renderBlocosDinamicos = (caso = {}) => {
 
 const obterCasoDoFormulario = (form) => {
   const data = new FormData(form);
-  const caso = Object.fromEntries(data.entries());
+  const municipio = String(data.get('municipio') || '').trim();
+  const nomeCompletoDesaparecido = String(data.get('nomeCompletoDesaparecido') || '').trim();
+  const nomeSolicitante = String(data.get('nomeSolicitante') || '').trim();
+  const telefoneSolicitante = String(data.get('telefoneSolicitante') || '').trim();
+  const caso = {
+    municipio,
+    nomeCompletoDesaparecido,
+    nomeSolicitante,
+    telefoneSolicitante,
+    vinculoSolicitante: String(data.get('vinculoSolicitante') || '').trim(),
+    idade: Number(data.get('idade') || 0),
+    localUltimaVisualizacao: String(data.get('localUltimaVisualizacao') || '').trim(),
+    statusCaso: String(data.get('statusCaso') || 'Em triagem').trim()
+  };
   [
     'vulnerabilidade',
     'suspeitaCrime',
@@ -174,12 +197,23 @@ const obterCasoDoFormulario = (form) => {
     'usoMedicacaoEssencial'
   ].forEach((k) => (caso[k] = data.get(k) === 'on'));
 
-  caso.idade = Number(caso.idade || 0);
   caso.faixaEtaria = calcularFaixaEtaria(caso.idade);
   caso.classificacaoRisco = calcularRisco(caso);
   caso.prioridade = calcularPrioridade(caso);
   caso.aptoCabineVerde = calcularAptoCabineVerde(caso);
   caso.acaoSugerida = caso.classificacaoRisco === 'Alto risco' ? 'Acionar protocolo prioritário.' : 'Monitorar e atualizar.';
+  console.log('FORM DATA DEBUG', {
+    municipio,
+    nomeCompletoDesaparecido,
+    nomeSolicitante,
+    telefoneSolicitante
+  });
+  atualizarCamposCapturados({
+    municipio,
+    nomeCompletoDesaparecido,
+    nomeSolicitante,
+    telefoneSolicitante
+  });
 
   return caso;
 };
@@ -254,12 +288,17 @@ const render = () => {
         <summary>Resposta do GAS</summary>
         <pre id="debug-response"></pre>
       </details>
+      <details open>
+        <summary>Campos capturados</summary>
+        <pre id="captured-fields"></pre>
+      </details>
     </section>
     <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
     <section class="cv-card"><h3>Relatório diário</h3><textarea id="relatorio" rows="10"></textarea></section>
   </div>`;
 
   const form = document.getElementById('f');
+  if (!(form instanceof HTMLFormElement)) return;
 
   const atualizarUI = () => {
     const casoAtual = obterCasoDoFormulario(form);
