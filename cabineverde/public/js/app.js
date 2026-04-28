@@ -23,6 +23,32 @@ const app = document.getElementById('app');
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
 const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
 
+const MIRROR_FIELDS = [
+  ['nomeCompletoDesaparecido', 'arvore__passo1_nome'],
+  ['municipio', 'arvore__passo1_municipio'],
+  ['sexoGenero', 'arvore__passo1_sexo_genero'],
+  ['idade', 'arvore__passo1_idade'],
+  ['fotoDisponivel', 'arvore__passo1_foto_digital'],
+  ['dispositivoLigado', 'arvore__passo1_dispositivo'],
+  ['telefoneDesaparecido', 'comp__passo1_dispositivo'],
+  ['dataHoraUltimaVisualizacao', 'arvore__passo2_data_hora'],
+  ['localUltimaVisualizacao', 'arvore__passo2_local'],
+  ['roupaUltimaVisualizacao', 'arvore__passo2_roupa'],
+  ['meioTransporte', 'arvore__passo2_transporte'],
+  ['dadosVeiculo', 'arvore__passo2_caracteristicas_transporte'],
+  ['vulnerabilidade', 'arvore__passo4_condicao_mental'],
+  ['suspeitaCrime', 'arvore__passo4_suspeita_crime'],
+  ['camerasResidencia', 'arvore__passo5_cameras_residencia'],
+  ['camerasUltimoLocal', 'arvore__passo5_cameras_ultimo_local']
+];
+
+const MIRROR_FIELD_INDEX = MIRROR_FIELDS.reduce((acc, par) => {
+  par.forEach((nomeCampo) => {
+    acc[nomeCampo] = par[0];
+  });
+  return acc;
+}, {});
+
 const atualizarFeedback = (mensagem, erro = false) => {
   const feedback = document.getElementById('feedback');
   if (!feedback) return;
@@ -33,13 +59,15 @@ const atualizarFeedback = (mensagem, erro = false) => {
 const renderPergunta = (pergunta) => {
   const nomeResposta = `arvore__${pergunta.id}`;
   const nomeComplemento = `comp__${pergunta.id}`;
+  const syncKeyResposta = MIRROR_FIELD_INDEX[nomeResposta] ? ` data-sync-key="${MIRROR_FIELD_INDEX[nomeResposta]}"` : '';
+  const syncKeyComplemento = MIRROR_FIELD_INDEX[nomeComplemento] ? ` data-sync-key="${MIRROR_FIELD_INDEX[nomeComplemento]}"` : '';
   const resposta =
     pergunta.tipo === 'simNao'
-      ? `<select name="${nomeResposta}">${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}</select>`
-      : `<input name="${nomeResposta}" type="text"/>`;
+      ? `<select name="${nomeResposta}"${syncKeyResposta}>${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}</select>`
+      : `<input name="${nomeResposta}" type="text"${syncKeyResposta}/>`;
 
   const complemento = pergunta.complementoLabel
-    ? `<label class="cv-complemento">Complemento (${pergunta.complementoLabel})<input type="text" name="${nomeComplemento}"/></label>`
+    ? `<label class="cv-complemento">Complemento (${pergunta.complementoLabel})<input type="text" name="${nomeComplemento}"${syncKeyComplemento}/></label>`
     : '';
 
   return `<article class="cv-pergunta"><p>${pergunta.pergunta}</p>${resposta}${complemento}</article>`;
@@ -91,6 +119,45 @@ const exibirSubabaPorIdade = (idade) => {
     subaba.classList.toggle('active', subaba.dataset.faixa === faixaEtaria);
   });
   return faixaEtaria;
+};
+
+const lerValorCampo = (campo) => {
+  if (!campo) return '';
+  if (campo.type === 'checkbox') return campo.checked;
+  if (campo.type === 'radio') return campo.checked ? campo.value : null;
+  return campo.value;
+};
+
+const escreverValorCampo = (campo, valor) => {
+  if (!campo) return;
+  if (campo.type === 'checkbox') {
+    campo.checked = Boolean(valor);
+    return;
+  }
+  if (campo.type === 'radio') {
+    campo.checked = campo.value === valor;
+    return;
+  }
+  campo.value = valor ?? '';
+};
+
+const sincronizarCamposDuplicados = (event) => {
+  const origem = event.target;
+  if (!(origem instanceof HTMLElement)) return;
+  const chave = origem.dataset.syncKey;
+  if (!chave) return;
+
+  const form = document.getElementById('f');
+  if (!form) return;
+
+  const valor = lerValorCampo(origem);
+  if (origem.type === 'radio' && valor === null) return;
+
+  const equivalentes = form.querySelectorAll(`[data-sync-key="${chave}"]`);
+  equivalentes.forEach((campo) => {
+    if (campo === origem) return;
+    escreverValorCampo(campo, valor);
+  });
 };
 
 const obterCasoDoFormulario = () => {
@@ -202,12 +269,48 @@ const render = () => {
         <form id="f" class="cv-form">
           <section class="cv-form-section">
             <h3>Dados principais</h3>
+            <p class="cv-section-helper">Preenchimento rápido operacional. Campos equivalentes na árvore oficial são sincronizados automaticamente.</p>
             <div class="cv-grid">
-              <label>Nome da pessoa desaparecida<input name="nomeCompletoDesaparecido" required /></label>
-              <label>Sexo ou gênero<input name="sexoGenero" /></label>
-              <label>Idade<input name="idade" type="number" min="0" required /></label>
-              <label>Município<input name="municipio" required /></label>
-              <label>Data/hora última visualização<input name="dataHoraUltimaVisualizacao" type="datetime-local" /></label>
+              <label>Nome da pessoa desaparecida<input name="nomeCompletoDesaparecido" data-sync-key="nomeCompletoDesaparecido" required /></label>
+              <label>Sexo ou gênero<input name="sexoGenero" data-sync-key="sexoGenero" /></label>
+              <label>Idade<input name="idade" data-sync-key="idade" type="number" min="0" required /></label>
+              <label>Município<input name="municipio" data-sync-key="municipio" required /></label>
+              <label>Data/hora última visualização<input name="dataHoraUltimaVisualizacao" data-sync-key="dataHoraUltimaVisualizacao" type="datetime-local" /></label>
+              <label>Local da última visualização<input name="localUltimaVisualizacao" data-sync-key="localUltimaVisualizacao" /></label>
+              <label>Roupa da última visualização<input name="roupaUltimaVisualizacao" data-sync-key="roupaUltimaVisualizacao" /></label>
+              <label>Meio de transporte<input name="meioTransporte" data-sync-key="meioTransporte" /></label>
+              <label>Dados do veículo/transporte<input name="dadosVeiculo" data-sync-key="dadosVeiculo" /></label>
+              <label>Foto digital disponível?
+                <select name="fotoDisponivel" data-sync-key="fotoDisponivel">
+                  ${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}
+                </select>
+              </label>
+              <label>Há dispositivo vinculado?
+                <select name="dispositivoLigado" data-sync-key="dispositivoLigado">
+                  ${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}
+                </select>
+              </label>
+              <label>Telefone/dispositivo da pessoa<input name="telefoneDesaparecido" data-sync-key="telefoneDesaparecido" /></label>
+              <label>Vulnerabilidade identificada?
+                <select name="vulnerabilidade" data-sync-key="vulnerabilidade">
+                  ${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}
+                </select>
+              </label>
+              <label>Suspeita de crime?
+                <select name="suspeitaCrime" data-sync-key="suspeitaCrime">
+                  ${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}
+                </select>
+              </label>
+              <label>Câmeras na residência?
+                <select name="camerasResidencia" data-sync-key="camerasResidencia">
+                  ${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}
+                </select>
+              </label>
+              <label>Câmeras no último local?
+                <select name="camerasUltimoLocal" data-sync-key="camerasUltimoLocal">
+                  ${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}
+                </select>
+              </label>
               <label>Status<input name="statusCaso" value="Em triagem" /></label>
             </div>
           </section>
@@ -248,7 +351,13 @@ const render = () => {
     document.getElementById('payload').textContent = JSON.stringify(gerarPayloadSheets(caso), null, 2);
   };
 
-  form.addEventListener('input', atualizarUI);
+  const sincronizarEAtualizar = (event) => {
+    sincronizarCamposDuplicados(event);
+    atualizarUI();
+  };
+
+  form.addEventListener('input', sincronizarEAtualizar);
+  form.addEventListener('change', sincronizarEAtualizar);
   atualizarUI();
 
   form.addEventListener('submit', async (e) => {

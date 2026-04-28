@@ -73,6 +73,17 @@ Foi adicionado log de auditoria local com:
 - Payload de integração com Google Sheets não teve quebra de contrato.
 - Apps Script em `cabineverde/GAS/` permanece compatível.
 
+## Espelhamento entre preenchimento rápido e árvore oficial
+
+A interface operacional mantém os campos repetidos de propósito:
+
+- **Dados principais**: preenchimento rápido para despacho e coleta inicial.
+- **Árvore oficial**: questionário completo para consolidação do caso.
+
+Para evitar divergências, os campos equivalentes funcionam com espelhamento bidirecional (ex.: nome, município, sexo/gênero, idade, última visualização, vulnerabilidade, suspeita de crime e apoio tecnológico). Assim, alteração em qualquer lado atualiza automaticamente o campo correspondente no outro.
+
+O envio para backend continua consolidado: apenas o valor final sincronizado é usado no payload, sem alteração de endpoint, contrato `no-cors` ou estrutura de 51 colunas.
+
 ## Camada de indicadores operacionais estruturados
 
 A triagem agora deriva um objeto interno `indicadoresOperacionais` a partir das respostas da árvore e do subfluxo etário, mantendo compatibilidade total com o payload atual de 51 colunas.
