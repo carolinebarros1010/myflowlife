@@ -40,6 +40,9 @@ cd cabineverde
 npm test
 ```
 
+Para evitar erro de tipagem nos testes, é necessário instalar @types/node.
+Em ambientes restritos sem acesso ao npm, o projeto inclui um shim local de tipos em `tests/node-test-shim.d.ts`.
+
 ## Configuração da integração com Google Sheets
 Variável global suportada:
 - `CABINE_VERDE_SPREADSHEET_ID`
