@@ -3,11 +3,10 @@
 ## Endpoint principal (produção)
 A referência oficial da operação Cabine Verde é:
 
-`https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4n0116w7VHup3MDk_3TNkfUB_9T-x1kL_a-EKhqtmDdQ/exec`
+`https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec`
 
 - `GET /exec`: healthcheck simples (`doGet`).
-- `GET /exec?idCaso=...`: busca de caso por `idCaso`.
-- `POST /exec`: criação/atualização de casos na aba `Desaparecidos` (`doPost`).
+- `POST /exec`: criação/atualização de casos na aba `Desaparecidos` (`doPost`, única aba permitida).
 
 ## Estrutura operacional da planilha
 A estrutura é garantida pelo Apps Script (`garantirEstruturaPlanilha`) sempre que ocorre um `POST`.
@@ -154,7 +153,7 @@ Regras de integração:
 
 ## Exemplo de requisição (POST)
 ```bash
-curl -X POST 'https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4n0116w7VHup3MDk_3TNkfUB_9T-x1kL_a-EKhqtmDdQ/exec' \
+curl -X POST 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec' \
   -H 'Content-Type: application/json' \
   --data @GAS/MockPayload.json
 ```
@@ -183,7 +182,7 @@ Resposta esperada ao atualizar (exemplo):
 
 ## Healthcheck (GET)
 ```bash
-curl 'https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4n0116w7VHup3MDk_3TNkfUB_9T-x1kL_a-EKhqtmDdQ/exec'
+curl 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec'
 ```
 
 Resposta esperada (exemplo):
@@ -191,27 +190,7 @@ Resposta esperada (exemplo):
 {
   "ok": true,
   "service": "cabineverde",
-  "message": "Cabine Verde Sheets endpoint ativo"
-}
-```
-
-## Busca por ID (GET)
-```bash
-curl 'https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4n0116w7VHup3MDk_3TNkfUB_9T-x1kL_a-EKhqtmDdQ/exec?idCaso=CV-2026-0001'
-```
-
-Resposta esperada quando encontrado (exemplo):
-```json
-{
-  "ok": true,
-  "action": "found",
-  "idCaso": "CV-2026-0001",
-  "linha": 42,
-  "data": {
-    "idCaso": "CV-2026-0001",
-    "statusCaso": "Em busca"
-  },
-  "timestamp": "2026-04-23T12:10:00.000Z"
+  "message": "Endpoint ativo"
 }
 ```
 
@@ -222,6 +201,6 @@ Resposta esperada quando encontrado (exemplo):
 2. **Atualizar caso**
    - Reenviar o mesmo `idCaso` com novo `statusCaso` e/ou dados operacionais de localização.
    - Validar retorno `action: "updated"` e ausência de linha duplicada.
-3. **Buscar caso**
-   - Consultar `GET /exec?idCaso=...`.
-   - Confirmar retorno `action: "found"` com dados mapeados por nome de coluna.
+3. **Healthcheck do endpoint**
+   - Consultar `GET /exec`.
+   - Confirmar retorno JSON: `{ ok: true, service: "cabineverde", message: "Endpoint ativo" }`.

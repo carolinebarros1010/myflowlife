@@ -55,8 +55,7 @@ function doGet() {
   return toJsonOutput({
     ok: true,
     service: 'cabineverde',
-    message: 'Endpoint ativo',
-    timestamp: new Date().toISOString()
+    message: 'Endpoint ativo'
   });
 }
 
