@@ -378,7 +378,7 @@ const render = () => {
       .join(' | ');
 
     if (retorno.ok) {
-      atualizarFeedback(retorno.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso');
+      atualizarFeedback(retorno.message || (retorno.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso'));
       casos.unshift(caso);
       localStorage.setItem('cabine-verde-casos', JSON.stringify(casos));
     } else {

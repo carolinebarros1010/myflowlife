@@ -159,14 +159,6 @@ export const gerarPayloadSheets = (caso) => {
   };
 };
 
-const parseJsonSeguro = async (resposta) => {
-  try {
-    return await resposta.json();
-  } catch {
-    return {};
-  }
-};
-
 const contemErroDoGet = (texto = '') => {
   const conteudo = String(texto || '').toLowerCase();
   return conteudo.includes('doget') || conteudo.includes('function doget') || conteudo.includes('script function not found');
@@ -175,28 +167,19 @@ const contemErroDoGet = (texto = '') => {
 export const salvarCasoSheets = async (caso) => {
   try {
     const payload = gerarPayloadSheets(caso);
-    const resposta = await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, {
+    await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, {
       method: 'POST',
+      mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
 
-    const body = await parseJsonSeguro(resposta);
-    if (!resposta.ok || body.ok === false) {
-      const mensagemBruta = body.error || body.message || '';
-      const mensagem = contemErroDoGet(mensagemBruta)
-        ? 'Backend GAS não publicado ou doGet ausente'
-        : 'Falha ao salvar caso';
-      return { ok: false, status: resposta.status, message: mensagem, detalhe: mensagemBruta || undefined, ...body };
-    }
-
     return {
       ok: true,
-      status: resposta.status,
-      message: body.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso',
-      ...body
+      mode: 'no-cors',
+      message: 'Caso enviado para processamento (modo silencioso)'
     };
   } catch {
     return { ok: false, message: 'Falha ao salvar caso' };
