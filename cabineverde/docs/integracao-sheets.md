@@ -139,6 +139,10 @@ Sempre que disponível, exibir também:
 
 ## Regras de envio no front (`/cabineverde/`)
 - O botão **Salvar caso** executa submissão real via `fetch(..., { method: 'POST' })`.
+- O envio do frontend em produção usa `mode: 'no-cors'` para evitar bloqueio CORS no navegador sem backend intermediário.
+- Em `no-cors`, o frontend não lê `response.ok` nem `response.json`; o retorno exibido ao operador é: `Caso enviado para processamento (modo silencioso)`.
+- O formulário principal usa **somente um** `<form id="f">`.
+- Os campos críticos (`nomeCompletoDesaparecido`, `municipio`, `nomeSolicitante`, `telefoneSolicitante`) devem existir **uma única vez** dentro do formulário e ser lidos por `querySelector` no submit.
 - O formulário publicado em `/cabineverde/` possui seção dedicada **Dados do Solicitante** com os campos:
   - `nomeSolicitante`
   - `vinculoSolicitante`

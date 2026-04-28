@@ -30,22 +30,21 @@ test('payload completo com 51 colunas para Desaparecidos', () => {
   assert.equal(payload.colunas[50], 'observacoesOperacionais');
 });
 
-test('salvarCasoSheets usa POST + JSON no endpoint oficial', async () => {
+test('salvarCasoSheets usa POST no-cors + JSON no endpoint oficial', async () => {
   const originalFetch = globalThis.fetch;
   let fetchArgs;
   globalThis.fetch = async (...args) => {
     fetchArgs = args;
-    return new Response(JSON.stringify({ ok: true, action: 'created', idCaso: 'CV-2026-0001', linha: 2 }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return new Response(null, { status: 204 });
   };
 
   const retorno = await salvarCasoSheets({ nomeCompletoDesaparecido: 'Teste', idade: 18 });
   assert.equal(retorno.ok, true);
-  assert.equal(retorno.action, 'created');
+  assert.equal(retorno.mode, 'no-cors');
+  assert.equal(retorno.message, 'Caso enviado para processamento (modo silencioso)');
   assert.equal(fetchArgs[0], ENDPOINT_OFICIAL_APPS_SCRIPT);
   assert.equal(fetchArgs[1].method, 'POST');
+  assert.equal(fetchArgs[1].mode, 'no-cors');
   assert.equal(fetchArgs[1].headers['Content-Type'], 'application/json');
 
   globalThis.fetch = originalFetch;

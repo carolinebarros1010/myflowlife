@@ -177,16 +177,24 @@ const obterCasoDoFormulario = () => {
     throw new Error('Formulário principal não encontrado.');
   }
 
-  const data = new FormData(document.getElementById('f'));
-  const municipio = String(data.get('municipio') || '').trim();
-  const nomeCompletoDesaparecido = String(data.get('nomeCompletoDesaparecido') || '').trim();
-  const nomeSolicitante = String(data.get('nomeSolicitante') || '').trim();
-  const telefoneSolicitante = String(data.get('telefoneSolicitante') || '').trim();
+  const form = formulario;
+  const data = new FormData(form);
+  const nomeCompletoDesaparecido = form.querySelector('[name="nomeCompletoDesaparecido"]')?.value?.trim() || '';
+  const municipio = form.querySelector('[name="municipio"]')?.value?.trim() || '';
+  const nomeSolicitante = form.querySelector('[name="nomeSolicitante"]')?.value?.trim() || '';
+  const telefoneSolicitante = form.querySelector('[name="telefoneSolicitante"]')?.value?.trim() || '';
+  console.log('FORM ELEMENT DEBUG', form);
+  console.log('INPUTS DEBUG', {
+    nomeInput: form.querySelector('[name="nomeCompletoDesaparecido"]'),
+    municipioInput: form.querySelector('[name="municipio"]'),
+    solicitanteInput: form.querySelector('[name="nomeSolicitante"]'),
+    telefoneInput: form.querySelector('[name="telefoneSolicitante"]')
+  });
   const caso = {
-    municipio: municipio,
-    nomeCompletoDesaparecido: nomeCompletoDesaparecido,
-    nomeSolicitante: nomeSolicitante,
-    telefoneSolicitante: telefoneSolicitante,
+    municipio,
+    nomeCompletoDesaparecido,
+    nomeSolicitante,
+    telefoneSolicitante,
     vinculoSolicitante: String(data.get('vinculoSolicitante') || '').trim(),
     idade: Number(data.get('idade') || 0),
     localUltimaVisualizacao: String(data.get('localUltimaVisualizacao') || '').trim(),
@@ -221,6 +229,27 @@ const obterCasoDoFormulario = () => {
   });
 
   return caso;
+};
+
+const validarEstruturaFormulario = (form) => {
+  if (!(form instanceof HTMLFormElement)) {
+    return { valido: false, erro: 'Formulário principal não encontrado.' };
+  }
+
+  const camposObrigatorios = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
+  const erros = [];
+
+  camposObrigatorios.forEach((name) => {
+    const encontrados = form.querySelectorAll(`[name="${name}"]`);
+    if (encontrados.length !== 1) {
+      erros.push(`Campo ${name} deve existir exatamente uma vez dentro do formulário (encontrado: ${encontrados.length}).`);
+    }
+  });
+
+  return {
+    valido: erros.length === 0,
+    erro: erros.join(' ')
+  };
 };
 
 const validarCamposMinimos = (caso) => {
@@ -304,6 +333,12 @@ const render = () => {
 
   const form = document.getElementById('f');
   if (!(form instanceof HTMLFormElement)) return;
+  const validacaoEstrutura = validarEstruturaFormulario(form);
+  if (!validacaoEstrutura.valido) {
+    atualizarFeedback(validacaoEstrutura.erro, true);
+    console.error('FORM STRUCTURE ERROR', validacaoEstrutura.erro);
+    return;
+  }
 
   const atualizarUI = () => {
     const casoAtual = obterCasoDoFormulario();
@@ -343,7 +378,7 @@ const render = () => {
       .join(' | ');
 
     if (retorno.ok) {
-      atualizarFeedback(retorno.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso');
+      atualizarFeedback(retorno.message || (retorno.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso'));
       casos.unshift(caso);
       localStorage.setItem('cabine-verde-casos', JSON.stringify(casos));
     } else {
