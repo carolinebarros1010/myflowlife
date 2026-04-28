@@ -19,29 +19,116 @@ const mensagemCamposMinimos =
 const textosFaixa = {
   Criança: {
     titulo: 'Bloco Criança (0–7)',
-    motivo: 'Apareceu porque a idade informada está entre 0 e 7 anos.',
-    perguntas: ['Estava sob supervisão direta?', 'Há disputa familiar?', 'Há adulto desconhecido ou veículo suspeito?']
+    motivo: 'Apareceu porque a idade informada está entre 0 e 7 anos.'
   },
   'Pré-adolescente': {
     titulo: 'Bloco Pré-adolescente (8–11)',
-    motivo: 'Apareceu porque a idade informada está entre 8 e 11 anos.',
-    perguntas: ['Desaparecimento após escola?', 'Histórico de saída sem autorização?', 'Suspeita de aliciamento virtual?']
+    motivo: 'Apareceu porque a idade informada está entre 8 e 11 anos.'
   },
   Adolescente: {
     titulo: 'Bloco Adolescente (12–17)',
-    motivo: 'Apareceu porque a idade informada está entre 12 e 17 anos.',
-    perguntas: ['Há indícios de fuga voluntária?', 'Houve conflito familiar/escolar recente?', 'Há ameaça em rede social?']
+    motivo: 'Apareceu porque a idade informada está entre 12 e 17 anos.'
   },
   Adulto: {
     titulo: 'Bloco Adulto (18–59)',
-    motivo: 'Apareceu porque a idade informada está entre 18 e 59 anos.',
-    perguntas: ['Mudança abrupta de comportamento?', 'Histórico de conflito prévio?', 'Há indícios de violência?']
+    motivo: 'Apareceu porque a idade informada está entre 18 e 59 anos.'
   },
   Idoso: {
     titulo: 'Bloco Idoso (60+)',
-    motivo: 'Apareceu porque a idade informada é igual ou maior que 60 anos.',
-    perguntas: ['Há demência/desorientação?', 'Uso de medicação essencial?', 'Há limitação de locomoção?']
+    motivo: 'Apareceu porque a idade informada é igual ou maior que 60 anos.'
   }
+};
+
+const OPCOES_RESPOSTAS_DINAMICAS = ['', 'Sim', 'Não', 'Não informado'];
+
+const perguntasDinamicasPorFaixa = {
+  Criança: [
+    { nome: 'criancaSupervisaoDireta', pergunta: 'Estava sob supervisão direta?' },
+    { nome: 'criancaConsegueInformarDados', pergunta: 'Consegue informar dados pessoais/endereço?' },
+    { nome: 'criancaCondicaoNeurodesenvolvimento', pergunta: 'Há condição de neurodesenvolvimento relevante?' },
+    { nome: 'criancaDisputaFamiliar', pergunta: 'Há disputa familiar?' },
+    { nome: 'criancaLocalDesaparecimento', pergunta: 'Desapareceu em local de alta circulação?' },
+    { nome: 'criancaAdultoVeiculoSuspeito', pergunta: 'Há adulto desconhecido ou veículo suspeito?' }
+  ],
+  'Pré-adolescente': [
+    { nome: 'preadolescenteContextoDesaparecimento', pergunta: 'Desaparecimento ocorreu em contexto escolar/retorno?' },
+    { nome: 'preadolescenteHistoricoSairSozinho', pergunta: 'Há histórico de sair sozinho?' },
+    { nome: 'preadolescenteAliciamentoVirtual', pergunta: 'Há indício de aliciamento virtual?' },
+    { nome: 'preadolescenteConflitoRecente', pergunta: 'Houve conflito recente?' },
+    { nome: 'preadolescenteDisputaResponsaveis', pergunta: 'Há disputa entre responsáveis?' }
+  ],
+  Adolescente: [
+    { nome: 'adolescenteHistoricoSairSemAutorizacao', pergunta: 'Há histórico de sair sem autorização?' },
+    { nome: 'adolescenteDiscussaoPrevia', pergunta: 'Houve discussão prévia ao desaparecimento?' },
+    { nome: 'adolescenteIndicioFuga', pergunta: 'Há indício de fuga voluntária?' },
+    { nome: 'adolescenteTerceirosRedesAmeaca', pergunta: 'Há terceiros/redes sociais com ameaça?' },
+    { nome: 'adolescenteSofrimentoPsiquico', pergunta: 'Há sinais de sofrimento psíquico?' },
+    { nome: 'adolescenteLitigioFamiliar', pergunta: 'Há litígio familiar?' }
+  ],
+  Adulto: [
+    { nome: 'adultoMudancaComportamento', pergunta: 'Houve mudança brusca de comportamento?' },
+    { nome: 'adultoCriseEmocionalMedicacao', pergunta: 'Há crise emocional/psíquica ou ajuste de medicação?' },
+    { nome: 'adultoHistoricoDesaparecimentoVoluntario', pergunta: 'Há histórico de desaparecimento voluntário?' },
+    { nome: 'adultoIndiciosViolenciaDividaAmeaca', pergunta: 'Há indícios de violência, dívida ou ameaça?' },
+    { nome: 'adultoDesaparecimentoTrajetoRotina', pergunta: 'Desapareceu em trajeto de rotina?' },
+    { nome: 'adultoDependenciaTratamento', pergunta: 'Depende de tratamento ou medicação contínua?' }
+  ],
+  Idoso: [
+    { nome: 'idosoAlzheimerDemenciaDesorientacao', pergunta: 'Há Alzheimer/demência/desorientação?' },
+    { nome: 'idosoLimitacaoComunicacaoLocomocao', pergunta: 'Há limitação de comunicação/locomoção?' },
+    { nome: 'idosoMedicacaoEssencial', pergunta: 'Faz uso de medicação essencial?' },
+    { nome: 'idosoCostumaSairSozinho', pergunta: 'Costuma sair sozinho?' },
+    { nome: 'idosoDesapareceuEmRotina', pergunta: 'Desapareceu em atividade de rotina?' },
+    { nome: 'idosoHistoricoDesorientacao', pergunta: 'Há histórico de desorientação?' }
+  ]
+};
+
+const alertasDinamicos = {
+  criancaAdultoVeiculoSuspeito: 'Alerta: adulto desconhecido/veículo suspeito informado.',
+  preadolescenteAliciamentoVirtual: 'Alerta: possível aliciamento virtual.',
+  adolescenteTerceirosRedesAmeaca: 'Alerta: ameaça de terceiros/redes sociais.',
+  adolescenteSofrimentoPsiquico: 'Alerta: sofrimento psíquico informado.',
+  adultoIndiciosViolenciaDividaAmeaca: 'Alerta: indícios de violência/dívida/ameaça.',
+  adultoCriseEmocionalMedicacao: 'Alerta: crise emocional/medicação em curso.',
+  idosoAlzheimerDemenciaDesorientacao: 'Alerta: desorientação cognitiva em idoso.',
+  idosoMedicacaoEssencial: 'Alerta: medicação essencial em idoso.'
+};
+
+const obterRespostasPreenchidas = (respostasDinamicas = {}) =>
+  Object.entries(respostasDinamicas).filter(([chave, valor]) => chave !== 'faixaEtaria' && String(valor || '').trim());
+
+const obterAlertasRespostasDinamicas = (respostasDinamicas = {}) =>
+  Object.entries(alertasDinamicos)
+    .filter(([campo]) => respostasDinamicas[campo] === 'Sim')
+    .map(([, alerta]) => alerta);
+
+const montarTextoRespostasDinamicas = (respostasDinamicas = {}) => {
+  const faixaEtaria = respostasDinamicas.faixaEtaria || '';
+  const perguntasFaixa = perguntasDinamicasPorFaixa[faixaEtaria] || [];
+  const respostasPreenchidas = obterRespostasPreenchidas(respostasDinamicas);
+
+  if (!faixaEtaria || respostasPreenchidas.length === 0) return '';
+
+  const mapaPerguntas = perguntasFaixa.reduce((acc, item) => {
+    acc[item.nome] = item.pergunta;
+    return acc;
+  }, {});
+
+  const linhasPerguntas = respostasPreenchidas.map(([campo, resposta]) => `${mapaPerguntas[campo] || campo}: ${resposta}`);
+
+  return ['[RESPOSTAS DINÂMICAS]', `Faixa etária: ${faixaEtaria}`, ...linhasPerguntas].join('\n');
+};
+
+const montarObservacoesOperacionais = (observacaoOperador = '', respostasDinamicas = {}) => {
+  const blocoDinamico = montarTextoRespostasDinamicas(respostasDinamicas);
+  const blocoOperador = String(observacaoOperador || '').trim();
+
+  if (blocoDinamico && blocoOperador) {
+    return `${blocoDinamico}\n\n[OBSERVAÇÕES DO OPERADOR]\n${blocoOperador}`;
+  }
+
+  if (blocoDinamico) return blocoDinamico;
+  return blocoOperador;
 };
 
 const atualizarFeedback = (mensagem, erro = false) => {
@@ -69,16 +156,16 @@ const atualizarPainelDebug = ({ payload = null, status = '', resposta = null } =
 const atualizarCamposCapturados = (campos) => {
   const camposEl = document.getElementById('captured-fields');
   if (!camposEl) return;
-  camposEl.textContent = `Campos capturados:
-- Nome desaparecido: ${campos.nomeCompletoDesaparecido || '-'}
-- Município: ${campos.municipio || '-'}
-- Nome solicitante: ${campos.nomeSolicitante || '-'}
-- Telefone solicitante: ${campos.telefoneSolicitante || '-'}`;
+  camposEl.textContent = `Campos capturados:\n- Nome desaparecido: ${campos.nomeCompletoDesaparecido || '-'}\n- Município: ${campos.municipio || '-'}\n- Nome solicitante: ${campos.nomeSolicitante || '-'}\n- Telefone solicitante: ${campos.telefoneSolicitante || '-'}`;
 };
 
 const atualizarResumo = (caso = {}) => {
   const resumo = document.getElementById('resumo');
   if (!resumo) return;
+  const respostasDinamicas = caso.respostasDinamicas || {};
+  const respostasPreenchidas = obterRespostasPreenchidas(respostasDinamicas);
+  const alertasRespostasDinamicas = obterAlertasRespostasDinamicas(respostasDinamicas);
+
   const linhas = [
     ['Nome', caso.nomeCompletoDesaparecido || '-'],
     ['Idade/Faixa', `${caso.idade || 0} / ${caso.faixaEtaria || calcularFaixaEtaria(Number(caso.idade || 0))}`],
@@ -91,7 +178,10 @@ const atualizarResumo = (caso = {}) => {
     ['Suspeita de crime', caso.suspeitaCrime ? 'Sim' : 'Não'],
     ['Foto disponível', caso.fotoDisponivel ? 'Sim' : 'Não'],
     ['Apoio tecnológico', caso.camerasResidencia || caso.camerasUltimoLocal ? 'Sim' : 'Não'],
-    ['Vulnerabilidade', caso.vulnerabilidade ? 'Sim' : 'Não']
+    ['Vulnerabilidade', caso.vulnerabilidade ? 'Sim' : 'Não'],
+    ['Faixa dinâmica', respostasDinamicas.faixaEtaria || caso.faixaEtaria || '-'],
+    ['Respostas dinâmicas', `${respostasPreenchidas.length} preenchidas`],
+    ['Alertas dinâmicos', alertasRespostasDinamicas.join(' | ') || '-']
   ];
 
   resumo.innerHTML = linhas
@@ -105,13 +195,27 @@ const renderBlocosDinamicos = (caso = {}) => {
 
   const faixa = calcularFaixaEtaria(Number(caso.idade || 0));
   const blocoFaixa = textosFaixa[faixa];
+  const perguntasFaixa = perguntasDinamicasPorFaixa[faixa] || [];
 
   const blocos = [
     `
     <section class="cv-dynamic-block" aria-live="polite">
       <h4>${blocoFaixa.titulo}</h4>
       <p class="cv-dynamic-reason">${blocoFaixa.motivo}</p>
-      <ul>${blocoFaixa.perguntas.map((pergunta) => `<li>${pergunta}</li>`).join('')}</ul>
+      <div class="cv-dynamic-fields">
+        ${perguntasFaixa
+          .map(({ nome, pergunta }) => {
+            const valorAtual = String(caso.respostasDinamicas?.[nome] || '');
+            return `
+              <label class="cv-dynamic-field-row">${pergunta}
+                <select name="${nome}">
+                  ${OPCOES_RESPOSTAS_DINAMICAS.map((opcao) => `<option value="${opcao}" ${valorAtual === opcao ? 'selected' : ''}>${opcao || 'Selecione'}</option>`).join('')}
+                </select>
+              </label>
+            `;
+          })
+          .join('')}
+      </div>
     </section>
     `
   ];
@@ -183,13 +287,6 @@ const obterCasoDoFormulario = () => {
   const municipio = form.querySelector('[name="municipio"]')?.value?.trim() || '';
   const nomeSolicitante = form.querySelector('[name="nomeSolicitante"]')?.value?.trim() || '';
   const telefoneSolicitante = form.querySelector('[name="telefoneSolicitante"]')?.value?.trim() || '';
-  console.log('FORM ELEMENT DEBUG', form);
-  console.log('INPUTS DEBUG', {
-    nomeInput: form.querySelector('[name="nomeCompletoDesaparecido"]'),
-    municipioInput: form.querySelector('[name="municipio"]'),
-    solicitanteInput: form.querySelector('[name="nomeSolicitante"]'),
-    telefoneInput: form.querySelector('[name="telefoneSolicitante"]')
-  });
   const caso = {
     municipio,
     nomeCompletoDesaparecido,
@@ -198,8 +295,10 @@ const obterCasoDoFormulario = () => {
     vinculoSolicitante: String(data.get('vinculoSolicitante') || '').trim(),
     idade: Number(data.get('idade') || 0),
     localUltimaVisualizacao: String(data.get('localUltimaVisualizacao') || '').trim(),
-    statusCaso: String(data.get('statusCaso') || 'Em triagem').trim()
+    statusCaso: String(data.get('statusCaso') || 'Em triagem').trim(),
+    observacoesOperador: String(data.get('observacoesOperador') || '').trim()
   };
+
   [
     'vulnerabilidade',
     'suspeitaCrime',
@@ -211,16 +310,23 @@ const obterCasoDoFormulario = () => {
   ].forEach((k) => (caso[k] = data.get(k) === 'on'));
 
   caso.faixaEtaria = calcularFaixaEtaria(caso.idade);
+  const perguntasFaixa = perguntasDinamicasPorFaixa[caso.faixaEtaria] || [];
+  const respostasDinamicas = perguntasFaixa.reduce(
+    (acc, { nome }) => {
+      const valor = String(data.get(nome) || '').trim();
+      if (valor) acc[nome] = valor;
+      return acc;
+    },
+    { faixaEtaria: caso.faixaEtaria }
+  );
+
+  caso.respostasDinamicas = respostasDinamicas;
+  caso.observacoesOperacionais = montarObservacoesOperacionais(caso.observacoesOperador, respostasDinamicas);
   caso.classificacaoRisco = calcularRisco(caso);
   caso.prioridade = calcularPrioridade(caso);
   caso.aptoCabineVerde = calcularAptoCabineVerde(caso);
   caso.acaoSugerida = caso.classificacaoRisco === 'Alto risco' ? 'Acionar protocolo prioritário.' : 'Monitorar e atualizar.';
-  console.log('FORM DATA DEBUG', {
-    municipio,
-    nomeCompletoDesaparecido,
-    nomeSolicitante,
-    telefoneSolicitante
-  });
+
   atualizarCamposCapturados({
     municipio,
     nomeCompletoDesaparecido,
@@ -295,6 +401,13 @@ const render = () => {
             <h3>Blocos dinâmicos da triagem</h3>
             <p>Os blocos aparecem automaticamente conforme idade e respostas operacionais.</p>
             <div id="blocosDinamicos"></div>
+          </section>
+
+          <section class="cv-form-section">
+            <h3>Observações operacionais do operador</h3>
+            <label>Observações
+              <textarea name="observacoesOperador" rows="4" placeholder="Descreva contexto complementar, diligências e informações úteis."></textarea>
+            </label>
           </section>
 
           <button type="submit">Salvar caso</button>

@@ -58,8 +58,15 @@ textarea { width: 100%; box-sizing: border-box; }
   margin: 8px 0;
 }
 .cv-dynamic-block h4 { margin: 0 0 6px 0; }
-.cv-dynamic-block ul { margin: 0; padding-left: 18px; }
 .cv-dynamic-reason { margin: 0 0 8px 0; font-size: 13px; color: #29473f; }
+.cv-dynamic-fields { display: grid; gap: 8px; }
+.cv-dynamic-field-row {
+  background: #fff;
+  border: 1px solid #d1ded9;
+  border-radius: 8px;
+  padding: 8px;
+}
+.cv-dynamic-field-row select { margin-top: 4px; }
 .cv-action-footer { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
 .cv-button { background: var(--brand); color: #fff; cursor: pointer; border: none; }
 .cv-button--secondary { background: #1e3e65; }
