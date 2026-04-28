@@ -54,6 +54,7 @@ function doPost(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName('Desaparecidos');
+    var COL_INDEX_ID = 1; // coluna A
 
     if (!sheet) {
       throw new Error('Aba Desaparecidos não encontrada');
@@ -70,11 +71,39 @@ function doPost(e) {
       throw new Error('Payload inválido');
     }
 
-    // 🔥 GRAVA DIRETO
-    sheet.appendRow(data.valores);
+    var idCaso = data && data.payload ? data.payload.idCaso : '';
 
-    // 🔥 LOG SIMPLES
-    logGAS('persistencia_desaparecidos', true, 'linha inserida', raw);
+    try {
+      var lastRow = sheet.getLastRow();
+      var linhaExistente = -1;
+
+      if (lastRow > 1) {
+        var ids = sheet.getRange(2, COL_INDEX_ID, lastRow - 1, 1).getValues();
+
+        for (var i = 0; i < ids.length; i += 1) {
+          if (ids[i][0] === idCaso) {
+            linhaExistente = i + 2;
+            break;
+          }
+        }
+      }
+
+      if (linhaExistente !== -1) {
+        sheet.getRange(linhaExistente, 1, 1, data.valores.length).setValues([data.valores]);
+        logGAS('update_desaparecidos', true, 'linha atualizada', idCaso);
+      } else {
+        sheet.appendRow(data.valores);
+        logGAS('create_desaparecidos', true, 'linha criada', idCaso);
+      }
+    } catch (errUpdate) {
+      sheet.appendRow(data.valores);
+      logGAS(
+        'fallback_append',
+        true,
+        'erro no update, append executado',
+        errUpdate && errUpdate.message ? errUpdate.message : String(errUpdate)
+      );
+    }
 
     return ContentService
       .createTextOutput(JSON.stringify({ ok: true }))
