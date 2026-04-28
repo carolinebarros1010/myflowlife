@@ -12,12 +12,32 @@ import {
 const app = document.getElementById('app');
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
 
-const perguntas = {
-  Criança: ['Estava sob supervisão direta?', 'Há disputa familiar?'],
-  'Pré-adolescente': ['Desaparecimento após escola?', 'Suspeita de aliciamento virtual?'],
-  Adolescente: ['Indícios de fuga voluntária?', 'Ameaça em rede social?'],
-  Adulto: ['Mudança abrupta de comportamento?', 'Indícios de violência?'],
-  Idoso: ['Demência/desorientação?', 'Uso de medicação essencial?']
+const textosFaixa = {
+  Criança: {
+    titulo: 'Bloco Criança (0–7)',
+    motivo: 'Apareceu porque a idade informada está entre 0 e 7 anos.',
+    perguntas: ['Estava sob supervisão direta?', 'Há disputa familiar?', 'Há adulto desconhecido ou veículo suspeito?']
+  },
+  'Pré-adolescente': {
+    titulo: 'Bloco Pré-adolescente (8–11)',
+    motivo: 'Apareceu porque a idade informada está entre 8 e 11 anos.',
+    perguntas: ['Desaparecimento após escola?', 'Histórico de saída sem autorização?', 'Suspeita de aliciamento virtual?']
+  },
+  Adolescente: {
+    titulo: 'Bloco Adolescente (12–17)',
+    motivo: 'Apareceu porque a idade informada está entre 12 e 17 anos.',
+    perguntas: ['Há indícios de fuga voluntária?', 'Houve conflito familiar/escolar recente?', 'Há ameaça em rede social?']
+  },
+  Adulto: {
+    titulo: 'Bloco Adulto (18–59)',
+    motivo: 'Apareceu porque a idade informada está entre 18 e 59 anos.',
+    perguntas: ['Mudança abrupta de comportamento?', 'Histórico de conflito prévio?', 'Há indícios de violência?']
+  },
+  Idoso: {
+    titulo: 'Bloco Idoso (60+)',
+    motivo: 'Apareceu porque a idade informada é igual ou maior que 60 anos.',
+    perguntas: ['Há demência/desorientação?', 'Uso de medicação essencial?', 'Há limitação de locomoção?']
+  }
 };
 
 const atualizarFeedback = (mensagem, erro = false) => {
@@ -27,57 +47,181 @@ const atualizarFeedback = (mensagem, erro = false) => {
   feedback.classList.toggle('danger', erro);
 };
 
+const atualizarResumo = (caso = {}) => {
+  const resumo = document.getElementById('resumo');
+  if (!resumo) return;
+  const linhas = [
+    ['Nome', caso.nomeCompletoDesaparecido || '-'],
+    ['Idade/Faixa', `${caso.idade || 0} / ${caso.faixaEtaria || calcularFaixaEtaria(Number(caso.idade || 0))}`],
+    ['Risco', caso.classificacaoRisco || calcularRisco(caso)],
+    ['Prioridade', caso.prioridade || calcularPrioridade(caso)],
+    ['Apto Cabine Verde', caso.aptoCabineVerde ? 'Sim' : 'Não'],
+    ['Suspeita de crime', caso.suspeitaCrime ? 'Sim' : 'Não'],
+    ['Foto disponível', caso.fotoDisponivel ? 'Sim' : 'Não'],
+    ['Apoio tecnológico', caso.camerasResidencia || caso.camerasUltimoLocal ? 'Sim' : 'Não'],
+    ['Vulnerabilidade', caso.vulnerabilidade ? 'Sim' : 'Não']
+  ];
+
+  resumo.innerHTML = linhas
+    .map(([rotulo, valor]) => `<dt>${rotulo}</dt><dd>${valor}</dd>`)
+    .join('');
+};
+
+const renderBlocosDinamicos = (caso = {}) => {
+  const container = document.getElementById('blocosDinamicos');
+  if (!container) return;
+
+  const faixa = calcularFaixaEtaria(Number(caso.idade || 0));
+  const blocoFaixa = textosFaixa[faixa];
+
+  const blocos = [
+    `
+    <section class="cv-dynamic-block" aria-live="polite">
+      <h4>${blocoFaixa.titulo}</h4>
+      <p class="cv-dynamic-reason">${blocoFaixa.motivo}</p>
+      <ul>${blocoFaixa.perguntas.map((pergunta) => `<li>${pergunta}</li>`).join('')}</ul>
+    </section>
+    `
+  ];
+
+  if (caso.suspeitaCrime) {
+    blocos.push(`
+      <section class="cv-dynamic-block">
+        <h4>Bloco de indícios criminais</h4>
+        <p class="cv-dynamic-reason">Apareceu porque “suspeita de crime” foi marcado como sim.</p>
+        <label>Descreva os indícios observados
+          <textarea name="indiciosCriminais" placeholder="Ex.: ameaça prévia, conflito, local de risco..."></textarea>
+        </label>
+      </section>
+    `);
+  }
+
+  if (caso.fotoDisponivel) {
+    blocos.push(`
+      <section class="cv-dynamic-block">
+        <h4>Bloco de imagem/foto</h4>
+        <p class="cv-dynamic-reason">Apareceu porque “foto disponível” foi marcado como sim.</p>
+        <label>Link da foto
+          <input name="linkFoto" type="url" placeholder="https://..." value="${caso.linkFoto || ''}"/>
+        </label>
+      </section>
+    `);
+  }
+
+  if (caso.camerasResidencia || caso.camerasUltimoLocal) {
+    blocos.push(`
+      <section class="cv-dynamic-block">
+        <h4>Bloco de apoio tecnológico</h4>
+        <p class="cv-dynamic-reason">Apareceu porque há câmeras na residência ou no último local.</p>
+        <label>Detalhes do apoio tecnológico
+          <textarea name="detalhesApoioTecnologico" placeholder="Ex.: tipo de câmera, horário, contato de acesso..."></textarea>
+        </label>
+      </section>
+    `);
+  }
+
+  if (caso.vulnerabilidade) {
+    blocos.push(`
+      <section class="cv-dynamic-block">
+        <h4>Bloco de detalhamento de vulnerabilidade</h4>
+        <p class="cv-dynamic-reason">Apareceu porque “vulnerabilidade” foi marcado como sim.</p>
+        <label>Condição mental/cognitiva/comportamental
+          <input name="condicaoMentalCognitivaComportamental" value="${caso.condicaoMentalCognitivaComportamental || ''}" />
+        </label>
+        <label>Limitação física
+          <input name="limitacaoFisica" value="${caso.limitacaoFisica || ''}" />
+        </label>
+        <label class="cv-check"><input type="checkbox" name="usoMedicacaoEssencial" ${caso.usoMedicacaoEssencial ? 'checked' : ''}/> Uso de medicação essencial</label>
+      </section>
+    `);
+  }
+
+  container.innerHTML = blocos.join('');
+};
+
+const obterCasoDoFormulario = (form) => {
+  const data = new FormData(form);
+  const caso = Object.fromEntries(data.entries());
+  [
+    'vulnerabilidade',
+    'suspeitaCrime',
+    'fotoDisponivel',
+    'dispositivoLigado',
+    'camerasResidencia',
+    'camerasUltimoLocal',
+    'usoMedicacaoEssencial'
+  ].forEach((k) => (caso[k] = data.get(k) === 'on'));
+
+  caso.idade = Number(caso.idade || 0);
+  caso.faixaEtaria = calcularFaixaEtaria(caso.idade);
+  caso.classificacaoRisco = calcularRisco(caso);
+  caso.prioridade = calcularPrioridade(caso);
+  caso.aptoCabineVerde = calcularAptoCabineVerde(caso);
+  caso.acaoSugerida = caso.classificacaoRisco === 'Alto risco' ? 'Acionar protocolo prioritário.' : 'Monitorar e atualizar.';
+
+  return caso;
+};
+
 const render = () => {
   app.innerHTML = `
   <div class="cv-shell">
     <header class="cv-header"><h1>Cabine Verde</h1><p>Triagem dinâmica e relatório operacional</p></header>
-    <section class="cv-card">
-      <form id="f" class="cv-form">
-        <div class="cv-grid">
-          <label>Nome<input name="nomeCompletoDesaparecido" required/></label>
-          <label>Idade<input name="idade" type="number" required/></label>
-          <label>Município<input name="municipio" required/></label>
-          <label>Último local<input name="localUltimaVisualizacao"/></label>
-          <label>Status<input name="statusCaso" value="Em triagem"/></label>
-        </div>
-        <div class="cv-grid">
-          <label class="cv-check"><input type="checkbox" name="vulnerabilidade"/> Vulnerabilidade</label>
-          <label class="cv-check"><input type="checkbox" name="suspeitaCrime"/> Suspeita de crime</label>
-          <label class="cv-check"><input type="checkbox" name="fotoDisponivel"/> Foto disponível</label>
-          <label class="cv-check"><input type="checkbox" name="dispositivoLigado"/> Dispositivo ligado</label>
-          <label class="cv-check"><input type="checkbox" name="camerasResidencia"/> Câmeras residência</label>
-          <label class="cv-check"><input type="checkbox" name="camerasUltimoLocal"/> Câmeras último local</label>
-        </div>
-        <button type="submit">Salvar</button>
-        <button type="button" id="relatorioBtn">Gerar relatório</button>
-      </form>
-    </section>
+    <div class="cv-operational-grid">
+      <section class="cv-card">
+        <form id="f" class="cv-form">
+          <div class="cv-grid">
+            <label>Nome<input name="nomeCompletoDesaparecido" required/></label>
+            <label>Idade<input name="idade" type="number" min="0" required/></label>
+            <label>Município<input name="municipio" required/></label>
+            <label>Último local<input name="localUltimaVisualizacao"/></label>
+            <label>Status<input name="statusCaso" value="Em triagem"/></label>
+          </div>
+          <div class="cv-grid">
+            <label class="cv-check"><input type="checkbox" name="vulnerabilidade"/> Vulnerabilidade</label>
+            <label class="cv-check"><input type="checkbox" name="suspeitaCrime"/> Suspeita de crime</label>
+            <label class="cv-check"><input type="checkbox" name="fotoDisponivel"/> Foto disponível</label>
+            <label class="cv-check"><input type="checkbox" name="dispositivoLigado"/> Dispositivo ligado</label>
+            <label class="cv-check"><input type="checkbox" name="camerasResidencia"/> Câmeras residência</label>
+            <label class="cv-check"><input type="checkbox" name="camerasUltimoLocal"/> Câmeras último local</label>
+          </div>
+
+          <section class="cv-card cv-conditional">
+            <h3>Blocos dinâmicos da triagem</h3>
+            <p>Os blocos aparecem automaticamente conforme idade e respostas operacionais.</p>
+            <div id="blocosDinamicos"></div>
+          </section>
+
+          <button type="submit">Salvar</button>
+          <button type="button" id="relatorioBtn">Gerar relatório</button>
+        </form>
+      </section>
+
+      <aside class="cv-card cv-live-summary">
+        <h3>Resumo lateral em tempo real</h3>
+        <dl id="resumo"></dl>
+      </aside>
+    </div>
+
     <section class="cv-card"><h3>Feedback</h3><p id="feedback">Pronto para envio.</p></section>
-    <section class="cv-card"><h3>Perguntas dinâmicas</h3><ul id="perguntas"></ul></section>
-    <section class="cv-card"><h3>Resumo</h3><pre id="resumo"></pre></section>
     <section class="cv-card"><h3>Payload Sheets</h3><pre id="payload"></pre></section>
     <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
     <section class="cv-card"><h3>Relatório diário</h3><textarea id="relatorio" rows="10"></textarea></section>
   </div>`;
 
   const form = document.getElementById('f');
-  form.addEventListener('input', () => {
-    const data = new FormData(form);
-    const faixa = calcularFaixaEtaria(Number(data.get('idade') || 0));
-    document.getElementById('perguntas').innerHTML = (perguntas[faixa] || []).map((p) => `<li>${p}</li>`).join('');
-  });
+
+  const atualizarUI = () => {
+    const casoAtual = obterCasoDoFormulario(form);
+    renderBlocosDinamicos(casoAtual);
+    atualizarResumo(casoAtual);
+    document.getElementById('payload').textContent = JSON.stringify(gerarPayloadSheets(casoAtual), null, 2);
+  };
+
+  form.addEventListener('input', atualizarUI);
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const data = new FormData(form);
-    const caso = Object.fromEntries(data.entries());
-    ['vulnerabilidade', 'suspeitaCrime', 'fotoDisponivel', 'dispositivoLigado', 'camerasResidencia', 'camerasUltimoLocal'].forEach((k) => (caso[k] = data.get(k) === 'on'));
-    caso.idade = Number(caso.idade || 0);
-    caso.faixaEtaria = calcularFaixaEtaria(caso.idade);
-    caso.classificacaoRisco = calcularRisco(caso);
-    caso.prioridade = calcularPrioridade(caso);
-    caso.aptoCabineVerde = calcularAptoCabineVerde(caso);
-    caso.acaoSugerida = caso.classificacaoRisco === 'Alto risco' ? 'Acionar protocolo prioritário.' : 'Monitorar e atualizar.';
+    const caso = obterCasoDoFormulario(form);
 
     const retorno = await salvarCasoSheets(caso);
     const metadados = [retorno.idCaso ? `idCaso: ${retorno.idCaso}` : '', Number.isFinite(retorno.linha) ? `linha: ${retorno.linha}` : '', retorno.action ? `ação: ${retorno.action}` : '']
@@ -85,26 +229,43 @@ const render = () => {
       .join(' | ');
 
     if (retorno.ok) {
-      atualizarFeedback(`${retorno.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso'}${metadados ? ` (${metadados})` : ''}`);
+      atualizarFeedback(retorno.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso');
       casos.unshift(caso);
       localStorage.setItem('cabine-verde-casos', JSON.stringify(casos));
     } else {
-      const msg = retorno.message === 'Endpoint indisponível' ? 'Endpoint indisponível' : retorno.message === 'Erro de integração com Google Sheets' ? 'Erro de integração com Google Sheets' : 'Falha ao salvar caso';
-      atualizarFeedback(`${msg}${metadados ? ` (${metadados})` : ''}`, true);
+      atualizarFeedback(retorno.message || 'Falha ao salvar caso', true);
+      if (retorno.message === 'Backend GAS não publicado ou doGet ausente') {
+        const ajuda = 'Verifique se foi feito novo deploy do Apps Script';
+        atualizarFeedback(`${retorno.message}. ${ajuda}`, true);
+      }
     }
 
-    document.getElementById('resumo').textContent = JSON.stringify(caso, null, 2);
-    document.getElementById('payload').textContent = JSON.stringify(gerarPayloadSheets(caso), null, 2);
+    if (metadados) {
+      const feedback = document.getElementById('feedback');
+      feedback.textContent = `${feedback.textContent} (${metadados})`;
+    }
+
     render();
   });
 
   document.getElementById('relatorioBtn').addEventListener('click', () => {
     document.getElementById('relatorio').value = gerarRelatorioOperacional(casos);
   });
+
+  atualizarUI();
 };
 
 (async () => {
   render();
   const health = await healthcheckSheets();
-  if (!health.ok) atualizarFeedback('Endpoint indisponível', true);
+  if (health.ok) {
+    atualizarFeedback('Endpoint ativo');
+    return;
+  }
+
+  atualizarFeedback(health.message || 'Falha ao salvar caso', true);
+  if (health.message === 'Backend GAS não publicado ou doGet ausente') {
+    const feedback = document.getElementById('feedback');
+    feedback.textContent = 'Backend GAS não publicado ou doGet ausente. Verifique se foi feito novo deploy do Apps Script';
+  }
 })();

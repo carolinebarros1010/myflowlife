@@ -34,6 +34,21 @@ Defina no projeto Apps Script:
 - `CABINE_VERDE_SPREADSHEET_ID` (obrigatório)
 - `CABINE_VERDE_SHEET_NAME` (opcional, padrão `Desaparecidos`)
 
+## Deploy obrigatório após sincronizar arquivos
+Sempre que atualizar os arquivos `.gs` no Apps Script real, publique uma nova versão da Web App:
+
+```text
+Deploy > Manage deployments > Edit > New version > Deploy
+```
+
+Se esse passo não for executado, a URL pública pode permanecer em versão anterior e retornar erro de `doGet` ausente.
+
+## Checklist operacional de validação
+1. Abrir o endpoint no navegador.
+2. Confirmar retorno JSON de healthcheck (`ok: true` e `message: "Endpoint ativo"`).
+3. Executar `POST` com `MockPayload.json`.
+4. Confirmar nova linha na aba `Desaparecidos`.
+
 ## Testes rápidos
 ### Healthcheck
 ```bash

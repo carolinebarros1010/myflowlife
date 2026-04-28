@@ -48,6 +48,16 @@ textarea { width: 100%; box-sizing: border-box; }
 
 .cv-check { flex-direction: row; align-items: center; gap: 8px; }
 .cv-conditional { border-left: 5px solid var(--brand); }
+.cv-dynamic-block {
+  border: 1px solid #b6ccc5;
+  border-radius: 8px;
+  background: #f3f9f6;
+  padding: 10px;
+  margin: 8px 0;
+}
+.cv-dynamic-block h4 { margin: 0 0 6px 0; }
+.cv-dynamic-block ul { margin: 0; padding-left: 18px; }
+.cv-dynamic-reason { margin: 0 0 8px 0; font-size: 13px; color: #29473f; }
 .cv-action-footer { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
 .cv-button { background: var(--brand); color: #fff; cursor: pointer; border: none; }
 .cv-button--secondary { background: #1e3e65; }
