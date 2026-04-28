@@ -193,10 +193,8 @@ Sempre que disponível, exibir também:
   - `nomeSolicitante`
   - `vinculoSolicitante`
   - `telefoneSolicitante`
-- A tela exibe três níveis de auditoria:
-  - **Payload Sheets** (payload pronto para envio),
-  - **Retorno GAS** (JSON bruto devolvido pelo Apps Script),
-  - **Debug integração GAS** (payload gerado, status de envio e resposta).
+- A tela operacional padrão não exibe painéis técnicos de payload/retorno.
+- A auditoria técnica (Payload Sheets, Retorno GAS e Debug integração GAS) fica disponível somente em `?debug=1`.
 - Campos mínimos bloqueantes antes do envio:
   - `nomeCompletoDesaparecido`
   - `municipio`
@@ -207,6 +205,26 @@ Sempre que disponível, exibir também:
   - `ok: true` + `action: updated` → `Caso atualizado com sucesso`
   - qualquer falha → `Falha ao salvar caso`
 - Quando faltar dado mínimo, exibir: `Preencha os campos mínimos: nome do desaparecido, município, nome do solicitante e telefone do solicitante.`
+
+
+## Modo debug de interface (`?debug=1`)
+- A interface operacional padrão **não exibe** painéis técnicos (payload JSON, retorno bruto do GAS, campos técnicos de envio).
+- Para suporte técnico, use `https://myflowlife.com.br/cabineverde/?debug=1`.
+- Com `debug=1`, a UI mostra o painel **Debug integração GAS** com:
+  - payload gerado para Sheets;
+  - resposta técnica do GAS/no-cors;
+  - logs visuais de envio para auditoria rápida.
+- Logs de console permanecem disponíveis para desenvolvimento sem poluir a tela operacional.
+
+## Menu fixo operacional
+- As ações principais ficam em menu fixo sempre visível:
+  - **Salvar caso**
+  - **Gerar relatório**
+  - **Novo caso**
+  - **Limpar formulário**
+  - **Ver resumo**
+- O fluxo de **Salvar caso** permanece inalterado: captura dados → payload → `POST` `no-cors` → gravação no GAS/Sheets.
+- O relatório operacional possui área recolhível/expandível e botão de cópia para uso rápido em despacho.
 
 ## URLs do frontend
 - URL oficial de produção: `https://myflowlife.com.br/cabineverde/`

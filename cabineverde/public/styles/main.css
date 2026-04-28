@@ -100,3 +100,32 @@ pre { white-space: pre-wrap; margin: 0; }
 .cv-complemento { margin-top: 6px; }
 .cv-subaba { display: none; border-left: 4px solid #6a7f8a; }
 .cv-subaba.active { display: block; border-left-color: var(--brand); background: #eef8f4; }
+
+.is-hidden { display: none !important; }
+.cv-debug-panel h4 { margin: 10px 0 6px; }
+.cv-relatorio-card details summary { cursor: pointer; font-weight: 700; margin-bottom: 8px; }
+.cv-relatorio-actions { margin-top: 8px; display: flex; justify-content: flex-end; }
+.cv-fixed-menu {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  display: flex;
+  gap: 8px;
+  background: #ffffffee;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.12);
+}
+.cv-fixed-menu .cv-button { white-space: nowrap; }
+.cv-shell { padding-bottom: 96px; }
+
+@media (max-width: 1024px) {
+  .cv-fixed-menu {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    overflow-x: auto;
+  }
+}

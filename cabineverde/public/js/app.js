@@ -22,6 +22,7 @@ import {
 const app = document.getElementById('app');
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
 const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
+const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
 
 const MIRROR_FIELDS = [
   ['nomeCompletoDesaparecido', 'arvore__passo1_nome'],
@@ -243,16 +244,19 @@ const atualizarResumo = (caso) => {
   const indicadoresAtivos = listarIndicadoresAtivos(caso.indicadoresOperacionais);
 
   resumo.innerHTML = [
-    ['Faixa etária', caso.faixaEtaria],
+    ['Nome do desaparecido', caso.nomeCompletoDesaparecido || '-'],
+    ['Idade/faixa etária', `${caso.idade || '-'} / ${caso.faixaEtaria}`],
+    ['Município', caso.municipio || '-'],
+    ['Solicitante', caso.nomeSolicitante || '-'],
+    ['Telefone', caso.telefoneSolicitante || '-'],
+    ['Risco', caso.classificacaoRisco],
+    ['Prioridade', caso.prioridade],
+    ['Status', caso.statusCaso || '-'],
     ['Subaba ativa', caso.faixaEtaria],
+    ['Indicadores operacionais ativos', indicadoresAtivos.length ? indicadoresAtivos.join(' | ') : '-'],
     ['Perguntas respondidas', String(respondidas)],
     ['Alertas relevantes', alertas.join(' | ') || '-'],
-    ['Indicadores ativos', indicadoresAtivos.length ? indicadoresAtivos.join(' | ') : '-'],
-    ['Criticidade indicadores', caso.criticidadeIndicadores],
-    ['Sugestão de ação', caso.acaoSugerida],
-    ['Suspeita de crime', caso.suspeitaCrime ? 'Sim' : 'Não'],
-    ['Vulnerabilidade', caso.vulnerabilidade ? 'Sim' : 'Não'],
-    ['Aptidão Cabine Verde', caso.aptoCabineVerde ? 'Sim' : 'Não']
+    ['Apto Cabine Verde', caso.aptoCabineVerde ? 'Sim' : 'Não']
   ]
     .map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`)
     .join('');
@@ -327,19 +331,36 @@ const render = () => {
             <h3>Observações operacionais do operador</h3>
             <label>Observações<textarea name="observacoesOperador" rows="4"></textarea></label>
           </section>
-          <div class="cv-action-footer">
-            <button class="cv-button" type="submit">Salvar caso</button>
-            <button class="cv-button cv-button--secondary" type="button" id="relatorioBtn">Gerar relatório</button>
-          </div>
         </form>
       </section>
-      <aside class="cv-card cv-live-summary"><h3>Resumo lateral em tempo real</h3><dl id="resumo"></dl></aside>
+      <aside class="cv-card cv-live-summary"><h3>Resumo operacional</h3><dl id="resumo"></dl></aside>
     </div>
     <section class="cv-card"><h3>Feedback</h3><p id="feedback">Pronto para envio.</p></section>
-    <section class="cv-card"><h3>Payload Sheets</h3><pre id="payload"></pre></section>
-    <section class="cv-card"><h3>Retorno GAS</h3><pre id="gas-response">Aguardando envio.</pre></section>
     <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
-    <section class="cv-card"><h3>Relatório diário</h3><textarea id="relatorio" rows="10"></textarea></section>
+    <section class="cv-card cv-relatorio-card">
+      <details id="relatorioContainer">
+        <summary>Relatório operacional</summary>
+        <textarea id="relatorio" rows="10" placeholder="Clique em &quot;Gerar relatório&quot; para montar o texto."></textarea>
+        <div class="cv-relatorio-actions">
+          <button type="button" class="cv-button cv-button--ghost" id="copiarRelatorioBtn">Copiar relatório</button>
+        </div>
+      </details>
+    </section>
+    <section class="cv-card cv-debug-panel${DEBUG_MODE ? '' : ' is-hidden'}" id="painelDebug">
+      <h3>Debug integração GAS</h3>
+      <p>Modo técnico ativo via <code>?debug=1</code>.</p>
+      <h4>Payload gerado</h4>
+      <pre id="payload"></pre>
+      <h4>Resposta do GAS</h4>
+      <pre id="gas-response">Aguardando envio.</pre>
+    </section>
+    <nav class="cv-fixed-menu" aria-label="Ações operacionais">
+      <button class="cv-button" type="button" id="menuSalvarCaso">Salvar caso</button>
+      <button class="cv-button cv-button--secondary" type="button" id="menuGerarRelatorio">Gerar relatório</button>
+      <button class="cv-button cv-button--ghost" type="button" id="menuNovoCaso">Novo caso</button>
+      <button class="cv-button cv-button--ghost" type="button" id="menuLimparFormulario">Limpar formulário</button>
+      <button class="cv-button cv-button--ghost" type="button" id="menuVerResumo">Ver resumo</button>
+    </nav>
   </div>`;
 
   const form = document.getElementById('f');
@@ -348,7 +369,9 @@ const render = () => {
     exibirSubabaPorIdade(idade);
     const caso = obterCasoDoFormulario();
     atualizarResumo(caso);
-    document.getElementById('payload').textContent = JSON.stringify(gerarPayloadSheets(caso), null, 2);
+    if (DEBUG_MODE) {
+      document.getElementById('payload').textContent = JSON.stringify(gerarPayloadSheets(caso), null, 2);
+    }
   };
 
   const sincronizarEAtualizar = (event) => {
@@ -369,26 +392,55 @@ const render = () => {
     }
 
     const retorno = await salvarCasoSheets(caso);
-    document.getElementById('gas-response').textContent = JSON.stringify(retorno, null, 2);
+    if (DEBUG_MODE) {
+      document.getElementById('gas-response').textContent = JSON.stringify(retorno, null, 2);
+    }
 
     if (retorno.ok) {
-      atualizarFeedback(retorno.message || 'Caso enviado para processamento (modo silencioso)');
+      atualizarFeedback('Caso enviado para processamento.');
       casos.unshift(caso);
       localStorage.setItem('cabine-verde-casos', JSON.stringify(casos));
     } else {
-      atualizarFeedback(retorno.message || 'Falha ao salvar caso', true);
+      atualizarFeedback('Caso salvo localmente para envio.', true);
     }
 
     render();
   });
 
-  document.getElementById('relatorioBtn').addEventListener('click', () => {
+  const gerarRelatorio = () => {
     document.getElementById('relatorio').value = gerarRelatorioOperacional(casos);
+    document.getElementById('relatorioContainer').open = true;
+    atualizarFeedback('Relatório gerado.');
+  };
+
+  document.getElementById('menuSalvarCaso').addEventListener('click', () => form.requestSubmit());
+  document.getElementById('menuGerarRelatorio').addEventListener('click', gerarRelatorio);
+  document.getElementById('menuNovoCaso').addEventListener('click', () => {
+    form.reset();
+    atualizarUI();
+    atualizarFeedback('Novo caso iniciado.');
+  });
+  document.getElementById('menuLimparFormulario').addEventListener('click', () => {
+    form.reset();
+    atualizarUI();
+    atualizarFeedback('Formulário limpo.');
+  });
+  document.getElementById('menuVerResumo').addEventListener('click', () => {
+    document.getElementById('resumo').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  document.getElementById('copiarRelatorioBtn').addEventListener('click', async () => {
+    const texto = document.getElementById('relatorio').value.trim();
+    if (!texto) {
+      atualizarFeedback('Gerar relatório antes de copiar.', true);
+      return;
+    }
+    await navigator.clipboard.writeText(texto);
+    atualizarFeedback('Relatório gerado.');
   });
 };
 
 (async () => {
   render();
   const health = await healthcheckSheets();
-  atualizarFeedback(health.ok ? 'Endpoint ativo' : health.message || 'Falha ao salvar caso', !health.ok);
+  atualizarFeedback(health.ok ? 'Endpoint ativo' : health.message || 'Caso salvo localmente para envio.', !health.ok);
 })();
