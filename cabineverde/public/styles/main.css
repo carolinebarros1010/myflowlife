@@ -35,6 +35,8 @@ input:focus, textarea:focus, button:focus, select:focus { outline: 2px solid #3b
 textarea { width: 100%; box-sizing: border-box; }
 
 .cv-form { display: grid; gap: 10px; }
+.cv-form-section { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #f8fbfc; }
+.cv-form-section h3 { margin: 0 0 8px 0; font-size: 15px; color: #1a3943; }
 .cv-step-section { border: 1px solid var(--line); border-radius: 8px; margin: 0; padding: 10px; }
 .cv-step-section legend { padding: 0 8px; font-weight: 700; }
 

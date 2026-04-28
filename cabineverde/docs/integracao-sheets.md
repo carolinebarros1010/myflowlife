@@ -137,6 +137,27 @@ Sempre que disponível, exibir também:
 - `linha`
 - `action` (`created` ou `updated`)
 
+## Regras de envio no front (`/cabineverde/`)
+- O botão **Salvar caso** executa submissão real via `fetch(..., { method: 'POST' })`.
+- O formulário publicado em `/cabineverde/` possui seção dedicada **Dados do Solicitante** com os campos:
+  - `nomeSolicitante`
+  - `vinculoSolicitante`
+  - `telefoneSolicitante`
+- A tela exibe três níveis de auditoria:
+  - **Payload Sheets** (payload pronto para envio),
+  - **Retorno GAS** (JSON bruto devolvido pelo Apps Script),
+  - **Debug integração GAS** (payload gerado, status de envio e resposta).
+- Campos mínimos bloqueantes antes do envio:
+  - `nomeCompletoDesaparecido`
+  - `municipio`
+  - `nomeSolicitante`
+  - `telefoneSolicitante`
+- A mensagem final deve seguir o contrato:
+  - `ok: true` + `action: created` → `Caso criado com sucesso`
+  - `ok: true` + `action: updated` → `Caso atualizado com sucesso`
+  - qualquer falha → `Falha ao salvar caso`
+- Quando faltar dado mínimo, exibir: `Preencha os campos mínimos: nome do desaparecido, município, nome do solicitante e telefone do solicitante.`
+
 ## URLs do frontend
 - URL oficial de produção: `https://myflowlife.com.br/cabineverde/`
 - `https://myflowlife.com.br/public/index.html` **não é URL oficial do Cabine Verde**.

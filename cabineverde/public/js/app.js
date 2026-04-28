@@ -11,6 +11,10 @@ import {
 
 const app = document.getElementById('app');
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
+const DEBUG_ENVIO_GAS = true;
+const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
+const mensagemCamposMinimos =
+  'Preencha os campos mínimos: nome do desaparecido, município, nome do solicitante e telefone do solicitante.';
 
 const textosFaixa = {
   Criança: {
@@ -47,12 +51,30 @@ const atualizarFeedback = (mensagem, erro = false) => {
   feedback.classList.toggle('danger', erro);
 };
 
+const atualizarPainelDebug = ({ payload = null, status = '', resposta = null } = {}) => {
+  const payloadEl = document.getElementById('debug-payload');
+  const statusEl = document.getElementById('debug-status');
+  const respostaEl = document.getElementById('debug-response');
+
+  if (payloadEl && payload) payloadEl.textContent = JSON.stringify(payload, null, 2);
+  if (statusEl && status) statusEl.textContent = status;
+  if (respostaEl && resposta) respostaEl.textContent = JSON.stringify(resposta, null, 2);
+
+  if (!DEBUG_ENVIO_GAS) return;
+  if (payload) console.log('[CabineVerde][GAS] payload gerado', payload);
+  if (status) console.log('[CabineVerde][GAS] status envio', status);
+  if (resposta) console.log('[CabineVerde][GAS] resposta GAS', resposta);
+};
+
 const atualizarResumo = (caso = {}) => {
   const resumo = document.getElementById('resumo');
   if (!resumo) return;
   const linhas = [
     ['Nome', caso.nomeCompletoDesaparecido || '-'],
     ['Idade/Faixa', `${caso.idade || 0} / ${caso.faixaEtaria || calcularFaixaEtaria(Number(caso.idade || 0))}`],
+    ['Solicitante', caso.nomeSolicitante || '-'],
+    ['Telefone solicitante', caso.telefoneSolicitante || '-'],
+    ['Vínculo solicitante', caso.vinculoSolicitante || '-'],
     ['Risco', caso.classificacaoRisco || calcularRisco(caso)],
     ['Prioridade', caso.prioridade || calcularPrioridade(caso)],
     ['Apto Cabine Verde', caso.aptoCabineVerde ? 'Sim' : 'Não'],
@@ -162,6 +184,14 @@ const obterCasoDoFormulario = (form) => {
   return caso;
 };
 
+const validarCamposMinimos = (caso) => {
+  const pendencias = camposObrigatoriosEnvio.filter((campo) => !String(caso[campo] || '').trim());
+  return {
+    valido: pendencias.length === 0,
+    pendencias
+  };
+};
+
 const render = () => {
   app.innerHTML = `
   <div class="cv-shell">
@@ -176,6 +206,14 @@ const render = () => {
             <label>Último local<input name="localUltimaVisualizacao"/></label>
             <label>Status<input name="statusCaso" value="Em triagem"/></label>
           </div>
+          <section class="cv-form-section">
+            <h3>Dados do Solicitante</h3>
+            <div class="cv-grid">
+              <label>Nome do solicitante<input name="nomeSolicitante" required/></label>
+              <label>Vínculo do solicitante<input name="vinculoSolicitante"/></label>
+              <label>Telefone do solicitante<input name="telefoneSolicitante" required/></label>
+            </div>
+          </section>
           <div class="cv-grid">
             <label class="cv-check"><input type="checkbox" name="vulnerabilidade"/> Vulnerabilidade</label>
             <label class="cv-check"><input type="checkbox" name="suspeitaCrime"/> Suspeita de crime</label>
@@ -191,7 +229,7 @@ const render = () => {
             <div id="blocosDinamicos"></div>
           </section>
 
-          <button type="submit">Salvar</button>
+          <button type="submit">Salvar caso</button>
           <button type="button" id="relatorioBtn">Gerar relatório</button>
         </form>
       </section>
@@ -204,6 +242,19 @@ const render = () => {
 
     <section class="cv-card"><h3>Feedback</h3><p id="feedback">Pronto para envio.</p></section>
     <section class="cv-card"><h3>Payload Sheets</h3><pre id="payload"></pre></section>
+    <section class="cv-card"><h3>Retorno GAS</h3><pre id="gas-response">Aguardando envio.</pre></section>
+    <section class="cv-card">
+      <h3>Debug integração GAS</h3>
+      <p><strong>Status:</strong> <span id="debug-status">Pronto para envio.</span></p>
+      <details>
+        <summary>Payload gerado</summary>
+        <pre id="debug-payload"></pre>
+      </details>
+      <details>
+        <summary>Resposta do GAS</summary>
+        <pre id="debug-response"></pre>
+      </details>
+    </section>
     <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
     <section class="cv-card"><h3>Relatório diário</h3><textarea id="relatorio" rows="10"></textarea></section>
   </div>`;
@@ -214,7 +265,9 @@ const render = () => {
     const casoAtual = obterCasoDoFormulario(form);
     renderBlocosDinamicos(casoAtual);
     atualizarResumo(casoAtual);
-    document.getElementById('payload').textContent = JSON.stringify(gerarPayloadSheets(casoAtual), null, 2);
+    const payload = gerarPayloadSheets(casoAtual);
+    document.getElementById('payload').textContent = JSON.stringify(payload, null, 2);
+    atualizarPainelDebug({ payload, status: 'Payload pronto para envio.' });
   };
 
   form.addEventListener('input', atualizarUI);
@@ -222,8 +275,23 @@ const render = () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const caso = obterCasoDoFormulario(form);
+    const payload = gerarPayloadSheets(caso);
+    const validacaoMinima = validarCamposMinimos(caso);
+    if (!validacaoMinima.valido) {
+      atualizarFeedback(mensagemCamposMinimos, true);
+      atualizarPainelDebug({ payload, status: 'Envio bloqueado por validação de campos mínimos.' });
+      return;
+    }
+
+    atualizarPainelDebug({ payload, status: 'Enviando payload para Apps Script...' });
 
     const retorno = await salvarCasoSheets(caso);
+    atualizarPainelDebug({
+      status: retorno.ok ? 'Envio concluído com sucesso.' : 'Falha no envio ao Apps Script.',
+      resposta: retorno
+    });
+    const respostaEl = document.getElementById('gas-response');
+    if (respostaEl) respostaEl.textContent = JSON.stringify(retorno, null, 2);
     const metadados = [retorno.idCaso ? `idCaso: ${retorno.idCaso}` : '', Number.isFinite(retorno.linha) ? `linha: ${retorno.linha}` : '', retorno.action ? `ação: ${retorno.action}` : '']
       .filter(Boolean)
       .join(' | ');
