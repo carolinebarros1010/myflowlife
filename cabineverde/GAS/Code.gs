@@ -71,37 +71,98 @@ function doPost(e) {
       throw new Error('Payload inválido');
     }
 
+    if (sheet.getName() !== 'Desaparecidos') {
+      throw new Error('Aba incorreta: ' + sheet.getName());
+    }
+
+    if (!Array.isArray(data.valores)) {
+      throw new Error('data.valores não é array');
+    }
+
+    if (data.valores.length !== 51) {
+      throw new Error('Quantidade inválida de colunas: ' + data.valores.length);
+    }
+
     var idCaso = data && data.payload ? data.payload.idCaso : '';
+    var lastRowAntes = sheet.getLastRow();
 
-    try {
-      var lastRow = sheet.getLastRow();
-      var linhaExistente = -1;
+    logGAS(
+      'persistencia_desaparecidos',
+      true,
+      'iniciando persistência na aba Desaparecidos',
+      JSON.stringify({
+        spreadsheetId: ss.getId(),
+        spreadsheetName: ss.getName(),
+        sheetName: sheet.getName(),
+        lastRowAntes: lastRowAntes,
+        lastRowDepois: null,
+        linhaGravada: null,
+        colunasRecebidas: data.valores.length,
+        idCaso: idCaso,
+        primeiroValor: data.valores[0],
+        decimoValor: data.valores[9]
+      })
+    );
 
-      if (lastRow > 1) {
-        var ids = sheet.getRange(2, COL_INDEX_ID, lastRow - 1, 1).getValues();
+    var linhaExistente = -1;
+    if (lastRowAntes > 1) {
+      var ids = sheet.getRange(2, COL_INDEX_ID, lastRowAntes - 1, 1).getValues();
 
-        for (var i = 0; i < ids.length; i += 1) {
-          if (ids[i][0] === idCaso) {
-            linhaExistente = i + 2;
-            break;
-          }
+      for (var i = 0; i < ids.length; i += 1) {
+        if (ids[i][0] === idCaso) {
+          linhaExistente = i + 2;
+          break;
         }
       }
+    }
 
-      if (linhaExistente !== -1) {
-        sheet.getRange(linhaExistente, 1, 1, data.valores.length).setValues([data.valores]);
-        logGAS('update_desaparecidos', true, 'linha atualizada', idCaso);
-      } else {
-        sheet.appendRow(data.valores);
-        logGAS('create_desaparecidos', true, 'linha criada', idCaso);
-      }
-    } catch (errUpdate) {
-      sheet.appendRow(data.valores);
+    if (linhaExistente !== -1) {
+      sheet.getRange(linhaExistente, 1, 1, data.valores.length).setValues([data.valores]);
+
+      var linhaAtualizada = sheet.getRange(linhaExistente, 1, 1, data.valores.length).getValues()[0];
+      var lastRowDepoisUpdate = sheet.getLastRow();
+
       logGAS(
-        'fallback_append',
+        'confirmacao_update_desaparecidos',
         true,
-        'erro no update, append executado',
-        errUpdate && errUpdate.message ? errUpdate.message : String(errUpdate)
+        'update confirmado na linha ' + linhaExistente,
+        JSON.stringify({
+          spreadsheetId: ss.getId(),
+          spreadsheetName: ss.getName(),
+          sheetName: sheet.getName(),
+          lastRowAntes: lastRowAntes,
+          lastRowDepois: lastRowDepoisUpdate,
+          linhaGravada: linhaExistente,
+          colunasRecebidas: data.valores.length,
+          idCaso: idCaso,
+          primeiroValor: linhaAtualizada[0],
+          decimoValor: linhaAtualizada[9],
+          nomeDesaparecido: linhaAtualizada[2]
+        })
+      );
+    } else {
+      sheet.appendRow(data.valores);
+
+      var linhaGravada = sheet.getLastRow();
+      var linha = sheet.getRange(linhaGravada, 1, 1, data.valores.length).getValues()[0];
+      var lastRowDepoisAppend = sheet.getLastRow();
+
+      logGAS(
+        'confirmacao_append_desaparecidos',
+        true,
+        'append confirmado na linha ' + linhaGravada,
+        JSON.stringify({
+          spreadsheetId: ss.getId(),
+          spreadsheetName: ss.getName(),
+          sheetName: sheet.getName(),
+          lastRowAntes: lastRowAntes,
+          lastRowDepois: lastRowDepoisAppend,
+          linhaGravada: linhaGravada,
+          colunasRecebidas: data.valores.length,
+          idCaso: data.payload && data.payload.idCaso,
+          primeiroValor: linha[0],
+          decimoValor: linha[9]
+        })
       );
     }
 
