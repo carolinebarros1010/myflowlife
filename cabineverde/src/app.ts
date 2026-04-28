@@ -270,7 +270,18 @@ if (form) {
 
     const retorno = await sheetsService.salvar(gerarPayloadSheets(triagemState.casoCompleto));
     const report = document.getElementById('report-content') as HTMLTextAreaElement | null;
-    if (report) report.value = retorno.ok ? `${retorno.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso salvo com sucesso'}\n${retorno.message}` : `Erro de integração\n${retorno.message}`;
+    const metaRetorno = [
+      retorno.idCaso ? `idCaso: ${retorno.idCaso}` : '',
+      typeof retorno.linha === 'number' ? `linha: ${retorno.linha}` : '',
+      retorno.action ? `ação: ${retorno.action}` : ''
+    ]
+      .filter(Boolean)
+      .join(' | ');
+    if (report) {
+      report.value = retorno.ok
+        ? `${retorno.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso'}\n${retorno.message}${metaRetorno ? `\n${metaRetorno}` : ''}`
+        : `${retorno.message === 'Endpoint indisponível' ? 'Endpoint indisponível' : 'Erro de integração com Google Sheets'}\n${retorno.message}${metaRetorno ? `\n${metaRetorno}` : ''}`;
+    }
 
     registrarLog({
       timestamp: new Date().toISOString(),
@@ -280,7 +291,7 @@ if (form) {
     });
     renderLogs();
 
-    atualizarStatus(retorno.ok ? 'Persistência concluída com sucesso.' : 'Endpoint indisponível ou erro de integração.', !retorno.ok);
+    atualizarStatus(retorno.ok ? 'Persistência concluída com sucesso.' : retorno.message === 'Endpoint indisponível' ? 'Endpoint indisponível' : 'Erro de integração com Google Sheets', !retorno.ok);
     atualizarLista();
     aplicarFiltros();
   });
