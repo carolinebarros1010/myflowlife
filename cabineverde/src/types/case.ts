@@ -1,4 +1,5 @@
 import { ClassificacaoRisco, FaixaEtaria, Prioridade, StatusCaso } from './enums.js';
+import type { IndicadoresOperacionais, NivelCriticidadeIndicadores } from '../modules/triagem/indicadoresOperacionais.js';
 
 export interface SubfluxoPerguntas {
   [pergunta: string]: boolean | string;
@@ -51,6 +52,8 @@ export interface CamposCalculados {
   prioridade: Prioridade;
   acaoSugerida: string;
   aptoCabineVerde: boolean;
+  indicadoresOperacionais: IndicadoresOperacionais;
+  criticidadeIndicadores: NivelCriticidadeIndicadores;
 }
 
 export interface CasoCompleto extends CasoDesaparecimento, CamposCalculados {}

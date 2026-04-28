@@ -11,7 +11,12 @@ import {
   OPCOES_SIM_NAO_NI,
   gerarObservacoesArvore,
   avaliarAlertasArvore,
-  contarPerguntasRespondidas
+  contarPerguntasRespondidas,
+  mapearIndicadoresOperacionais,
+  calcularCriticidadeIndicadores,
+  listarIndicadoresAtivos,
+  sugerirAcaoIndicadores,
+  anexarIndicadoresObservacoes
 } from './core.js';
 
 const app = document.getElementById('app');
@@ -96,13 +101,15 @@ const obterCasoDoFormulario = () => {
   const { respostas, complementos } = obterArvoreFormulario(form, faixaEtaria);
 
   const observacoesOperador = String(data.get('observacoesOperador') || '').trim();
-  const { texto: observacoesOperacionais, alertas } = gerarObservacoesArvore({
+  const { texto: observacoesArvore, alertas } = gerarObservacoesArvore({
     respostas,
     complementos,
     faixaEtaria,
     observacoesOperador
   });
 
+  const indicadoresOperacionais = mapearIndicadoresOperacionais(respostas);
+  const criticidadeIndicadores = calcularCriticidadeIndicadores(indicadoresOperacionais);
   const suspeitaCrime = respostas.passo4_suspeita_crime === 'Sim' || respostas.adulto_indicios_violencia === 'Sim';
   const vulnerabilidade =
     respostas.passo4_condicao_mental === 'Sim' ||
@@ -146,16 +153,18 @@ const obterCasoDoFormulario = () => {
       `Tentativa contato: ${respostas.passo5_tentativa_contato || 'Não informado'}`
     ].join(' | '),
     numeroBo: complementos.passo5_registro_delegacia || '',
-    observacoesOperacionais,
+    observacoesOperacionais: anexarIndicadoresObservacoes(observacoesArvore, indicadoresOperacionais),
+    indicadoresOperacionais,
+    criticidadeIndicadores,
     respostasArvore: respostas,
     complementosArvore: complementos,
     alertasArvore: alertas
   };
 
-  caso.aptoCabineVerde = calcularAptoCabineVerde(caso);
-  caso.classificacaoRisco = calcularRisco(caso);
-  caso.prioridade = calcularPrioridade(caso);
-  caso.acaoSugerida = caso.classificacaoRisco === 'Alto risco' ? 'Acionar protocolo prioritário.' : 'Monitorar e atualizar.';
+  caso.aptoCabineVerde = calcularAptoCabineVerde(caso, indicadoresOperacionais);
+  caso.classificacaoRisco = calcularRisco(caso, indicadoresOperacionais);
+  caso.prioridade = calcularPrioridade(caso, indicadoresOperacionais);
+  caso.acaoSugerida = sugerirAcaoIndicadores(indicadoresOperacionais);
 
   return caso;
 };
@@ -164,12 +173,16 @@ const atualizarResumo = (caso) => {
   const resumo = document.getElementById('resumo');
   const { respondidas } = contarPerguntasRespondidas(caso.respostasArvore, caso.complementosArvore);
   const alertas = avaliarAlertasArvore(caso.respostasArvore, caso.faixaEtaria);
+  const indicadoresAtivos = listarIndicadoresAtivos(caso.indicadoresOperacionais);
 
   resumo.innerHTML = [
     ['Faixa etária', caso.faixaEtaria],
     ['Subaba ativa', caso.faixaEtaria],
     ['Perguntas respondidas', String(respondidas)],
     ['Alertas relevantes', alertas.join(' | ') || '-'],
+    ['Indicadores ativos', indicadoresAtivos.length ? indicadoresAtivos.join(' | ') : '-'],
+    ['Criticidade indicadores', caso.criticidadeIndicadores],
+    ['Sugestão de ação', caso.acaoSugerida],
     ['Suspeita de crime', caso.suspeitaCrime ? 'Sim' : 'Não'],
     ['Vulnerabilidade', caso.vulnerabilidade ? 'Sim' : 'Não'],
     ['Aptidão Cabine Verde', caso.aptoCabineVerde ? 'Sim' : 'Não']

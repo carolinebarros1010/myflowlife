@@ -45,6 +45,15 @@ export const casosMock: CasoCompleto[] = [
     classificacaoRisco: ClassificacaoRisco.MODERADO,
     prioridade: Prioridade.MEDIA,
     acaoSugerida: 'Conduzir busca qualificada e monitorar evolução a cada 2 horas.',
-    aptoCabineVerde: true
+    aptoCabineVerde: true,
+    indicadoresOperacionais: {
+      criancaSemSupervisao: false,
+      criancaVeiculoSuspeito: false,
+      preadolescenteAliciamentoVirtual: false,
+      adolescenteSofrimentoPsiquico: false,
+      adultoSuspeitaCrime: false,
+      idosoDesorientado: false
+    },
+    criticidadeIndicadores: 'Baixa'
   }
 ];
