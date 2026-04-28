@@ -41,58 +41,12 @@ var ESTRUTURA_PLANILHA = {
   Config: ['chave', 'valor']
 };
 
-function doGet(e) {
-  try {
-    var params = e && e.parameter ? e.parameter : {};
-    var idCaso = limparTexto(params.idCaso);
-
-    if (idCaso) {
-      var planilhaId = obterSpreadsheetId(params);
-      var planilha = SpreadsheetApp.openById(planilhaId);
-      garantirEstruturaPlanilha(planilha);
-
-      var caso = buscarCasoPorId(idCaso, planilha);
-      if (!caso) {
-        return criarRespostaJson(
-          {
-            ok: false,
-            error: 'Caso não encontrado para o idCaso informado.',
-            idCaso: idCaso,
-            timestamp: new Date().toISOString()
-          },
-          404
-        );
-      }
-
-      return criarRespostaJson({
-        ok: true,
-        action: 'found',
-        idCaso: idCaso,
-        linha: caso.linha,
-        data: caso.dados,
-        timestamp: new Date().toISOString()
-      });
-    }
-
-    return criarRespostaJson({
-      ok: true,
-      service: 'cabineverde',
-      message: 'Cabine Verde Sheets endpoint ativo',
-      endpoint: 'exec',
-      abaPrincipal: ABA_DESAPARECIDOS,
-      versaoEstrutura: '2026-04-23',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    return criarRespostaJson(
-      {
-        ok: false,
-        error: error && error.message ? error.message : String(error),
-        timestamp: new Date().toISOString()
-      },
-      400
-    );
-  }
+function doGet() {
+  return criarRespostaJson({
+    ok: true,
+    service: 'cabineverde',
+    message: 'Endpoint ativo'
+  });
 }
 
 function doPost(e) {
@@ -337,5 +291,11 @@ function obterSpreadsheetId(body) {
 function obterNomeAba(body) {
   var nomeAbaBody = body && (body.aba || body.sheetName) ? String(body.aba || body.sheetName) : '';
   var nomeAbaConfig = PropertiesService.getScriptProperties().getProperty('CABINE_VERDE_SHEET_NAME');
-  return limparTexto(nomeAbaBody) || limparTexto(nomeAbaConfig) || ABA_DESAPARECIDOS;
+  var nomeAbaSolicitada = limparTexto(nomeAbaBody) || limparTexto(nomeAbaConfig) || ABA_DESAPARECIDOS;
+
+  if (nomeAbaSolicitada !== ABA_DESAPARECIDOS) {
+    throw new Error('A integração Cabine Verde aceita gravação somente na aba "' + ABA_DESAPARECIDOS + '".');
+  }
+
+  return ABA_DESAPARECIDOS;
 }

@@ -6,12 +6,23 @@ Aplicação web operacional para triagem dinâmica, registro de casos de desapar
 - **Camada funcional atual**: HTML/CSS/JavaScript modular (rápida para operar no ambiente atual do repositório).
 - **Camada de evolução**: estrutura TypeScript em `src/` já preparada para crescimento com tipagem forte e serviços desacoplados.
 
-## Como rodar
+## URLs oficiais
+- Site principal: `https://myflowlife.com.br/`
+- Cabine Verde: `https://myflowlife.com.br/cabineverde/`
+
+## Como rodar localmente
 ```bash
-cd cabineverde
 python3 -m http.server 4173 -d .
 ```
-Acesse `http://localhost:4173/public/index.html`.
+Acesse:
+- `http://localhost:4173/` (site principal)
+- `http://localhost:4173/cabineverde/public/index.html` (Cabine Verde no repositório)
+
+## Publicação do Cabine Verde
+```bash
+scripts/deploy-cabineverde.sh /caminho/para/public_html
+```
+O script copia `cabineverde/public/` para `/caminho/para/public_html/cabineverde/`.
 
 ## Testes
 ```bash
@@ -25,8 +36,11 @@ Defina as variáveis globais antes de carregar a página:
 - `CABINE_VERDE_SHEETS_ENDPOINT` (usa endpoint padrão de desenvolvimento caso ausente)
 - `CABINE_VERDE_SPREADSHEET_ID`
 
+Endpoint oficial atual:
+`https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec`
+
 ### Fluxo de integração
-- `GET` no Apps Script (`doGet`) é somente healthcheck.
+- `GET` no Apps Script (`doGet`) é healthcheck.
 - `POST` no Apps Script (`doPost`) grava na aba `Desaparecidos`.
 - O frontend envia JSON com mapeamento explícito de colunas.
 

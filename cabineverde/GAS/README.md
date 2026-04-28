@@ -3,11 +3,10 @@
 Esta pasta (`cabineverde/GAS/`) é a área versionada do Google Apps Script usada pela integração do Cabine Verde com Google Sheets.
 
 ## Endpoint principal publicado
-`https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4n0116w7VHup3MDk_3TNkfUB_9T-x1kL_a-EKhqtmDdQ/exec`
+`https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec`
 
 - `GET`: healthcheck simples do serviço.
-- `GET ?idCaso=...`: busca de um caso existente por chave primária.
-- `POST`: cria ou atualiza casos em `Desaparecidos` sem duplicidade de `idCaso`.
+- `POST`: cria ou atualiza casos em `Desaparecidos` sem duplicidade de `idCaso` (única aba permitida).
 
 ## Estrutura de arquivos
 - `Code.gs`: `doGet`, `doPost` e orquestração da estrutura da planilha.
@@ -38,17 +37,13 @@ Defina no projeto Apps Script:
 ## Testes rápidos
 ### Healthcheck
 ```bash
-curl 'https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4n0116w7VHup3MDk_3TNkfUB_9T-x1kL_a-EKhqtmDdQ/exec'
+curl 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec'
 ```
 
 ### Gravação
 ```bash
-curl -X POST 'https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4n0116w7VHup3MDk_3TNkfUB_9T-x1kL_a-EKhqtmDdQ/exec' \
+curl -X POST 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec' \
   -H 'Content-Type: application/json' \
   --data @MockPayload.json
 ```
 
-### Busca por ID
-```bash
-curl 'https://script.google.com/macros/s/AKfycby0K8dr5dvHAK_graS1qoYq_r4n0116w7VHup3MDk_3TNkfUB_9T-x1kL_a-EKhqtmDdQ/exec?idCaso=CV-2026-0001'
-```
