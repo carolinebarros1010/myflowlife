@@ -120,25 +120,43 @@ Ordem oficial (51 colunas):
 50. numeroBo
 51. observacoesOperacionais
 
-## Blocos dinâmicos da triagem (frontend)
-- Os blocos dinâmicos por faixa etária agora são campos respondíveis no formulário (opções: `Sim`, `Não`, `Não informado`).
-- Essas respostas **não** criam novas colunas na planilha e **não** alteram o endpoint atual.
-- As respostas são serializadas no frontend em `respostasDinamicas` e anexadas em formato estruturado dentro de `observacoesOperacionais`.
-- O padrão operacional de texto em `observacoesOperacionais` é:
+## Árvore de decisão no frontend (Cabine Verde)
+- A árvore oficial (`Arvore de decisão.docx`) é renderizada no formulário em cinco passos fixos e subabas por faixa etária.
+- Perguntas Sim/Não usam exclusivamente as opções: `Sim`, `Não`, `Não informado`.
+- Subaba ativa automática pela idade:
+  - `0–7`: Criança
+  - `8–11`: Pré-adolescente
+  - `12–17`: Adolescente
+  - `18–59`: Adulto
+  - `60+`: Idoso
+- Não há criação de novas colunas: todas as respostas são consolidadas na coluna `observacoesOperacionais`.
+- Formato obrigatório persistido no payload:
 
 ```text
-[RESPOSTAS DINÂMICAS]
-Faixa etária: <faixa>
-<pergunta 1>: <resposta>
-<pergunta 2>: <resposta>
+[ÁRVORE DE DECISÃO – 190/193]
+
+PASSO 1 – Identificação mínima
+Pergunta: ...
+Resposta: ...
+Complemento: ...
+
 ...
 
+SUBABA – <Faixa>
+Pergunta: ...
+Resposta: ...
+Complemento: ...
+
+[ALERTAS AUTOMÁTICOS]
+- ...
+
 [OBSERVAÇÕES DO OPERADOR]
-<texto livre>
+...
 ```
 
-- Quando houver texto livre do operador, ele é preservado e concatenado ao bloco de respostas dinâmicas.
-- O fluxo de envio `POST` com `mode: 'no-cors'` e o upsert por `idCaso` permanecem inalterados.
+- O texto livre do operador é preservado integralmente no bloco `[OBSERVAÇÕES DO OPERADOR]`.
+- Alertas automáticos visuais também entram no texto estruturado de `observacoesOperacionais`.
+- O envio `POST` com `mode: 'no-cors'`, endpoint e aba `Desaparecidos` permanecem inalterados.
 
 ## Respostas esperadas do backend
 ### Criação
