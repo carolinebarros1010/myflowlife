@@ -47,3 +47,7 @@ curl -X POST 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2
   --data @MockPayload.json
 ```
 
+
+## URL oficial do frontend
+- Produção: `https://myflowlife.com.br/cabineverde/`
+- `https://myflowlife.com.br/public/index.html` não deve ser tratado como URL oficial do Cabine Verde.

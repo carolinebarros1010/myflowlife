@@ -8,7 +8,15 @@ Aplicação web operacional para triagem dinâmica, registro de casos de desapar
 
 ## URLs oficiais
 - Site principal: `https://myflowlife.com.br/`
-- Cabine Verde: `https://myflowlife.com.br/cabineverde/`
+- Cabine Verde (oficial): `https://myflowlife.com.br/cabineverde/`
+- `https://myflowlife.com.br/public/index.html` **não é URL oficial do Cabine Verde**.
+
+## Endpoint oficial Apps Script (único)
+`https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec`
+
+Regras:
+- `GET`: healthcheck do endpoint.
+- `POST`: gravação/atualização de casos na aba `Desaparecidos`.
 
 ## Como rodar localmente
 ```bash
@@ -16,7 +24,9 @@ python3 -m http.server 4173 -d .
 ```
 Acesse:
 - `http://localhost:4173/` (site principal)
-- `http://localhost:4173/cabineverde/public/index.html` (Cabine Verde no repositório)
+- `http://localhost:4173/cabineverde/public/index.html` (rota local de desenvolvimento)
+
+> A rota local `.../public/index.html` é apenas de desenvolvimento no repositório.
 
 ## Publicação do Cabine Verde
 ```bash
@@ -30,23 +40,24 @@ cd cabineverde
 npm test
 ```
 
-## Configuração da integração com Google Sheets
-Defina as variáveis globais antes de carregar a página:
+Para evitar erro de tipagem nos testes, é necessário instalar @types/node.
+Em ambientes restritos sem acesso ao npm, o projeto inclui um shim local de tipos em `tests/node-test-shim.d.ts`.
 
-- `CABINE_VERDE_SHEETS_ENDPOINT` (usa endpoint padrão de desenvolvimento caso ausente)
+## Configuração da integração com Google Sheets
+Variável global suportada:
 - `CABINE_VERDE_SPREADSHEET_ID`
 
-Endpoint oficial atual:
-`https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec`
+> O endpoint é fixo no código para garantir uso exclusivo do endpoint oficial.
 
 ### Fluxo de integração
-- `GET` no Apps Script (`doGet`) é healthcheck.
-- `POST` no Apps Script (`doPost`) grava na aba `Desaparecidos`.
-- O frontend envia JSON com mapeamento explícito de colunas.
-
-### Script pronto para publicação
-Use os arquivos em:
-- `scripts/google-apps-script/Code.gs`
-- `scripts/google-apps-script/README.md`
+1. Frontend monta payload completo de 51 colunas (`Desaparecidos`).
+2. Frontend envia `POST` com `Content-Type: application/json` para o endpoint oficial.
+3. Apps Script cria (`action: created`) ou atualiza (`action: updated`) pelo `idCaso`.
+4. Frontend exibe feedback operacional:
+   - `Caso criado com sucesso`
+   - `Caso atualizado com sucesso`
+   - `Falha ao salvar caso`
+   - `Endpoint indisponível`
+   - `Erro de integração com Google Sheets`
 
 Consulte `docs/integracao-sheets.md` para passo a passo completo.

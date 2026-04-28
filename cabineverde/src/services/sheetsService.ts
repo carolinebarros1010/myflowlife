@@ -6,10 +6,15 @@ export interface SheetsServiceResponse {
   message: string;
   status?: number;
   action?: 'created' | 'updated';
+  idCaso?: string;
+  linha?: number;
+  aba?: string;
+  timestamp?: string;
 }
 
 export interface SheetsService {
   salvar(payload: SheetPayload): Promise<SheetsServiceResponse>;
+  healthcheck(): Promise<SheetsServiceResponse>;
 }
 
 interface EndpointResponse {
@@ -18,6 +23,10 @@ interface EndpointResponse {
   error?: string;
   erro?: string;
   action?: 'created' | 'updated';
+  idCaso?: string;
+  linha?: number;
+  aba?: string;
+  timestamp?: string;
 }
 
 const parseResponseBody = async (resposta: Response): Promise<EndpointResponse> => {
@@ -29,11 +38,32 @@ const parseResponseBody = async (resposta: Response): Promise<EndpointResponse> 
 };
 
 export class GoogleSheetsService implements SheetsService {
-  async salvar(payload: SheetPayload): Promise<SheetsServiceResponse> {
-    if (!sheetsConfig.endpoint) {
-      return { ok: false, message: 'Integração não configurada. Defina CABINE_VERDE_SHEETS_ENDPOINT.' };
-    }
+  async healthcheck(): Promise<SheetsServiceResponse> {
+    try {
+      const resposta = await fetch(sheetsConfig.endpoint, { method: 'GET' });
+      const body = await parseResponseBody(resposta);
+      if (!resposta.ok || body.ok === false) {
+        return {
+          ok: false,
+          status: resposta.status,
+          message: 'Endpoint indisponível'
+        };
+      }
 
+      return {
+        ok: true,
+        status: resposta.status,
+        message: body.message || 'Healthcheck concluído com sucesso'
+      };
+    } catch {
+      return {
+        ok: false,
+        message: 'Endpoint indisponível'
+      };
+    }
+  }
+
+  async salvar(payload: SheetPayload): Promise<SheetsServiceResponse> {
     try {
       const resposta = await fetch(sheetsConfig.endpoint, {
         method: 'POST',
@@ -51,28 +81,36 @@ export class GoogleSheetsService implements SheetsService {
 
       const body = await parseResponseBody(resposta);
       const detail = body.message || body.error || body.erro || '';
-      if (!resposta.ok) {
+      if (!resposta.ok || body.ok === false) {
         return {
           ok: false,
           status: resposta.status,
-          message: detail || `Falha ao salvar na planilha (${resposta.status}).`
+          message: detail || 'Falha ao salvar caso',
+          action: body.action,
+          idCaso: body.idCaso,
+          linha: body.linha,
+          aba: body.aba,
+          timestamp: body.timestamp
         };
       }
 
-      const action = body.action;
-      const mensagemSucesso =
-        action === 'updated' ? 'Caso atualizado com sucesso.' : 'Caso criado com sucesso.';
+      const action = body.action || 'created';
+      const mensagemSucesso = action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso';
 
       return {
         ok: true,
         status: resposta.status,
         action,
-        message: detail || mensagemSucesso
+        message: detail || mensagemSucesso,
+        idCaso: body.idCaso,
+        linha: body.linha,
+        aba: body.aba,
+        timestamp: body.timestamp
       };
-    } catch (error) {
+    } catch {
       return {
         ok: false,
-        message: `Falha ao salvar: ${error instanceof Error ? error.message : 'erro desconhecido'}.`
+        message: 'Erro de integração com Google Sheets'
       };
     }
   }

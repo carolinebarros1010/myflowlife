@@ -1,18 +1,33 @@
 # Integração Google Sheets (Cabine Verde + Apps Script)
 
-## Endpoint principal (produção)
-A referência oficial da operação Cabine Verde é:
-
+## Endpoint oficial (referência única)
 `https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec`
 
-- `GET /exec`: healthcheck simples (`doGet`).
-- `POST /exec`: criação/atualização de casos na aba `Desaparecidos` (`doPost`, única aba permitida).
+> O projeto Cabine Verde não deve usar endpoints antigos nem alternativos.
 
-## Estrutura operacional da planilha
-A estrutura é garantida pelo Apps Script (`garantirEstruturaPlanilha`) sempre que ocorre um `POST`.
+## Método HTTP por finalidade
+- `GET /exec`: **somente healthcheck**.
+- `POST /exec`: **somente gravação/atualização** de caso na aba `Desaparecidos`.
 
-### 1) Aba `Desaparecidos` (principal)
-Linha 1 (ordem exata):
+## Fluxo frontend → Apps Script → planilha
+1. Frontend gera payload compatível com `SheetsMapping.gs`.
+2. Frontend envia requisição:
+
+```js
+fetch(ENDPOINT, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(payload)
+})
+```
+
+3. Apps Script valida e persiste na aba `Desaparecidos`.
+4. Resposta retorna JSON operacional com `ok`, `action`, `idCaso`, `linha`, `aba`, `timestamp`.
+
+## Estrutura operacional da aba `Desaparecidos`
+Ordem oficial (51 colunas):
 
 1. idCaso
 2. dataHoraRegistro
@@ -66,141 +81,77 @@ Linha 1 (ordem exata):
 50. numeroBo
 51. observacoesOperacionais
 
-### 2) Aba `Listas`
-Cabeçalho: `tipoLista | valor`
+## Respostas esperadas do backend
+### Criação
+```json
+{
+  "ok": true,
+  "action": "created",
+  "idCaso": "CV-2026-0001",
+  "aba": "Desaparecidos",
+  "linha": 2,
+  "timestamp": "2026-04-28T12:00:00.000Z"
+}
+```
 
-Blocos carregados automaticamente:
-- `statusCaso`: Aberto | Em análise | Em busca | Localizado | Encerrado
-- `faixaEtaria`: Criança | Pré-adolescente | Adolescente | Adulto | Idoso
-- `classificacaoRisco`: Alto | Moderado | Baixo
-- `prioridade`: Máxima | Alta | Média | Baixa
-- `acaoSugerida`: Despacho imediato | Cabine Verde | Monitoramento | Orientação | Encaminhamento investigativo
-- `vinculoSolicitante`: Pai | Mãe | Responsável | Familiar | Vizinho | Escola | Outro
-- `turno`: Diurno | Noturno
-- `formaLocalizacao`: Contato do solicitante | Busca local | Ferramenta inteligente | Viatura | Outro
+### Atualização
+```json
+{
+  "ok": true,
+  "action": "updated",
+  "idCaso": "CV-2026-0001",
+  "aba": "Desaparecidos",
+  "linha": 2,
+  "timestamp": "2026-04-28T12:00:00.000Z"
+}
+```
 
-### 3) Aba `Relatorio_Diario`
-Cabeçalho:
-- dataServico
-- turno
-- equipe
-- totalCasosAnalisados
-- totalContatosDeclarantes
-- totalLocalizados
-- totalBaixas
-- totalFotosRecebidas
-- totalAptosCabineVerde
-- totalSuspeitaCrime
-- totalCriancas
-- totalAdolescentes
-- totalIdosos
-- textoOcorrenciasRelevancia
-- textoOrientacoesPublico
-- textoEncerramento
+### Erro
+```json
+{
+  "ok": false,
+  "error": "mensagem do erro"
+}
+```
 
-### 4) Aba `Painel`
-Cabeçalho: `Indicador | Valor`
+## Feedback visual obrigatório no frontend
+Mensagens esperadas para operador:
+- `Caso criado com sucesso`
+- `Caso atualizado com sucesso`
+- `Falha ao salvar caso`
+- `Endpoint indisponível`
+- `Erro de integração com Google Sheets`
 
-Indicadores-base inseridos automaticamente:
-- Casos do dia
-- Casos abertos
-- Casos localizados
-- Crianças
-- Idosos
-- Suspeita de crime
-- Com foto
-- Com câmera
-- Aptos Cabine Verde
+Sempre que disponível, exibir também:
+- `idCaso`
+- `linha`
+- `action` (`created` ou `updated`)
 
-### 5) Aba `Ocorrencias_Relevancia`
-Cabeçalho:
-- idCaso
-- dataServico
-- talaoBopm
-- nomeCompletoDesaparecido
-- motivoRelevancia
-- resumoNarrativo
-- incluidoNoRelatorio
-- responsavelRegistro
+## URLs do frontend
+- URL oficial de produção: `https://myflowlife.com.br/cabineverde/`
+- `https://myflowlife.com.br/public/index.html` **não é URL oficial do Cabine Verde**.
 
-### 6) Aba `Config`
-Cabeçalho: `chave | valor`
+## Testes de integração
+### 1) Healthcheck (GET)
+```bash
+curl 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec'
+```
 
-Chaves padrão:
-- spreadsheetVersion
-- sheetPrincipal
-- ultimaAtualizacaoEstrutura
-- responsavelEstrutura
-
-## Compatibilidade frontend ↔ GAS
-Arquivos de referência:
-- Frontend payload: `src/utils/sheetsPayload.ts`
-- Endpoint/config: `src/config/env.ts`, `src/services/sheetsService.ts`
-- Apps Script: `GAS/Code.gs`, `GAS/SheetsMapping.gs`, `GAS/Utils.gs`
-
-Regras de integração:
-1. O frontend envia `POST` com `Content-Type: application/json`.
-2. O payload segue os mesmos nomes de coluna da aba `Desaparecidos`.
-3. `idCaso` é obrigatório e funciona como chave primária lógica.
-4. Se `idCaso` ainda não existir, o Apps Script cria a linha (`action: "created"`).
-5. Se `idCaso` já existir, o Apps Script atualiza somente campos operacionais (`action: "updated"`):
-   - `statusCaso`
-   - `localizado`
-   - `dataHoraLocalizacao`
-   - `formaLocalizacao`
-   - `observacoesOperacionais`
-6. O retorno JSON padroniza `ok`, `action`, `idCaso`, `linha` e `timestamp`.
-
-## Exemplo de requisição (POST)
+### 2) Gravação/atualização (POST)
 ```bash
 curl -X POST 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec' \
   -H 'Content-Type: application/json' \
   --data @GAS/MockPayload.json
 ```
 
-Resposta esperada ao criar (exemplo):
-```json
-{
-  "ok": true,
-  "action": "created",
-  "idCaso": "CV-2026-0001",
-  "linha": 42,
-  "timestamp": "2026-04-23T12:00:00.000Z"
-}
-```
-
-Resposta esperada ao atualizar (exemplo):
-```json
-{
-  "ok": true,
-  "action": "updated",
-  "idCaso": "CV-2026-0001",
-  "linha": 42,
-  "timestamp": "2026-04-23T12:05:00.000Z"
-}
-```
-
-## Healthcheck (GET)
+### 3) Teste local do frontend
 ```bash
-curl 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec'
+python3 -m http.server 4173 -d .
 ```
+Acesse `http://localhost:4173/cabineverde/public/index.html`, registre um caso e confirme feedback + resposta no painel.
 
-Resposta esperada (exemplo):
-```json
-{
-  "ok": true,
-  "service": "cabineverde",
-  "message": "Endpoint ativo"
-}
-```
-
-## Como testar fluxo completo
-1. **Criar caso**
-   - Não preencher `idCaso` no formulário (frontend gera ID automaticamente) ou enviar ID novo no payload.
-   - Validar retorno `action: "created"`.
-2. **Atualizar caso**
-   - Reenviar o mesmo `idCaso` com novo `statusCaso` e/ou dados operacionais de localização.
-   - Validar retorno `action: "updated"` e ausência de linha duplicada.
-3. **Healthcheck do endpoint**
-   - Consultar `GET /exec`.
-   - Confirmar retorno JSON: `{ ok: true, service: "cabineverde", message: "Endpoint ativo" }`.
+### 4) Teste em produção
+1. Abrir `https://myflowlife.com.br/cabineverde/`.
+2. Registrar caso com `idCaso` novo e confirmar mensagem de criação.
+3. Reenviar mesmo `idCaso` com alteração operacional e confirmar mensagem de atualização.
+4. Verificar a aba `Desaparecidos` e linha retornada.

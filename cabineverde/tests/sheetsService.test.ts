@@ -13,10 +13,10 @@ const payloadBase: SheetPayload = {
   valores: ['Belém', 'Teste']
 };
 
-test('retorna sucesso quando endpoint responde 200', async () => {
+test('retorna sucesso quando endpoint responde created', async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async () =>
-    new Response(JSON.stringify({ ok: true, message: 'Caso salvo com sucesso' }), {
+    new Response(JSON.stringify({ ok: true, action: 'created', idCaso: 'CV-2026-0001', linha: 2 }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     })) as typeof fetch;
@@ -26,6 +26,8 @@ test('retorna sucesso quando endpoint responde 200', async () => {
 
   assert.equal(response.ok, true);
   assert.equal(response.action, 'created');
+  assert.equal(response.idCaso, 'CV-2026-0001');
+  assert.equal(response.linha, 2);
   assert.match(response.message.toLowerCase(), /criado|sucesso/);
   globalThis.fetch = originalFetch;
 });
@@ -50,7 +52,7 @@ test('retorna mensagem de atualização quando endpoint informa action updated',
 test('retorna falha quando endpoint responde erro', async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async () =>
-    new Response(JSON.stringify({ ok: false, message: 'Falha ao salvar' }), {
+    new Response(JSON.stringify({ ok: false, error: 'Falha ao salvar caso' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     })) as typeof fetch;
