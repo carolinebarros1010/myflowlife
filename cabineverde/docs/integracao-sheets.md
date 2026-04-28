@@ -120,6 +120,26 @@ Ordem oficial (51 colunas):
 50. numeroBo
 51. observacoesOperacionais
 
+## Blocos dinâmicos da triagem (frontend)
+- Os blocos dinâmicos por faixa etária agora são campos respondíveis no formulário (opções: `Sim`, `Não`, `Não informado`).
+- Essas respostas **não** criam novas colunas na planilha e **não** alteram o endpoint atual.
+- As respostas são serializadas no frontend em `respostasDinamicas` e anexadas em formato estruturado dentro de `observacoesOperacionais`.
+- O padrão operacional de texto em `observacoesOperacionais` é:
+
+```text
+[RESPOSTAS DINÂMICAS]
+Faixa etária: <faixa>
+<pergunta 1>: <resposta>
+<pergunta 2>: <resposta>
+...
+
+[OBSERVAÇÕES DO OPERADOR]
+<texto livre>
+```
+
+- Quando houver texto livre do operador, ele é preservado e concatenado ao bloco de respostas dinâmicas.
+- O fluxo de envio `POST` com `mode: 'no-cors'` e o upsert por `idCaso` permanecem inalterados.
+
 ## Respostas esperadas do backend
 ### Criação
 ```json
