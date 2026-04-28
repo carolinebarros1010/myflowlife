@@ -6,6 +6,7 @@ import {
   calcularPrioridade,
   gerarPayloadSheets,
   salvarCasoSheets,
+  healthcheckSheets,
   ENDPOINT_OFICIAL_APPS_SCRIPT
 } from '../public/js/core.js';
 
@@ -46,6 +47,21 @@ test('salvarCasoSheets usa POST + JSON no endpoint oficial', async () => {
   assert.equal(fetchArgs[0], ENDPOINT_OFICIAL_APPS_SCRIPT);
   assert.equal(fetchArgs[1].method, 'POST');
   assert.equal(fetchArgs[1].headers['Content-Type'], 'application/json');
+
+  globalThis.fetch = originalFetch;
+});
+
+test('healthcheckSheets retorna erro claro quando doGet não está publicado', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new Response('<html><body>Script function not found: doGet</body></html>', {
+      status: 200,
+      headers: { 'Content-Type': 'text/html' }
+    });
+
+  const retorno = await healthcheckSheets();
+  assert.equal(retorno.ok, false);
+  assert.equal(retorno.message, 'Backend GAS não publicado ou doGet ausente');
 
   globalThis.fetch = originalFetch;
 });

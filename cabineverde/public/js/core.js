@@ -167,6 +167,11 @@ const parseJsonSeguro = async (resposta) => {
   }
 };
 
+const contemErroDoGet = (texto = '') => {
+  const conteudo = String(texto || '').toLowerCase();
+  return conteudo.includes('doget') || conteudo.includes('function doget') || conteudo.includes('script function not found');
+};
+
 export const salvarCasoSheets = async (caso) => {
   try {
     const payload = gerarPayloadSheets(caso);
@@ -180,23 +185,48 @@ export const salvarCasoSheets = async (caso) => {
 
     const body = await parseJsonSeguro(resposta);
     if (!resposta.ok || body.ok === false) {
-      return { ok: false, message: body.error || body.message || 'Falha ao salvar caso', ...body };
+      const mensagemBruta = body.error || body.message || '';
+      const mensagem = contemErroDoGet(mensagemBruta)
+        ? 'Backend GAS não publicado ou doGet ausente'
+        : 'Falha ao salvar caso';
+      return { ok: false, message: mensagem, detalhe: mensagemBruta || undefined, ...body };
     }
 
     return { ok: true, message: body.action === 'updated' ? 'Caso atualizado com sucesso' : 'Caso criado com sucesso', ...body };
   } catch {
-    return { ok: false, message: 'Erro de integração com Google Sheets' };
+    return { ok: false, message: 'Falha ao salvar caso' };
   }
 };
 
 export const healthcheckSheets = async () => {
   try {
     const resposta = await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, { method: 'GET' });
-    if (!resposta.ok) return { ok: false, message: 'Endpoint indisponível' };
-    const body = await parseJsonSeguro(resposta);
-    return body.ok === false ? { ok: false, message: 'Endpoint indisponível' } : { ok: true, message: body.message || 'Endpoint ativo' };
+    const texto = await resposta.text();
+    let body = {};
+    try {
+      body = JSON.parse(texto);
+    } catch {
+      body = {};
+    }
+
+    if (!resposta.ok) {
+      return {
+        ok: false,
+        message: contemErroDoGet(texto) ? 'Backend GAS não publicado ou doGet ausente' : 'Falha ao salvar caso'
+      };
+    }
+
+    if (contemErroDoGet(texto)) {
+      return { ok: false, message: 'Backend GAS não publicado ou doGet ausente' };
+    }
+
+    if (body.ok === false) {
+      return { ok: false, message: 'Falha ao salvar caso' };
+    }
+
+    return { ok: true, message: body.message || 'Endpoint ativo' };
   } catch {
-    return { ok: false, message: 'Endpoint indisponível' };
+    return { ok: false, message: 'Falha ao salvar caso' };
   }
 };
 

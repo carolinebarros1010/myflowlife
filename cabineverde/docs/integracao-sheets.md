@@ -9,6 +9,15 @@
 - `GET /exec`: **somente healthcheck**.
 - `POST /exec`: **somente gravação/atualização** de caso na aba `Desaparecidos`.
 
+## Publicação obrigatória do Apps Script (evita erro de `doGet`)
+Após copiar/atualizar os arquivos de `cabineverde/GAS/` no projeto Apps Script real, é obrigatório publicar uma nova versão:
+
+```text
+Deploy > Manage deployments > Edit > New version > Deploy
+```
+
+Sem esse fluxo, a URL publicada pode continuar apontando para uma versão antiga sem `doGet()`, causando erro de healthcheck no frontend.
+
 ## Fluxo frontend → Apps Script → planilha
 1. Frontend gera payload compatível com `SheetsMapping.gs`.
 2. Frontend envia requisição:
@@ -116,11 +125,12 @@ Ordem oficial (51 colunas):
 
 ## Feedback visual obrigatório no frontend
 Mensagens esperadas para operador:
+- `Endpoint ativo`
 - `Caso criado com sucesso`
 - `Caso atualizado com sucesso`
 - `Falha ao salvar caso`
-- `Endpoint indisponível`
-- `Erro de integração com Google Sheets`
+- `Backend GAS não publicado ou doGet ausente`
+- `Verifique se foi feito novo deploy do Apps Script`
 
 Sempre que disponível, exibir também:
 - `idCaso`
@@ -132,6 +142,12 @@ Sempre que disponível, exibir também:
 - `https://myflowlife.com.br/public/index.html` **não é URL oficial do Cabine Verde**.
 
 ## Testes de integração
+### Checklist rápido pós-deploy
+1. Abrir endpoint no navegador.
+2. Confirmar JSON de healthcheck.
+3. Enviar `POST` com `MockPayload.json`.
+4. Confirmar nova linha na aba `Desaparecidos`.
+
 ### 1) Healthcheck (GET)
 ```bash
 curl 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec'
