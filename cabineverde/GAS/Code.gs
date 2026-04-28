@@ -51,89 +51,56 @@ function doGet() {
 }
 
 function doPost(e) {
-  var rawPostData = extrairRawPostData(e);
-  var planilhaLogs = obterPlanilhaLogs();
-  registrarLogTecnico(planilhaLogs, {
-    etapa: 'inicio_post',
-    ok: true,
-    mensagem: 'doPost recebido',
-    rawPostData: rawPostData,
-    payloadIdCaso: ''
-  });
-
   try {
-    var body = parsePayload(e);
-    var payload = body && body.payload && typeof body.payload === 'object' ? body.payload : body;
-    var idCaso = validarIdCasoPayload(payload);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Desaparecidos');
 
-    registrarLogTecnico(planilhaLogs, {
-      etapa: 'parse_payload',
-      ok: true,
-      mensagem: 'Payload parseado com sucesso',
-      rawPostData: rawPostData,
-      payloadIdCaso: idCaso
-    });
-
-    var planilhaId = obterSpreadsheetId(body);
-    var nomeAba = obterNomeAba(body);
-    var planilha = SpreadsheetApp.openById(planilhaId);
-
-    garantirEstruturaPlanilha(planilha);
-
-    var aba = planilha.getSheetByName(nomeAba);
-    if (!aba) {
-      throw new Error('Aba "' + nomeAba + '" não encontrada na planilha.');
+    if (!sheet) {
+      throw new Error('Aba Desaparecidos não encontrada');
     }
 
-    var linhaExistente = encontrarLinhaPorId(aba, idCaso);
-    var numeroLinha;
-    var action;
-
-    if (linhaExistente === -1) {
-      var linhaCompleta = mapearPayloadParaLinhaDesaparecidos(payload);
-      aba.appendRow(linhaCompleta);
-      numeroLinha = aba.getLastRow();
-      action = 'created';
-    } else {
-      atualizarLinha(aba, linhaExistente, payload);
-      numeroLinha = linhaExistente;
-      action = 'updated';
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error('postData vazio');
     }
 
-    registrarLogTecnico(planilha, {
-      etapa: 'persistencia_desaparecidos',
-      ok: true,
-      mensagem: 'Registro ' + action + ' na linha ' + numeroLinha,
-      rawPostData: rawPostData,
-      payloadIdCaso: idCaso
-    });
+    var raw = e.postData.contents;
+    var data = JSON.parse(raw);
 
-    return criarRespostaJson({
-      ok: true,
-      action: action,
-      idCaso: idCaso,
-      linha: numeroLinha,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    var mensagemErro = error && error.message ? error.message : String(error);
-    registrarLogTecnico(planilhaLogs, {
-      etapa: 'erro_post',
-      ok: false,
-      mensagem: mensagemErro,
-      rawPostData: rawPostData,
-      payloadIdCaso: extrairIdCasoBruto(e)
-    });
+    if (!data || !data.valores) {
+      throw new Error('Payload inválido');
+    }
 
-    return criarRespostaJson(
-      {
-        ok: false,
-        error: mensagemErro,
-        timestamp: new Date().toISOString()
-      },
-      400
-    );
+    // 🔥 GRAVA DIRETO
+    sheet.appendRow(data.valores);
+
+    // 🔥 LOG SIMPLES
+    logGAS('persistencia_desaparecidos', true, 'linha inserida', raw);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: true }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    var mensagemErro = err && err.message ? err.message : String(err);
+    var rawErro = e && e.postData && e.postData.contents ? e.postData.contents : '';
+
+    logGAS('erro_post', false, mensagemErro, rawErro);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, message: mensagemErro }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+function logGAS(etapa, ok, mensagem, raw) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Logs_GAS');
+
+  if (!sheet) {
+    sheet = ss.insertSheet('Logs_GAS');
+    sheet.appendRow(['timestamp', 'etapa', 'ok', 'mensagem', 'raw']);
+  }
+
+  sheet.appendRow([new Date(), etapa, ok, mensagem, raw]);
 }
 
 function encontrarLinhaPorId(sheet, idCaso) {
