@@ -608,26 +608,59 @@ function restaurarBackupMaisRecente_() {
 
 function migrarLegadoParaCasosTratados_() {
   validarContextoExecucaoAutorizada_('migrarLegadoParaCasosTratados_');
+  var dryRun = obterDryRunEfetivo_();
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
-  var abaOrigem = planilha.getSheetByName('DESAPARECIDOS');
-  if (!abaOrigem || abaOrigem.getLastRow() < 2) {
-    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Aba DESAPARECIDOS ausente ou sem dados para saneamento.');
+  var abaOrigem = obterAbaPorNomeFlexivel_(planilha, ['Desaparecidos', 'DESAPARECIDOS', 'desaparecidos']);
+  var modoExecucao = dryRun ? 'SIMULADO' : 'EXECUTADO';
+
+  if (!abaOrigem) {
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Aba origem Desaparecidos não encontrada.', modoExecucao);
     return;
   }
 
   var abaDestino = planilha.getSheetByName('CASOS_TRATADOS') || planilha.insertSheet('CASOS_TRATADOS');
-  garantirCabecalhoSemDuplicidade_(abaDestino, COLUNAS_CASOS_TRATADOS, 'CASOS_TRATADOS', false);
-  var cabOrigem = obterCabecalho_(abaOrigem);
-  var dadosOrigem = abaOrigem.getRange(2, 1, abaOrigem.getLastRow() - 1, abaOrigem.getLastColumn()).getValues();
+  garantirCabecalhoSemDuplicidade_(abaDestino, COLUNAS_CASOS_TRATADOS, 'CASOS_TRATADOS', dryRun);
+  var cabDestino = obterCabecalho_(abaDestino);
+  var dadosOrigem = abaOrigem.getDataRange().getValues();
+  if (!dadosOrigem || dadosOrigem.length <= 1) {
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Aba origem encontrada, mas sem registros abaixo do cabeçalho.', modoExecucao);
+    return;
+  }
+  var cabOrigem = (dadosOrigem[0] || []).map(function (h) { return limparTexto(h); });
 
   var indicesDestino = {};
-  COLUNAS_CASOS_TRATADOS.forEach(function (coluna, indice) {
+  cabDestino.forEach(function (coluna, indice) {
     indicesDestino[coluna] = indice;
   });
 
+  var camposBase = {
+    idCaso: 'idCaso',
+    talaoBopm: 'talaoPMESP',
+    nomeCompletoDesaparecido: 'nomeCompletoDesaparecido',
+    sexoGenero: 'sexoGenero',
+    idade: 'idade',
+    faixaEtaria: 'faixaEtaria',
+    dataHoraUltimaVisualizacao: 'dataHoraUltimaVisualizacao',
+    localUltimaVisualizacao: 'localUltimaVisualizacao',
+    roupaUltimaVisualizacao: 'roupaUltimaVisualizacao',
+    meioTransporte: 'meioTransporte',
+    classificacaoRisco: 'classificacaoRisco',
+    prioridade: 'prioridade',
+    statusCaso: 'statusCaso'
+  };
+  var camposPreservar = [
+    'dataHoraRegistro', 'dataServico', 'turno', 'equipe', 'operadorResponsavel', 'municipio', 'cpf', 'rg', 'nomeMae',
+    'dataNascimento', 'dadosVeiculo', 'fotoDisponivel', 'linkFoto', 'telefoneDesaparecido', 'dispositivoLigado',
+    'camerasResidencia', 'camerasUltimoLocal', 'aptoCabineVerde', 'nomeSolicitante', 'vinculoSolicitante',
+    'telefoneSolicitante', 'vulnerabilidade', 'condicaoMentalCognitivaComportamental', 'limitacaoFisica',
+    'usoMedicacaoEssencial', 'usoAlcoolOutrasDrogas', 'historicoDesaparecimentoAnterior', 'conflitoPrevio',
+    'suspeitaCrime', 'locaisHabituais', 'buscasPreliminares', 'acaoSugerida', 'localizado', 'dataHoraLocalizacao',
+    'formaLocalizacao', 'encerrado190', 'numeroBo'
+  ];
+
   var idsExistentes = {};
   if (abaDestino.getLastRow() >= 2) {
-    var dadosDestino = abaDestino.getRange(2, 1, abaDestino.getLastRow() - 1, COLUNAS_CASOS_TRATADOS.length).getValues();
+    var dadosDestino = abaDestino.getRange(2, 1, abaDestino.getLastRow() - 1, abaDestino.getLastColumn()).getValues();
     dadosDestino.forEach(function (linha) {
       var id = limparTexto(linha[indicesDestino.idCaso]);
       if (id) idsExistentes[id] = true;
@@ -635,71 +668,135 @@ function migrarLegadoParaCasosTratados_() {
   }
 
   var novasLinhas = [];
-  dadosOrigem.forEach(function (linha, idx) {
+  var totalIgnoradasSemIdCaso = 0;
+  var totalValidos = 0;
+  var totalExistentes = 0;
+  var totalErros = 0;
+  var dadosSemCabecalho = dadosOrigem.slice(1);
+
+  dadosSemCabecalho.forEach(function (linha, idx) {
     var linhaPlanilha = idx + 2;
     var registro = linhaParaObjeto_(cabOrigem, linha);
-    var idCaso = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['idCaso', 'id', 'codigoCaso']) || ('LEGADO-DESAP-' + linhaPlanilha));
-
-    if (idsExistentes[idCaso]) {
-      registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'IGNORADO', idCaso, 'Caso já migrado anteriormente; sem sobrescrita.');
+    var idCaso = limparTexto(registro.idCaso);
+    if (!idCaso) {
+      totalIgnoradasSemIdCaso += 1;
       return;
     }
 
-    var observacaoBruta = limparTexto(obterPrimeiroValorDisponivel_(registro, ['observacoesOperacionais', 'observacoes', 'observacao', 'obsOperacional']));
-    var resumoObservacao = gerarResumoArvoreDecisaoLegado_(observacaoBruta);
-    extrairArvoreObservacoesLegadas_(idCaso, linhaPlanilha, observacaoBruta, false);
+    if (idsExistentes[idCaso]) {
+      totalExistentes += 1;
+      return;
+    }
 
-    var talaoPMESP = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['talaoPMESP', 'talaoBopm', 'talaoBOPM', 'talão', 'talao', 'numeroTalao']));
-    var statusMigracao = talaoPMESP ? 'MIGRADO' : 'INCOMPLETO';
+    totalValidos += 1;
+    try {
+      var observacaoBruta = normalizarTextoMigracao_(registro.observacoesOperacionais);
+      var resumoObservacao = gerarResumoArvoreDecisaoLegado_(observacaoBruta);
+      var precisaArquivarBruto = observacaoBruta && (observacaoBruta.length > 500 || observacaoBruta.indexOf('[ÁRVORE DE DECISÃO') !== -1);
+      if (precisaArquivarBruto) {
+        extrairArvoreObservacoesLegadas_(idCaso, linhaPlanilha, observacaoBruta, dryRun);
+      }
 
-    var sexoGenero = normalizarSexoGeneroMigracao_(obterPrimeiroValorDisponivel_(registro, ['sexoGenero', 'sexo', 'genero']));
-    var meioTransporte = normalizarMeioTransporteMigracao_(obterPrimeiroValorDisponivel_(registro, ['meioTransporte', 'transporte']));
+      var linhaDestino = new Array(cabDestino.length).fill('');
+      Object.keys(camposBase).forEach(function (origem) {
+        var destino = camposBase[origem];
+        if (indicesDestino[destino] === undefined) return;
+        var valor = registro[origem];
+        if (destino === 'sexoGenero') valor = normalizarSexoGeneroMigracao_(valor);
+        else if (destino === 'meioTransporte') valor = normalizarMeioTransporteMigracao_(valor);
+        else if (destino === 'idade') valor = normalizarInteiroMigracao_(valor);
+        else valor = normalizarBooleanoOuTextoMigracao_(valor);
+        linhaDestino[indicesDestino[destino]] = valor;
+      });
 
-    var linhaDestino = new Array(COLUNAS_CASOS_TRATADOS.length).fill('');
-    linhaDestino[indicesDestino.idCaso] = idCaso;
-    linhaDestino[indicesDestino.talaoPMESP] = talaoPMESP;
-    linhaDestino[indicesDestino.nomeCompletoDesaparecido] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['nomeCompletoDesaparecido', 'nome', 'nomeDesaparecido']));
-    linhaDestino[indicesDestino.sexoGenero] = sexoGenero;
-    linhaDestino[indicesDestino.idade] = normalizarInteiroMigracao_(obterPrimeiroValorDisponivel_(registro, ['idade']));
-    linhaDestino[indicesDestino.faixaEtaria] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['faixaEtaria']));
-    linhaDestino[indicesDestino.dataHoraUltimaVisualizacao] = normalizarBooleanoOuTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['dataHoraUltimaVisualizacao', 'dataUltimaVisualizacao']));
-    linhaDestino[indicesDestino.localUltimaVisualizacao] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['localUltimaVisualizacao']));
-    linhaDestino[indicesDestino.roupaUltimaVisualizacao] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['roupaUltimaVisualizacao']));
-    linhaDestino[indicesDestino.meioTransporte] = meioTransporte;
-    linhaDestino[indicesDestino.classificacaoRisco] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['classificacaoRisco']));
-    linhaDestino[indicesDestino.prioridade] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['prioridade']));
-    linhaDestino[indicesDestino.statusCaso] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['statusCaso', 'status'])) || 'LEGADO MIGRADO';
-    linhaDestino[indicesDestino.observacoesOperacionais] = resumoObservacao;
-    linhaDestino[indicesDestino.statusMigracao] = statusMigracao;
+      camposPreservar.forEach(function (campo) {
+        if (indicesDestino[campo] === undefined) return;
+        linhaDestino[indicesDestino[campo]] = normalizarBooleanoOuTextoMigracao_(registro[campo]);
+      });
 
-    novasLinhas.push(linhaDestino);
-    idsExistentes[idCaso] = true;
-    registrarLogMigracao_('migrarLegadoParaCasosTratados_', statusMigracao, idCaso, statusMigracao === 'INCOMPLETO' ? 'Campo crítico talaoPMESP ausente.' : 'Caso migrado para CASOS_TRATADOS.');
+      if (indicesDestino.observacoesOperacionais !== undefined) {
+        linhaDestino[indicesDestino.observacoesOperacionais] = resumoObservacao;
+      }
+      var talaoPMESP = indicesDestino.talaoPMESP !== undefined ? limparTexto(linhaDestino[indicesDestino.talaoPMESP]) : '';
+      if (indicesDestino.statusMigracao !== undefined) {
+        linhaDestino[indicesDestino.statusMigracao] = talaoPMESP ? 'MIGRADO' : 'INCOMPLETO';
+      }
+
+      novasLinhas.push(linhaDestino);
+      idsExistentes[idCaso] = true;
+    } catch (erro) {
+      totalErros += 1;
+      registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ERRO', idCaso, 'Falha de tratamento: ' + erro.message, modoExecucao);
+    }
   });
 
-  if (!novasLinhas.length) {
-    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Nenhum novo caso elegível para migração.');
+  if (dadosSemCabecalho.length === 0) {
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Aba origem encontrada, mas sem registros abaixo do cabeçalho.', modoExecucao);
     return;
   }
+  if ((totalValidos + totalExistentes) === 0) {
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Linhas encontradas, mas nenhum idCaso preenchido.', modoExecucao);
+    return;
+  }
+  if (!novasLinhas.length && totalExistentes > 0) {
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Todos os casos válidos já estavam em CASOS_TRATADOS.', modoExecucao);
+  } else if (dryRun) {
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'SIMULADO', '', 'Migração simulada: ' + novasLinhas.length + ' registros seriam migrados.', 'SIMULADO');
+  } else if (novasLinhas.length) {
+    abaDestino.getRange(abaDestino.getLastRow() + 1, 1, novasLinhas.length, cabDestino.length).setValues(novasLinhas);
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'EXECUTADO', '', 'Migração executada: ' + novasLinhas.length + ' registros migrados.', 'EXECUTADO');
+  } else {
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Linhas encontradas, mas nenhum idCaso preenchido.', modoExecucao);
+  }
 
-  abaDestino.getRange(abaDestino.getLastRow() + 1, 1, novasLinhas.length, COLUNAS_CASOS_TRATADOS.length).setValues(novasLinhas);
+  registrarLogMigracao_(
+    'migrarLegadoParaCasosTratados_',
+    dryRun ? 'SIMULADO' : 'EXECUTADO',
+    '',
+    'Resumo migração | origem=' + abaOrigem.getName() +
+      '; linhasLidas=' + dadosSemCabecalho.length +
+      '; ignoradasSemIdCaso=' + totalIgnoradasSemIdCaso +
+      '; validos=' + totalValidos +
+      '; migrados=' + novasLinhas.length +
+      '; jaExistentes=' + totalExistentes +
+      '; erros=' + totalErros +
+      '; modo=' + (dryRun ? 'SIMULADO' : 'EXECUTADO'),
+    modoExecucao
+  );
+}
+
+function obterAbaPorNomeFlexivel_(ss, nomesPossiveis) {
+  var planilha = ss || SpreadsheetApp.getActiveSpreadsheet();
+  var nomes = (nomesPossiveis || []).map(function (nome) { return limparTexto(nome).toUpperCase(); });
+  var abas = planilha.getSheets();
+  for (var i = 0; i < abas.length; i += 1) {
+    var aba = abas[i];
+    var nomeAba = limparTexto(aba.getName()).toUpperCase();
+    if (nomes.indexOf(nomeAba) !== -1) return aba;
+  }
+  for (var j = 0; j < nomesPossiveis.length; j += 1) {
+    var candidata = planilha.getSheetByName(nomesPossiveis[j]);
+    if (candidata) return candidata;
+  }
+  return null;
 }
 
 function normalizarTextoMigracao_(valor) {
   var texto = limparTexto(valor);
   if (!texto) return '';
-  return texto.replace(/\s+/g, ' ').toUpperCase();
+  return texto.replace(/\s+/g, ' ');
 }
 
 function normalizarSexoGeneroMigracao_(valor) {
-  var texto = normalizarTextoMigracao_(valor);
-  if (texto === 'MASCULIMPO') return 'MASCULINO';
+  var texto = normalizarTextoMigracao_(valor).toUpperCase();
+  if (texto === 'MASCULIMPO' || texto === 'MASCULINO') return 'MASCULINO';
+  if (texto === 'FEMININO') return 'FEMININO';
   return texto;
 }
 
 function normalizarMeioTransporteMigracao_(valor) {
-  var texto = normalizarTextoMigracao_(valor);
-  if (texto === 'N/D') return 'NAO INFORMADO';
+  var texto = normalizarTextoMigracao_(valor).toUpperCase();
+  if (texto === 'N/D' || texto === 'ND') return 'NAO INFORMADO';
   return texto;
 }
 
@@ -718,14 +815,10 @@ function normalizarInteiroMigracao_(valor) {
 }
 
 function gerarResumoArvoreDecisaoLegado_(texto) {
-  var bruto = limparTexto(texto);
+  var bruto = normalizarTextoMigracao_(texto);
   if (!bruto) return '';
-  var normalizado = bruto.replace(/\s+/g, ' ').toUpperCase();
-  if (normalizado.indexOf('SUSPEITA DE CRIME') !== -1) {
-    return 'ÁRVORE DE DECISÃO APLICADA - SUSPEITA DE CRIME';
-  }
-  if (normalizado.indexOf('ÁRVORE') !== -1 || normalizado.indexOf('ARVORE') !== -1) {
-    return 'ÁRVORE DE DECISÃO APLICADA - REVISAR DETALHES NO LEGADO';
+  if (bruto.indexOf('[ÁRVORE DE DECISÃO') !== -1 || bruto.length > 500) {
+    return gerarResumoOperacionalLegado_(bruto);
   }
   return gerarResumoOperacionalLegado_(bruto);
 }
