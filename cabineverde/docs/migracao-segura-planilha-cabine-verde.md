@@ -65,3 +65,55 @@ Usa o header existente em `COLUNAS_CASOS` com adição de `statusMigracao`.
 - O contexto é aberto por `iniciarContextoExecucao_()` e encerrado por `finalizarContextoExecucao_()`.
 - Chamadas isoladas fora do fluxo seguro são bloqueadas com erro e log `BLOQUEADA` em `LOG_MIGRACAO`.
 - Ações de menu executam wrappers com `try/finally` para garantir reset do contexto, evitando bypass manual no Apps Script.
+
+## Rotina de saneamento DESAPARECIDOS -> CASOS_TRATADOS
+
+Foi adicionada a função `migrarLegadoParaCasosTratados_()` para copiar e sanear dados legados da aba `DESAPARECIDOS` sem alterar a origem.
+
+Principais garantias:
+- Cria/usa aba `CASOS_TRATADOS` com cabeçalho padronizado de 15 colunas.
+- Preserva dados brutos de observações em `LEGADO_OBSERVACOES_BRUTAS` e salva resumo operacional em `observacoesOperacionais`.
+- Normaliza campos críticos (`sexoGenero`, `meioTransporte`, caixa alta, espaços duplicados).
+- Mantém booleanos (`TRUE`/`FALSE`) como tipo booleano.
+- Marca `statusMigracao` como `MIGRADO`, `INCOMPLETO` ou `ERRO` (quando aplicável por validações futuras).
+- É idempotente por `idCaso`: não duplica nem sobrescreve registros já migrados.
+- Registra eventos e inconsistências em `LOG_MIGRACAO`.
+
+## Validação pós-migração de CASOS_TRATADOS
+
+A função `validarCasosTratados_()` executa verificação de completude, coerência e utilidade operacional dos dados migrados.
+
+Saída:
+- Aba `VALIDACAO_MIGRACAO` com os campos: `dataHoraValidacao`, `idCaso`, `talaoPMESP`, `campo`, `problema`, `severidade`, `statusValidacao`.
+
+Regras aplicadas:
+- `nomeCompletoDesaparecido` vazio -> `CRITICA`.
+- `idade` inválida -> `ALTA`.
+- `dataHoraUltimaVisualizacao` inválida -> `ALTA`.
+- `localUltimaVisualizacao` vazio -> `ALTA`.
+- `classificacaoRisco` vazio -> `CRITICA`.
+- `prioridade` vazia -> `CRITICA`.
+- `observacoesOperacionais` muito curtas -> `MEDIA`.
+
+Evento de auditoria:
+- Registra `VALIDACAO_MIGRACAO_EXECUTADA` no `LOG_MIGRACAO`, com total de problemas encontrados.
+
+## Consolidação do status final de uso (CASOS_TRATADOS)
+
+A função `consolidarStatusUsoCasosTratados_()` atribui selo final de uso por registro em `CASOS_TRATADOS` com base nas severidades da aba `VALIDACAO_MIGRACAO`.
+
+Colunas adicionadas/atualizadas em `CASOS_TRATADOS`:
+- `statusUso`
+- `dataHoraConsolidacaoUso`
+
+Regras de consolidação:
+- qualquer `CRITICA` -> `NAO_APTO`
+- sem `CRITICA`, mas com `ALTA` -> `APTO_COM_RESTRICAO`
+- apenas `MEDIA`/`BAIXA` -> `APTO_COM_OBSERVACAO`
+- sem problemas -> `APTO_PARA_USO`
+
+Auditoria:
+- Registra `STATUS_USO_CONSOLIDADO` no `LOG_MIGRACAO` com totais:
+  - `totalApto`
+  - `totalRestricao`
+  - `totalNaoApto`
