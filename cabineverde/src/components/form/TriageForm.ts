@@ -1,7 +1,7 @@
 import { StatusCaso } from '../../types/enums.js';
 
-const input = (name: string, label: string, type = 'text', required = false) => `
-  <label>${label}<input name="${name}" type="${type}" ${required ? 'required' : ''} /></label>`;
+const input = (name: string, label: string, type = 'text', required = false, attrs = '') => `
+  <label>${label}<input name="${name}" type="${type}" ${required ? 'required' : ''} ${attrs} /></label>`;
 
 const checkbox = (name: string, label: string) => `
   <label class="cv-check"><input name="${name}" type="checkbox" /> ${label}</label>`;
@@ -49,11 +49,11 @@ export const renderTriageForm = (): string => `
         input('nomeMae', 'Nome da mãe'),
         input('dataNascimento', 'Data de nascimento', 'date'),
         input('telefoneDesaparecido', 'Telefone desaparecido'),
-        select('corPele', 'Cor da pele', ['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não informado']),
-        input('alturaAproximada', 'Altura aproximada (cm)', 'number'),
-        input('pesoAproximado', 'Peso aproximado (kg)', 'number'),
-        input('corCabelo', 'Cor do cabelo'),
-        input('corOlhos', 'Cor dos olhos'),
+        select('corPele', 'Cor da pele', ['BRANCA', 'PARDA', 'PRETA', 'AMARELA', 'INDIGENA', 'NAO INFORMADO']),
+        input('alturaAproximada', 'Altura aproximada (cm)', 'number', false, 'min="30" max="250" step="1" inputmode="numeric"'),
+        input('pesoAproximado', 'Peso aproximado (kg)', 'number', false, 'min="1" max="400" step="1" inputmode="numeric"'),
+        select('corCabelo', 'Cor do cabelo', ['PRETO', 'CASTANHO', 'LOIRO', 'RUIVO', 'GRISALHO', 'NAO INFORMADO']),
+        select('corOlhos', 'Cor dos olhos', ['CASTANHO', 'PRETO', 'AZUL', 'VERDE', 'MEL', 'NAO INFORMADO']),
         input('caracteristicasMarcantes', 'Características marcantes')
       ].join('')
     )}

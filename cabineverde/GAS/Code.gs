@@ -495,6 +495,7 @@ function persistirRegistro(planilha, registro) {
 
   if (aba === 'CASOS') {
     var registroPorColuna = mapearPorColuna(colunas, valores);
+    registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
     var linhaPorIdCaso = localizarCasoPorIdCaso(sheet, idCaso, cabecalhoAtual);
