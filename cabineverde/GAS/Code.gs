@@ -49,7 +49,7 @@ var ESTRUTURA_PLANILHA = {
   FOTOS_DESAPARECIDOS: typeof COLUNAS_FOTOS_DESAPARECIDOS !== 'undefined' ? COLUNAS_FOTOS_DESAPARECIDOS : [],
   OPERADORES: ['email','nome','perfil','ativo','ultimaAtualizacao'],
   Logs_GAS: ['timestamp', 'etapa', 'ok', 'mensagem', 'rawPostData', 'payloadIdCaso'],
-  QUALIDADE_DADOS: ['dataHoraAuditoria','idCaso','talaoPMESP','campo','problema','severidade','acaoRecomendada','statusTratamento']
+  QUALIDADE_DADOS: ['dataHoraAuditoria','idCaso','talaoPMESP','campo','problema','severidade','acaoRecomendada','statusTratamento','responsavelTratamento','dataHoraResolucao']
 };
 
 
