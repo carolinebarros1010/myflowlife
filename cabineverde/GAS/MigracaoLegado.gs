@@ -621,12 +621,17 @@ function migrarLegadoParaCasosTratados_() {
   var abaDestino = planilha.getSheetByName('CASOS_TRATADOS') || planilha.insertSheet('CASOS_TRATADOS');
   garantirCabecalhoSemDuplicidade_(abaDestino, COLUNAS_CASOS_TRATADOS, 'CASOS_TRATADOS', dryRun);
   var cabDestino = obterCabecalho_(abaDestino);
-  var dadosOrigem = abaOrigem.getDataRange().getValues();
-  if (!dadosOrigem || dadosOrigem.length <= 1) {
+  var dados = abaOrigem.getDataRange().getValues();
+  if (!dados || dados.length <= 1) {
     registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Aba origem encontrada, mas sem registros abaixo do cabeçalho.', modoExecucao);
     return;
   }
-  var cabOrigem = (dadosOrigem[0] || []).map(function (h) { return limparTexto(h); });
+  var headers = dados[0] || [];
+  var idxIdCaso = headers.indexOf('idCaso');
+  if (idxIdCaso === -1) {
+    throw new Error('Coluna idCaso não encontrada.');
+  }
+  var cabOrigem = headers.map(function (h) { return limparTexto(h); });
 
   var indicesDestino = {};
   cabDestino.forEach(function (coluna, indice) {
@@ -666,33 +671,34 @@ function migrarLegadoParaCasosTratados_() {
   }
 
   var novasLinhas = [];
-  var totalLinhasLidas = 0;
+  var totalLinhasLidas = dados.length;
   var totalLinhasComIdCaso = 0;
   var totalSemIdCaso = 0;
   var totalMigrados = 0;
   var totalIncompletos = 0;
   var totalJaExistentes = 0;
   var totalErros = 0;
-  var dadosSemCabecalho = dadosOrigem.slice(1);
-
-  dadosSemCabecalho.forEach(function (linha, idx) {
-    var linhaPlanilha = idx + 2;
-    var linhaVazia = !linha || linha.every(function (celula) {
-      return limparTexto(celula) === '';
-    });
-    if (linhaVazia) return;
-    totalLinhasLidas += 1;
-    var registro = linhaParaObjeto_(cabOrigem, linha);
-    var idCaso = limparTexto(obterPrimeiroValorDisponivel_(registro, ['idCaso', 'idcaso', 'IDCASO']));
-    if (!idCaso) {
+  for (var i = 1; i < dados.length; i += 1) {
+    var linha = dados[i];
+    var linhaPlanilha = i + 1;
+    if (!linha) {
       totalSemIdCaso += 1;
-      return;
+      continue;
+    }
+    var idCasoLinha = linha[idxIdCaso];
+    if (!idCasoLinha || String(idCasoLinha).trim() === '') {
+      totalSemIdCaso += 1;
+      continue;
     }
     totalLinhasComIdCaso += 1;
 
+    var registro = linhaParaObjeto_(cabOrigem, linha);
+    var idCaso = limparTexto(obterPrimeiroValorDisponivel_(registro, ['idCaso', 'idcaso', 'IDCASO']));
+    if (!idCaso) continue;
+
     if (idsExistentes[idCaso]) {
       totalJaExistentes += 1;
-      return;
+      continue;
     }
 
     try {
@@ -742,15 +748,11 @@ function migrarLegadoParaCasosTratados_() {
       totalErros += 1;
       registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ERRO', idCaso, 'Falha de tratamento: ' + erro.message, modoExecucao);
     }
-  });
-
-  if (dadosSemCabecalho.length === 0) {
-    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Aba origem encontrada, mas sem registros abaixo do cabeçalho.', modoExecucao);
-    return;
   }
+  Logger.log('Total linhas lidas: ' + dados.length);
+  Logger.log('Total com idCaso: ' + totalLinhasComIdCaso);
   if (totalLinhasComIdCaso === 0) {
-    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Linhas encontradas, mas nenhum idCaso preenchido.', modoExecucao);
-    return;
+    throw new Error('Nenhum idCaso encontrado na aba Desaparecidos.');
   }
   if (!novasLinhas.length && totalJaExistentes > 0) {
     registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Todos os casos válidos já estavam em CASOS_TRATADOS.', modoExecucao);

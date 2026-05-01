@@ -84,9 +84,11 @@ Principais garantias:
 - **Origem oficial**: aba `Desaparecidos` (com busca flexível por nome: `Desaparecidos`, `DESAPARECIDOS`, `desaparecidos`).
 - **Destino**: aba `CASOS_TRATADOS`.
 - **Leitura segura**: usa `getDataRange().getValues()` para não perder registros com linhas em branco no meio.
+- **Validação de cabeçalho**: exige a coluna `idCaso`; se não existir, a rotina encerra com erro explícito.
 - **Mapeamento por cabeçalho**: dados são mapeados por nome de coluna (não por posição fixa).
 - **Critério de linha válida**: somente linhas com `idCaso` preenchido.
 - **Linhas ignoradas**: linhas vazias e linhas sem `idCaso` são ignoradas e contabilizadas no log.
+- **Métricas operacionais**: registra `totalLinhasLidas`, `totalLinhasComIdCaso` e `totalSemIdCaso` no `LOG_MIGRACAO` e também em `Logger.log`.
 - **Idempotência**: se `idCaso` já existir em `CASOS_TRATADOS`, o caso não é duplicado nem sobrescrito.
 - **Observações longas/árvore**:
   - quando `observacoesOperacionais` contiver `[ÁRVORE DE DECISÃO` ou for extensa, o texto bruto vai para `LEGADO_OBSERVACOES_BRUTAS`;
