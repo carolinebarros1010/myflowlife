@@ -10,4 +10,5 @@ export const renderActionFooter = (): string => `
   <button type="button" id="share-session" class="cv-button cv-button--ghost">Gerar token sessão</button>
   <button type="reset" form="triage-form" id="clear-form" class="cv-button cv-button--ghost">Limpar formulário</button>
   <button type="button" id="new-case" class="cv-button cv-button--ghost">Iniciar novo caso</button>
+  <button type="button" id="send-feedback" class="cv-button cv-button--secondary">Enviar feedback</button>
 </footer>`;
