@@ -55,3 +55,12 @@ A árvore de decisão **não foi removida**. Ela segue no frontend e agora é pe
 
 - Acesso a imagem deve ocorrer via função intermediária `visualizarFotoDesaparecido_` (sem exposição de link direto).
 - Eventos `FOTO_VISUALIZADA` e logs em `LOG_ACESSO_FOTOS` reforçam rastreabilidade jurídica.
+
+
+## Fechamento operacional Cabine Verde (eventos críticos)
+
+- Criação de caso registra `CASO_CRIADO` em `EVENTOS_OCORRENCIA` com dados operacionais (`idCaso`, `talaoPMESP`, `operador`, `dataHora`, `statusInicial`).
+- A decisão da triagem pode ser registrada via `registrarDecisaoOperacional_(idCaso, operador, classificacao, prioridade, justificativa)`, gerando `DECISAO_OPERACIONAL`.
+- Auditoria de acesso registra `OPERADOR_LOGADO` e `OPERADOR_BLOQUEADO` na `LOG_ACESSO` com `email`, `perfil`, `resultado` e `motivoBloqueio`.
+- Validação de foto usa `validarFotoDesaparecido_(idFoto, operador, status)` com perfis `SUPERVISOR/ADMIN` e gera `FOTO_VALIDADA`/`FOTO_REJEITADA`.
+- Controle de uso excessivo de foto via `verificarUsoExcessivoFoto_(idFoto, operador)`: se exceder limite configurado (mais de 5 acessos em 10 minutos), registra `USO_EXCESSIVO_FOTO` e retorna sugestão de bloqueio temporário.

@@ -56,7 +56,7 @@ function validarOperadorAtual_() {
   var emailAtual = limparTexto(Session.getActiveUser().getEmail()).toLowerCase();
 
   if (!emailAtual) {
-    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'BLOQUEADO_SEM_EMAIL', 'Usuário sem e-mail identificado na sessão Google.', '');
+    registrarLogAcessoOperador_(planilha, 'OPERADOR_BLOQUEADO', 'BLOQUEADO_SEM_EMAIL', 'Usuário sem e-mail identificado na sessão Google.', '');
     throw new Error('Usuário não autorizado. Solicite acesso ao administrador.');
   }
 
@@ -64,7 +64,7 @@ function validarOperadorAtual_() {
   var idxAtivo = cabecalho.indexOf('ativo');
   var idxPerfil = cabecalho.indexOf('perfil');
   if (idxEmail === -1 || idxAtivo === -1 || idxPerfil === -1) {
-    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'ERRO_ESTRUTURA_OPERADORES', 'Aba OPERADORES sem colunas obrigatórias (email/ativo/perfil).', emailAtual);
+    registrarLogAcessoOperador_(planilha, 'OPERADOR_BLOQUEADO', 'ERRO_ESTRUTURA_OPERADORES', 'Aba OPERADORES sem colunas obrigatórias (email/ativo/perfil).', emailAtual);
     throw new Error('Usuário não autorizado. Solicite acesso ao administrador.');
   }
 
@@ -82,7 +82,7 @@ function validarOperadorAtual_() {
   }
 
   if (!encontrado) {
-    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'NAO_CADASTRADO', 'E-mail não encontrado na aba OPERADORES.', emailAtual);
+    registrarLogAcessoOperador_(planilha, 'OPERADOR_BLOQUEADO', 'NAO_CADASTRADO', 'E-mail não encontrado na aba OPERADORES.', emailAtual);
     throw new Error('Usuário não autorizado. Solicite acesso ao administrador.');
   }
 
@@ -90,26 +90,71 @@ function validarOperadorAtual_() {
   var operadorAtivo = ['TRUE','VERDADEIRO','SIM','ATIVO','1'].indexOf(ativoNormalizado) !== -1;
 
   if (!operadorAtivo) {
-    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'OPERADOR_INATIVO', 'Operador localizado, porém inativo na aba OPERADORES.', emailAtual);
+    registrarLogAcessoOperador_(planilha, 'OPERADOR_BLOQUEADO', 'OPERADOR_INATIVO', 'Operador localizado, porém inativo na aba OPERADORES.', emailAtual);
     throw new Error('Usuário não autorizado. Solicite acesso ao administrador.');
   }
 
   var perfilValidacao = validarPerfilOperador_({ email: emailAtual, perfil: encontrado[idxPerfil] }, PERFIS_OPERADOR_VALIDOS);
   if (!perfilValidacao.permitido) {
-    registrarLogAcessoOperador_(planilha, "ACESSO_NEGADO", "PERFIL_INVALIDO", perfilValidacao.motivo, emailAtual);
+    registrarLogAcessoOperador_(planilha, 'OPERADOR_BLOQUEADO', 'PERFIL_INVALIDO', perfilValidacao.motivo, emailAtual);
     throw new Error("Usuário não autorizado. Solicite acesso ao administrador.");
   }
 
+  registrarLogAcessoOperador_(planilha, 'OPERADOR_LOGADO', 'PERMITIDO', 'Operador autenticado com sucesso.', emailAtual);
   return { autorizado: true, email: emailAtual, perfil: perfilValidacao.perfil };
 }
 
 function registrarLogAcessoOperador_(planilha, tipoEvento, status, mensagem, email) {
-  var abaLog = garantirAbaComCabecalho(planilha, 'LOG_ACESSO', ['dataHora','tipoEvento','status','mensagem','email']);
-  abaLog.appendRow([formatarDataHora(new Date()), limparTexto(tipoEvento), limparTexto(status), limparTexto(mensagem), limparTexto(email)]);
+  var colunasLog = ['dataHora','tipoEvento','status','mensagem','email','perfil','resultado','motivoBloqueio'];
+  var abaLog = garantirAbaComCabecalho(planilha, 'LOG_ACESSO', colunasLog);
+  var cabecalhoLog = garantirColunasDaEstrutura(abaLog, colunasLog).map(limparTexto);
+  var evento = {
+    dataHora: formatarDataHora(new Date()),
+    tipoEvento: limparTexto(tipoEvento),
+    status: limparTexto(status),
+    mensagem: limparTexto(mensagem),
+    email: limparTexto(email),
+    perfil: '',
+    resultado: limparTexto(status),
+    motivoBloqueio: limparTexto(status).indexOf('BLOQUEADO') !== -1 ? limparTexto(mensagem) : ''
+  };
+  abaLog.appendRow(cabecalhoLog.map(function (coluna) { return normalizarValorPlanilha(evento[coluna]); }));
 
   if (typeof registrarLogMigracao_ === 'function') {
     registrarLogMigracao_('validarOperadorAtual_', limparTexto(status), '', limparTexto(mensagem), 'EXECUTADO', true, limparTexto(tipoEvento));
   }
+}
+
+
+function serializarDadosEvento_(dados) {
+  try {
+    return JSON.stringify(dados || {});
+  } catch (err) {
+    return limparTexto(dados);
+  }
+}
+
+function registrarEventoOperacional_(planilha, idCaso, tipoEvento, dadosEvento) {
+  var descricao = 'dados=' + serializarDadosEvento_(dadosEvento || {});
+  registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricao);
+}
+
+function registrarDecisaoOperacional_(idCaso, operador, classificacao, prioridade, justificativa) {
+  var idCasoLimpo = limparTexto(idCaso);
+  if (!idCasoLimpo) throw new Error('idCaso obrigatório para registrar decisão operacional.');
+
+  var operadorValidado = validarPerfilOperador_(operador || {}, PERFIS_OPERADOR_VALIDOS);
+  if (!operadorValidado.permitido) throw new Error('Operador inválido para decisão operacional: ' + operadorValidado.motivo);
+
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  registrarEventoOperacional_(planilha, idCasoLimpo, 'DECISAO_OPERACIONAL', {
+    classificacaoRisco: limparTexto(classificacao),
+    prioridade: limparTexto(prioridade),
+    justificativa: limparTexto(justificativa),
+    operador: operadorValidado.email || limparTexto(operador && operador.email)
+  });
+
+  return { ok: true, idCaso: idCasoLimpo, tipoEvento: 'DECISAO_OPERACIONAL' };
 }
 
 function doGet() {
@@ -200,6 +245,13 @@ function persistirRegistro(planilha, registro) {
     }
 
     sheet.appendRow(linhaFinal);
+    registrarEventoOperacional_(planilha, idCaso, 'CASO_CRIADO', {
+      idCaso: idCaso,
+      talaoPMESP: talaoPMESPRecebido,
+      operador: limparTexto(registroPorColuna.operadorResponsavel),
+      dataHora: formatarDataHora(new Date()),
+      statusInicial: limparTexto(registroPorColuna.statusCaso) || 'Em triagem'
+    });
     return;
   }
 

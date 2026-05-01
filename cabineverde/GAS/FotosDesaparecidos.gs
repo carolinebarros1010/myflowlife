@@ -166,6 +166,75 @@ function obterLinkFotoPrincipal_(idCaso) {
   return '';
 }
 
+
+function localizarFotoPorId_(idFoto) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = garantirAbaComCabecalho(planilha, 'FOTOS_DESAPARECIDOS', COLUNAS_FOTOS_DESAPARECIDOS);
+  var cabecalho = garantirColunasDaEstrutura(aba, COLUNAS_FOTOS_DESAPARECIDOS);
+  var idxIdFoto = cabecalho.indexOf('idFoto');
+  var dados = aba.getRange(2, 1, Math.max(aba.getLastRow() - 1, 0), aba.getLastColumn()).getValues();
+  for (var i = 0; i < dados.length; i += 1) {
+    if (limparTexto(dados[i][idxIdFoto]) === limparTexto(idFoto)) {
+      return { aba: aba, cabecalho: cabecalho, linha: i + 2, valores: dados[i] };
+    }
+  }
+  return null;
+}
+
+function validarFotoDesaparecido_(idFoto, operador, status) {
+  var statusNormalizado = limparTexto(status).toUpperCase();
+  if (['VALIDADA', 'REJEITADA'].indexOf(statusNormalizado) === -1) throw new Error('Status inválido. Use VALIDADA ou REJEITADA.');
+
+  var permissao = validarPermissaoAcao_({ email: limparTexto(operador && operador.email), perfil: limparTexto(operador && operador.perfil) }, 'VALIDAR_REJEITAR_FOTO');
+  if (!permissao.permitido) throw new Error('Apenas SUPERVISOR/ADMIN pode validar foto.');
+
+  var foto = localizarFotoPorId_(idFoto);
+  if (!foto) throw new Error('Foto não encontrada para validação.');
+
+  var idxStatus = foto.cabecalho.indexOf('statusValidacao');
+  var idxIdCaso = foto.cabecalho.indexOf('idCaso');
+  if (idxStatus < 0) throw new Error('Coluna statusValidacao não encontrada.');
+  foto.aba.getRange(foto.linha, idxStatus + 1).setValue(statusNormalizado === 'VALIDADA' ? 'Validada' : 'Rejeitada');
+
+  var idCaso = limparTexto(foto.valores[idxIdCaso]);
+  atualizarResumoFotosNoCaso_(idCaso);
+  registrarEventoOcorrencia(SpreadsheetApp.getActiveSpreadsheet(), idCaso, statusNormalizado === 'VALIDADA' ? 'FOTO_VALIDADA' : 'FOTO_REJEITADA', 'idFoto=' + limparTexto(idFoto) + '; operador=' + (permissao.email || limparTexto(operador && operador.email)));
+  return { ok: true, idFoto: limparTexto(idFoto), statusValidacao: statusNormalizado };
+}
+
+function verificarUsoExcessivoFoto_(idFoto, operador) {
+  var janelaMinutos = 10;
+  var limiteAcessos = 5;
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = garantirAbaComCabecalho(planilha, 'LOG_ACESSO_FOTOS', ['dataHora', 'idFoto', 'operador', 'perfilOperador', 'acao', 'resultado', 'motivoAcessoFoto', 'justificativa', 'justificativaValidada']);
+  var ultimaLinha = aba.getLastRow();
+  if (ultimaLinha < 2) return { excedeu: false, acessosNoPeriodo: 0, limiteAcessos: limiteAcessos, janelaMinutos: janelaMinutos };
+
+  var agora = new Date();
+  var limiteMs = janelaMinutos * 60 * 1000;
+  var dados = aba.getRange(2, 1, ultimaLinha - 1, aba.getLastColumn()).getValues();
+  var idFotoLimpo = limparTexto(idFoto);
+  var operadorLimpo = limparTexto(operador).toLowerCase();
+  var total = 0;
+
+  for (var i = 0; i < dados.length; i += 1) {
+    var ts = new Date(dados[i][0]);
+    var idLinha = limparTexto(dados[i][1]);
+    var operadorLinha = limparTexto(dados[i][2]).toLowerCase();
+    if (!idLinha || (agora.getTime() - ts.getTime()) > limiteMs) continue;
+    if (idLinha === idFotoLimpo && operadorLinha === operadorLimpo) total += 1;
+  }
+
+  if (total > limiteAcessos) {
+    var foto = localizarFotoPorId_(idFotoLimpo);
+    var idCaso = foto ? limparTexto(foto.valores[foto.cabecalho.indexOf('idCaso')]) : '';
+    registrarEventoOcorrencia(planilha, idCaso, 'USO_EXCESSIVO_FOTO', 'idFoto=' + idFotoLimpo + '; operador=' + operadorLimpo + '; acessos=' + total + '; limite=' + limiteAcessos + '; janelaMinutos=' + janelaMinutos);
+    return { excedeu: true, acessosNoPeriodo: total, limiteAcessos: limiteAcessos, janelaMinutos: janelaMinutos, bloqueioTemporarioSugerido: true };
+  }
+
+  return { excedeu: false, acessosNoPeriodo: total, limiteAcessos: limiteAcessos, janelaMinutos: janelaMinutos };
+}
+
 function registrarLogMigracaoSeNecessario_(etapa, idCaso, mensagem) {
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   var aba = planilha.getSheetByName('LOG_MIGRACAO');
