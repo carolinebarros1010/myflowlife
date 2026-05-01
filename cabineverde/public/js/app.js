@@ -364,6 +364,12 @@ const render = () => {
     </section>
     <section class="cv-card">
       <h3>Painel de Qualidade dos Dados</h3>
+      <div class="cv-prioridade-rapida" role="group" aria-label="Filtro rápido por prioridade de tratamento">
+        <button class="cv-button cv-prioridade-btn" type="button" data-prioridade="URGENTE">URGENTE</button>
+        <button class="cv-button cv-prioridade-btn cv-prioridade-btn--alta" type="button" data-prioridade="ALTA">ALTA</button>
+        <button class="cv-button cv-prioridade-btn cv-prioridade-btn--media" type="button" data-prioridade="MEDIA">MEDIA</button>
+        <button class="cv-button cv-prioridade-btn cv-prioridade-btn--baixa" type="button" data-prioridade="BAIXA">BAIXA</button>
+      </div>
       <div class="cv-grid cv-grid--filters">
         <label>Total problemas<input id="qtd-totalProblemas" readonly /></label>
         <label>Total críticos<input id="qtd-totalCriticos" readonly /></label>
@@ -374,6 +380,7 @@ const render = () => {
         <label>Filtro idCaso<input id="qualidade-filtro-idCaso" /></label>
         <label>Filtro talão PMESP<input id="qualidade-filtro-talaoPMESP" /></label>
         <label>Filtro severidade<input id="qualidade-filtro-severidade" placeholder="CRITICA/ALTA/MEDIA" /></label>
+        <label>Filtro prioridade tratamento<input id="qualidade-filtro-prioridadeTratamento" placeholder="URGENTE/ALTA/MEDIA/BAIXA" /></label>
         <label>Filtro status<input id="qualidade-filtro-statusTratamento" placeholder="PENDENTE/RESOLVIDO" /></label>
       </div>
       <button class="cv-button cv-button--secondary" type="button" id="atualizarQualidadeBtn">Atualizar painel</button>
@@ -544,12 +551,26 @@ const render = () => {
     idCaso: document.getElementById('qualidade-filtro-idCaso').value.trim().toLowerCase(),
     talaoPMESP: document.getElementById('qualidade-filtro-talaoPMESP').value.trim().toLowerCase(),
     severidade: document.getElementById('qualidade-filtro-severidade').value.trim().toLowerCase(),
+    prioridadeTratamento: document.getElementById('qualidade-filtro-prioridadeTratamento').value.trim().toLowerCase(),
     statusTratamento: document.getElementById('qualidade-filtro-statusTratamento').value.trim().toLowerCase()
   });
+  const ordemPrioridadeTratamento = { URGENTE: 0, ALTA: 1, MEDIA: 2, BAIXA: 3 };
+  const obterPrioridadeTratamento = (item) => {
+    const prioridade = String(item.prioridadeTratamento || '').toUpperCase();
+    if (prioridade) return prioridade;
+    const campo = String(item.campo || '');
+    if (campo === 'talaoPMESP' || campo === 'classificacaoRisco') return 'URGENTE';
+    const severidade = String(item.severidade || '').toUpperCase();
+    if (severidade === 'CRITICA') return 'URGENTE';
+    if (severidade === 'ALTA') return 'ALTA';
+    if (severidade === 'MEDIA') return 'MEDIA';
+    return 'BAIXA';
+  };
   const aplicarFiltroQualidade = (item, filtro) =>
     (!filtro.idCaso || String(item.idCaso || '').toLowerCase().includes(filtro.idCaso)) &&
     (!filtro.talaoPMESP || String(item.talaoPMESP || '').toLowerCase().includes(filtro.talaoPMESP)) &&
     (!filtro.severidade || String(item.severidade || '').toLowerCase().includes(filtro.severidade)) &&
+    (!filtro.prioridadeTratamento || obterPrioridadeTratamento(item).toLowerCase().includes(filtro.prioridadeTratamento)) &&
     (!filtro.statusTratamento || String(item.statusTratamento || '').toLowerCase().includes(filtro.statusTratamento));
   const filtrarPorPerfil = (lista) => {
     if (['SUPERVISOR', 'ADMIN', 'AUDITOR'].includes(PERFIL_OPERADOR)) return lista;
@@ -563,10 +584,13 @@ const render = () => {
     document.getElementById('qtd-totalPendentes').value = String(resumo.totalPendentes || 0);
     document.getElementById('qtd-totalResolvidos').value = String(resumo.totalResolvidos || 0);
     const inconsistencias = Array.isArray(resumo.inconsistencias) ? resumo.inconsistencias : [];
-    const lista = filtrarPorPerfil(inconsistencias).filter((item) => aplicarFiltroQualidade(item, lerFiltrosQualidade()));
+    const lista = filtrarPorPerfil(inconsistencias)
+      .map((item) => ({ ...item, prioridadeTratamento: obterPrioridadeTratamento(item) }))
+      .filter((item) => aplicarFiltroQualidade(item, lerFiltrosQualidade()))
+      .sort((a, b) => (ordemPrioridadeTratamento[a.prioridadeTratamento] ?? 99) - (ordemPrioridadeTratamento[b.prioridadeTratamento] ?? 99));
     const alvo = document.getElementById('qualidade-lista');
-    alvo.innerHTML = lista.length ? lista.map((item) => `<section>
-      <p><strong>${item.idCaso || '-'}</strong> · Talão: ${item.talaoPMESP || '-'} · ${item.severidade || '-'}</p>
+    alvo.innerHTML = lista.length ? lista.map((item) => `<section class="cv-prioridade-card cv-prioridade-card--${String(item.prioridadeTratamento || 'BAIXA').toLowerCase()}">
+      <p><strong>${item.idCaso || '-'}</strong> · Talão: ${item.talaoPMESP || '-'} · ${item.severidade || '-'} · <strong>Tratamento: ${item.prioridadeTratamento || 'BAIXA'}</strong></p>
       <p>Campo: ${item.campo || '-'} · Status: ${item.statusTratamento || 'PENDENTE'}</p>
       <p>${item.problema || '-'}</p>
       ${['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR) && String(item.statusTratamento || '').toUpperCase() !== 'RESOLVIDO' ? `<button class="cv-button" data-cmd="resolver-qualidade" data-idcaso="${item.idCaso || ''}" data-campo="${item.campo || ''}" data-problema="${item.problema || ''}">Marcar como resolvido</button>` : ''}
@@ -579,9 +603,15 @@ const render = () => {
   document.getElementById('atualizarQualidadeBtn').addEventListener('click', async () => {
     try { await atualizarPainelQualidade(); } catch (error) { atualizarFeedback(error.message || 'Falha ao atualizar painel de qualidade.', true); }
   });
-  ['qualidade-filtro-idCaso', 'qualidade-filtro-talaoPMESP', 'qualidade-filtro-severidade', 'qualidade-filtro-statusTratamento'].forEach((id) =>
+  ['qualidade-filtro-idCaso', 'qualidade-filtro-talaoPMESP', 'qualidade-filtro-severidade', 'qualidade-filtro-prioridadeTratamento', 'qualidade-filtro-statusTratamento'].forEach((id) =>
     document.getElementById(id).addEventListener('input', () => atualizarPainelQualidade().catch(() => {}))
   );
+  document.querySelectorAll('.cv-prioridade-btn').forEach((botao) => {
+    botao.addEventListener('click', () => {
+      document.getElementById('qualidade-filtro-prioridadeTratamento').value = botao.dataset.prioridade || '';
+      atualizarPainelQualidade().catch(() => {});
+    });
+  });
   document.getElementById('qualidade-lista').addEventListener('click', async (event) => {
     const alvo = event.target;
     if (!(alvo instanceof HTMLElement) || alvo.dataset.cmd !== 'resolver-qualidade') return;
