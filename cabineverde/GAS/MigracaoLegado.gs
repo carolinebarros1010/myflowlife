@@ -21,12 +21,13 @@ var CABECALHO_LOG_MIGRACAO = [
 ];
 
 var CABECALHO_LEGADO_OBSERVACOES_BRUTAS = [
-  'dataHora',
+  'dataHoraArquivo',
   'idCaso',
-  'linhaOrigem',
-  'hashConteudo',
-  'conteudoBruto',
-  'operador'
+  'talaoPMESP',
+  'origem',
+  'campoOrigem',
+  'hashObservacao',
+  'textoBruto'
 ];
 
 var CABECALHO_VALIDACAO_MIGRACAO = [
@@ -57,6 +58,10 @@ var COLUNAS_CASOS_TRATADOS = [
   'prioridade',
   'statusCaso',
   'observacoesOperacionais',
+  'classificacoesOperacionais',
+  'prioridadeAutomatica',
+  'tipoCaso',
+  'flagAlerta',
   'statusMigracao',
   'statusUso',
   'dataHoraConsolidacaoUso'
@@ -678,6 +683,26 @@ function migrarLegadoParaCasosTratados_() {
   var totalIncompletos = 0;
   var totalJaExistentes = 0;
   var totalErros = 0;
+  var totalObservacoesExpandidas = 0;
+  var totalArvoresDetectadas = 0;
+  var totalArvoresArquivadas = 0;
+  var totalArvoresJaExistentes = 0;
+  var totalResumosGerados = 0;
+  var totalSemObservacao = 0;
+  var totalClassificados = 0;
+  var totalAlertas = 0;
+  var totalCriticos = 0;
+  var totalMultiplosFatores = 0;
+  var totalPrioridadeAlta = 0;
+  var totalPrioridadeMedia = 0;
+  var totalPrioridadeBaixa = 0;
+  var totalPorClassificacao = {
+    POSSIVEL_CRIME: 0,
+    CRIANCA_DESAPARECIDA: 0,
+    RISCO_COGNITIVO: 0,
+    IDOSO_DESAPARECIDO: 0,
+    VULNERAVEL: 0
+  };
   for (var i = 1; i < dados.length; i += 1) {
     var linha = dados[i];
     var linhaPlanilha = i + 1;
@@ -702,12 +727,23 @@ function migrarLegadoParaCasosTratados_() {
     }
 
     try {
-      var observacaoBruta = normalizarTextoMigracao_(registro.observacoesOperacionais);
-      var resumoObservacao = gerarResumoArvoreDecisaoLegado_(observacaoBruta);
-      var precisaArquivarBruto = observacaoBruta && (observacaoBruta.length > 500 || observacaoBruta.indexOf('[ÁRVORE DE DECISÃO') !== -1);
-      if (precisaArquivarBruto) {
-        extrairArvoreObservacoesLegadas_(idCaso, linhaPlanilha, observacaoBruta, dryRun);
+      var idxObservacoes = cabOrigem.indexOf('observacoesOperacionais');
+      var observacaoBrutaExpandida = montarObservacaoBrutaExpandida_(linha, idxObservacoes);
+      if (observacaoBrutaExpandida) totalObservacoesExpandidas += 1;
+      else totalSemObservacao += 1;
+
+      var arvoreLegada = contemArvoreLegada_(observacaoBrutaExpandida);
+      if (arvoreLegada) {
+        totalArvoresDetectadas += 1;
+        var statusArquivo = arquivarObservacaoBrutaLegada_(idCaso, limparTexto(obterPrimeiroValorDisponivel_(registro, ['talaoBopm', 'talaoBOPM', 'talaoPMESP', 'talão', 'talao', 'numeroTalao'])), observacaoBrutaExpandida, 'observacoesOperacionais_expandido', dryRun);
+        if (statusArquivo === 'ARQUIVADO') {
+          totalArvoresArquivadas += 1;
+        } else if (statusArquivo === 'JA_EXISTENTE') {
+          totalArvoresJaExistentes += 1;
+        }
       }
+      var resumoObservacao = arvoreLegada ? extrairResumoOperacionalDaArvore_(observacaoBrutaExpandida) : gerarResumoArvoreDecisaoLegado_(observacaoBrutaExpandida);
+      if (resumoObservacao) totalResumosGerados += 1;
 
       var linhaDestino = new Array(cabDestino.length).fill('');
       Object.keys(camposBase).forEach(function (origem) {
@@ -735,6 +771,22 @@ function migrarLegadoParaCasosTratados_() {
       if (indicesDestino.observacoesOperacionais !== undefined) {
         linhaDestino[indicesDestino.observacoesOperacionais] = resumoObservacao;
       }
+      var classificacao = classificarCasoOperacional_(registro);
+      if (indicesDestino.classificacoesOperacionais !== undefined) linhaDestino[indicesDestino.classificacoesOperacionais] = JSON.stringify(classificacao.classificacoesOperacionais || []);
+      if (indicesDestino.prioridadeAutomatica !== undefined) linhaDestino[indicesDestino.prioridadeAutomatica] = classificacao.prioridadeAutomatica;
+      if (indicesDestino.tipoCaso !== undefined) linhaDestino[indicesDestino.tipoCaso] = classificacao.tipoCaso;
+      if (indicesDestino.flagAlerta !== undefined) linhaDestino[indicesDestino.flagAlerta] = classificacao.flagAlerta;
+      totalClassificados += 1;
+      if (classificacao.flagAlerta) totalAlertas += 1;
+      if (classificacao.prioridadeAutomatica === 'CRITICA') totalCriticos += 1;
+      else if (classificacao.prioridadeAutomatica === 'ALTA') totalPrioridadeAlta += 1;
+      else if (classificacao.prioridadeAutomatica === 'MEDIA') totalPrioridadeMedia += 1;
+      else totalPrioridadeBaixa += 1;
+      if ((classificacao.classificacoesOperacionais || []).length > 1) totalMultiplosFatores += 1;
+      (classificacao.classificacoesOperacionais || []).forEach(function (rotulo) {
+        if (totalPorClassificacao[rotulo] === undefined) totalPorClassificacao[rotulo] = 0;
+        totalPorClassificacao[rotulo] += 1;
+      });
       var talaoPMESP = indicesDestino.talaoPMESP !== undefined ? limparTexto(linhaDestino[indicesDestino.talaoPMESP]) : '';
       if (indicesDestino.statusMigracao !== undefined) {
         linhaDestino[indicesDestino.statusMigracao] = talaoPMESP ? 'MIGRADO' : 'INCOMPLETO';
@@ -777,9 +829,172 @@ function migrarLegadoParaCasosTratados_() {
       '; totalIncompletos=' + totalIncompletos +
       '; totalJaExistentes=' + totalJaExistentes +
       '; totalErros=' + totalErros +
+      '; totalObservacoesExpandidas=' + totalObservacoesExpandidas +
+      '; totalArvoresDetectadas=' + totalArvoresDetectadas +
+      '; totalArvoresArquivadas=' + totalArvoresArquivadas +
+      '; totalArvoresJaExistentes=' + totalArvoresJaExistentes +
+      '; totalResumosGerados=' + totalResumosGerados +
+      '; totalSemObservacao=' + totalSemObservacao +
+      '; totalClassificados=' + totalClassificados +
+      '; totalAlertas=' + totalAlertas +
+      '; totalCriticos=' + totalCriticos +
+      '; totalPrioridadeAlta=' + totalPrioridadeAlta +
+      '; totalPrioridadeMedia=' + totalPrioridadeMedia +
+      '; totalPrioridadeBaixa=' + totalPrioridadeBaixa +
+      '; totalMultiplosFatores=' + totalMultiplosFatores +
+      '; qtdPossivelCrime=' + totalPorClassificacao.POSSIVEL_CRIME +
+      '; qtdCriancaDesaparecida=' + totalPorClassificacao.CRIANCA_DESAPARECIDA +
+      '; qtdRiscoCognitivo=' + totalPorClassificacao.RISCO_COGNITIVO +
+      '; qtdIdosoDesaparecido=' + totalPorClassificacao.IDOSO_DESAPARECIDO +
+      '; qtdVulneravel=' + totalPorClassificacao.VULNERAVEL +
       '; modo=' + (dryRun ? 'SIMULADO' : 'EXECUTADO'),
     modoExecucao
   );
+  registrarLogMigracao_('CLASSIFICACAO_AUTOMATICA_REALIZADA', dryRun ? 'SIMULADO' : 'EXECUTADO', '', 'Classificação multi-etiqueta aplicada | totalClassificados=' + totalClassificados + '; totalAlertas=' + totalAlertas + '; totalCriticos=' + totalCriticos + '; totalMultiplosFatores=' + totalMultiplosFatores + '; prioridade(ALTA/MEDIA/BAIXA)=' + totalPrioridadeAlta + '/' + totalPrioridadeMedia + '/' + totalPrioridadeBaixa + '; qtdPorTipo=' + JSON.stringify(totalPorClassificacao) + '; modo=' + (dryRun ? 'SIMULADO' : 'EXECUTADO'), modoExecucao);
+}
+
+function montarObservacaoBrutaExpandida_(linha, idxObservacoes) {
+  if (!linha || idxObservacoes < 0 || idxObservacoes >= linha.length) return '';
+  var partes = [];
+  for (var i = idxObservacoes; i < linha.length; i += 1) {
+    var trecho = limparTexto(linha[i]);
+    if (trecho) partes.push(trecho);
+  }
+  return partes.join('\n');
+}
+
+function contemArvoreLegada_(texto) {
+  var bruto = limparTexto(texto);
+  if (!bruto) return false;
+  var marcadores = ['[ÁRVORE DE DECISÃO', 'PASSO 1', 'Resposta:', 'Complemento:', '[INDICADORES OPERACIONAIS]'];
+  for (var i = 0; i < marcadores.length; i += 1) {
+    if (bruto.indexOf(marcadores[i]) !== -1) return true;
+  }
+  return false;
+}
+
+function extrairResumoOperacionalDaArvore_(texto) {
+  var textoBruto = String(texto || '');
+  if (!limparTexto(textoBruto)) return 'Árvore de decisão legada arquivada.';
+
+  var marcadorInicio = '[OBSERVAÇÕES DO OPERADOR]';
+  var marcadorFim = '[INDICADORES OPERACIONAIS]';
+  var marcadorAlerta = '[ALERTAS AUTOMÁTICOS]';
+  var inicio = textoBruto.indexOf(marcadorInicio);
+  if (inicio === -1) return 'Árvore de decisão legada arquivada.';
+
+  var fim = textoBruto.indexOf(marcadorFim, inicio + marcadorInicio.length);
+  if (fim === -1) fim = textoBruto.length;
+
+  var trecho = limparTexto(textoBruto.substring(inicio + marcadorInicio.length, fim)).replace(/\s+/g, ' ');
+  if (!trecho || trecho === '-') trecho = 'Árvore de decisão legada arquivada.';
+  if (textoBruto.indexOf(marcadorAlerta) !== -1) trecho = 'Alerta operacional identificado. ' + trecho;
+  if (trecho.length > 300) trecho = trecho.substring(0, 297) + '...';
+  return trecho;
+}
+
+function arquivarObservacaoBrutaLegada_(idCaso, talaoPMESP, textoBruto, campoOrigem, dryRun) {
+  var conteudo = limparTexto(textoBruto);
+  if (!conteudo) return 'SEM_TEXTO';
+  var hashObservacao = gerarHashTexto_(conteudo);
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaLegado = planilha.getSheetByName('LEGADO_OBSERVACOES_BRUTAS') || planilha.insertSheet('LEGADO_OBSERVACOES_BRUTAS');
+  garantirCabecalhoSemDuplicidade_(abaLegado, CABECALHO_LEGADO_OBSERVACOES_BRUTAS, 'LEGADO_OBSERVACOES_BRUTAS', dryRun);
+  var cabecalhoLegado = obterCabecalho_(abaLegado);
+  var idx = {};
+  cabecalhoLegado.forEach(function (coluna, indice) { idx[coluna] = indice; });
+  var jaExiste = false;
+  if (abaLegado.getLastRow() >= 2) {
+    var dados = abaLegado.getRange(2, 1, abaLegado.getLastRow() - 1, abaLegado.getLastColumn()).getValues();
+    for (var i = 0; i < dados.length; i += 1) {
+      if (
+        limparTexto(dados[i][idx.idCaso]) === limparTexto(idCaso) &&
+        limparTexto(dados[i][idx.campoOrigem]) === limparTexto(campoOrigem) &&
+        limparTexto(dados[i][idx.hashObservacao]) === hashObservacao
+      ) {
+        jaExiste = true;
+        break;
+      }
+    }
+  }
+  if (jaExiste) return 'JA_EXISTENTE';
+  if (dryRun) return 'ARQUIVADO';
+  abaLegado.appendRow([
+    formatarDataHora(new Date()),
+    idCaso,
+    talaoPMESP || '',
+    'Desaparecidos',
+    campoOrigem || 'observacoesOperacionais_expandido'
+    ,hashObservacao,
+    conteudo
+  ]);
+  return 'ARQUIVADO';
+}
+
+function gerarHashTexto_(texto) {
+  var bytes = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.MD5,
+    String(texto || '')
+  );
+  return bytes.map(function (b) {
+    return (b + 256).toString(16).slice(-2);
+  }).join('');
+}
+
+function classificarCasoOperacional_(caso) {
+  var registro = caso || {};
+  var PESO_RISCO = {
+    POSSIVEL_CRIME: 100,
+    CRIANCA_DESAPARECIDA: 90,
+    RISCO_COGNITIVO: 85,
+    IDOSO_DESAPARECIDO: 80,
+    VULNERAVEL: 70
+  };
+  var idade = Number(registro.idade);
+  var vulnerabilidade = textoEhSim_(registro.vulnerabilidade);
+  var suspeitaCrime = textoEhSim_(registro.suspeitaCrime);
+  var riscoCognitivo = textoEhSim_(registro.condicaoMentalCognitivaComportamental);
+  var classificacoesOperacionais = [];
+  if (!isNaN(idade) && idade < 18) classificacoesOperacionais.push('CRIANCA_DESAPARECIDA');
+  if (!isNaN(idade) && idade >= 60) classificacoesOperacionais.push('IDOSO_DESAPARECIDO');
+  if (vulnerabilidade) classificacoesOperacionais.push('VULNERAVEL');
+  if (riscoCognitivo) classificacoesOperacionais.push('RISCO_COGNITIVO');
+  if (suspeitaCrime) classificacoesOperacionais.push('POSSIVEL_CRIME');
+
+  var classificacaoDominante = '';
+  var maiorPeso = 0;
+  classificacoesOperacionais.forEach(function (item) {
+    var peso = PESO_RISCO[item] || 0;
+    if (peso > maiorPeso) {
+      maiorPeso = peso;
+      classificacaoDominante = item;
+    }
+  });
+
+  var prioridadeAutomatica = 'BAIXA';
+  if (maiorPeso >= 90) prioridadeAutomatica = 'CRITICA';
+  else if (maiorPeso >= 80) prioridadeAutomatica = 'ALTA';
+  else if (maiorPeso >= 70) prioridadeAutomatica = 'MEDIA';
+
+  var flagAlerta = classificacoesOperacionais.indexOf('POSSIVEL_CRIME') !== -1 ||
+    classificacoesOperacionais.indexOf('CRIANCA_DESAPARECIDA') !== -1 ||
+    classificacoesOperacionais.indexOf('RISCO_COGNITIVO') !== -1;
+  var tipoCaso = classificacaoDominante || 'CASO_GERAL';
+
+  return {
+    classificacoesOperacionais: classificacoesOperacionais,
+    classificacaoDominante: classificacaoDominante,
+    pesoDominante: maiorPeso,
+    prioridadeAutomatica: prioridadeAutomatica,
+    tipoCaso: tipoCaso,
+    flagAlerta: flagAlerta
+  };
+}
+
+function textoEhSim_(valor) {
+  if (typeof valor === 'boolean') return valor;
+  var texto = limparTexto(valor).toUpperCase();
+  return texto === 'SIM' || texto === 'TRUE';
 }
 
 function obterAbaPorNomeFlexivel_(ss, nomesPossiveis) {
