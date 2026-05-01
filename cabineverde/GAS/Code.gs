@@ -588,6 +588,133 @@ function registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricaoEvento
   sheetEventos.appendRow(linhaEvento);
 }
 
+function gerarTimelineCaso_(idCaso) {
+  var idCasoLimpo = limparTexto(idCaso);
+  if (!idCasoLimpo) throw new Error('idCaso obrigatório para gerar timeline.');
+
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var timeline = [];
+
+  timeline = timeline
+    .concat(coletarEventosOcorrenciaTimeline_(planilha, idCasoLimpo))
+    .concat(coletarHistoricoEdicoesTimeline_(planilha, idCasoLimpo));
+
+  timeline.sort(function (a, b) {
+    return obterTimestampOrdenacao_(a.dataHora) - obterTimestampOrdenacao_(b.dataHora);
+  });
+
+  return timeline;
+}
+
+function coletarEventosOcorrenciaTimeline_(planilha, idCaso) {
+  var aba = planilha.getSheetByName('EVENTOS_OCORRENCIA');
+  if (!aba || aba.getLastRow() < 2) return [];
+
+  var cabecalho = garantirColunasDaEstrutura(aba, ESTRUTURA_PLANILHA.EVENTOS_OCORRENCIA).map(limparTexto);
+  var idxIdCaso = cabecalho.indexOf('idCaso');
+  var idxDataHora = cabecalho.indexOf('timestampEvento');
+  var idxTipoEvento = cabecalho.indexOf('tipoEvento');
+  var idxDescricao = cabecalho.indexOf('descricaoEvento');
+  if (idxIdCaso < 0 || idxDataHora < 0 || idxTipoEvento < 0 || idxDescricao < 0) return [];
+
+  var dados = aba.getRange(2, 1, aba.getLastRow() - 1, aba.getLastColumn()).getValues();
+  return dados.filter(function (linha) {
+    return limparTexto(linha[idxIdCaso]) === idCaso;
+  }).map(function (linha) {
+    var tipoEvento = limparTexto(linha[idxTipoEvento]);
+    var descricao = limparTexto(linha[idxDescricao]);
+    return {
+      dataHora: normalizarValorPlanilha(linha[idxDataHora]),
+      tipoEvento: tipoEvento,
+      descricao: descricao,
+      operador: extrairOperadorDeDescricao_(descricao),
+      origem: inferirOrigemTimeline_(tipoEvento),
+      resumo: montarResumoTimeline_(tipoEvento, descricao),
+      detalhes: { fonte: 'EVENTOS_OCORRENCIA', descricaoEvento: descricao }
+    };
+  });
+}
+
+function coletarHistoricoEdicoesTimeline_(planilha, idCaso) {
+  var aba = planilha.getSheetByName('HISTORICO_EDICOES');
+  if (!aba || aba.getLastRow() < 2) return [];
+
+  var colunas = ESTRUTURA_PLANILHA.HISTORICO_EDICOES;
+  var cabecalho = garantirColunasDaEstrutura(aba, colunas).map(limparTexto);
+  var idxIdCaso = cabecalho.indexOf('idCaso');
+  var idxDataHora = cabecalho.indexOf('timestampEdicao');
+  var idxOperador = cabecalho.indexOf('operadorEmail');
+  var idxCampo = cabecalho.indexOf('campo');
+  var idxAnterior = cabecalho.indexOf('valorAnterior');
+  var idxNovo = cabecalho.indexOf('valorNovo');
+  var idxJustificativa = cabecalho.indexOf('justificativa');
+  if (idxIdCaso < 0 || idxDataHora < 0) return [];
+
+  var dados = aba.getRange(2, 1, aba.getLastRow() - 1, aba.getLastColumn()).getValues();
+  return dados.filter(function (linha) {
+    return limparTexto(linha[idxIdCaso]) === idCaso;
+  }).map(function (linha) {
+    var campo = limparTexto(linha[idxCampo]);
+    var valorAnterior = normalizarValorPlanilha(linha[idxAnterior]);
+    var valorNovo = normalizarValorPlanilha(linha[idxNovo]);
+    var resumo = 'Campo "' + campo + '" alterado de "' + valorAnterior + '" para "' + valorNovo + '".';
+    return {
+      dataHora: normalizarValorPlanilha(linha[idxDataHora]),
+      tipoEvento: 'CASO_EDITADO',
+      descricao: resumo,
+      operador: limparTexto(linha[idxOperador]),
+      origem: 'EDICAO',
+      resumo: resumo,
+      detalhes: {
+        fonte: 'HISTORICO_EDICOES',
+        campo: campo,
+        valorAnterior: valorAnterior,
+        valorNovo: valorNovo,
+        justificativa: normalizarValorPlanilha(linha[idxJustificativa])
+      }
+    };
+  });
+}
+
+function inferirOrigemTimeline_(tipoEvento) {
+  var tipo = limparTexto(tipoEvento).toUpperCase();
+  if (tipo.indexOf('FOTO_') === 0) return 'FOTO';
+  if (tipo === 'USO_EXCESSIVO_FOTO' || tipo === 'BLOQUEIO_TEMPORARIO_FOTO') return 'ACESSO';
+  if (tipo === 'CASO_CRIADO' || tipo === 'DECISAO_OPERACIONAL') return 'CASOS';
+  return 'CASOS';
+}
+
+function montarResumoTimeline_(tipoEvento, descricao) {
+  var tipo = limparTexto(tipoEvento).toUpperCase();
+  if (tipo === 'CASO_CRIADO') return 'Caso criado no sistema.';
+  if (tipo === 'DECISAO_OPERACIONAL') return 'Decisão operacional registrada.';
+  if (tipo === 'FOTO_ANEXADA') return 'Foto anexada ao caso.';
+  if (tipo === 'FOTO_VALIDADA') return 'Foto validada por supervisor/admin.';
+  if (tipo === 'FOTO_REJEITADA') return 'Foto rejeitada na validação.';
+  if (tipo === 'FOTO_VISUALIZADA') return 'Foto visualizada por operador autorizado.';
+  if (tipo === 'USO_EXCESSIVO_FOTO') return 'Uso excessivo de foto detectado.';
+  return limparTexto(descricao) || 'Evento operacional registrado.';
+}
+
+function extrairOperadorDeDescricao_(descricao) {
+  var texto = limparTexto(descricao);
+  if (!texto) return '';
+  var operador = texto.match(/operador=([^;]+)/i);
+  if (operador && operador[1]) return limparTexto(operador[1]);
+  var operadorTexto = texto.match(/Operador=([^;]+)/i);
+  if (operadorTexto && operadorTexto[1]) return limparTexto(operadorTexto[1]);
+  return '';
+}
+
+function obterTimestampOrdenacao_(dataHora) {
+  var texto = limparTexto(dataHora);
+  if (!texto) return 0;
+  var convertidoIso = texto.replace(' ', 'T');
+  var data = new Date(convertidoIso);
+  if (!isNaN(data.getTime())) return data.getTime();
+  return 0;
+}
+
 function mapearPorColuna(colunas, valores) {
   var registro = {};
   (colunas || []).forEach(function (coluna, indice) {
