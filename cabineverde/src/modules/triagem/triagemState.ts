@@ -15,7 +15,7 @@ export interface TriagemState {
 }
 
 export const camposObrigatoriosPorEtapa: Record<number, Array<keyof CasoDesaparecimento>> = {
-  0: ['dataHoraRegistro', 'municipio'],
+  0: ['talaoPMESP', 'dataHoraRegistro', 'municipio'],
   1: ['nomeCompletoDesaparecido', 'idade'],
   2: ['dataHoraUltimaVisualizacao', 'localUltimaVisualizacao'],
   3: ['nomeSolicitante', 'vinculoSolicitante', 'telefoneSolicitante'],

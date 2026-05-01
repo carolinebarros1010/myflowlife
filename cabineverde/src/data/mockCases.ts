@@ -4,6 +4,7 @@ import { ClassificacaoRisco, FaixaEtaria, Prioridade, StatusCaso } from '../type
 export const casosMock: CasoCompleto[] = [
   {
     id: 'CV-EXEMPLO-001',
+    talaoPMESP: 'PMESP-2026-000001',
     dataHoraRegistro: new Date().toISOString(),
     municipio: 'São Paulo',
     talaoBopm: '12345',

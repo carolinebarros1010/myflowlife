@@ -21,6 +21,7 @@ export const renderTriageForm = (): string => `
       '1) Identificação do caso',
       [
         input('idCaso', 'ID do caso (preencha para atualização)'),
+        input('talaoPMESP', 'Talão PMESP', 'text', true),
         input('dataHoraRegistro', 'Data/hora registro', 'datetime-local', true),
         input('municipio', 'Município', 'text', true),
         input('talaoBopm', 'Talão BOPM'),
