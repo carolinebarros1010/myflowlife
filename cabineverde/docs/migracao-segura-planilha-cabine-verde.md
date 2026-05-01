@@ -79,6 +79,70 @@ Principais garantias:
 - É idempotente por `idCaso`: não duplica nem sobrescreve registros já migrados.
 - Registra eventos e inconsistências em `LOG_MIGRACAO`.
 
+### Fluxo definitivo da migração legada (Desaparecidos -> CASOS_TRATADOS)
+
+- **Origem oficial**: aba `Desaparecidos` (com busca flexível por nome: `Desaparecidos`, `DESAPARECIDOS`, `desaparecidos`).
+- **Destino**: aba `CASOS_TRATADOS`.
+- **Leitura segura**: usa `getDataRange().getValues()` para não perder registros com linhas em branco no meio.
+- **Mapeamento por cabeçalho**: dados são mapeados por nome de coluna (não por posição fixa).
+- **Critério de linha válida**: somente linhas com `idCaso` preenchido.
+- **Linhas ignoradas**: linhas vazias e linhas sem `idCaso` são ignoradas e contabilizadas no log.
+- **Idempotência**: se `idCaso` já existir em `CASOS_TRATADOS`, o caso não é duplicado nem sobrescrito.
+- **Observações longas/árvore**:
+  - quando `observacoesOperacionais` contiver `[ÁRVORE DE DECISÃO` ou for extensa, o texto bruto vai para `LEGADO_OBSERVACOES_BRUTAS`;
+  - em `CASOS_TRATADOS`, fica apenas um resumo curto.
+- **Status da migração (`statusMigracao`)**:
+  - `MIGRADO`: `idCaso` válido + `talaoPMESP` preenchido;
+  - `INCOMPLETO`: `idCaso` válido sem `talaoPMESP`;
+  - `ERRO`: falha de tratamento do registro.
+- **Normalizações aplicadas**:
+  - `sexoGenero`: `masculimpo`/`masculino` => `MASCULINO`; `feminino` => `FEMININO`;
+  - `meioTransporte`: `n/d` e `nd` => `NAO INFORMADO`;
+  - textos: remoção de espaços duplicados preservando legibilidade;
+  - booleanos textuais `TRUE`/`FALSE`: convertidos para booleanos reais quando possível.
+
+### DRY RUN (`DRY_RUN_MIGRACAO`)
+
+- `DRY_RUN_MIGRACAO = true`:
+  - não grava em `CASOS_TRATADOS`;
+  - registra no `LOG_MIGRACAO` como **SIMULADO**;
+  - mensagem esperada: `Migração simulada: X registros seriam migrados.`
+- `DRY_RUN_MIGRACAO = false`:
+  - grava em `CASOS_TRATADOS`;
+  - registra no `LOG_MIGRACAO` como **EXECUTADO**;
+  - mensagem esperada: `Migração executada: X registros migrados.`
+
+### Diagnóstico no LOG_MIGRACAO
+
+Mensagens específicas esperadas:
+- `Aba origem Desaparecidos não encontrada.`
+- `Aba origem encontrada, mas sem registros abaixo do cabeçalho.`
+- `Linhas encontradas, mas nenhum idCaso preenchido.`
+- `Todos os casos válidos já estavam em CASOS_TRATADOS.`
+- `Migração simulada: X registros seriam migrados.`
+- `Migração executada: X registros migrados.`
+
+Resumo técnico registrado:
+- aba origem utilizada;
+- total de linhas lidas;
+- total de linhas vazias/sem `idCaso` ignoradas;
+- total de registros válidos;
+- total migrado;
+- total já existente;
+- total de erros;
+- modo (`SIMULADO` ou `EXECUTADO`).
+
+### Como confirmar que funcionou
+
+1. Execute a rotina em `DRY_RUN_MIGRACAO=true` e valide os números no `LOG_MIGRACAO`.
+2. Confirme se há contagem coerente para `linhasLidas`, `validos`, `migrados` e `jaExistentes`.
+3. Altere para `DRY_RUN_MIGRACAO=false` e execute novamente.
+4. Verifique:
+   - crescimento de `CASOS_TRATADOS` somente para novos `idCaso`;
+   - ausência de duplicatas de `idCaso`;
+   - presença de `statusMigracao`;
+   - preservação de observações brutas em `LEGADO_OBSERVACOES_BRUTAS` quando aplicável.
+
 ## Validação pós-migração de CASOS_TRATADOS
 
 A função `validarCasosTratados_()` executa verificação de completude, coerência e utilidade operacional dos dados migrados.
