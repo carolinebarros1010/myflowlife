@@ -80,12 +80,14 @@ export const renderTriageForm = (): string => `
       4,
       '5) Vulnerabilidade e risco',
       [
-        input('condicaoMentalCognitivaComportamental', 'Condição mental/cognitiva/comportamental'),
-        input('limitacaoFisica', 'Limitação física'),
         checkbox('vulnerabilidade', 'Vulnerabilidade'),
-        checkbox('usoMedicacaoEssencial', 'Uso de medicação essencial'),
-        checkbox('usoAlcoolOutrasDrogas', 'Uso de álcool/outras drogas'),
-        checkbox('historicoDesaparecimentoAnterior', 'Histórico de desaparecimento anterior'),
+        `<div id="vulnerability-details" class="cv-grid cv-grid--nested">
+          ${input('condicaoMentalCognitivaComportamental', 'Condição mental/cognitiva/comportamental')}
+          ${input('limitacaoFisica', 'Limitação física')}
+          ${checkbox('usoMedicacaoEssencial', 'Uso de medicação essencial')}
+          ${checkbox('usoAlcoolOutrasDrogas', 'Uso de álcool/outras drogas')}
+          ${checkbox('historicoDesaparecimentoAnterior', 'Histórico de desaparecimento anterior')}
+        </div>`,
         checkbox('conflitoPrevio', 'Conflito prévio'),
         checkbox('suspeitaCrime', 'Suspeita de crime')
       ].join('')

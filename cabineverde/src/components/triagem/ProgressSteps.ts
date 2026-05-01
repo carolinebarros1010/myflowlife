@@ -17,6 +17,7 @@ export const etapasTriagem: EtapaTriagem[] = [
 export const renderProgressSteps = (): string => `
 <section class="cv-card">
   <h2>Fluxo guiado da triagem</h2>
+  <p id="triage-progress-text" class="cv-progress-text" aria-live="polite">Triagem: 0% concluída</p>
   <ol class="cv-steps" id="progress-steps" aria-label="etapas da triagem">
     ${etapasTriagem
       .map(
