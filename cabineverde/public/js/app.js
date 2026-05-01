@@ -270,27 +270,29 @@ const render = () => {
   app.innerHTML = `
   <div class="cv-shell">
     <header class="cv-header"><h1>Cabine Verde</h1><p>Triagem dinâmica de pessoas desaparecidas</p></header>
-    <div class="cv-operational-grid">
+    <section class="cv-card" data-tela="1">
+      <h3>Tela 1 — Entrada Operacional</h3>
+      <form id="entrada-operacional-form" class="cv-form-section cv-operational-entry">
+        <div class="cv-grid">
+          <label for="entrada-talaoPMESP">Número do Talão PMESP<input id="entrada-talaoPMESP" required /></label>
+          <label for="entrada-municipio">Município<input id="entrada-municipio" /></label>
+        </div>
+        <div class="cv-inline-actions">
+          <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
+        </div>
+      </form>
+    </section>
+    <section class="cv-card" data-tela="2" hidden>
+      <h3>Tela 2 — Triagem</h3>
+      <div class="cv-inline-actions">
+        <span id="indicador-passo">PASSO 1 de 5</span>
+      </div>
       <section class="cv-card">
         <form id="f" class="cv-form">
-          <section class="cv-form-section cv-operational-entry">
-            <h3>Entrada Operacional</h3>
-            <p class="cv-section-helper">Inicie o atendimento pelo número do talão e use os links de navegação rápida entre sistema interno e página pública.</p>
+          <section class="cv-form-section" data-passo="1">
+            <h3>Dados principais</h3>
             <div class="cv-grid">
               <label for="talaoPMESP">Número do Talão PMESP<input id="talaoPMESP" name="talaoPMESP" data-sync-key="talaoPMESP" required placeholder="Ex: 7450" /></label>
-            </div>
-            <div class="cv-inline-actions">
-              <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
-            </div>
-            <div class="cv-inline-actions cv-operational-links">
-              <a class="cv-button cv-button--ghost" href="https://myflowlife.com.br/cabineverde/" target="_blank" rel="noopener noreferrer">Ir para Cabine Verde pública</a>
-              <a class="cv-button cv-button--secondary" href="/cabineverde/sistema">Voltar para o Sistema Cabine Verde</a>
-            </div>
-          </section>
-          <section class="cv-form-section">
-            <h3>Dados principais</h3>
-            <p class="cv-section-helper">Preenchimento rápido operacional. Campos equivalentes na árvore oficial são sincronizados automaticamente.</p>
-            <div class="cv-grid">
               <label>Nome da pessoa desaparecida<input name="nomeCompletoDesaparecido" data-sync-key="nomeCompletoDesaparecido" required /></label>
               <label>Sexo ou gênero<input name="sexoGenero" data-sync-key="sexoGenero" /></label>
               <label>Idade<input name="idade" data-sync-key="idade" type="number" min="0" required /></label>
@@ -334,7 +336,7 @@ const render = () => {
               <label>Status<input name="statusCaso" value="Em triagem" /></label>
             </div>
           </section>
-          <section class="cv-form-section">
+          <section class="cv-form-section" data-passo="2">
             <h3>Dados do Solicitante</h3>
             <div class="cv-grid">
               <label>Nome do solicitante<input name="nomeSolicitante" required /></label>
@@ -342,18 +344,43 @@ const render = () => {
               <label>Telefone do solicitante<input name="telefoneSolicitante" required /></label>
             </div>
           </section>
-          ${renderArvore()}
-          <section class="cv-form-section">
+          <section class="cv-form-section" data-passo="3">
+            ${renderArvore()}
+          </section>
+          <section class="cv-form-section" data-passo="4">
             <h3>Observações operacionais do operador</h3>
             <label>Observações<textarea name="observacoesOperador" rows="4"></textarea></label>
           </section>
+          <section class="cv-form-section" data-passo="5">
+            <h3>Fechamento da Triagem</h3>
+            <p class="cv-section-helper">Revise os dados e avance para a decisão operacional.</p>
+          </section>
+          <div class="cv-inline-actions">
+            <button type="button" class="cv-button cv-button--ghost" id="passoVoltarBtn">Voltar</button>
+            <button type="button" class="cv-button cv-button--secondary" id="passoProximoBtn">Próximo</button>
+          </div>
         </form>
       </section>
-      <aside class="cv-card cv-live-summary"><h3>Resumo operacional</h3><dl id="resumo"></dl></aside>
-    </div>
+    </section>
+    <section class="cv-card" data-tela="3" hidden>
+      <h3>Tela 3 — Decisão Operacional</h3>
+      <h4>Resumo operacional</h4><dl id="resumo"></dl>
+      <div class="cv-grid">
+        <label>Risco<input id="decisao-risco" readonly /></label>
+        <label>Prioridade<input id="decisao-prioridade" readonly /></label>
+        <label>Status<input id="decisao-status" readonly /></label>
+      </div>
+      <div class="cv-inline-actions">
+        <button class="cv-button" type="button" id="menuSalvarCaso">Despacho</button>
+        <button class="cv-button cv-button--secondary" type="button" id="menuGerarRelatorio">Encaminhamento</button>
+        <button class="cv-button cv-button--ghost" type="button" id="voltarTriagemBtn">Voltar para triagem</button>
+      </div>
+    </section>
     <section class="cv-card"><h3>Feedback</h3><p id="feedback">Pronto para envio.</p></section>
-    <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
-    <section class="cv-card">
+    <details class="cv-card">
+      <summary>Menu secundário</summary>
+      <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
+      <section class="cv-card">
       <h3>Consulta e auditoria de caso</h3>
       <div class="cv-grid">
         <label>idCaso<input id="audit-idCaso" /></label>
@@ -366,8 +393,8 @@ const render = () => {
         <summary>Timeline</summary>
         <ul id="audit-timeline"></ul>
       </details>
-    </section>
-    <section class="cv-card cv-relatorio-card">
+      </section>
+      <section class="cv-card cv-relatorio-card">
       <details id="relatorioContainer">
         <summary>Relatório operacional</summary>
         <textarea id="relatorio" rows="10" placeholder="Clique em &quot;Gerar relatório&quot; para montar o texto."></textarea>
@@ -375,8 +402,8 @@ const render = () => {
           <button type="button" class="cv-button cv-button--ghost" id="copiarRelatorioBtn">Copiar relatório</button>
         </div>
       </details>
-    </section>
-    <section class="cv-card">
+      </section>
+      <section class="cv-card">
       <h3>Painel de Qualidade dos Dados</h3>
       <div class="cv-prioridade-rapida" role="group" aria-label="Filtro rápido por prioridade de tratamento">
         <button class="cv-button cv-prioridade-btn" type="button" data-prioridade="URGENTE">URGENTE</button>
@@ -399,7 +426,8 @@ const render = () => {
       </div>
       <button class="cv-button cv-button--secondary" type="button" id="atualizarQualidadeBtn">Atualizar painel</button>
       <div id="qualidade-lista" class="cv-case-detail-grid">Carregando inconsistências da aba QUALIDADE_DADOS...</div>
-    </section>
+      </section>
+    </details>
     <section class="cv-card cv-debug-panel${DEBUG_MODE ? '' : ' is-hidden'}" id="painelDebug">
       <h3>Debug integração GAS</h3>
       <p>Modo técnico ativo via <code>?debug=1</code>.</p>
@@ -408,13 +436,6 @@ const render = () => {
       <h4>Resposta do GAS</h4>
       <pre id="gas-response">Aguardando envio.</pre>
     </section>
-    <nav class="cv-fixed-menu" aria-label="Ações operacionais">
-      <button class="cv-button" type="button" id="menuSalvarCaso">Salvar caso</button>
-      <button class="cv-button cv-button--secondary" type="button" id="menuGerarRelatorio">Gerar relatório</button>
-      <button class="cv-button cv-button--ghost" type="button" id="menuNovoCaso">Novo caso</button>
-      <button class="cv-button cv-button--ghost" type="button" id="menuLimparFormulario">Limpar formulário</button>
-      <button class="cv-button cv-button--ghost" type="button" id="menuVerResumo">Ver resumo</button>
-    </nav>
   </div>`;
 
   const form = document.getElementById('f');
@@ -435,9 +456,39 @@ const render = () => {
 
   form.addEventListener('input', sincronizarEAtualizar);
   form.addEventListener('change', sincronizarEAtualizar);
+  const telas = Array.from(document.querySelectorAll('[data-tela]'));
+  const mostrarTela = (numero) => telas.forEach((tela) => { tela.hidden = tela.dataset.tela !== String(numero); });
+  let passoAtual = 1;
+  const atualizarPassos = () => {
+    form.querySelectorAll('[data-passo]').forEach((bloco) => { bloco.hidden = Number(bloco.dataset.passo) !== passoAtual; });
+    document.getElementById('indicador-passo').textContent = `PASSO ${passoAtual} de 5`;
+  };
   document.getElementById('iniciarAtendimentoBtn')?.addEventListener('click', () => {
+    const talao = document.getElementById('entrada-talaoPMESP').value.trim();
+    if (!talao) return atualizarFeedback('Número do Talão PMESP é obrigatório.', true);
+    form.querySelector('[name="talaoPMESP"]').value = talao;
+    form.querySelector('[name="municipio"]').value = document.getElementById('entrada-municipio').value.trim();
+    mostrarTela(2);
+    atualizarPassos();
     form.querySelector('[name="nomeCompletoDesaparecido"]')?.focus();
   });
+  document.getElementById('passoProximoBtn').addEventListener('click', () => {
+    if (passoAtual < 5) {
+      passoAtual += 1;
+      atualizarPassos();
+      return;
+    }
+    mostrarTela(3);
+    const casoAtual = obterCasoDoFormulario();
+    document.getElementById('decisao-risco').value = casoAtual.classificacaoRisco || '-';
+    document.getElementById('decisao-prioridade').value = casoAtual.prioridade || '-';
+    document.getElementById('decisao-status').value = casoAtual.statusCaso || '-';
+  });
+  document.getElementById('passoVoltarBtn').addEventListener('click', () => {
+    if (passoAtual > 1) passoAtual -= 1;
+    atualizarPassos();
+  });
+  document.getElementById('voltarTriagemBtn').addEventListener('click', () => mostrarTela(2));
   atualizarUI();
 
   form.addEventListener('submit', async (e) => {
@@ -539,22 +590,22 @@ const render = () => {
     atualizarFeedback('Relatório gerado.');
   };
 
-  document.getElementById('menuSalvarCaso').addEventListener('click', () => form.requestSubmit());
-  document.getElementById('menuGerarRelatorio').addEventListener('click', gerarRelatorio);
-  document.getElementById('menuNovoCaso').addEventListener('click', () => {
+  document.getElementById('menuSalvarCaso')?.addEventListener('click', () => form.requestSubmit());
+  document.getElementById('menuGerarRelatorio')?.addEventListener('click', gerarRelatorio);
+  document.getElementById('menuNovoCaso')?.addEventListener('click', () => {
     form.reset();
     atualizarUI();
     atualizarFeedback('Novo caso iniciado.');
   });
-  document.getElementById('menuLimparFormulario').addEventListener('click', () => {
+  document.getElementById('menuLimparFormulario')?.addEventListener('click', () => {
     form.reset();
     atualizarUI();
     atualizarFeedback('Formulário limpo.');
   });
-  document.getElementById('menuVerResumo').addEventListener('click', () => {
+  document.getElementById('menuVerResumo')?.addEventListener('click', () => {
     document.getElementById('resumo').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
-  document.getElementById('copiarRelatorioBtn').addEventListener('click', async () => {
+  document.getElementById('copiarRelatorioBtn')?.addEventListener('click', async () => {
     const texto = document.getElementById('relatorio').value.trim();
     if (!texto) {
       atualizarFeedback('Gerar relatório antes de copiar.', true);
@@ -617,7 +668,7 @@ const render = () => {
     const resumo = await resumoQualidadeDados_();
     renderListaQualidade(resumo);
   };
-  document.getElementById('atualizarQualidadeBtn').addEventListener('click', async () => {
+  document.getElementById('atualizarQualidadeBtn')?.addEventListener('click', async () => {
     try { await atualizarPainelQualidade(); } catch (error) { atualizarFeedback(error.message || 'Falha ao atualizar painel de qualidade.', true); }
   });
   ['qualidade-filtro-idCaso', 'qualidade-filtro-talaoPMESP', 'qualidade-filtro-severidade', 'qualidade-filtro-prioridadeTratamento', 'qualidade-filtro-statusTratamento'].forEach((id) =>
@@ -629,7 +680,7 @@ const render = () => {
       atualizarPainelQualidade().catch(() => {});
     });
   });
-  document.getElementById('qualidade-lista').addEventListener('click', async (event) => {
+  document.getElementById('qualidade-lista')?.addEventListener('click', async (event) => {
     const alvo = event.target;
     if (!(alvo instanceof HTMLElement) || alvo.dataset.cmd !== 'resolver-qualidade') return;
     if (!['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR)) return atualizarFeedback('Apenas SUPERVISOR/ADMIN pode marcar como resolvido.', true);
