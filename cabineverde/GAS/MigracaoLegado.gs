@@ -634,8 +634,6 @@ function migrarLegadoParaCasosTratados_() {
   });
 
   var camposBase = {
-    idCaso: 'idCaso',
-    talaoBopm: 'talaoPMESP',
     nomeCompletoDesaparecido: 'nomeCompletoDesaparecido',
     sexoGenero: 'sexoGenero',
     idade: 'idade',
@@ -668,27 +666,35 @@ function migrarLegadoParaCasosTratados_() {
   }
 
   var novasLinhas = [];
-  var totalIgnoradasSemIdCaso = 0;
-  var totalValidos = 0;
-  var totalExistentes = 0;
+  var totalLinhasLidas = 0;
+  var totalLinhasComIdCaso = 0;
+  var totalSemIdCaso = 0;
+  var totalMigrados = 0;
+  var totalIncompletos = 0;
+  var totalJaExistentes = 0;
   var totalErros = 0;
   var dadosSemCabecalho = dadosOrigem.slice(1);
 
   dadosSemCabecalho.forEach(function (linha, idx) {
     var linhaPlanilha = idx + 2;
+    var linhaVazia = !linha || linha.every(function (celula) {
+      return limparTexto(celula) === '';
+    });
+    if (linhaVazia) return;
+    totalLinhasLidas += 1;
     var registro = linhaParaObjeto_(cabOrigem, linha);
-    var idCaso = limparTexto(registro.idCaso);
+    var idCaso = limparTexto(obterPrimeiroValorDisponivel_(registro, ['idCaso', 'idcaso', 'IDCASO']));
     if (!idCaso) {
-      totalIgnoradasSemIdCaso += 1;
+      totalSemIdCaso += 1;
       return;
     }
+    totalLinhasComIdCaso += 1;
 
     if (idsExistentes[idCaso]) {
-      totalExistentes += 1;
+      totalJaExistentes += 1;
       return;
     }
 
-    totalValidos += 1;
     try {
       var observacaoBruta = normalizarTextoMigracao_(registro.observacoesOperacionais);
       var resumoObservacao = gerarResumoArvoreDecisaoLegado_(observacaoBruta);
@@ -708,6 +714,12 @@ function migrarLegadoParaCasosTratados_() {
         else valor = normalizarBooleanoOuTextoMigracao_(valor);
         linhaDestino[indicesDestino[destino]] = valor;
       });
+      if (indicesDestino.idCaso !== undefined) {
+        linhaDestino[indicesDestino.idCaso] = idCaso;
+      }
+      if (indicesDestino.talaoPMESP !== undefined) {
+        linhaDestino[indicesDestino.talaoPMESP] = limparTexto(obterPrimeiroValorDisponivel_(registro, ['talaoBopm', 'talaoBOPM', 'talaoPMESP', 'talão', 'talao', 'numeroTalao']));
+      }
 
       camposPreservar.forEach(function (campo) {
         if (indicesDestino[campo] === undefined) return;
@@ -721,6 +733,8 @@ function migrarLegadoParaCasosTratados_() {
       if (indicesDestino.statusMigracao !== undefined) {
         linhaDestino[indicesDestino.statusMigracao] = talaoPMESP ? 'MIGRADO' : 'INCOMPLETO';
       }
+      if (talaoPMESP) totalMigrados += 1;
+      else totalIncompletos += 1;
 
       novasLinhas.push(linhaDestino);
       idsExistentes[idCaso] = true;
@@ -734,17 +748,17 @@ function migrarLegadoParaCasosTratados_() {
     registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Aba origem encontrada, mas sem registros abaixo do cabeçalho.', modoExecucao);
     return;
   }
-  if ((totalValidos + totalExistentes) === 0) {
+  if (totalLinhasComIdCaso === 0) {
     registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Linhas encontradas, mas nenhum idCaso preenchido.', modoExecucao);
     return;
   }
-  if (!novasLinhas.length && totalExistentes > 0) {
+  if (!novasLinhas.length && totalJaExistentes > 0) {
     registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Todos os casos válidos já estavam em CASOS_TRATADOS.', modoExecucao);
   } else if (dryRun) {
-    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'SIMULADO', '', 'Migração simulada: ' + novasLinhas.length + ' registros seriam migrados.', 'SIMULADO');
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'SIMULADO', '', 'Migração simulada: ' + novasLinhas.length + ' registros seriam migrados, ' + totalIncompletos + ' incompletos por falta de talaoPMESP.', 'SIMULADO');
   } else if (novasLinhas.length) {
     abaDestino.getRange(abaDestino.getLastRow() + 1, 1, novasLinhas.length, cabDestino.length).setValues(novasLinhas);
-    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'EXECUTADO', '', 'Migração executada: ' + novasLinhas.length + ' registros migrados.', 'EXECUTADO');
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'EXECUTADO', '', 'Migração executada: ' + novasLinhas.length + ' registros migrados, ' + totalIncompletos + ' incompletos.', 'EXECUTADO');
   } else {
     registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Linhas encontradas, mas nenhum idCaso preenchido.', modoExecucao);
   }
@@ -754,12 +768,13 @@ function migrarLegadoParaCasosTratados_() {
     dryRun ? 'SIMULADO' : 'EXECUTADO',
     '',
     'Resumo migração | origem=' + abaOrigem.getName() +
-      '; linhasLidas=' + dadosSemCabecalho.length +
-      '; ignoradasSemIdCaso=' + totalIgnoradasSemIdCaso +
-      '; validos=' + totalValidos +
-      '; migrados=' + novasLinhas.length +
-      '; jaExistentes=' + totalExistentes +
-      '; erros=' + totalErros +
+      '; totalLinhasLidas=' + totalLinhasLidas +
+      '; totalLinhasComIdCaso=' + totalLinhasComIdCaso +
+      '; totalSemIdCaso=' + totalSemIdCaso +
+      '; totalMigrados=' + totalMigrados +
+      '; totalIncompletos=' + totalIncompletos +
+      '; totalJaExistentes=' + totalJaExistentes +
+      '; totalErros=' + totalErros +
       '; modo=' + (dryRun ? 'SIMULADO' : 'EXECUTADO'),
     modoExecucao
   );
