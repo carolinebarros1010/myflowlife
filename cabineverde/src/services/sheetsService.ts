@@ -15,7 +15,12 @@ export interface SheetsServiceResponse {
 export interface SheetsService {
   salvar(payload: SheetPayload): Promise<SheetsServiceResponse>;
   healthcheck(): Promise<SheetsServiceResponse>;
-  visualizarFoto(idFoto: string, operador: string, justificativa?: string): Promise<SheetsServiceResponse & { conteudoBase64?: string; mimeType?: string }>;
+  visualizarFoto(
+    idFoto: string,
+    operador: string,
+    justificativa?: string,
+    motivoAcessoFoto?: string
+  ): Promise<SheetsServiceResponse & { conteudoBase64?: string; mimeType?: string }>;
 }
 
 interface EndpointResponse {
@@ -39,12 +44,17 @@ const parseResponseBody = async (resposta: Response): Promise<EndpointResponse> 
 };
 
 export class GoogleSheetsService implements SheetsService {
-  async visualizarFoto(idFoto: string, operador: string, justificativa = ''): Promise<SheetsServiceResponse & { conteudoBase64?: string; mimeType?: string }> {
+  async visualizarFoto(
+    idFoto: string,
+    operador: string,
+    justificativa = '',
+    motivoAcessoFoto = ''
+  ): Promise<SheetsServiceResponse & { conteudoBase64?: string; mimeType?: string }> {
     try {
       const resposta = await fetch(sheetsConfig.endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'visualizarFotoDesaparecido', idFoto, operador, justificativa })
+        body: JSON.stringify({ action: 'visualizarFotoDesaparecido', idFoto, operador, justificativa, motivoAcessoFoto })
       });
       const body = (await parseResponseBody(resposta)) as EndpointResponse & {
         conteudoBase64?: string;

@@ -208,14 +208,33 @@ function validarJustificativa_(justificativa) {
   };
 }
 
-function visualizarFotoDesaparecido_(idFoto, operador, justificativa) {
+var MOTIVOS_ACESSO_FOTO_VALIDOS = [
+  'ATENDIMENTO_EM_ANDAMENTO',
+  'VALIDACAO_IDENTIDADE',
+  'SOLICITACAO_SUPERVISOR',
+  'APOIO_EQUIPE_CAMPO',
+  'AUDITORIA',
+  'OUTRO'
+];
+
+function validarMotivoAcessoFoto_(motivo) {
+  var motivoNormalizado = limparTexto(motivo).toUpperCase();
+  var valido = MOTIVOS_ACESSO_FOTO_VALIDOS.indexOf(motivoNormalizado) !== -1;
+  return {
+    original: limparTexto(motivo),
+    normalizado: motivoNormalizado,
+    valido: valido
+  };
+}
+
+function visualizarFotoDesaparecido_(idFoto, operador, justificativa, motivoAcessoFoto) {
   if (typeof EXECUCAO_AUTORIZADA !== 'undefined' && !EXECUCAO_AUTORIZADA) {
     throw new Error('Execução bloqueada: EXECUCAO_AUTORIZADA=false.');
   }
   var idFotoLimpo = limparTexto(idFoto);
   var operadorLimpo = limparTexto(operador);
   var justificativaAnalise = validarJustificativa_(justificativa);
-  var justificativaLimpa = justificativaAnalise.normalizada;
+  var motivoAnalise = validarMotivoAcessoFoto_(motivoAcessoFoto);
   if (!idFotoLimpo) throw new Error('idFoto obrigatório.');
   if (!operadorLimpo) throw new Error('operador obrigatório.');
 
@@ -236,18 +255,29 @@ function visualizarFotoDesaparecido_(idFoto, operador, justificativa) {
   var permissao = validarPermissaoFoto_(operadorLimpo, idxNivel >= 0 ? alvo[idxNivel] : 'INTERNO');
   var nivelAcesso = limparTexto(idxNivel >= 0 ? alvo[idxNivel] : 'INTERNO').toUpperCase() || 'INTERNO';
   var justificativaObrigatoria = nivelAcesso === 'RESTRITO' || nivelAcesso === 'SIGILOSO';
+  var motivoObrigatorio = justificativaObrigatoria;
+  var perfilOperador = limparTexto(permissao.perfil || 'N/A');
+
+  if (motivoObrigatorio && !motivoAnalise.original) {
+    registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', 'BLOQUEADO', motivoAnalise.original, justificativaAnalise.original, false, perfilOperador);
+    throw new Error('Motivo de acesso inválido. Selecione uma opção válida.');
+  }
+  if (motivoAnalise.original && !motivoAnalise.valido) {
+    registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', 'BLOQUEADO', motivoAnalise.original, justificativaAnalise.original, false, perfilOperador);
+    throw new Error('Motivo de acesso inválido. Selecione uma opção válida.');
+  }
   if (justificativaObrigatoria && !justificativaAnalise.valida) {
-    registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', 'BLOQUEADO', justificativaAnalise.original, false);
+    registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', 'BLOQUEADO', motivoAnalise.normalizado, justificativaAnalise.original, false, perfilOperador);
     throw new Error('Justificativa inválida. Descreva o motivo da visualização.');
   }
-  registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', permissao.permitido ? 'PERMITIDO' : 'BLOQUEADO', justificativaAnalise.original, justificativaAnalise.valida);
+  registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', permissao.permitido ? 'PERMITIDO' : 'BLOQUEADO', motivoAnalise.normalizado, justificativaAnalise.original, justificativaAnalise.valida, perfilOperador);
   if (!permissao.permitido) {
     registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'SEM_PERMISSAO_FOTO', 'Visualização bloqueada para foto=' + idFotoLimpo + '; motivo=' + permissao.motivo, operadorLimpo);
     throw new Error('Acesso bloqueado: ' + permissao.motivo);
   }
 
   var idCaso = limparTexto(alvo[idxIdCaso]);
-  registrarEventoOcorrencia(planilha, idCaso, 'FOTO_VISUALIZADA', 'Operador=' + operadorLimpo + '; idFoto=' + idFotoLimpo + '; nivelAcesso=' + nivelAcesso + '; justificativa=' + (justificativaAnalise.original || 'N/A') + '; justificativaValida=' + (justificativaAnalise.valida ? 'TRUE' : 'FALSE'));
+  registrarEventoOcorrencia(planilha, idCaso, 'FOTO_VISUALIZADA', 'Operador=' + operadorLimpo + '; perfilOperador=' + (perfilOperador || 'N/A') + '; idFoto=' + idFotoLimpo + '; nivelAcesso=' + nivelAcesso + '; motivoAcessoFoto=' + (motivoAnalise.normalizado || 'N/A') + '; justificativa=' + (justificativaAnalise.original || 'N/A') + '; justificativaValida=' + (justificativaAnalise.valida ? 'TRUE' : 'FALSE'));
   var fileId = limparTexto(alvo[idxFileId]);
   var file = DriveApp.getFileById(fileId);
   file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
@@ -260,8 +290,8 @@ function visualizarFotoDesaparecido_(idFoto, operador, justificativa) {
   };
 }
 
-function registrarLogAcessoFoto_(idFoto, operador, acao, resultado, justificativaOriginal, justificativaValidada) {
+function registrarLogAcessoFoto_(idFoto, operador, acao, resultado, motivoAcessoFoto, justificativaOriginal, justificativaValidada, perfilOperador) {
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
-  var aba = garantirAbaComCabecalho(planilha, 'LOG_ACESSO_FOTOS', ['dataHora', 'idFoto', 'operador', 'acao', 'resultado', 'justificativaOriginal', 'justificativaValidada']);
-  aba.appendRow([formatarDataHora(new Date()), idFoto, operador, acao, resultado, limparTexto(justificativaOriginal), justificativaValidada ? 'TRUE' : 'FALSE']);
+  var aba = garantirAbaComCabecalho(planilha, 'LOG_ACESSO_FOTOS', ['dataHora', 'idFoto', 'operador', 'perfilOperador', 'acao', 'resultado', 'motivoAcessoFoto', 'justificativa', 'justificativaValidada']);
+  aba.appendRow([formatarDataHora(new Date()), idFoto, operador, limparTexto(perfilOperador), acao, resultado, limparTexto(motivoAcessoFoto), limparTexto(justificativaOriginal), justificativaValidada ? 'TRUE' : 'FALSE']);
 }
