@@ -68,7 +68,7 @@ Usa o header existente em `COLUNAS_CASOS` com adição de `statusMigracao`.
 
 ## Rotina de saneamento DESAPARECIDOS -> CASOS_TRATADOS
 
-Foi adicionada a função `migrarLegadoParaCasosTratados_()` para copiar e sanear dados legados da aba `DESAPARECIDOS` sem alterar a origem.
+Foi adicionada a função `migrarLegadoParaCasosTratados_()` para copiar e sanear dados legados da aba `Desaparecidos` sem alterar a origem.
 
 Principais garantias:
 - Cria/usa aba `CASOS_TRATADOS` com cabeçalho padronizado de 15 colunas.
@@ -106,11 +106,11 @@ Principais garantias:
 - `DRY_RUN_MIGRACAO = true`:
   - não grava em `CASOS_TRATADOS`;
   - registra no `LOG_MIGRACAO` como **SIMULADO**;
-  - mensagem esperada: `Migração simulada: X registros seriam migrados.`
+  - mensagem esperada: `Migração simulada: X registros seriam migrados, Y incompletos por falta de talaoPMESP.`
 - `DRY_RUN_MIGRACAO = false`:
   - grava em `CASOS_TRATADOS`;
   - registra no `LOG_MIGRACAO` como **EXECUTADO**;
-  - mensagem esperada: `Migração executada: X registros migrados.`
+  - mensagem esperada: `Migração executada: X registros migrados, Y incompletos.`
 
 ### Diagnóstico no LOG_MIGRACAO
 
@@ -119,23 +119,24 @@ Mensagens específicas esperadas:
 - `Aba origem encontrada, mas sem registros abaixo do cabeçalho.`
 - `Linhas encontradas, mas nenhum idCaso preenchido.`
 - `Todos os casos válidos já estavam em CASOS_TRATADOS.`
-- `Migração simulada: X registros seriam migrados.`
-- `Migração executada: X registros migrados.`
+- `Migração simulada: X registros seriam migrados, Y incompletos por falta de talaoPMESP.`
+- `Migração executada: X registros migrados, Y incompletos.`
 
 Resumo técnico registrado:
 - aba origem utilizada;
-- total de linhas lidas;
-- total de linhas vazias/sem `idCaso` ignoradas;
-- total de registros válidos;
-- total migrado;
-- total já existente;
-- total de erros;
+- `totalLinhasLidas`;
+- `totalLinhasComIdCaso`;
+- `totalSemIdCaso`;
+- `totalMigrados`;
+- `totalIncompletos`;
+- `totalJaExistentes`;
+- `totalErros`;
 - modo (`SIMULADO` ou `EXECUTADO`).
 
 ### Como confirmar que funcionou
 
 1. Execute a rotina em `DRY_RUN_MIGRACAO=true` e valide os números no `LOG_MIGRACAO`.
-2. Confirme se há contagem coerente para `linhasLidas`, `validos`, `migrados` e `jaExistentes`.
+2. Confirme se há contagem coerente para `totalLinhasLidas`, `totalLinhasComIdCaso`, `totalMigrados`, `totalIncompletos` e `totalJaExistentes`.
 3. Altere para `DRY_RUN_MIGRACAO=false` e execute novamente.
 4. Verifique:
    - crescimento de `CASOS_TRATADOS` somente para novos `idCaso`;
