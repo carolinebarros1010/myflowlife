@@ -26,12 +26,11 @@ export const renderTriageForm = (): string => `
   <form id="triage-form" class="cv-form" novalidate>
     ${etapa(
       0,
-      '1) Identificação do caso',
+      '1) Identificação complementar',
       [
         input('idCaso', 'ID do caso (preencha para atualização)'),
         input('talaoPMESP', 'Talão PMESP', 'text', true),
         input('dataHoraRegistro', 'Data/hora registro', 'datetime-local', true),
-        input('municipio', 'Município', 'text', true),
         input('talaoBopm', 'Talão BOPM'),
         input('statusCaso', 'Status caso')
       ].join('')
@@ -39,11 +38,8 @@ export const renderTriageForm = (): string => `
 
     ${etapa(
       1,
-      '2) Dados do desaparecido',
+      '2) Dados complementares do desaparecido',
       [
-        input('nomeCompletoDesaparecido', 'Nome completo desaparecido', 'text', true),
-        input('sexoGenero', 'Sexo/Gênero'),
-        input('idade', 'Idade', 'number', true),
         input('cpf', 'CPF'),
         input('rg', 'RG'),
         input('nomeMae', 'Nome da mãe'),
@@ -60,9 +56,8 @@ export const renderTriageForm = (): string => `
 
     ${etapa(
       2,
-      '3) Última visualização',
+      '3) Contexto adicional',
       [
-        input('dataHoraUltimaVisualizacao', 'Última visualização', 'datetime-local', true),
         input('localUltimaVisualizacao', 'Local última visualização', 'text', true),
         input('roupaUltimaVisualizacao', 'Roupa última visualização'),
         input('meioTransporte', 'Meio de transporte'),
@@ -74,9 +69,8 @@ export const renderTriageForm = (): string => `
 
     ${etapa(
       3,
-      '4) Solicitante',
+      '4) Solicitante complementar',
       [
-        input('nomeSolicitante', 'Nome solicitante', 'text', true),
         input('vinculoSolicitante', 'Vínculo solicitante', 'text', true),
         input('telefoneSolicitante', 'Telefone solicitante', 'text', true)
       ].join('')
@@ -122,6 +116,27 @@ export const renderTriageForm = (): string => `
         input('feedbackOperacional', 'Feedback operacional (melhoria/erro percebido)')
       ].join('')
     )}
+  </form>
+</section>`;
+
+export const renderRegistroForm = (): string => `
+<section class="cv-card">
+  <h2>Registro inicial</h2>
+  <form id="registro-form" class="cv-form" novalidate>
+    <fieldset class="cv-step-section">
+      <legend>Registro rápido</legend>
+      <div class="cv-grid">
+        ${input('nomeCompletoDesaparecido', 'Nome', 'text', true)}
+        ${input('idade', 'Idade', 'number', true)}
+        ${input('sexoGenero', 'Sexo', 'text', true)}
+        ${input('municipio', 'Município', 'text', true)}
+        ${input('dataHoraUltimaVisualizacao', 'Última visualização', 'datetime-local', true)}
+        ${input('nomeSolicitante', 'Solicitante', 'text', true)}
+      </div>
+      <div class="cv-inline-actions">
+        <button id="save-registro" type="submit" class="cv-button cv-button--primary">Salvar</button>
+      </div>
+    </fieldset>
   </form>
 </section>`;
 

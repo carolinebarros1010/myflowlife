@@ -1,5 +1,5 @@
 import { renderMainLayout } from './components/layout/MainLayout.js';
-import { renderTriageForm, statusFallback } from './components/form/TriageForm.js';
+import { renderRegistroForm, renderTriageForm, statusFallback } from './components/form/TriageForm.js';
 import { etapasTriagem, renderProgressSteps } from './components/triagem/ProgressSteps.js';
 import { renderAgeSections } from './components/triagem/AgeSections.js';
 import { renderCaseSummary } from './components/desaparecidos/CaseSummary.js';
@@ -35,17 +35,18 @@ import { listarIndicadoresAtivos, sugerirAcaoIndicadores } from './modules/triag
 const sheetsService = new GoogleSheetsService();
 const chaveEtapaAtual = 'cabine-verde-etapa-atual';
 type PerfilOperacional = 'OPERADOR' | 'SUPERVISOR' | 'ADMIN' | 'AUDITOR';
-type ModuloOperacional = 'registro' | 'consulta' | 'qualidade' | 'relatorios' | 'midias' | 'admin';
+type ModuloOperacional = 'registro' | 'triagem' | 'consulta' | 'qualidade' | 'relatorios' | 'midias' | 'admin';
 
 const permissoesPorPerfil: Record<PerfilOperacional, ModuloOperacional[]> = {
-  OPERADOR: ['registro'],
-  SUPERVISOR: ['registro', 'consulta', 'qualidade', 'relatorios', 'midias'],
-  ADMIN: ['registro', 'consulta', 'qualidade', 'relatorios', 'midias', 'admin'],
+  OPERADOR: ['registro', 'triagem'],
+  SUPERVISOR: ['registro', 'triagem', 'consulta', 'qualidade', 'relatorios', 'midias'],
+  ADMIN: ['registro', 'triagem', 'consulta', 'qualidade', 'relatorios', 'midias', 'admin'],
   AUDITOR: ['consulta', 'qualidade', 'relatorios']
 };
 
 const titulosModulos: Record<ModuloOperacional, string> = {
   registro: 'Registro de Ocorrência',
+  triagem: 'Triagem',
   consulta: 'Consulta e Auditoria',
   qualidade: 'Qualidade dos Dados',
   relatorios: 'Relatórios',
@@ -91,14 +92,16 @@ const renderModuloCard = (id: ModuloOperacional, descricao: string, acoes: strin
 const baseLayout = () => {
   const menu = `<nav class="cv-card cv-nav" id="cv-nav-modulos" aria-label="Navegação operacional"></nav>`;
   const modulos = [
-    renderModuloCard('registro', 'Cadastro e triagem operacional do desaparecimento.', ['Cadastrar novo desaparecido', 'Preencher triagem', 'Anexar foto', 'Salvar caso', 'Gerar relatório SIOPM']),
+    renderModuloCard('registro', 'Cadastro inicial simplificado para abertura rápida do caso.', ['Cadastrar novo desaparecido', 'Salvar e seguir para triagem']),
+    renderModuloCard('triagem', 'Triagem operacional detalhada com dados herdados do registro.', ['Preencher triagem', 'Anexar foto', 'Salvar caso', 'Gerar relatório SIOPM']),
     renderModuloCard('consulta', 'Consulta estruturada com auditoria e histórico.', ['Buscar por idCaso, talão ou nome', 'Visualizar timeline', 'Revisar histórico de edições']),
     renderModuloCard('qualidade', 'Painel de inconsistências e tratamento.', ['Filtrar problemas', 'Resumo de criticidade', 'Marcar resolvido']),
     renderModuloCard('relatorios', 'Consolidação e exportação operacional.', ['Relatório diário', 'Relatório estatístico', 'Exportar PDF', 'Exportar texto SIOPM']),
     renderModuloCard('midias', 'Validação de fotos e evidências visuais.', ['Listar fotos por caso', 'Validar ou rejeitar foto', 'Controlar status de validação']),
     renderModuloCard('admin', 'Governança, segurança e manutenção da plataforma.', ['Operadores e perfis', 'Logs e auditoria', 'Backup, migração e rollback'])
   ].join('');
-  const conteudoRegistro =
+  const conteudoRegistro = [renderRegistroForm()].join('');
+  const conteudoTriagem =
     [
     renderProgressSteps(),
     renderCaseStatusBanner(),
@@ -125,7 +128,7 @@ const baseLayout = () => {
     renderReportView(),
     renderAgeSections()
   ].join('');
-  return `${menu}${modulos}<section hidden id="registro-layout-cache">${conteudoRegistro}</section>`;
+  return `${menu}${modulos}<section hidden id="registro-layout-cache">${conteudoRegistro}</section><section hidden id="triagem-layout-cache">${conteudoTriagem}</section>`;
 };
 
 const app = document.getElementById('app');
@@ -168,6 +171,13 @@ const montarConteudosModulares = (): void => {
     while (cacheRegistro.firstChild) registro.appendChild(cacheRegistro.firstChild);
     cacheRegistro.remove();
   }
+  const triagem = document.getElementById('modulo-triagem-conteudo');
+  const cacheTriagem = document.getElementById('triagem-layout-cache');
+  if (triagem && cacheTriagem) {
+    while (cacheTriagem.firstChild) triagem.appendChild(cacheTriagem.firstChild);
+    cacheTriagem.remove();
+  }
+
   const consulta = document.getElementById('modulo-consulta-conteudo');
   if (consulta) consulta.innerHTML = `${renderCaseDetails()}<section class="cv-card"><h4>Navegação contextual</h4><div class="cv-inline-actions"><button type="button" class="cv-button cv-button--ghost" data-flow-action="ver-fotos">Ver fotos</button><button type="button" class="cv-button cv-button--ghost" data-flow-action="ver-qualidade">Ver qualidade</button><button type="button" class="cv-button cv-button--secondary" data-flow-action="gerar-relatorio">Gerar relatório</button></div></section>${renderAuditLogPanel()}<div class="cv-card"><p>Edição condicionada à confirmação de e-mail e justificativa registrada em log.</p></div>`;
   const qualidade = document.getElementById('modulo-qualidade-conteudo');
@@ -184,6 +194,7 @@ montarConteudosModulares();
 obterPerfilBackend().then(montarNavegacaoPorPerfil);
 
 const form = document.getElementById('triage-form') as HTMLFormElement | null;
+const formRegistro = document.getElementById('registro-form') as HTMLFormElement | null;
 const initial = Number(localStorage.getItem(chaveEtapaAtual) || 0);
 
 const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCamposFisicos({
@@ -399,6 +410,25 @@ const aplicarFiltros = (): void => {
 
   atualizarLista(casos);
 };
+
+
+if (formRegistro) {
+  formRegistro.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const dadosRegistro = new FormData(formRegistro);
+    if (form) {
+      const mapCampos = ['nomeCompletoDesaparecido', 'idade', 'sexoGenero', 'municipio', 'dataHoraUltimaVisualizacao', 'nomeSolicitante'];
+      mapCampos.forEach((campo) => {
+        const valor = String(dadosRegistro.get(campo) || '');
+        const destino = form.elements.namedItem(campo) as HTMLInputElement | null;
+        if (destino) destino.value = valor;
+      });
+      atualizarStateDoFormulario();
+    }
+    atualizarStatus('Registro salvo. Redirecionando para triagem.');
+    navegarParaModulo('triagem');
+  });
+}
 
 if (form) {
   (document.getElementById('session-id') as HTMLInputElement | null)!.value = sessionId;
