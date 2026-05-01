@@ -104,3 +104,27 @@ A triagem agora deriva um objeto interno `indicadoresOperacionais` a partir das 
 
 ### Base para painel futuro
 A estrutura foi mantida somente no front-end neste ciclo, pronta para filtros e painéis sem dependência imediata de alteração de endpoint, GAS ou colunas existentes.
+
+## Fluxo progressivo e condicional (maio/2026)
+
+Evoluções aplicadas para reduzir carga cognitiva do operador:
+
+- **Progressão por etapas com ação contextual**: botão **Próximo** fica visível apenas até a última etapa; no fechamento, o operador usa **Finalizar triagem**.
+- **Indicador explícito de progresso**: texto vivo com percentual (`Triagem: X% concluída`) sincronizado à etapa ativa.
+- **Lógica condicional de vulnerabilidade**: ao marcar **Vulnerabilidade = não** (checkbox desmarcado), o bloco detalhado de vulnerabilidade é ocultado.
+- **Lógica condicional de crime**: blocos de indícios de crime permanecem ocultos quando **Suspeita de crime = não**.
+- **Cálculo em tempo real preservado**: risco, prioridade e indicadores seguem recalculados a cada digitação no resumo lateral.
+- **Finalização operacional**: no submit final, o caso é consolidado e o status evolui automaticamente para **Em busca**.
+
+### Salvamento automático de rascunho local
+
+- A cada alteração relevante no fluxo Registro/Triagem, o estado é salvo automaticamente no navegador (com debounce curto).
+- A chave de rascunho usa prioridade: `idCaso`; na ausência, usa `talaoPMESP`.
+- Ao reabrir o sistema, o operador recebe prompt para continuar o último rascunho local identificado.
+- Após finalização com sucesso, o rascunho local correspondente é removido automaticamente.
+- Arquivos de foto **não** são persistidos em `localStorage`; apenas metadados já estruturados no estado textual.
+- **Limitação importante**: rascunho local é mecanismo de continuidade operacional e **não substitui** o salvamento oficial no banco central/Google Sheets.
+- Feedback visual diferenciado no banner:
+  - **Rascunho local**: mensagem `Rascunho salvo no dispositivo.` com destaque **amarelo**.
+  - **Salvamento oficial**: mensagem `Caso salvo no sistema com sucesso.` com destaque **verde**.
+  - Mensagens distintas evitam confusão entre continuidade local e persistência oficial.

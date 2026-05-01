@@ -1,8 +1,8 @@
 export const renderActionFooter = (): string => `
 <footer class="cv-action-footer">
   <button type="button" id="prev-step" class="cv-button cv-button--ghost">Voltar etapa</button>
-  <button type="button" id="next-step" class="cv-button">Avançar etapa</button>
-  <button type="submit" form="triage-form" id="save-case" class="cv-button">Salvar caso</button>
+  <button type="button" id="next-step" class="cv-button">Próximo</button>
+  <button type="submit" form="triage-form" id="save-case" class="cv-button">Finalizar triagem</button>
   <button type="button" id="update-case" class="cv-button cv-button--secondary">Atualizar caso</button>
   <button type="button" id="generate-report" class="cv-button cv-button--secondary">Gerar relatório</button>
   <button type="button" id="save-draft" class="cv-button cv-button--ghost">Salvar rascunho</button>

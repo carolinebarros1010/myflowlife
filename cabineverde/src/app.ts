@@ -26,7 +26,17 @@ import { renderConditionalSection } from './components/triagem/ConditionalSectio
 import { renderRecentCasesPanel } from './components/desaparecidos/RecentCasesPanel.js';
 import { calcularEstadoTriagem } from './modules/triagem/triagemState.js';
 import type { TriagemState } from './modules/triagem/triagemState.js';
-import { carregarRascunhoLocal, exportarRascunhoSessao, gerarSessionId, importarRascunhoSessao, salvarRascunhoLocal } from './services/draftSessionService.js';
+import {
+  carregarRascunhoLocal,
+  carregarUltimoAutoRascunho,
+  limparAutoRascunhoLocal,
+  exportarRascunhoSessao,
+  gerarSessionId,
+  importarRascunhoSessao,
+  obterChaveAutoRascunho,
+  salvarAutoRascunhoLocal,
+  salvarRascunhoLocal
+} from './services/draftSessionService.js';
 import { listarLogs, registrarLog } from './services/auditLogService.js';
 import { renderSessionPanel } from './components/triagem/SessionPanel.js';
 import { renderAuditLogPanel } from './components/desaparecidos/AuditLogPanel.js';
@@ -78,6 +88,7 @@ const validarJustificativaVisualizacao = (justificativa: string): boolean => {
   return normalizada.length >= 10 && !bloqueadas.has(analisada) && !apenasNumeros.test(analisada) && temPalavraMinima;
 };
 let sessionId = gerarSessionId();
+let timeoutAutoRascunho: number | null = null;
 
 const renderModuloCard = (id: ModuloOperacional, descricao: string, acoes: string[]): string => `
   <section class="cv-card cv-module" id="modulo-${id}" data-route="${id}" hidden>
@@ -251,12 +262,16 @@ const getDadosFormularioAtual = (): CasoDesaparecimento =>
 
 let triagemState: TriagemState = calcularEstadoTriagem(getDadosFormularioAtual(), Math.min(initial, etapasTriagem.length - 1), 'Pronto para triagem.');
 
-const atualizarStatus = (mensagem: string, erro = false): void => {
+type TipoStatus = 'padrao' | 'rascunho' | 'oficial';
+
+const atualizarStatus = (mensagem: string, erro = false, tipo: TipoStatus = 'padrao'): void => {
   triagemState.status = mensagem;
   const status = document.getElementById('case-status-banner');
   const texto = document.getElementById('case-status-message');
   if (texto) texto.textContent = mensagem;
   status?.classList.toggle('danger', erro);
+  status?.classList.toggle('warning', !erro && tipo === 'rascunho');
+  status?.classList.toggle('success', !erro && tipo === 'oficial');
 };
 
 const renderLogs = (): void => {
@@ -284,6 +299,17 @@ const atualizarEtapaVisual = (novaEtapa: number): void => {
     item.classList.toggle('active', indice === triagemState.etapa);
     item.classList.toggle('done', indice < triagemState.etapa);
   });
+
+  const progresso = document.getElementById('triage-progress-text');
+  if (progresso) {
+    const percentual = Math.round(((triagemState.etapa + 1) / etapasTriagem.length) * 100);
+    progresso.textContent = `Triagem: ${percentual}% concluída`;
+  }
+
+  const botaoProximo = document.getElementById('next-step') as HTMLButtonElement | null;
+  if (botaoProximo) {
+    botaoProximo.hidden = triagemState.etapa >= etapasTriagem.length - 1;
+  }
 };
 
 const sincronizarCondicionais = (): void => {
@@ -296,8 +322,10 @@ const sincronizarCondicionais = (): void => {
 
   const crimeBlock = document.getElementById('crime-block');
   const techBlock = document.getElementById('tech-block');
+  const vulnerabilityBlock = document.getElementById('vulnerability-details');
   if (crimeBlock) crimeBlock.hidden = !triagemState.dados.suspeitaCrime;
   if (techBlock) techBlock.hidden = !(triagemState.dados.dispositivoLigado || triagemState.dados.camerasResidencia || triagemState.dados.camerasUltimoLocal || triagemState.dados.fotoDisponivel);
+  if (vulnerabilityBlock) vulnerabilityBlock.hidden = !triagemState.dados.vulnerabilidade;
 };
 
 const renderResumo = (): void => {
@@ -363,6 +391,18 @@ const atualizarStateDoFormulario = (): void => {
   }
 };
 
+const salvarAutoRascunho = (): void => {
+  const chave = obterChaveAutoRascunho(triagemState.dados.id, triagemState.dados.talaoPMESP);
+  if (!chave) return;
+  salvarAutoRascunhoLocal(chave, triagemState);
+  atualizarStatus('Rascunho salvo no dispositivo.', false, 'rascunho');
+};
+
+const agendarAutoRascunho = (): void => {
+  if (timeoutAutoRascunho) window.clearTimeout(timeoutAutoRascunho);
+  timeoutAutoRascunho = window.setTimeout(() => salvarAutoRascunho(), 400);
+};
+
 const atualizarLista = (casos?: CasoCompleto[]): void => {
   const wrapper = document.getElementById('case-list-wrapper');
   if (wrapper) wrapper.innerHTML = renderCaseList(casos || listarCasos());
@@ -424,6 +464,7 @@ if (formRegistro) {
         if (destino) destino.value = valor;
       });
       atualizarStateDoFormulario();
+      agendarAutoRascunho();
     }
     atualizarStatus('Registro salvo. Redirecionando para triagem.');
     navegarParaModulo('triagem');
@@ -432,11 +473,21 @@ if (formRegistro) {
 
 if (form) {
   (document.getElementById('session-id') as HTMLInputElement | null)!.value = sessionId;
+  const ultimoAutoRascunho = carregarUltimoAutoRascunho();
+  if (ultimoAutoRascunho) {
+    const desejaContinuar = window.confirm(`Encontramos um rascunho local (${ultimoAutoRascunho.chave}). Deseja continuar de onde parou?`);
+    if (desejaContinuar) {
+      triagemState = ultimoAutoRascunho.draft;
+      preencherFormulario(triagemState.dados);
+      atualizarStatus('Rascunho local restaurado.');
+    }
+  }
   atualizarEtapaVisual(triagemState.etapa);
   atualizarStateDoFormulario();
   renderLogs();
 
   form.addEventListener('input', atualizarStateDoFormulario);
+  form.addEventListener('input', agendarAutoRascunho);
   const justificativaInput = form.elements.namedItem('justificativaVisualizacao') as HTMLInputElement | null;
   justificativaInput?.addEventListener('blur', () => {
     if (!justificativaInput.value) {
@@ -454,6 +505,8 @@ if (form) {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     atualizarStateDoFormulario();
+    triagemState.dados.statusCaso = StatusCaso.EM_BUSCA;
+    triagemState = calcularEstadoTriagem(triagemState.dados, triagemState.etapa, triagemState.status);
 
     salvarCasoLocal(triagemState.casoCompleto);
     const summary = document.getElementById('case-summary');
@@ -511,7 +564,11 @@ if (form) {
     });
     renderLogs();
 
-    atualizarStatus(retorno.ok ? 'Persistência concluída com sucesso.' : retorno.message === 'Endpoint indisponível' ? 'Endpoint indisponível' : 'Erro de integração com Google Sheets', !retorno.ok);
+    atualizarStatus(retorno.ok ? 'Caso salvo no sistema com sucesso.' : retorno.message === 'Endpoint indisponível' ? 'Endpoint indisponível' : 'Erro de integração com Google Sheets', !retorno.ok, retorno.ok ? 'oficial' : 'padrao');
+    if (retorno.ok) {
+      const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
+      if (chaveAuto) limparAutoRascunhoLocal(chaveAuto);
+    }
     atualizarLista();
     aplicarFiltros();
   });
@@ -552,6 +609,7 @@ document.getElementById('generate-report')?.addEventListener('click', () => {
 document.getElementById('save-draft')?.addEventListener('click', () => {
   atualizarStateDoFormulario();
   salvarRascunhoLocal(sessionId, triagemState);
+  salvarAutoRascunho();
   atualizarStatus(`Rascunho salvo na sessão ${sessionId}.`);
 });
 
