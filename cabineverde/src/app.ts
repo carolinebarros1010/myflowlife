@@ -541,6 +541,7 @@ if (form) {
       payload.dados.talaoPMESP = triagemState.casoCompleto.talaoPMESP;
     }
 
+    atualizarStatus('Gravação em andamento na planilha central...');
     const retorno = await sheetsService.salvar(payload);
     const report = document.getElementById('report-content') as HTMLTextAreaElement | null;
     const metaRetorno = [
@@ -564,7 +565,10 @@ if (form) {
     });
     renderLogs();
 
-    atualizarStatus(retorno.ok ? 'Caso salvo no sistema com sucesso.' : retorno.message === 'Endpoint indisponível' ? 'Endpoint indisponível' : 'Erro de integração com Google Sheets', !retorno.ok, retorno.ok ? 'oficial' : 'padrao');
+    const mensagemOperacional = retorno.ok
+      ? `Registro confirmado na planilha (${retorno.aba || 'CASOS'}).`
+      : `Falha no registro: ${retorno.message || 'causa não informada pelo endpoint'}`;
+    atualizarStatus(mensagemOperacional, !retorno.ok, retorno.ok ? 'oficial' : 'padrao');
     if (retorno.ok) {
       const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
       if (chaveAuto) limparAutoRascunhoLocal(chaveAuto);

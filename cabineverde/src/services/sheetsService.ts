@@ -33,11 +33,16 @@ interface EndpointResponse {
   linha?: number;
   aba?: string;
   timestamp?: string;
+  data?: EndpointResponse;
 }
 
 const parseResponseBody = async (resposta: Response): Promise<EndpointResponse> => {
   try {
-    return (await resposta.json()) as EndpointResponse;
+    const body = (await resposta.json()) as EndpointResponse;
+    if (body.data && typeof body.data === 'object') {
+      return { ...body, ...body.data };
+    }
+    return body;
   } catch {
     return {};
   }
