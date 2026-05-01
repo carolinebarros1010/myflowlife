@@ -614,6 +614,24 @@ export const healthcheckSheets = async () => {
   }
 };
 
+const chamarAcaoGAS = async (action, payload = {}) => {
+  const resposta = await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, ...payload })
+  });
+  const body = await resposta.json();
+  if (!resposta.ok || body.ok === false) {
+    throw new Error(body.message || 'Falha na integração GAS.');
+  }
+  return body;
+};
+
+export const buscarCaso_ = async (filtro) => chamarAcaoGAS('buscarCaso_', { filtro });
+export const gerarTimelineCaso_ = async (idCaso) => chamarAcaoGAS('gerarTimelineCaso_', { idCaso });
+export const editarCasoControlado_ = async (idCaso, operador, alteracoes, justificativaEdicao, emailConfirmacaoOperador) =>
+  chamarAcaoGAS('editarCasoControlado_', { idCaso, operador, alteracoes, justificativa: justificativaEdicao, emailConfirmacaoOperador });
+
 export const gerarRelatorioOperacional = (casos, extra = '') => {
   const data = new Date().toLocaleDateString('pt-BR');
   const criticos = casos.filter((c) => c.classificacaoRisco === 'Alto risco');

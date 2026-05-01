@@ -44,7 +44,7 @@ var ESTRUTURA_PLANILHA = {
   TRIAGEM_RESPOSTAS: COLUNAS_TRIAGEM_RESPOSTAS,
   EVENTOS_OCORRENCIA: COLUNAS_EVENTOS_OCORRENCIA,
   INDICADORES_OPERACIONAIS: COLUNAS_INDICADORES_OPERACIONAIS,
-  HISTORICO_EDICOES: ['idEdicao','idCaso','timestampEdicao','operadorEmail','operadorPerfil','campo','valorAnterior','valorNovo','justificativa'],
+  HISTORICO_EDICOES: ['idEdicao','idCaso','talaoPMESP','campoAlterado','valorAnterior','valorNovo','operadorNome','operadorEmail','operadorPerfil','dataHoraEdicao','justificativa','emailConfirmado'],
   RELATORIO_OPERACIONAL: ['dataReferencia','qtdFotosRecebidas','qtdFotosValidadas','qtdFotosUtilizadas','qtdFotosRejeitadas','observacaoOcorrenciasImagem','geradoEm'],
   FOTOS_DESAPARECIDOS: typeof COLUNAS_FOTOS_DESAPARECIDOS !== 'undefined' ? COLUNAS_FOTOS_DESAPARECIDOS : [],
   OPERADORES: ['email','nome','perfil','ativo','ultimaAtualizacao'],
@@ -139,7 +139,7 @@ function serializarDadosEvento_(dados) {
 
 function registrarEventoOperacional_(planilha, idCaso, tipoEvento, dadosEvento) {
   var descricao = 'dados=' + serializarDadosEvento_(dadosEvento || {});
-  registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricao);
+  registrarEventoOcorrenciaDetalhado_(planilha, idCaso, tipoEvento, descricao, dadosEvento || {});
 }
 
 function registrarDecisaoOperacional_(idCaso, operador, classificacao, prioridade, justificativa) {
@@ -165,8 +165,11 @@ function buscarCaso_(filtro) {
   var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
   if (abaCasos.getLastRow() < 2) return [];
 
-  var termo = limparTexto(filtro).toLowerCase();
-  if (!termo) return [];
+  var filtroObj = filtro && typeof filtro === 'object' ? filtro : { termo: filtro };
+  var termoId = limparTexto(filtroObj.idCaso || filtroObj.termo).toLowerCase();
+  var termoTalao = limparTexto(filtroObj.talaoPMESP || filtroObj.termo).toLowerCase();
+  var termoNome = limparTexto(filtroObj.nomeCompletoDesaparecido || filtroObj.termo).toLowerCase();
+  if (!termoId && !termoTalao && !termoNome) return [];
 
   var cabecalho = garantirColunasDaEstrutura(abaCasos, COLUNAS_CASOS).map(limparTexto);
   var idxIdCaso = cabecalho.indexOf('idCaso');
@@ -178,7 +181,10 @@ function buscarCaso_(filtro) {
     var idCaso = limparTexto(linha[idxIdCaso]).toLowerCase();
     var talao = limparTexto(linha[idxTalao]).toLowerCase();
     var nome = limparTexto(linha[idxNome]).toLowerCase();
-    return idCaso.indexOf(termo) !== -1 || talao.indexOf(termo) !== -1 || nome.indexOf(termo) !== -1;
+    var matchId = !termoId || idCaso.indexOf(termoId) !== -1;
+    var matchTalao = !termoTalao || talao.indexOf(termoTalao) !== -1;
+    var matchNome = !termoNome || nome.indexOf(termoNome) !== -1;
+    return matchId && matchTalao && matchNome;
   }).map(function (linha) {
     var caso = {};
     cabecalho.forEach(function (coluna, index) {
@@ -188,14 +194,24 @@ function buscarCaso_(filtro) {
   });
 }
 
-function editarCasoControlado_(idCaso, operador, alteracoes, justificativa) {
+function editarCasoControlado_(idCaso, operador, alteracoes, justificativa, emailConfirmacaoOperador) {
   var idCasoLimpo = limparTexto(idCaso);
   if (!idCasoLimpo) throw new Error('idCaso obrigatório.');
   var justificativaLimpa = limparTexto(justificativa);
   if (!justificativaLimpa) throw new Error('Edição bloqueada: justificativa obrigatória.');
   if (!alteracoes || typeof alteracoes !== 'object') throw new Error('Edição bloqueada: alteracoes inválidas.');
 
-  var permissao = validarPermissaoAcao_(operador || {}, 'EDITAR_CASO_CONTROLADO');
+  var emailSessao = limparTexto(Session.getActiveUser().getEmail()).toLowerCase();
+  var emailConfirmacao = limparTexto(emailConfirmacaoOperador).toLowerCase();
+  if (!emailSessao || emailSessao !== emailConfirmacao) {
+    var planilhaBloqueio = SpreadsheetApp.getActiveSpreadsheet();
+    registrarLogAcessoOperador_(planilhaBloqueio, 'EDICAO_CASO_BLOQUEADA', 'BLOQUEADO_EMAIL_INVALIDO', 'Confirmação de email inválida. Edição bloqueada.', emailSessao || emailConfirmacao);
+    throw new Error('Confirmação de email inválida. Edição bloqueada.');
+  }
+
+  var operadorBase = operador || {};
+  operadorBase.email = emailSessao;
+  var permissao = validarPermissaoAcao_(operadorBase, 'EDITAR_CASO_CONTROLADO');
   if (!permissao.permitido) throw new Error('Operador sem permissão para editar caso.');
 
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
@@ -229,34 +245,40 @@ function editarCasoControlado_(idCaso, operador, alteracoes, justificativa) {
     return { ok: true, idCaso: idCasoLimpo, alteracoesAplicadas: 0, message: 'Sem diferenças para atualizar.' };
   }
 
-  salvarHistoricoEdicoes_(planilha, idCasoLimpo, permissao, historico, justificativaLimpa);
+  var idxTalaoPMESP = cabecalho.indexOf('talaoPMESP');
+  var talaoPMESP = idxTalaoPMESP >= 0 ? normalizarValorPlanilha(linhaAtual[idxTalaoPMESP]) : '';
+  var dataHoraEdicao = formatarDataHora(new Date());
+  salvarHistoricoEdicoes_(planilha, idCasoLimpo, talaoPMESP, permissao, operadorBase, historico, justificativaLimpa, dataHoraEdicao);
   registrarEventoOperacional_(planilha, idCasoLimpo, 'CASO_EDITADO', {
-    operador: permissao.email || limparTexto(operador && operador.email),
-    perfil: permissao.perfil,
+    operadorNome: limparTexto(operadorBase.nome),
+    operadorEmail: emailSessao,
+    operadorPerfil: permissao.perfil,
+    dataHoraEdicao: dataHoraEdicao,
     justificativa: justificativaLimpa,
-    totalAlteracoes: historico.length,
+    quantidadeCamposAlterados: historico.length,
     campos: historico.map(function (item) { return item.campo; })
   });
   return { ok: true, idCaso: idCasoLimpo, alteracoesAplicadas: historico.length };
 }
 
-function salvarHistoricoEdicoes_(planilha, idCaso, permissao, historico, justificativa) {
+function salvarHistoricoEdicoes_(planilha, idCaso, talaoPMESP, permissao, operador, historico, justificativa, dataHoraEdicao) {
   var colunas = ESTRUTURA_PLANILHA.HISTORICO_EDICOES;
   var aba = garantirAbaComCabecalho(planilha, 'HISTORICO_EDICOES', colunas);
   var cabecalho = garantirColunasDaEstrutura(aba, colunas);
-  var dataHora = formatarDataHora(new Date());
-
   historico.forEach(function (item) {
     var linha = {
       idEdicao: 'ED-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000),
       idCaso: idCaso,
-      timestampEdicao: dataHora,
+      talaoPMESP: talaoPMESP,
+      campoAlterado: item.campo,
       operadorEmail: permissao.email || '',
+      operadorNome: limparTexto(operador && operador.nome),
       operadorPerfil: permissao.perfil || '',
-      campo: item.campo,
       valorAnterior: item.valorAnterior,
       valorNovo: item.valorNovo,
-      justificativa: justificativa
+      dataHoraEdicao: dataHoraEdicao,
+      justificativa: justificativa,
+      emailConfirmado: true
     };
     aba.appendRow(cabecalho.map(function (coluna) { return normalizarValorPlanilha(linha[coluna]); }));
   });
@@ -569,8 +591,13 @@ function validarConsistenciaCaso(planilha, contexto) {
 }
 
 function registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricaoEvento) {
+  return registrarEventoOcorrenciaDetalhado_(planilha, idCaso, tipoEvento, descricaoEvento, {});
+}
+
+function registrarEventoOcorrenciaDetalhado_(planilha, idCaso, tipoEvento, descricaoEvento, metadados) {
   var sheetEventos = garantirAbaComCabecalho(planilha, 'EVENTOS_OCORRENCIA', ESTRUTURA_PLANILHA.EVENTOS_OCORRENCIA);
   var cabecalhoEventos = garantirColunasDaEstrutura(sheetEventos, ESTRUTURA_PLANILHA.EVENTOS_OCORRENCIA);
+  var meta = metadados || {};
   var eventoPorColuna = {
     idCaso: limparTexto(idCaso),
     timestampEvento: formatarDataHora(new Date()),
@@ -578,7 +605,12 @@ function registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricaoEvento
     descricaoEvento: limparTexto(descricaoEvento),
     statusCaso: '',
     prioridade: '',
-    classificacaoRisco: ''
+    classificacaoRisco: '',
+    operadorEmail: limparTexto(meta.operadorEmail),
+    operadorPerfil: limparTexto(meta.operadorPerfil || meta.perfil),
+    dataHoraEdicao: normalizarValorPlanilha(meta.dataHoraEdicao || ''),
+    quantidadeCamposAlterados: normalizarValorPlanilha(meta.quantidadeCamposAlterados || meta.totalAlteracoes || ''),
+    justificativa: limparTexto(meta.justificativa)
   };
 
   var linhaEvento = cabecalhoEventos.map(function (nomeColuna) {
@@ -586,6 +618,7 @@ function registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricaoEvento
   });
 
   sheetEventos.appendRow(linhaEvento);
+  return true;
 }
 
 function gerarTimelineCaso_(idCaso) {
@@ -642,9 +675,11 @@ function coletarHistoricoEdicoesTimeline_(planilha, idCaso) {
   var colunas = ESTRUTURA_PLANILHA.HISTORICO_EDICOES;
   var cabecalho = garantirColunasDaEstrutura(aba, colunas).map(limparTexto);
   var idxIdCaso = cabecalho.indexOf('idCaso');
-  var idxDataHora = cabecalho.indexOf('timestampEdicao');
+  var idxDataHora = cabecalho.indexOf('dataHoraEdicao');
+  if (idxDataHora < 0) idxDataHora = cabecalho.indexOf('timestampEdicao');
   var idxOperador = cabecalho.indexOf('operadorEmail');
-  var idxCampo = cabecalho.indexOf('campo');
+  var idxCampo = cabecalho.indexOf('campoAlterado');
+  if (idxCampo < 0) idxCampo = cabecalho.indexOf('campo');
   var idxAnterior = cabecalho.indexOf('valorAnterior');
   var idxNovo = cabecalho.indexOf('valorNovo');
   var idxJustificativa = cabecalho.indexOf('justificativa');

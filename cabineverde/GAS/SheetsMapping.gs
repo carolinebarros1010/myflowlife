@@ -5,5 +5,5 @@ var COLUNAS_CASOS = [
 ];
 
 var COLUNAS_TRIAGEM_RESPOSTAS = ['idCaso', 'perguntaChave', 'resposta', 'complemento'];
-var COLUNAS_EVENTOS_OCORRENCIA = ['idCaso', 'timestampEvento', 'tipoEvento', 'descricaoEvento', 'statusCaso', 'prioridade', 'classificacaoRisco'];
+var COLUNAS_EVENTOS_OCORRENCIA = ['idCaso', 'timestampEvento', 'tipoEvento', 'descricaoEvento', 'statusCaso', 'prioridade', 'classificacaoRisco', 'operadorEmail', 'operadorPerfil', 'dataHoraEdicao', 'quantidadeCamposAlterados', 'justificativa'];
 var COLUNAS_INDICADORES_OPERACIONAIS = ['idCaso', 'criancaSemSupervisao', 'criancaVeiculoSuspeito', 'preadolescenteAliciamentoVirtual', 'adolescenteSofrimentoPsiquico', 'adultoSuspeitaCrime', 'idosoDesorientado'];

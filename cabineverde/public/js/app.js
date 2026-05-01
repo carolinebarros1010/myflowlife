@@ -7,6 +7,9 @@ import {
   gerarRelatorioOperacional,
   salvarCasoSheets,
   healthcheckSheets,
+  buscarCaso_,
+  gerarTimelineCaso_,
+  editarCasoControlado_,
   ARVORE_DECISAO_CONFIG,
   OPCOES_SIM_NAO_NI,
   avaliarAlertasArvore,
@@ -21,6 +24,9 @@ const app = document.getElementById('app');
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
 const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
 const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
+const PERFIL_OPERADOR = String(localStorage.getItem('cabine-verde-perfil') || 'OPERADOR').toUpperCase();
+const podeEditarCaso = ['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR);
+const mascararDadoSensivel = (valor) => (podeEditarCaso ? valor || '-' : '***');
 
 const MIRROR_FIELDS = [
   ['nomeCompletoDesaparecido', 'arvore__passo1_nome'],
@@ -330,6 +336,20 @@ const render = () => {
     </div>
     <section class="cv-card"><h3>Feedback</h3><p id="feedback">Pronto para envio.</p></section>
     <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
+    <section class="cv-card">
+      <h3>Consulta e auditoria de caso</h3>
+      <div class="cv-grid">
+        <label>idCaso<input id="audit-idCaso" /></label>
+        <label>talão PMESP<input id="audit-talaoPMESP" /></label>
+        <label>Nome completo<input id="audit-nomeCompletoDesaparecido" /></label>
+      </div>
+      <button class="cv-button cv-button--secondary" type="button" id="buscarCasoBtn">Buscar caso</button>
+      <article id="audit-resultado" class="cv-case-detail-grid">Informe ao menos um filtro para consulta.</article>
+      <details>
+        <summary>Timeline</summary>
+        <ul id="audit-timeline"></ul>
+      </details>
+    </section>
     <section class="cv-card cv-relatorio-card">
       <details id="relatorioContainer">
         <summary>Relatório operacional</summary>
@@ -398,6 +418,75 @@ const render = () => {
     }
 
     render();
+  });
+
+  const renderResultadoAuditoria = (caso) => {
+    const resumoFotos = caso.fotoDisponivel ? 'Foto registrada (link protegido).' : 'Sem foto registrada.';
+    document.getElementById('audit-resultado').innerHTML = `
+      <p><strong>${caso.idCaso || caso.id || '-'}</strong> · ${caso.statusCaso || '-'}</p>
+      <p>Desaparecido: ${caso.nomeCompletoDesaparecido || '-'} · Talão PMESP: ${caso.talaoPMESP || '-'}</p>
+      <p>Risco: ${caso.classificacaoRisco || '-'} · Prioridade: ${caso.prioridade || '-'}</p>
+      <p>Resumo de fotos: ${resumoFotos}</p>
+      <p>CPF: ${mascararDadoSensivel(caso.cpf)} · RG: ${mascararDadoSensivel(caso.rg)}</p>
+      <div class="cv-relatorio-actions">
+        <button class="cv-button cv-button--ghost" type="button" id="verTimelineBtn" data-id="${caso.idCaso || caso.id}">Ver timeline</button>
+        ${podeEditarCaso ? `<button class="cv-button" type="button" id="editarCasoBtn" data-id="${caso.idCaso || caso.id}">Editar caso</button>` : ''}
+      </div>`;
+  };
+
+  document.getElementById('buscarCasoBtn')?.addEventListener('click', async () => {
+    const filtro = {
+      idCaso: document.getElementById('audit-idCaso').value.trim(),
+      talaoPMESP: document.getElementById('audit-talaoPMESP').value.trim(),
+      nomeCompletoDesaparecido: document.getElementById('audit-nomeCompletoDesaparecido').value.trim()
+    };
+    if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.nomeCompletoDesaparecido) return atualizarFeedback('Informe ao menos um filtro para consulta.', true);
+    try {
+      const resposta = await buscarCaso_(filtro);
+      const caso = Array.isArray(resposta.casos) ? resposta.casos[0] : resposta.caso;
+      if (!caso) throw new Error('Caso não localizado.');
+      renderResultadoAuditoria(caso);
+      atualizarFeedback('Caso localizado para auditoria.');
+    } catch (error) {
+      atualizarFeedback(error.message || 'Falha na consulta do caso.', true);
+    }
+  });
+
+  document.getElementById('audit-resultado')?.addEventListener('click', async (event) => {
+    const alvo = event.target;
+    if (!(alvo instanceof HTMLElement)) return;
+    if (alvo.id === 'verTimelineBtn') {
+      const idCaso = alvo.dataset.id || '';
+      try {
+        const resposta = await gerarTimelineCaso_(idCaso);
+        const eventos = (resposta.timeline || []).sort((a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime());
+        document.getElementById('audit-timeline').innerHTML = eventos.length
+          ? eventos.map((ev) => `<li><strong>${new Date(ev.dataHora).toLocaleString('pt-BR')}</strong> · ${ev.evento}</li>`).join('')
+          : '<li>Sem eventos de timeline.</li>';
+      } catch (error) {
+        atualizarFeedback(error.message || 'Falha ao gerar timeline.', true);
+      }
+    }
+    if (alvo.id === 'editarCasoBtn') {
+      const idCaso = alvo.dataset.id || '';
+      const emailConfirmacaoOperador = window.prompt('Confirme seu email corporativo para editar o caso:', '') || '';
+      if (!emailConfirmacaoOperador.trim()) return atualizarFeedback('Confirmação de email obrigatória para editar caso.', true);
+      const justificativaEdicao = window.prompt('Justificativa da edição (obrigatória):', '') || '';
+      if (!justificativaEdicao.trim()) return atualizarFeedback('Justificativa obrigatória para editar caso.', true);
+      const observacoesOperacionais = window.prompt('Nova observação operacional:', '') || '';
+      try {
+        await editarCasoControlado_(
+          idCaso,
+          { perfil: PERFIL_OPERADOR, nome: 'Operador Cabine Verde' },
+          { observacoesOperacionais },
+          justificativaEdicao,
+          emailConfirmacaoOperador
+        );
+        atualizarFeedback('Caso editado com sucesso. Histórico atualizado.');
+      } catch (error) {
+        atualizarFeedback(error.message || 'Falha ao editar caso.', true);
+      }
+    }
   });
 
   const gerarRelatorio = () => {
