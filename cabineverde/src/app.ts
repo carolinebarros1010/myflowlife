@@ -33,6 +33,20 @@ import { listarIndicadoresAtivos, sugerirAcaoIndicadores } from './modules/triag
 
 const sheetsService = new GoogleSheetsService();
 const chaveEtapaAtual = 'cabine-verde-etapa-atual';
+
+const MAX_FOTO_BYTES = 5 * 1024 * 1024;
+
+const converterArquivoParaBase64 = (arquivo: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const resultado = String(reader.result || '');
+      const base64 = resultado.includes(',') ? resultado.split(',')[1] : resultado;
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error('Falha ao converter arquivo para base64.'));
+    reader.readAsDataURL(arquivo);
+  });
 let sessionId = gerarSessionId();
 
 const baseLayout = () =>
@@ -82,7 +96,7 @@ const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => ({
   nomeMae: normalizarTexto(String(dados.get('nomeMae') || '')),
   dataNascimento: String(dados.get('dataNascimento') || ''),
   fotoDisponivel: toBoolean(dados.get('fotoDisponivel')),
-  linkFoto: normalizarTexto(String(dados.get('linkFoto') || '')),
+  linkFoto: '',
   telefoneDesaparecido: normalizarTelefone(String(dados.get('telefoneDesaparecido') || '')),
   dispositivoLigado: toBoolean(dados.get('dispositivoLigado')),
   dataHoraUltimaVisualizacao: String(dados.get('dataHoraUltimaVisualizacao') || ''),
@@ -278,7 +292,34 @@ if (form) {
     if (summary) summary.textContent = gerarResumoCaso(triagemState.casoCompleto);
     renderDetalheCaso(triagemState.casoCompleto);
 
-    const retorno = await sheetsService.salvar(gerarPayloadSheets(triagemState.casoCompleto));
+    const payload = gerarPayloadSheets(triagemState.casoCompleto);
+    const arquivoFoto = form.elements.namedItem('fotoDesaparecido') as HTMLInputElement | null;
+    const fotoSelecionada = arquivoFoto?.files?.[0];
+    if (fotoSelecionada) {
+      if (!fotoSelecionada.type.startsWith('image/')) {
+        atualizarStatus('Upload bloqueado: apenas imagens são permitidas.', true);
+        return;
+      }
+      if (fotoSelecionada.size > MAX_FOTO_BYTES) {
+        atualizarStatus('Upload bloqueado: imagem excede 5MB.', true);
+        return;
+      }
+
+      payload.foto = {
+        base64: await converterArquivoParaBase64(fotoSelecionada),
+        nomeArquivo: fotoSelecionada.name,
+        mimeType: fotoSelecionada.type
+      };
+      payload.dados.origemFoto = normalizarTexto(String((form.elements.namedItem('origemFoto') as HTMLSelectElement | null)?.value || ''));
+      payload.dados.tipoFoto = normalizarTexto(String((form.elements.namedItem('tipoFoto') as HTMLSelectElement | null)?.value || ''));
+      payload.dados.autorizacaoUsoImagem = toBoolean((form.elements.namedItem('autorizacaoUsoImagem') as HTMLInputElement | null)?.checked);
+      payload.dados.operadorResponsavel = normalizarTexto(triagemState.dados.nomeSolicitante || 'Operador');
+      payload.dados.nomeDesaparecido = triagemState.dados.nomeCompletoDesaparecido;
+      payload.dados.idCaso = triagemState.casoCompleto.id;
+      payload.dados.talaoPMESP = triagemState.casoCompleto.talaoPMESP;
+    }
+
+    const retorno = await sheetsService.salvar(payload);
     const report = document.getElementById('report-content') as HTMLTextAreaElement | null;
     const metaRetorno = [
       retorno.idCaso ? `idCaso: ${retorno.idCaso}` : '',

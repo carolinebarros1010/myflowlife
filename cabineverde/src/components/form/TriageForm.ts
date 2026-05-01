@@ -6,6 +6,14 @@ const input = (name: string, label: string, type = 'text', required = false) => 
 const checkbox = (name: string, label: string) => `
   <label class="cv-check"><input name="${name}" type="checkbox" /> ${label}</label>`;
 
+const select = (name: string, label: string, opcoes: string[], required = false) => `
+  <label>${label}
+    <select name="${name}" ${required ? 'required' : ''}>
+      <option value="">Selecione</option>
+      ${opcoes.map((opcao) => `<option value="${opcao}">${opcao}</option>`).join('')}
+    </select>
+  </label>`;
+
 const etapa = (step: number, titulo: string, conteudo: string) => `
 <fieldset class="cv-step-section" data-step="${step}" ${step === 0 ? '' : 'hidden'}>
   <legend>${titulo}</legend>
@@ -88,7 +96,10 @@ export const renderTriageForm = (): string => `
       '6) Apoio tecnológico',
       [
         checkbox('fotoDisponivel', 'Foto disponível'),
-        input('linkFoto', 'Link da foto'),
+        '<label>Foto desaparecido<input type="file" id="fotoDesaparecido" name="fotoDesaparecido" accept="image/*" /></label>',
+        select('origemFoto', 'Origem da foto', ['Solicitante', 'Familiar', 'Câmera', 'Outro']),
+        select('tipoFoto', 'Tipo da foto', ['Recente', 'Documento', 'Câmera', 'Outro']),
+        checkbox('autorizacaoUsoImagem', 'Autorização de uso de imagem'),
         checkbox('dispositivoLigado', 'Dispositivo ligado'),
         checkbox('camerasResidencia', 'Câmeras na residência'),
         checkbox('camerasUltimoLocal', 'Câmeras no último local')
@@ -98,7 +109,11 @@ export const renderTriageForm = (): string => `
     ${etapa(
       6,
       '7) Resumo e ação final',
-      [input('observacoesOperacionais', 'Observações operacionais')].join('')
+      [
+        input('observacoesOperacionais', 'Observações operacionais'),
+        input('idFotoVisualizacao', 'ID da foto para visualização controlada'),
+        input('justificativaVisualizacao', 'Justificativa de visualização (obrigatória para RESTRITO/SIGILOSO)')
+      ].join('')
     )}
   </form>
 </section>`;

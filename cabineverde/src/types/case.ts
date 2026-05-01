@@ -73,4 +73,9 @@ export interface SheetPayload {
   dados: Record<string, SheetCellValue>;
   valores: SheetCellValue[];
   abas: AbaPayload[];
+  foto?: {
+    base64: string;
+    nomeArquivo: string;
+    mimeType: string;
+  };
 }
