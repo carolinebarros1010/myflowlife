@@ -15,7 +15,7 @@ Usa o header existente em `COLUNAS_CASOS` com adição de `statusMigracao`.
 `idCaso`, `criancaSemSupervisao`, `criancaVeiculoSuspeito`, `preadolescenteAliciamentoVirtual`, `adolescenteSofrimentoPsiquico`, `adultoSuspeitaCrime`, `idosoDesorientado`.
 
 ### LOG_MIGRACAO
-`dataHora`, `funcaoExecutada`, `status`, `modoExecucao`, `backupConfirmado`, `idCaso`, `mensagem`, `usuario`.
+`dataHora`, `funcaoExecutada`, `status`, `modoExecucao`, `backupConfirmado`, `idCaso`, `mensagem`, `usuario`, `origemExecucao`.
 
 ### LEGADO_OBSERVACOES_BRUTAS
 `dataHora`, `idCaso`, `linhaOrigem`, `hashConteudo`, `conteudoBruto`, `operador`.
@@ -58,3 +58,10 @@ Usa o header existente em `COLUNAS_CASOS` com adição de `statusMigracao`.
 - **Bloqueio de execução sem backup**: `validarPreExecucaoMigracao_` impede migração real sem backup recente (até 30 minutos), com log bloqueante em `LOG_MIGRACAO`.
 - **Duplicidade crítica de talão**: `validarConsistenciaCaso` registra `POSSIVEL_DUPLICIDADE_TALAO_PMESP` com severidade crítica, marca `flagDuplicidade` e bloqueia persistência.
 - **Rollback assistido**: `restaurarBackupMaisRecente_` restaura `CASOS`, `TRIAGEM_RESPOSTAS`, `EVENTOS_OCORRENCIA` e `INDICADORES_OPERACIONAIS` a partir do backup mais recente por aba, sem apagar o backup de origem.
+
+
+## Contexto de execução autorizada
+- As funções críticas (`ajustarEstruturaPlanilha_`, `migrarDadosLegados_`, `validarIntegridadeMigracao_`, `restaurarBackupMaisRecente_`) agora exigem contexto autorizado.
+- O contexto é aberto por `iniciarContextoExecucao_()` e encerrado por `finalizarContextoExecucao_()`.
+- Chamadas isoladas fora do fluxo seguro são bloqueadas com erro e log `BLOQUEADA` em `LOG_MIGRACAO`.
+- Ações de menu executam wrappers com `try/finally` para garantir reset do contexto, evitando bypass manual no Apps Script.
