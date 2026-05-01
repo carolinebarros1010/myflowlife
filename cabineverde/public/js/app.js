@@ -10,6 +10,8 @@ import {
   buscarCaso_,
   gerarTimelineCaso_,
   editarCasoControlado_,
+  resumoQualidadeDados_,
+  marcarProblemaQualidadeResolvido_,
   ARVORE_DECISAO_CONFIG,
   OPCOES_SIM_NAO_NI,
   avaliarAlertasArvore,
@@ -25,6 +27,7 @@ const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
 const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
 const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
 const PERFIL_OPERADOR = String(localStorage.getItem('cabine-verde-perfil') || 'OPERADOR').toUpperCase();
+const NOME_OPERADOR = String(localStorage.getItem('cabine-verde-operador-nome') || 'Operador Cabine Verde').trim();
 const podeEditarCaso = ['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR);
 const mascararDadoSensivel = (valor) => (podeEditarCaso ? valor || '-' : '***');
 
@@ -359,6 +362,23 @@ const render = () => {
         </div>
       </details>
     </section>
+    <section class="cv-card">
+      <h3>Painel de Qualidade dos Dados</h3>
+      <div class="cv-grid cv-grid--filters">
+        <label>Total problemas<input id="qtd-totalProblemas" readonly /></label>
+        <label>Total críticos<input id="qtd-totalCriticos" readonly /></label>
+        <label>Total pendentes<input id="qtd-totalPendentes" readonly /></label>
+        <label>Total resolvidos<input id="qtd-totalResolvidos" readonly /></label>
+      </div>
+      <div class="cv-grid cv-grid--filters">
+        <label>Filtro idCaso<input id="qualidade-filtro-idCaso" /></label>
+        <label>Filtro talão PMESP<input id="qualidade-filtro-talaoPMESP" /></label>
+        <label>Filtro severidade<input id="qualidade-filtro-severidade" placeholder="CRITICA/ALTA/MEDIA" /></label>
+        <label>Filtro status<input id="qualidade-filtro-statusTratamento" placeholder="PENDENTE/RESOLVIDO" /></label>
+      </div>
+      <button class="cv-button cv-button--secondary" type="button" id="atualizarQualidadeBtn">Atualizar painel</button>
+      <div id="qualidade-lista" class="cv-case-detail-grid">Carregando inconsistências da aba QUALIDADE_DADOS...</div>
+    </section>
     <section class="cv-card cv-debug-panel${DEBUG_MODE ? '' : ' is-hidden'}" id="painelDebug">
       <h3>Debug integração GAS</h3>
       <p>Modo técnico ativo via <code>?debug=1</code>.</p>
@@ -519,6 +539,58 @@ const render = () => {
     await navigator.clipboard.writeText(texto);
     atualizarFeedback('Relatório gerado.');
   });
+
+  const lerFiltrosQualidade = () => ({
+    idCaso: document.getElementById('qualidade-filtro-idCaso').value.trim().toLowerCase(),
+    talaoPMESP: document.getElementById('qualidade-filtro-talaoPMESP').value.trim().toLowerCase(),
+    severidade: document.getElementById('qualidade-filtro-severidade').value.trim().toLowerCase(),
+    statusTratamento: document.getElementById('qualidade-filtro-statusTratamento').value.trim().toLowerCase()
+  });
+  const aplicarFiltroQualidade = (item, filtro) =>
+    (!filtro.idCaso || String(item.idCaso || '').toLowerCase().includes(filtro.idCaso)) &&
+    (!filtro.talaoPMESP || String(item.talaoPMESP || '').toLowerCase().includes(filtro.talaoPMESP)) &&
+    (!filtro.severidade || String(item.severidade || '').toLowerCase().includes(filtro.severidade)) &&
+    (!filtro.statusTratamento || String(item.statusTratamento || '').toLowerCase().includes(filtro.statusTratamento));
+  const filtrarPorPerfil = (lista) => {
+    if (['SUPERVISOR', 'ADMIN', 'AUDITOR'].includes(PERFIL_OPERADOR)) return lista;
+    if (PERFIL_OPERADOR !== 'OPERADOR') return lista;
+    const idsRegistrados = new Set(casos.filter((c) => String(c.operadorResponsavel || '').trim().toLowerCase() === NOME_OPERADOR.toLowerCase()).map((c) => c.idCaso || c.id));
+    return lista.filter((item) => String(item.statusTratamento || '').toUpperCase() === 'PENDENTE' && (idsRegistrados.size ? idsRegistrados.has(item.idCaso) : true));
+  };
+  const renderListaQualidade = (resumo) => {
+    document.getElementById('qtd-totalProblemas').value = String(resumo.totalProblemas || 0);
+    document.getElementById('qtd-totalCriticos').value = String(resumo.totalCriticos || 0);
+    document.getElementById('qtd-totalPendentes').value = String(resumo.totalPendentes || 0);
+    document.getElementById('qtd-totalResolvidos').value = String(resumo.totalResolvidos || 0);
+    const inconsistencias = Array.isArray(resumo.inconsistencias) ? resumo.inconsistencias : [];
+    const lista = filtrarPorPerfil(inconsistencias).filter((item) => aplicarFiltroQualidade(item, lerFiltrosQualidade()));
+    const alvo = document.getElementById('qualidade-lista');
+    alvo.innerHTML = lista.length ? lista.map((item) => `<section>
+      <p><strong>${item.idCaso || '-'}</strong> · Talão: ${item.talaoPMESP || '-'} · ${item.severidade || '-'}</p>
+      <p>Campo: ${item.campo || '-'} · Status: ${item.statusTratamento || 'PENDENTE'}</p>
+      <p>${item.problema || '-'}</p>
+      ${['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR) && String(item.statusTratamento || '').toUpperCase() !== 'RESOLVIDO' ? `<button class="cv-button" data-cmd="resolver-qualidade" data-idcaso="${item.idCaso || ''}" data-campo="${item.campo || ''}" data-problema="${item.problema || ''}">Marcar como resolvido</button>` : ''}
+    </section>`).join('') : '<p>Nenhuma inconsistência para os filtros/perfil informados.</p>';
+  };
+  const atualizarPainelQualidade = async () => {
+    const resumo = await resumoQualidadeDados_();
+    renderListaQualidade(resumo);
+  };
+  document.getElementById('atualizarQualidadeBtn').addEventListener('click', async () => {
+    try { await atualizarPainelQualidade(); } catch (error) { atualizarFeedback(error.message || 'Falha ao atualizar painel de qualidade.', true); }
+  });
+  ['qualidade-filtro-idCaso', 'qualidade-filtro-talaoPMESP', 'qualidade-filtro-severidade', 'qualidade-filtro-statusTratamento'].forEach((id) =>
+    document.getElementById(id).addEventListener('input', () => atualizarPainelQualidade().catch(() => {}))
+  );
+  document.getElementById('qualidade-lista').addEventListener('click', async (event) => {
+    const alvo = event.target;
+    if (!(alvo instanceof HTMLElement) || alvo.dataset.cmd !== 'resolver-qualidade') return;
+    if (!['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR)) return atualizarFeedback('Apenas SUPERVISOR/ADMIN pode marcar como resolvido.', true);
+    await marcarProblemaQualidadeResolvido_(alvo.dataset.idcaso || '', alvo.dataset.campo || '', alvo.dataset.problema || '', NOME_OPERADOR);
+    atualizarFeedback('Problema marcado como resolvido.');
+    await atualizarPainelQualidade();
+  });
+  atualizarPainelQualidade().catch(() => atualizarFeedback('Falha ao carregar painel de qualidade.', true));
 };
 
 (async () => {

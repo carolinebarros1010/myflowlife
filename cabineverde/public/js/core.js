@@ -631,6 +631,9 @@ export const buscarCaso_ = async (filtro) => chamarAcaoGAS('buscarCaso_', { filt
 export const gerarTimelineCaso_ = async (idCaso) => chamarAcaoGAS('gerarTimelineCaso_', { idCaso });
 export const editarCasoControlado_ = async (idCaso, operador, alteracoes, justificativaEdicao, emailConfirmacaoOperador) =>
   chamarAcaoGAS('editarCasoControlado_', { idCaso, operador, alteracoes, justificativa: justificativaEdicao, emailConfirmacaoOperador });
+export const resumoQualidadeDados_ = async () => chamarAcaoGAS('resumoQualidadeDados_');
+export const marcarProblemaQualidadeResolvido_ = async (idCaso, campo, problema, responsavelTratamento) =>
+  chamarAcaoGAS('marcarProblemaQualidadeResolvido_', { idCaso, campo, problema, responsavelTratamento });
 
 export const gerarRelatorioOperacional = (casos, extra = '') => {
   const data = new Date().toLocaleDateString('pt-BR');

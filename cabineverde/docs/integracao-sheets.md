@@ -134,3 +134,16 @@ A árvore de decisão **não foi removida**. Ela segue no frontend e agora é pe
   - resolução pode ser registrada por `marcarProblemaQualidadeResolvido_(idCaso, campo, problema, responsavelTratamento)`;
   - ao resolver, registra evento `PROBLEMA_QUALIDADE_RESOLVIDO` em `EVENTOS_OCORRENCIA`;
   - painel resumido via `resumoQualidadeDados_()` com `totalProblemas`, `totalCriticos`, `totalPendentes` e `totalResolvidos`.
+
+### Painel de Qualidade dos Dados (frontend)
+
+- A interface do Cabine Verde possui painel dedicado com:
+  - totais (`totalProblemas`, `totalCriticos`, `totalPendentes`, `totalResolvidos`);
+  - lista de inconsistências da aba `QUALIDADE_DADOS`;
+  - filtros operacionais por `idCaso`, `talaoPMESP`, `severidade` e `statusTratamento`;
+  - ação `Marcar como resolvido`.
+- Permissões no frontend:
+  - `SUPERVISOR`/`ADMIN`: visualizam e podem marcar resolução;
+  - `AUDITOR`: somente visualização;
+  - `OPERADOR`: visualiza apenas pendências (com restrição por casos registrados quando possível via cache local).
+- Não existe ação de exclusão de inconsistências no frontend.

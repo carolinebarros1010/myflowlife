@@ -125,11 +125,19 @@ function resumoQualidadeDados_() {
   var idxStatus = cabecalho.indexOf('statusTratamento');
 
   if (abaQualidade.getLastRow() < 2) {
-    return { totalProblemas: 0, totalCriticos: 0, totalPendentes: 0, totalResolvidos: 0 };
+    return { totalProblemas: 0, totalCriticos: 0, totalPendentes: 0, totalResolvidos: 0, inconsistencias: [] };
   }
 
   var dados = abaQualidade.getRange(2, 1, abaQualidade.getLastRow() - 1, abaQualidade.getLastColumn()).getValues();
-  var resumo = { totalProblemas: dados.length, totalCriticos: 0, totalPendentes: 0, totalResolvidos: 0 };
+  var idxDataHoraAuditoria = cabecalho.indexOf('dataHoraAuditoria');
+  var idxIdCaso = cabecalho.indexOf('idCaso');
+  var idxTalaoPMESP = cabecalho.indexOf('talaoPMESP');
+  var idxCampo = cabecalho.indexOf('campo');
+  var idxProblema = cabecalho.indexOf('problema');
+  var idxAcaoRecomendada = cabecalho.indexOf('acaoRecomendada');
+  var idxResponsavelTratamento = cabecalho.indexOf('responsavelTratamento');
+  var idxDataHoraResolucao = cabecalho.indexOf('dataHoraResolucao');
+  var resumo = { totalProblemas: dados.length, totalCriticos: 0, totalPendentes: 0, totalResolvidos: 0, inconsistencias: [] };
 
   dados.forEach(function (linha) {
     var severidade = limparTexto(linha[idxSeveridade]).toUpperCase();
@@ -137,6 +145,18 @@ function resumoQualidadeDados_() {
     if (severidade === 'CRITICA') resumo.totalCriticos += 1;
     if (status === 'PENDENTE') resumo.totalPendentes += 1;
     if (status === 'RESOLVIDO') resumo.totalResolvidos += 1;
+    resumo.inconsistencias.push({
+      dataHoraAuditoria: normalizarValorPlanilha(linha[idxDataHoraAuditoria]),
+      idCaso: normalizarValorPlanilha(linha[idxIdCaso]),
+      talaoPMESP: normalizarValorPlanilha(linha[idxTalaoPMESP]),
+      campo: normalizarValorPlanilha(linha[idxCampo]),
+      problema: normalizarValorPlanilha(linha[idxProblema]),
+      severidade: severidade,
+      acaoRecomendada: normalizarValorPlanilha(linha[idxAcaoRecomendada]),
+      statusTratamento: status,
+      responsavelTratamento: normalizarValorPlanilha(linha[idxResponsavelTratamento]),
+      dataHoraResolucao: normalizarValorPlanilha(linha[idxDataHoraResolucao])
+    });
   });
 
   return resumo;
