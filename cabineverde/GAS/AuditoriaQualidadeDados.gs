@@ -134,6 +134,7 @@ function resumoQualidadeDados_() {
   var idxTalaoPMESP = cabecalho.indexOf('talaoPMESP');
   var idxCampo = cabecalho.indexOf('campo');
   var idxProblema = cabecalho.indexOf('problema');
+  var idxPrioridadeTratamento = cabecalho.indexOf('prioridadeTratamento');
   var idxAcaoRecomendada = cabecalho.indexOf('acaoRecomendada');
   var idxResponsavelTratamento = cabecalho.indexOf('responsavelTratamento');
   var idxDataHoraResolucao = cabecalho.indexOf('dataHoraResolucao');
@@ -152,6 +153,7 @@ function resumoQualidadeDados_() {
       campo: normalizarValorPlanilha(linha[idxCampo]),
       problema: normalizarValorPlanilha(linha[idxProblema]),
       severidade: severidade,
+      prioridadeTratamento: normalizarPrioridadeTratamento_(linha[idxPrioridadeTratamento], severidade, normalizarValorPlanilha(linha[idxCampo])),
       acaoRecomendada: normalizarValorPlanilha(linha[idxAcaoRecomendada]),
       statusTratamento: status,
       responsavelTratamento: normalizarValorPlanilha(linha[idxResponsavelTratamento]),
@@ -198,6 +200,7 @@ function adicionarRegistroQualidadeSeNovo_(registros, mapaPendentes, dataHoraAud
     campo,
     problema,
     severidade,
+    calcularPrioridadeTratamentoQualidade_(severidade, campo),
     acaoRecomendada,
     'PENDENTE',
     '',
@@ -209,4 +212,20 @@ function adicionarRegistroQualidadeSeNovo_(registros, mapaPendentes, dataHoraAud
 
 function gerarChaveProblemaQualidade_(idCaso, campo, problema, statusTratamento) {
   return [limparTexto(idCaso), limparTexto(campo), limparTexto(problema), limparTexto(statusTratamento).toUpperCase()].join('|');
+}
+
+function calcularPrioridadeTratamentoQualidade_(severidade, campo) {
+  var campoNormalizado = limparTexto(campo);
+  if (campoNormalizado === 'talaoPMESP' || campoNormalizado === 'classificacaoRisco') return 'URGENTE';
+  var severidadeNormalizada = limparTexto(severidade).toUpperCase();
+  if (severidadeNormalizada === 'CRITICA') return 'URGENTE';
+  if (severidadeNormalizada === 'ALTA') return 'ALTA';
+  if (severidadeNormalizada === 'MEDIA') return 'MEDIA';
+  return 'BAIXA';
+}
+
+function normalizarPrioridadeTratamento_(prioridadeTratamento, severidade, campo) {
+  var prioridade = limparTexto(prioridadeTratamento).toUpperCase();
+  if (prioridade) return prioridade;
+  return calcularPrioridadeTratamentoQualidade_(severidade, campo);
 }
