@@ -273,6 +273,20 @@ const render = () => {
     <div class="cv-operational-grid">
       <section class="cv-card">
         <form id="f" class="cv-form">
+          <section class="cv-form-section cv-operational-entry">
+            <h3>Entrada Operacional</h3>
+            <p class="cv-section-helper">Inicie o atendimento pelo número do talão e use os links de navegação rápida entre sistema interno e página pública.</p>
+            <div class="cv-grid">
+              <label for="talaoPMESP">Número do Talão PMESP<input id="talaoPMESP" name="talaoPMESP" data-sync-key="talaoPMESP" required placeholder="Ex: 7450" /></label>
+            </div>
+            <div class="cv-inline-actions">
+              <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
+            </div>
+            <div class="cv-inline-actions cv-operational-links">
+              <a class="cv-button cv-button--ghost" href="https://myflowlife.com.br/cabineverde/" target="_blank" rel="noopener noreferrer">Ir para Cabine Verde pública</a>
+              <a class="cv-button cv-button--secondary" href="/cabineverde/sistema">Voltar para o Sistema Cabine Verde</a>
+            </div>
+          </section>
           <section class="cv-form-section">
             <h3>Dados principais</h3>
             <p class="cv-section-helper">Preenchimento rápido operacional. Campos equivalentes na árvore oficial são sincronizados automaticamente.</p>
@@ -421,6 +435,9 @@ const render = () => {
 
   form.addEventListener('input', sincronizarEAtualizar);
   form.addEventListener('change', sincronizarEAtualizar);
+  document.getElementById('iniciarAtendimentoBtn')?.addEventListener('click', () => {
+    form.querySelector('[name="nomeCompletoDesaparecido"]')?.focus();
+  });
   atualizarUI();
 
   form.addEventListener('submit', async (e) => {
