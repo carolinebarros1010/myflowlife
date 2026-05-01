@@ -47,6 +47,16 @@ const converterArquivoParaBase64 = (arquivo: File): Promise<string> =>
     reader.onerror = () => reject(new Error('Falha ao converter arquivo para base64.'));
     reader.readAsDataURL(arquivo);
   });
+
+const validarJustificativaVisualizacao = (justificativa: string): boolean => {
+  const original = String(justificativa || '');
+  const normalizada = original.trim().replace(/\s+/g, ' ');
+  const analisada = normalizada.toLowerCase();
+  const bloqueadas = new Set(['ok', 'teste', '-', 'ver', 'foto', 'visualizar']);
+  const apenasNumeros = /^\d+$/;
+  const temPalavraMinima = analisada.split(' ').some((parte) => parte.trim().length > 3);
+  return normalizada.length >= 10 && !bloqueadas.has(analisada) && !apenasNumeros.test(analisada) && temPalavraMinima;
+};
 let sessionId = gerarSessionId();
 
 const baseLayout = () =>
@@ -282,6 +292,19 @@ if (form) {
   renderLogs();
 
   form.addEventListener('input', atualizarStateDoFormulario);
+  const justificativaInput = form.elements.namedItem('justificativaVisualizacao') as HTMLInputElement | null;
+  justificativaInput?.addEventListener('blur', () => {
+    if (!justificativaInput.value) {
+      justificativaInput.setCustomValidity('');
+      return;
+    }
+    if (!validarJustificativaVisualizacao(justificativaInput.value)) {
+      justificativaInput.setCustomValidity('Justificativa inválida. Descreva o motivo da visualização.');
+      atualizarStatus('Justificativa inválida. Descreva o motivo da visualização.', true);
+      return;
+    }
+    justificativaInput.setCustomValidity('');
+  });
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();

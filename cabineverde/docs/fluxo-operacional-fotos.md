@@ -35,3 +35,13 @@
 - `SIGILOSO`: exige supervisor **e justificativa obrigatória**.
 - Se a justificativa estiver vazia para `RESTRITO`/`SIGILOSO`, a visualização é bloqueada.
 - A justificativa deve constar em `LOG_ACESSO_FOTOS` e no evento `FOTO_VISUALIZADA`.
+
+## Qualidade mínima da justificativa
+Para `RESTRITO` e `SIGILOSO`, a justificativa só é aceita quando:
+- possui ao menos 10 caracteres;
+- não é termo genérico único (`ok`, `teste`, `-`, `ver`, `foto`, `visualizar`);
+- não é apenas números;
+- contém ao menos uma palavra com mais de 3 caracteres.
+
+Quando inválida, o acesso é bloqueado com a mensagem:
+`Justificativa inválida. Descreva o motivo da visualização.`

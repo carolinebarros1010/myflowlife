@@ -164,13 +164,35 @@ function validarPermissaoFoto_(operador, nivelAcesso) {
   return { permitido: true, motivo: 'PERMITIDO' };
 }
 
+function validarJustificativa_(justificativa) {
+  var original = limparTexto(justificativa);
+  var normalizada = original.replace(/\s+/g, ' ').trim();
+  var validacao = normalizada.toLowerCase();
+  var bloqueadas = ['ok', 'teste', '-', 'ver', 'foto', 'visualizar'];
+  var apenasNumeros = /^\d+$/;
+  var temPalavraMinima = validacao.split(' ').some(function (parte) { return limparTexto(parte).length > 3; });
+
+  var valida = true;
+  if (!normalizada || normalizada.length < 10) valida = false;
+  if (bloqueadas.indexOf(validacao) !== -1) valida = false;
+  if (apenasNumeros.test(validacao)) valida = false;
+  if (!temPalavraMinima) valida = false;
+
+  return {
+    original: original,
+    normalizada: normalizada,
+    valida: valida
+  };
+}
+
 function visualizarFotoDesaparecido_(idFoto, operador, justificativa) {
   if (typeof EXECUCAO_AUTORIZADA !== 'undefined' && !EXECUCAO_AUTORIZADA) {
     throw new Error('Execução bloqueada: EXECUCAO_AUTORIZADA=false.');
   }
   var idFotoLimpo = limparTexto(idFoto);
   var operadorLimpo = limparTexto(operador);
-  var justificativaLimpa = limparTexto(justificativa);
+  var justificativaAnalise = validarJustificativa_(justificativa);
+  var justificativaLimpa = justificativaAnalise.normalizada;
   if (!idFotoLimpo) throw new Error('idFoto obrigatório.');
   if (!operadorLimpo) throw new Error('operador obrigatório.');
 
@@ -191,15 +213,15 @@ function visualizarFotoDesaparecido_(idFoto, operador, justificativa) {
   var permissao = validarPermissaoFoto_(operadorLimpo, idxNivel >= 0 ? alvo[idxNivel] : 'INTERNO');
   var nivelAcesso = limparTexto(idxNivel >= 0 ? alvo[idxNivel] : 'INTERNO').toUpperCase() || 'INTERNO';
   var justificativaObrigatoria = nivelAcesso === 'RESTRITO' || nivelAcesso === 'SIGILOSO';
-  if (justificativaObrigatoria && !justificativaLimpa) {
-    registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', 'BLOQUEADO', 'Justificativa obrigatória ausente.');
-    throw new Error('Acesso bloqueado: justificativa obrigatória para nível ' + nivelAcesso + '.');
+  if (justificativaObrigatoria && !justificativaAnalise.valida) {
+    registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', 'BLOQUEADO', justificativaAnalise.original, false);
+    throw new Error('Justificativa inválida. Descreva o motivo da visualização.');
   }
-  registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', permissao.permitido ? 'PERMITIDO' : 'BLOQUEADO', justificativaLimpa);
+  registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', permissao.permitido ? 'PERMITIDO' : 'BLOQUEADO', justificativaAnalise.original, justificativaAnalise.valida);
   if (!permissao.permitido) throw new Error('Acesso bloqueado: ' + permissao.motivo);
 
   var idCaso = limparTexto(alvo[idxIdCaso]);
-  registrarEventoOcorrencia(planilha, idCaso, 'FOTO_VISUALIZADA', 'Operador=' + operadorLimpo + '; idFoto=' + idFotoLimpo + '; nivelAcesso=' + nivelAcesso + '; justificativa=' + (justificativaLimpa || 'N/A'));
+  registrarEventoOcorrencia(planilha, idCaso, 'FOTO_VISUALIZADA', 'Operador=' + operadorLimpo + '; idFoto=' + idFotoLimpo + '; nivelAcesso=' + nivelAcesso + '; justificativa=' + (justificativaAnalise.original || 'N/A') + '; justificativaValida=' + (justificativaAnalise.valida ? 'TRUE' : 'FALSE'));
   var fileId = limparTexto(alvo[idxFileId]);
   var file = DriveApp.getFileById(fileId);
   file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
@@ -212,8 +234,8 @@ function visualizarFotoDesaparecido_(idFoto, operador, justificativa) {
   };
 }
 
-function registrarLogAcessoFoto_(idFoto, operador, acao, resultado, justificativa) {
+function registrarLogAcessoFoto_(idFoto, operador, acao, resultado, justificativaOriginal, justificativaValidada) {
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
-  var aba = garantirAbaComCabecalho(planilha, 'LOG_ACESSO_FOTOS', ['dataHora', 'idFoto', 'operador', 'acao', 'resultado', 'justificativa']);
-  aba.appendRow([formatarDataHora(new Date()), idFoto, operador, acao, resultado, limparTexto(justificativa)]);
+  var aba = garantirAbaComCabecalho(planilha, 'LOG_ACESSO_FOTOS', ['dataHora', 'idFoto', 'operador', 'acao', 'resultado', 'justificativaOriginal', 'justificativaValidada']);
+  aba.appendRow([formatarDataHora(new Date()), idFoto, operador, acao, resultado, limparTexto(justificativaOriginal), justificativaValidada ? 'TRUE' : 'FALSE']);
 }
