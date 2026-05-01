@@ -176,6 +176,14 @@ function doPost(e) {
       var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa, body.motivoAcessoFoto);
       return criarRespostaJson({ ok: true, message: 'Visualização autorizada', conteudoBase64: respostaFoto.conteudoBase64, mimeType: respostaFoto.mimeType, idCaso: respostaFoto.idCaso, idFoto: respostaFoto.idFoto });
     }
+    if (body.action === 'listarCasos') {
+      var casos = listarCasosComProtecao_(operadorAtual);
+      return criarRespostaJson({ ok: true, action: 'listarCasos', casos: casos });
+    }
+    if (body.action === 'verificarSegurancaDrive') {
+      var resultadoSeguranca = verificarSegurancaDrive_(!!body.corrigirAutomaticamente);
+      return criarRespostaJson({ ok: true, action: 'verificarSegurancaDrive', resultado: resultadoSeguranca });
+    }
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
     Object.keys(ESTRUTURA_PLANILHA).forEach(function (aba) {
       garantirAbaComCabecalho(planilha, aba, ESTRUTURA_PLANILHA[aba]);
@@ -212,6 +220,86 @@ function doPost(e) {
     registrarLogTecnico(planilhaLogs, { etapa: 'erro_post', ok: false, mensagem: mensagemErro, rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
     return criarRespostaJson({ ok: false, message: mensagemErro }, 500);
   }
+}
+
+function listarCasosComProtecao_(operadorAtual) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
+  if (aba.getLastRow() < 2) return [];
+  var cabecalho = garantirColunasDaEstrutura(aba, COLUNAS_CASOS);
+  var dados = aba.getRange(2, 1, aba.getLastRow() - 1, aba.getLastColumn()).getValues();
+  var perfil = normalizarPerfilOperador_(operadorAtual && operadorAtual.perfil);
+  return dados.map(function (linha) {
+    var item = {};
+    for (var i = 0; i < cabecalho.length; i += 1) {
+      item[cabecalho[i]] = normalizarValorPlanilha(linha[i]);
+    }
+    item.cpfDesaparecido = mascararDadosSensivel_(item.cpfDesaparecido, perfil);
+    item.rgDesaparecido = mascararDadosSensivel_(item.rgDesaparecido, perfil);
+    return item;
+  });
+}
+
+function mascararDadosSensivel_(valor, perfil) {
+  var texto = limparTexto(valor);
+  var perfilNormalizado = normalizarPerfilOperador_(perfil);
+  if (!texto) return '';
+  if (perfilNormalizado === 'SUPERVISOR' || perfilNormalizado === 'ADMIN') return texto;
+  if (perfilNormalizado === 'AUDITOR') return '***AUDITORIA_CONTROLADA***';
+  var apenasDigitos = texto.replace(/\D/g, '');
+  if (apenasDigitos.length >= 4) {
+    return '***.***.***-' + apenasDigitos.slice(-2);
+  }
+  return '***' + texto.slice(-2);
+}
+
+function verificarSegurancaDrive_(corrigirAutomaticamente) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var pastaRaiz = obterOuCriarPasta_('Cabine Verde');
+  var pastaFotos = obterOuCriarSubpasta_(pastaRaiz, 'Fotos');
+  var itensAnalisados = 0;
+  var arquivosExpostos = 0;
+  var arquivosCorrigidos = 0;
+  var filas = [pastaFotos];
+  while (filas.length) {
+    var atual = filas.shift();
+    var arquivos = atual.getFiles();
+    while (arquivos.hasNext()) {
+      var arquivo = arquivos.next();
+      itensAnalisados += 1;
+      var acesso = arquivo.getSharingAccess();
+      if (acesso !== DriveApp.Access.PRIVATE) {
+        arquivosExpostos += 1;
+        if (corrigirAutomaticamente) {
+          arquivo.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
+          arquivosCorrigidos += 1;
+        }
+        registrarEventoOcorrencia(planilha, '', 'ARQUIVO_EXPOSTO', 'fileId=' + arquivo.getId() + '; nome=' + arquivo.getName() + '; acesso=' + acesso + '; corrigido=' + (corrigirAutomaticamente ? 'TRUE' : 'FALSE'));
+      }
+    }
+    var subpastas = atual.getFolders();
+    while (subpastas.hasNext()) filas.push(subpastas.next());
+  }
+  return { itensAnalisados: itensAnalisados, arquivosExpostos: arquivosExpostos, arquivosCorrigidos: arquivosCorrigidos, correcaoAutomatica: !!corrigirAutomaticamente };
+}
+
+function rotinaDiariaSeguranca_() {
+  var resultado = verificarSegurancaDrive_(true);
+  gerarRelatorioSeguranca_(resultado);
+  return resultado;
+}
+
+function gerarRelatorioSeguranca_(resultado) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var colunas = ['dataHora', 'itensAnalisados', 'arquivosExpostos', 'arquivosCorrigidos', 'correcaoAutomatica'];
+  var aba = garantirAbaComCabecalho(planilha, 'RELATORIO_SEGURANCA', colunas);
+  aba.appendRow([
+    formatarDataHora(new Date()),
+    normalizarValorPlanilha(resultado && resultado.itensAnalisados),
+    normalizarValorPlanilha(resultado && resultado.arquivosExpostos),
+    normalizarValorPlanilha(resultado && resultado.arquivosCorrigidos),
+    resultado && resultado.correcaoAutomatica ? 'TRUE' : 'FALSE'
+  ]);
 }
 
 function persistirRegistro(planilha, registro) {

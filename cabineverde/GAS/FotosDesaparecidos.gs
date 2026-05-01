@@ -205,6 +205,7 @@ function validarFotoDesaparecido_(idFoto, operador, status) {
 function verificarUsoExcessivoFoto_(idFoto, operador) {
   var janelaMinutos = 10;
   var limiteAcessos = 5;
+  var bloqueioMinutos = 15;
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   var aba = garantirAbaComCabecalho(planilha, 'LOG_ACESSO_FOTOS', ['dataHora', 'idFoto', 'operador', 'perfilOperador', 'acao', 'resultado', 'motivoAcessoFoto', 'justificativa', 'justificativaValidada']);
   var ultimaLinha = aba.getLastRow();
@@ -215,6 +216,18 @@ function verificarUsoExcessivoFoto_(idFoto, operador) {
   var dados = aba.getRange(2, 1, ultimaLinha - 1, aba.getLastColumn()).getValues();
   var idFotoLimpo = limparTexto(idFoto);
   var operadorLimpo = limparTexto(operador).toLowerCase();
+  var bloqueio = consultarBloqueioFoto_(operadorLimpo, idFotoLimpo);
+  if (bloqueio.bloqueado) {
+    return {
+      excedeu: true,
+      bloqueado: true,
+      ate: bloqueio.ate,
+      motivo: 'BLOQUEIO_TEMPORARIO_FOTO',
+      limiteAcessos: limiteAcessos,
+      janelaMinutos: janelaMinutos,
+      bloqueioMinutos: bloqueioMinutos
+    };
+  }
   var total = 0;
 
   for (var i = 0; i < dados.length; i += 1) {
@@ -229,10 +242,43 @@ function verificarUsoExcessivoFoto_(idFoto, operador) {
     var foto = localizarFotoPorId_(idFotoLimpo);
     var idCaso = foto ? limparTexto(foto.valores[foto.cabecalho.indexOf('idCaso')]) : '';
     registrarEventoOcorrencia(planilha, idCaso, 'USO_EXCESSIVO_FOTO', 'idFoto=' + idFotoLimpo + '; operador=' + operadorLimpo + '; acessos=' + total + '; limite=' + limiteAcessos + '; janelaMinutos=' + janelaMinutos);
-    return { excedeu: true, acessosNoPeriodo: total, limiteAcessos: limiteAcessos, janelaMinutos: janelaMinutos, bloqueioTemporarioSugerido: true };
+    registrarBloqueioTemporarioFoto_(idFotoLimpo, operadorLimpo, bloqueioMinutos);
+    return { excedeu: true, bloqueado: true, acessosNoPeriodo: total, limiteAcessos: limiteAcessos, janelaMinutos: janelaMinutos, bloqueioMinutos: bloqueioMinutos };
   }
 
   return { excedeu: false, acessosNoPeriodo: total, limiteAcessos: limiteAcessos, janelaMinutos: janelaMinutos };
+}
+
+function registrarBloqueioTemporarioFoto_(idFoto, operador, bloqueioMinutos) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = garantirAbaComCabecalho(planilha, 'BLOQUEIOS_FOTO', ['dataHoraInicio', 'dataHoraFim', 'idFoto', 'operador', 'ativo', 'motivo']);
+  var inicio = new Date();
+  var fim = new Date(inicio.getTime() + (bloqueioMinutos * 60 * 1000));
+  aba.appendRow([formatarDataHora(inicio), formatarDataHora(fim), idFoto, operador, 'TRUE', 'BLOQUEIO_TEMPORARIO_FOTO']);
+  var foto = localizarFotoPorId_(idFoto);
+  var idCaso = foto ? limparTexto(foto.valores[foto.cabecalho.indexOf('idCaso')]) : '';
+  registrarEventoOcorrencia(planilha, idCaso, 'BLOQUEIO_TEMPORARIO_FOTO', 'idFoto=' + idFoto + '; operador=' + operador + '; bloqueioMinutos=' + bloqueioMinutos + '; ate=' + formatarDataHora(fim));
+}
+
+function consultarBloqueioFoto_(operador, idFoto) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = planilha.getSheetByName('BLOQUEIOS_FOTO');
+  if (!aba || aba.getLastRow() < 2) return { bloqueado: false };
+  var dados = aba.getRange(2, 1, aba.getLastRow() - 1, aba.getLastColumn()).getValues();
+  var agora = new Date();
+  var operadorLimpo = limparTexto(operador).toLowerCase();
+  var idFotoLimpo = limparTexto(idFoto);
+  for (var i = dados.length - 1; i >= 0; i -= 1) {
+    var fim = new Date(dados[i][1]);
+    var idFotoLinha = limparTexto(dados[i][2]);
+    var operadorLinha = limparTexto(dados[i][3]).toLowerCase();
+    var ativo = limparTexto(dados[i][4]).toUpperCase();
+    if (idFotoLinha !== idFotoLimpo || operadorLinha !== operadorLimpo || ativo !== 'TRUE') continue;
+    if (fim.getTime() >= agora.getTime()) {
+      return { bloqueado: true, ate: formatarDataHora(fim) };
+    }
+  }
+  return { bloqueado: false };
 }
 
 function registrarLogMigracaoSeNecessario_(etapa, idCaso, mensagem) {
@@ -343,6 +389,11 @@ function visualizarFotoDesaparecido_(idFoto, operador, justificativa, motivoAces
   if (!permissao.permitido) {
     registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'SEM_PERMISSAO_FOTO', 'Visualização bloqueada para foto=' + idFotoLimpo + '; motivo=' + permissao.motivo, operadorLimpo);
     throw new Error('Acesso bloqueado: ' + permissao.motivo);
+  }
+  var riscoUso = verificarUsoExcessivoFoto_(idFotoLimpo, operadorLimpo);
+  if (riscoUso.bloqueado) {
+    registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', 'BLOQUEADO', motivoAnalise.normalizado, justificativaAnalise.original, justificativaAnalise.valida, perfilOperador);
+    throw new Error('Visualização temporariamente bloqueada até ' + riscoUso.ate + '.');
   }
 
   var idCaso = limparTexto(alvo[idxIdCaso]);
