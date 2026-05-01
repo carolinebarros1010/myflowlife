@@ -4,7 +4,8 @@ var ABAS_OBRIGATORIAS_CABINE_VERDE = [
   'EVENTOS_OCORRENCIA',
   'INDICADORES_OPERACIONAIS',
   'LOG_MIGRACAO',
-  'LEGADO_OBSERVACOES_BRUTAS'
+  'LEGADO_OBSERVACOES_BRUTAS',
+  'VALIDACAO_MIGRACAO'
 ];
 
 var CABECALHO_LOG_MIGRACAO = [
@@ -28,7 +29,38 @@ var CABECALHO_LEGADO_OBSERVACOES_BRUTAS = [
   'operador'
 ];
 
+var CABECALHO_VALIDACAO_MIGRACAO = [
+  'dataHoraValidacao',
+  'idCaso',
+  'talaoPMESP',
+  'campo',
+  'problema',
+  'severidade',
+  'statusValidacao'
+];
+
 var COLUNAS_CASOS_OBRIGATORIAS_MIGRACAO = COLUNAS_CASOS.concat(['statusMigracao']);
+
+
+var COLUNAS_CASOS_TRATADOS = [
+  'idCaso',
+  'talaoPMESP',
+  'nomeCompletoDesaparecido',
+  'sexoGenero',
+  'idade',
+  'faixaEtaria',
+  'dataHoraUltimaVisualizacao',
+  'localUltimaVisualizacao',
+  'roupaUltimaVisualizacao',
+  'meioTransporte',
+  'classificacaoRisco',
+  'prioridade',
+  'statusCaso',
+  'observacoesOperacionais',
+  'statusMigracao',
+  'statusUso',
+  'dataHoraConsolidacaoUso'
+];
 
 var MAPEAMENTO_COLUNAS_LEGADO = {
   idCaso: ['idCaso', 'id', 'codigoCaso'],
@@ -50,6 +82,8 @@ function onOpen() {
     .addItem('5. Rodar rotina completa segura', 'menuRodarRotinaCompletaSegura_')
     .addItem('6. Restaurar último backup', 'menuRestaurarBackupMaisRecente_')
     .addItem('7. Auditar qualidade dos dados', 'menuAuditarQualidadeDados_')
+    .addItem('8. Validar CASOS_TRATADOS', 'menuValidarCasosTratados_')
+    .addItem('9. Consolidar status de uso', 'menuConsolidarStatusUsoCasosTratados_')
     .addToUi();
 }
 
@@ -98,6 +132,14 @@ function menuRestaurarBackupMaisRecente_() {
 
 function menuAuditarQualidadeDados_() {
   return executarComContextoAutorizado_('MENU', function () { return auditarQualidadeDados_(); });
+}
+
+function menuValidarCasosTratados_() {
+  return executarComContextoAutorizado_('MENU', function () { return validarCasosTratados_(); });
+}
+
+function menuConsolidarStatusUsoCasosTratados_() {
+  return executarComContextoAutorizado_('MENU', function () { return consolidarStatusUsoCasosTratados_(); });
 }
 
 function rodarRotinaCompletaSegura_() {
@@ -362,7 +404,8 @@ function obterEstruturaAbas_() {
     EVENTOS_OCORRENCIA: COLUNAS_EVENTOS_OCORRENCIA,
     INDICADORES_OPERACIONAIS: COLUNAS_INDICADORES_OPERACIONAIS,
     LOG_MIGRACAO: CABECALHO_LOG_MIGRACAO,
-    LEGADO_OBSERVACOES_BRUTAS: CABECALHO_LEGADO_OBSERVACOES_BRUTAS
+    LEGADO_OBSERVACOES_BRUTAS: CABECALHO_LEGADO_OBSERVACOES_BRUTAS,
+    VALIDACAO_MIGRACAO: CABECALHO_VALIDACAO_MIGRACAO
   };
 }
 
@@ -559,4 +602,292 @@ function restaurarBackupMaisRecente_() {
   });
 
   registrarLogMigracao_('restaurarBackupMaisRecente_', 'EXECUTADO', '', 'Rollback concluído com backup mais recente por aba.', 'EXECUTADO', true);
+}
+
+
+
+function migrarLegadoParaCasosTratados_() {
+  validarContextoExecucaoAutorizada_('migrarLegadoParaCasosTratados_');
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaOrigem = planilha.getSheetByName('DESAPARECIDOS');
+  if (!abaOrigem || abaOrigem.getLastRow() < 2) {
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Aba DESAPARECIDOS ausente ou sem dados para saneamento.');
+    return;
+  }
+
+  var abaDestino = planilha.getSheetByName('CASOS_TRATADOS') || planilha.insertSheet('CASOS_TRATADOS');
+  garantirCabecalhoSemDuplicidade_(abaDestino, COLUNAS_CASOS_TRATADOS, 'CASOS_TRATADOS', false);
+  var cabOrigem = obterCabecalho_(abaOrigem);
+  var dadosOrigem = abaOrigem.getRange(2, 1, abaOrigem.getLastRow() - 1, abaOrigem.getLastColumn()).getValues();
+
+  var indicesDestino = {};
+  COLUNAS_CASOS_TRATADOS.forEach(function (coluna, indice) {
+    indicesDestino[coluna] = indice;
+  });
+
+  var idsExistentes = {};
+  if (abaDestino.getLastRow() >= 2) {
+    var dadosDestino = abaDestino.getRange(2, 1, abaDestino.getLastRow() - 1, COLUNAS_CASOS_TRATADOS.length).getValues();
+    dadosDestino.forEach(function (linha) {
+      var id = limparTexto(linha[indicesDestino.idCaso]);
+      if (id) idsExistentes[id] = true;
+    });
+  }
+
+  var novasLinhas = [];
+  dadosOrigem.forEach(function (linha, idx) {
+    var linhaPlanilha = idx + 2;
+    var registro = linhaParaObjeto_(cabOrigem, linha);
+    var idCaso = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['idCaso', 'id', 'codigoCaso']) || ('LEGADO-DESAP-' + linhaPlanilha));
+
+    if (idsExistentes[idCaso]) {
+      registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'IGNORADO', idCaso, 'Caso já migrado anteriormente; sem sobrescrita.');
+      return;
+    }
+
+    var observacaoBruta = limparTexto(obterPrimeiroValorDisponivel_(registro, ['observacoesOperacionais', 'observacoes', 'observacao', 'obsOperacional']));
+    var resumoObservacao = gerarResumoArvoreDecisaoLegado_(observacaoBruta);
+    extrairArvoreObservacoesLegadas_(idCaso, linhaPlanilha, observacaoBruta, false);
+
+    var talaoPMESP = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['talaoPMESP', 'talaoBopm', 'talaoBOPM', 'talão', 'talao', 'numeroTalao']));
+    var statusMigracao = talaoPMESP ? 'MIGRADO' : 'INCOMPLETO';
+
+    var sexoGenero = normalizarSexoGeneroMigracao_(obterPrimeiroValorDisponivel_(registro, ['sexoGenero', 'sexo', 'genero']));
+    var meioTransporte = normalizarMeioTransporteMigracao_(obterPrimeiroValorDisponivel_(registro, ['meioTransporte', 'transporte']));
+
+    var linhaDestino = new Array(COLUNAS_CASOS_TRATADOS.length).fill('');
+    linhaDestino[indicesDestino.idCaso] = idCaso;
+    linhaDestino[indicesDestino.talaoPMESP] = talaoPMESP;
+    linhaDestino[indicesDestino.nomeCompletoDesaparecido] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['nomeCompletoDesaparecido', 'nome', 'nomeDesaparecido']));
+    linhaDestino[indicesDestino.sexoGenero] = sexoGenero;
+    linhaDestino[indicesDestino.idade] = normalizarInteiroMigracao_(obterPrimeiroValorDisponivel_(registro, ['idade']));
+    linhaDestino[indicesDestino.faixaEtaria] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['faixaEtaria']));
+    linhaDestino[indicesDestino.dataHoraUltimaVisualizacao] = normalizarBooleanoOuTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['dataHoraUltimaVisualizacao', 'dataUltimaVisualizacao']));
+    linhaDestino[indicesDestino.localUltimaVisualizacao] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['localUltimaVisualizacao']));
+    linhaDestino[indicesDestino.roupaUltimaVisualizacao] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['roupaUltimaVisualizacao']));
+    linhaDestino[indicesDestino.meioTransporte] = meioTransporte;
+    linhaDestino[indicesDestino.classificacaoRisco] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['classificacaoRisco']));
+    linhaDestino[indicesDestino.prioridade] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['prioridade']));
+    linhaDestino[indicesDestino.statusCaso] = normalizarTextoMigracao_(obterPrimeiroValorDisponivel_(registro, ['statusCaso', 'status'])) || 'LEGADO MIGRADO';
+    linhaDestino[indicesDestino.observacoesOperacionais] = resumoObservacao;
+    linhaDestino[indicesDestino.statusMigracao] = statusMigracao;
+
+    novasLinhas.push(linhaDestino);
+    idsExistentes[idCaso] = true;
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', statusMigracao, idCaso, statusMigracao === 'INCOMPLETO' ? 'Campo crítico talaoPMESP ausente.' : 'Caso migrado para CASOS_TRATADOS.');
+  });
+
+  if (!novasLinhas.length) {
+    registrarLogMigracao_('migrarLegadoParaCasosTratados_', 'ALERTA', '', 'Nenhum novo caso elegível para migração.');
+    return;
+  }
+
+  abaDestino.getRange(abaDestino.getLastRow() + 1, 1, novasLinhas.length, COLUNAS_CASOS_TRATADOS.length).setValues(novasLinhas);
+}
+
+function normalizarTextoMigracao_(valor) {
+  var texto = limparTexto(valor);
+  if (!texto) return '';
+  return texto.replace(/\s+/g, ' ').toUpperCase();
+}
+
+function normalizarSexoGeneroMigracao_(valor) {
+  var texto = normalizarTextoMigracao_(valor);
+  if (texto === 'MASCULIMPO') return 'MASCULINO';
+  return texto;
+}
+
+function normalizarMeioTransporteMigracao_(valor) {
+  var texto = normalizarTextoMigracao_(valor);
+  if (texto === 'N/D') return 'NAO INFORMADO';
+  return texto;
+}
+
+function normalizarBooleanoOuTextoMigracao_(valor) {
+  if (typeof valor === 'boolean') return valor;
+  var texto = limparTexto(valor).toUpperCase();
+  if (texto === 'TRUE') return true;
+  if (texto === 'FALSE') return false;
+  return normalizarTextoMigracao_(valor);
+}
+
+function normalizarInteiroMigracao_(valor) {
+  var numero = Number(valor);
+  if (!isNaN(numero) && numero >= 0) return Math.trunc(numero);
+  return normalizarTextoMigracao_(valor);
+}
+
+function gerarResumoArvoreDecisaoLegado_(texto) {
+  var bruto = limparTexto(texto);
+  if (!bruto) return '';
+  var normalizado = bruto.replace(/\s+/g, ' ').toUpperCase();
+  if (normalizado.indexOf('SUSPEITA DE CRIME') !== -1) {
+    return 'ÁRVORE DE DECISÃO APLICADA - SUSPEITA DE CRIME';
+  }
+  if (normalizado.indexOf('ÁRVORE') !== -1 || normalizado.indexOf('ARVORE') !== -1) {
+    return 'ÁRVORE DE DECISÃO APLICADA - REVISAR DETALHES NO LEGADO';
+  }
+  return gerarResumoOperacionalLegado_(bruto);
+}
+
+function validarCasosTratados_() {
+  validarContextoExecucaoAutorizada_('validarCasosTratados_');
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaCasosTratados = planilha.getSheetByName('CASOS_TRATADOS');
+  var abaValidacao = planilha.getSheetByName('VALIDACAO_MIGRACAO') || planilha.insertSheet('VALIDACAO_MIGRACAO');
+  garantirCabecalhoSemDuplicidade_(abaValidacao, CABECALHO_VALIDACAO_MIGRACAO, 'VALIDACAO_MIGRACAO', false);
+
+  if (!abaCasosTratados || abaCasosTratados.getLastRow() < 2) {
+    registrarLogMigracao_('validarCasosTratados_', 'ALERTA', '', 'Aba CASOS_TRATADOS ausente ou sem dados para validação.');
+    registrarLogMigracao_('VALIDACAO_MIGRACAO_EXECUTADA', 'ALERTA', '', 'Validação executada sem dados elegíveis.');
+    return;
+  }
+
+  var cabecalho = obterCabecalho_(abaCasosTratados);
+  var dados = abaCasosTratados.getRange(2, 1, abaCasosTratados.getLastRow() - 1, abaCasosTratados.getLastColumn()).getValues();
+  var registrosValidacao = [];
+  var dataHora = formatarDataHora(new Date());
+
+  dados.forEach(function (linha) {
+    var registro = linhaParaObjeto_(cabecalho, linha);
+    var idCaso = limparTexto(registro.idCaso);
+    var talaoPMESP = limparTexto(registro.talaoPMESP);
+
+    registrarProblemaValidacao_(registrosValidacao, dataHora, idCaso, talaoPMESP, 'nomeCompletoDesaparecido', limparTexto(registro.nomeCompletoDesaparecido) ? '' : 'nomeCompletoDesaparecido vazio', 'CRITICA');
+    registrarProblemaValidacao_(registrosValidacao, dataHora, idCaso, talaoPMESP, 'idade', idadeValidaMigracao_(registro.idade) ? '' : 'idade inválida', 'ALTA');
+    registrarProblemaValidacao_(registrosValidacao, dataHora, idCaso, talaoPMESP, 'dataHoraUltimaVisualizacao', dataHoraValidaMigracao_(registro.dataHoraUltimaVisualizacao) ? '' : 'dataHoraUltimaVisualizacao inválida', 'ALTA');
+    registrarProblemaValidacao_(registrosValidacao, dataHora, idCaso, talaoPMESP, 'localUltimaVisualizacao', limparTexto(registro.localUltimaVisualizacao) ? '' : 'localUltimaVisualizacao vazio', 'ALTA');
+    registrarProblemaValidacao_(registrosValidacao, dataHora, idCaso, talaoPMESP, 'classificacaoRisco', limparTexto(registro.classificacaoRisco) ? '' : 'classificacaoRisco vazio', 'CRITICA');
+    registrarProblemaValidacao_(registrosValidacao, dataHora, idCaso, talaoPMESP, 'prioridade', limparTexto(registro.prioridade) ? '' : 'prioridade vazia', 'CRITICA');
+    registrarProblemaValidacao_(registrosValidacao, dataHora, idCaso, talaoPMESP, 'observacoesOperacionais', observacaoCurtaMigracao_(registro.observacoesOperacionais) ? 'observacoes muito curtas' : '', 'MEDIA');
+  });
+
+  if (registrosValidacao.length) {
+    abaValidacao.getRange(abaValidacao.getLastRow() + 1, 1, registrosValidacao.length, CABECALHO_VALIDACAO_MIGRACAO.length).setValues(registrosValidacao);
+  }
+
+  registrarLogMigracao_('VALIDACAO_MIGRACAO_EXECUTADA', 'EXECUTADO', '', 'Validação concluída. Problemas identificados: ' + registrosValidacao.length + '.');
+}
+
+function registrarProblemaValidacao_(acumulador, dataHora, idCaso, talaoPMESP, campo, problema, severidade) {
+  if (!problema) return;
+  acumulador.push([
+    dataHora,
+    idCaso || '',
+    talaoPMESP || '',
+    campo,
+    problema,
+    severidade,
+    statusValidacaoPorSeveridade_(severidade)
+  ]);
+}
+
+function statusValidacaoPorSeveridade_(severidade) {
+  var nivel = limparTexto(severidade).toUpperCase();
+  if (nivel === 'CRITICA') return 'REPROVADO_IMPEDE_USO';
+  if (nivel === 'ALTA') return 'REPROVADO_ANALISE_COMPROMETIDA';
+  if (nivel === 'MEDIA') return 'APROVADO_COM_RESTRICAO';
+  return 'APROVADO';
+}
+
+function idadeValidaMigracao_(idade) {
+  var numero = Number(idade);
+  return !isNaN(numero) && numero >= 0 && numero <= 130;
+}
+
+function dataHoraValidaMigracao_(valor) {
+  if (valor instanceof Date && !isNaN(valor.getTime())) return true;
+  var texto = limparTexto(valor);
+  if (!texto) return false;
+  var data = new Date(texto);
+  return !isNaN(data.getTime());
+}
+
+function observacaoCurtaMigracao_(valor) {
+  var texto = limparTexto(valor).replace(/\s+/g, ' ');
+  return texto.length > 0 && texto.length < 15;
+}
+
+function consolidarStatusUsoCasosTratados_() {
+  validarContextoExecucaoAutorizada_('consolidarStatusUsoCasosTratados_');
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaCasosTratados = planilha.getSheetByName('CASOS_TRATADOS');
+  var abaValidacao = planilha.getSheetByName('VALIDACAO_MIGRACAO');
+
+  if (!abaCasosTratados || abaCasosTratados.getLastRow() < 2) {
+    registrarLogMigracao_('consolidarStatusUsoCasosTratados_', 'ALERTA', '', 'Aba CASOS_TRATADOS ausente ou sem dados para consolidação.');
+    return;
+  }
+
+  garantirCabecalhoSemDuplicidade_(abaCasosTratados, COLUNAS_CASOS_TRATADOS, 'CASOS_TRATADOS', false);
+  var cabCasos = obterCabecalho_(abaCasosTratados);
+  var idxIdCaso = cabCasos.indexOf('idCaso');
+  var idxStatusUso = cabCasos.indexOf('statusUso');
+  var idxDataHoraConsolidacao = cabCasos.indexOf('dataHoraConsolidacaoUso');
+  var idxTalao = cabCasos.indexOf('talaoPMESP');
+  if (idxIdCaso === -1 || idxStatusUso === -1 || idxDataHoraConsolidacao === -1) {
+    registrarLogMigracao_('consolidarStatusUsoCasosTratados_', 'ERRO', '', 'Colunas obrigatórias ausentes em CASOS_TRATADOS para consolidação.');
+    return;
+  }
+
+  var severidadePorCaso = {};
+  if (abaValidacao && abaValidacao.getLastRow() >= 2) {
+    var cabValidacao = obterCabecalho_(abaValidacao);
+    var idxValIdCaso = cabValidacao.indexOf('idCaso');
+    var idxValSeveridade = cabValidacao.indexOf('severidade');
+    if (idxValIdCaso !== -1 && idxValSeveridade !== -1) {
+      var dadosValidacao = abaValidacao.getRange(2, 1, abaValidacao.getLastRow() - 1, abaValidacao.getLastColumn()).getValues();
+      dadosValidacao.forEach(function (linha) {
+        var idCaso = limparTexto(linha[idxValIdCaso]);
+        var severidade = limparTexto(linha[idxValSeveridade]).toUpperCase();
+        if (!idCaso || !severidade) return;
+        severidadePorCaso[idCaso] = severidadeMaisGrave_(severidadePorCaso[idCaso], severidade);
+      });
+    }
+  }
+
+  var dadosCasos = abaCasosTratados.getRange(2, 1, abaCasosTratados.getLastRow() - 1, abaCasosTratados.getLastColumn()).getValues();
+  var dataHoraAtual = formatarDataHora(new Date());
+  var totalApto = 0;
+  var totalRestricao = 0;
+  var totalNaoApto = 0;
+
+  dadosCasos.forEach(function (linha, idx) {
+    var idCaso = limparTexto(linha[idxIdCaso]);
+    if (!idCaso) return;
+
+    var severidade = severidadePorCaso[idCaso] || '';
+    var statusUso = statusUsoPorSeveridade_(severidade);
+    if (statusUso === 'NAO_APTO') totalNaoApto += 1;
+    else if (statusUso === 'APTO_COM_RESTRICAO') totalRestricao += 1;
+    else totalApto += 1;
+
+    var linhaPlanilha = idx + 2;
+    abaCasosTratados.getRange(linhaPlanilha, idxStatusUso + 1).setValue(statusUso);
+    abaCasosTratados.getRange(linhaPlanilha, idxDataHoraConsolidacao + 1).setValue(dataHoraAtual);
+  });
+
+  registrarLogMigracao_(
+    'STATUS_USO_CONSOLIDADO',
+    'EXECUTADO',
+    '',
+    'Consolidação concluída. totalApto=' + totalApto + '; totalRestricao=' + totalRestricao + '; totalNaoApto=' + totalNaoApto + '.'
+  );
+}
+
+function severidadeMaisGrave_(atual, candidata) {
+  var ordem = { CRITICA: 4, ALTA: 3, MEDIA: 2, BAIXA: 1 };
+  var sevAtual = limparTexto(atual).toUpperCase();
+  var sevCandidata = limparTexto(candidata).toUpperCase();
+  if (!ordem[sevAtual]) return sevCandidata;
+  if (!ordem[sevCandidata]) return sevAtual;
+  return ordem[sevCandidata] > ordem[sevAtual] ? sevCandidata : sevAtual;
+}
+
+function statusUsoPorSeveridade_(severidade) {
+  var sev = limparTexto(severidade).toUpperCase();
+  if (sev === 'CRITICA') return 'NAO_APTO';
+  if (sev === 'ALTA') return 'APTO_COM_RESTRICAO';
+  if (sev === 'MEDIA' || sev === 'BAIXA') return 'APTO_COM_OBSERVACAO';
+  return 'APTO_PARA_USO';
 }
