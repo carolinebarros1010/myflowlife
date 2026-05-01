@@ -98,3 +98,30 @@ A árvore de decisão **não foi removida**. Ela segue no frontend e agora é pe
 - Observação operacional automática:
   - `Ocorrências com uso de imagem: [idCasos]`
 - Cada emissão registra evento `RELATORIO_OPERACIONAL_IMAGEM` para trilha de auditoria.
+
+## Auditoria de qualidade dos dados (maio/2026)
+
+- Nova rotina GAS: `auditarQualidadeDados_()`.
+- Execução manual via menu: `Cabine Verde → Auditar qualidade dos dados`.
+- A rotina percorre a aba `CASOS`, não altera dados automaticamente e apenas aponta inconsistências.
+- A rotina registra evidências na aba `QUALIDADE_DADOS` com as colunas:
+  - `dataHoraAuditoria`
+  - `idCaso`
+  - `talaoPMESP`
+  - `campo`
+  - `problema`
+  - `severidade` (`CRITICA`, `ALTA`, `MEDIA`, `BAIXA`)
+  - `acaoRecomendada`
+  - `statusTratamento`
+- Itens auditados automaticamente:
+  1. ausência de `talaoPMESP`;
+  2. ausência de `nomeCompletoDesaparecido`;
+  3. ausência simultânea de `idade` e `faixaEtaria`;
+  4. ausência de `dataHoraUltimaVisualizacao`;
+  5. ausência de `localUltimaVisualizacao`;
+  6. campos físicos com valor `NAO INFORMADO`;
+  7. `fotoDisponivel = FALSE`;
+  8. `classificacaoRisco` vazia;
+  9. `prioridade` vazia;
+  10. falta de decisão operacional registrada.
+- Ao final, a rotina grava evento `AUDITORIA_QUALIDADE_DADOS` na aba `EVENTOS_OCORRENCIA` com resumo da execução.
