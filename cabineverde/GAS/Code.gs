@@ -128,7 +128,7 @@ function doPost(e) {
       throw new Error("Ação não permitida para o perfil do operador.");
     }
     if (body.action === 'visualizarFotoDesaparecido') {
-      var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa);
+      var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa, body.motivoAcessoFoto);
       return criarRespostaJson({ ok: true, message: 'Visualização autorizada', conteudoBase64: respostaFoto.conteudoBase64, mimeType: respostaFoto.mimeType, idCaso: respostaFoto.idCaso, idFoto: respostaFoto.idFoto });
     }
     var planilha = SpreadsheetApp.getActiveSpreadsheet();

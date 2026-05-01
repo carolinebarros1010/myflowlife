@@ -29,12 +29,35 @@
 - Cada visualização permitida gera evento `FOTO_VISUALIZADA` em `EVENTOS_OCORRENCIA`.
 - Cada tentativa (permitida ou bloqueada) gera trilha em `LOG_ACESSO_FOTOS`.
 
-## Justificativa obrigatória por sensibilidade
-- `INTERNO`: visualização permitida com log simples.
-- `RESTRITO`: exige operador autorizado **e justificativa obrigatória**.
-- `SIGILOSO`: exige supervisor **e justificativa obrigatória**.
-- Se a justificativa estiver vazia para `RESTRITO`/`SIGILOSO`, a visualização é bloqueada.
-- A justificativa deve constar em `LOG_ACESSO_FOTOS` e no evento `FOTO_VISUALIZADA`.
+## Motivo padronizado + justificativa por sensibilidade
+- `INTERNO`: visualização permitida; `motivoAcessoFoto` é opcional (recomendado) e registrado quando informado.
+- `RESTRITO`: exige operador autorizado **+ motivo padronizado + justificativa obrigatória**.
+- `SIGILOSO`: exige supervisor **+ motivo padronizado + justificativa obrigatória**.
+- Se o `motivoAcessoFoto` for inválido, o acesso é bloqueado com a mensagem:
+  `Motivo de acesso inválido. Selecione uma opção válida.`
+- Se a justificativa estiver vazia/inválida para `RESTRITO`/`SIGILOSO`, a visualização é bloqueada.
+- Motivo, justificativa e perfil do operador devem constar em `LOG_ACESSO_FOTOS` e no evento `FOTO_VISUALIZADA`.
+
+### Whitelist de `motivoAcessoFoto`
+- `ATENDIMENTO_EM_ANDAMENTO`
+- `VALIDACAO_IDENTIDADE`
+- `SOLICITACAO_SUPERVISOR`
+- `APOIO_EQUIPE_CAMPO`
+- `AUDITORIA`
+- `OUTRO`
+
+### Frontend de visualização (referência)
+```html
+<select id="motivoAcessoFoto">
+  <option value="">Selecione...</option>
+  <option value="ATENDIMENTO_EM_ANDAMENTO">Atendimento em andamento</option>
+  <option value="VALIDACAO_IDENTIDADE">Validação de identidade</option>
+  <option value="SOLICITACAO_SUPERVISOR">Solicitação do supervisor</option>
+  <option value="APOIO_EQUIPE_CAMPO">Apoio à equipe de campo</option>
+  <option value="AUDITORIA">Auditoria</option>
+  <option value="OUTRO">Outro</option>
+</select>
+```
 
 ## Qualidade mínima da justificativa
 Para `RESTRITO` e `SIGILOSO`, a justificativa só é aceita quando:
