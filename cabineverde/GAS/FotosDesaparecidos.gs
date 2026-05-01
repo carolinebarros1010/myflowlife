@@ -1,3 +1,21 @@
+
+function obterOperadorPorEmail_(email) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaOperadores = garantirAbaComCabecalho(planilha, 'OPERADORES', ESTRUTURA_PLANILHA.OPERADORES);
+  var cabecalho = garantirColunasDaEstrutura(abaOperadores, ESTRUTURA_PLANILHA.OPERADORES).map(limparTexto);
+  var idxEmail = cabecalho.indexOf('email');
+  var idxPerfil = cabecalho.indexOf('perfil');
+  if (idxEmail < 0 || idxPerfil < 0) return null;
+  var alvo = limparTexto(email).toLowerCase();
+  var dados = abaOperadores.getRange(2, 1, Math.max(abaOperadores.getLastRow() - 1, 0), abaOperadores.getLastColumn()).getValues();
+  for (var i = 0; i < dados.length; i += 1) {
+    if (limparTexto(dados[i][idxEmail]).toLowerCase() === alvo) {
+      return { email: alvo, perfil: limparTexto(dados[i][idxPerfil]) };
+    }
+  }
+  return null;
+}
+
 var COLUNAS_FOTOS_DESAPARECIDOS = [
   'idFoto','idCaso','talaoPMESP','nomeDesaparecido','dataHoraUpload','operadorResponsavel','origemFoto','tipoFoto','nomeArquivo','linkArquivo','fileIdDrive','fotoPrincipal','autorizacaoUsoImagem','restricaoDivulgacao','statusValidacao','nivelAcesso','observacoesFoto'
 ];
@@ -156,12 +174,17 @@ function registrarLogMigracaoSeNecessario_(etapa, idCaso, mensagem) {
 }
 
 function validarPermissaoFoto_(operador, nivelAcesso) {
-  var operadorLimpo = limparTexto(operador).toLowerCase();
-  if (!operadorLimpo) return { permitido: false, motivo: 'Operador ausente.' };
+  var emailOperador = limparTexto(operador).toLowerCase();
+  if (!emailOperador) return { permitido: false, motivo: 'Operador ausente.' };
+  var cadastro = obterOperadorPorEmail_(emailOperador);
+  if (!cadastro) return { permitido: false, motivo: 'Operador não cadastrado na aba OPERADORES.' };
+  var perfilCheck = validarPerfilOperador_(cadastro, PERFIS_OPERADOR_VALIDOS);
+  if (!perfilCheck.permitido) return { permitido: false, motivo: perfilCheck.motivo, perfil: perfilCheck.perfil };
+
   var nivel = limparTexto(nivelAcesso || 'INTERNO').toUpperCase();
-  if (nivel === 'SIGILOSO' && operadorLimpo.indexOf('supervisor') === -1) return { permitido: false, motivo: 'Acesso SIGILOSO exige supervisor.' };
-  if (nivel === 'RESTRITO' && operadorLimpo.indexOf('autorizado') === -1 && operadorLimpo.indexOf('supervisor') === -1) return { permitido: false, motivo: 'Acesso RESTRITO exige operador autorizado.' };
-  return { permitido: true, motivo: 'PERMITIDO' };
+  if (nivel === 'INTERNO') return validarPermissaoAcao_(cadastro, 'VISUALIZAR_FOTO_INTERNO');
+  if (nivel === 'RESTRITO' || nivel === 'SIGILOSO') return validarPermissaoAcao_(cadastro, 'VISUALIZAR_FOTO_RESTRITO_SIGILOSO');
+  return { permitido: false, motivo: 'Nível de acesso inválido para foto: ' + nivel };
 }
 
 function validarJustificativa_(justificativa) {
@@ -218,7 +241,10 @@ function visualizarFotoDesaparecido_(idFoto, operador, justificativa) {
     throw new Error('Justificativa inválida. Descreva o motivo da visualização.');
   }
   registrarLogAcessoFoto_(idFotoLimpo, operadorLimpo, 'VISUALIZAR_FOTO', permissao.permitido ? 'PERMITIDO' : 'BLOQUEADO', justificativaAnalise.original, justificativaAnalise.valida);
-  if (!permissao.permitido) throw new Error('Acesso bloqueado: ' + permissao.motivo);
+  if (!permissao.permitido) {
+    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'SEM_PERMISSAO_FOTO', 'Visualização bloqueada para foto=' + idFotoLimpo + '; motivo=' + permissao.motivo, operadorLimpo);
+    throw new Error('Acesso bloqueado: ' + permissao.motivo);
+  }
 
   var idCaso = limparTexto(alvo[idxIdCaso]);
   registrarEventoOcorrencia(planilha, idCaso, 'FOTO_VISUALIZADA', 'Operador=' + operadorLimpo + '; idFoto=' + idFotoLimpo + '; nivelAcesso=' + nivelAcesso + '; justificativa=' + (justificativaAnalise.original || 'N/A') + '; justificativaValida=' + (justificativaAnalise.valida ? 'TRUE' : 'FALSE'));

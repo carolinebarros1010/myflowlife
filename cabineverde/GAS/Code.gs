@@ -1,3 +1,43 @@
+
+var PERFIS_OPERADOR_VALIDOS = ['OPERADOR', 'SUPERVISOR', 'ADMIN', 'AUDITOR'];
+
+function normalizarPerfilOperador_(perfil) {
+  return limparTexto(perfil).toUpperCase();
+}
+
+function validarPerfilOperador_(operador, perfisPermitidos) {
+  var email = limparTexto(operador && operador.email).toLowerCase();
+  var perfil = normalizarPerfilOperador_(operador && operador.perfil);
+  var permitidos = Array.isArray(perfisPermitidos) && perfisPermitidos.length
+    ? perfisPermitidos.map(function (item) { return normalizarPerfilOperador_(item); })
+    : PERFIS_OPERADOR_VALIDOS.slice();
+
+  if (PERFIS_OPERADOR_VALIDOS.indexOf(perfil) === -1) {
+    return { permitido: false, perfil: perfil, motivo: 'Perfil inválido: ' + (perfil || 'N/A') };
+  }
+  if (permitidos.indexOf(perfil) === -1) {
+    return { permitido: false, perfil: perfil, motivo: 'Perfil sem permissão para a ação.' };
+  }
+  return { permitido: true, perfil: perfil, email: email, motivo: 'PERMITIDO' };
+}
+
+function validarPermissaoAcao_(operador, acao) {
+  var matriz = {
+    REGISTRAR_CASO: ['OPERADOR', 'SUPERVISOR', 'ADMIN'],
+    ANEXAR_FOTO: ['OPERADOR', 'SUPERVISOR', 'ADMIN'],
+    VISUALIZAR_FOTO_INTERNO: ['OPERADOR', 'SUPERVISOR', 'ADMIN'],
+    VALIDAR_REJEITAR_FOTO: ['SUPERVISOR', 'ADMIN'],
+    VISUALIZAR_FOTO_RESTRITO_SIGILOSO: ['SUPERVISOR', 'ADMIN'],
+    AJUSTAR_ESTRUTURA: ['ADMIN'],
+    MIGRACAO: ['ADMIN'],
+    GERIR_OPERADORES: ['ADMIN'],
+    CONFIGURACOES: ['ADMIN'],
+    CONSULTAR_LOGS: ['AUDITOR', 'ADMIN']
+  };
+  var permitidos = matriz[acao] || PERFIS_OPERADOR_VALIDOS;
+  return validarPerfilOperador_(operador, permitidos);
+}
+
 var ESTRUTURA_PLANILHA = {
   CASOS: COLUNAS_CASOS,
   TRIAGEM_RESPOSTAS: COLUNAS_TRIAGEM_RESPOSTAS,
@@ -22,8 +62,9 @@ function validarOperadorAtual_() {
 
   var idxEmail = cabecalho.indexOf('email');
   var idxAtivo = cabecalho.indexOf('ativo');
-  if (idxEmail === -1 || idxAtivo === -1) {
-    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'ERRO_ESTRUTURA_OPERADORES', 'Aba OPERADORES sem colunas obrigatórias (email/ativo).', emailAtual);
+  var idxPerfil = cabecalho.indexOf('perfil');
+  if (idxEmail === -1 || idxAtivo === -1 || idxPerfil === -1) {
+    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'ERRO_ESTRUTURA_OPERADORES', 'Aba OPERADORES sem colunas obrigatórias (email/ativo/perfil).', emailAtual);
     throw new Error('Usuário não autorizado. Solicite acesso ao administrador.');
   }
 
@@ -53,7 +94,13 @@ function validarOperadorAtual_() {
     throw new Error('Usuário não autorizado. Solicite acesso ao administrador.');
   }
 
-  return { autorizado: true, email: emailAtual };
+  var perfilValidacao = validarPerfilOperador_({ email: emailAtual, perfil: encontrado[idxPerfil] }, PERFIS_OPERADOR_VALIDOS);
+  if (!perfilValidacao.permitido) {
+    registrarLogAcessoOperador_(planilha, "ACESSO_NEGADO", "PERFIL_INVALIDO", perfilValidacao.motivo, emailAtual);
+    throw new Error("Usuário não autorizado. Solicite acesso ao administrador.");
+  }
+
+  return { autorizado: true, email: emailAtual, perfil: perfilValidacao.perfil };
 }
 
 function registrarLogAcessoOperador_(planilha, tipoEvento, status, mensagem, email) {
@@ -72,8 +119,14 @@ function doGet() {
 
 function doPost(e) {
   try {
-    validarOperadorAtual_();
+    var operadorAtual = validarOperadorAtual_();
     var body = parsePayload(e);
+    var acao = limparTexto(body.action).toUpperCase();
+    var validacaoAcao = validarPermissaoAcao_(operadorAtual, acao === "VISUALIZARFOTODESAPARECIDO" ? "VISUALIZAR_FOTO_INTERNO" : "REGISTRAR_CASO");
+    if (!validacaoAcao.permitido) {
+      registrarLogAcessoOperador_(SpreadsheetApp.getActiveSpreadsheet(), "ACESSO_NEGADO", "SEM_PERMISSAO_ACAO", "Ação bloqueada: " + acao + "; motivo=" + validacaoAcao.motivo, operadorAtual.email);
+      throw new Error("Ação não permitida para o perfil do operador.");
+    }
     if (body.action === 'visualizarFotoDesaparecido') {
       var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa);
       return criarRespostaJson({ ok: true, message: 'Visualização autorizada', conteudoBase64: respostaFoto.conteudoBase64, mimeType: respostaFoto.mimeType, idCaso: respostaFoto.idCaso, idFoto: respostaFoto.idFoto });
