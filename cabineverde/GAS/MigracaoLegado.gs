@@ -49,6 +49,7 @@ function onOpen() {
     .addItem('4. Validar integridade', 'menuValidarIntegridadeMigracao_')
     .addItem('5. Rodar rotina completa segura', 'menuRodarRotinaCompletaSegura_')
     .addItem('6. Restaurar último backup', 'menuRestaurarBackupMaisRecente_')
+    .addItem('7. Auditar qualidade dos dados', 'menuAuditarQualidadeDados_')
     .addToUi();
 }
 
@@ -93,6 +94,10 @@ function menuRodarRotinaCompletaSegura_() {
 
 function menuRestaurarBackupMaisRecente_() {
   return executarComContextoAutorizado_('MENU', function () { return restaurarBackupMaisRecente_(); });
+}
+
+function menuAuditarQualidadeDados_() {
+  return executarComContextoAutorizado_('MENU', function () { return auditarQualidadeDados_(); });
 }
 
 function rodarRotinaCompletaSegura_() {
