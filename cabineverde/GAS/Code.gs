@@ -27,6 +27,7 @@ function validarPermissaoAcao_(operador, acao) {
     ANEXAR_FOTO: ['OPERADOR', 'SUPERVISOR', 'ADMIN'],
     VISUALIZAR_FOTO_INTERNO: ['OPERADOR', 'SUPERVISOR', 'ADMIN'],
     VALIDAR_REJEITAR_FOTO: ['SUPERVISOR', 'ADMIN'],
+    EDITAR_CASO_CONTROLADO: ['SUPERVISOR', 'ADMIN'],
     VISUALIZAR_FOTO_RESTRITO_SIGILOSO: ['SUPERVISOR', 'ADMIN'],
     AJUSTAR_ESTRUTURA: ['ADMIN'],
     MIGRACAO: ['ADMIN'],
@@ -43,6 +44,8 @@ var ESTRUTURA_PLANILHA = {
   TRIAGEM_RESPOSTAS: COLUNAS_TRIAGEM_RESPOSTAS,
   EVENTOS_OCORRENCIA: COLUNAS_EVENTOS_OCORRENCIA,
   INDICADORES_OPERACIONAIS: COLUNAS_INDICADORES_OPERACIONAIS,
+  HISTORICO_EDICOES: ['idEdicao','idCaso','timestampEdicao','operadorEmail','operadorPerfil','campo','valorAnterior','valorNovo','justificativa'],
+  RELATORIO_OPERACIONAL: ['dataReferencia','qtdFotosRecebidas','qtdFotosValidadas','qtdFotosUtilizadas','qtdFotosRejeitadas','observacaoOcorrenciasImagem','geradoEm'],
   FOTOS_DESAPARECIDOS: typeof COLUNAS_FOTOS_DESAPARECIDOS !== 'undefined' ? COLUNAS_FOTOS_DESAPARECIDOS : [],
   OPERADORES: ['email','nome','perfil','ativo','ultimaAtualizacao'],
   Logs_GAS: ['timestamp', 'etapa', 'ok', 'mensagem', 'rawPostData', 'payloadIdCaso']
@@ -155,6 +158,165 @@ function registrarDecisaoOperacional_(idCaso, operador, classificacao, prioridad
   });
 
   return { ok: true, idCaso: idCasoLimpo, tipoEvento: 'DECISAO_OPERACIONAL' };
+}
+
+function buscarCaso_(filtro) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
+  if (abaCasos.getLastRow() < 2) return [];
+
+  var termo = limparTexto(filtro).toLowerCase();
+  if (!termo) return [];
+
+  var cabecalho = garantirColunasDaEstrutura(abaCasos, COLUNAS_CASOS).map(limparTexto);
+  var idxIdCaso = cabecalho.indexOf('idCaso');
+  var idxTalao = cabecalho.indexOf('talaoPMESP');
+  var idxNome = cabecalho.indexOf('nomeCompletoDesaparecido');
+  var dados = abaCasos.getRange(2, 1, abaCasos.getLastRow() - 1, abaCasos.getLastColumn()).getValues();
+
+  return dados.filter(function (linha) {
+    var idCaso = limparTexto(linha[idxIdCaso]).toLowerCase();
+    var talao = limparTexto(linha[idxTalao]).toLowerCase();
+    var nome = limparTexto(linha[idxNome]).toLowerCase();
+    return idCaso.indexOf(termo) !== -1 || talao.indexOf(termo) !== -1 || nome.indexOf(termo) !== -1;
+  }).map(function (linha) {
+    var caso = {};
+    cabecalho.forEach(function (coluna, index) {
+      caso[coluna] = normalizarValorPlanilha(linha[index]);
+    });
+    return caso;
+  });
+}
+
+function editarCasoControlado_(idCaso, operador, alteracoes, justificativa) {
+  var idCasoLimpo = limparTexto(idCaso);
+  if (!idCasoLimpo) throw new Error('idCaso obrigatório.');
+  var justificativaLimpa = limparTexto(justificativa);
+  if (!justificativaLimpa) throw new Error('Edição bloqueada: justificativa obrigatória.');
+  if (!alteracoes || typeof alteracoes !== 'object') throw new Error('Edição bloqueada: alteracoes inválidas.');
+
+  var permissao = validarPermissaoAcao_(operador || {}, 'EDITAR_CASO_CONTROLADO');
+  if (!permissao.permitido) throw new Error('Operador sem permissão para editar caso.');
+
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
+  var cabecalho = garantirColunasDaEstrutura(abaCasos, COLUNAS_CASOS).map(limparTexto);
+  var linhaCaso = localizarCasoPorIdCaso(abaCasos, idCasoLimpo, cabecalho);
+  if (linhaCaso < 2) throw new Error('Caso não encontrado para edição controlada.');
+
+  var colunasPermitidas = Object.keys(alteracoes).filter(function (campo) {
+    return cabecalho.indexOf(campo) !== -1;
+  });
+  if (!colunasPermitidas.length) throw new Error('Nenhuma coluna válida para edição.');
+
+  var linhaAtual = abaCasos.getRange(linhaCaso, 1, 1, abaCasos.getLastColumn()).getValues()[0];
+  var historico = [];
+  for (var i = 0; i < colunasPermitidas.length; i += 1) {
+    var campo = colunasPermitidas[i];
+    var indiceCampo = cabecalho.indexOf(campo);
+    var valorAnterior = normalizarValorPlanilha(linhaAtual[indiceCampo]);
+    var valorNovo = normalizarValorPlanilha(alteracoes[campo]);
+    if (valorAnterior === valorNovo) continue;
+    abaCasos.getRange(linhaCaso, indiceCampo + 1).setValue(valorNovo);
+    historico.push({
+      campo: campo,
+      valorAnterior: valorAnterior,
+      valorNovo: valorNovo
+    });
+  }
+
+  if (!historico.length) {
+    return { ok: true, idCaso: idCasoLimpo, alteracoesAplicadas: 0, message: 'Sem diferenças para atualizar.' };
+  }
+
+  salvarHistoricoEdicoes_(planilha, idCasoLimpo, permissao, historico, justificativaLimpa);
+  registrarEventoOperacional_(planilha, idCasoLimpo, 'CASO_EDITADO', {
+    operador: permissao.email || limparTexto(operador && operador.email),
+    perfil: permissao.perfil,
+    justificativa: justificativaLimpa,
+    totalAlteracoes: historico.length,
+    campos: historico.map(function (item) { return item.campo; })
+  });
+  return { ok: true, idCaso: idCasoLimpo, alteracoesAplicadas: historico.length };
+}
+
+function salvarHistoricoEdicoes_(planilha, idCaso, permissao, historico, justificativa) {
+  var colunas = ESTRUTURA_PLANILHA.HISTORICO_EDICOES;
+  var aba = garantirAbaComCabecalho(planilha, 'HISTORICO_EDICOES', colunas);
+  var cabecalho = garantirColunasDaEstrutura(aba, colunas);
+  var dataHora = formatarDataHora(new Date());
+
+  historico.forEach(function (item) {
+    var linha = {
+      idEdicao: 'ED-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000),
+      idCaso: idCaso,
+      timestampEdicao: dataHora,
+      operadorEmail: permissao.email || '',
+      operadorPerfil: permissao.perfil || '',
+      campo: item.campo,
+      valorAnterior: item.valorAnterior,
+      valorNovo: item.valorNovo,
+      justificativa: justificativa
+    };
+    aba.appendRow(cabecalho.map(function (coluna) { return normalizarValorPlanilha(linha[coluna]); }));
+  });
+}
+
+function gerarRelatorioOperacionalComImagem_(dataReferencia) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var colunas = ESTRUTURA_PLANILHA.RELATORIO_OPERACIONAL;
+  var abaRelatorio = garantirAbaComCabecalho(planilha, 'RELATORIO_OPERACIONAL', colunas);
+  var resumo = consolidarDadosImagemPorData_(dataReferencia);
+  var observacao = 'Ocorrências com uso de imagem: ' + (resumo.idCasosComImagem.length ? resumo.idCasosComImagem.join(', ') : 'Nenhuma');
+
+  abaRelatorio.appendRow([
+    resumo.dataReferencia,
+    resumo.qtdFotosRecebidas,
+    resumo.qtdFotosValidadas,
+    resumo.qtdFotosUtilizadas,
+    resumo.qtdFotosRejeitadas,
+    observacao,
+    formatarDataHora(new Date())
+  ]);
+
+  registrarEventoOcorrencia(planilha, '', 'RELATORIO_OPERACIONAL_IMAGEM', 'dataReferencia=' + resumo.dataReferencia + '; qtdFotosUtilizadas=' + resumo.qtdFotosUtilizadas + '; idCasos=' + resumo.idCasosComImagem.join(','));
+  return resumo;
+}
+
+function consolidarDadosImagemPorData_(dataReferencia) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaFotos = garantirAbaComCabecalho(planilha, 'FOTOS_DESAPARECIDOS', COLUNAS_FOTOS_DESAPARECIDOS);
+  var dados = abaFotos.getLastRow() < 2 ? [] : abaFotos.getRange(2, 1, abaFotos.getLastRow() - 1, abaFotos.getLastColumn()).getValues();
+  var cabecalho = garantirColunasDaEstrutura(abaFotos, COLUNAS_FOTOS_DESAPARECIDOS).map(limparTexto);
+  var alvo = normalizarDataChave_(dataReferencia || new Date());
+  var idxData = cabecalho.indexOf('dataHoraUpload');
+  var idxStatus = cabecalho.indexOf('statusValidacao');
+  var idxAutorizacao = cabecalho.indexOf('autorizacaoUsoImagem');
+  var idxCaso = cabecalho.indexOf('idCaso');
+  var casos = {};
+  var resumo = { dataReferencia: alvo, qtdFotosRecebidas: 0, qtdFotosValidadas: 0, qtdFotosUtilizadas: 0, qtdFotosRejeitadas: 0, idCasosComImagem: [] };
+
+  dados.forEach(function (linha) {
+    if (normalizarDataChave_(linha[idxData]) !== alvo) return;
+    resumo.qtdFotosRecebidas += 1;
+    var status = limparTexto(linha[idxStatus]).toLowerCase();
+    var autorizada = ['sim', 'true', 'verdadeiro', '1'].indexOf(limparTexto(linha[idxAutorizacao]).toLowerCase()) !== -1;
+    var idCaso = limparTexto(linha[idxCaso]);
+    if (status === 'validada') resumo.qtdFotosValidadas += 1;
+    if (status === 'rejeitada') resumo.qtdFotosRejeitadas += 1;
+    if (status === 'validada' && autorizada) {
+      resumo.qtdFotosUtilizadas += 1;
+      if (idCaso) casos[idCaso] = true;
+    }
+  });
+  resumo.idCasosComImagem = Object.keys(casos);
+  return resumo;
+}
+
+function normalizarDataChave_(entrada) {
+  var data = Object.prototype.toString.call(entrada) === '[object Date]' ? entrada : new Date(entrada);
+  if (isNaN(data.getTime())) data = new Date();
+  return Utilities.formatDate(data, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyy-MM-dd');
 }
 
 function doGet() {

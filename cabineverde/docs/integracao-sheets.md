@@ -64,3 +64,27 @@ A árvore de decisão **não foi removida**. Ela segue no frontend e agora é pe
 - Auditoria de acesso registra `OPERADOR_LOGADO` e `OPERADOR_BLOQUEADO` na `LOG_ACESSO` com `email`, `perfil`, `resultado` e `motivoBloqueio`.
 - Validação de foto usa `validarFotoDesaparecido_(idFoto, operador, status)` com perfis `SUPERVISOR/ADMIN` e gera `FOTO_VALIDADA`/`FOTO_REJEITADA`.
 - Controle de uso excessivo de foto via `verificarUsoExcessivoFoto_(idFoto, operador)`: se exceder limite configurado (mais de 5 acessos em 10 minutos), registra `USO_EXCESSIVO_FOTO` e retorna sugestão de bloqueio temporário.
+
+## Edição controlada de casos (maio/2026)
+
+- Busca operacional: `buscarCaso_(filtro)` retorna casos por `idCaso`, `talaoPMESP` ou `nomeCompletoDesaparecido`.
+- Edição com governança: `editarCasoControlado_(idCaso, operador, alteracoes, justificativa)`.
+- Regras aplicadas:
+  - bloqueio sem justificativa;
+  - bloqueio de perfil sem permissão (somente `SUPERVISOR/ADMIN`);
+  - gravação detalhada de `valorAnterior` e `valorNovo`;
+  - evento `CASO_EDITADO` na aba `EVENTOS_OCORRENCIA`;
+  - histórico completo na aba `HISTORICO_EDICOES`.
+
+## Relatório operacional com dados de imagem
+
+- Geração por data: `gerarRelatorioOperacionalComImagem_(dataReferencia)`.
+- Fonte única: aba `FOTOS_DESAPARECIDOS`.
+- Campos incluídos no relatório:
+  - `qtdFotosRecebidas`
+  - `qtdFotosValidadas`
+  - `qtdFotosUtilizadas` (validadas e autorizadas para uso)
+  - `qtdFotosRejeitadas`
+- Observação operacional automática:
+  - `Ocorrências com uso de imagem: [idCasos]`
+- Cada emissão registra evento `RELATORIO_OPERACIONAL_IMAGEM` para trilha de auditoria.
