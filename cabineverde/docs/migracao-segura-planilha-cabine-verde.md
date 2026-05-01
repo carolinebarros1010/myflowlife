@@ -15,7 +15,7 @@ Usa o header existente em `COLUNAS_CASOS` com adição de `statusMigracao`.
 `idCaso`, `criancaSemSupervisao`, `criancaVeiculoSuspeito`, `preadolescenteAliciamentoVirtual`, `adolescenteSofrimentoPsiquico`, `adultoSuspeitaCrime`, `idosoDesorientado`.
 
 ### LOG_MIGRACAO
-`dataHora`, `funcaoExecutada`, `status`, `idCaso`, `mensagem`, `operador`.
+`dataHora`, `funcaoExecutada`, `status`, `modoExecucao`, `backupConfirmado`, `idCaso`, `mensagem`, `usuario`.
 
 ### LEGADO_OBSERVACOES_BRUTAS
 `dataHora`, `idCaso`, `linhaOrigem`, `hashConteudo`, `conteudoBruto`, `operador`.
@@ -52,3 +52,9 @@ Usa o header existente em `COLUNAS_CASOS` com adição de `statusMigracao`.
 - [ ] Backup foi executado no mesmo dia da janela de migração.
 - [ ] Operador responsável está identificado no log.
 - [ ] `DRY_RUN_MIGRACAO` foi alterado manualmente para `false` antes da execução real.
+
+
+## Controles obrigatórios de produção (maio/2026)
+- **Bloqueio de execução sem backup**: `validarPreExecucaoMigracao_` impede migração real sem backup recente (até 30 minutos), com log bloqueante em `LOG_MIGRACAO`.
+- **Duplicidade crítica de talão**: `validarConsistenciaCaso` registra `POSSIVEL_DUPLICIDADE_TALAO_PMESP` com severidade crítica, marca `flagDuplicidade` e bloqueia persistência.
+- **Rollback assistido**: `restaurarBackupMaisRecente_` restaura `CASOS`, `TRIAGEM_RESPOSTAS`, `EVENTOS_OCORRENCIA` e `INDICADORES_OPERACIONAIS` a partir do backup mais recente por aba, sem apagar o backup de origem.

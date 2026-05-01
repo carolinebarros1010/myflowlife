@@ -120,8 +120,14 @@ function validarConsistenciaCaso(planilha, contexto) {
     var indiceIdCaso = cabecalhoExistente.indexOf('idCaso');
     var idCasoExistente = indiceIdCaso >= 0 ? limparTexto(sheetCasosExistente.getRange(linhaPorTalaoPMESP, indiceIdCaso + 1).getValue()) : '';
     if (!idCaso || idCaso !== idCasoExistente) {
-      registrarEventoOcorrencia(planilha, idCaso || idCasoExistente, 'POSSIVEL_DUPLICIDADE_TALAO_PMESP', 'Alerta: talaoPMESP já vinculado a outro idCaso. Merge assistido futuro.');
-      throw new Error('Possível duplicidade operacional: talaoPMESP já cadastrado em outro idCaso. Operação não realizada automaticamente.');
+      var colunasAtualizadas = garantirColunasDaEstrutura(sheetCasosExistente, ESTRUTURA_PLANILHA.CASOS.concat(['flagDuplicidade']));
+      var indiceFlagDuplicidade = colunasAtualizadas.indexOf('flagDuplicidade');
+      if (indiceFlagDuplicidade >= 0) {
+        sheetCasosExistente.getRange(linhaPorTalaoPMESP, indiceFlagDuplicidade + 1).setValue(true);
+      }
+
+      registrarEventoOcorrencia(planilha, idCaso || idCasoExistente, 'POSSIVEL_DUPLICIDADE_TALAO_PMESP', 'severidade=CRITICA; acao=BLOQUEADO_AUTOMATICAMENTE; talaoPMESP já vinculado a outro idCaso.');
+      throw new Error('Duplicidade operacional detectada: talaoPMESP já vinculado a outro caso.');
     }
   }
 }
