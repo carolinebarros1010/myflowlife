@@ -351,32 +351,44 @@ function doPost(e) {
   try {
     var operadorAtual = validarOperadorAtual_();
     var body = parsePayload(e);
-    var acao = limparTexto(body.action).toUpperCase();
-    var validacaoAcao = validarPermissaoAcao_(operadorAtual, acao === "VISUALIZARFOTODESAPARECIDO" ? "VISUALIZAR_FOTO_INTERNO" : "REGISTRAR_CASO");
+    var acaoOriginal = limparTexto(body.action);
+    var action = acaoOriginal || 'salvarCaso';
+    var acao = action.toUpperCase();
+    var aliases = { 'perfil-operador': 'listarPerfilOperador', 'buscarCaso_': 'buscarCaso', 'gerarTimelineCaso_': 'gerarTimelineCaso', 'resumoQualidadeDados_': 'resumoQualidadeDados', 'marcarProblemaQualidadeResolvido_': 'marcarProblemaQualidadeResolvido' };
+    action = aliases[action] || action;
+
+    if (action === 'healthcheck') {
+      return criarRespostaJson({ ok: true, data: { service: 'cabineverde', message: 'Endpoint ativo' } });
+    }
+
+    var mapaPermissao = {
+      visualizarFotoDesaparecido: 'VISUALIZAR_FOTO_INTERNO',
+      validarFotoDesaparecido: 'VALIDAR_REJEITAR_FOTO',
+      editarCasoControlado: 'EDITAR_CASO_CONTROLADO',
+      listarPerfilOperador: 'GERIR_OPERADORES'
+    };
+    var validacaoAcao = validarPermissaoAcao_(operadorAtual, mapaPermissao[action] || 'REGISTRAR_CASO');
     if (!validacaoAcao.permitido) {
       registrarLogAcessoOperador_(SpreadsheetApp.getActiveSpreadsheet(), "ACESSO_NEGADO", "SEM_PERMISSAO_ACAO", "Ação bloqueada: " + acao + "; motivo=" + validacaoAcao.motivo, operadorAtual.email);
       throw new Error("Ação não permitida para o perfil do operador.");
     }
-    if (body.action === 'healthcheck') {
-      return criarRespostaJson({ ok: true, service: 'cabineverde', message: 'Endpoint ativo' });
-    }
-    if (body.action === 'visualizarFotoDesaparecido') {
+    if (action === 'visualizarFotoDesaparecido') {
       var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa, body.motivoAcessoFoto);
-      return criarRespostaJson({ ok: true, message: 'Visualização autorizada', conteudoBase64: respostaFoto.conteudoBase64, mimeType: respostaFoto.mimeType, idCaso: respostaFoto.idCaso, idFoto: respostaFoto.idFoto });
+      return criarRespostaJson({ ok: true, data: { message: 'Visualização autorizada', conteudoBase64: respostaFoto.conteudoBase64, mimeType: respostaFoto.mimeType, idCaso: respostaFoto.idCaso, idFoto: respostaFoto.idFoto } });
     }
-    if (body.action === 'listarCasos') {
+    if (action === 'listarCasos') {
       var casos = listarCasosComProtecao_(operadorAtual);
-      return criarRespostaJson({ ok: true, action: 'listarCasos', casos: casos });
+      return criarRespostaJson({ ok: true, data: { action: 'listarCasos', casos: casos } });
     }
-    if (body.action === 'verificarSegurancaDrive') {
+    if (action === 'verificarSegurancaDrive') {
       var resultadoSeguranca = verificarSegurancaDrive_(!!body.corrigirAutomaticamente);
-      return criarRespostaJson({ ok: true, action: 'verificarSegurancaDrive', resultado: resultadoSeguranca });
+      return criarRespostaJson({ ok: true, data: { action: 'verificarSegurancaDrive', resultado: resultadoSeguranca } });
     }
-    if (body.action === 'resumoQualidadeDados_') {
+    if (action === 'resumoQualidadeDados') {
       var resumoQualidade = resumoQualidadeDados_();
       return criarRespostaJson({
         ok: true,
-        action: 'resumoQualidadeDados_',
+        action: 'resumoQualidadeDados',
         resumo: resumoQualidade,
         totalProblemas: resumoQualidade.totalProblemas,
         totalCriticos: resumoQualidade.totalCriticos,
@@ -385,9 +397,20 @@ function doPost(e) {
         inconsistencias: resumoQualidade.inconsistencias
       });
     }
-    if (body.action === 'marcarProblemaQualidadeResolvido_') {
-      return criarRespostaJson(marcarProblemaQualidadeResolvido_(body.idCaso, body.campo, body.problema, body.responsavelTratamento));
+    if (action === 'marcarProblemaQualidadeResolvido') {
+      return criarRespostaJson({ ok: true, data: marcarProblemaQualidadeResolvido_(body.idCaso, body.campo, body.problema, body.responsavelTratamento) });
     }
+
+    if (action === 'buscarCaso') return criarRespostaJson({ ok: true, data: buscarCaso_(body.filtro || body.payload || body.termo || '') });
+    if (action === 'gerarTimelineCaso') return criarRespostaJson({ ok: true, data: gerarTimelineCaso_(body.idCaso) });
+    if (action === 'editarCasoControlado') return criarRespostaJson({ ok: true, data: editarCasoControlado_(body.idCaso, body.operador, body.alteracoes, body.justificativa, body.emailConfirmacaoOperador) });
+    if (action === 'validarFotoDesaparecido') return criarRespostaJson({ ok: true, data: validarFotoDesaparecido_(body.idFoto, body.operador || operadorAtual, body.status) });
+    if (action === 'auditarQualidadeDados') return criarRespostaJson({ ok: true, data: auditarQualidadeDados_() });
+    if (action === 'enviarFeedback') return criarRespostaJson({ ok: true, data: { recebido: true, feedback: body.payload || body.feedback || {} } });
+    if (action === 'gerarRelatorioTextoSIOPM') return criarRespostaJson({ ok: true, data: { relatorio: gerarRelatorioTextoSIOPM_(body.idCaso || (body.payload && body.payload.idCaso)) } });
+    if (action === 'gerarRelatorioOperacionalComImagem') return criarRespostaJson({ ok: true, data: gerarRelatorioOperacionalComImagem_(body.dataReferencia) });
+    if (action === 'listarPerfilOperador') return criarRespostaJson({ ok: true, data: operadorAtual });
+
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
     Object.keys(ESTRUTURA_PLANILHA).forEach(function (aba) {
       garantirAbaComCabecalho(planilha, aba, ESTRUTURA_PLANILHA[aba]);
@@ -417,12 +440,13 @@ function doPost(e) {
     }
 
     registrarLogTecnico(planilha, { etapa: 'persistencia_multiabas', ok: true, mensagem: 'Registros persistidos', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
-    return criarRespostaJson({ ok: true, action: 'updated', idCaso: idCaso, message: 'Gravação multiabas concluída' });
+    return criarRespostaJson({ ok: true, data: { action: 'salvarCaso', idCaso: idCaso, message: 'Gravação multiabas concluída' } });
   } catch (err) {
     var mensagemErro = err && err.message ? err.message : String(err);
     var planilhaLogs = obterPlanilhaLogs();
     registrarLogTecnico(planilhaLogs, { etapa: 'erro_post', ok: false, mensagem: mensagemErro, rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
-    return criarRespostaJson({ ok: false, message: mensagemErro }, 500);
+    var actionErro = ''; try { actionErro = limparTexto(parsePayload(e).action); } catch (_e) {}
+    return criarRespostaJson({ ok: false, erro: mensagemErro, detalhe: 'Falha no processamento da action ' + actionErro }, 500);
   }
 }
 
@@ -777,4 +801,11 @@ function mapearPorColuna(colunas, valores) {
     registro[coluna] = indice < valores.length ? valores[indice] : '';
   });
   return registro;
+}
+
+function gerarRelatorioTextoSIOPM_(idCaso) {
+  var caso = buscarCaso_({ idCaso: idCaso });
+  if (!caso.length) return 'Caso não encontrado para relatório SIOPM.';
+  var item = caso[0];
+  return 'SIOPM | idCaso=' + limparTexto(item.idCaso) + '; talaoPMESP=' + limparTexto(item.talaoPMESP) + '; nome=' + limparTexto(item.nomeCompletoDesaparecido) + '; risco=' + limparTexto(item.classificacaoRisco) + '; prioridade=' + limparTexto(item.prioridade);
 }
