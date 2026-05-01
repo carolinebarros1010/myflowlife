@@ -181,3 +181,41 @@ function garantirColunasDaEstrutura(sheet, colunasEsperadas) {
 
   return cabecalhoAtual.filter(Boolean);
 }
+
+
+function normalizarCamposFisicos_(dados) {
+  var base = dados && typeof dados === 'object' ? dados : {};
+  var permitidoPele = ['BRANCA', 'PARDA', 'PRETA', 'AMARELA', 'INDIGENA', 'NAO INFORMADO'];
+  var permitidoCabelo = ['PRETO', 'CASTANHO', 'LOIRO', 'RUIVO', 'GRISALHO', 'NAO INFORMADO'];
+  var permitidoOlhos = ['CASTANHO', 'PRETO', 'AZUL', 'VERDE', 'MEL', 'NAO INFORMADO'];
+
+  function limparUpperSemAcento(valor) {
+    var txt = limparTexto(valor)
+      .toUpperCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return txt;
+  }
+
+  function normalizarLista(valor, permitidos) {
+    var txt = limparUpperSemAcento(valor);
+    return permitidos.indexOf(txt) !== -1 ? txt : 'NAO INFORMADO';
+  }
+
+  function normalizarNumero(valor, min, max) {
+    var numero = Number(valor);
+    if (!isFinite(numero)) return 0;
+    var inteiro = Math.round(numero);
+    if (inteiro < min || inteiro > max) return 0;
+    return inteiro;
+  }
+
+  base.corPele = normalizarLista(base.corPele, permitidoPele);
+  base.corCabelo = normalizarLista(base.corCabelo, permitidoCabelo);
+  base.corOlhos = normalizarLista(base.corOlhos, permitidoOlhos);
+  base.alturaAproximada = normalizarNumero(base.alturaAproximada, 30, 250);
+  base.pesoAproximado = normalizarNumero(base.pesoAproximado, 1, 400);
+  return base;
+}

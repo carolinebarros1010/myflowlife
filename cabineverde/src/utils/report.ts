@@ -1,4 +1,5 @@
 import type { CasoCompleto } from '../types/case.js';
+import { normalizarCamposFisicos } from './camposFisicos.js';
 
 export interface RelatorioParams {
   numeroRelatorio: string;
@@ -28,14 +29,18 @@ export const gerarRelatorioTextoSIOPM_ = (casos: CasoCompleto[]): string => {
 };
 
 export const gerarRelatorioEstatistico = (casos: CasoCompleto[]): string => {
-  const adultos = casos.filter((c) => c.idade >= 18).length;
-  const criancas = casos.filter((c) => c.idade > 0 && c.idade < 18).length;
-  const localizados = casos.filter((c) => c.statusCaso === 'Localizado' || c.statusCaso === 'Encerrado').length;
-  const total = casos.length;
+  const casosPadronizados = casos.map((caso) => normalizarCamposFisicos(caso));
+  const adultos = casosPadronizados.filter((c) => c.idade >= 18).length;
+  const criancas = casosPadronizados.filter((c) => c.idade > 0 && c.idade < 18).length;
+  const localizados = casosPadronizados.filter((c) => c.statusCaso === 'Localizado' || c.statusCaso === 'Encerrado').length;
+  const total = casosPadronizados.length;
   const taxa = total ? ((localizados / total) * 100).toFixed(1) : '0.0';
-  const tempos = casos
+  const tempos = casosPadronizados
     .map((c) => new Date(c.dataHoraRegistro).getTime())
     .filter((t) => Number.isFinite(t));
   const mediaHoras = tempos.length ? ((Date.now() - tempos.reduce((a,b)=>a+b,0)/tempos.length) / 36e5).toFixed(1) : '0.0';
-  return `RELATÓRIO ESTATÍSTICO\nAdultos x crianças: ${adultos} x ${criancas}\nTotal/localizados: ${total}/${localizados}\nTaxa de sucesso: ${taxa}%\nTempo médio desde registro: ${mediaHoras}h`;
+  const distribuicaoCorPele = ['BRANCA','PARDA','PRETA','AMARELA','INDIGENA','NAO INFORMADO']
+    .map((cor) => `${cor}: ${casosPadronizados.filter((c) => c.corPele === cor).length}`)
+    .join(', ');
+  return `RELATÓRIO ESTATÍSTICO\nAdultos x crianças: ${adultos} x ${criancas}\nTotal/localizados: ${total}/${localizados}\nTaxa de sucesso: ${taxa}%\nTempo médio desde registro: ${mediaHoras}h\nDistribuição cor da pele: ${distribuicaoCorPele}`;
 };

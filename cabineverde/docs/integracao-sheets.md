@@ -31,6 +31,15 @@ A árvore de decisão **não foi removida**. Ela segue no frontend e agora é pe
 - Indicadores calculados (`indicadoresOperacionais`) geram linha em `INDICADORES_OPERACIONAIS`.
 
 
+
+## Padronização de campos físicos (maio/2026)
+
+- Frontend: `corPele`, `corCabelo` e `corOlhos` usam lista fechada (`select`) com valores canônicos em uppercase.
+- Frontend: `alturaAproximada` (cm) e `pesoAproximado` (kg) aceitam apenas número inteiro com limites (`30-250` e `1-400`).
+- Backend web (TypeScript): `normalizarCamposFisicos` aplica uppercase, remoção de espaços extras, validação de lista e fallback `NAO INFORMADO` para inválidos.
+- Backend GAS: `normalizarCamposFisicos_(dados)` aplica as mesmas regras antes de persistir a aba `CASOS`.
+- Relatório estatístico: utiliza dados normalizados para evitar fragmentação analítica por variações textuais.
+
 ## Regras de identidade do caso
 - `idCaso` é a **chave técnica interna** para escrita e atualização no backend.
 - `talaoPMESP` é a **referência oficial institucional PMESP**.

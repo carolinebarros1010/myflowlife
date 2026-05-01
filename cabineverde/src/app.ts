@@ -7,6 +7,7 @@ import { renderCaseList } from './components/desaparecidos/CaseList.js';
 import { renderCaseDetails } from './components/desaparecidos/CaseDetails.js';
 import { renderReportView } from './components/relatorios/ReportView.js';
 import { normalizarTelefone, normalizarTexto, toBoolean } from './utils/normalizers.js';
+import { normalizarCamposFisicos } from './utils/camposFisicos.js';
 import { gerarResumoCaso } from './utils/summary.js';
 import { GoogleSheetsService } from './services/sheetsService.js';
 import { gerarPayloadSheets } from './utils/sheetsPayload.js';
@@ -92,7 +93,7 @@ if (app) app.innerHTML = renderMainLayout(baseLayout());
 const form = document.getElementById('triage-form') as HTMLFormElement | null;
 const initial = Number(localStorage.getItem(chaveEtapaAtual) || 0);
 
-const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => ({
+const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCamposFisicos({
   id: normalizarTexto(String(dados.get('idCaso') || '')) || `CV-${Date.now()}`,
   talaoPMESP: normalizarTexto(String(dados.get('talaoPMESP') || '')),
   dataHoraRegistro: String(dados.get('dataHoraRegistro') || new Date().toISOString()),
