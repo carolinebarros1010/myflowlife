@@ -15,6 +15,7 @@ export interface SheetsServiceResponse {
 export interface SheetsService {
   salvar(payload: SheetPayload): Promise<SheetsServiceResponse>;
   healthcheck(): Promise<SheetsServiceResponse>;
+  visualizarFoto(idFoto: string, operador: string, justificativa?: string): Promise<SheetsServiceResponse & { conteudoBase64?: string; mimeType?: string }>;
 }
 
 interface EndpointResponse {
@@ -38,6 +39,32 @@ const parseResponseBody = async (resposta: Response): Promise<EndpointResponse> 
 };
 
 export class GoogleSheetsService implements SheetsService {
+  async visualizarFoto(idFoto: string, operador: string, justificativa = ''): Promise<SheetsServiceResponse & { conteudoBase64?: string; mimeType?: string }> {
+    try {
+      const resposta = await fetch(sheetsConfig.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'visualizarFotoDesaparecido', idFoto, operador, justificativa })
+      });
+      const body = (await parseResponseBody(resposta)) as EndpointResponse & {
+        conteudoBase64?: string;
+        mimeType?: string;
+      };
+      if (!resposta.ok || body.ok === false) {
+        return { ok: false, status: resposta.status, message: body.message || 'Acesso à foto bloqueado' };
+      }
+      return {
+        ok: true,
+        status: resposta.status,
+        message: body.message || 'Foto liberada',
+        conteudoBase64: body.conteudoBase64,
+        mimeType: body.mimeType
+      };
+    } catch {
+      return { ok: false, message: 'Erro de integração com Google Sheets' };
+    }
+  }
+
   async healthcheck(): Promise<SheetsServiceResponse> {
     try {
       const resposta = await fetch(sheetsConfig.endpoint, { method: 'GET' });
@@ -75,7 +102,9 @@ export class GoogleSheetsService implements SheetsService {
           aba: payload.aba,
           spreadsheetId: sheetsConfig.spreadsheetId,
           colunas: payload.colunas,
-          payload: payload.dados
+          payload: payload.dados,
+          abas: payload.abas,
+          foto: payload.foto
         })
       });
 

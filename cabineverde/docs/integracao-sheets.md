@@ -43,3 +43,15 @@ A árvore de decisão **não foi removida**. Ela segue no frontend e agora é pe
 - Não incluir árvore de decisão, indicadores operacionais ou `talaoPMESP` neste campo.
 - A árvore continua persistida em `TRIAGEM_RESPOSTAS`.
 - Os indicadores continuam persistidos em `INDICADORES_OPERACIONAIS`.
+
+
+## Fluxo de fotos da pessoa desaparecida
+
+- A imagem em si é armazenada no Google Drive (`Cabine Verde/Fotos/{idCaso}_{talaoPMESP}`), nunca em célula da planilha.
+- Os metadados da imagem são gravados na aba `FOTOS_DESAPARECIDOS`.
+- O caso é atualizado automaticamente com: `fotoDisponivel`, `quantidadeFotos`, `fotoPrincipalLink`, `statusFotos`.
+- Todo upload gera evento `FOTO_ANEXADA` em `EVENTOS_OCORRENCIA`.
+- Regras de uso de imagem: upload exige `autorizacaoUsoImagem`; quando ausente, `restricaoDivulgacao` é marcada.
+
+- Acesso a imagem deve ocorrer via função intermediária `visualizarFotoDesaparecido_` (sem exposição de link direto).
+- Eventos `FOTO_VISUALIZADA` e logs em `LOG_ACESSO_FOTOS` reforçam rastreabilidade jurídica.

@@ -3,6 +3,7 @@ var ESTRUTURA_PLANILHA = {
   TRIAGEM_RESPOSTAS: COLUNAS_TRIAGEM_RESPOSTAS,
   EVENTOS_OCORRENCIA: COLUNAS_EVENTOS_OCORRENCIA,
   INDICADORES_OPERACIONAIS: COLUNAS_INDICADORES_OPERACIONAIS,
+  FOTOS_DESAPARECIDOS: typeof COLUNAS_FOTOS_DESAPARECIDOS !== 'undefined' ? COLUNAS_FOTOS_DESAPARECIDOS : [],
   Logs_GAS: ['timestamp', 'etapa', 'ok', 'mensagem', 'rawPostData', 'payloadIdCaso']
 };
 
@@ -13,6 +14,10 @@ function doGet() {
 function doPost(e) {
   try {
     var body = parsePayload(e);
+    if (body.action === 'visualizarFotoDesaparecido') {
+      var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa);
+      return criarRespostaJson({ ok: true, message: 'Visualização autorizada', conteudoBase64: respostaFoto.conteudoBase64, mimeType: respostaFoto.mimeType, idCaso: respostaFoto.idCaso, idFoto: respostaFoto.idFoto });
+    }
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
     Object.keys(ESTRUTURA_PLANILHA).forEach(function (aba) {
       garantirAbaComCabecalho(planilha, aba, ESTRUTURA_PLANILHA[aba]);
@@ -24,6 +29,22 @@ function doPost(e) {
     registros.forEach(function (registro) {
       persistirRegistro(planilha, registro);
     });
+
+    if (body.foto && body.foto.base64) {
+      salvarFotoDesaparecido_({
+        idCaso: limparTexto(body.payload && body.payload.idCaso),
+        talaoPMESP: limparTexto(body.payload && body.payload.talaoPMESP),
+        nomeDesaparecido: limparTexto(body.payload && body.payload.nomeDesaparecido),
+        operadorResponsavel: limparTexto(body.payload && body.payload.operadorResponsavel),
+        origemFoto: limparTexto(body.payload && body.payload.origemFoto),
+        tipoFoto: limparTexto(body.payload && body.payload.tipoFoto),
+        nivelAcesso: limparTexto(body.payload && body.payload.nivelAcesso),
+        autorizacaoUsoImagem: body.payload && body.payload.autorizacaoUsoImagem,
+        base64: body.foto.base64,
+        nomeArquivo: body.foto.nomeArquivo,
+        mimeType: body.foto.mimeType
+      });
+    }
 
     registrarLogTecnico(planilha, { etapa: 'persistencia_multiabas', ok: true, mensagem: 'Registros persistidos', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
     return criarRespostaJson({ ok: true, action: 'updated', idCaso: idCaso, message: 'Gravação multiabas concluída' });
@@ -159,4 +180,3 @@ function mapearPorColuna(colunas, valores) {
   });
   return registro;
 }
-
