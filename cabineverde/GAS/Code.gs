@@ -348,9 +348,12 @@ function doGet() {
 }
 
 function doPost(e) {
+  var planilhaLogs = obterPlanilhaLogs();
   try {
+    registrarLogTecnico(planilhaLogs, { etapa: 'POST_RECEBIDO', ok: true, mensagem: 'Requisição POST recebida pelo Web App', rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
     var operadorAtual = validarOperadorAtual_();
     var body = parsePayload(e);
+    registrarLogTecnico(planilhaLogs, { etapa: 'PAYLOAD_RECEBIDO', ok: true, mensagem: 'Payload recebido e parseado com sucesso', rawPostData: extrairRawPostData(e), payloadIdCaso: limparTexto((body.payload && body.payload.idCaso) || (body.dados && body.dados.idCaso) || body.idCaso) });
     var acaoOriginal = limparTexto(body.action);
     var action = acaoOriginal || 'salvarCaso';
     var acao = action.toUpperCase();
@@ -418,6 +421,7 @@ function doPost(e) {
 
     var registros = body.abas && Array.isArray(body.abas) ? body.abas : [body];
     var idCaso = limparTexto((body.payload && body.payload.idCaso) || (body.dados && body.dados.idCaso));
+    registrarLogTecnico(planilhaLogs, { etapa: 'GRAVACAO_INICIADA', ok: true, mensagem: 'Iniciando persistência em abas de destino', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
 
     registros.forEach(function (registro) {
       persistirRegistro(planilha, registro);
@@ -439,12 +443,11 @@ function doPost(e) {
       });
     }
 
-    registrarLogTecnico(planilha, { etapa: 'persistencia_multiabas', ok: true, mensagem: 'Registros persistidos', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
+    registrarLogTecnico(planilhaLogs || planilha, { etapa: 'GRAVACAO_SUCESSO', ok: true, mensagem: 'Registros persistidos com sucesso', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
     return criarRespostaJson({ ok: true, data: { action: 'salvarCaso', idCaso: idCaso, message: 'Gravação multiabas concluída' } });
   } catch (err) {
     var mensagemErro = err && err.message ? err.message : String(err);
-    var planilhaLogs = obterPlanilhaLogs();
-    registrarLogTecnico(planilhaLogs, { etapa: 'erro_post', ok: false, mensagem: mensagemErro, rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
+    registrarLogTecnico(planilhaLogs, { etapa: 'ERRO_GRAVACAO_PLANILHA', ok: false, mensagem: mensagemErro, rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
     var actionErro = ''; try { actionErro = limparTexto(parsePayload(e).action); } catch (_e) {}
     return criarRespostaJson({ ok: false, erro: mensagemErro, detalhe: 'Falha no processamento da action ' + actionErro }, 500);
   }
