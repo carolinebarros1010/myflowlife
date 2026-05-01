@@ -48,7 +48,13 @@ export const renderTriageForm = (): string => `
         input('rg', 'RG'),
         input('nomeMae', 'Nome da mãe'),
         input('dataNascimento', 'Data de nascimento', 'date'),
-        input('telefoneDesaparecido', 'Telefone desaparecido')
+        input('telefoneDesaparecido', 'Telefone desaparecido'),
+        select('corPele', 'Cor da pele', ['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não informado']),
+        input('alturaCm', 'Altura (cm)', 'number'),
+        input('pesoKg', 'Peso (kg)', 'number'),
+        input('cabelo', 'Cabelo'),
+        input('olhos', 'Olhos'),
+        input('caracteristicasMarcantes', 'Características marcantes')
       ].join('')
     )}
 
@@ -96,7 +102,7 @@ export const renderTriageForm = (): string => `
       '6) Apoio tecnológico',
       [
         checkbox('fotoDisponivel', 'Foto disponível'),
-        '<label>Foto desaparecido<input type="file" id="fotoDesaparecido" name="fotoDesaparecido" accept="image/*" /></label>',
+        '<label class="cv-upload">Upload da foto (obrigatório quando disponível)<input type="file" id="fotoDesaparecido" name="fotoDesaparecido" accept="image/*" /><small id="foto-status" class="cv-upload-status">Status da foto: pendente</small></label>',
         select('origemFoto', 'Origem da foto', ['Solicitante', 'Familiar', 'Câmera', 'Outro']),
         select('tipoFoto', 'Tipo da foto', ['Recente', 'Documento', 'Câmera', 'Outro']),
         checkbox('autorizacaoUsoImagem', 'Autorização de uso de imagem'),
@@ -112,7 +118,8 @@ export const renderTriageForm = (): string => `
       [
         input('observacoesOperacionais', 'Observações operacionais'),
         input('idFotoVisualizacao', 'ID da foto para visualização controlada'),
-        input('justificativaVisualizacao', 'Justificativa de visualização (obrigatória para RESTRITO/SIGILOSO)')
+        input('justificativaVisualizacao', 'Justificativa de visualização (obrigatória para RESTRITO/SIGILOSO)'),
+        input('feedbackOperacional', 'Feedback operacional (melhoria/erro percebido)')
       ].join('')
     )}
   </form>

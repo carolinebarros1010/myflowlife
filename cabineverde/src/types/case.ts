@@ -18,6 +18,13 @@ export interface CasoDesaparecimento {
   rg: string;
   nomeMae: string;
   dataNascimento: string;
+  corPele?: string;
+  alturaCm?: number;
+  pesoKg?: number;
+  cabelo?: string;
+  olhos?: string;
+  caracteristicasMarcantes?: string;
+  statusFoto?: 'pendente' | 'enviada' | 'validada';
   fotoDisponivel: boolean;
   linkFoto: string;
   telefoneDesaparecido: string;

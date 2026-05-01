@@ -11,7 +11,7 @@ import { gerarResumoCaso } from './utils/summary.js';
 import { GoogleSheetsService } from './services/sheetsService.js';
 import { gerarPayloadSheets } from './utils/sheetsPayload.js';
 import { listarCasos, salvarCasoLocal } from './services/caseRepository.js';
-import { montarRelatorio } from './modules/relatorios/reportModule.js';
+import { montarRelatorio, montarRelatorioEstatistico, montarRelatorioSIOPM } from './modules/relatorios/reportModule.js';
 import { casosMock } from './data/mockCases.js';
 import { renderPerguntasFaixa } from './components/triagem/ConditionalQuestions.js';
 import { calcularFaixaEtaria } from './utils/age.js';
@@ -105,6 +105,13 @@ const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => ({
   rg: normalizarTexto(String(dados.get('rg') || '')),
   nomeMae: normalizarTexto(String(dados.get('nomeMae') || '')),
   dataNascimento: String(dados.get('dataNascimento') || ''),
+  corPele: normalizarTexto(String(dados.get('corPele') || '')),
+  alturaCm: Number(dados.get('alturaCm') || 0),
+  pesoKg: Number(dados.get('pesoKg') || 0),
+  cabelo: normalizarTexto(String(dados.get('cabelo') || '')),
+  olhos: normalizarTexto(String(dados.get('olhos') || '')),
+  caracteristicasMarcantes: normalizarTexto(String(dados.get('caracteristicasMarcantes') || '')),
+  statusFoto: 'pendente',
   fotoDisponivel: toBoolean(dados.get('fotoDisponivel')),
   linkFoto: '',
   telefoneDesaparecido: normalizarTelefone(String(dados.get('telefoneDesaparecido') || '')),
@@ -481,4 +488,69 @@ document.getElementById('case-list-wrapper')?.addEventListener('click', (event) 
 ['filter-idCaso', 'filter-status', 'filter-risco', 'filter-data'].forEach((id) => {
   document.getElementById(id)?.addEventListener('input', aplicarFiltros);
   document.getElementById(id)?.addEventListener('change', aplicarFiltros);
+});
+
+
+document.getElementById('view-report')?.addEventListener('click', () => {
+  const report = document.getElementById('report-content') as HTMLTextAreaElement | null;
+  if (!report?.value) {
+    const casos = listarCasos();
+    report!.value = `${montarRelatorio(casos, { numeroRelatorio: String(casos.length + 1).padStart(3, '0'), dataReferencia: new Date().toLocaleDateString('pt-BR'), equipe: 'Equipe Cabine Verde', complementoManual: '' })}
+
+${montarRelatorioEstatistico(casos)}`;
+  }
+  report?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  atualizarStatus('Relatório exibido para revisão operacional.');
+});
+
+document.getElementById('export-report-siopm')?.addEventListener('click', async () => {
+  const texto = montarRelatorioSIOPM(listarCasos());
+  const report = document.getElementById('report-content') as HTMLTextAreaElement | null;
+  if (report) report.value = texto;
+  await navigator.clipboard.writeText(texto);
+  atualizarStatus('Texto SIOPM gerado e copiado.');
+});
+
+document.getElementById('export-report-pdf')?.addEventListener('click', () => {
+  window.print();
+  atualizarStatus('Exportação PDF acionada via impressão do navegador.');
+});
+
+(document.getElementById('fotoDesaparecido') as HTMLInputElement | null)?.addEventListener('change', () => {
+  const fotoInput = document.getElementById('fotoDesaparecido') as HTMLInputElement | null;
+  const status = document.getElementById('foto-status');
+  if (!status) return;
+  status.textContent = fotoInput?.files?.length ? 'Status da foto: enviada' : 'Status da foto: pendente';
+});
+
+(document.getElementById('autorizacaoUsoImagem') as HTMLInputElement | null)?.addEventListener('change', (event) => {
+  const status = document.getElementById('foto-status');
+  if (!status) return;
+  status.textContent = (event.target as HTMLInputElement).checked ? 'Status da foto: validada' : status.textContent;
+});
+
+
+const atualizarStatusSistema = async (): Promise<void> => {
+  const banco = document.getElementById('status-banco-central');
+  const sync = document.getElementById('status-sincronizacao');
+  const health = await sheetsService.healthcheck();
+  if (banco) banco.textContent = `Banco central: ${health.ok ? 'ativo' : 'inativo'}`;
+  if (sync) sync.textContent = `Sincronização: ${health.ok ? 'online' : 'offline'}`;
+};
+
+void atualizarStatusSistema();
+setInterval(() => void atualizarStatusSistema(), 30000);
+
+document.getElementById('send-feedback')?.addEventListener('click', async () => {
+  const feedback = (form?.elements.namedItem('feedbackOperacional') as HTMLInputElement | null)?.value?.trim() || '';
+  if (!feedback) return atualizarStatus('Informe um feedback operacional antes de enviar.', true);
+  const base = triagemState.casoCompleto;
+  const payload = gerarPayloadSheets(base);
+  payload.abas.push({
+    aba: 'FEEDBACK',
+    colunas: ['idCaso', 'timestampEvento', 'tipoEvento', 'feedback', 'operador'],
+    valores: [base.id, new Date().toISOString(), 'FEEDBACK_ENVIADO', feedback, base.nomeSolicitante || 'Operador']
+  });
+  const retorno = await sheetsService.salvar(payload);
+  atualizarStatus(retorno.ok ? 'Feedback enviado com sucesso.' : `Falha ao enviar feedback: ${retorno.message}`, !retorno.ok);
 });
