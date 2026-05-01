@@ -6,7 +6,9 @@ const badgeClass = (risco: string): string => {
   return 'cv-badge cv-badge--ok';
 };
 
-export const renderCaseList = (casos: CasoCompleto[]): string => `
+type ContextoLista = 'padrao' | 'qualidade';
+
+export const renderCaseList = (casos: CasoCompleto[], contexto: ContextoLista = 'padrao'): string => `
 <section class="cv-card">
   <h3>Listagem operacional</h3>
   <ul class="cv-case-list">
@@ -20,6 +22,14 @@ export const renderCaseList = (casos: CasoCompleto[]): string => `
             <span class="${badgeClass(caso.classificacaoRisco)}">${caso.classificacaoRisco}</span>
             <span class="cv-badge">${caso.statusCaso}</span>
           </button>
+          ${
+            contexto === 'qualidade'
+              ? `<div class="cv-inline-actions">
+            <button type="button" class="cv-button cv-button--ghost" data-open-case="${caso.id}">Abrir caso</button>
+            <button type="button" class="cv-button cv-button--secondary" data-open-case="${caso.id}" data-go-module="registro">Ir para edição</button>
+          </div>`
+              : ''
+          }
         </li>`
         )
         .join('') || '<li>Nenhum caso registrado ainda.</li>'

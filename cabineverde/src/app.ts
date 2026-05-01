@@ -109,6 +109,7 @@ const baseLayout = () => {
     renderConditionalSection('tech-block', 'Apoio tecnológico ativo', 'Registre câmeras, rastreio de dispositivo e fontes de mídia com potencial de localização.'),
     renderConditionalSection('age-block', 'Subfluxo por faixa etária', 'Perguntas dinâmicas para ampliar entendimento do risco específico.'),
     renderActionFooter(),
+    '<section id="post-save-actions" class="cv-card" hidden><h4>Caso salvo</h4><div class="cv-inline-actions"><button type="button" class="cv-button cv-button--ghost" data-flow-action="ver-caso">Ver caso</button><button type="button" class="cv-button cv-button--ghost" data-flow-action="ir-consulta">Ir para consulta</button><button type="button" class="cv-button cv-button--secondary" data-flow-action="ver-timeline">Ver timeline</button></div></section>',
     '</div>',
     '<div>',
     renderRiskBadgePanel(),
@@ -168,13 +169,13 @@ const montarConteudosModulares = (): void => {
     cacheRegistro.remove();
   }
   const consulta = document.getElementById('modulo-consulta-conteudo');
-  if (consulta) consulta.innerHTML = `${renderCaseDetails()}${renderAuditLogPanel()}<div class="cv-card"><p>Edição condicionada à confirmação de e-mail e justificativa registrada em log.</p></div>`;
+  if (consulta) consulta.innerHTML = `${renderCaseDetails()}<section class="cv-card"><h4>Navegação contextual</h4><div class="cv-inline-actions"><button type="button" class="cv-button cv-button--ghost" data-flow-action="ver-fotos">Ver fotos</button><button type="button" class="cv-button cv-button--ghost" data-flow-action="ver-qualidade">Ver qualidade</button><button type="button" class="cv-button cv-button--secondary" data-flow-action="gerar-relatorio">Gerar relatório</button></div></section>${renderAuditLogPanel()}<div class="cv-card"><p>Edição condicionada à confirmação de e-mail e justificativa registrada em log.</p></div>`;
   const qualidade = document.getElementById('modulo-qualidade-conteudo');
-  if (qualidade) qualidade.innerHTML = `${renderCaseList(listarCasos().length ? listarCasos() : casosMock)}<div class="cv-card"><p>Resumo: totalProblemas, totalCriticos, totalPendentes e totalResolvidos.</p></div>`;
+  if (qualidade) qualidade.innerHTML = `${renderCaseList(listarCasos().length ? listarCasos() : casosMock, 'qualidade')}<div class="cv-card"><p>Resumo: totalProblemas, totalCriticos, totalPendentes e totalResolvidos.</p></div>`;
   const relatorios = document.getElementById('modulo-relatorios-conteudo');
   if (relatorios) relatorios.innerHTML = renderReportView();
   const midias = document.getElementById('modulo-midias-conteudo');
-  if (midias) midias.innerHTML = '<div class="cv-card"><p>Listagem de fotos por caso com motivo, justificativa e status de validação/rejeição.</p></div>';
+  if (midias) midias.innerHTML = `<div class="cv-card"><p>Listagem de fotos por caso com motivo, justificativa e status de validação/rejeição.</p><div class="cv-inline-actions"><button type="button" class="cv-button cv-button--ghost" data-flow-action="abrir-caso-relacionado">Abrir caso relacionado</button></div></div>`;
   const admin = document.getElementById('modulo-admin-conteudo');
   if (admin) admin.innerHTML = '<div class="cv-card"><p>Gestão de operadores, perfis, logs, backup, migração, rollback e auditoria Drive.</p></div>';
 };
@@ -356,6 +357,20 @@ const atualizarLista = (casos?: CasoCompleto[]): void => {
   if (wrapper) wrapper.innerHTML = renderCaseList(casos || listarCasos());
 };
 
+
+const navegarParaModulo = (modulo: ModuloOperacional): void => {
+  document.querySelectorAll<HTMLElement>('.cv-module').forEach((el) => {
+    el.hidden = el.dataset.route !== modulo;
+  });
+};
+
+const renderAcoesPosSalvar = (idCaso: string): void => {
+  const acoes = document.getElementById('post-save-actions');
+  if (!acoes) return;
+  acoes.hidden = false;
+  acoes.setAttribute('data-case-id', idCaso);
+};
+
 const renderDetalheCaso = (caso: CasoCompleto): void => {
   const details = document.getElementById('case-details');
   if (!details) return;
@@ -414,6 +429,7 @@ if (form) {
     const summary = document.getElementById('case-summary');
     if (summary) summary.textContent = gerarResumoCaso(triagemState.casoCompleto);
     renderDetalheCaso(triagemState.casoCompleto);
+    renderAcoesPosSalvar(triagemState.casoCompleto.id);
 
     const payload = gerarPayloadSheets(triagemState.casoCompleto);
     const arquivoFoto = form.elements.namedItem('fotoDesaparecido') as HTMLInputElement | null;
@@ -565,6 +581,17 @@ document.getElementById('copy-report')?.addEventListener('click', async () => {
   atualizarStatus('Relatório copiado para área de transferência.');
 });
 
+document.addEventListener('click', (event) => {
+  const acao = (event.target as HTMLElement).closest('[data-flow-action]') as HTMLElement | null;
+  if (!acao) return;
+  const tipo = acao.getAttribute('data-flow-action');
+  if (tipo === 'ir-consulta' || tipo === 'ver-caso' || tipo === 'ver-timeline') navegarParaModulo('consulta');
+  if (tipo === 'ver-qualidade') navegarParaModulo('qualidade');
+  if (tipo === 'ver-fotos' || tipo === 'abrir-caso-relacionado') navegarParaModulo('midias');
+  if (tipo === 'gerar-relatorio') { navegarParaModulo('relatorios'); document.getElementById('generate-report')?.dispatchEvent(new Event('click')); }
+  if (tipo === 'ver-timeline') atualizarStatus('Fluxo decisão: problema → caso → evidências → decisão (timeline).');
+});
+
 document.getElementById('case-list-wrapper')?.addEventListener('click', (event) => {
   const target = event.target as HTMLElement;
   const trigger = target.closest('[data-open-case]') as HTMLElement | null;
@@ -575,6 +602,8 @@ document.getElementById('case-list-wrapper')?.addEventListener('click', (event) 
   triagemState = calcularEstadoTriagem(caso, triagemState.etapa, triagemState.status);
   renderDetalheCaso(caso);
   atualizarStateDoFormulario();
+  const moduloDestino = trigger.getAttribute('data-go-module') as ModuloOperacional | null;
+  if (moduloDestino) navegarParaModulo(moduloDestino);
   atualizarStatus(`Caso ${caso.id} carregado no modo edição.`);
 });
 
