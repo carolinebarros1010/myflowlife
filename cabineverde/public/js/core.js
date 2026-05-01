@@ -424,12 +424,6 @@ export const sugerirAcaoIndicadores = (indicadores = {}) => {
   return 'Manter monitoramento operacional e reavaliar respostas da árvore periodicamente.';
 };
 
-export const anexarIndicadoresObservacoes = (observacoesOperacionais = '', indicadores = {}) => {
-  const bloco = ['[INDICADORES OPERACIONAIS]', ...Object.entries(indicadores).map(([k, v]) => `${k}: ${v ? 'SIM' : 'NÃO'}`)].join('\n');
-  const base = String(observacoesOperacionais || '').replace(/\[INDICADORES OPERACIONAIS\][\s\S]*$/i, '').trim();
-  return base ? `${base}\n\n${bloco}` : bloco;
-};
-
 export const contarPerguntasRespondidas = (respostas = {}, complemento = {}) => {
   const respondidas = Object.values(respostas).filter((valor) => String(valor || '').trim()).length;
   const complementos = Object.values(complemento).filter((valor) => String(valor || '').trim()).length;

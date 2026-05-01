@@ -9,14 +9,12 @@ import {
   healthcheckSheets,
   ARVORE_DECISAO_CONFIG,
   OPCOES_SIM_NAO_NI,
-  gerarObservacoesArvore,
   avaliarAlertasArvore,
   contarPerguntasRespondidas,
   mapearIndicadoresOperacionais,
   calcularCriticidadeIndicadores,
   listarIndicadoresAtivos,
   sugerirAcaoIndicadores,
-  anexarIndicadoresObservacoes
 } from './core.js';
 
 const app = document.getElementById('app');
@@ -169,12 +167,7 @@ const obterCasoDoFormulario = () => {
   const { respostas, complementos } = obterArvoreFormulario(form, faixaEtaria);
 
   const observacoesOperador = String(data.get('observacoesOperador') || '').trim();
-  const { texto: observacoesArvore, alertas } = gerarObservacoesArvore({
-    respostas,
-    complementos,
-    faixaEtaria,
-    observacoesOperador
-  });
+  const alertas = avaliarAlertasArvore(respostas, faixaEtaria);
 
   const indicadoresOperacionais = mapearIndicadoresOperacionais(respostas);
   const criticidadeIndicadores = calcularCriticidadeIndicadores(indicadoresOperacionais);
@@ -221,7 +214,7 @@ const obterCasoDoFormulario = () => {
       `Tentativa contato: ${respostas.passo5_tentativa_contato || 'Não informado'}`
     ].join(' | '),
     numeroBo: complementos.passo5_registro_delegacia || '',
-    observacoesOperacionais: anexarIndicadoresObservacoes(observacoesArvore, indicadoresOperacionais),
+    observacoesOperacionais: observacoesOperador,
     indicadoresOperacionais,
     criticidadeIndicadores,
     respostasArvore: respostas,

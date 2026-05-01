@@ -28,3 +28,18 @@ A árvore de decisão **não foi removida**. Ela segue no frontend e agora é pe
 - Cada chave da árvore (`subfluxoPerguntas`) gera registro em `TRIAGEM_RESPOSTAS`.
 - Criticidade/risco/prioridade e decisões iniciais geram evento em `EVENTOS_OCORRENCIA`.
 - Indicadores calculados (`indicadoresOperacionais`) geram linha em `INDICADORES_OPERACIONAIS`.
+
+
+## Regras de identidade do caso
+- `idCaso` é a **chave técnica interna** para escrita e atualização no backend.
+- `talaoPMESP` é a **referência oficial institucional PMESP**.
+- Se `idCaso` já existir com `talaoPMESP` vazio, o registro pode receber `talaoPMESP` novo normalmente.
+- Se `idCaso` já existir com `talaoPMESP` preenchido e o valor recebido divergir do salvo, o GAS bloqueia a atualização, registra `CONFLITO_TALAO_PMESP` em `EVENTOS_OCORRENCIA` e retorna erro claro ao frontend.
+- Se `idCaso` não existir, mas o `talaoPMESP` já existir em outro `idCaso`, o GAS bloqueia a atualização automática, registra `POSSIVEL_DUPLICIDADE_TALAO_PMESP` em `EVENTOS_OCORRENCIA` e retorna alerta de possível duplicidade operacional.
+- Merge automático **não é executado**; permanece apenas como possibilidade futura de merge assistido.
+
+## Regra de observações operacionais
+- `observacoesOperacionais` deve conter exclusivamente texto livre resumido do operador.
+- Não incluir árvore de decisão, indicadores operacionais ou `talaoPMESP` neste campo.
+- A árvore continua persistida em `TRIAGEM_RESPOSTAS`.
+- Os indicadores continuam persistidos em `INDICADORES_OPERACIONAIS`.

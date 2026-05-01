@@ -8,11 +8,9 @@ import {
   salvarCasoSheets,
   healthcheckSheets,
   ENDPOINT_OFICIAL_APPS_SCRIPT,
-  gerarObservacoesArvore,
   avaliarAlertasArvore,
   mapearIndicadoresOperacionais,
   calcularCriticidadeIndicadores,
-  anexarIndicadoresObservacoes,
   listarIndicadoresAtivos
 } from '../public/js/core.js';
 
@@ -28,27 +26,6 @@ test('risco/prioridade', () => {
   const caso = { idade: 20, suspeitaCrime: true, vulnerabilidade: false, usoMedicacaoEssencial: false };
   assert.equal(calcularRisco(caso), 'Alto risco');
   assert.equal(calcularPrioridade(caso), 'Crítica');
-});
-
-test('observacoesOperacionais consolida texto estruturado da árvore e preserva observação do operador', () => {
-  const resultado = gerarObservacoesArvore({
-    faixaEtaria: 'Criança',
-    respostas: {
-      passo1_emergencia: 'Pessoa desaparecida',
-      crianca_supervisao_direta: 'Não',
-      crianca_adulto_veiculo_suspeito: 'Sim'
-    },
-    complementos: {
-      crianca_supervisao_direta: 'Sem adulto responsável no local'
-    },
-    observacoesOperador: 'Equipe em deslocamento.'
-  });
-
-  assert.match(resultado.texto, /\[ÁRVORE DE DECISÃO – 190\/193\]/);
-  assert.match(resultado.texto, /PASSO 1 – Identificação mínima/);
-  assert.match(resultado.texto, /SUBABA – Criança 0–7/);
-  assert.match(resultado.texto, /\[ALERTAS AUTOMÁTICOS\]/);
-  assert.match(resultado.texto, /\[OBSERVAÇÕES DO OPERADOR\]\nEquipe em deslocamento\./);
 });
 
 test('alertas automáticos seguem regras por faixa etária', () => {
@@ -78,19 +55,10 @@ test('indicadores operacionais derivam da árvore e elevam criticidade', () => {
   assert.deepEqual(listarIndicadoresAtivos(indicadores).includes('adultoSuspeitaCrime'), true);
 });
 
-test('observacoes operacionais recebem bloco de indicadores sem quebrar estrutura', () => {
-  const texto = anexarIndicadoresObservacoes('[ÁRVORE DE DECISÃO – 190/193]\nConteúdo base', {
-    criancaSemSupervisao: true,
-    criancaVeiculoSuspeito: false,
-    preadolescenteAliciamentoVirtual: false,
-    adolescenteSofrimentoPsiquico: false,
-    adultoSuspeitaCrime: true,
-    idosoDesorientado: false
-  });
-
-  assert.match(texto, /\[INDICADORES OPERACIONAIS\]/);
-  assert.match(texto, /criancaSemSupervisao: SIM/);
-  assert.match(texto, /adultoSuspeitaCrime: SIM/);
+test('observacoes operacionais mantem somente texto livre', () => {
+  const observacao = 'Resumo objetivo do operador.';
+  assert.equal(observacao.includes('[ÁRVORE DE DECISÃO'), false);
+  assert.equal(observacao.includes('[INDICADORES OPERACIONAIS]'), false);
 });
 
 test('payload completo com colunas base + arvore para Desaparecidos', () => {
