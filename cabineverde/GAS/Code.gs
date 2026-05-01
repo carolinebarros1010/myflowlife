@@ -369,6 +369,22 @@ function doPost(e) {
       var resultadoSeguranca = verificarSegurancaDrive_(!!body.corrigirAutomaticamente);
       return criarRespostaJson({ ok: true, action: 'verificarSegurancaDrive', resultado: resultadoSeguranca });
     }
+    if (body.action === 'resumoQualidadeDados_') {
+      var resumoQualidade = resumoQualidadeDados_();
+      return criarRespostaJson({
+        ok: true,
+        action: 'resumoQualidadeDados_',
+        resumo: resumoQualidade,
+        totalProblemas: resumoQualidade.totalProblemas,
+        totalCriticos: resumoQualidade.totalCriticos,
+        totalPendentes: resumoQualidade.totalPendentes,
+        totalResolvidos: resumoQualidade.totalResolvidos,
+        inconsistencias: resumoQualidade.inconsistencias
+      });
+    }
+    if (body.action === 'marcarProblemaQualidadeResolvido_') {
+      return criarRespostaJson(marcarProblemaQualidadeResolvido_(body.idCaso, body.campo, body.problema, body.responsavelTratamento));
+    }
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
     Object.keys(ESTRUTURA_PLANILHA).forEach(function (aba) {
       garantirAbaComCabecalho(planilha, aba, ESTRUTURA_PLANILHA[aba]);
