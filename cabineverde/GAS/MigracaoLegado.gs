@@ -15,7 +15,8 @@ var CABECALHO_LOG_MIGRACAO = [
   'backupConfirmado',
   'idCaso',
   'mensagem',
-  'usuario'
+  'usuario',
+  'origemExecucao'
 ];
 
 var CABECALHO_LEGADO_OBSERVACOES_BRUTAS = [
@@ -36,20 +37,66 @@ var MAPEAMENTO_COLUNAS_LEGADO = {
   observacoesOperacionais: ['observacoesOperacionais', 'observacoes', 'observacao', 'obsOperacional']
 };
 var DRY_RUN_MIGRACAO = true;
+var EXECUCAO_AUTORIZADA = false;
+
 
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Cabine Verde')
-    .addItem('1. Fazer backup da planilha', 'fazerBackupPlanilha_')
-    .addItem('2. Ajustar estrutura automaticamente', 'ajustarEstruturaPlanilha_')
-    .addItem('3. Migrar dados legados', 'migrarDadosLegados_')
-    .addItem('4. Validar integridade', 'validarIntegridadeMigracao_')
-    .addItem('5. Rodar rotina completa segura', 'rodarRotinaCompletaSegura_')
-    .addItem('6. Restaurar último backup', 'restaurarBackupMaisRecente_')
+    .addItem('1. Fazer backup da planilha', 'menuFazerBackupPlanilha_')
+    .addItem('2. Ajustar estrutura automaticamente', 'menuAjustarEstruturaPlanilha_')
+    .addItem('3. Migrar dados legados', 'menuMigrarDadosLegados_')
+    .addItem('4. Validar integridade', 'menuValidarIntegridadeMigracao_')
+    .addItem('5. Rodar rotina completa segura', 'menuRodarRotinaCompletaSegura_')
+    .addItem('6. Restaurar último backup', 'menuRestaurarBackupMaisRecente_')
     .addToUi();
 }
 
+function iniciarContextoExecucao_(origem) {
+  EXECUCAO_AUTORIZADA = true;
+  PropertiesService.getScriptProperties().setProperty('ORIGEM_EXECUCAO', limparTexto(origem).toUpperCase() || 'INTERNA');
+}
+
+function finalizarContextoExecucao_() {
+  EXECUCAO_AUTORIZADA = false;
+  PropertiesService.getScriptProperties().deleteProperty('ORIGEM_EXECUCAO');
+}
+
+function executarComContextoAutorizado_(origemExecucao, callback) {
+  try {
+    iniciarContextoExecucao_(origemExecucao);
+    return callback();
+  } finally {
+    finalizarContextoExecucao_();
+  }
+}
+
+function menuFazerBackupPlanilha_() {
+  return executarComContextoAutorizado_('MENU', function () { return fazerBackupPlanilha_({ dryRun: false }); });
+}
+
+function menuAjustarEstruturaPlanilha_() {
+  return executarComContextoAutorizado_('MENU', function () { return ajustarEstruturaPlanilha_({ dryRun: obterDryRunEfetivo_() }); });
+}
+
+function menuMigrarDadosLegados_() {
+  return executarComContextoAutorizado_('MENU', function () { return migrarDadosLegados_({ dryRun: obterDryRunEfetivo_() }); });
+}
+
+function menuValidarIntegridadeMigracao_() {
+  return executarComContextoAutorizado_('MENU', function () { return validarIntegridadeMigracao_({ dryRun: obterDryRunEfetivo_() }); });
+}
+
+function menuRodarRotinaCompletaSegura_() {
+  return executarComContextoAutorizado_('MENU', function () { return rodarRotinaCompletaSegura_(); });
+}
+
+function menuRestaurarBackupMaisRecente_() {
+  return executarComContextoAutorizado_('MENU', function () { return restaurarBackupMaisRecente_(); });
+}
+
 function rodarRotinaCompletaSegura_() {
+  return executarComContextoAutorizado_('INTERNA', function () {
   validarPreExecucaoMigracao_('SIMULACAO');
   registrarLogMigracao_('rodarRotinaCompletaSegura_', 'SIMULADO', '', 'Início obrigatório da simulação completa (dry run).', 'SIMULADO', true);
   ajustarEstruturaPlanilha_({ dryRun: true });
@@ -66,6 +113,7 @@ function rodarRotinaCompletaSegura_() {
   ajustarEstruturaPlanilha_({ dryRun: false });
   migrarDadosLegados_({ dryRun: false });
   validarIntegridadeMigracao_({ dryRun: false });
+  });
 }
 
 function fazerBackupPlanilha_(opcoes) {
@@ -90,6 +138,7 @@ function fazerBackupPlanilha_(opcoes) {
 }
 
 function ajustarEstruturaPlanilha_(opcoes) {
+  validarContextoExecucaoAutorizada_('ajustarEstruturaPlanilha_');
   var dryRun = obterDryRunEfetivo_(opcoes);
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   var mapa = obterEstruturaAbas_();
@@ -124,6 +173,7 @@ function ajustarEstruturaPlanilha_(opcoes) {
 }
 
 function migrarDadosLegados_(opcoes) {
+  validarContextoExecucaoAutorizada_('migrarDadosLegados_');
   var dryRun = obterDryRunEfetivo_(opcoes);
   validarPreExecucaoMigracao_(dryRun ? 'SIMULACAO' : 'EXECUCAO_REAL');
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
@@ -232,6 +282,7 @@ function gerarResumoOperacionalLegado_(texto) {
 }
 
 function validarIntegridadeMigracao_(opcoes) {
+  validarContextoExecucaoAutorizada_('validarIntegridadeMigracao_');
   var dryRun = obterDryRunEfetivo_(opcoes);
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = planilha.getSheetByName('CASOS');
@@ -269,7 +320,19 @@ function validarIntegridadeMigracao_(opcoes) {
   registrarLogMigracao_('validarIntegridadeMigracao_', status, '', 'Total casos: ' + dados.length + '; sem idCaso: ' + linhasSemId + '; duplicados idCaso: ' + duplicadosId.length + '; duplicados talaoPMESP: ' + duplicadosTalao.length + '.');
 }
 
-function registrarLogMigracao_(funcaoExecutada, status, idCaso, mensagem, modoExecucao, backupConfirmado) {
+
+function validarContextoExecucaoAutorizada_(funcao) {
+  if (EXECUCAO_AUTORIZADA) return;
+  registrarLogMigracao_(funcao || 'desconhecida', 'BLOQUEADO', '', 'Execução bloqueada: função só pode ser chamada via fluxo autorizado.', 'EXECUTADO', false, 'BLOQUEADA');
+  throw new Error('Execução bloqueada: função só pode ser chamada via fluxo autorizado.');
+}
+
+function obterOrigemExecucaoAtual_() {
+  var origem = PropertiesService.getScriptProperties().getProperty('ORIGEM_EXECUCAO');
+  return origem || 'INTERNA';
+}
+
+function registrarLogMigracao_(funcaoExecutada, status, idCaso, mensagem, modoExecucao, backupConfirmado, origemExecucao) {
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   var abaLog = planilha.getSheetByName('LOG_MIGRACAO') || planilha.insertSheet('LOG_MIGRACAO');
   garantirCabecalhoSemDuplicidade_(abaLog, CABECALHO_LOG_MIGRACAO, 'LOG_MIGRACAO');
@@ -282,7 +345,8 @@ function registrarLogMigracao_(funcaoExecutada, status, idCaso, mensagem, modoEx
     backupConfirmado === undefined ? (verificarBackupRecente_() ? 'TRUE' : 'FALSE') : (backupConfirmado ? 'TRUE' : 'FALSE'),
     idCaso || '',
     mensagem || '',
-    Session.getActiveUser().getEmail() || 'sistema'
+    Session.getActiveUser().getEmail() || 'sistema',
+    origemExecucao || obterOrigemExecucaoAtual_()
   ]);
 }
 
@@ -453,6 +517,7 @@ function verificarBackupRecente_() {
  * Rollback assistido: restaura as abas operacionais a partir do backup mais recente.
  */
 function restaurarBackupMaisRecente_() {
+  validarContextoExecucaoAutorizada_('restaurarBackupMaisRecente_');
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   var abasAlvo = ['CASOS', 'TRIAGEM_RESPOSTAS', 'EVENTOS_OCORRENCIA', 'INDICADORES_OPERACIONAIS'];
   var backupsPorAba = {};
