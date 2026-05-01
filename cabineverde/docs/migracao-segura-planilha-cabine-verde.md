@@ -91,8 +91,12 @@ Principais garantias:
 - **Métricas operacionais**: registra `totalLinhasLidas`, `totalLinhasComIdCaso` e `totalSemIdCaso` no `LOG_MIGRACAO` e também em `Logger.log`.
 - **Idempotência**: se `idCaso` já existir em `CASOS_TRATADOS`, o caso não é duplicado nem sobrescrito.
 - **Observações longas/árvore**:
-  - quando `observacoesOperacionais` contiver `[ÁRVORE DE DECISÃO` ou for extensa, o texto bruto vai para `LEGADO_OBSERVACOES_BRUTAS`;
-  - em `CASOS_TRATADOS`, fica apenas um resumo curto.
+  - quando a aba `Desaparecidos` tiver sofrido separação indevida de **“texto em colunas”**, a migração recompõe `observacaoBrutaCompleta` com `observacoesOperacionais` + colunas à direita da mesma linha;
+  - a detecção de árvore legada considera marcadores como `[ÁRVORE DE DECISÃO`, `PASSO 1`, `Resposta:`, `Complemento:` e `[INDICADORES OPERACIONAIS]`;
+  - a árvore completa reconstruída é arquivada em `LEGADO_OBSERVACOES_BRUTAS` com `origem=Desaparecidos`, `campoOrigem=observacoesOperacionais_expandido` e `hashObservacao` (MD5 do texto bruto);
+  - a não duplicação de arquivamento usa a chave `idCaso + campoOrigem + hashObservacao`;
+  - a extração de resumo é resiliente: se não houver `[INDICADORES OPERACIONAIS]`, o trecho vai até o fim; sem `[OBSERVAÇÕES DO OPERADOR]` (ou vazio/`-`) usa fallback padrão;
+  - em `CASOS_TRATADOS`, `observacoesOperacionais` recebe somente resumo operacional curto (até 300 caracteres), sem carregar a árvore completa.
 - **Status da migração (`statusMigracao`)**:
   - `MIGRADO`: `idCaso` válido + `talaoPMESP` preenchido;
   - `INCOMPLETO`: `idCaso` válido sem `talaoPMESP`;
@@ -102,6 +106,17 @@ Principais garantias:
   - `meioTransporte`: `n/d` e `nd` => `NAO INFORMADO`;
   - textos: remoção de espaços duplicados preservando legibilidade;
   - booleanos textuais `TRUE`/`FALSE`: convertidos para booleanos reais quando possível.
+- **Classificação automática operacional em `CASOS_TRATADOS`**:
+  - novos campos: `classificacoesOperacionais`, `prioridadeAutomatica`, `tipoCaso`, `flagAlerta`;
+  - modelo multi-etiqueta: o caso pode receber simultaneamente `POSSIVEL_CRIME`, `CRIANCA_DESAPARECIDA`, `IDOSO_DESAPARECIDO`, `RISCO_COGNITIVO`, `VULNERAVEL`;
+  - `classificacoesOperacionais` é persistido como JSON string no Sheets para compatibilidade futura de leitura;
+  - priorização por peso (maior risco dominante): `POSSIVEL_CRIME=100`, `CRIANCA_DESAPARECIDA=90`, `RISCO_COGNITIVO=85`, `IDOSO_DESAPARECIDO=80`, `VULNERAVEL=70`;
+  - `prioridadeAutomatica`: `CRITICA` (>=90), `ALTA` (>=80), `MEDIA` (>=70), `BAIXA` (<70);
+  - `tipoCaso` segue a classificação dominante (maior peso);
+  - `flagAlerta=true` quando houver `POSSIVEL_CRIME`, `CRIANCA_DESAPARECIDA` ou `RISCO_COGNITIVO`;
+  - evento de auditoria: `CLASSIFICACAO_AUTOMATICA_REALIZADA` com `totalClassificados`, `totalAlertas` e `totalCriticos`;
+  - logs ampliados: contagem por tipo de classificação, distribuição de prioridade calculada e total de casos com múltiplos fatores;
+  - uso operacional: o operador utiliza `prioridadeAutomatica`, `flagAlerta` e o conjunto de rótulos para triagem rápida, mantendo leitura detalhada no restante do caso.
 
 ### DRY RUN (`DRY_RUN_MIGRACAO`)
 
