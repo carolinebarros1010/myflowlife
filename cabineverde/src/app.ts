@@ -457,7 +457,7 @@ if (formRegistro) {
     event.preventDefault();
     const dadosRegistro = new FormData(formRegistro);
     if (form) {
-      const mapCampos = ['nomeCompletoDesaparecido', 'idade', 'sexoGenero', 'municipio', 'dataHoraUltimaVisualizacao', 'nomeSolicitante'];
+      const mapCampos = ['talaoPMESP', 'nomeCompletoDesaparecido', 'idade', 'sexoGenero', 'municipio', 'dataHoraUltimaVisualizacao', 'nomeSolicitante', 'telefoneSolicitante'];
       mapCampos.forEach((campo) => {
         const valor = String(dadosRegistro.get(campo) || '');
         const destino = form.elements.namedItem(campo) as HTMLInputElement | null;
