@@ -103,7 +103,7 @@ A árvore de decisão **não foi removida**. Ela segue no frontend e agora é pe
 
 - Nova rotina GAS: `auditarQualidadeDados_()`.
 - Execução manual via menu: `Cabine Verde → Auditar qualidade dos dados`.
-- A rotina percorre a aba `CASOS`, não altera dados automaticamente e apenas aponta inconsistências.
+- A rotina percorre a aba `CASOS` e registra inconsistências como itens gerenciáveis (evitando duplicidade de pendências já abertas).
 - A rotina registra evidências na aba `QUALIDADE_DADOS` com as colunas:
   - `dataHoraAuditoria`
   - `idCaso`
@@ -112,7 +112,9 @@ A árvore de decisão **não foi removida**. Ela segue no frontend e agora é pe
   - `problema`
   - `severidade` (`CRITICA`, `ALTA`, `MEDIA`, `BAIXA`)
   - `acaoRecomendada`
-  - `statusTratamento`
+  - `statusTratamento` (`PENDENTE`, `EM_TRATAMENTO`, `RESOLVIDO`, `IGNORADO`)
+  - `responsavelTratamento`
+  - `dataHoraResolucao`
 - Itens auditados automaticamente:
   1. ausência de `talaoPMESP`;
   2. ausência de `nomeCompletoDesaparecido`;
@@ -125,3 +127,10 @@ A árvore de decisão **não foi removida**. Ela segue no frontend e agora é pe
   9. `prioridade` vazia;
   10. falta de decisão operacional registrada.
 - Ao final, a rotina grava evento `AUDITORIA_QUALIDADE_DADOS` na aba `EVENTOS_OCORRENCIA` com resumo da execução.
+
+- Regras de gestão de inconsistências:
+  - antes de inserir, o GAS verifica duplicidade por `idCaso + campo + problema + statusTratamento=PENDENTE`;
+  - se já existir pendência idêntica, não cria nova linha;
+  - resolução pode ser registrada por `marcarProblemaQualidadeResolvido_(idCaso, campo, problema, responsavelTratamento)`;
+  - ao resolver, registra evento `PROBLEMA_QUALIDADE_RESOLVIDO` em `EVENTOS_OCORRENCIA`;
+  - painel resumido via `resumoQualidadeDados_()` com `totalProblemas`, `totalCriticos`, `totalPendentes` e `totalResolvidos`.
