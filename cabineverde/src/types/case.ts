@@ -19,10 +19,10 @@ export interface CasoDesaparecimento {
   nomeMae: string;
   dataNascimento: string;
   corPele?: string;
-  alturaCm?: number;
-  pesoKg?: number;
-  cabelo?: string;
-  olhos?: string;
+  alturaAproximada?: number;
+  pesoAproximado?: number;
+  corCabelo?: string;
+  corOlhos?: string;
   caracteristicasMarcantes?: string;
   statusFoto?: 'pendente' | 'enviada' | 'validada';
   fotoDisponivel: boolean;

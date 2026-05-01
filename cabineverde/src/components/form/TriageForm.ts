@@ -50,10 +50,10 @@ export const renderTriageForm = (): string => `
         input('dataNascimento', 'Data de nascimento', 'date'),
         input('telefoneDesaparecido', 'Telefone desaparecido'),
         select('corPele', 'Cor da pele', ['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não informado']),
-        input('alturaCm', 'Altura (cm)', 'number'),
-        input('pesoKg', 'Peso (kg)', 'number'),
-        input('cabelo', 'Cabelo'),
-        input('olhos', 'Olhos'),
+        input('alturaAproximada', 'Altura aproximada (cm)', 'number'),
+        input('pesoAproximado', 'Peso aproximado (kg)', 'number'),
+        input('corCabelo', 'Cor do cabelo'),
+        input('corOlhos', 'Cor dos olhos'),
         input('caracteristicasMarcantes', 'Características marcantes')
       ].join('')
     )}
