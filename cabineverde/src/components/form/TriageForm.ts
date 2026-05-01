@@ -29,10 +29,10 @@ export const renderTriageForm = (): string => `
       '1) Identificação complementar',
       [
         input('idCaso', 'ID do caso (preencha para atualização)'),
-        input('talaoPMESP', 'Talão PMESP', 'text', true),
+        input('talaoPMESP', 'Talão PMESP', 'text', true, 'placeholder="Ex.: 2026-000123" pattern="[A-Za-z0-9\\-\\/]{6,20}" title="Use letras, números, hífen ou barra (6 a 20 caracteres)."'),
         input('dataHoraRegistro', 'Data/hora registro', 'datetime-local', true),
         input('talaoBopm', 'Talão BOPM'),
-        input('statusCaso', 'Status caso')
+        select('statusCaso', 'Status caso', ['EM_TRIAGEM', 'EM_BUSCA', 'LOCALIZADO_VIVO', 'LOCALIZADO_OBITO', 'ENCERRADO'], true)
       ].join('')
     )}
 
@@ -44,7 +44,7 @@ export const renderTriageForm = (): string => `
         input('rg', 'RG'),
         input('nomeMae', 'Nome da mãe'),
         input('dataNascimento', 'Data de nascimento', 'date'),
-        input('telefoneDesaparecido', 'Telefone desaparecido'),
+        input('telefoneDesaparecido', 'Telefone desaparecido', 'tel', false, 'placeholder="(11) 99999-0000" pattern="^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$"'),
         select('corPele', 'Cor da pele', ['BRANCA', 'PARDA', 'PRETA', 'AMARELA', 'INDIGENA', 'NAO INFORMADO']),
         input('alturaAproximada', 'Altura aproximada (cm)', 'number', false, 'min="30" max="250" step="1" inputmode="numeric"'),
         input('pesoAproximado', 'Peso aproximado (kg)', 'number', false, 'min="1" max="400" step="1" inputmode="numeric"'),
@@ -72,7 +72,7 @@ export const renderTriageForm = (): string => `
       '4) Solicitante complementar',
       [
         input('vinculoSolicitante', 'Vínculo solicitante', 'text', true),
-        input('telefoneSolicitante', 'Telefone solicitante', 'text', true)
+        input('telefoneSolicitante', 'Telefone solicitante', 'tel', true, 'placeholder="(11) 99999-0000" pattern="^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$"')
       ].join('')
     )}
 
@@ -128,12 +128,14 @@ export const renderRegistroForm = (): string => `
     <fieldset class="cv-step-section">
       <legend>Registro rápido</legend>
       <div class="cv-grid">
+        ${input('talaoPMESP', 'Número do Talão PMESP', 'text', true, 'placeholder="Ex.: 2026-000123" pattern="[A-Za-z0-9\\-\\/]{6,20}" title="Use letras, números, hífen ou barra (6 a 20 caracteres)." autofocus')}
         ${input('nomeCompletoDesaparecido', 'Nome', 'text', true)}
-        ${input('idade', 'Idade', 'number', true)}
+        ${input('idade', 'Idade', 'number', true, 'min="0" max="120" step="1"')}
         ${input('sexoGenero', 'Sexo', 'text', true)}
         ${input('municipio', 'Município', 'text', true)}
         ${input('dataHoraUltimaVisualizacao', 'Última visualização', 'datetime-local', true)}
         ${input('nomeSolicitante', 'Solicitante', 'text', true)}
+        ${input('telefoneSolicitante', 'Telefone solicitante', 'tel', true, 'placeholder="(11) 99999-0000" pattern="^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$"')}
       </div>
       <div class="cv-inline-actions">
         <button id="save-registro" type="submit" class="cv-button cv-button--primary">Salvar</button>
