@@ -584,7 +584,11 @@ export const salvarCasoSheets = async (caso) => {
 
 export const healthcheckSheets = async () => {
   try {
-    const resposta = await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, { method: 'GET' });
+    const resposta = await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'healthcheck' })
+    });
     const texto = await resposta.text();
     let body = {};
     try {
@@ -617,7 +621,7 @@ export const healthcheckSheets = async () => {
 const chamarAcaoGAS = async (action, payload = {}) => {
   const resposta = await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ action, ...payload })
   });
   const body = await resposta.json();

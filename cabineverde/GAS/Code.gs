@@ -357,6 +357,9 @@ function doPost(e) {
       registrarLogAcessoOperador_(SpreadsheetApp.getActiveSpreadsheet(), "ACESSO_NEGADO", "SEM_PERMISSAO_ACAO", "Ação bloqueada: " + acao + "; motivo=" + validacaoAcao.motivo, operadorAtual.email);
       throw new Error("Ação não permitida para o perfil do operador.");
     }
+    if (body.action === 'healthcheck') {
+      return criarRespostaJson({ ok: true, service: 'cabineverde', message: 'Endpoint ativo' });
+    }
     if (body.action === 'visualizarFotoDesaparecido') {
       var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa, body.motivoAcessoFoto);
       return criarRespostaJson({ ok: true, message: 'Visualização autorizada', conteudoBase64: respostaFoto.conteudoBase64, mimeType: respostaFoto.mimeType, idCaso: respostaFoto.idCaso, idFoto: respostaFoto.idFoto });

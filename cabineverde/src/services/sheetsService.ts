@@ -53,7 +53,7 @@ export class GoogleSheetsService implements SheetsService {
     try {
       const resposta = await fetch(sheetsConfig.endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: 'visualizarFotoDesaparecido', idFoto, operador, justificativa, motivoAcessoFoto })
       });
       const body = (await parseResponseBody(resposta)) as EndpointResponse & {
@@ -77,7 +77,11 @@ export class GoogleSheetsService implements SheetsService {
 
   async healthcheck(): Promise<SheetsServiceResponse> {
     try {
-      const resposta = await fetch(sheetsConfig.endpoint, { method: 'GET' });
+      const resposta = await fetch(sheetsConfig.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'healthcheck' })
+      });
       const body = await parseResponseBody(resposta);
       if (!resposta.ok || body.ok === false) {
         return {
@@ -105,7 +109,7 @@ export class GoogleSheetsService implements SheetsService {
       const resposta = await fetch(sheetsConfig.endpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'text/plain;charset=utf-8'
         },
         body: JSON.stringify({
           service: 'cabineverde',
