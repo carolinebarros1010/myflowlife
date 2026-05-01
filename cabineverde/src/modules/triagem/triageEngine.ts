@@ -3,7 +3,6 @@ import { calcularFaixaEtaria } from '../../utils/age.js';
 import { calcularRisco } from '../../utils/risk.js';
 import { calcularPrioridade, calcularAcaoSugerida } from '../../utils/priority.js';
 import {
-  anexarBlocoIndicadoresObservacoes,
   calcularCriticidadeIndicadores,
   mapearIndicadoresOperacionais,
   sugerirAcaoIndicadores
@@ -24,10 +23,8 @@ export const calcularAptoCabineVerde = (caso: CasoDesaparecimento): boolean => {
 export const enriquecerCaso = (base: CasoDesaparecimento): CasoCompleto => {
   const indicadoresOperacionais = mapearIndicadoresOperacionais(base);
   const criticidadeIndicadores = calcularCriticidadeIndicadores(indicadoresOperacionais);
-  const observacoesOperacionais = anexarBlocoIndicadoresObservacoes(base.observacoesOperacionais, indicadoresOperacionais);
   const baseComIndicadores: CasoDesaparecimento = {
-    ...base,
-    observacoesOperacionais
+    ...base
   };
 
   return {

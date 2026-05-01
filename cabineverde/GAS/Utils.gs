@@ -151,3 +151,33 @@ function formatarDataHora(data) {
   var timezone = Session.getScriptTimeZone() || 'America/Sao_Paulo';
   return Utilities.formatDate(data, timezone, 'yyyy-MM-dd HH:mm:ss');
 }
+
+function garantirAbaComCabecalho(planilha, nomeAba, cabecalho) {
+  var sheet = planilha.getSheetByName(nomeAba);
+  if (!sheet) {
+    sheet = planilha.insertSheet(nomeAba);
+  }
+
+  var linha1 = sheet.getRange(1, 1, 1, cabecalho.length).getValues()[0];
+  var precisaCabecalho = !linha1.some(function (c) { return limparTexto(c); });
+  if (precisaCabecalho) {
+    sheet.getRange(1, 1, 1, cabecalho.length).setValues([cabecalho]);
+  }
+
+  return sheet;
+}
+
+function garantirColunasDaEstrutura(sheet, colunasEsperadas) {
+  var ultimaColuna = Math.max(sheet.getLastColumn(), 1);
+  var cabecalhoAtual = sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0].map(limparTexto);
+  var colunasFaltantes = (colunasEsperadas || []).filter(function (coluna) {
+    return cabecalhoAtual.indexOf(coluna) === -1;
+  });
+
+  if (colunasFaltantes.length) {
+    sheet.getRange(1, ultimaColuna + 1, 1, colunasFaltantes.length).setValues([colunasFaltantes]);
+    cabecalhoAtual = cabecalhoAtual.concat(colunasFaltantes);
+  }
+
+  return cabecalhoAtual.filter(Boolean);
+}

@@ -7,6 +7,7 @@ export interface SubfluxoPerguntas {
 
 export interface CasoDesaparecimento {
   id: string;
+  talaoPMESP: string;
   dataHoraRegistro: string;
   municipio: string;
   talaoBopm: string;
@@ -60,9 +61,16 @@ export interface CasoCompleto extends CasoDesaparecimento, CamposCalculados {}
 
 export type SheetCellValue = string | number | boolean;
 
+export interface AbaPayload {
+  aba: string;
+  colunas: string[];
+  valores: SheetCellValue[];
+}
+
 export interface SheetPayload {
-  aba: 'Desaparecidos' | 'Listas' | 'Relatorio_Diario' | 'Painel' | 'Ocorrencias_Relevancia' | 'Config';
+  aba: 'CASOS';
   colunas: string[];
   dados: Record<string, SheetCellValue>;
   valores: SheetCellValue[];
+  abas: AbaPayload[];
 }

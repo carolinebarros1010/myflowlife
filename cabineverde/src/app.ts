@@ -70,6 +70,7 @@ const initial = Number(localStorage.getItem(chaveEtapaAtual) || 0);
 
 const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => ({
   id: normalizarTexto(String(dados.get('idCaso') || '')) || `CV-${Date.now()}`,
+  talaoPMESP: normalizarTexto(String(dados.get('talaoPMESP') || '')),
   dataHoraRegistro: String(dados.get('dataHoraRegistro') || new Date().toISOString()),
   municipio: normalizarTexto(String(dados.get('municipio') || '')),
   talaoBopm: normalizarTexto(String(dados.get('talaoBopm') || '')),
