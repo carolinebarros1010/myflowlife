@@ -21,11 +21,11 @@ Data: 2026-05-01
 8. **`observacoesOperacionais` não recebe `talaoPMESP` nem árvore**: **OK no código TypeScript principal**.
    - Em `src/app.ts`, `observacoesOperacionais` vem apenas do campo livre do formulário.
    - Em `src/utils/sheetsPayload.ts`, é normalizada como texto curto.
-   - **Atenção**: existe código legado em `public/js` que ainda concatena árvore/indicadores em observações.
+   - Removido legado em `public/js`: observações voltaram a carregar apenas texto livre do operador.
 9. **Teste de payload valida presença do campo**: **OK**.
    - `tests/payload.test.ts` verifica coluna e dado `talaoPMESP`.
-10. **Documentação sobre `idCaso` técnico e `talaoPMESP` oficial PMESP**: **PARCIAL**.
-   - A doc atual informa obrigatoriedade de `talaoPMESP` e uso de `idCaso`, porém não explicita literalmente a distinção "chave técnica" vs "referência oficial PMESP".
+10. **Documentação sobre `idCaso` técnico e `talaoPMESP` oficial PMESP**: **OK**.
+   - A documentação de integração agora explicita a distinção operacional e as regras de consistência/duplicidade.
 
 ## Avaliação complementar — upsert por `idCaso`
 
@@ -43,3 +43,18 @@ Data: 2026-05-01
    - Se `idCaso` já existe e `talaoPMESP` diverge do registro atual, bloquear atualização e registrar log de conflito.
    - Se `idCaso` não existe, mas `talaoPMESP` já existe, retornar alerta de potencial duplicidade (ou modo "merge assistido").
 3. Registrar decisão em documentação operacional para auditoria.
+
+
+## Implementações concluídas após auditoria
+- Frontend legado (`public/js`) atualizado para não concatenar árvore/indicadores em `observacoesOperacionais`.
+- Backend GAS com busca por `idCaso` e por `talaoPMESP` na aba `CASOS`.
+- Regra de bloqueio implementada para `idCaso` existente com `talaoPMESP` divergente (`CONFLITO_TALAO_PMESP`).
+- Regra de alerta implementada para possível duplicidade quando `talaoPMESP` já existir com outro `idCaso` (`POSSIVEL_DUPLICIDADE_TALAO_PMESP`).
+- Eventos de consistência registrados em `EVENTOS_OCORRENCIA`.
+- Mantida diretriz de evolução futura para merge assistido, sem merge automático no fluxo atual.
+
+
+## Regras explícitas de consistência implementadas
+- `idCaso` existente com `talaoPMESP` vazio pode receber `talaoPMESP` novo.
+- `idCaso` existente com `talaoPMESP` preenchido e divergente é bloqueado com evento `CONFLITO_TALAO_PMESP`.
+- `talaoPMESP` já existente em outro `idCaso` gera bloqueio por possível duplicidade operacional com evento `POSSIVEL_DUPLICIDADE_TALAO_PMESP`.

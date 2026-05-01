@@ -45,19 +45,105 @@ function persistirRegistro(planilha, registro) {
   if (aba === 'CASOS') {
     var registroPorColuna = mapearPorColuna(colunas, valores);
     var idCaso = limparTexto(registroPorColuna.idCaso);
-    var linha = encontrarLinhaPorId(sheet, idCaso, 1);
+    var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
+    var linhaPorIdCaso = localizarCasoPorIdCaso(sheet, idCaso, cabecalhoAtual);
+    var linhaPorTalaoPMESP = localizarCasoPorTalaoPMESP(sheet, talaoPMESPRecebido, cabecalhoAtual);
+
+    validarConsistenciaCaso(planilha, {
+      idCaso: idCaso,
+      talaoPMESP: talaoPMESPRecebido,
+      linhaPorIdCaso: linhaPorIdCaso,
+      linhaPorTalaoPMESP: linhaPorTalaoPMESP
+    });
+
     var linhaFinal = cabecalhoAtual.map(function (nomeColuna) {
       return normalizarValorPlanilha(registroPorColuna[nomeColuna]);
     });
-    if (linha > 1) {
-      sheet.getRange(linha, 1, 1, linhaFinal.length).setValues([linhaFinal]);
+
+    if (linhaPorIdCaso > 1) {
+      sheet.getRange(linhaPorIdCaso, 1, 1, linhaFinal.length).setValues([linhaFinal]);
       return;
     }
+
     sheet.appendRow(linhaFinal);
     return;
   }
 
   sheet.appendRow(valores);
+}
+
+
+function localizarCasoPorIdCaso(sheet, idCaso, cabecalhoAtual) {
+  return encontrarLinhaPorColuna(sheet, idCaso, 'idCaso', cabecalhoAtual);
+}
+
+function localizarCasoPorTalaoPMESP(sheet, talaoPMESP, cabecalhoAtual) {
+  return encontrarLinhaPorColuna(sheet, talaoPMESP, 'talaoPMESP', cabecalhoAtual);
+}
+
+function encontrarLinhaPorColuna(sheet, valorBusca, nomeColuna, cabecalhoAtual) {
+  var valorLimpo = limparTexto(valorBusca);
+  if (!valorLimpo || sheet.getLastRow() < 2) return -1;
+  var indiceColuna = (cabecalhoAtual || []).indexOf(nomeColuna);
+  if (indiceColuna === -1) return -1;
+
+  var valores = sheet.getRange(2, indiceColuna + 1, sheet.getLastRow() - 1, 1).getValues();
+  for (var i = 0; i < valores.length; i += 1) {
+    if (limparTexto(valores[i][0]) === valorLimpo) return i + 2;
+  }
+
+  return -1;
+}
+
+function validarConsistenciaCaso(planilha, contexto) {
+  var idCaso = limparTexto(contexto.idCaso);
+  var talaoPMESP = limparTexto(contexto.talaoPMESP);
+  var linhaPorIdCaso = contexto.linhaPorIdCaso;
+  var linhaPorTalaoPMESP = contexto.linhaPorTalaoPMESP;
+
+  if (linhaPorIdCaso > 1) {
+    var sheetCasos = planilha.getSheetByName('CASOS');
+    var cabecalho = sheetCasos.getRange(1, 1, 1, sheetCasos.getLastColumn()).getValues()[0].map(limparTexto);
+    var indiceTalao = cabecalho.indexOf('talaoPMESP');
+    var talaoSalvo = indiceTalao >= 0 ? limparTexto(sheetCasos.getRange(linhaPorIdCaso, indiceTalao + 1).getValue()) : '';
+
+    if (talaoPMESP && talaoSalvo && talaoPMESP !== talaoSalvo) {
+      registrarEventoOcorrencia(planilha, idCaso, 'CONFLITO_TALAO_PMESP', 'Bloqueio: idCaso existente com talaoPMESP divergente.');
+      throw new Error('Conflito de consistência: idCaso já cadastrado com outro talaoPMESP. Atualização bloqueada.');
+    }
+    return;
+  }
+
+  if (linhaPorTalaoPMESP > 1) {
+    var sheetCasosExistente = planilha.getSheetByName('CASOS');
+    var cabecalhoExistente = sheetCasosExistente.getRange(1, 1, 1, sheetCasosExistente.getLastColumn()).getValues()[0].map(limparTexto);
+    var indiceIdCaso = cabecalhoExistente.indexOf('idCaso');
+    var idCasoExistente = indiceIdCaso >= 0 ? limparTexto(sheetCasosExistente.getRange(linhaPorTalaoPMESP, indiceIdCaso + 1).getValue()) : '';
+    if (!idCaso || idCaso !== idCasoExistente) {
+      registrarEventoOcorrencia(planilha, idCaso || idCasoExistente, 'POSSIVEL_DUPLICIDADE_TALAO_PMESP', 'Alerta: talaoPMESP já vinculado a outro idCaso. Merge assistido futuro.');
+      throw new Error('Possível duplicidade operacional: talaoPMESP já cadastrado em outro idCaso. Operação não realizada automaticamente.');
+    }
+  }
+}
+
+function registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricaoEvento) {
+  var sheetEventos = garantirAbaComCabecalho(planilha, 'EVENTOS_OCORRENCIA', ESTRUTURA_PLANILHA.EVENTOS_OCORRENCIA);
+  var cabecalhoEventos = garantirColunasDaEstrutura(sheetEventos, ESTRUTURA_PLANILHA.EVENTOS_OCORRENCIA);
+  var eventoPorColuna = {
+    idCaso: limparTexto(idCaso),
+    timestampEvento: formatarDataHora(new Date()),
+    tipoEvento: limparTexto(tipoEvento),
+    descricaoEvento: limparTexto(descricaoEvento),
+    statusCaso: '',
+    prioridade: '',
+    classificacaoRisco: ''
+  };
+
+  var linhaEvento = cabecalhoEventos.map(function (nomeColuna) {
+    return normalizarValorPlanilha(eventoPorColuna[nomeColuna]);
+  });
+
+  sheetEventos.appendRow(linhaEvento);
 }
 
 function mapearPorColuna(colunas, valores) {
@@ -68,12 +154,3 @@ function mapearPorColuna(colunas, valores) {
   return registro;
 }
 
-function encontrarLinhaPorId(sheet, idCaso, colunaId) {
-  var idLimpo = limparTexto(idCaso);
-  if (!idLimpo || sheet.getLastRow() < 2) return -1;
-  var ids = sheet.getRange(2, colunaId || 1, sheet.getLastRow() - 1, 1).getValues();
-  for (var i = 0; i < ids.length; i += 1) {
-    if (limparTexto(ids[i][0]) === idLimpo) return i + 2;
-  }
-  return -1;
-}
