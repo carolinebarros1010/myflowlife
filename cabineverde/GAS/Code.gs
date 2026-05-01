@@ -4,15 +4,75 @@ var ESTRUTURA_PLANILHA = {
   EVENTOS_OCORRENCIA: COLUNAS_EVENTOS_OCORRENCIA,
   INDICADORES_OPERACIONAIS: COLUNAS_INDICADORES_OPERACIONAIS,
   FOTOS_DESAPARECIDOS: typeof COLUNAS_FOTOS_DESAPARECIDOS !== 'undefined' ? COLUNAS_FOTOS_DESAPARECIDOS : [],
+  OPERADORES: ['email','nome','perfil','ativo','ultimaAtualizacao'],
   Logs_GAS: ['timestamp', 'etapa', 'ok', 'mensagem', 'rawPostData', 'payloadIdCaso']
 };
 
+
+function validarOperadorAtual_() {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaOperadores = garantirAbaComCabecalho(planilha, 'OPERADORES', ESTRUTURA_PLANILHA.OPERADORES);
+  var cabecalho = garantirColunasDaEstrutura(abaOperadores, ESTRUTURA_PLANILHA.OPERADORES).map(limparTexto);
+  var emailAtual = limparTexto(Session.getActiveUser().getEmail()).toLowerCase();
+
+  if (!emailAtual) {
+    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'BLOQUEADO_SEM_EMAIL', 'Usuário sem e-mail identificado na sessão Google.', '');
+    throw new Error('Usuário não autorizado. Solicite acesso ao administrador.');
+  }
+
+  var idxEmail = cabecalho.indexOf('email');
+  var idxAtivo = cabecalho.indexOf('ativo');
+  if (idxEmail === -1 || idxAtivo === -1) {
+    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'ERRO_ESTRUTURA_OPERADORES', 'Aba OPERADORES sem colunas obrigatórias (email/ativo).', emailAtual);
+    throw new Error('Usuário não autorizado. Solicite acesso ao administrador.');
+  }
+
+  var ultimaLinha = abaOperadores.getLastRow();
+  var encontrado = null;
+  if (ultimaLinha >= 2) {
+    var dados = abaOperadores.getRange(2, 1, ultimaLinha - 1, abaOperadores.getLastColumn()).getValues();
+    for (var i = 0; i < dados.length; i += 1) {
+      var emailLinha = limparTexto(dados[i][idxEmail]).toLowerCase();
+      if (emailLinha === emailAtual) {
+        encontrado = dados[i];
+        break;
+      }
+    }
+  }
+
+  if (!encontrado) {
+    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'NAO_CADASTRADO', 'E-mail não encontrado na aba OPERADORES.', emailAtual);
+    throw new Error('Usuário não autorizado. Solicite acesso ao administrador.');
+  }
+
+  var ativoNormalizado = limparTexto(encontrado[idxAtivo]).toUpperCase();
+  var operadorAtivo = ['TRUE','VERDADEIRO','SIM','ATIVO','1'].indexOf(ativoNormalizado) !== -1;
+
+  if (!operadorAtivo) {
+    registrarLogAcessoOperador_(planilha, 'ACESSO_NEGADO', 'OPERADOR_INATIVO', 'Operador localizado, porém inativo na aba OPERADORES.', emailAtual);
+    throw new Error('Usuário não autorizado. Solicite acesso ao administrador.');
+  }
+
+  return { autorizado: true, email: emailAtual };
+}
+
+function registrarLogAcessoOperador_(planilha, tipoEvento, status, mensagem, email) {
+  var abaLog = garantirAbaComCabecalho(planilha, 'LOG_ACESSO', ['dataHora','tipoEvento','status','mensagem','email']);
+  abaLog.appendRow([formatarDataHora(new Date()), limparTexto(tipoEvento), limparTexto(status), limparTexto(mensagem), limparTexto(email)]);
+
+  if (typeof registrarLogMigracao_ === 'function') {
+    registrarLogMigracao_('validarOperadorAtual_', limparTexto(status), '', limparTexto(mensagem), 'EXECUTADO', true, limparTexto(tipoEvento));
+  }
+}
+
 function doGet() {
+  validarOperadorAtual_();
   return criarRespostaJson({ ok: true, service: 'cabineverde', message: 'Endpoint ativo' });
 }
 
 function doPost(e) {
   try {
+    validarOperadorAtual_();
     var body = parsePayload(e);
     if (body.action === 'visualizarFotoDesaparecido') {
       var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa);
