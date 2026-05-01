@@ -22,6 +22,10 @@ body { margin: 0; font-family: Inter, Arial, Helvetica, sans-serif; background: 
 .cv-chip--muted { background: #3d6f64; }
 
 .cv-main { display: grid; gap: 12px; margin-top: 12px; }
+.cv-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.cv-nav-item { font-weight: 700; }
+.cv-module header h2 { margin: 0 0 6px; }
+.cv-module-content { display: grid; gap: 10px; margin-top: 10px; }
 .cv-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
 .cv-status-banner { border-left: 6px solid var(--warn); background: #fff7d5; }
 .cv-status-banner.danger { border-left-color: var(--danger); background: #fde8e7; }
