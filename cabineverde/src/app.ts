@@ -34,6 +34,24 @@ import { listarIndicadoresAtivos, sugerirAcaoIndicadores } from './modules/triag
 
 const sheetsService = new GoogleSheetsService();
 const chaveEtapaAtual = 'cabine-verde-etapa-atual';
+type PerfilOperacional = 'OPERADOR' | 'SUPERVISOR' | 'ADMIN' | 'AUDITOR';
+type ModuloOperacional = 'registro' | 'consulta' | 'qualidade' | 'relatorios' | 'midias' | 'admin';
+
+const permissoesPorPerfil: Record<PerfilOperacional, ModuloOperacional[]> = {
+  OPERADOR: ['registro'],
+  SUPERVISOR: ['registro', 'consulta', 'qualidade', 'relatorios', 'midias'],
+  ADMIN: ['registro', 'consulta', 'qualidade', 'relatorios', 'midias', 'admin'],
+  AUDITOR: ['consulta', 'qualidade', 'relatorios']
+};
+
+const titulosModulos: Record<ModuloOperacional, string> = {
+  registro: 'Registro de Ocorrência',
+  consulta: 'Consulta e Auditoria',
+  qualidade: 'Qualidade dos Dados',
+  relatorios: 'Relatórios',
+  midias: 'Mídias/Fotos',
+  admin: 'Administração'
+};
 
 const MAX_FOTO_BYTES = 5 * 1024 * 1024;
 
@@ -60,8 +78,28 @@ const validarJustificativaVisualizacao = (justificativa: string): boolean => {
 };
 let sessionId = gerarSessionId();
 
-const baseLayout = () =>
-  [
+const renderModuloCard = (id: ModuloOperacional, descricao: string, acoes: string[]): string => `
+  <section class="cv-card cv-module" id="modulo-${id}" data-route="${id}" hidden>
+    <header>
+      <h2>${titulosModulos[id]}</h2>
+      <p>${descricao}</p>
+      <p><strong>Ações principais:</strong> ${acoes.join(' · ')}</p>
+    </header>
+    <div class="cv-module-content" id="modulo-${id}-conteudo"></div>
+  </section>`;
+
+const baseLayout = () => {
+  const menu = `<nav class="cv-card cv-nav" id="cv-nav-modulos" aria-label="Navegação operacional"></nav>`;
+  const modulos = [
+    renderModuloCard('registro', 'Cadastro e triagem operacional do desaparecimento.', ['Cadastrar novo desaparecido', 'Preencher triagem', 'Anexar foto', 'Salvar caso', 'Gerar relatório SIOPM']),
+    renderModuloCard('consulta', 'Consulta estruturada com auditoria e histórico.', ['Buscar por idCaso, talão ou nome', 'Visualizar timeline', 'Revisar histórico de edições']),
+    renderModuloCard('qualidade', 'Painel de inconsistências e tratamento.', ['Filtrar problemas', 'Resumo de criticidade', 'Marcar resolvido']),
+    renderModuloCard('relatorios', 'Consolidação e exportação operacional.', ['Relatório diário', 'Relatório estatístico', 'Exportar PDF', 'Exportar texto SIOPM']),
+    renderModuloCard('midias', 'Validação de fotos e evidências visuais.', ['Listar fotos por caso', 'Validar ou rejeitar foto', 'Controlar status de validação']),
+    renderModuloCard('admin', 'Governança, segurança e manutenção da plataforma.', ['Operadores e perfis', 'Logs e auditoria', 'Backup, migração e rollback'])
+  ].join('');
+  const conteudoRegistro =
+    [
     renderProgressSteps(),
     renderCaseStatusBanner(),
     '<section class="cv-operational-grid">',
@@ -86,9 +124,63 @@ const baseLayout = () =>
     renderReportView(),
     renderAgeSections()
   ].join('');
+  return `${menu}${modulos}<section hidden id="registro-layout-cache">${conteudoRegistro}</section>`;
+};
 
 const app = document.getElementById('app');
 if (app) app.innerHTML = renderMainLayout(baseLayout());
+const obterPerfilBackend = async (): Promise<PerfilOperacional> => {
+  try {
+    const resp = await fetch('/api/perfil-operador', { headers: { Accept: 'application/json' } });
+    if (!resp.ok) throw new Error('Perfil indisponível');
+    const dados = (await resp.json()) as { perfil?: PerfilOperacional };
+    if (dados.perfil && dados.perfil in permissoesPorPerfil) return dados.perfil;
+  } catch (_erro) {
+    // fallback operacional para ambientes sem backend local
+  }
+  return 'OPERADOR';
+};
+
+const montarNavegacaoPorPerfil = (perfil: PerfilOperacional): void => {
+  const nav = document.getElementById('cv-nav-modulos');
+  if (!nav) return;
+  const permitidos = permissoesPorPerfil[perfil];
+  nav.innerHTML = permitidos
+    .map((modulo) => `<button class="cv-button cv-button--ghost cv-nav-item" data-route="${modulo}" type="button">${titulosModulos[modulo]}</button>`)
+    .join('');
+  const moduloInicial = perfil === 'OPERADOR' ? 'registro' : permitidos[0];
+  const abrirModulo = (modulo: ModuloOperacional): void => {
+    document.querySelectorAll<HTMLElement>('.cv-module').forEach((el) => {
+      el.hidden = el.dataset.route !== modulo;
+    });
+  };
+  nav.querySelectorAll<HTMLButtonElement>('button[data-route]').forEach((btn) => {
+    btn.addEventListener('click', () => abrirModulo(btn.dataset.route as ModuloOperacional));
+  });
+  abrirModulo(moduloInicial);
+};
+
+const montarConteudosModulares = (): void => {
+  const registro = document.getElementById('modulo-registro-conteudo');
+  const cacheRegistro = document.getElementById('registro-layout-cache');
+  if (registro && cacheRegistro) {
+    while (cacheRegistro.firstChild) registro.appendChild(cacheRegistro.firstChild);
+    cacheRegistro.remove();
+  }
+  const consulta = document.getElementById('modulo-consulta-conteudo');
+  if (consulta) consulta.innerHTML = `${renderCaseDetails()}${renderAuditLogPanel()}<div class="cv-card"><p>Edição condicionada à confirmação de e-mail e justificativa registrada em log.</p></div>`;
+  const qualidade = document.getElementById('modulo-qualidade-conteudo');
+  if (qualidade) qualidade.innerHTML = `${renderCaseList(listarCasos().length ? listarCasos() : casosMock)}<div class="cv-card"><p>Resumo: totalProblemas, totalCriticos, totalPendentes e totalResolvidos.</p></div>`;
+  const relatorios = document.getElementById('modulo-relatorios-conteudo');
+  if (relatorios) relatorios.innerHTML = renderReportView();
+  const midias = document.getElementById('modulo-midias-conteudo');
+  if (midias) midias.innerHTML = '<div class="cv-card"><p>Listagem de fotos por caso com motivo, justificativa e status de validação/rejeição.</p></div>';
+  const admin = document.getElementById('modulo-admin-conteudo');
+  if (admin) admin.innerHTML = '<div class="cv-card"><p>Gestão de operadores, perfis, logs, backup, migração, rollback e auditoria Drive.</p></div>';
+};
+
+montarConteudosModulares();
+obterPerfilBackend().then(montarNavegacaoPorPerfil);
 
 const form = document.getElementById('triage-form') as HTMLFormElement | null;
 const initial = Number(localStorage.getItem(chaveEtapaAtual) || 0);
