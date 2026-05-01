@@ -94,3 +94,10 @@ curl -X POST 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2
 ## URL oficial do frontend
 - Produção: `https://myflowlife.com.br/cabineverde/`
 - `https://myflowlife.com.br/public/index.html` não deve ser tratado como URL oficial do Cabine Verde.
+
+
+## Hardening institucional (2026-05-01)
+- Mascaramento LGPD em leitura de casos com `mascararDadosSensivel_`.
+- Bloqueio automático de abuso de visualização de foto (5 acessos/10 min, bloqueio de 15 min).
+- Varredura de permissões do Drive com evento `ARQUIVO_EXPOSTO`.
+- Rotina diária `rotinaDiariaSeguranca_` com saída em `RELATORIO_SEGURANCA`.
