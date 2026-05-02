@@ -752,8 +752,9 @@ const registrarEventosSessao = () => {
         return;
       }
       if (mensagemLogin) mensagemLogin.textContent = resposta?.mensagem || 'Operador não autorizado. Verifique o e-mail ou solicite cadastro.';
-    } catch {
-      if (mensagemLogin) mensagemLogin.textContent = 'Não foi possível validar o operador. Verifique a conexão e tente novamente.';
+    } catch (error) {
+      const mensagem = error instanceof Error ? error.message : 'Não foi possível validar o operador. Verifique a conexão e tente novamente.';
+      if (mensagemLogin) mensagemLogin.textContent = mensagem;
     }
   });
   document.getElementById('trocarOperadorBtn')?.addEventListener('click', () => {

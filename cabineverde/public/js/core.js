@@ -660,6 +660,21 @@ export const healthcheckSheets = async () => {
   }
 };
 
+
+const classificarErroRespostaGAS = (texto, statusHttp = 0) => {
+  const bruto = String(texto || '');
+  const normalizado = bruto.toLowerCase();
+
+  if (!bruto.trim()) return { categoria: 7, rotulo: 'erro interno do GAS' };
+  if (normalizado.includes('failed to fetch') || normalizado.includes('networkerror')) return { categoria: 1, rotulo: 'CORS/preflight' };
+  if (normalizado.includes('script function not found: doget')) return { categoria: 2, rotulo: 'URL/implantação incorreta' };
+  if (normalizado.includes('<!doctype html') || normalizado.includes('<html')) return { categoria: 4, rotulo: 'resposta HTML em vez de JSON' };
+  if (normalizado.includes('operador não autorizado') || normalizado.includes('operador_nao_autorizado')) return { categoria: 5, rotulo: 'operador não cadastrado' };
+  if (normalizado.includes('operador inativo') || normalizado.includes('operador_inativo')) return { categoria: 6, rotulo: 'operador inativo' };
+  if (statusHttp === 401 || statusHttp === 403 || normalizado.includes('permission') || normalizado.includes('permiss')) return { categoria: 3, rotulo: 'permissão do Apps Script' };
+  return { categoria: 7, rotulo: 'erro interno do GAS' };
+};
+
 const chamarAcaoGAS = async (action, payload = {}) => {
   const operador = obterOperadorLocal();
   const payloadComOperador = {
@@ -685,11 +700,14 @@ const chamarAcaoGAS = async (action, payload = {}) => {
   try {
     body = JSON.parse(texto);
   } catch {
-    throw new Error('Resposta inválida do servidor.');
+    const diagnostico = classificarErroRespostaGAS(texto, resposta.status);
+    throw new Error(`Falha na validação operacional [categoria ${diagnostico.categoria}: ${diagnostico.rotulo}].`);
   }
 
   if (!resposta.ok || body.ok === false) {
-    throw new Error(body.message || body.mensagem || 'Falha na integração GAS.');
+    const mensagemBackend = body.message || body.mensagem || body.erro || body.detalhe || '';
+    const diagnostico = classificarErroRespostaGAS(mensagemBackend || texto, resposta.status);
+    throw new Error((mensagemBackend || 'Falha na integração GAS.') + ` [categoria ${diagnostico.categoria}: ${diagnostico.rotulo}]`);
   }
 
   return body;
