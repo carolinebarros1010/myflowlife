@@ -17,6 +17,7 @@ import {
   limparOperadorLocal,
   obterOperadorLocal,
   operadorEstaValidadoLocalmente,
+  sessaoOperadorExpirada,
   ARVORE_DECISAO_CONFIG,
   OPCOES_SIM_NAO_NI,
   avaliarAlertasArvore,
@@ -31,10 +32,10 @@ const app = document.getElementById('app');
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
 const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
 const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
-const PERFIL_OPERADOR = String(localStorage.getItem('cabineVerdeOperadorPerfil') || 'OPERADOR').toUpperCase();
-const NOME_OPERADOR = String(localStorage.getItem('cabineVerdeOperadorNome') || 'Operador Cabine Verde').trim();
-const podeEditarCaso = ['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR);
-const mascararDadoSensivel = (valor) => (podeEditarCaso ? valor || '-' : '***');
+const PERFIL_OPERADOR = () => String(localStorage.getItem('cabineVerdeOperadorPerfil') || 'OPERADOR').toUpperCase();
+const NOME_OPERADOR = () => String(localStorage.getItem('cabineVerdeOperadorNome') || 'Operador Cabine Verde').trim();
+const podeEditarCaso = () => ['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR());
+const mascararDadoSensivel = (valor) => (podeEditarCaso() ? valor || '-' : '***');
 
 const MIRROR_FIELDS = [
   ['nomeCompletoDesaparecido', 'arvore__passo1_nome'],
@@ -272,12 +273,31 @@ const atualizarResumo = (caso) => {
 const validarCamposMinimos = (caso) => camposObrigatoriosEnvio.every((campo) => String(caso[campo] || '').trim());
 
 const render = () => {
+  if (sessaoOperadorExpirada()) {
+    limparOperadorLocal();
+    atualizarFeedback('Sessão expirada após 12 horas. Faça novo login operacional.', true);
+  }
   const operadorValidado = operadorEstaValidadoLocalmente();
   const operadorAtual = obterOperadorLocal();
+  if (!operadorValidado) {
+    app.innerHTML = `
+    <div class="cv-shell">
+      <header class="cv-header"><h1>Cabine Verde</h1><p>Triagem dinâmica de pessoas desaparecidas</p></header>
+      <section class="cv-card cv-login-operacional" data-tela="0">
+        <h2>Login Operacional</h2>
+        <p>Informe seu e-mail institucional para acessar o sistema Cabine Verde.</p>
+        <label for="operadorEmail">E-mail institucional do operador</label>
+        <input id="operadorEmail" name="operadorEmail" type="email" required placeholder="seunome@dominio.com" autocomplete="email" />
+        <button type="button" class="cv-button cv-button--primary" id="btnValidarOperador">Validar operador</button>
+        <p id="mensagemLoginOperacional"></p>
+      </section>
+    </div>`;
+    return;
+  }
   app.innerHTML = `
   <div class="cv-shell">
     <header class="cv-header"><h1>Cabine Verde</h1><p>Triagem dinâmica de pessoas desaparecidas</p></header>
-    <section class="cv-card cv-login-operacional" data-tela="0"${operadorValidado ? ' hidden' : ''}>
+    <section class="cv-card cv-login-operacional" data-tela="0" hidden>
       <h2>Login Operacional</h2>
       <p>Informe seu e-mail institucional para acessar o sistema Cabine Verde.</p>
       <label for="operadorEmail">E-mail institucional do operador</label>
@@ -285,7 +305,7 @@ const render = () => {
       <button type="button" class="cv-button cv-button--primary" id="btnValidarOperador">Validar operador</button>
       <p id="mensagemLoginOperacional"></p>
     </section>
-    <section class="cv-card" data-tela="1"${operadorValidado ? '' : ' hidden'}>
+    <section class="cv-card" data-tela="1">
       <h3>Tela 1 — Entrada Operacional</h3>
       <p>Operador: <strong>${operadorAtual.operadorNome || operadorAtual.operadorEmail || '-'}</strong> (${operadorAtual.operadorPerfil || '-'})</p>
       <form id="entrada-operacional-form" class="cv-form-section cv-operational-entry">
@@ -531,6 +551,7 @@ const render = () => {
     }
 
     render();
+    registrarEventosSessao();
   });
 
   const renderResultadoAuditoria = (caso) => {
@@ -591,7 +612,7 @@ const render = () => {
       try {
         await editarCasoControlado_(
           idCaso,
-          { perfil: PERFIL_OPERADOR, nome: 'Operador Cabine Verde' },
+          { perfil: PERFIL_OPERADOR(), nome: 'Operador Cabine Verde' },
           { observacoesOperacionais },
           justificativaEdicao,
           emailConfirmacaoOperador
@@ -660,9 +681,9 @@ const render = () => {
     (!filtro.prioridadeTratamento || obterPrioridadeTratamento(item).toLowerCase().includes(filtro.prioridadeTratamento)) &&
     (!filtro.statusTratamento || String(item.statusTratamento || '').toLowerCase().includes(filtro.statusTratamento));
   const filtrarPorPerfil = (lista) => {
-    if (['SUPERVISOR', 'ADMIN', 'AUDITOR'].includes(PERFIL_OPERADOR)) return lista;
-    if (PERFIL_OPERADOR !== 'OPERADOR') return lista;
-    const idsRegistrados = new Set(casos.filter((c) => String(c.operadorResponsavel || '').trim().toLowerCase() === NOME_OPERADOR.toLowerCase()).map((c) => c.idCaso || c.id));
+    if (['SUPERVISOR', 'ADMIN', 'AUDITOR'].includes(PERFIL_OPERADOR())) return lista;
+    if (PERFIL_OPERADOR() !== 'OPERADOR') return lista;
+    const idsRegistrados = new Set(casos.filter((c) => String(c.operadorResponsavel || '').trim().toLowerCase() === NOME_OPERADOR().toLowerCase()).map((c) => c.idCaso || c.id));
     return lista.filter((item) => String(item.statusTratamento || '').toUpperCase() === 'PENDENTE' && (idsRegistrados.size ? idsRegistrados.has(item.idCaso) : true));
   };
   const renderListaQualidade = (resumo) => {
@@ -680,7 +701,7 @@ const render = () => {
       <p><strong>${item.idCaso || '-'}</strong> · Talão: ${item.talaoPMESP || '-'} · ${item.severidade || '-'} · <strong>Tratamento: ${item.prioridadeTratamento || 'BAIXA'}</strong></p>
       <p>Campo: ${item.campo || '-'} · Status: ${item.statusTratamento || 'PENDENTE'}</p>
       <p>${item.problema || '-'}</p>
-      ${['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR) && String(item.statusTratamento || '').toUpperCase() !== 'RESOLVIDO' ? `<button class="cv-button" data-cmd="resolver-qualidade" data-idcaso="${item.idCaso || ''}" data-campo="${item.campo || ''}" data-problema="${item.problema || ''}">Marcar como resolvido</button>` : ''}
+      ${['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR()) && String(item.statusTratamento || '').toUpperCase() !== 'RESOLVIDO' ? `<button class="cv-button" data-cmd="resolver-qualidade" data-idcaso="${item.idCaso || ''}" data-campo="${item.campo || ''}" data-problema="${item.problema || ''}">Marcar como resolvido</button>` : ''}
     </section>`).join('') : '<p>Nenhuma inconsistência para os filtros/perfil informados.</p>';
   };
   const atualizarPainelQualidade = async () => {
@@ -702,19 +723,15 @@ const render = () => {
   document.getElementById('qualidade-lista')?.addEventListener('click', async (event) => {
     const alvo = event.target;
     if (!(alvo instanceof HTMLElement) || alvo.dataset.cmd !== 'resolver-qualidade') return;
-    if (!['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR)) return atualizarFeedback('Apenas SUPERVISOR/ADMIN pode marcar como resolvido.', true);
-    await marcarProblemaQualidadeResolvido_(alvo.dataset.idcaso || '', alvo.dataset.campo || '', alvo.dataset.problema || '', NOME_OPERADOR);
+    if (!['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR())) return atualizarFeedback('Apenas SUPERVISOR/ADMIN pode marcar como resolvido.', true);
+    await marcarProblemaQualidadeResolvido_(alvo.dataset.idcaso || '', alvo.dataset.campo || '', alvo.dataset.problema || '', NOME_OPERADOR());
     atualizarFeedback('Problema marcado como resolvido.');
     await atualizarPainelQualidade();
   });
   atualizarPainelQualidade().catch(() => atualizarFeedback('Falha ao carregar painel de qualidade.', true));
 };
 
-(async () => {
-  render();
-  const health = await healthcheckSheets();
-  atualizarFeedback(health.ok ? 'Endpoint ativo' : health.message || 'Caso salvo localmente para envio.', !health.ok);
-})();
+const registrarEventosSessao = () => {
   const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const mensagemLogin = document.getElementById('mensagemLoginOperacional');
   document.getElementById('btnValidarOperador')?.addEventListener('click', async () => {
@@ -731,6 +748,7 @@ const render = () => {
         salvarOperadorLocal(resposta.operador);
         atualizarFeedback('Operador validado com sucesso. Acesso liberado.');
         render();
+        registrarEventosSessao();
         return;
       }
       if (mensagemLogin) mensagemLogin.textContent = resposta?.mensagem || 'Operador não autorizado. Verifique o e-mail ou solicite cadastro.';
@@ -741,9 +759,14 @@ const render = () => {
   document.getElementById('trocarOperadorBtn')?.addEventListener('click', () => {
     limparOperadorLocal();
     render();
+    registrarEventosSessao();
   });
 
-  if (!operadorEstaValidadoLocalmente()) {
-    mostrarTela(0);
-    return;
-  }
+};
+
+(async () => {
+  render();
+  registrarEventosSessao();
+  const health = await healthcheckSheets();
+  atualizarFeedback(health.ok ? 'Endpoint ativo' : health.message || 'Caso salvo localmente para envio.', !health.ok);
+})();
