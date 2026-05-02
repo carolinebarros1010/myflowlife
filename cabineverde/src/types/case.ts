@@ -50,6 +50,8 @@ export interface CasoDesaparecimento {
   camerasResidencia: boolean;
   camerasUltimoLocal: boolean;
   observacoesOperacionais: string;
+  operadorCriador?: string;
+  operadorUltimaAcao?: string;
   statusCaso: StatusCaso;
   subfluxoPerguntas: SubfluxoPerguntas;
 }

@@ -52,6 +52,46 @@ var ESTRUTURA_PLANILHA = {
   QUALIDADE_DADOS: ['dataHoraAuditoria','idCaso','talaoPMESP','campo','problema','severidade','prioridadeTratamento','acaoRecomendada','statusTratamento','responsavelTratamento','dataHoraResolucao']
 };
 
+var CACHE_OPERADORES_TTL_SEGUNDOS = 300;
+
+function obterOperadoresCache_() {
+  var cache = CacheService.getScriptCache();
+  var bruto = cache.get('cabineverde:operadores');
+  if (!bruto) return null;
+  try {
+    return JSON.parse(bruto);
+  } catch (_erro) {
+    return null;
+  }
+}
+
+function salvarOperadoresCache_(operadores) {
+  var cache = CacheService.getScriptCache();
+  cache.put('cabineverde:operadores', JSON.stringify(operadores || []), CACHE_OPERADORES_TTL_SEGUNDOS);
+}
+
+function carregarOperadoresDaPlanilha_(abaOperadores) {
+  var dados = abaOperadores.getDataRange().getValues();
+  var cabecalho = (dados[0] || []).map(function (h) { return limparTexto(h).toUpperCase(); });
+  var idxEmail = cabecalho.indexOf('EMAIL');
+  var idxNome = cabecalho.indexOf('NOME');
+  var idxPerfil = cabecalho.indexOf('PERFIL');
+  var idxAtivo = cabecalho.indexOf('ATIVO');
+  if (idxEmail < 0 || idxNome < 0 || idxPerfil < 0 || idxAtivo < 0) return { invalido: true, operadores: [] };
+  var operadores = [];
+  for (var i = 1; i < dados.length; i += 1) {
+    var row = dados[i];
+    operadores.push({
+      email: limparTexto(row[idxEmail]).toLowerCase(),
+      nome: limparTexto(row[idxNome]),
+      perfil: normalizarPerfilOperador_(row[idxPerfil]),
+      ativo: limparTexto(row[idxAtivo]).toUpperCase()
+    });
+  }
+  salvarOperadoresCache_(operadores);
+  return { invalido: false, operadores: operadores };
+}
+
 
 function validarOperadorAtual_() {
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
@@ -488,25 +528,21 @@ function validarOperador_(emailInformado, payload) {
     registrarLogAcessoOperador_(planilha, 'LOGIN_OPERADOR_BLOQUEADO', 'ABA_OPERADORES_NAO_ENCONTRADA', 'Aba OPERADORES não encontrada.', email);
     return { ok: false, autorizado: false, motivo: 'ABA_OPERADORES_NAO_ENCONTRADA', mensagem: 'Configuração de operadores não encontrada.' };
   }
-  var dados = aba.getDataRange().getValues();
-  var cabecalho = (dados[0] || []).map(function (h) { return limparTexto(h).toUpperCase(); });
-  var idxEmail = cabecalho.indexOf('EMAIL');
-  var idxNome = cabecalho.indexOf('NOME');
-  var idxPerfil = cabecalho.indexOf('PERFIL');
-  var idxAtivo = cabecalho.indexOf('ATIVO');
-  if (idxEmail < 0 || idxNome < 0 || idxPerfil < 0 || idxAtivo < 0) {
+  var cacheOperadores = obterOperadoresCache_();
+  var snapshot = cacheOperadores ? { invalido: false, operadores: cacheOperadores } : carregarOperadoresDaPlanilha_(aba);
+  if (snapshot.invalido) {
     registrarLogAcessoOperador_(planilha, 'LOGIN_OPERADOR_BLOQUEADO', 'CABECALHOS_OPERADORES_INVALIDOS', 'Cabeçalhos obrigatórios ausentes na aba OPERADORES.', email);
     return { ok: false, autorizado: false, motivo: 'CABECALHOS_OPERADORES_INVALIDOS', mensagem: 'A aba OPERADORES está sem cabeçalhos obrigatórios.' };
   }
-  for (var i = 1; i < dados.length; i += 1) {
-    var row = dados[i];
-    if (limparTexto(row[idxEmail]).toLowerCase() !== email) continue;
-    var ativo = limparTexto(row[idxAtivo]).toUpperCase();
+  for (var i = 0; i < snapshot.operadores.length; i += 1) {
+    var row = snapshot.operadores[i];
+    if (limparTexto(row.email).toLowerCase() !== email) continue;
+    var ativo = limparTexto(row.ativo).toUpperCase();
     if (ativo !== 'SIM') {
       registrarLogAcessoOperador_(planilha, 'LOGIN_OPERADOR_BLOQUEADO', 'OPERADOR_INATIVO', email, email);
       return { ok: false, autorizado: false, motivo: 'OPERADOR_INATIVO', mensagem: 'Operador inativo. Solicite liberação.' };
     }
-    var operador = { email: email, nome: limparTexto(row[idxNome]) || nomePayload, perfil: normalizarPerfilOperador_(row[idxPerfil]) || perfilPayload || 'OPERADOR', ativo: 'SIM' };
+    var operador = { email: email, nome: limparTexto(row.nome) || nomePayload, perfil: normalizarPerfilOperador_(row.perfil) || perfilPayload || 'OPERADOR', ativo: 'SIM' };
     registrarLogAcessoOperador_(planilha, 'LOGIN_OPERADOR_SUCESSO', 'OPERADOR_AUTORIZADO', 'Operador validado na aba OPERADORES.', email);
     return { ok: true, autorizado: true, operador: operador };
   }

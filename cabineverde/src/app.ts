@@ -262,7 +262,7 @@ const getDadosFormularioAtual = (): CasoDesaparecimento =>
 
 let triagemState: TriagemState = calcularEstadoTriagem(getDadosFormularioAtual(), Math.min(initial, etapasTriagem.length - 1), 'Pronto para triagem.');
 
-type TipoStatus = 'padrao' | 'rascunho' | 'oficial';
+type TipoStatus = 'padrao' | 'rascunho' | 'oficial' | 'bloqueio';
 
 const atualizarStatus = (mensagem: string, erro = false, tipo: TipoStatus = 'padrao'): void => {
   triagemState.status = mensagem;
@@ -272,7 +272,16 @@ const atualizarStatus = (mensagem: string, erro = false, tipo: TipoStatus = 'pad
   status?.classList.toggle('danger', erro);
   status?.classList.toggle('warning', !erro && tipo === 'rascunho');
   status?.classList.toggle('success', !erro && tipo === 'oficial');
+  status?.classList.toggle('blocked', tipo === 'bloqueio');
 };
+
+const obterOperadorAtual = (): string =>
+  normalizarTexto(
+    localStorage.getItem('cabineVerdeOperadorNome') ||
+      localStorage.getItem('cabineVerdeOperadorEmail') ||
+      triagemState.dados.nomeSolicitante ||
+      'Operador'
+  );
 
 const renderLogs = (): void => {
   const ul = document.getElementById('audit-log');
@@ -506,6 +515,9 @@ if (form) {
     event.preventDefault();
     atualizarStateDoFormulario();
     triagemState.dados.statusCaso = StatusCaso.EM_BUSCA;
+    const operadorAtual = obterOperadorAtual();
+    triagemState.dados.operadorCriador = triagemState.dados.operadorCriador || operadorAtual;
+    triagemState.dados.operadorUltimaAcao = operadorAtual;
     triagemState = calcularEstadoTriagem(triagemState.dados, triagemState.etapa, triagemState.status);
 
     salvarCasoLocal(triagemState.casoCompleto);
@@ -519,11 +531,11 @@ if (form) {
     const fotoSelecionada = arquivoFoto?.files?.[0];
     if (fotoSelecionada) {
       if (!fotoSelecionada.type.startsWith('image/')) {
-        atualizarStatus('Upload bloqueado: apenas imagens são permitidas.', true);
+        atualizarStatus('Upload bloqueado: apenas imagens são permitidas.', true, 'bloqueio');
         return;
       }
       if (fotoSelecionada.size > MAX_FOTO_BYTES) {
-        atualizarStatus('Upload bloqueado: imagem excede 5MB.', true);
+        atualizarStatus('Upload bloqueado: imagem excede 5MB.', true, 'bloqueio');
         return;
       }
 
@@ -569,6 +581,11 @@ if (form) {
       ? `Registro confirmado na planilha (${retorno.aba || 'CASOS'}).`
       : `Falha no registro: ${retorno.message || 'causa não informada pelo endpoint'}`;
     atualizarStatus(mensagemOperacional, !retorno.ok, retorno.ok ? 'oficial' : 'padrao');
+    if (!retorno.ok) {
+      const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
+      if (chaveAuto) salvarAutoRascunhoLocal(chaveAuto, triagemState);
+      atualizarStatus('Falha de conexão detectada: rascunho salvo localmente para retentativa.', true, 'rascunho');
+    }
     if (retorno.ok) {
       const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
       if (chaveAuto) limparAutoRascunhoLocal(chaveAuto);
