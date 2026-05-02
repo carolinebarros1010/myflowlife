@@ -11,10 +11,28 @@ const CHAVES_OPERADOR = {
 export const obterOperadorLocal = () => ({
   operadorEmail: String(localStorage.getItem(CHAVES_OPERADOR.email) || '').trim().toLowerCase(),
   operadorNome: String(localStorage.getItem(CHAVES_OPERADOR.nome) || '').trim(),
-  operadorPerfil: String(localStorage.getItem(CHAVES_OPERADOR.perfil) || '').trim().toUpperCase()
+  operadorPerfil: String(localStorage.getItem(CHAVES_OPERADOR.perfil) || '').trim().toUpperCase(),
+  operadorValidadoEm: String(localStorage.getItem(CHAVES_OPERADOR.validadoEm) || '').trim()
 });
 
-export const operadorEstaValidadoLocalmente = () => Boolean(obterOperadorLocal().operadorEmail);
+const SESSAO_MAXIMA_MS = 12 * 60 * 60 * 1000;
+export const sessaoOperadorExpirada = () => {
+  const validadoEmRaw = obterOperadorLocal().operadorValidadoEm;
+  if (!validadoEmRaw) return true;
+  const validadoEmMs = Date.parse(validadoEmRaw);
+  if (!Number.isFinite(validadoEmMs)) return true;
+  return Date.now() - validadoEmMs > SESSAO_MAXIMA_MS;
+};
+
+export const operadorEstaValidadoLocalmente = () => {
+  const operador = obterOperadorLocal();
+  if (!operador.operadorEmail) return false;
+  if (sessaoOperadorExpirada()) {
+    limparOperadorLocal();
+    return false;
+  }
+  return true;
+};
 export const limparOperadorLocal = () => Object.values(CHAVES_OPERADOR).forEach((chave) => localStorage.removeItem(chave));
 export const salvarOperadorLocal = (operador) => {
   localStorage.setItem(CHAVES_OPERADOR.email, String(operador.email || '').trim().toLowerCase());

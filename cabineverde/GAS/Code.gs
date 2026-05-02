@@ -108,19 +108,22 @@ function validarOperadorAtual_() {
   return { autorizado: true, email: emailAtual, perfil: perfilValidacao.perfil };
 }
 
-function registrarLogAcessoOperador_(planilha, tipoEvento, status, mensagem, email) {
-  var colunasLog = ['dataHora','tipoEvento','status','mensagem','email','perfil','resultado','motivoBloqueio'];
+function registrarLogAcessoOperador_(planilha, tipoEvento, status, mensagem, email, detalhes) {
+  var colunasLog = ['dataHora','tipoEvento','status','mensagem','email','perfil','resultado','motivoBloqueio','acaoExecutada','talaoPMESP'];
   var abaLog = garantirAbaComCabecalho(planilha, 'LOG_ACESSO', colunasLog);
   var cabecalhoLog = garantirColunasDaEstrutura(abaLog, colunasLog).map(limparTexto);
+  var det = detalhes && typeof detalhes === 'object' ? detalhes : {};
   var evento = {
     dataHora: formatarDataHora(new Date()),
     tipoEvento: limparTexto(tipoEvento),
     status: limparTexto(status),
     mensagem: limparTexto(mensagem),
     email: limparTexto(email),
-    perfil: '',
+    perfil: limparTexto(det.perfil),
     resultado: limparTexto(status),
-    motivoBloqueio: limparTexto(status).indexOf('BLOQUEADO') !== -1 ? limparTexto(mensagem) : ''
+    motivoBloqueio: limparTexto(status).indexOf('BLOQUEADO') !== -1 ? limparTexto(mensagem) : '',
+    acaoExecutada: limparTexto(det.acaoExecutada || tipoEvento),
+    talaoPMESP: limparTexto(det.talaoPMESP)
   };
   abaLog.appendRow(cabecalhoLog.map(function (coluna) { return normalizarValorPlanilha(evento[coluna]); }));
 
@@ -424,6 +427,12 @@ function doPost(e) {
 
     var registros = body.abas && Array.isArray(body.abas) ? body.abas : [body];
     var idCaso = limparTexto((body.payload && body.payload.idCaso) || (body.dados && body.dados.idCaso));
+    var talao = limparTexto((body.payload && body.payload.talaoPMESP) || (body.dados && body.dados.talaoPMESP) || body.talaoPMESP);
+    var revalidacao = validarOperador_(operadorAtual.email, body || {});
+    if (!revalidacao.ok || !revalidacao.autorizado) {
+      registrarLogAcessoOperador_(planilha, 'GRAVACAO_BLOQUEADA', 'OPERADOR_NAO_REVALIDADO', 'Operador não revalidado na aba OPERADORES antes da gravação.', operadorAtual.email, { perfil: operadorAtual.perfil, acaoExecutada: action, talaoPMESP: talao });
+      throw new Error('Operador não validado para gravação.');
+    }
     registrarLogTecnico(planilhaLogs, { etapa: 'GRAVACAO_INICIADA', ok: true, mensagem: 'Iniciando persistência em abas de destino', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
 
     registros.forEach(function (registro) {
@@ -446,6 +455,7 @@ function doPost(e) {
       });
     }
 
+    registrarLogAcessoOperador_(planilha, 'GRAVACAO_CONCLUIDA', 'SUCESSO', 'Registros persistidos com sucesso.', operadorAtual.email, { perfil: operadorAtual.perfil, acaoExecutada: action, talaoPMESP: talao });
     registrarLogTecnico(planilhaLogs || planilha, { etapa: 'GRAVACAO_SUCESSO', ok: true, mensagem: 'Registros persistidos com sucesso', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
     return criarRespostaJson({ ok: true, data: { action: 'salvarCaso', idCaso: idCaso, message: 'Gravação multiabas concluída' } });
   } catch (err) {
