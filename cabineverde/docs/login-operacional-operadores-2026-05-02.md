@@ -28,3 +28,9 @@ Após validação positiva, o front salva:
 - `cabineVerdeOperadorValidadoEm`
 
 Botão **Trocar operador** limpa as chaves e retorna para Login Operacional.
+
+## Correção CORS/POST no Login Operacional (2026-05-02)
+- O frontend deve enviar `POST` para o endpoint `/exec` com body em texto JSON serializado.
+- **Evitar `Content-Type: application/json` no fetch para Apps Script Web App e usar `text/plain` para não gerar preflight CORS.**
+- O parse da resposta do GAS no frontend deve ler `response.text()` e só então fazer `JSON.parse` com fallback de erro.
+- A action de validação precisa ser exatamente `validarOperador` com `operadorEmail` em minúsculo e sem espaços.
