@@ -662,16 +662,36 @@ export const healthcheckSheets = async () => {
 
 const chamarAcaoGAS = async (action, payload = {}) => {
   const operador = obterOperadorLocal();
-  const payloadComOperador = { ...payload, ...operador };
+  const payloadComOperador = {
+    action,
+    ...payload,
+    operadorEmail: operador.operadorEmail || payload.operadorEmail || '',
+    operadorNome: operador.operadorNome || payload.operadorNome || '',
+    operadorPerfil: operador.operadorPerfil || payload.operadorPerfil || ''
+  };
+
+  console.info('[GAS] Enviando payload:', payloadComOperador);
+
   const resposta = await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action, ...payloadComOperador })
+    body: JSON.stringify(payloadComOperador)
   });
-  const body = await resposta.json();
-  if (!resposta.ok || body.ok === false) {
-    throw new Error(body.message || 'Falha na integração GAS.');
+
+  const texto = await resposta.text();
+  console.info('[GAS] Resposta bruta:', texto);
+
+  let body = {};
+  try {
+    body = JSON.parse(texto);
+  } catch {
+    throw new Error('Resposta inválida do servidor.');
   }
+
+  if (!resposta.ok || body.ok === false) {
+    throw new Error(body.message || body.mensagem || 'Falha na integração GAS.');
+  }
+
   return body;
 };
 
