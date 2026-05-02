@@ -1,6 +1,30 @@
 export const ENDPOINT_OFICIAL_APPS_SCRIPT =
   'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec';
 
+const CHAVES_OPERADOR = {
+  email: 'cabineVerdeOperadorEmail',
+  nome: 'cabineVerdeOperadorNome',
+  perfil: 'cabineVerdeOperadorPerfil',
+  validadoEm: 'cabineVerdeOperadorValidadoEm'
+};
+
+export const obterOperadorLocal = () => ({
+  operadorEmail: String(localStorage.getItem(CHAVES_OPERADOR.email) || '').trim().toLowerCase(),
+  operadorNome: String(localStorage.getItem(CHAVES_OPERADOR.nome) || '').trim(),
+  operadorPerfil: String(localStorage.getItem(CHAVES_OPERADOR.perfil) || '').trim().toUpperCase()
+});
+
+export const operadorEstaValidadoLocalmente = () => Boolean(obterOperadorLocal().operadorEmail);
+export const limparOperadorLocal = () => Object.values(CHAVES_OPERADOR).forEach((chave) => localStorage.removeItem(chave));
+export const salvarOperadorLocal = (operador) => {
+  localStorage.setItem(CHAVES_OPERADOR.email, String(operador.email || '').trim().toLowerCase());
+  localStorage.setItem(CHAVES_OPERADOR.nome, String(operador.nome || '').trim());
+  localStorage.setItem(CHAVES_OPERADOR.perfil, String(operador.perfil || 'OPERADOR').trim().toUpperCase());
+  localStorage.setItem(CHAVES_OPERADOR.validadoEm, new Date().toISOString());
+};
+
+export const validarOperador_ = async (operadorEmail) => chamarAcaoGAS('validarOperador', { operadorEmail });
+
 export const FaixaEtaria = {
   CRIANCA: 'Criança',
   PRE_ADOLESCENTE: 'Pré-adolescente',
@@ -619,10 +643,12 @@ export const healthcheckSheets = async () => {
 };
 
 const chamarAcaoGAS = async (action, payload = {}) => {
+  const operador = obterOperadorLocal();
+  const payloadComOperador = { ...payload, ...operador };
   const resposta = await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action, ...payload })
+    body: JSON.stringify({ action, ...payloadComOperador })
   });
   const body = await resposta.json();
   if (!resposta.ok || body.ok === false) {

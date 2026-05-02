@@ -12,6 +12,11 @@ import {
   editarCasoControlado_,
   resumoQualidadeDados_,
   marcarProblemaQualidadeResolvido_,
+  validarOperador_,
+  salvarOperadorLocal,
+  limparOperadorLocal,
+  obterOperadorLocal,
+  operadorEstaValidadoLocalmente,
   ARVORE_DECISAO_CONFIG,
   OPCOES_SIM_NAO_NI,
   avaliarAlertasArvore,
@@ -26,8 +31,8 @@ const app = document.getElementById('app');
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
 const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
 const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
-const PERFIL_OPERADOR = String(localStorage.getItem('cabine-verde-perfil') || 'OPERADOR').toUpperCase();
-const NOME_OPERADOR = String(localStorage.getItem('cabine-verde-operador-nome') || 'Operador Cabine Verde').trim();
+const PERFIL_OPERADOR = String(localStorage.getItem('cabineVerdeOperadorPerfil') || 'OPERADOR').toUpperCase();
+const NOME_OPERADOR = String(localStorage.getItem('cabineVerdeOperadorNome') || 'Operador Cabine Verde').trim();
 const podeEditarCaso = ['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR);
 const mascararDadoSensivel = (valor) => (podeEditarCaso ? valor || '-' : '***');
 
@@ -267,11 +272,22 @@ const atualizarResumo = (caso) => {
 const validarCamposMinimos = (caso) => camposObrigatoriosEnvio.every((campo) => String(caso[campo] || '').trim());
 
 const render = () => {
+  const operadorValidado = operadorEstaValidadoLocalmente();
+  const operadorAtual = obterOperadorLocal();
   app.innerHTML = `
   <div class="cv-shell">
     <header class="cv-header"><h1>Cabine Verde</h1><p>Triagem dinâmica de pessoas desaparecidas</p></header>
-    <section class="cv-card" data-tela="1">
+    <section class="cv-card cv-login-operacional" data-tela="0"${operadorValidado ? ' hidden' : ''}>
+      <h2>Login Operacional</h2>
+      <p>Informe seu e-mail institucional para acessar o sistema Cabine Verde.</p>
+      <label for="operadorEmail">E-mail institucional do operador</label>
+      <input id="operadorEmail" name="operadorEmail" type="email" required placeholder="seunome@dominio.com" autocomplete="email" />
+      <button type="button" class="cv-button cv-button--primary" id="btnValidarOperador">Validar operador</button>
+      <p id="mensagemLoginOperacional"></p>
+    </section>
+    <section class="cv-card" data-tela="1"${operadorValidado ? '' : ' hidden'}>
       <h3>Tela 1 — Entrada Operacional</h3>
+      <p>Operador: <strong>${operadorAtual.operadorNome || operadorAtual.operadorEmail || '-'}</strong> (${operadorAtual.operadorPerfil || '-'})</p>
       <form id="entrada-operacional-form" class="cv-form-section cv-operational-entry">
         <div class="cv-grid">
           <label for="entrada-talaoPMESP">Número do Talão PMESP<input id="entrada-talaoPMESP" required /></label>
@@ -279,6 +295,7 @@ const render = () => {
         </div>
         <div class="cv-inline-actions">
           <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
+          <button type="button" class="cv-button cv-button--ghost" id="trocarOperadorBtn">Trocar operador</button>
         </div>
       </form>
     </section>
@@ -493,6 +510,7 @@ const render = () => {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!operadorEstaValidadoLocalmente()) return atualizarFeedback('Operador não validado. Faça o login operacional para continuar.', true);
     const caso = obterCasoDoFormulario();
     if (!validarCamposMinimos(caso)) {
       atualizarFeedback('Preencha os campos mínimos: nome do desaparecido, município, nome do solicitante e telefone do solicitante.', true);
@@ -530,6 +548,7 @@ const render = () => {
   };
 
   document.getElementById('buscarCasoBtn')?.addEventListener('click', async () => {
+    if (!operadorEstaValidadoLocalmente()) return atualizarFeedback('Operador não validado. Faça o login operacional para continuar.', true);
     const filtro = {
       idCaso: document.getElementById('audit-idCaso').value.trim(),
       talaoPMESP: document.getElementById('audit-talaoPMESP').value.trim(),
@@ -696,3 +715,35 @@ const render = () => {
   const health = await healthcheckSheets();
   atualizarFeedback(health.ok ? 'Endpoint ativo' : health.message || 'Caso salvo localmente para envio.', !health.ok);
 })();
+  const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const mensagemLogin = document.getElementById('mensagemLoginOperacional');
+  document.getElementById('btnValidarOperador')?.addEventListener('click', async () => {
+    const input = document.getElementById('operadorEmail');
+    const email = String(input?.value || '').trim().toLowerCase();
+    if (!validarEmail(email)) {
+      if (mensagemLogin) mensagemLogin.textContent = 'Informe um e-mail institucional válido.';
+      return;
+    }
+    if (mensagemLogin) mensagemLogin.textContent = 'Validando operador...';
+    try {
+      const resposta = await validarOperador_(email);
+      if (resposta?.autorizado && resposta?.operador) {
+        salvarOperadorLocal(resposta.operador);
+        atualizarFeedback('Operador validado com sucesso. Acesso liberado.');
+        render();
+        return;
+      }
+      if (mensagemLogin) mensagemLogin.textContent = resposta?.mensagem || 'Operador não autorizado. Verifique o e-mail ou solicite cadastro.';
+    } catch {
+      if (mensagemLogin) mensagemLogin.textContent = 'Não foi possível validar o operador. Verifique a conexão e tente novamente.';
+    }
+  });
+  document.getElementById('trocarOperadorBtn')?.addEventListener('click', () => {
+    limparOperadorLocal();
+    render();
+  });
+
+  if (!operadorEstaValidadoLocalmente()) {
+    mostrarTela(0);
+    return;
+  }
