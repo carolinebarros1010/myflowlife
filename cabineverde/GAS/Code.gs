@@ -1,6 +1,7 @@
 
 
 
+var CABINE_VERDE_BUILD = '2026-05-03-181-CASOS-FIX';
 var PERFIS_OPERADOR_VALIDOS = ['OPERADOR', 'SUPERVISOR', 'ADMIN', 'AUDITOR'];
 
 function normalizarPerfilOperador_(perfil) {
@@ -408,9 +409,14 @@ function normalizarDataChave_(entrada) {
   return Utilities.formatDate(data, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyy-MM-dd');
 }
 
-function doGet() {
-  validarOperadorAtual_();
-  return criarRespostaJson({ ok: true, service: 'cabineverde', message: 'Endpoint ativo' });
+function doGet(e) {
+  return jsonResponse_({
+    ok: true,
+    service: 'cabineverde',
+    build: CABINE_VERDE_BUILD,
+    message: 'Endpoint ativo',
+    httpStatus: 200
+  });
 }
 
 function doPost(e) {
@@ -423,6 +429,16 @@ function doPost(e) {
     var body = parsePayload(e);
     if (limparTexto(body.action) === 'validarOperador') {
       return criarRespostaJson(validarOperador_(body.operadorEmail, body));
+    }
+    if (limparTexto(body.action) === 'diagnosticoBuild') {
+      var schema = obterSchemaCabineVerdeUnificado_();
+      return jsonResponse_({
+        ok: true,
+        build: CABINE_VERDE_BUILD,
+        schemaCasos: Array.isArray(schema.CASOS) ? schema.CASOS.length : 0,
+        schemaEventosCaso: Array.isArray(schema.EVENTOS_CASO),
+        httpStatus: 200
+      });
     }
     var operadorAtual = validarOperadorPayloadOuSessao_(body);
     registrarLogTecnico(planilhaLogs, { etapa: 'PAYLOAD_RECEBIDO', ok: true, mensagem: 'Payload recebido e parseado com sucesso', rawPostData: extrairRawPostData(e), payloadIdCaso: limparTexto((body.payload && body.payload.idCaso) || (body.dados && body.dados.idCaso) || body.idCaso) });
