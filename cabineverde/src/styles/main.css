@@ -92,3 +92,26 @@ pre { white-space: pre-wrap; margin: 0; }
 
 .cv-upload { border: 1px dashed var(--line); border-radius: 8px; padding: 8px; background: #f7fafb; }
 .cv-upload-status { font-weight: 700; color: var(--brand); }
+
+.cv-photo-upload {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px dashed #9fb7b1;
+  border-radius: 8px;
+  background: #f7fbfa;
+}
+
+.cv-photo-status {
+  margin-top: 6px;
+  font-size: 0.9rem;
+}
+
+.cv-photo-preview {
+  display: block;
+  margin-top: 8px;
+  max-width: 160px;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #c7d6d2;
+}

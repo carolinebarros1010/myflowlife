@@ -213,6 +213,30 @@ let casoOriginalEdicao: Record<string, unknown> | null = null;
 let urlFotoUploadAtual = '';
 
 
+const fotoDigitalDisponivelSelecionada = (valor: unknown): boolean => {
+  if (valor === true) return true;
+  const normalizado = String(valor ?? '').trim().toUpperCase();
+  return ['SIM', 'TRUE', '1', 'ON'].includes(normalizado);
+};
+
+const mostrarBlocoUploadFoto = (seMostrar: boolean): void => {
+  const bloco = document.getElementById('blocoUploadFotoDesaparecido');
+  if (bloco) bloco.hidden = !seMostrar;
+};
+
+const atualizarPreviewFoto = (url: string): void => {
+  const preview = document.getElementById('previewFotoDesaparecido') as HTMLImageElement | null;
+  if (!preview) return;
+  if (!url) {
+    preview.hidden = true;
+    preview.removeAttribute('src');
+    return;
+  }
+  preview.src = url;
+  preview.hidden = false;
+};
+
+
 const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCamposFisicos({
   id: normalizarTexto(String(dados.get('idCaso') || '')) || `CV-${Date.now()}`,
   talaoPMESP: normalizarTexto(String(dados.get('talaoPMESP') || '')),
@@ -233,7 +257,7 @@ const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCa
   corOlhos: normalizarTexto(String(dados.get('corOlhos') || '')),
   caracteristicasMarcantes: normalizarTexto(String(dados.get('caracteristicasMarcantes') || '')),
   statusFoto: 'pendente',
-  fotoDisponivel: toBoolean(dados.get('fotoDisponivel')),
+  fotoDisponivel: fotoDigitalDisponivelSelecionada(dados.get('fotoDisponivel')),
   linkFoto: normalizarTexto(String(dados.get('urlFoto') || dados.get('linkFoto') || '')),
   urlFoto: normalizarTexto(String(dados.get('urlFoto') || dados.get('linkFoto') || '')), 
   telefoneDesaparecido: normalizarTelefone(String(dados.get('telefoneDesaparecido') || '')),
@@ -396,6 +420,8 @@ const sincronizarCondicionais = (): void => {
   if (crimeBlock) crimeBlock.hidden = !triagemState.dados.suspeitaCrime;
   if (techBlock) techBlock.hidden = !(triagemState.dados.dispositivoLigado || triagemState.dados.camerasResidencia || triagemState.dados.camerasUltimoLocal || triagemState.dados.fotoDisponivel);
   if (vulnerabilityBlock) vulnerabilityBlock.hidden = !triagemState.dados.vulnerabilidade;
+  const valorFoto = (form?.elements.namedItem('fotoDisponivel') as HTMLSelectElement | null)?.value;
+  mostrarBlocoUploadFoto(fotoDigitalDisponivelSelecionada(valorFoto) || Boolean(urlFotoUploadAtual));
 };
 
 const renderResumo = (): void => {
@@ -472,6 +498,18 @@ const preencherFormularioComCaso = (caso: Record<string, unknown>): void => {
 
   const campoIdCaso = form.elements.namedItem('idCaso') as HTMLInputElement | null;
   if (campoIdCaso) campoIdCaso.value = idCasoOriginal;
+  const urlFotoExistente = normalizarTexto(String(caso.urlFoto || caso.linkFoto || ''));
+  if (urlFotoExistente) {
+    const campoUrlFoto = form.elements.namedItem('urlFoto') as HTMLInputElement | null;
+    const campoLinkFoto = form.elements.namedItem('linkFoto') as HTMLInputElement | null;
+    if (campoUrlFoto) campoUrlFoto.value = urlFotoExistente;
+    if (campoLinkFoto) campoLinkFoto.value = urlFotoExistente;
+    urlFotoUploadAtual = urlFotoExistente;
+    mostrarBlocoUploadFoto(true);
+    atualizarPreviewFoto(urlFotoExistente);
+    const status = document.getElementById('statusUploadFoto');
+    if (status) status.textContent = 'Foto já vinculada ao caso.';
+  }
   modoFormulario = 'edicao';
   idCasoEdicaoAtual = idCasoOriginal;
   atualizarStatus(`Editando caso: ${idCasoOriginal}`);
@@ -894,44 +932,60 @@ document.getElementById('export-report-pdf')?.addEventListener('click', () => {
   atualizarStatus('Exportação PDF acionada via impressão do navegador.');
 });
 
-(document.getElementById('fotoDesaparecido') as HTMLInputElement | null)?.addEventListener('change', async () => {
+
+const configurarUploadFotoDesaparecido = (): void => {
   const fotoInput = document.getElementById('fotoDesaparecido') as HTMLInputElement | null;
-  const status = document.getElementById('foto-status');
-  if (!status) return;
-  const foto = fotoInput?.files?.[0];
-  if (!foto) {
-    status.textContent = 'Status da foto: pendente';
-    return;
-  }
-  if (!foto.type.startsWith('image/')) {
-    status.textContent = 'Status da foto: arquivo inválido';
-    return;
-  }
-  status.textContent = 'Status da foto: enviando...';
-  const dadosAtuais = getDadosFormularioAtual();
-  const retorno = await sheetsService.uploadFotoCaso({
-    base64: await converterArquivoParaBase64(foto),
-    mimeType: foto.type,
-    nomeArquivo: foto.name,
-    idCaso: dadosAtuais.id || `CV-${Date.now()}`,
-    talaoPMESP: dadosAtuais.talaoPMESP || '',
-    nomeDesaparecido: dadosAtuais.nomeCompletoDesaparecido,
-    operadorResponsavel: obterOperadorAtual(),
-    origemFoto: String((form?.elements.namedItem('origemFoto') as HTMLSelectElement | null)?.value || ''),
-    tipoFoto: String((form?.elements.namedItem('tipoFoto') as HTMLSelectElement | null)?.value || ''),
-    autorizacaoUsoImagem: Boolean((form?.elements.namedItem('autorizacaoUsoImagem') as HTMLInputElement | null)?.checked)
+  const status = document.getElementById('statusUploadFoto');
+  const seletorFotoDisponivel = form?.elements.namedItem('fotoDisponivel') as HTMLSelectElement | null;
+  if (!fotoInput || !status) return;
+
+  const atualizarVisibilidade = (): void => {
+    mostrarBlocoUploadFoto(fotoDigitalDisponivelSelecionada(seletorFotoDisponivel?.value) || Boolean(urlFotoUploadAtual));
+  };
+  seletorFotoDisponivel?.addEventListener('change', atualizarVisibilidade);
+  atualizarVisibilidade();
+
+  fotoInput.addEventListener('change', async () => {
+    const foto = fotoInput.files?.[0];
+    if (!foto) {
+      status.textContent = 'Nenhuma imagem enviada.';
+      atualizarPreviewFoto('');
+      return;
+    }
+    if (!foto.type.startsWith('image/')) {
+      status.textContent = 'Arquivo inválido. Selecione uma imagem.';
+      return;
+    }
+    atualizarPreviewFoto(URL.createObjectURL(foto));
+    status.textContent = 'Upload em andamento...';
+    const dadosAtuais = getDadosFormularioAtual();
+    const idCasoAtual = dadosAtuais.id || normalizarTexto(String((form?.elements.namedItem('idCaso') as HTMLInputElement | null)?.value || '')) || `CV-${Date.now()}`;
+    const retorno = await sheetsService.uploadFotoCaso({
+      base64: await converterArquivoParaBase64(foto),
+      mimeType: foto.type,
+      nomeArquivo: foto.name,
+      idCaso: idCasoAtual,
+      talaoPMESP: dadosAtuais.talaoPMESP || '',
+      nomeDesaparecido: dadosAtuais.nomeCompletoDesaparecido,
+      operadorResponsavel: obterOperadorAtual()
+    });
+    if (!retorno.ok || !retorno.urlFoto) {
+      status.textContent = `Falha no upload: ${retorno.message}`;
+      return;
+    }
+    urlFotoUploadAtual = retorno.urlFoto;
+    const campoUrlFoto = form?.elements.namedItem('urlFoto') as HTMLInputElement | null;
+    const campoLinkFoto = form?.elements.namedItem('linkFoto') as HTMLInputElement | null;
+    if (campoUrlFoto) campoUrlFoto.value = retorno.urlFoto;
+    if (campoLinkFoto) campoLinkFoto.value = retorno.urlFoto;
+    triagemState.dados.urlFoto = retorno.urlFoto;
+    triagemState.dados.linkFoto = retorno.urlFoto;
+    atualizarPreviewFoto(retorno.urlFoto);
+    status.textContent = 'Upload realizado.';
   });
-  if (!retorno.ok || !retorno.urlFoto) {
-    status.textContent = `Status da foto: falha (${retorno.message})`;
-    return;
-  }
-  urlFotoUploadAtual = retorno.urlFoto;
-  const campoUrlFoto = form?.elements.namedItem('urlFoto') as HTMLInputElement | null;
-  if (campoUrlFoto) campoUrlFoto.value = retorno.urlFoto;
-  triagemState.dados.linkFoto = retorno.urlFoto;
-  triagemState.dados.urlFoto = retorno.urlFoto;
-  status.textContent = 'Status da foto: upload realizado';
-});
+};
+
+configurarUploadFotoDesaparecido();
 
 (document.getElementById('autorizacaoUsoImagem') as HTMLInputElement | null)?.addEventListener('change', (event) => {
   const status = document.getElementById('foto-status');
