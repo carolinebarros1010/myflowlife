@@ -1108,8 +1108,18 @@ function auditarELimparCasosSeguro_(dryRun) {
     classificacaooperacional: 'classificacaoRisco',
     operadorcriador: 'operadorResponsavel',
     operadorultimaacao: 'operadorResponsavel',
-    observacoesoperacionais: 'observacoesOperacionais'
+    observacoesoperacionais: 'observacoesOperacionais',
+    tipocaso: 'observacoesOperacionais',
+    flagalerta: 'observacoesOperacionais'
   };
+
+  function concatenarObservacoesOperacionais_(valorAtual, prefixo, valorExtra) {
+    var base = limparTexto(valorAtual);
+    var extraLimpo = limparTexto(valorExtra);
+    if (!extraLimpo) return base;
+    var bloco = prefixo + extraLimpo;
+    return base ? (base + ' | ' + bloco) : bloco;
+  }
 
   var camposEquivalentes = [];
   var camposPerdidos = [];
@@ -1156,6 +1166,20 @@ function auditarELimparCasosSeguro_(dryRun) {
     var dados = abaOriginal.getRange(2, 1, linhas - 1, abaOriginal.getLastColumn()).getValues();
     var dadosMapeados = dados.map(function (linha) {
       return schemaCasos.map(function (colDestino) {
+        if (colDestino === 'observacoesOperacionais') {
+          var idxObs = headerNorm.indexOf('observacoesoperacionais');
+          var observacao = idxObs >= 0 ? normalizarValorPlanilha(linha[idxObs]) : '';
+          var idxTipoCaso = headerNorm.indexOf('tipocaso');
+          if (idxTipoCaso >= 0) {
+            observacao = concatenarObservacoesOperacionais_(observacao, 'tipoCaso: ', normalizarValorPlanilha(linha[idxTipoCaso]));
+          }
+          var idxFlagAlerta = headerNorm.indexOf('flagalerta');
+          if (idxFlagAlerta >= 0) {
+            observacao = concatenarObservacoesOperacionais_(observacao, 'flagAlerta: ', normalizarValorPlanilha(linha[idxFlagAlerta]));
+          }
+          return observacao;
+        }
+
         var idxDireto = headerNorm.indexOf(normalizarCabecalho_(colDestino));
         if (idxDireto >= 0) return normalizarValorPlanilha(linha[idxDireto]);
 
