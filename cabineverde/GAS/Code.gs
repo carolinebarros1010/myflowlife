@@ -1102,8 +1102,11 @@ function gerarRelatorioTextoSIOPM_(idCaso) {
   return 'SIOPM | idCaso=' + limparTexto(item.idCaso) + '; talaoPMESP=' + limparTexto(item.talaoPMESP) + '; nome=' + limparTexto(item.nomeCompletoDesaparecido) + '; risco=' + limparTexto(item.classificacaoRisco) + '; prioridade=' + limparTexto(item.prioridade);
 }
 
-function executarAuditarELimparCasosSeguro() {
-  return auditarELimparCasosSeguro_();
+function executarLimpezaCasosReal() {
+  return auditarELimparCasosSeguro_(false);
+}
+function executarAuditoriaCasosDryRun() {
+  return auditarELimparCasosSeguro_(true);
 }
 function auditarELimparCasosSeguro_(dryRun) {
   var DRY_RUN = dryRun !== false;
