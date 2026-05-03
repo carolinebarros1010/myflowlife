@@ -152,34 +152,80 @@ function formatarDataHora(data) {
   return Utilities.formatDate(data, timezone, 'yyyy-MM-dd HH:mm:ss');
 }
 
-function garantirAbaComCabecalho(planilha, nomeAba, cabecalho) {
-  var sheet = planilha.getSheetByName(nomeAba);
+
+function normalizarCabecalho_(valor) {
+  return limparTexto(valor).trim().toLowerCase();
+}
+
+function registrarLogEstrutura_(evento, mensagem, nomeAba, coluna) {
+  try {
+    var planilha = SpreadsheetApp.getActiveSpreadsheet();
+    var abaLogs = planilha.getSheetByName('LOGS');
+    if (!abaLogs) return;
+    var cabecalho = garantirColunasDaEstrutura(abaLogs, CABINE_VERDE_SCHEMA.LOGS);
+    var registro = {
+      dataHora: formatarDataHora(new Date()),
+      evento: limparTexto(evento),
+      motivo: 'ESTRUTURA_BASE',
+      mensagem: limparTexto(mensagem),
+      operadorEmail: '',
+      operadorNome: '',
+      operadorPerfil: '',
+      talaoPMESP: '',
+      idCaso: '',
+      resultado: 'SUCESSO',
+      origem: [limparTexto(nomeAba), limparTexto(coluna)].filter(Boolean).join(':')
+    };
+    abaLogs.appendRow(cabecalho.map(function (colunaNome) { return normalizarValorPlanilha(registro[colunaNome]); }));
+  } catch (_e) {}
+}
+
+function garantirAbaComCabecalhos_(ss, nomeAba, colunasObrigatorias) {
+  var sheet = ss.getSheetByName(nomeAba);
+  var criada = false;
   if (!sheet) {
-    sheet = planilha.insertSheet(nomeAba);
+    sheet = ss.insertSheet(nomeAba);
+    criada = true;
   }
 
-  var linha1 = sheet.getRange(1, 1, 1, cabecalho.length).getValues()[0];
-  var precisaCabecalho = !linha1.some(function (c) { return limparTexto(c); });
-  if (precisaCabecalho) {
-    sheet.getRange(1, 1, 1, cabecalho.length).setValues([cabecalho]);
+  var ultimaColuna = Math.max(sheet.getLastColumn(), 1);
+  var cabecalhoAtual = sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0];
+  var temCabecalho = cabecalhoAtual.some(function (c) { return limparTexto(c); });
+  if (!temCabecalho) {
+    sheet.getRange(1, 1, 1, colunasObrigatorias.length).setValues([colunasObrigatorias]);
+    cabecalhoAtual = colunasObrigatorias.slice();
   }
 
+  var normalizados = cabecalhoAtual.map(normalizarCabecalho_);
+  colunasObrigatorias.forEach(function (coluna) {
+    if (normalizados.indexOf(normalizarCabecalho_(coluna)) === -1) {
+      sheet.getRange(1, sheet.getLastColumn() + 1, 1, 1).setValue(coluna);
+      normalizados.push(normalizarCabecalho_(coluna));
+      registrarLogEstrutura_('COLUNA_ADICIONADA', 'Coluna obrigatória adicionada.', nomeAba, coluna);
+    }
+  });
+
+  if (criada) registrarLogEstrutura_('ABA_CRIADA', 'Aba obrigatória criada automaticamente.', nomeAba, '');
   return sheet;
 }
 
-function garantirColunasDaEstrutura(sheet, colunasEsperadas) {
-  var ultimaColuna = Math.max(sheet.getLastColumn(), 1);
-  var cabecalhoAtual = sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0].map(limparTexto);
-  var colunasFaltantes = (colunasEsperadas || []).filter(function (coluna) {
-    return cabecalhoAtual.indexOf(coluna) === -1;
+function garantirEstruturaCabineVerde_() {
+  var spreadsheetId = limparTexto(PropertiesService.getScriptProperties().getProperty('CABINE_VERDE_SPREADSHEET_ID'));
+  var ss = spreadsheetId ? SpreadsheetApp.openById(spreadsheetId) : SpreadsheetApp.getActiveSpreadsheet();
+  Object.keys(CABINE_VERDE_SCHEMA).forEach(function (nomeAba) {
+    garantirAbaComCabecalhos_(ss, nomeAba, CABINE_VERDE_SCHEMA[nomeAba]);
   });
+  return true;
+}
 
-  if (colunasFaltantes.length) {
-    sheet.getRange(1, ultimaColuna + 1, 1, colunasFaltantes.length).setValues([colunasFaltantes]);
-    cabecalhoAtual = cabecalhoAtual.concat(colunasFaltantes);
-  }
+function garantirAbaComCabecalho(planilha, nomeAba, cabecalho) {
+  return garantirAbaComCabecalhos_(planilha, nomeAba, cabecalho || []);
+}
 
-  return cabecalhoAtual.filter(Boolean);
+function garantirColunasDaEstrutura(sheet, colunasEsperadas) {
+  garantirAbaComCabecalhos_(sheet.getParent(), sheet.getName(), colunasEsperadas || []);
+  var ultimaColuna = Math.max(sheet.getLastColumn(), 1);
+  return sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0].map(limparTexto).filter(Boolean);
 }
 
 
