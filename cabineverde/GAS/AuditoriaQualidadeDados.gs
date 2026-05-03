@@ -1,6 +1,7 @@
 function auditarQualidadeDados_() {
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
-  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
+  var colunasCasos = obterSchemaCabineVerdeUnificado_().CASOS;
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasos);
   var colunasQualidade = ESTRUTURA_PLANILHA.QUALIDADE_DADOS;
   var abaQualidade = garantirAbaComCabecalho(planilha, 'QUALIDADE_DADOS', colunasQualidade);
   var cabecalhoQualidade = garantirColunasDaEstrutura(abaQualidade, colunasQualidade);
@@ -11,7 +12,7 @@ function auditarQualidadeDados_() {
     return { ok: true, totalCasosAnalisados: 0, totalProblemas: 0, totalNovos: 0, totalDuplicados: 0 };
   }
 
-  var cabecalhoCasos = garantirColunasDaEstrutura(abaCasos, COLUNAS_CASOS).map(limparTexto);
+  var cabecalhoCasos = garantirColunasDaEstrutura(abaCasos, colunasCasos).map(limparTexto);
   var dados = abaCasos.getRange(2, 1, abaCasos.getLastRow() - 1, abaCasos.getLastColumn()).getValues();
   var dataHoraAuditoria = formatarDataHora(new Date());
   var registros = [];

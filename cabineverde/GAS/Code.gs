@@ -225,7 +225,8 @@ function buscarCaso_(filtro) {
   garantirEstruturaCabineVerde_();
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   garantirEstruturaCabineVerde_();
-  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
+  var colunasCasosBusca = obterSchemaCabineVerdeUnificado_().CASOS;
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasosBusca);
   var abasBusca = [abaCasos, planilha.getSheetByName('Desaparecidos'), planilha.getSheetByName('CASOS_TRATADOS')].filter(Boolean);
   if (abasBusca.every(function(a){ return a.getLastRow() < 2; })) return [];
 
@@ -238,7 +239,7 @@ function buscarCaso_(filtro) {
   var resultados = [];
   abasBusca.forEach(function (abaAtual) {
     if (abaAtual.getLastRow() < 2) return;
-    var cabecalho = garantirColunasDaEstrutura(abaAtual, COLUNAS_CASOS).map(limparTexto);
+    var cabecalho = garantirColunasDaEstrutura(abaAtual, colunasCasosBusca).map(limparTexto);
     var idxIdCaso = cabecalho.indexOf('idCaso');
     var idxTalao = cabecalho.indexOf('talaoPMESP');
     var idxNome = cabecalho.indexOf('nomeCompletoDesaparecido');
@@ -284,8 +285,9 @@ function editarCasoControlado_(idCaso, operador, alteracoes, justificativa, emai
 
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   garantirEstruturaCabineVerde_();
-  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
-  var cabecalho = garantirColunasDaEstrutura(abaCasos, COLUNAS_CASOS).map(limparTexto);
+  var colunasCasosEdicao = obterSchemaCabineVerdeUnificado_().CASOS;
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasosEdicao);
+  var cabecalho = garantirColunasDaEstrutura(abaCasos, colunasCasosEdicao).map(limparTexto);
   var linhaCaso = localizarCasoPorIdCaso(abaCasos, idCasoLimpo, cabecalho);
   if (linhaCaso < 2) throw new Error('Caso não encontrado para edição controlada.');
 
@@ -621,9 +623,10 @@ function validarOperador_(emailInformado, payload) {
 
 function listarCasosComProtecao_(operadorAtual) {
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
-  var aba = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
+  var colunasCasos = obterSchemaCabineVerdeUnificado_().CASOS;
+  var aba = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasos);
   if (aba.getLastRow() < 2) return [];
-  var cabecalho = garantirColunasDaEstrutura(aba, COLUNAS_CASOS);
+  var cabecalho = garantirColunasDaEstrutura(aba, colunasCasos);
   var dados = aba.getRange(2, 1, aba.getLastRow() - 1, aba.getLastColumn()).getValues();
   var perfil = normalizarPerfilOperador_(operadorAtual && operadorAtual.perfil);
   return dados.map(function (linha) {
@@ -700,6 +703,7 @@ function gerarRelatorioSeguranca_(resultado) {
 }
 
 function persistirRegistro(planilha, registro) {
+  Logger.log("PERSISTIR_REGISTRO_OFICIAL_ATIVO");
   Logger.log('DEBUG_FLUXO_SALVARCASO: persistirRegistro entrada=' + JSON.stringify({
     aba: limparTexto(registro && registro.aba),
     colunasArray: Array.isArray(registro && registro.colunas),
@@ -911,7 +915,8 @@ function validarConsistenciaCaso(planilha, contexto) {
     var indiceIdCaso = cabecalhoExistente.indexOf('idCaso');
     var idCasoExistente = indiceIdCaso >= 0 ? limparTexto(sheetCasosExistente.getRange(linhaPorTalaoPMESP, indiceIdCaso + 1).getValue()) : '';
     if (!idCaso || idCaso !== idCasoExistente) {
-      var colunasAtualizadas = garantirColunasDaEstrutura(sheetCasosExistente, ESTRUTURA_PLANILHA.CASOS.concat(['flagDuplicidade']));
+      var colunasSchemaCasos = obterSchemaCabineVerdeUnificado_().CASOS;
+      var colunasAtualizadas = garantirColunasDaEstrutura(sheetCasosExistente, colunasSchemaCasos.concat(['flagDuplicidade']));
       var indiceFlagDuplicidade = colunasAtualizadas.indexOf('flagDuplicidade');
       if (indiceFlagDuplicidade >= 0) {
         sheetCasosExistente.getRange(linhaPorTalaoPMESP, indiceFlagDuplicidade + 1).setValue(true);
@@ -977,7 +982,8 @@ function coletarEventosOcorrenciaTimeline_(planilha, idCaso) {
   var aba = planilha.getSheetByName('EVENTOS_CASO');
   if (!aba || aba.getLastRow() < 2) return [];
 
-  var cabecalho = garantirColunasDaEstrutura(aba, ESTRUTURA_PLANILHA.EVENTOS_CASO).map(limparTexto);
+  var colunasEventos = obterSchemaCabineVerdeUnificado_().EVENTOS_CASO;
+  var cabecalho = garantirColunasDaEstrutura(aba, colunasEventos).map(limparTexto);
   var idxIdCaso = cabecalho.indexOf('idCaso');
   var idxDataHora = cabecalho.indexOf('dataHora');
   var idxTipoEvento = cabecalho.indexOf('evento');
