@@ -659,10 +659,26 @@ function persistirRegistro(planilha, registro) {
   var aba = limparTexto(registro.aba);
   var colunas = registro.colunas || [];
   var valores = registro.valores || [];
-  var sheet = garantirAbaComCabecalho(planilha, aba, ESTRUTURA_PLANILHA[aba] || colunas);
-  var cabecalhoAtual = garantirColunasDaEstrutura(sheet, ESTRUTURA_PLANILHA[aba] || colunas);
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var colunasPayload = Array.isArray(registro.colunas) ? registro.colunas : [];
+  var colunasFallback = Array.isArray(schema && schema[aba]) ? schema[aba] : [];
+  var colunasEstrutura = Array.isArray(ESTRUTURA_PLANILHA[aba]) && ESTRUTURA_PLANILHA[aba].length ? ESTRUTURA_PLANILHA[aba] : colunasFallback;
 
   if (aba === 'CASOS') {
+    var colunasCasos = colunasPayload.length ? colunasPayload : (Array.isArray(schema && schema.CASOS) ? schema.CASOS : (Array.isArray(CABINE_VERDE_SCHEMA && CABINE_VERDE_SCHEMA.CASOS) ? CABINE_VERDE_SCHEMA.CASOS : []));
+    Logger.log("COLUNAS PAYLOAD CASOS: " + JSON.stringify(registro.colunas || []));
+    Logger.log("TOTAL COLUNAS PAYLOAD CASOS: " + (Array.isArray(registro.colunas) ? registro.colunas.length : "NAO_ARRAY"));
+    Logger.log("TOTAL COLUNAS SCHEMA CASOS: " + (schema && Array.isArray(schema.CASOS) ? schema.CASOS.length : "INVALIDO"));
+
+    if (!Array.isArray(colunasCasos) || colunasCasos.length === 0) {
+      throw new Error("CASOS sem colunas válidas: payload.colunas e schema.CASOS estão inválidos.");
+    }
+
+    colunas = colunasCasos;
+    var sheetCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasos);
+    garantirAbaComCabecalhos_(planilha, 'CASOS', colunasCasos);
+    var cabecalhoAtual = garantirColunasDaEstrutura(sheetCasos, colunasCasos);
+
     Logger.log('TOTAL COLUNAS HEADER CASOS: ' + cabecalhoAtual.length);
     Logger.log('TOTAL COLUNAS PAYLOAD: ' + colunas.length);
     Logger.log('TOTAL VALORES PAYLOAD: ' + valores.length);
@@ -670,7 +686,7 @@ function persistirRegistro(planilha, registro) {
       throw new Error('Quantidade de colunas diferente da quantidade de valores.');
     }
     if (cabecalhoAtual.length < colunas.length) {
-      cabecalhoAtual = garantirColunasDaEstrutura(sheet, cabecalhoAtual.concat(colunas));
+      cabecalhoAtual = garantirColunasDaEstrutura(sheetCasos, cabecalhoAtual.concat(colunas));
     }
 
     Logger.log("GRAVANDO CASO:");
@@ -679,8 +695,8 @@ function persistirRegistro(planilha, registro) {
     registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
-    var linhaPorIdCaso = localizarCasoPorIdCaso(sheet, idCaso, cabecalhoAtual);
-    var linhaPorTalaoPMESP = localizarCasoPorTalaoPMESP(sheet, talaoPMESPRecebido, cabecalhoAtual);
+    var linhaPorIdCaso = localizarCasoPorIdCaso(sheetCasos, idCaso, cabecalhoAtual);
+    var linhaPorTalaoPMESP = localizarCasoPorTalaoPMESP(sheetCasos, talaoPMESPRecebido, cabecalhoAtual);
 
     validarConsistenciaCaso(planilha, {
       idCaso: idCaso,
@@ -694,11 +710,11 @@ function persistirRegistro(planilha, registro) {
     });
 
     if (linhaPorIdCaso > 1) {
-      sheet.getRange(linhaPorIdCaso, 1, 1, linhaFinal.length).setValues([linhaFinal]);
+      sheetCasos.getRange(linhaPorIdCaso, 1, 1, linhaFinal.length).setValues([linhaFinal]);
       return;
     }
 
-    sheet.appendRow(linhaFinal);
+    sheetCasos.appendRow(linhaFinal);
     registrarEventoOperacional_(planilha, idCaso, 'CASO_CRIADO', {
       idCaso: idCaso,
       talaoPMESP: talaoPMESPRecebido,
@@ -709,6 +725,7 @@ function persistirRegistro(planilha, registro) {
     return;
   }
 
+  var sheet = garantirAbaComCabecalho(planilha, aba, colunasEstrutura.length ? colunasEstrutura : colunas);
   sheet.appendRow(valores);
 }
 
@@ -723,6 +740,33 @@ function testeGravacaoDireta() {
   ]);
 }
 
+
+
+function testarSalvarCasoPayloadMinimo181() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var valores = schema.CASOS.map(function (col) {
+    if (col === 'idCaso') return 'TESTE-181';
+    if (col === 'nomeCompletoDesaparecido') return 'Teste Cabine Verde';
+    if (col === 'municipio') return 'SÃO PAULO';
+    return '';
+  });
+
+  return persistirRegistro(ss, {
+    action: 'salvarCaso',
+    aba: 'CASOS',
+    colunas: schema.CASOS,
+    valores: valores,
+    payload: {
+      idCaso: 'TESTE-181',
+      nomeCompletoDesaparecido: 'Teste Cabine Verde',
+      municipio: 'SÃO PAULO'
+    },
+    operadorEmail: 'cabineverdeesperanca@gmail.com',
+    operadorNome: 'admin',
+    operadorPerfil: 'ADMIN'
+  });
+}
 
 function localizarCasoPorIdCaso(sheet, idCaso, cabecalhoAtual) {
   return encontrarLinhaPorColuna(sheet, idCaso, 'idCaso', cabecalhoAtual);

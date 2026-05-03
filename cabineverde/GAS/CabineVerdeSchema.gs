@@ -10,15 +10,25 @@ const CABINE_VERDE_SCHEMA = {
 };
 
 function obterSchemaCabineVerdeUnificado_() {
-  if (typeof CABINE_VERDE_SCHEMA === "undefined") {
+  if (typeof CABINE_VERDE_SCHEMA === "undefined" || !CABINE_VERDE_SCHEMA || typeof CABINE_VERDE_SCHEMA !== 'object') {
     throw new Error("CABINE_VERDE_SCHEMA não está definido globalmente.");
   }
 
-  if (!CABINE_VERDE_SCHEMA.OPERADORES) {
-    throw new Error("CABINE_VERDE_SCHEMA não possui chave OPERADORES.");
+  if (!Array.isArray(CABINE_VERDE_SCHEMA.OPERADORES)) {
+    throw new Error("CABINE_VERDE_SCHEMA não possui chave OPERADORES válida.");
+  }
+
+  if (!Array.isArray(CABINE_VERDE_SCHEMA.CASOS) || CABINE_VERDE_SCHEMA.CASOS.length === 0) {
+    throw new Error("CABINE_VERDE_SCHEMA não possui chave CASOS válida.");
   }
 
   return CABINE_VERDE_SCHEMA;
+}
+
+function testarSchemaCasos181() {
+  var schema = obterSchemaCabineVerdeUnificado_();
+  Logger.log(Array.isArray(schema.CASOS));
+  Logger.log(schema.CASOS.length);
 }
 
 function testeSchemaGlobal() {
