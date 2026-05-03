@@ -1074,3 +1074,116 @@ function gerarRelatorioTextoSIOPM_(idCaso) {
   var item = caso[0];
   return 'SIOPM | idCaso=' + limparTexto(item.idCaso) + '; talaoPMESP=' + limparTexto(item.talaoPMESP) + '; nome=' + limparTexto(item.nomeCompletoDesaparecido) + '; risco=' + limparTexto(item.classificacaoRisco) + '; prioridade=' + limparTexto(item.prioridade);
 }
+
+function auditarELimparCasosSeguro_(dryRun) {
+  var DRY_RUN = dryRun !== false;
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var schemaCasos = Array.isArray(schema && schema.CASOS) ? schema.CASOS : [];
+  if (!schemaCasos.length) throw new Error('Schema oficial CASOS inválido.');
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var abaOriginal = ss.getSheetByName('CASOS');
+  if (!abaOriginal) throw new Error('Aba CASOS não encontrada.');
+
+  var headerOriginal = abaOriginal.getRange(1, 1, 1, Math.max(abaOriginal.getLastColumn(), 1)).getValues()[0].map(limparTexto).filter(Boolean);
+  var headerNorm = headerOriginal.map(normalizarCabecalho_);
+  var schemaNorm = schemaCasos.map(normalizarCabecalho_);
+
+  var duplicadas = [];
+  var seen = {};
+  headerNorm.forEach(function (h, i) { if (seen[h]) duplicadas.push(headerOriginal[i]); seen[h] = true; });
+
+  var extras = headerOriginal.filter(function (c) { return schemaNorm.indexOf(normalizarCabecalho_(c)) === -1; });
+  var equivalencias = {
+    talaopmesp: 'talaoBopm',
+    datahorainicio: 'dataHoraRegistro',
+    datahoraultimaatualizacao: 'dataHoraRegistro',
+    status: 'statusCaso',
+    dadosveiculotransporte: 'dadosVeiculo',
+    fotodigitaldisponivel: 'fotoDisponivel',
+    dispositivovinculado: 'dispositivoLigado',
+    telefonedispositivopessoa: 'telefoneDesaparecido',
+    vulnerabilidadeidentificada: 'vulnerabilidade',
+    risco: 'classificacaoRisco',
+    classificacaooperacional: 'classificacaoRisco',
+    operadorcriador: 'operadorResponsavel',
+    operadorultimaacao: 'operadorResponsavel',
+    observacoesoperacionais: 'observacoesOperacionais'
+  };
+
+  var camposEquivalentes = [];
+  var camposPerdidos = [];
+  extras.forEach(function (coluna) {
+    var destino = equivalencias[normalizarCabecalho_(coluna)];
+    if (destino && schemaNorm.indexOf(normalizarCabecalho_(destino)) !== -1) {
+      camposEquivalentes.push({ origem: coluna, destino: destino });
+    } else {
+      camposPerdidos.push(coluna);
+    }
+  });
+
+  var relatorio = {
+    dryRun: DRY_RUN,
+    totalColunasAtuais: headerOriginal.length,
+    totalColunasOficiais: schemaCasos.length,
+    colunasExtras: extras,
+    colunasDuplicadas: duplicadas,
+    camposEquivalentesEncontrados: camposEquivalentes,
+    camposQueSeriamPerdidos: camposPerdidos,
+    planoMigracao: [
+      'Criar backup CASOS_BACKUP_<timestamp>',
+      'Criar CASOS_LIMPA com header oficial de 181 colunas',
+      'Copiar dados mapeados por header/equivalências',
+      'Validar contagem de linhas',
+      'Renomear CASOS para CASOS_ANTIGA e CASOS_LIMPA para CASOS'
+    ]
+  };
+
+  Logger.log('RELATORIO AUDITORIA CASOS: ' + JSON.stringify(relatorio));
+  if (DRY_RUN) return relatorio;
+
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyyMMdd_HHmmss');
+  var backupName = 'CASOS_BACKUP_' + timestamp;
+  abaOriginal.copyTo(ss).setName(backupName);
+
+  var abaLimpa = ss.getSheetByName('CASOS_LIMPA');
+  if (abaLimpa) ss.deleteSheet(abaLimpa);
+  abaLimpa = ss.insertSheet('CASOS_LIMPA');
+  abaLimpa.getRange(1, 1, 1, schemaCasos.length).setValues([schemaCasos]);
+
+  var linhas = abaOriginal.getLastRow();
+  if (linhas > 1) {
+    var dados = abaOriginal.getRange(2, 1, linhas - 1, abaOriginal.getLastColumn()).getValues();
+    var dadosMapeados = dados.map(function (linha) {
+      return schemaCasos.map(function (colDestino) {
+        var idxDireto = headerNorm.indexOf(normalizarCabecalho_(colDestino));
+        if (idxDireto >= 0) return normalizarValorPlanilha(linha[idxDireto]);
+
+        var origemEq = null;
+        for (var chave in equivalencias) {
+          if (equivalencias[chave] === colDestino) {
+            var idxEq = headerNorm.indexOf(chave);
+            if (idxEq >= 0) { origemEq = idxEq; break; }
+          }
+        }
+        return origemEq !== null ? normalizarValorPlanilha(linha[origemEq]) : '';
+      });
+    });
+    if (dadosMapeados.length) {
+      abaLimpa.getRange(2, 1, dadosMapeados.length, schemaCasos.length).setValues(dadosMapeados);
+    }
+  }
+
+  if (abaLimpa.getLastRow() !== abaOriginal.getLastRow()) {
+    throw new Error('Validação de linhas falhou: CASOS_LIMPA=' + abaLimpa.getLastRow() + ' CASOS=' + abaOriginal.getLastRow());
+  }
+
+  abaOriginal.setName('CASOS_ANTIGA');
+  abaLimpa.setName('CASOS');
+
+  relatorio.executado = true;
+  relatorio.backupCriado = backupName;
+  relatorio.linhasOriginais = abaOriginal.getLastRow();
+  relatorio.linhasMigradas = ss.getSheetByName('CASOS').getLastRow();
+  return relatorio;
+}
