@@ -41,7 +41,7 @@ function validarPermissaoAcao_(operador, acao) {
   return validarPerfilOperador_(operador, permitidos);
 }
 
-var SCHEMA_CABINE_VERDE = obterSchemaCabineVerdeUnificado_();
+var SCHEMA_CABINE_VERDE = CABINE_VERDE_SCHEMA;
 
 var ESTRUTURA_PLANILHA = {
   CASOS: COLUNAS_CASOS,

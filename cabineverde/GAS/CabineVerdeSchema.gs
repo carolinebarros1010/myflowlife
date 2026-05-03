@@ -10,9 +10,18 @@ const CABINE_VERDE_SCHEMA = {
 };
 
 function obterSchemaCabineVerdeUnificado_() {
-  if (typeof CABINE_VERDE_SCHEMA === 'undefined' || !CABINE_VERDE_SCHEMA || !CABINE_VERDE_SCHEMA.OPERADORES) {
-    throw new Error('CABINE_VERDE_SCHEMA não definido corretamente ou sem chave OPERADORES.');
+  if (typeof CABINE_VERDE_SCHEMA === "undefined") {
+    throw new Error("CABINE_VERDE_SCHEMA não está definido globalmente.");
+  }
+
+  if (!CABINE_VERDE_SCHEMA.OPERADORES) {
+    throw new Error("CABINE_VERDE_SCHEMA não possui chave OPERADORES.");
   }
 
   return CABINE_VERDE_SCHEMA;
+}
+
+function testeSchemaGlobal() {
+  var schema = obterSchemaCabineVerdeUnificado_();
+  Logger.log(Object.keys(schema).join(', '));
 }
