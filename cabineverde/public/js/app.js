@@ -12,6 +12,7 @@ import {
   editarCasoControlado_,
   resumoQualidadeDados_,
   marcarProblemaQualidadeResolvido_,
+  registrarConsultaCaso_,
   validarOperador_,
   salvarOperadorLocal,
   limparOperadorLocal,
@@ -578,12 +579,30 @@ const render = () => {
     if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.nomeCompletoDesaparecido) return atualizarFeedback('Informe ao menos um filtro para consulta.', true);
     try {
       const resposta = await buscarCaso_(filtro);
-      const caso = Array.isArray(resposta.casos) ? resposta.casos[0] : resposta.caso;
-      if (!caso) throw new Error('Caso não localizado.');
+      const casosEncontrados = Array.isArray(resposta.casos) ? resposta.casos : (resposta.caso ? [resposta.caso] : []);
+      if (!casosEncontrados.length) {
+        atualizarFeedback('Não foi encontrado caso com os filtros informados.', true);
+        return;
+      }
+      const caso = casosEncontrados[0];
       renderResultadoAuditoria(caso);
-      atualizarFeedback('Caso localizado para auditoria.');
+      if (casosEncontrados.length > 1) {
+        const opcoes = casosEncontrados.slice(0, 5).map((item) => `${item.idCaso || item.id} (${item.nomeCompletoDesaparecido || 'Sem nome'})`).join('; ');
+        atualizarFeedback(`Consulta realizada com sucesso. ${casosEncontrados.length} casos encontrados. Exibindo o primeiro: ${opcoes}`);
+      } else {
+        atualizarFeedback('Consulta realizada com sucesso. 1 caso encontrado.');
+      }
+      await registrarConsultaCaso_({
+        operadorEmail: localStorage.getItem('cabineVerdeOperadorEmail') || '',
+        filtroUsado: Object.keys(filtro).filter((chave) => filtro[chave]).join(','),
+        idCaso: filtro.idCaso || '',
+        talaoPMESP: filtro.talaoPMESP || '',
+        nomeCompleto: filtro.nomeCompletoDesaparecido || '',
+        dataHora: new Date().toISOString(),
+        resultado: `${casosEncontrados.length} caso(s)`
+      });
     } catch (error) {
-      atualizarFeedback(error.message || 'Falha na consulta do caso.', true);
+      atualizarFeedback(error.message || 'Erro ao consultar caso. Verifique os filtros e tente novamente.', true);
     }
   });
 
