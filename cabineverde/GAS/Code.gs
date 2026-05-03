@@ -223,6 +223,7 @@ function registrarDecisaoOperacional_(idCaso, operador, classificacao, prioridad
 function buscarCaso_(filtro) {
   garantirEstruturaCabineVerde_();
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  garantirEstruturaCabineVerde_();
   var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
   var abasBusca = [abaCasos, planilha.getSheetByName('Desaparecidos'), planilha.getSheetByName('CASOS_TRATADOS')].filter(Boolean);
   if (abasBusca.every(function(a){ return a.getLastRow() < 2; })) return [];
