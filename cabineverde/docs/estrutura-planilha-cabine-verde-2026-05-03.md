@@ -23,7 +23,8 @@ Definido em `CABINE_VERDE_SCHEMA` com as abas:
 
 ## Atualização de robustez (2026-05-03)
 - centralização do schema global em `GAS/CabineVerdeSchema.gs`;
+- criação de `obterSchemaCabineVerdeUnificado_()` como fonte única de verdade para todos os consumers do schema;
+- eliminação de validações e acessos duplicados diretos a `CABINE_VERDE_SCHEMA`, com uso padrão via helper unificado;
 - criação de `obterSpreadsheetCabineVerde_()` para eliminar dependência de parâmetro `undefined`;
 - reforço de validações em `garantirAbaComCabecalhos_`, `garantirAbaComCabecalho` e `garantirColunasDaEstrutura`;
 - inclusão do teste manual `testarGarantirEstruturaCabineVerde()`.
-

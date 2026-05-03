@@ -8,3 +8,11 @@ const CABINE_VERDE_SCHEMA = {
   LOGS: ['dataHora', 'evento', 'motivo', 'mensagem', 'operadorEmail', 'operadorNome', 'operadorPerfil', 'talaoPMESP', 'idCaso', 'resultado', 'origem'],
   AUDITORIA_CONSULTAS: ['dataHora', 'operadorEmail', 'operadorNome', 'operadorPerfil', 'filtroUsado', 'idCaso', 'talaoPMESP', 'nomeCompleto', 'resultado', 'quantidadeEncontrada']
 };
+
+function obterSchemaCabineVerdeUnificado_() {
+  if (typeof CABINE_VERDE_SCHEMA === 'undefined' || !CABINE_VERDE_SCHEMA || !CABINE_VERDE_SCHEMA.OPERADORES) {
+    throw new Error('CABINE_VERDE_SCHEMA não definido corretamente ou sem chave OPERADORES.');
+  }
+
+  return CABINE_VERDE_SCHEMA;
+}

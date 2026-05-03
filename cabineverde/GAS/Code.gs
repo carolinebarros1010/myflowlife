@@ -41,9 +41,7 @@ function validarPermissaoAcao_(operador, acao) {
   return validarPerfilOperador_(operador, permitidos);
 }
 
-if (!CABINE_VERDE_SCHEMA || !CABINE_VERDE_SCHEMA.OPERADORES) {
-  throw new Error('Schema não definido corretamente');
-}
+var SCHEMA_CABINE_VERDE = obterSchemaCabineVerdeUnificado_();
 
 var ESTRUTURA_PLANILHA = {
   CASOS: COLUNAS_CASOS,
@@ -53,7 +51,7 @@ var ESTRUTURA_PLANILHA = {
   HISTORICO_EDICOES: ['idEdicao','idCaso','talaoPMESP','campoAlterado','valorAnterior','valorNovo','operadorNome','operadorEmail','operadorPerfil','dataHoraEdicao','justificativa','emailConfirmado'],
   RELATORIO_OPERACIONAL: ['dataReferencia','qtdFotosRecebidas','qtdFotosValidadas','qtdFotosUtilizadas','qtdFotosRejeitadas','observacaoOcorrenciasImagem','geradoEm'],
   FOTOS_DESAPARECIDOS: typeof COLUNAS_FOTOS_DESAPARECIDOS !== 'undefined' ? COLUNAS_FOTOS_DESAPARECIDOS : [],
-  OPERADORES: CABINE_VERDE_SCHEMA.OPERADORES,
+  OPERADORES: SCHEMA_CABINE_VERDE.OPERADORES,
   Logs_GAS: ['timestamp', 'etapa', 'ok', 'mensagem', 'rawPostData', 'payloadIdCaso'],
   QUALIDADE_DADOS: ['dataHoraAuditoria','idCaso','talaoPMESP','campo','problema','severidade','prioridadeTratamento','acaoRecomendada','statusTratamento','responsavelTratamento','dataHoraResolucao']
 };

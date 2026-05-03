@@ -155,10 +155,7 @@ function formatarDataHora(data) {
 
 
 function obterSchemaCabineVerde_() {
-  if (typeof CABINE_VERDE_SCHEMA === 'undefined' || !CABINE_VERDE_SCHEMA.OPERADORES) {
-    throw new Error('CABINE_VERDE_SCHEMA não definido corretamente ou sem chave OPERADORES.');
-  }
-  return CABINE_VERDE_SCHEMA;
+  return obterSchemaCabineVerdeUnificado_();
 }
 
 function obterSpreadsheetCabineVerde_() {
@@ -184,7 +181,8 @@ function registrarLogEstrutura_(evento, mensagem, nomeAba, coluna) {
 
     if (!abaLogs) {
       abaLogs = ss.insertSheet('LOGS');
-      abaLogs.getRange(1, 1, 1, CABINE_VERDE_SCHEMA.LOGS.length).setValues([CABINE_VERDE_SCHEMA.LOGS]);
+      var schema = obterSchemaCabineVerde_();
+      abaLogs.getRange(1, 1, 1, schema.LOGS.length).setValues([schema.LOGS]);
     }
 
     abaLogs.appendRow([
@@ -246,17 +244,15 @@ function garantirAbaComCabecalhos_(ss, nomeAba, colunasObrigatorias) {
 }
 
 function garantirEstruturaCabineVerde_() {
-  if (typeof CABINE_VERDE_SCHEMA === 'undefined' || !CABINE_VERDE_SCHEMA.OPERADORES) {
-    throw new Error('CABINE_VERDE_SCHEMA não definido corretamente ou sem chave OPERADORES.');
-  }
+  var schema = obterSchemaCabineVerde_();
   var ss = obterSpreadsheetCabineVerde_();
-  Object.keys(CABINE_VERDE_SCHEMA).forEach(function (nomeAba) {
-    garantirAbaComCabecalhos_(ss, nomeAba, CABINE_VERDE_SCHEMA[nomeAba]);
+  Object.keys(schema).forEach(function (nomeAba) {
+    garantirAbaComCabecalhos_(ss, nomeAba, schema[nomeAba]);
   });
   return {
     ok: true,
     mensagem: 'Estrutura da Cabine Verde verificada/criada com sucesso.',
-    abas: Object.keys(CABINE_VERDE_SCHEMA)
+    abas: Object.keys(schema)
   };
 }
 
