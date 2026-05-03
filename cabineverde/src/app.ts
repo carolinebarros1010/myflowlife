@@ -207,6 +207,8 @@ obterPerfilBackend().then(montarNavegacaoPorPerfil);
 const form = document.getElementById('triage-form') as HTMLFormElement | null;
 const formRegistro = document.getElementById('registro-form') as HTMLFormElement | null;
 const initial = Number(localStorage.getItem(chaveEtapaAtual) || 0);
+let modoFormulario: 'criacao' | 'edicao' = 'criacao';
+let idCasoEdicaoAtual = '';
 
 const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCamposFisicos({
   id: normalizarTexto(String(dados.get('idCaso') || '')) || `CV-${Date.now()}`,
@@ -443,6 +445,33 @@ const preencherFormulario = (dados: CasoDesaparecimento): void => {
   });
 };
 
+
+const preencherFormularioComCaso = (caso: Record<string, unknown>): void => {
+  if (!form) return;
+  const idCasoOriginal = normalizarTexto(String(caso.idCaso || caso.id || ''));
+  if (!idCasoOriginal) return;
+
+  const campos = form.querySelectorAll<CampoPreenchivel>('input[name], input[id], select[name], select[id], textarea[name], textarea[id]');
+  campos.forEach((campo) => {
+    const chave = campo.getAttribute('name') || campo.getAttribute('id') || '';
+    if (!chave || chave === 'idCaso') return;
+    const valor = caso[chave];
+    if (valor === undefined || valor === null) return;
+
+    if (campo instanceof HTMLInputElement && campo.type === 'checkbox') campo.checked = Boolean(valor);
+    else campo.value = String(valor);
+
+    campo.dispatchEvent(new Event('input', { bubbles: true }));
+    campo.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  const campoIdCaso = form.elements.namedItem('idCaso') as HTMLInputElement | null;
+  if (campoIdCaso) campoIdCaso.value = idCasoOriginal;
+  modoFormulario = 'edicao';
+  idCasoEdicaoAtual = idCasoOriginal;
+  atualizarStatus(`Editando caso ${idCasoOriginal}`);
+};
+
 const atualizarStateDoFormulario = (): void => {
   if (!form) return;
   triagemState = calcularEstadoTriagem(buildCasoFromForm(new FormData(form)), triagemState.etapa, triagemState.status);
@@ -586,6 +615,8 @@ if (form) {
     renderAcoesPosSalvar(triagemState.casoCompleto.id);
 
     const payload = gerarPayloadSheets(triagemState.casoCompleto);
+    payload.dados.modo = modoFormulario;
+    if (modoFormulario === 'edicao' && idCasoEdicaoAtual) payload.dados.idCaso = idCasoEdicaoAtual;
     const arquivoFoto = form.elements.namedItem('fotoDesaparecido') as HTMLInputElement | null;
     const fotoSelecionada = arquivoFoto?.files?.[0];
     if (fotoSelecionada) {
@@ -740,6 +771,8 @@ document.getElementById('new-case')?.addEventListener('click', () => {
   const sessionInput = document.getElementById('session-id') as HTMLInputElement | null;
   if (sessionInput) sessionInput.value = sessionId;
   atualizarEtapaVisual(0);
+  modoFormulario = 'criacao';
+  idCasoEdicaoAtual = '';
   atualizarStateDoFormulario();
 });
 
@@ -766,13 +799,13 @@ document.getElementById('case-list-wrapper')?.addEventListener('click', (event) 
   if (!trigger) return;
   const caso = listarCasos().find((item) => item.id === trigger.getAttribute('data-open-case'));
   if (!caso) return;
-  preencherFormulario(caso);
+  preencherFormularioComCaso(caso as unknown as Record<string, unknown>);
   triagemState = calcularEstadoTriagem(caso, triagemState.etapa, triagemState.status);
   renderDetalheCaso(caso);
   atualizarStateDoFormulario();
   const moduloDestino = trigger.getAttribute('data-go-module') as ModuloOperacional | null;
   if (moduloDestino) navegarParaModulo(moduloDestino);
-  atualizarStatus(`Caso ${caso.id} carregado no modo edição.`);
+  atualizarStatus(`Editando caso ${caso.id}.`);
 });
 
 ['filter-idCaso', 'filter-status', 'filter-risco', 'filter-data'].forEach((id) => {

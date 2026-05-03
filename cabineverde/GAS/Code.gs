@@ -756,6 +756,7 @@ function persistirRegistro(planilha, registro) {
     registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
+    var modoRegistro = limparTexto((registro.payload && registro.payload.modo) || registro.modo || '').toLowerCase();
     var linhaPorIdCaso = localizarCasoPorIdCaso(sheetCasos, idCaso, cabecalhoAtual);
     var linhaPorTalaoPMESP = localizarCasoPorTalaoPMESP(sheetCasos, talaoPMESPRecebido, cabecalhoAtual);
 
@@ -772,7 +773,19 @@ function persistirRegistro(planilha, registro) {
 
     if (linhaPorIdCaso > 1) {
       sheetCasos.getRange(linhaPorIdCaso, 1, 1, linhaFinal.length).setValues([linhaFinal]);
+      if (modoRegistro === 'edicao') {
+        registrarEventoOperacional_(planilha, idCaso, 'EDICAO_CASO', {
+          idCaso: idCaso,
+          talaoPMESP: talaoPMESPRecebido,
+          modo: 'edicao',
+          dataHora: formatarDataHora(new Date())
+        });
+      }
       return;
+    }
+
+    if (modoRegistro === 'edicao') {
+      throw new Error('Modo edição requer idCaso existente.');
     }
 
     sheetCasos.appendRow(linhaFinal);
