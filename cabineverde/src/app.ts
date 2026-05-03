@@ -209,6 +209,7 @@ const formRegistro = document.getElementById('registro-form') as HTMLFormElement
 const initial = Number(localStorage.getItem(chaveEtapaAtual) || 0);
 let modoFormulario: 'criacao' | 'edicao' = 'criacao';
 let idCasoEdicaoAtual = '';
+let casoOriginalEdicao: Record<string, unknown> | null = null;
 
 const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCamposFisicos({
   id: normalizarTexto(String(dados.get('idCaso') || '')) || `CV-${Date.now()}`,
@@ -450,6 +451,7 @@ const preencherFormularioComCaso = (caso: Record<string, unknown>): void => {
   if (!form) return;
   const idCasoOriginal = normalizarTexto(String(caso.idCaso || caso.id || ''));
   if (!idCasoOriginal) return;
+  casoOriginalEdicao = { ...caso };
 
   const campos = form.querySelectorAll<CampoPreenchivel>('input[name], input[id], select[name], select[id], textarea[name], textarea[id]');
   campos.forEach((campo) => {
@@ -469,7 +471,46 @@ const preencherFormularioComCaso = (caso: Record<string, unknown>): void => {
   if (campoIdCaso) campoIdCaso.value = idCasoOriginal;
   modoFormulario = 'edicao';
   idCasoEdicaoAtual = idCasoOriginal;
-  atualizarStatus(`Editando caso ${idCasoOriginal}`);
+  atualizarStatus(`Editando caso: ${idCasoOriginal}`);
+};
+
+const coletarCamposVisiveisDoFormulario = (): { dados: Record<string, unknown>; camposPresentes: string[] } => {
+  if (!form) return { dados: {}, camposPresentes: [] };
+  const campos = form.querySelectorAll<CampoPreenchivel>('input[name], input[id], select[name], select[id], textarea[name], textarea[id]');
+  const dados: Record<string, unknown> = {};
+  const camposPresentes = new Set<string>();
+  campos.forEach((campo) => {
+    const chave = campo.getAttribute('name') || campo.getAttribute('id') || '';
+    if (!chave || (campo instanceof HTMLInputElement && campo.type === 'file')) return;
+    camposPresentes.add(chave);
+    if (campo instanceof HTMLInputElement && campo.type === 'checkbox') {
+      dados[chave] = campo.checked;
+    } else {
+      dados[chave] = campo.value;
+    }
+  });
+  return { dados, camposPresentes: Array.from(camposPresentes) };
+};
+
+const montarPayloadCasoParaSalvar = (): CasoCompleto => {
+  const dadosFormulario = getDadosFormularioAtual();
+  if (modoFormulario !== 'edicao') return calcularEstadoTriagem(dadosFormulario, triagemState.etapa, triagemState.status).casoCompleto;
+
+  const { dados, camposPresentes } = coletarCamposVisiveisDoFormulario();
+  const payloadFinal: Record<string, unknown> = { ...(casoOriginalEdicao || {}) };
+  camposPresentes.forEach((campo) => {
+    payloadFinal[campo] = dados[campo];
+  });
+  Object.assign(payloadFinal, dadosFormulario);
+  payloadFinal.idCaso = idCasoEdicaoAtual || String(payloadFinal.idCaso || payloadFinal.id || '');
+  payloadFinal.id = String(payloadFinal.idCaso || payloadFinal.id || '');
+  payloadFinal.modo = 'edicao';
+
+  console.info('[EDICAO] casoOriginal campos:', Object.keys(casoOriginalEdicao || {}).length);
+  console.info('[EDICAO] camposFormulario:', camposPresentes.length);
+  console.info('[EDICAO] payloadFinal campos:', Object.keys(payloadFinal).length);
+  console.info('[EDICAO] idCaso preservado:', payloadFinal.idCaso);
+  return calcularEstadoTriagem(payloadFinal as CasoDesaparecimento, triagemState.etapa, triagemState.status).casoCompleto;
 };
 
 const atualizarStateDoFormulario = (): void => {
@@ -607,6 +648,7 @@ if (form) {
     triagemState.dados.operadorCriador = triagemState.dados.operadorCriador || operadorAtual;
     triagemState.dados.operadorUltimaAcao = operadorAtual;
     triagemState = calcularEstadoTriagem(triagemState.dados, triagemState.etapa, triagemState.status);
+    triagemState = calcularEstadoTriagem(montarPayloadCasoParaSalvar(), triagemState.etapa, triagemState.status);
 
     salvarCasoLocal(triagemState.casoCompleto);
     const summary = document.getElementById('case-summary');
@@ -679,6 +721,11 @@ if (form) {
     if (retorno.ok) {
       const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
       if (chaveAuto) limparAutoRascunhoLocal(chaveAuto);
+      if (modoFormulario === 'edicao') {
+        casoOriginalEdicao = null;
+        idCasoEdicaoAtual = '';
+        modoFormulario = 'criacao';
+      }
     }
     atualizarLista();
     aplicarFiltros();
