@@ -42,12 +42,12 @@ function validarPermissaoAcao_(operador, acao) {
 var ESTRUTURA_PLANILHA = {
   CASOS: COLUNAS_CASOS,
   TRIAGEM_RESPOSTAS: COLUNAS_TRIAGEM_RESPOSTAS,
-  EVENTOS_OCORRENCIA: COLUNAS_EVENTOS_OCORRENCIA,
+  EVENTOS_CASO: COLUNAS_EVENTOS_OCORRENCIA,
   INDICADORES_OPERACIONAIS: COLUNAS_INDICADORES_OPERACIONAIS,
   HISTORICO_EDICOES: ['idEdicao','idCaso','talaoPMESP','campoAlterado','valorAnterior','valorNovo','operadorNome','operadorEmail','operadorPerfil','dataHoraEdicao','justificativa','emailConfirmado'],
   RELATORIO_OPERACIONAL: ['dataReferencia','qtdFotosRecebidas','qtdFotosValidadas','qtdFotosUtilizadas','qtdFotosRejeitadas','observacaoOcorrenciasImagem','geradoEm'],
   FOTOS_DESAPARECIDOS: typeof COLUNAS_FOTOS_DESAPARECIDOS !== 'undefined' ? COLUNAS_FOTOS_DESAPARECIDOS : [],
-  OPERADORES: ['email','nome','perfil','ativo','ultimaAtualizacao'],
+  OPERADORES: CABINE_VERDE_SCHEMA.OPERADORES,
   Logs_GAS: ['timestamp', 'etapa', 'ok', 'mensagem', 'rawPostData', 'payloadIdCaso'],
   QUALIDADE_DADOS: ['dataHoraAuditoria','idCaso','talaoPMESP','campo','problema','severidade','prioridadeTratamento','acaoRecomendada','statusTratamento','responsavelTratamento','dataHoraResolucao']
 };
@@ -205,9 +205,12 @@ function registrarDecisaoOperacional_(idCaso, operador, classificacao, prioridad
 }
 
 function buscarCaso_(filtro) {
+  garantirEstruturaCabineVerde_();
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  garantirEstruturaCabineVerde_();
   var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
-  if (abaCasos.getLastRow() < 2) return [];
+  var abasBusca = [abaCasos, planilha.getSheetByName('Desaparecidos'), planilha.getSheetByName('CASOS_TRATADOS')].filter(Boolean);
+  if (abasBusca.every(function(a){ return a.getLastRow() < 2; })) return [];
 
   var filtroObj = filtro && typeof filtro === 'object' ? filtro : { termo: filtro };
   var termoId = limparTexto(filtroObj.idCaso || filtroObj.termo).toLowerCase();
@@ -215,13 +218,17 @@ function buscarCaso_(filtro) {
   var termoNome = limparTexto(filtroObj.nomeCompletoDesaparecido || filtroObj.termo).toLowerCase();
   if (!termoId && !termoTalao && !termoNome) return [];
 
-  var cabecalho = garantirColunasDaEstrutura(abaCasos, COLUNAS_CASOS).map(limparTexto);
-  var idxIdCaso = cabecalho.indexOf('idCaso');
-  var idxTalao = cabecalho.indexOf('talaoPMESP');
-  var idxNome = cabecalho.indexOf('nomeCompletoDesaparecido');
-  var dados = abaCasos.getRange(2, 1, abaCasos.getLastRow() - 1, abaCasos.getLastColumn()).getValues();
+  var resultados = [];
+  abasBusca.forEach(function (abaAtual) {
+    if (abaAtual.getLastRow() < 2) return;
+    var cabecalho = garantirColunasDaEstrutura(abaAtual, COLUNAS_CASOS).map(limparTexto);
+    var idxIdCaso = cabecalho.indexOf('idCaso');
+    var idxTalao = cabecalho.indexOf('talaoPMESP');
+    var idxNome = cabecalho.indexOf('nomeCompletoDesaparecido');
+    if (idxIdCaso < 0 && idxTalao < 0 && idxNome < 0) return;
+    var dados = abaAtual.getRange(2, 1, abaAtual.getLastRow() - 1, abaAtual.getLastColumn()).getValues();
 
-  return dados.filter(function (linha) {
+    resultados = resultados.concat(dados.filter(function (linha) {
     var idCaso = limparTexto(linha[idxIdCaso]).toLowerCase();
     var talao = limparTexto(linha[idxTalao]).toLowerCase();
     var nome = limparTexto(linha[idxNome]).toLowerCase();
@@ -229,13 +236,13 @@ function buscarCaso_(filtro) {
     var matchTalao = !termoTalao || talao.indexOf(termoTalao) !== -1;
     var matchNome = !termoNome || nome.indexOf(termoNome) !== -1;
     return matchId && matchTalao && matchNome;
-  }).map(function (linha) {
-    var caso = {};
-    cabecalho.forEach(function (coluna, index) {
-      caso[coluna] = normalizarValorPlanilha(linha[index]);
-    });
-    return caso;
+    }).map(function (linha) {
+      var caso = {};
+      cabecalho.forEach(function (coluna, index) { caso[coluna] = normalizarValorPlanilha(linha[index]); });
+      return caso;
+    }));
   });
+  return resultados;
 }
 
 function editarCasoControlado_(idCaso, operador, alteracoes, justificativa, emailConfirmacaoOperador) {
@@ -259,6 +266,7 @@ function editarCasoControlado_(idCaso, operador, alteracoes, justificativa, emai
   if (!permissao.permitido) throw new Error('Operador sem permissão para editar caso.');
 
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  garantirEstruturaCabineVerde_();
   var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
   var cabecalho = garantirColunasDaEstrutura(abaCasos, COLUNAS_CASOS).map(limparTexto);
   var linhaCaso = localizarCasoPorIdCaso(abaCasos, idCasoLimpo, cabecalho);
@@ -391,6 +399,7 @@ function doGet() {
 }
 
 function doPost(e) {
+  garantirEstruturaCabineVerde_();
   var planilhaLogs = obterPlanilhaLogs();
   try {
     registrarLogTecnico(planilhaLogs, { etapa: 'POST_RECEBIDO', ok: true, mensagem: 'Requisição POST recebida pelo Web App', rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
@@ -515,6 +524,7 @@ function validarOperadorPayloadOuSessao_(payload) {
 }
 
 function validarOperador_(emailInformado, payload) {
+  garantirEstruturaCabineVerde_();
   var email = limparTexto(emailInformado).toLowerCase();
   var nomePayload = limparTexto(payload && payload.operadorNome);
   var perfilPayload = normalizarPerfilOperador_(payload && payload.operadorPerfil);
@@ -631,6 +641,7 @@ function gerarRelatorioSeguranca_(resultado) {
 }
 
 function persistirRegistro(planilha, registro) {
+  garantirEstruturaCabineVerde_();
   var aba = limparTexto(registro.aba);
   var colunas = registro.colunas || [];
   var valores = registro.valores || [];
@@ -740,7 +751,7 @@ function registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricaoEvento
 }
 
 function registrarEventoOcorrenciaDetalhado_(planilha, idCaso, tipoEvento, descricaoEvento, metadados) {
-  var sheetEventos = garantirAbaComCabecalho(planilha, 'EVENTOS_OCORRENCIA', ESTRUTURA_PLANILHA.EVENTOS_OCORRENCIA);
+  var sheetEventos = garantirAbaComCabecalho(planilha, 'EVENTOS_CASO', ESTRUTURA_PLANILHA.EVENTOS_OCORRENCIA);
   var cabecalhoEventos = garantirColunasDaEstrutura(sheetEventos, ESTRUTURA_PLANILHA.EVENTOS_OCORRENCIA);
   var meta = metadados || {};
   var eventoPorColuna = {
@@ -767,6 +778,7 @@ function registrarEventoOcorrenciaDetalhado_(planilha, idCaso, tipoEvento, descr
 }
 
 function gerarTimelineCaso_(idCaso) {
+  garantirEstruturaCabineVerde_();
   var idCasoLimpo = limparTexto(idCaso);
   if (!idCasoLimpo) throw new Error('idCaso obrigatório para gerar timeline.');
 
@@ -785,7 +797,7 @@ function gerarTimelineCaso_(idCaso) {
 }
 
 function coletarEventosOcorrenciaTimeline_(planilha, idCaso) {
-  var aba = planilha.getSheetByName('EVENTOS_OCORRENCIA');
+  var aba = planilha.getSheetByName('EVENTOS_CASO');
   if (!aba || aba.getLastRow() < 2) return [];
 
   var cabecalho = garantirColunasDaEstrutura(aba, ESTRUTURA_PLANILHA.EVENTOS_OCORRENCIA).map(limparTexto);
@@ -808,7 +820,7 @@ function coletarEventosOcorrenciaTimeline_(planilha, idCaso) {
       operador: extrairOperadorDeDescricao_(descricao),
       origem: inferirOrigemTimeline_(tipoEvento),
       resumo: montarResumoTimeline_(tipoEvento, descricao),
-      detalhes: { fonte: 'EVENTOS_OCORRENCIA', descricaoEvento: descricao }
+      detalhes: { fonte: 'EVENTOS_CASO', descricaoEvento: descricao }
     };
   });
 }
