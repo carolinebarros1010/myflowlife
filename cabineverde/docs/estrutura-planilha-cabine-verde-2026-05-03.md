@@ -20,3 +20,10 @@ Definido em `CABINE_VERDE_SCHEMA` com as abas:
 - destino principal de casos: aba `CASOS`.
 - timeline passa a usar `EVENTOS_CASO`.
 - busca de caso prioriza `CASOS` e usa fallback legado: `Desaparecidos` e `CASOS_TRATADOS`.
+
+## Atualização de robustez (2026-05-03)
+- centralização do schema global em `GAS/CabineVerdeSchema.gs`;
+- criação de `obterSpreadsheetCabineVerde_()` para eliminar dependência de parâmetro `undefined`;
+- reforço de validações em `garantirAbaComCabecalhos_`, `garantirAbaComCabecalho` e `garantirColunasDaEstrutura`;
+- inclusão do teste manual `testarGarantirEstruturaCabineVerde()`.
+

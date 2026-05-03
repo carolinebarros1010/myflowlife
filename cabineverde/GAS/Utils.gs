@@ -155,85 +155,131 @@ function formatarDataHora(data) {
 
 
 function obterSchemaCabineVerde_() {
-  if (!CABINE_VERDE_SCHEMA || !CABINE_VERDE_SCHEMA.OPERADORES) {
-    throw new Error('Schema não definido corretamente');
+  if (typeof CABINE_VERDE_SCHEMA === 'undefined' || !CABINE_VERDE_SCHEMA.OPERADORES) {
+    throw new Error('CABINE_VERDE_SCHEMA não definido corretamente ou sem chave OPERADORES.');
   }
   return CABINE_VERDE_SCHEMA;
 }
 
+function obterSpreadsheetCabineVerde_() {
+  if (typeof CABINE_VERDE_SPREADSHEET_ID !== 'undefined' && CABINE_VERDE_SPREADSHEET_ID) {
+    return SpreadsheetApp.openById(CABINE_VERDE_SPREADSHEET_ID);
+  }
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) {
+    throw new Error('Nenhuma planilha ativa encontrada e CABINE_VERDE_SPREADSHEET_ID não definido.');
+  }
+  return ss;
+}
+
 function normalizarCabecalho_(valor) {
-  return limparTexto(valor).trim().toLowerCase();
+  return String(valor || '').trim().toLowerCase();
 }
 
 function registrarLogEstrutura_(evento, mensagem, nomeAba, coluna) {
   try {
-    var planilha = SpreadsheetApp.getActiveSpreadsheet();
-    var abaLogs = planilha.getSheetByName('LOGS');
-    if (!abaLogs) return;
-    var cabecalho = garantirColunasDaEstrutura(abaLogs, obterSchemaCabineVerde_().LOGS);
-    var registro = {
-      dataHora: formatarDataHora(new Date()),
-      evento: limparTexto(evento),
-      motivo: 'ESTRUTURA_BASE',
-      mensagem: limparTexto(mensagem),
-      operadorEmail: '',
-      operadorNome: '',
-      operadorPerfil: '',
-      talaoPMESP: '',
-      idCaso: '',
-      resultado: 'SUCESSO',
-      origem: [limparTexto(nomeAba), limparTexto(coluna)].filter(Boolean).join(':')
-    };
-    abaLogs.appendRow(cabecalho.map(function (colunaNome) { return normalizarValorPlanilha(registro[colunaNome]); }));
-  } catch (_e) {}
+    var ss = obterSpreadsheetCabineVerde_();
+    var abaLogs = ss.getSheetByName('LOGS');
+
+    if (!abaLogs) {
+      abaLogs = ss.insertSheet('LOGS');
+      abaLogs.getRange(1, 1, 1, CABINE_VERDE_SCHEMA.LOGS.length).setValues([CABINE_VERDE_SCHEMA.LOGS]);
+    }
+
+    abaLogs.appendRow([
+      new Date(),
+      evento,
+      'ESTRUTURA_PLANILHA',
+      mensagem,
+      '',
+      '',
+      '',
+      '',
+      '',
+      coluna ? 'Aba: ' + nomeAba + ' | Coluna: ' + coluna : 'Aba: ' + nomeAba,
+      'garantirEstruturaCabineVerde_'
+    ]);
+  } catch (erro) {
+    Logger.log('Falha ao registrar log de estrutura: ' + erro.message);
+  }
 }
 
 function garantirAbaComCabecalhos_(ss, nomeAba, colunasObrigatorias) {
-  var sheet = ss.getSheetByName(nomeAba);
-  var criada = false;
-  if (!sheet) {
-    sheet = ss.insertSheet(nomeAba);
-    criada = true;
+  if (!ss || typeof ss.getSheetByName !== 'function') {
+    throw new Error('Spreadsheet inválido ou não informado para aba: ' + nomeAba);
+  }
+  if (!nomeAba) {
+    throw new Error('Nome da aba não informado.');
+  }
+  if (!Array.isArray(colunasObrigatorias)) {
+    throw new Error('Colunas obrigatórias inválidas para aba: ' + nomeAba);
   }
 
-  var ultimaColuna = Math.max(sheet.getLastColumn(), 1);
-  var cabecalhoAtual = sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0];
-  var temCabecalho = cabecalhoAtual.some(function (c) { return limparTexto(c); });
-  if (!temCabecalho) {
-    sheet.getRange(1, 1, 1, colunasObrigatorias.length).setValues([colunasObrigatorias]);
-    cabecalhoAtual = colunasObrigatorias.slice();
+  var aba = ss.getSheetByName(nomeAba);
+  if (!aba) {
+    aba = ss.insertSheet(nomeAba);
+    aba.getRange(1, 1, 1, colunasObrigatorias.length).setValues([colunasObrigatorias]);
+    registrarLogEstrutura_('ABA_CRIADA', 'Aba criada automaticamente', nomeAba, '');
+    return aba;
   }
 
+  var ultimaColuna = aba.getLastColumn();
+  if (ultimaColuna === 0) {
+    aba.getRange(1, 1, 1, colunasObrigatorias.length).setValues([colunasObrigatorias]);
+    registrarLogEstrutura_('CABECALHO_CRIADO', 'Cabeçalho criado em aba vazia', nomeAba, '');
+    return aba;
+  }
+
+  var cabecalhoAtual = aba.getRange(1, 1, 1, ultimaColuna).getValues()[0];
   var normalizados = cabecalhoAtual.map(normalizarCabecalho_);
   colunasObrigatorias.forEach(function (coluna) {
-    if (normalizados.indexOf(normalizarCabecalho_(coluna)) === -1) {
-      sheet.getRange(1, sheet.getLastColumn() + 1, 1, 1).setValue(coluna);
-      normalizados.push(normalizarCabecalho_(coluna));
-      registrarLogEstrutura_('COLUNA_ADICIONADA', 'Coluna obrigatória adicionada.', nomeAba, coluna);
+    var colunaNormalizada = normalizarCabecalho_(coluna);
+    if (normalizados.indexOf(colunaNormalizada) === -1) {
+      var novaColuna = aba.getLastColumn() + 1;
+      aba.getRange(1, novaColuna).setValue(coluna);
+      normalizados.push(colunaNormalizada);
+      registrarLogEstrutura_('COLUNA_ADICIONADA', 'Coluna obrigatória adicionada', nomeAba, coluna);
     }
   });
-
-  if (criada) registrarLogEstrutura_('ABA_CRIADA', 'Aba obrigatória criada automaticamente.', nomeAba, '');
-  return sheet;
+  return aba;
 }
 
 function garantirEstruturaCabineVerde_() {
-  var spreadsheetId = limparTexto(PropertiesService.getScriptProperties().getProperty('CABINE_VERDE_SPREADSHEET_ID'));
-  var ss = spreadsheetId ? SpreadsheetApp.openById(spreadsheetId) : SpreadsheetApp.getActiveSpreadsheet();
-  Object.keys(obterSchemaCabineVerde_()).forEach(function (nomeAba) {
-    garantirAbaComCabecalhos_(ss, nomeAba, obterSchemaCabineVerde_()[nomeAba]);
+  if (typeof CABINE_VERDE_SCHEMA === 'undefined' || !CABINE_VERDE_SCHEMA.OPERADORES) {
+    throw new Error('CABINE_VERDE_SCHEMA não definido corretamente ou sem chave OPERADORES.');
+  }
+  var ss = obterSpreadsheetCabineVerde_();
+  Object.keys(CABINE_VERDE_SCHEMA).forEach(function (nomeAba) {
+    garantirAbaComCabecalhos_(ss, nomeAba, CABINE_VERDE_SCHEMA[nomeAba]);
   });
-  return true;
+  return {
+    ok: true,
+    mensagem: 'Estrutura da Cabine Verde verificada/criada com sucesso.',
+    abas: Object.keys(CABINE_VERDE_SCHEMA)
+  };
 }
 
-function garantirAbaComCabecalho(planilha, nomeAba, cabecalho) {
-  return garantirAbaComCabecalhos_(planilha, nomeAba, cabecalho || []);
+function garantirAbaComCabecalho(ss, nomeAba, colunasObrigatorias) {
+  return garantirAbaComCabecalhos_(ss, nomeAba, colunasObrigatorias);
 }
 
-function garantirColunasDaEstrutura(sheet, colunasEsperadas) {
-  garantirAbaComCabecalhos_(sheet.getParent(), sheet.getName(), colunasEsperadas || []);
-  var ultimaColuna = Math.max(sheet.getLastColumn(), 1);
-  return sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0].map(limparTexto).filter(Boolean);
+function garantirColunasDaEstrutura(aba, colunasObrigatorias) {
+  if (!aba || typeof aba.getParent !== 'function') {
+    throw new Error('Sheet inválido em garantirColunasDaEstrutura.');
+  }
+
+  var ss = aba.getParent();
+  var nomeAba = aba.getName();
+  garantirAbaComCabecalhos_(ss, nomeAba, colunasObrigatorias);
+
+  var ultimaColuna = Math.max(aba.getLastColumn(), 1);
+  return aba.getRange(1, 1, 1, ultimaColuna).getValues()[0].map(limparTexto).filter(Boolean);
+}
+
+function testarGarantirEstruturaCabineVerde() {
+  var resultado = garantirEstruturaCabineVerde_();
+  Logger.log(JSON.stringify(resultado));
 }
 
 
