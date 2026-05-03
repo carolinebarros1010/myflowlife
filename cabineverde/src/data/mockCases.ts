@@ -17,6 +17,7 @@ export const casosMock: CasoCompleto[] = [
     dataNascimento: '2011-03-15',
     fotoDisponivel: true,
     linkFoto: 'https://exemplo.local/foto.jpg',
+    urlFoto: 'https://exemplo.local/foto.jpg',
     telefoneDesaparecido: '11911112222',
     dispositivoLigado: true,
     dataHoraUltimaVisualizacao: new Date().toISOString(),

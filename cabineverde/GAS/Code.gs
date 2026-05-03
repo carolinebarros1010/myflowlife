@@ -483,6 +483,24 @@ function doPost(e) {
       var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa, body.motivoAcessoFoto);
       return criarRespostaJson({ ok: true, data: { message: 'Visualização autorizada', conteudoBase64: respostaFoto.conteudoBase64, mimeType: respostaFoto.mimeType, idCaso: respostaFoto.idCaso, idFoto: respostaFoto.idFoto } });
     }
+    if (action === 'uploadFotoCaso') {
+      var payloadFoto = body.payload || {};
+      var resultadoUpload = salvarFotoDesaparecido_({
+        idCaso: limparTexto(payloadFoto.idCaso),
+        talaoPMESP: limparTexto(payloadFoto.talaoPMESP),
+        nomeDesaparecido: limparTexto(payloadFoto.nomeDesaparecido),
+        operadorResponsavel: limparTexto(payloadFoto.operadorResponsavel),
+        origemFoto: limparTexto(payloadFoto.origemFoto),
+        tipoFoto: limparTexto(payloadFoto.tipoFoto),
+        autorizacaoUsoImagem: !!payloadFoto.autorizacaoUsoImagem,
+        base64: limparTexto(payloadFoto.base64),
+        nomeArquivo: limparTexto(payloadFoto.nomeArquivo),
+        mimeType: limparTexto(payloadFoto.mimeType)
+      });
+      limparFotosTemporarias_();
+      return criarRespostaJson({ ok: true, data: { action: 'uploadFotoCaso', urlFoto: resultadoUpload.linkArquivo, linkArquivo: resultadoUpload.linkArquivo, fileIdDrive: resultadoUpload.fileIdDrive } });
+    }
+
     if (action === 'listarCasos') {
       var casos = listarCasosComProtecao_(operadorAtual);
       return criarRespostaJson({ ok: true, data: { action: 'listarCasos', casos: casos } });
@@ -561,6 +579,11 @@ function doPost(e) {
       });
     }
 
+    var urlFotoCaso = limparTexto((body.payload && (body.payload.urlFoto || body.payload.linkFoto)) || (body.dados && (body.dados.urlFoto || body.dados.linkFoto)));
+    if (action === 'salvarCaso' && urlFotoCaso) {
+      consolidarFotoCaso_(idCaso, urlFotoCaso);
+    }
+    limparFotosTemporarias_();
     registrarLogAcessoOperador_(planilha, 'GRAVACAO_CONCLUIDA', 'SUCESSO', 'Registros persistidos com sucesso.', operadorAtual.email, { perfil: operadorAtual.perfil, acaoExecutada: action, talaoPMESP: talao });
     registrarLogTecnico(planilhaLogs || planilha, { etapa: 'GRAVACAO_SUCESSO', ok: true, mensagem: 'Registros persistidos com sucesso', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
     return criarRespostaJson({ ok: true, data: { action: 'salvarCaso', idCaso: idCaso, message: 'Gravação multiabas concluída' } });

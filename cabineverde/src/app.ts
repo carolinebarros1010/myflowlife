@@ -210,6 +210,8 @@ const initial = Number(localStorage.getItem(chaveEtapaAtual) || 0);
 let modoFormulario: 'criacao' | 'edicao' = 'criacao';
 let idCasoEdicaoAtual = '';
 let casoOriginalEdicao: Record<string, unknown> | null = null;
+let urlFotoUploadAtual = '';
+
 
 const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCamposFisicos({
   id: normalizarTexto(String(dados.get('idCaso') || '')) || `CV-${Date.now()}`,
@@ -232,7 +234,8 @@ const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCa
   caracteristicasMarcantes: normalizarTexto(String(dados.get('caracteristicasMarcantes') || '')),
   statusFoto: 'pendente',
   fotoDisponivel: toBoolean(dados.get('fotoDisponivel')),
-  linkFoto: '',
+  linkFoto: normalizarTexto(String(dados.get('urlFoto') || dados.get('linkFoto') || '')),
+  urlFoto: normalizarTexto(String(dados.get('urlFoto') || dados.get('linkFoto') || '')), 
   telefoneDesaparecido: normalizarTelefone(String(dados.get('telefoneDesaparecido') || '')),
   dispositivoLigado: toBoolean(dados.get('dispositivoLigado')),
   dataHoraUltimaVisualizacao: String(dados.get('dataHoraUltimaVisualizacao') || ''),
@@ -498,6 +501,7 @@ const montarPayloadCasoParaSalvar = (): CasoCompleto => {
 
   const { dados, camposPresentes } = coletarCamposVisiveisDoFormulario();
   const payloadFinal: Record<string, unknown> = { ...(casoOriginalEdicao || {}) };
+  if (urlFotoUploadAtual) { payloadFinal.urlFoto = urlFotoUploadAtual; payloadFinal.linkFoto = urlFotoUploadAtual; }
   camposPresentes.forEach((campo) => {
     payloadFinal[campo] = dados[campo];
   });
@@ -564,7 +568,7 @@ const renderDetalheCaso = (caso: CasoCompleto): void => {
     <section><h4>Desaparecido</h4><p>${caso.nomeCompletoDesaparecido} · ${caso.idade} anos (${caso.faixaEtaria})</p></section>
     <section><h4>Contexto</h4><p>${caso.localUltimaVisualizacao || '-'} em ${caso.dataHoraUltimaVisualizacao || '-'}</p></section>
     <section><h4>Risco e vulnerabilidade</h4><p>${caso.classificacaoRisco} · Prioridade ${caso.prioridade} · Suspeita crime: ${caso.suspeitaCrime ? 'Sim' : 'Não'}</p></section>
-    <section><h4>Apoio tecnológico</h4><p>Dispositivo: ${caso.dispositivoLigado ? 'Sim' : 'Não'} · Câmeras: ${caso.camerasResidencia || caso.camerasUltimoLocal ? 'Sim' : 'Não'} · Foto: ${caso.fotoDisponivel ? 'Sim' : 'Não'}</p></section>
+    <section><h4>Apoio tecnológico</h4><p>Dispositivo: ${caso.dispositivoLigado ? 'Sim' : 'Não'} · Câmeras: ${caso.camerasResidencia || caso.camerasUltimoLocal ? 'Sim' : 'Não'} · Foto: ${caso.fotoDisponivel ? 'Sim' : 'Não'}</p><div class="cv-case-photo">${(caso.urlFoto || caso.linkFoto) ? `<img src="${caso.urlFoto || caso.linkFoto}" alt="Foto do desaparecido" />` : '<div class="cv-photo-placeholder">Sem foto</div>'}</div></section>
     <section><h4>Histórico de atualização</h4><p>Solicitante: ${caso.nomeSolicitante || '-'} · Atualizado em ${new Date().toLocaleString('pt-BR')}</p></section>`;
 };
 
@@ -661,6 +665,10 @@ if (form) {
     if (modoFormulario === 'edicao' && idCasoEdicaoAtual) payload.dados.idCaso = idCasoEdicaoAtual;
     const arquivoFoto = form.elements.namedItem('fotoDesaparecido') as HTMLInputElement | null;
     const fotoSelecionada = arquivoFoto?.files?.[0];
+    if (urlFotoUploadAtual) {
+      payload.dados.urlFoto = urlFotoUploadAtual;
+      payload.dados.linkFoto = urlFotoUploadAtual;
+    }
     if (fotoSelecionada) {
       if (!fotoSelecionada.type.startsWith('image/')) {
         atualizarStatus('Upload bloqueado: apenas imagens são permitidas.', true, 'bloqueio');
@@ -886,11 +894,43 @@ document.getElementById('export-report-pdf')?.addEventListener('click', () => {
   atualizarStatus('Exportação PDF acionada via impressão do navegador.');
 });
 
-(document.getElementById('fotoDesaparecido') as HTMLInputElement | null)?.addEventListener('change', () => {
+(document.getElementById('fotoDesaparecido') as HTMLInputElement | null)?.addEventListener('change', async () => {
   const fotoInput = document.getElementById('fotoDesaparecido') as HTMLInputElement | null;
   const status = document.getElementById('foto-status');
   if (!status) return;
-  status.textContent = fotoInput?.files?.length ? 'Status da foto: enviada' : 'Status da foto: pendente';
+  const foto = fotoInput?.files?.[0];
+  if (!foto) {
+    status.textContent = 'Status da foto: pendente';
+    return;
+  }
+  if (!foto.type.startsWith('image/')) {
+    status.textContent = 'Status da foto: arquivo inválido';
+    return;
+  }
+  status.textContent = 'Status da foto: enviando...';
+  const dadosAtuais = getDadosFormularioAtual();
+  const retorno = await sheetsService.uploadFotoCaso({
+    base64: await converterArquivoParaBase64(foto),
+    mimeType: foto.type,
+    nomeArquivo: foto.name,
+    idCaso: dadosAtuais.id || `CV-${Date.now()}`,
+    talaoPMESP: dadosAtuais.talaoPMESP || '',
+    nomeDesaparecido: dadosAtuais.nomeCompletoDesaparecido,
+    operadorResponsavel: obterOperadorAtual(),
+    origemFoto: String((form?.elements.namedItem('origemFoto') as HTMLSelectElement | null)?.value || ''),
+    tipoFoto: String((form?.elements.namedItem('tipoFoto') as HTMLSelectElement | null)?.value || ''),
+    autorizacaoUsoImagem: Boolean((form?.elements.namedItem('autorizacaoUsoImagem') as HTMLInputElement | null)?.checked)
+  });
+  if (!retorno.ok || !retorno.urlFoto) {
+    status.textContent = `Status da foto: falha (${retorno.message})`;
+    return;
+  }
+  urlFotoUploadAtual = retorno.urlFoto;
+  const campoUrlFoto = form?.elements.namedItem('urlFoto') as HTMLInputElement | null;
+  if (campoUrlFoto) campoUrlFoto.value = retorno.urlFoto;
+  triagemState.dados.linkFoto = retorno.urlFoto;
+  triagemState.dados.urlFoto = retorno.urlFoto;
+  status.textContent = 'Status da foto: upload realizado';
 });
 
 (document.getElementById('autorizacaoUsoImagem') as HTMLInputElement | null)?.addEventListener('change', (event) => {
