@@ -43,11 +43,12 @@ function validarPermissaoAcao_(operador, acao) {
 }
 
 var SCHEMA_CABINE_VERDE = CABINE_VERDE_SCHEMA;
+var SCHEMA_UNIFICADO = obterSchemaCabineVerdeUnificado_();
 
 var ESTRUTURA_PLANILHA = {
-  CASOS: COLUNAS_CASOS,
+  CASOS: Array.isArray(SCHEMA_UNIFICADO.CASOS) ? SCHEMA_UNIFICADO.CASOS : COLUNAS_CASOS,
   TRIAGEM_RESPOSTAS: COLUNAS_TRIAGEM_RESPOSTAS,
-  EVENTOS_CASO: COLUNAS_EVENTOS_OCORRENCIA,
+  EVENTOS_CASO: Array.isArray(SCHEMA_UNIFICADO.EVENTOS_CASO) ? SCHEMA_UNIFICADO.EVENTOS_CASO : COLUNAS_EVENTOS_OCORRENCIA,
   INDICADORES_OPERACIONAIS: COLUNAS_INDICADORES_OPERACIONAIS,
   HISTORICO_EDICOES: ['idEdicao','idCaso','talaoPMESP','campoAlterado','valorAnterior','valorNovo','operadorNome','operadorEmail','operadorPerfil','dataHoraEdicao','justificativa','emailConfirmado'],
   RELATORIO_OPERACIONAL: ['dataReferencia','qtdFotosRecebidas','qtdFotosValidadas','qtdFotosUtilizadas','qtdFotosRejeitadas','observacaoOcorrenciasImagem','geradoEm'],
@@ -224,7 +225,8 @@ function buscarCaso_(filtro) {
   garantirEstruturaCabineVerde_();
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   garantirEstruturaCabineVerde_();
-  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
+  var colunasCasosBusca = obterSchemaCabineVerdeUnificado_().CASOS;
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasosBusca);
   var abasBusca = [abaCasos, planilha.getSheetByName('Desaparecidos'), planilha.getSheetByName('CASOS_TRATADOS')].filter(Boolean);
   if (abasBusca.every(function(a){ return a.getLastRow() < 2; })) return [];
 
@@ -237,7 +239,7 @@ function buscarCaso_(filtro) {
   var resultados = [];
   abasBusca.forEach(function (abaAtual) {
     if (abaAtual.getLastRow() < 2) return;
-    var cabecalho = garantirColunasDaEstrutura(abaAtual, COLUNAS_CASOS).map(limparTexto);
+    var cabecalho = garantirColunasDaEstrutura(abaAtual, colunasCasosBusca).map(limparTexto);
     var idxIdCaso = cabecalho.indexOf('idCaso');
     var idxTalao = cabecalho.indexOf('talaoPMESP');
     var idxNome = cabecalho.indexOf('nomeCompletoDesaparecido');
@@ -283,8 +285,9 @@ function editarCasoControlado_(idCaso, operador, alteracoes, justificativa, emai
 
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   garantirEstruturaCabineVerde_();
-  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
-  var cabecalho = garantirColunasDaEstrutura(abaCasos, COLUNAS_CASOS).map(limparTexto);
+  var colunasCasosEdicao = obterSchemaCabineVerdeUnificado_().CASOS;
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasosEdicao);
+  var cabecalho = garantirColunasDaEstrutura(abaCasos, colunasCasosEdicao).map(limparTexto);
   var linhaCaso = localizarCasoPorIdCaso(abaCasos, idCasoLimpo, cabecalho);
   if (linhaCaso < 2) throw new Error('Caso não encontrado para edição controlada.');
 
@@ -420,7 +423,7 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  garantirEstruturaCabineVerde_();
+  Logger.log('DEBUG_FLUXO_SALVARCASO: doPost inicio');
   var planilhaLogs = obterPlanilhaLogs();
   try {
     Logger.log("POST RECEBIDO:");
@@ -451,9 +454,18 @@ function doPost(e) {
     if (action === 'healthcheck') {
       return criarRespostaJson({ ok: true, data: { service: 'cabineverde', message: 'Endpoint ativo' } });
     }
+    if (action === 'testeSalvarCasoWebApp') {
+      return jsonResponse_(testarSalvarCasoPayloadMinimo181());
+    }
     if (action === 'salvarCaso') {
       Logger.log("GRAVANDO CASO:");
       Logger.log(body);
+      Logger.log('DEBUG_FLUXO_SALVARCASO: doPost salvarCaso payload=' + JSON.stringify({
+        colunasArray: Array.isArray(body && body.colunas),
+        colunasLength: Array.isArray(body && body.colunas) ? body.colunas.length : null,
+        valoresArray: Array.isArray(body && body.valores),
+        valoresLength: Array.isArray(body && body.valores) ? body.valores.length : null
+      }));
     }
 
     var mapaPermissao = {
@@ -507,9 +519,17 @@ function doPost(e) {
     if (action === 'listarPerfilOperador') return criarRespostaJson({ ok: true, data: operadorAtual });
 
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
-    Object.keys(ESTRUTURA_PLANILHA).forEach(function (aba) {
-      garantirAbaComCabecalho(planilha, aba, ESTRUTURA_PLANILHA[aba]);
-    });
+    if (action === 'salvarCaso') {
+      var schemaSalvarCaso = obterSchemaCabineVerdeUnificado_();
+      var colunasCasosSalvar = Array.isArray(body.colunas) && body.colunas.length ? body.colunas : schemaSalvarCaso.CASOS;
+      Logger.log('DEBUG_FLUXO_SALVARCASO: doPost garantir CASOS=' + JSON.stringify({
+        origem: Array.isArray(body.colunas) && body.colunas.length ? 'payload.colunas' : 'schema.CASOS',
+        length: Array.isArray(colunasCasosSalvar) ? colunasCasosSalvar.length : null
+      }));
+      garantirAbaComCabecalhos_(planilha, 'CASOS', colunasCasosSalvar);
+    } else {
+      garantirEstruturaCabineVerde_();
+    }
 
     var registros = body.abas && Array.isArray(body.abas) ? body.abas : [body];
     var idCaso = limparTexto((body.payload && body.payload.idCaso) || (body.dados && body.dados.idCaso));
@@ -603,9 +623,10 @@ function validarOperador_(emailInformado, payload) {
 
 function listarCasosComProtecao_(operadorAtual) {
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
-  var aba = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
+  var colunasCasos = obterSchemaCabineVerdeUnificado_().CASOS;
+  var aba = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasos);
   if (aba.getLastRow() < 2) return [];
-  var cabecalho = garantirColunasDaEstrutura(aba, COLUNAS_CASOS);
+  var cabecalho = garantirColunasDaEstrutura(aba, colunasCasos);
   var dados = aba.getRange(2, 1, aba.getLastRow() - 1, aba.getLastColumn()).getValues();
   var perfil = normalizarPerfilOperador_(operadorAtual && operadorAtual.perfil);
   return dados.map(function (linha) {
@@ -682,7 +703,14 @@ function gerarRelatorioSeguranca_(resultado) {
 }
 
 function persistirRegistro(planilha, registro) {
-  garantirEstruturaCabineVerde_();
+  Logger.log("PERSISTIR_REGISTRO_OFICIAL_ATIVO");
+  Logger.log('DEBUG_FLUXO_SALVARCASO: persistirRegistro entrada=' + JSON.stringify({
+    aba: limparTexto(registro && registro.aba),
+    colunasArray: Array.isArray(registro && registro.colunas),
+    colunasLength: Array.isArray(registro && registro.colunas) ? registro.colunas.length : null,
+    valoresArray: Array.isArray(registro && registro.valores),
+    valoresLength: Array.isArray(registro && registro.valores) ? registro.valores.length : null
+  }));
   var aba = limparTexto(registro.aba);
   var colunas = registro.colunas || [];
   var valores = registro.valores || [];
@@ -887,7 +915,8 @@ function validarConsistenciaCaso(planilha, contexto) {
     var indiceIdCaso = cabecalhoExistente.indexOf('idCaso');
     var idCasoExistente = indiceIdCaso >= 0 ? limparTexto(sheetCasosExistente.getRange(linhaPorTalaoPMESP, indiceIdCaso + 1).getValue()) : '';
     if (!idCaso || idCaso !== idCasoExistente) {
-      var colunasAtualizadas = garantirColunasDaEstrutura(sheetCasosExistente, ESTRUTURA_PLANILHA.CASOS.concat(['flagDuplicidade']));
+      var colunasSchemaCasos = obterSchemaCabineVerdeUnificado_().CASOS;
+      var colunasAtualizadas = garantirColunasDaEstrutura(sheetCasosExistente, colunasSchemaCasos.concat(['flagDuplicidade']));
       var indiceFlagDuplicidade = colunasAtualizadas.indexOf('flagDuplicidade');
       if (indiceFlagDuplicidade >= 0) {
         sheetCasosExistente.getRange(linhaPorTalaoPMESP, indiceFlagDuplicidade + 1).setValue(true);
@@ -904,7 +933,8 @@ function registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricaoEvento
 }
 
 function registrarEventoOcorrenciaDetalhado_(planilha, idCaso, tipoEvento, descricaoEvento, metadados) {
-  var colunasEventos = obterColunasEventosCaso_();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var colunasEventos = Array.isArray(schema.EVENTOS_CASO) ? schema.EVENTOS_CASO : obterColunasEventosCaso_();
   garantirAbaComCabecalhos_(planilha, 'EVENTOS_CASO', colunasEventos);
   var sheetEventos = garantirAbaComCabecalho(planilha, 'EVENTOS_CASO', colunasEventos);
   var cabecalhoEventos = garantirColunasDaEstrutura(sheetEventos, colunasEventos);
@@ -952,7 +982,8 @@ function coletarEventosOcorrenciaTimeline_(planilha, idCaso) {
   var aba = planilha.getSheetByName('EVENTOS_CASO');
   if (!aba || aba.getLastRow() < 2) return [];
 
-  var cabecalho = garantirColunasDaEstrutura(aba, ESTRUTURA_PLANILHA.EVENTOS_CASO).map(limparTexto);
+  var colunasEventos = obterSchemaCabineVerdeUnificado_().EVENTOS_CASO;
+  var cabecalho = garantirColunasDaEstrutura(aba, colunasEventos).map(limparTexto);
   var idxIdCaso = cabecalho.indexOf('idCaso');
   var idxDataHora = cabecalho.indexOf('dataHora');
   var idxTipoEvento = cabecalho.indexOf('evento');

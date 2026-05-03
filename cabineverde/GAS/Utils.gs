@@ -220,6 +220,13 @@ function garantirAbaComCabecalhos_(ss, nomeAba, colunasObrigatorias) {
     throw new Error('Nome da aba não informado.');
   }
   if (!Array.isArray(colunasObrigatorias)) {
+    Logger.log("ERRO_COLUNAS_INVALIDAS_DEBUG: " + JSON.stringify({
+      nomeAba: nomeAba,
+      tipoColunas: typeof colunasObrigatorias,
+      isArray: Array.isArray(colunasObrigatorias),
+      length: Array.isArray(colunasObrigatorias) ? colunasObrigatorias.length : null,
+      stack: new Error().stack
+    }));
     throw new Error('Colunas obrigatórias inválidas para aba: ' + nomeAba);
   }
 
@@ -255,6 +262,11 @@ function garantirAbaComCabecalhos_(ss, nomeAba, colunasObrigatorias) {
 function garantirEstruturaCabineVerde_() {
   var schema = obterSchemaCabineVerde_();
   var ss = obterSpreadsheetCabineVerde_();
+  Logger.log('DEBUG_FLUXO_SALVARCASO: garantirEstruturaCabineVerde_ schema=' + JSON.stringify({
+    abas: Object.keys(schema || {}),
+    casosArray: Array.isArray(schema && schema.CASOS),
+    casosLength: Array.isArray(schema && schema.CASOS) ? schema.CASOS.length : null
+  }));
   Object.keys(schema).forEach(function (nomeAba) {
     garantirAbaComCabecalhos_(ss, nomeAba, schema[nomeAba]);
   });
@@ -266,6 +278,11 @@ function garantirEstruturaCabineVerde_() {
 }
 
 function garantirAbaComCabecalho(ss, nomeAba, colunasObrigatorias) {
+  Logger.log('DEBUG_FLUXO_SALVARCASO: garantirAbaComCabecalho ' + JSON.stringify({
+    nomeAba: nomeAba,
+    isArray: Array.isArray(colunasObrigatorias),
+    length: Array.isArray(colunasObrigatorias) ? colunasObrigatorias.length : null
+  }));
   return garantirAbaComCabecalhos_(ss, nomeAba, colunasObrigatorias);
 }
 

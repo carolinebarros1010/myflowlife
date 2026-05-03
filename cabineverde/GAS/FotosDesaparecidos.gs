@@ -109,8 +109,9 @@ function registrarFotoNaPlanilha_(dados) {
 
 function atualizarResumoFotosNoCaso_(idCaso, linkFoto) {
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
-  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', COLUNAS_CASOS);
-  var cabecalho = garantirColunasDaEstrutura(abaCasos, COLUNAS_CASOS.concat(['quantidadeFotos', 'fotoPrincipalLink', 'statusFotos']));
+  var colunasCasos = obterSchemaCabineVerdeUnificado_().CASOS;
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasos);
+  var cabecalho = garantirColunasDaEstrutura(abaCasos, colunasCasos.concat(['quantidadeFotos', 'fotoPrincipalLink', 'statusFotos']));
   var linhaCaso = localizarCasoPorIdCaso(abaCasos, idCaso, cabecalho);
   if (linhaCaso < 2) return;
 
