@@ -692,33 +692,39 @@ function persistirRegistro(planilha, registro) {
   var colunasEstrutura = Array.isArray(ESTRUTURA_PLANILHA[aba]) && ESTRUTURA_PLANILHA[aba].length ? ESTRUTURA_PLANILHA[aba] : colunasFallback;
 
   if (aba === 'CASOS') {
-    var colunasCasos = colunasPayload.length ? colunasPayload : (Array.isArray(schema && schema.CASOS) ? schema.CASOS : (Array.isArray(CABINE_VERDE_SCHEMA && CABINE_VERDE_SCHEMA.CASOS) ? CABINE_VERDE_SCHEMA.CASOS : []));
-    Logger.log("COLUNAS PAYLOAD CASOS: " + JSON.stringify(registro.colunas || []));
-    Logger.log("TOTAL COLUNAS PAYLOAD CASOS: " + (Array.isArray(registro.colunas) ? registro.colunas.length : "NAO_ARRAY"));
-    Logger.log("TOTAL COLUNAS SCHEMA CASOS: " + (schema && Array.isArray(schema.CASOS) ? schema.CASOS.length : "INVALIDO"));
+    var colunasSchemaCasos = Array.isArray(schema && schema.CASOS)
+      ? schema.CASOS
+      : (Array.isArray(CABINE_VERDE_SCHEMA && CABINE_VERDE_SCHEMA.CASOS) ? CABINE_VERDE_SCHEMA.CASOS : []);
 
-    if (!Array.isArray(colunasCasos) || colunasCasos.length === 0) {
-      throw new Error("CASOS sem colunas válidas: payload.colunas e schema.CASOS estão inválidos.");
+    if (!Array.isArray(colunasSchemaCasos) || colunasSchemaCasos.length === 0) {
+      throw new Error('CASOS sem colunas válidas no schema.');
     }
 
-    colunas = colunasCasos;
-    var sheetCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasos);
-    garantirAbaComCabecalhos_(planilha, 'CASOS', colunasCasos);
-    var cabecalhoAtual = garantirColunasDaEstrutura(sheetCasos, colunasCasos);
+    colunas = colunasSchemaCasos;
+    var sheetCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasSchemaCasos);
+    garantirAbaComCabecalhos_(planilha, 'CASOS', colunasSchemaCasos);
+    var cabecalhoAtual = garantirColunasDaEstrutura(sheetCasos, colunasSchemaCasos);
 
-    Logger.log('TOTAL COLUNAS HEADER CASOS: ' + cabecalhoAtual.length);
-    Logger.log('TOTAL COLUNAS PAYLOAD: ' + colunas.length);
+    Logger.log('TOTAL COLUNAS HEADER CASOS (PLANILHA): ' + cabecalhoAtual.length);
+    Logger.log('HEADER FINAL CASOS: ' + colunasSchemaCasos.length);
+    Logger.log('TOTAL COLUNAS PAYLOAD: ' + (Array.isArray(registro.colunas) ? registro.colunas.length : 'NAO_ARRAY'));
     Logger.log('TOTAL VALORES PAYLOAD: ' + valores.length);
-    if (colunas.length !== valores.length) {
-      throw new Error('Quantidade de colunas diferente da quantidade de valores.');
-    }
-    if (cabecalhoAtual.length < colunas.length) {
-      cabecalhoAtual = garantirColunasDaEstrutura(sheetCasos, cabecalhoAtual.concat(colunas));
+
+    var valoresPorSchema = colunasSchemaCasos.map(function (nomeColuna) {
+      if (Array.isArray(colunasPayload) && colunasPayload.length) {
+        var idx = colunasPayload.indexOf(nomeColuna);
+        return idx >= 0 ? valores[idx] : '';
+      }
+      return '';
+    });
+
+    if (valoresPorSchema.length !== colunas.length) {
+      throw new Error('Falha ao alinhar valores ao schema CASOS.');
     }
 
     Logger.log("GRAVANDO CASO:");
     Logger.log(registro);
-    var registroPorColuna = mapearPorColuna(colunas, valores);
+    var registroPorColuna = mapearPorColuna(colunas, valoresPorSchema);
     registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
@@ -732,7 +738,7 @@ function persistirRegistro(planilha, registro) {
       linhaPorTalaoPMESP: linhaPorTalaoPMESP
     });
 
-    var linhaFinal = cabecalhoAtual.map(function (nomeColuna) {
+    var linhaFinal = colunasSchemaCasos.map(function (nomeColuna) {
       return normalizarValorPlanilha(registroPorColuna[nomeColuna]);
     });
 
@@ -754,6 +760,43 @@ function persistirRegistro(planilha, registro) {
 
   var sheet = garantirAbaComCabecalho(planilha, aba, colunasEstrutura.length ? colunasEstrutura : colunas);
   sheet.appendRow(valores);
+}
+
+
+function auditarHeaderCasos_() {
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var schemaCasos = Array.isArray(schema && schema.CASOS) ? schema.CASOS : [];
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaCasos = planilha.getSheetByName('CASOS');
+  if (!abaCasos) {
+    return { ok: false, erro: 'Aba CASOS não encontrada.', schemaCasos: schemaCasos.length };
+  }
+
+  var cabecalhoAtual = abaCasos.getRange(1, 1, 1, Math.max(abaCasos.getLastColumn(), 1)).getValues()[0].map(limparTexto).filter(Boolean);
+  var normalizados = {};
+  var duplicadas = [];
+  cabecalhoAtual.forEach(function (coluna) {
+    var chave = normalizarCabecalho_(coluna);
+    if (normalizados[chave]) duplicadas.push(coluna);
+    normalizados[chave] = true;
+  });
+
+  var schemaNormalizado = schemaCasos.map(normalizarCabecalho_);
+  var extras = cabecalhoAtual.filter(function (coluna) {
+    return schemaNormalizado.indexOf(normalizarCabecalho_(coluna)) === -1;
+  });
+
+  Logger.log('HEADER FINAL CASOS: ' + schemaCasos.length);
+  Logger.log('COLUNAS EXTRAS CASOS: ' + JSON.stringify(extras));
+  Logger.log('COLUNAS DUPLICADAS CASOS: ' + JSON.stringify(duplicadas));
+
+  return {
+    ok: true,
+    headerAtual: cabecalhoAtual.length,
+    headerSchema: schemaCasos.length,
+    colunasExtras: extras,
+    colunasDuplicadas: duplicadas
+  };
 }
 
 function testeGravacaoDireta() {
