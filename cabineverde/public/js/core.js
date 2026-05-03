@@ -590,7 +590,7 @@ export const gerarPayloadSheets = (caso) => {
   };
 
   return {
-    aba: 'Desaparecidos',
+    aba: 'CASOS',
     colunas: [...COLUNAS_DESAPARECIDOS],
     payload: dados,
     valores: COLUNAS_DESAPARECIDOS.map((coluna) => dados[coluna])
@@ -605,20 +605,9 @@ const contemErroDoGet = (texto = '') => {
 export const salvarCasoSheets = async (caso) => {
   try {
     const payload = gerarPayloadSheets(caso);
-    await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    return {
-      ok: true,
-      mode: 'no-cors',
-      message: 'Caso enviado para processamento (modo silencioso)'
-    };
+    console.log("PAYLOAD ENVIADO:", payload);
+    const resposta = await chamarAcaoGAS('salvarCaso', payload);
+    return { ok: true, message: resposta?.message || 'Caso enviado para processamento', data: resposta };
   } catch {
     return { ok: false, message: 'Falha ao salvar caso' };
   }
@@ -694,6 +683,7 @@ const chamarAcaoGAS = async (action, payload = {}) => {
   });
 
   const texto = await resposta.text();
+  console.log("RESPOSTA BRUTA GAS:", texto);
   console.info('[GAS] Resposta bruta:', texto);
 
   let body = {};

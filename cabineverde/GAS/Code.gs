@@ -406,6 +406,8 @@ function doPost(e) {
   garantirEstruturaCabineVerde_();
   var planilhaLogs = obterPlanilhaLogs();
   try {
+    Logger.log("POST RECEBIDO:");
+    Logger.log(e && e.postData ? e.postData.contents : '');
     registrarLogTecnico(planilhaLogs, { etapa: 'POST_RECEBIDO', ok: true, mensagem: 'Requisição POST recebida pelo Web App', rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
     var body = parsePayload(e);
     if (limparTexto(body.action) === 'validarOperador') {
@@ -421,6 +423,10 @@ function doPost(e) {
 
     if (action === 'healthcheck') {
       return criarRespostaJson({ ok: true, data: { service: 'cabineverde', message: 'Endpoint ativo' } });
+    }
+    if (action === 'salvarCaso') {
+      Logger.log("GRAVANDO CASO:");
+      Logger.log(body);
     }
 
     var mapaPermissao = {
@@ -523,7 +529,10 @@ function validarOperadorPayloadOuSessao_(payload) {
   var emailGoogle = limparTexto(Session.getActiveUser().getEmail()).toLowerCase();
   var emailOperador = limparTexto(payload && payload.operadorEmail).toLowerCase() || emailGoogle;
   var validacao = validarOperador_(emailOperador, payload || {});
-  if (!validacao.ok || !validacao.autorizado) throw new Error('Operador não validado ou não autorizado.');
+  if (!validacao.ok || !validacao.autorizado) {
+    Logger.log("BLOQUEIO DE EXECUÇÃO");
+    throw new Error('Operador não validado ou não autorizado.');
+  }
   return { autorizado: true, email: validacao.operador.email, perfil: validacao.operador.perfil, nome: validacao.operador.nome };
 }
 
@@ -654,6 +663,8 @@ function persistirRegistro(planilha, registro) {
   var cabecalhoAtual = garantirColunasDaEstrutura(sheet, ESTRUTURA_PLANILHA[aba] || colunas);
 
   if (aba === 'CASOS') {
+    Logger.log("GRAVANDO CASO:");
+    Logger.log(registro);
     var registroPorColuna = mapearPorColuna(colunas, valores);
     registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
     var idCaso = limparTexto(registroPorColuna.idCaso);
@@ -689,6 +700,17 @@ function persistirRegistro(planilha, registro) {
   }
 
   sheet.appendRow(valores);
+}
+
+function testeGravacaoDireta() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = ss.getSheetByName("CASOS");
+  aba.appendRow([
+    "TESTE123",
+    "7450",
+    new Date(),
+    "TESTE"
+  ]);
 }
 
 

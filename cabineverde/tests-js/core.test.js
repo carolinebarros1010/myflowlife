@@ -61,9 +61,9 @@ test('observacoes operacionais mantem somente texto livre', () => {
   assert.equal(observacao.includes('[INDICADORES OPERACIONAIS]'), false);
 });
 
-test('payload completo com colunas base + arvore para Desaparecidos', () => {
+test('payload completo com colunas base + arvore para CASOS', () => {
   const payload = gerarPayloadSheets({ nomeCompletoDesaparecido: 'x', idade: 30 });
-  assert.equal(payload.aba, 'Desaparecidos');
+  assert.equal(payload.aba, 'CASOS');
   assert.equal(payload.colunas.length, payload.valores.length);
   assert.equal(payload.colunas.length > 51, true);
   assert.equal(payload.colunas[0], 'idCaso');
@@ -74,24 +74,31 @@ test('payload completo com colunas base + arvore para Desaparecidos', () => {
   assert.equal(payload.payload.arv_p1_emergencia_resp, 'Não informado');
 });
 
-test('salvarCasoSheets usa POST no-cors + endpoint oficial', async () => {
+test('salvarCasoSheets usa action salvarCaso via endpoint oficial', async () => {
   const originalFetch = globalThis.fetch;
+  const originalLocalStorage = globalThis.localStorage;
   let fetchArgs;
+  globalThis.localStorage = {
+    getItem: () => '',
+    setItem: () => {},
+    removeItem: () => {}
+  };
   globalThis.fetch = async (...args) => {
     fetchArgs = args;
-    return new Response(null, { status: 204 });
+    return new Response(JSON.stringify({ ok: true, message: 'ok' }), { status: 200 });
   };
 
   const retorno = await salvarCasoSheets({ nomeCompletoDesaparecido: 'Teste', idade: 18 });
   assert.equal(retorno.ok, true);
-  assert.equal(retorno.mode, 'no-cors');
-  assert.equal(retorno.message, 'Caso enviado para processamento (modo silencioso)');
+  assert.equal(retorno.message, 'ok');
   assert.equal(fetchArgs[0], ENDPOINT_OFICIAL_APPS_SCRIPT);
   assert.equal(fetchArgs[1].method, 'POST');
-  assert.equal(fetchArgs[1].mode, 'no-cors');
   assert.equal(fetchArgs[1].headers['Content-Type'], 'text/plain;charset=utf-8');
+  const body = JSON.parse(fetchArgs[1].body);
+  assert.equal(body.action, 'salvarCaso');
 
   globalThis.fetch = originalFetch;
+  globalThis.localStorage = originalLocalStorage;
 });
 
 test('healthcheckSheets retorna erro claro quando doGet não está publicado', async () => {
