@@ -185,6 +185,17 @@ function serializarDadosEvento_(dados) {
   }
 }
 
+
+function obterColunasEventosCaso_() {
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var colunasEventos = Array.isArray(schema.EVENTOS_CASO) ? schema.EVENTOS_CASO : [];
+  Logger.log("TOTAL COLUNAS EVENTOS_CASO: " + colunasEventos.length);
+  if (!Array.isArray(colunasEventos) || colunasEventos.length === 0) {
+    throw new Error("Schema EVENTOS_CASO inválido.");
+  }
+  return colunasEventos;
+}
+
 function registrarEventoOperacional_(planilha, idCaso, tipoEvento, dadosEvento) {
   var descricao = 'dados=' + serializarDadosEvento_(dadosEvento || {});
   registrarEventoOcorrenciaDetalhado_(planilha, idCaso, tipoEvento, descricao, dadosEvento || {});
@@ -832,8 +843,10 @@ function registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricaoEvento
 }
 
 function registrarEventoOcorrenciaDetalhado_(planilha, idCaso, tipoEvento, descricaoEvento, metadados) {
-  var sheetEventos = garantirAbaComCabecalho(planilha, 'EVENTOS_CASO', ESTRUTURA_PLANILHA.EVENTOS_CASO);
-  var cabecalhoEventos = garantirColunasDaEstrutura(sheetEventos, ESTRUTURA_PLANILHA.EVENTOS_CASO);
+  var colunasEventos = obterColunasEventosCaso_();
+  garantirAbaComCabecalhos_(planilha, 'EVENTOS_CASO', colunasEventos);
+  var sheetEventos = garantirAbaComCabecalho(planilha, 'EVENTOS_CASO', colunasEventos);
+  var cabecalhoEventos = garantirColunasDaEstrutura(sheetEventos, colunasEventos);
   var meta = metadados || {};
   var eventoPorColuna = {
     idCaso: limparTexto(idCaso),

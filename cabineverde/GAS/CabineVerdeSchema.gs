@@ -22,6 +22,10 @@ function obterSchemaCabineVerdeUnificado_() {
     throw new Error("CABINE_VERDE_SCHEMA não possui chave CASOS válida.");
   }
 
+  if (!Array.isArray(CABINE_VERDE_SCHEMA.EVENTOS_CASO) || CABINE_VERDE_SCHEMA.EVENTOS_CASO.length === 0) {
+    throw new Error("CABINE_VERDE_SCHEMA não possui chave EVENTOS_CASO válida.");
+  }
+
   return CABINE_VERDE_SCHEMA;
 }
 
