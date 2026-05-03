@@ -152,34 +152,88 @@ function formatarDataHora(data) {
   return Utilities.formatDate(data, timezone, 'yyyy-MM-dd HH:mm:ss');
 }
 
-function garantirAbaComCabecalho(planilha, nomeAba, cabecalho) {
-  var sheet = planilha.getSheetByName(nomeAba);
+
+
+function obterSchemaCabineVerde_() {
+  if (!CABINE_VERDE_SCHEMA || !CABINE_VERDE_SCHEMA.OPERADORES) {
+    throw new Error('Schema não definido corretamente');
+  }
+  return CABINE_VERDE_SCHEMA;
+}
+
+function normalizarCabecalho_(valor) {
+  return limparTexto(valor).trim().toLowerCase();
+}
+
+function registrarLogEstrutura_(evento, mensagem, nomeAba, coluna) {
+  try {
+    var planilha = SpreadsheetApp.getActiveSpreadsheet();
+    var abaLogs = planilha.getSheetByName('LOGS');
+    if (!abaLogs) return;
+    var cabecalho = garantirColunasDaEstrutura(abaLogs, obterSchemaCabineVerde_().LOGS);
+    var registro = {
+      dataHora: formatarDataHora(new Date()),
+      evento: limparTexto(evento),
+      motivo: 'ESTRUTURA_BASE',
+      mensagem: limparTexto(mensagem),
+      operadorEmail: '',
+      operadorNome: '',
+      operadorPerfil: '',
+      talaoPMESP: '',
+      idCaso: '',
+      resultado: 'SUCESSO',
+      origem: [limparTexto(nomeAba), limparTexto(coluna)].filter(Boolean).join(':')
+    };
+    abaLogs.appendRow(cabecalho.map(function (colunaNome) { return normalizarValorPlanilha(registro[colunaNome]); }));
+  } catch (_e) {}
+}
+
+function garantirAbaComCabecalhos_(ss, nomeAba, colunasObrigatorias) {
+  var sheet = ss.getSheetByName(nomeAba);
+  var criada = false;
   if (!sheet) {
-    sheet = planilha.insertSheet(nomeAba);
+    sheet = ss.insertSheet(nomeAba);
+    criada = true;
   }
 
-  var linha1 = sheet.getRange(1, 1, 1, cabecalho.length).getValues()[0];
-  var precisaCabecalho = !linha1.some(function (c) { return limparTexto(c); });
-  if (precisaCabecalho) {
-    sheet.getRange(1, 1, 1, cabecalho.length).setValues([cabecalho]);
+  var ultimaColuna = Math.max(sheet.getLastColumn(), 1);
+  var cabecalhoAtual = sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0];
+  var temCabecalho = cabecalhoAtual.some(function (c) { return limparTexto(c); });
+  if (!temCabecalho) {
+    sheet.getRange(1, 1, 1, colunasObrigatorias.length).setValues([colunasObrigatorias]);
+    cabecalhoAtual = colunasObrigatorias.slice();
   }
 
+  var normalizados = cabecalhoAtual.map(normalizarCabecalho_);
+  colunasObrigatorias.forEach(function (coluna) {
+    if (normalizados.indexOf(normalizarCabecalho_(coluna)) === -1) {
+      sheet.getRange(1, sheet.getLastColumn() + 1, 1, 1).setValue(coluna);
+      normalizados.push(normalizarCabecalho_(coluna));
+      registrarLogEstrutura_('COLUNA_ADICIONADA', 'Coluna obrigatória adicionada.', nomeAba, coluna);
+    }
+  });
+
+  if (criada) registrarLogEstrutura_('ABA_CRIADA', 'Aba obrigatória criada automaticamente.', nomeAba, '');
   return sheet;
 }
 
-function garantirColunasDaEstrutura(sheet, colunasEsperadas) {
-  var ultimaColuna = Math.max(sheet.getLastColumn(), 1);
-  var cabecalhoAtual = sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0].map(limparTexto);
-  var colunasFaltantes = (colunasEsperadas || []).filter(function (coluna) {
-    return cabecalhoAtual.indexOf(coluna) === -1;
+function garantirEstruturaCabineVerde_() {
+  var spreadsheetId = limparTexto(PropertiesService.getScriptProperties().getProperty('CABINE_VERDE_SPREADSHEET_ID'));
+  var ss = spreadsheetId ? SpreadsheetApp.openById(spreadsheetId) : SpreadsheetApp.getActiveSpreadsheet();
+  Object.keys(obterSchemaCabineVerde_()).forEach(function (nomeAba) {
+    garantirAbaComCabecalhos_(ss, nomeAba, obterSchemaCabineVerde_()[nomeAba]);
   });
+  return true;
+}
 
-  if (colunasFaltantes.length) {
-    sheet.getRange(1, ultimaColuna + 1, 1, colunasFaltantes.length).setValues([colunasFaltantes]);
-    cabecalhoAtual = cabecalhoAtual.concat(colunasFaltantes);
-  }
+function garantirAbaComCabecalho(planilha, nomeAba, cabecalho) {
+  return garantirAbaComCabecalhos_(planilha, nomeAba, cabecalho || []);
+}
 
-  return cabecalhoAtual.filter(Boolean);
+function garantirColunasDaEstrutura(sheet, colunasEsperadas) {
+  garantirAbaComCabecalhos_(sheet.getParent(), sheet.getName(), colunasEsperadas || []);
+  var ultimaColuna = Math.max(sheet.getLastColumn(), 1);
+  return sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0].map(limparTexto).filter(Boolean);
 }
 
 
@@ -218,4 +272,24 @@ function normalizarCamposFisicos_(dados) {
   base.alturaAproximada = normalizarNumero(base.alturaAproximada, 30, 250);
   base.pesoAproximado = normalizarNumero(base.pesoAproximado, 1, 400);
   return base;
+}
+
+function auditarEstruturaCabineVerde_() {
+  garantirEstruturaCabineVerde_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var relatorio = { abas: [], colunasFaltantes: {}, logsEstrutura: [] };
+  Object.keys(obterSchemaCabineVerde_()).forEach(function (nomeAba) {
+    var aba = ss.getSheetByName(nomeAba);
+    var cab = aba ? aba.getRange(1, 1, 1, Math.max(aba.getLastColumn(), 1)).getValues()[0].map(limparTexto) : [];
+    var faltantes = obterSchemaCabineVerde_()[nomeAba].filter(function (col) {
+      return cab.map(normalizarCabecalho_).indexOf(normalizarCabecalho_(col)) === -1;
+    });
+    relatorio.abas.push(nomeAba);
+    relatorio.colunasFaltantes[nomeAba] = faltantes;
+  });
+  var abaLogs = ss.getSheetByName('LOGS');
+  if (abaLogs && abaLogs.getLastRow() > 1) {
+    relatorio.logsEstrutura = abaLogs.getRange(Math.max(2, abaLogs.getLastRow() - 20), 1, Math.min(20, abaLogs.getLastRow() - 1), abaLogs.getLastColumn()).getValues();
+  }
+  return relatorio;
 }

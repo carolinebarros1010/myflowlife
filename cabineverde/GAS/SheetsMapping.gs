@@ -1,9 +1,17 @@
 var ABA_CASOS = 'CASOS';
 
-var COLUNAS_CASOS = [
-  'idCaso','talaoPMESP','dataHoraRegistro','dataServico','turno','equipe','operadorResponsavel','municipio','talaoBopm','statusCaso','nomeCompletoDesaparecido','sexoGenero','idade','faixaEtaria','cpf','rg','nomeMae','dataNascimento','corPele','alturaAproximada','pesoAproximado','corCabelo','corOlhos','caracteristicasMarcantes','dataHoraUltimaVisualizacao','localUltimaVisualizacao','roupaUltimaVisualizacao','meioTransporte','dadosVeiculo','fotoDisponivel','linkFoto','telefoneDesaparecido','dispositivoLigado','camerasResidencia','camerasUltimoLocal','aptoCabineVerde','nomeSolicitante','vinculoSolicitante','telefoneSolicitante','vulnerabilidade','condicaoMentalCognitivaComportamental','limitacaoFisica','usoMedicacaoEssencial','usoAlcoolOutrasDrogas','historicoDesaparecimentoAnterior','conflitoPrevio','suspeitaCrime','locaisHabituais','buscasPreliminares','classificacaoRisco','prioridade','acaoSugerida','localizado','dataHoraLocalizacao','formaLocalizacao','encerrado190','numeroBo','observacoesOperacionais'
-];
+var CABINE_VERDE_SCHEMA = (typeof CABINE_VERDE_SCHEMA !== 'undefined' && CABINE_VERDE_SCHEMA) ? CABINE_VERDE_SCHEMA : {
+  OPERADORES: ['email','nome','perfil','ativo','ultimaAtualizacao'],
+  CASOS: ['idCaso','talaoPMESP','dataHoraInicio','dataHoraUltimaAtualizacao','status','nomeCompletoDesaparecido','sexoGenero','idade','faixaEtaria','municipio','dataHoraUltimaVisualizacao','localUltimaVisualizacao','roupaUltimaVisualizacao','meioTransporte','dadosVeiculoTransporte','fotoDigitalDisponivel','dispositivoVinculado','telefoneDispositivoPessoa','vulnerabilidadeIdentificada','suspeitaCrime','camerasResidencia','camerasUltimoLocal','nomeSolicitante','vinculoSolicitante','telefoneSolicitante','risco','prioridade','aptoCabineVerde','classificacaoOperacional','tipoCaso','flagAlerta','operadorCriador','operadorUltimaAcao','observacoesOperacionais'],
+  TRIAGEM_RESPOSTAS: ['idCaso','talaoPMESP','etapa','campo','pergunta','resposta','dataHora','operadorEmail','operadorNome'],
+  EVENTOS_CASO: ['idCaso','talaoPMESP','dataHora','evento','descricao','operadorEmail','operadorNome','operadorPerfil','resultado'],
+  INDICADORES_OPERACIONAIS: ['idCaso','talaoPMESP','risco','prioridade','classificacaoOperacional','tipoCaso','flagAlerta','vulnerabilidadeIdentificada','suspeitaCrime','idade','faixaEtaria','dataHora','operadorEmail'],
+  QUALIDADE_DADOS: ['idProblema','idCaso','talaoPMESP','dataHora','campo','problema','severidade','prioridadeTratamento','status','operadorEmail','resolvidoEm','resolvidoPor','observacaoResolucao'],
+  LOGS: ['dataHora','evento','motivo','mensagem','operadorEmail','operadorNome','operadorPerfil','talaoPMESP','idCaso','resultado','origem'],
+  AUDITORIA_CONSULTAS: ['dataHora','operadorEmail','operadorNome','operadorPerfil','filtroUsado','idCaso','talaoPMESP','nomeCompleto','resultado','quantidadeEncontrada']
+};
 
-var COLUNAS_TRIAGEM_RESPOSTAS = ['idCaso', 'perguntaChave', 'resposta', 'complemento'];
-var COLUNAS_EVENTOS_OCORRENCIA = ['idCaso', 'timestampEvento', 'tipoEvento', 'descricaoEvento', 'statusCaso', 'prioridade', 'classificacaoRisco', 'operadorEmail', 'operadorPerfil', 'dataHoraEdicao', 'quantidadeCamposAlterados', 'justificativa'];
-var COLUNAS_INDICADORES_OPERACIONAIS = ['idCaso', 'criancaSemSupervisao', 'criancaVeiculoSuspeito', 'preadolescenteAliciamentoVirtual', 'adolescenteSofrimentoPsiquico', 'adultoSuspeitaCrime', 'idosoDesorientado'];
+var COLUNAS_CASOS = CABINE_VERDE_SCHEMA.CASOS;
+var COLUNAS_TRIAGEM_RESPOSTAS = CABINE_VERDE_SCHEMA.TRIAGEM_RESPOSTAS;
+var COLUNAS_EVENTOS_OCORRENCIA = CABINE_VERDE_SCHEMA.EVENTOS_CASO;
+var COLUNAS_INDICADORES_OPERACIONAIS = CABINE_VERDE_SCHEMA.INDICADORES_OPERACIONAIS;
