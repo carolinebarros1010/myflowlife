@@ -721,6 +721,9 @@ export const resumoQualidadeDados_ = async () => chamarAcaoGAS('resumoQualidadeD
 export const marcarProblemaQualidadeResolvido_ = async (idCaso, campo, problema, responsavelTratamento) =>
   chamarAcaoGAS('marcarProblemaQualidadeResolvido_', { idCaso, campo, problema, responsavelTratamento });
 
+export const registrarConsultaCaso_ = async (dadosConsulta) =>
+  chamarAcaoGAS('enviarFeedback', { feedback: { tipo: 'CONSULTA_CASO_REALIZADA', ...dadosConsulta } });
+
 export const gerarRelatorioOperacional = (casos, extra = '') => {
   const data = new Date().toLocaleDateString('pt-BR');
   const criticos = casos.filter((c) => c.classificacaoRisco === 'Alto risco');
