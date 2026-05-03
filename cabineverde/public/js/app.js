@@ -71,6 +71,11 @@ const atualizarFeedback = (mensagem, erro = false) => {
   feedback.classList.toggle('danger', erro);
 };
 
+const logBotaoOperacional = (nomeBotao, payload = {}) => {
+  console.log('BOTÃO CLICADO:', nomeBotao);
+  console.log('PAYLOAD ENVIADO:', payload);
+};
+
 const renderPergunta = (pergunta) => {
   const nomeResposta = `arvore__${pergunta.id}`;
   const nomeComplemento = `comp__${pergunta.id}`;
@@ -401,7 +406,7 @@ const render = () => {
       </section>
     </section>
     <section class="cv-card" data-tela="3" hidden>
-      <h3>Tela 3 — Decisão Operacional</h3>
+      <h3>Tela 3 — Fechamento da Triagem</h3>
       <h4>Resumo operacional</h4><dl id="resumo"></dl>
       <div class="cv-grid">
         <label>Risco<input id="decisao-risco" readonly /></label>
@@ -409,9 +414,15 @@ const render = () => {
         <label>Status<input id="decisao-status" readonly /></label>
       </div>
       <div class="cv-inline-actions">
-        <button class="cv-button" type="button" id="menuSalvarCaso">Despacho</button>
-        <button class="cv-button cv-button--secondary" type="button" id="menuGerarRelatorio">Encaminhamento</button>
+        <button class="cv-button" type="button" id="menuSalvarCaso">Salvar caso</button>
+        <button class="cv-button cv-button--secondary" type="button" id="menuGerarRelatorio">Finalizar triagem</button>
         <button class="cv-button cv-button--ghost" type="button" id="voltarTriagemBtn">Voltar para triagem</button>
+      </div>
+      <div class="cv-section-helper">
+        <p><strong>Salvar caso:</strong> grava as informações na planilha.</p>
+        <p><strong>Finalizar triagem:</strong> salva e encerra a etapa de triagem.</p>
+        <p><strong>Buscar caso:</strong> apenas consulta dados existentes.</p>
+        <p><strong>Atualizar painel:</strong> apenas consulta qualidade dos dados.</p>
       </div>
     </section>
     <section class="cv-card"><h3>Feedback</h3><p id="feedback">Pronto para envio.</p></section>
@@ -538,13 +549,15 @@ const render = () => {
       return;
     }
 
+    logBotaoOperacional('Finalizar triagem', caso);
     const retorno = await salvarCasoSheets(caso);
+    console.log('RESPOSTA GAS:', retorno);
     if (DEBUG_MODE) {
       document.getElementById('gas-response').textContent = JSON.stringify(retorno, null, 2);
     }
 
     if (retorno.ok) {
-      atualizarFeedback('Caso enviado para processamento.');
+      atualizarFeedback('Caso salvo com sucesso na planilha.');
       casos.unshift(caso);
       localStorage.setItem('cabine-verde-casos', JSON.stringify(casos));
     } else {
@@ -578,7 +591,9 @@ const render = () => {
     };
     if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.nomeCompletoDesaparecido) return atualizarFeedback('Informe ao menos um filtro para consulta.', true);
     try {
+      logBotaoOperacional('Buscar caso', filtro);
       const resposta = await buscarCaso_(filtro);
+      console.log('RESPOSTA GAS:', resposta);
       const casosEncontrados = Array.isArray(resposta.casos) ? resposta.casos : (resposta.caso ? [resposta.caso] : []);
       if (!casosEncontrados.length) {
         atualizarFeedback('Não foi encontrado caso com os filtros informados.', true);
@@ -649,8 +664,15 @@ const render = () => {
     atualizarFeedback('Relatório gerado.');
   };
 
-  document.getElementById('menuSalvarCaso')?.addEventListener('click', () => form.requestSubmit());
-  document.getElementById('menuGerarRelatorio')?.addEventListener('click', gerarRelatorio);
+  document.getElementById('menuSalvarCaso')?.addEventListener('click', () => {
+    logBotaoOperacional('Salvar caso', { action: 'salvarCaso' });
+    console.log('action: salvarCaso');
+    form.requestSubmit();
+  });
+  document.getElementById('menuGerarRelatorio')?.addEventListener('click', () => {
+    logBotaoOperacional('Finalizar triagem', { action: 'salvarCaso', etapa: 'encerramentoTriagem' });
+    form.requestSubmit();
+  });
   document.getElementById('menuNovoCaso')?.addEventListener('click', () => {
     form.reset();
     atualizarUI();
@@ -728,7 +750,11 @@ const render = () => {
     renderListaQualidade(resumo);
   };
   document.getElementById('atualizarQualidadeBtn')?.addEventListener('click', async () => {
-    try { await atualizarPainelQualidade(); } catch (error) { atualizarFeedback(error.message || 'Falha ao atualizar painel de qualidade.', true); }
+    try {
+      logBotaoOperacional('Atualizar painel', { action: 'resumoQualidadeDados_' });
+      await atualizarPainelQualidade();
+      console.log('RESPOSTA GAS:', { ok: true, action: 'resumoQualidadeDados_' });
+    } catch (error) { atualizarFeedback(error.message || 'Falha ao atualizar painel de qualidade.', true); }
   });
   ['qualidade-filtro-idCaso', 'qualidade-filtro-talaoPMESP', 'qualidade-filtro-severidade', 'qualidade-filtro-prioridadeTratamento', 'qualidade-filtro-statusTratamento'].forEach((id) =>
     document.getElementById(id).addEventListener('input', () => atualizarPainelQualidade().catch(() => {}))
@@ -762,7 +788,9 @@ const registrarEventosSessao = () => {
     }
     if (mensagemLogin) mensagemLogin.textContent = 'Validando operador...';
     try {
+      logBotaoOperacional('Validar operador', { operadorEmail: email });
       const resposta = await validarOperador_(email);
+      console.log('RESPOSTA GAS:', resposta);
       if (resposta?.autorizado && resposta?.operador) {
         salvarOperadorLocal(resposta.operador);
         atualizarFeedback('Operador validado com sucesso. Acesso liberado.');
