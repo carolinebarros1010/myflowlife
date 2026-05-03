@@ -663,6 +663,16 @@ function persistirRegistro(planilha, registro) {
   var cabecalhoAtual = garantirColunasDaEstrutura(sheet, ESTRUTURA_PLANILHA[aba] || colunas);
 
   if (aba === 'CASOS') {
+    Logger.log('TOTAL COLUNAS HEADER CASOS: ' + cabecalhoAtual.length);
+    Logger.log('TOTAL COLUNAS PAYLOAD: ' + colunas.length);
+    Logger.log('TOTAL VALORES PAYLOAD: ' + valores.length);
+    if (colunas.length !== valores.length) {
+      throw new Error('Quantidade de colunas diferente da quantidade de valores.');
+    }
+    if (cabecalhoAtual.length < colunas.length) {
+      cabecalhoAtual = garantirColunasDaEstrutura(sheet, cabecalhoAtual.concat(colunas));
+    }
+
     Logger.log("GRAVANDO CASO:");
     Logger.log(registro);
     var registroPorColuna = mapearPorColuna(colunas, valores);

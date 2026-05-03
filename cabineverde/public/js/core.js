@@ -605,7 +605,9 @@ const contemErroDoGet = (texto = '') => {
 export const salvarCasoSheets = async (caso) => {
   try {
     const payload = gerarPayloadSheets(caso);
-    console.log("PAYLOAD ENVIADO:", payload);
+    console.log("COLUNAS SALVAR CASO:", payload.colunas);
+    console.log("VALORES SALVAR CASO:", payload.valores);
+    console.log("PAYLOAD SALVAR CASO:", payload);
     const resposta = await chamarAcaoGAS('salvarCaso', payload);
     return { ok: true, message: resposta?.message || 'Caso enviado para processamento', data: resposta };
   } catch {
