@@ -39,7 +39,7 @@ function salvarFotoDesaparecido_(dadosFoto) {
   var pastaCaso = obterOuCriarSubpasta_(pastaFotos, idCaso + '_' + talaoPMESP);
 
   var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyyMMdd_HHmmss');
-  var nomeArquivo = idCaso + '_' + talaoPMESP + '_' + timestamp + '.jpg';
+  var nomeArquivo = 'TEMP_' + idCaso + '_' + timestamp + '.jpg';
   var blob = Utilities.newBlob(bytes, mimeType, nomeArquivo);
   var file = pastaCaso.createFile(blob);
   file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
@@ -64,7 +64,7 @@ function salvarFotoDesaparecido_(dadosFoto) {
   registrarEventoOcorrencia(SpreadsheetApp.getActiveSpreadsheet(), idCaso, 'FOTO_ANEXADA', 'Foto anexada ao caso: ' + nomeArquivo);
   registrarLogMigracaoSeNecessario_('FOTO_ANEXADA', idCaso, 'Upload de foto no Drive com metadados na planilha.');
 
-  return { idFoto: registro.idFoto, fileIdDrive: file.getId(), linkArquivo: file.getUrl() };
+  return { idFoto: registro.idFoto, fileIdDrive: file.getId(), linkArquivo: file.getUrl(), nomeArquivo: nomeArquivo };
 }
 
 function obterOuCriarPasta_(nome) {
@@ -415,4 +415,95 @@ function registrarLogAcessoFoto_(idFoto, operador, acao, resultado, motivoAcesso
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   var aba = garantirAbaComCabecalho(planilha, 'LOG_ACESSO_FOTOS', ['dataHora', 'idFoto', 'operador', 'perfilOperador', 'acao', 'resultado', 'motivoAcessoFoto', 'justificativa', 'justificativaValidada']);
   aba.appendRow([formatarDataHora(new Date()), idFoto, operador, limparTexto(perfilOperador), acao, resultado, limparTexto(motivoAcessoFoto), limparTexto(justificativaOriginal), justificativaValidada ? 'TRUE' : 'FALSE']);
+}
+
+
+function localizarRegistroFotoPrincipalPorCaso_(idCaso) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = planilha.getSheetByName('FOTOS_DESAPARECIDOS');
+  if (!aba || aba.getLastRow() < 2) return null;
+  var cab = aba.getRange(1, 1, 1, aba.getLastColumn()).getValues()[0].map(limparTexto);
+  var idxIdCaso = cab.indexOf('idCaso');
+  var idxPrincipal = cab.indexOf('fotoPrincipal');
+  var idxFile = cab.indexOf('fileIdDrive');
+  var idxLink = cab.indexOf('linkArquivo');
+  var idxNome = cab.indexOf('nomeArquivo');
+  if (idxIdCaso < 0 || idxPrincipal < 0) return null;
+  var dados = aba.getRange(2, 1, aba.getLastRow() - 1, aba.getLastColumn()).getValues();
+  for (var i = dados.length - 1; i >= 0; i -= 1) {
+    if (limparTexto(dados[i][idxIdCaso]) !== limparTexto(idCaso)) continue;
+    if (limparTexto(dados[i][idxPrincipal]) === 'Sim') {
+      return { aba: aba, cabecalho: cab, linha: i + 2, fileIdDrive: limparTexto(dados[i][idxFile]), linkArquivo: limparTexto(dados[i][idxLink]), nomeArquivo: limparTexto(dados[i][idxNome]) };
+    }
+  }
+  return null;
+}
+
+function excluirFotoDrivePorUrlOuFileId_(urlFoto, fileIdDrive, idCaso, motivo) {
+  var file = null;
+  var fileId = limparTexto(fileIdDrive);
+  if (!fileId && urlFoto) {
+    var match = String(urlFoto).match(/[\/\?]d\/([^\/\?]+)/);
+    if (match && match[1]) fileId = match[1];
+  }
+  if (!fileId) return false;
+  try {
+    file = DriveApp.getFileById(fileId);
+    file.setTrashed(true);
+    registrarEventoOcorrencia(SpreadsheetApp.getActiveSpreadsheet(), limparTexto(idCaso), 'FOTO_EXCLUIDA', 'fileId=' + fileId + '; motivo=' + limparTexto(motivo));
+    registrarLogMigracaoSeNecessario_('FOTO_EXCLUIDA', limparTexto(idCaso), 'Arquivo movido para lixeira: ' + fileId + '; motivo=' + limparTexto(motivo));
+    return true;
+  } catch (e) {
+    registrarLogMigracaoSeNecessario_('FOTO_EXCLUSAO_FALHA', limparTexto(idCaso), 'Falha ao excluir fileId=' + fileId + '; erro=' + e);
+    return false;
+  }
+}
+
+function consolidarFotoCaso_(idCaso, urlFoto) {
+  var idCasoLimpo = limparTexto(idCaso);
+  var urlLimpa = limparTexto(urlFoto);
+  if (!idCasoLimpo || !urlLimpa) return { ok: false, motivo: 'idCaso/urlFoto ausentes' };
+
+  var atual = localizarRegistroFotoPrincipalPorCaso_(idCasoLimpo);
+  if (!atual) return { ok: false, motivo: 'foto principal não localizada' };
+
+  if (atual.linkArquivo !== urlLimpa) {
+    excluirFotoDrivePorUrlOuFileId_(atual.linkArquivo, atual.fileIdDrive, idCasoLimpo, 'SUBSTITUICAO_FOTO');
+  }
+
+  try {
+    var file = DriveApp.getFileById(atual.fileIdDrive);
+    var extensao = file.getName().indexOf('.') > -1 ? file.getName().split('.').pop() : 'jpg';
+    var nomeDefinitivo = 'FOTO_' + idCasoLimpo + '.' + extensao;
+    file.setName(nomeDefinitivo);
+    registrarEventoOcorrencia(SpreadsheetApp.getActiveSpreadsheet(), idCasoLimpo, 'FOTO_FINALIZADA', 'Foto consolidada: ' + nomeDefinitivo);
+    registrarLogMigracaoSeNecessario_('FOTO_FINALIZADA', idCasoLimpo, 'Arquivo renomeado para definitivo: ' + nomeDefinitivo);
+  } catch (e) {
+    return { ok: false, motivo: 'falha ao renomear arquivo: ' + e };
+  }
+  return { ok: true };
+}
+
+function limparFotosTemporarias_() {
+  var pastaRaiz = obterOuCriarPasta_('Cabine Verde');
+  var pastaFotos = obterOuCriarSubpasta_(pastaRaiz, 'Fotos');
+  var limiteMs = 2 * 60 * 60 * 1000;
+  var agora = new Date().getTime();
+  var apagadas = 0;
+  var pastas = pastaFotos.getFolders();
+  while (pastas.hasNext()) {
+    var pastaCaso = pastas.next();
+    var arquivos = pastaCaso.getFiles();
+    while (arquivos.hasNext()) {
+      var file = arquivos.next();
+      var nome = limparTexto(file.getName());
+      if (nome.indexOf('TEMP_') !== 0) continue;
+      if ((agora - file.getDateCreated().getTime()) > limiteMs) {
+        file.setTrashed(true);
+        apagadas += 1;
+        registrarLogMigracaoSeNecessario_('FOTO_TEMP_REMOVIDA', '', 'TEMP removida: ' + nome + '; fileId=' + file.getId());
+      }
+    }
+  }
+  return { ok: true, apagadas: apagadas };
 }

@@ -15,6 +15,7 @@ export interface SheetsServiceResponse {
 export interface SheetsService {
   salvar(payload: SheetPayload): Promise<SheetsServiceResponse>;
   healthcheck(): Promise<SheetsServiceResponse>;
+  uploadFotoCaso(payload: { base64: string; mimeType: string; nomeArquivo: string; idCaso: string; talaoPMESP: string; nomeDesaparecido?: string; operadorResponsavel?: string; origemFoto?: string; tipoFoto?: string; autorizacaoUsoImagem?: boolean; }): Promise<SheetsServiceResponse & { urlFoto?: string }>;
   visualizarFoto(
     idFoto: string,
     operador: string,
@@ -49,6 +50,24 @@ const parseResponseBody = async (resposta: Response): Promise<EndpointResponse> 
 };
 
 export class GoogleSheetsService implements SheetsService {
+
+  async uploadFotoCaso(payload: { base64: string; mimeType: string; nomeArquivo: string; idCaso: string; talaoPMESP: string; nomeDesaparecido?: string; operadorResponsavel?: string; origemFoto?: string; tipoFoto?: string; autorizacaoUsoImagem?: boolean; }): Promise<SheetsServiceResponse & { urlFoto?: string }> {
+    try {
+      const resposta = await fetch(sheetsConfig.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'uploadFotoCaso', payload })
+      });
+      const body = (await parseResponseBody(resposta)) as EndpointResponse & { urlFoto?: string; linkArquivo?: string };
+      if (!resposta.ok || body.ok === false) {
+        return { ok: false, status: resposta.status, message: body.message || 'Falha no upload da foto' };
+      }
+      return { ok: true, status: resposta.status, message: body.message || 'Foto enviada com sucesso', urlFoto: body.urlFoto || body.linkArquivo };
+    } catch {
+      return { ok: false, message: 'Erro de integração com Google Sheets' };
+    }
+  }
+
   async visualizarFoto(
     idFoto: string,
     operador: string,
