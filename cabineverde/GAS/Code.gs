@@ -1,6 +1,7 @@
 
 
 
+var CABINE_VERDE_BUILD = '2026-05-03-181-CASOS-FIX';
 var PERFIS_OPERADOR_VALIDOS = ['OPERADOR', 'SUPERVISOR', 'ADMIN', 'AUDITOR'];
 
 function normalizarPerfilOperador_(perfil) {
@@ -408,9 +409,14 @@ function normalizarDataChave_(entrada) {
   return Utilities.formatDate(data, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyy-MM-dd');
 }
 
-function doGet() {
-  validarOperadorAtual_();
-  return criarRespostaJson({ ok: true, service: 'cabineverde', message: 'Endpoint ativo' });
+function doGet(e) {
+  return jsonResponse_({
+    ok: true,
+    service: 'cabineverde',
+    build: CABINE_VERDE_BUILD,
+    message: 'Endpoint ativo',
+    httpStatus: 200
+  });
 }
 
 function doPost(e) {
@@ -423,6 +429,16 @@ function doPost(e) {
     var body = parsePayload(e);
     if (limparTexto(body.action) === 'validarOperador') {
       return criarRespostaJson(validarOperador_(body.operadorEmail, body));
+    }
+    if (limparTexto(body.action) === 'diagnosticoBuild') {
+      var schema = obterSchemaCabineVerdeUnificado_();
+      return jsonResponse_({
+        ok: true,
+        build: CABINE_VERDE_BUILD,
+        schemaCasos: Array.isArray(schema.CASOS) ? schema.CASOS.length : 0,
+        schemaEventosCaso: Array.isArray(schema.EVENTOS_CASO),
+        httpStatus: 200
+      });
     }
     var operadorAtual = validarOperadorPayloadOuSessao_(body);
     registrarLogTecnico(planilhaLogs, { etapa: 'PAYLOAD_RECEBIDO', ok: true, mensagem: 'Payload recebido e parseado com sucesso', rawPostData: extrairRawPostData(e), payloadIdCaso: limparTexto((body.payload && body.payload.idCaso) || (body.dados && body.dados.idCaso) || body.idCaso) });
@@ -676,33 +692,39 @@ function persistirRegistro(planilha, registro) {
   var colunasEstrutura = Array.isArray(ESTRUTURA_PLANILHA[aba]) && ESTRUTURA_PLANILHA[aba].length ? ESTRUTURA_PLANILHA[aba] : colunasFallback;
 
   if (aba === 'CASOS') {
-    var colunasCasos = colunasPayload.length ? colunasPayload : (Array.isArray(schema && schema.CASOS) ? schema.CASOS : (Array.isArray(CABINE_VERDE_SCHEMA && CABINE_VERDE_SCHEMA.CASOS) ? CABINE_VERDE_SCHEMA.CASOS : []));
-    Logger.log("COLUNAS PAYLOAD CASOS: " + JSON.stringify(registro.colunas || []));
-    Logger.log("TOTAL COLUNAS PAYLOAD CASOS: " + (Array.isArray(registro.colunas) ? registro.colunas.length : "NAO_ARRAY"));
-    Logger.log("TOTAL COLUNAS SCHEMA CASOS: " + (schema && Array.isArray(schema.CASOS) ? schema.CASOS.length : "INVALIDO"));
+    var colunasSchemaCasos = Array.isArray(schema && schema.CASOS)
+      ? schema.CASOS
+      : (Array.isArray(CABINE_VERDE_SCHEMA && CABINE_VERDE_SCHEMA.CASOS) ? CABINE_VERDE_SCHEMA.CASOS : []);
 
-    if (!Array.isArray(colunasCasos) || colunasCasos.length === 0) {
-      throw new Error("CASOS sem colunas válidas: payload.colunas e schema.CASOS estão inválidos.");
+    if (!Array.isArray(colunasSchemaCasos) || colunasSchemaCasos.length === 0) {
+      throw new Error('CASOS sem colunas válidas no schema.');
     }
 
-    colunas = colunasCasos;
-    var sheetCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasos);
-    garantirAbaComCabecalhos_(planilha, 'CASOS', colunasCasos);
-    var cabecalhoAtual = garantirColunasDaEstrutura(sheetCasos, colunasCasos);
+    colunas = colunasSchemaCasos;
+    var sheetCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasSchemaCasos);
+    garantirAbaComCabecalhos_(planilha, 'CASOS', colunasSchemaCasos);
+    var cabecalhoAtual = garantirColunasDaEstrutura(sheetCasos, colunasSchemaCasos);
 
-    Logger.log('TOTAL COLUNAS HEADER CASOS: ' + cabecalhoAtual.length);
-    Logger.log('TOTAL COLUNAS PAYLOAD: ' + colunas.length);
+    Logger.log('TOTAL COLUNAS HEADER CASOS (PLANILHA): ' + cabecalhoAtual.length);
+    Logger.log('HEADER FINAL CASOS: ' + colunasSchemaCasos.length);
+    Logger.log('TOTAL COLUNAS PAYLOAD: ' + (Array.isArray(registro.colunas) ? registro.colunas.length : 'NAO_ARRAY'));
     Logger.log('TOTAL VALORES PAYLOAD: ' + valores.length);
-    if (colunas.length !== valores.length) {
-      throw new Error('Quantidade de colunas diferente da quantidade de valores.');
-    }
-    if (cabecalhoAtual.length < colunas.length) {
-      cabecalhoAtual = garantirColunasDaEstrutura(sheetCasos, cabecalhoAtual.concat(colunas));
+
+    var valoresPorSchema = colunasSchemaCasos.map(function (nomeColuna) {
+      if (Array.isArray(colunasPayload) && colunasPayload.length) {
+        var idx = colunasPayload.indexOf(nomeColuna);
+        return idx >= 0 ? valores[idx] : '';
+      }
+      return '';
+    });
+
+    if (valoresPorSchema.length !== colunas.length) {
+      throw new Error('Falha ao alinhar valores ao schema CASOS.');
     }
 
     Logger.log("GRAVANDO CASO:");
     Logger.log(registro);
-    var registroPorColuna = mapearPorColuna(colunas, valores);
+    var registroPorColuna = mapearPorColuna(colunas, valoresPorSchema);
     registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
@@ -716,7 +738,7 @@ function persistirRegistro(planilha, registro) {
       linhaPorTalaoPMESP: linhaPorTalaoPMESP
     });
 
-    var linhaFinal = cabecalhoAtual.map(function (nomeColuna) {
+    var linhaFinal = colunasSchemaCasos.map(function (nomeColuna) {
       return normalizarValorPlanilha(registroPorColuna[nomeColuna]);
     });
 
@@ -738,6 +760,43 @@ function persistirRegistro(planilha, registro) {
 
   var sheet = garantirAbaComCabecalho(planilha, aba, colunasEstrutura.length ? colunasEstrutura : colunas);
   sheet.appendRow(valores);
+}
+
+
+function auditarHeaderCasos_() {
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var schemaCasos = Array.isArray(schema && schema.CASOS) ? schema.CASOS : [];
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaCasos = planilha.getSheetByName('CASOS');
+  if (!abaCasos) {
+    return { ok: false, erro: 'Aba CASOS não encontrada.', schemaCasos: schemaCasos.length };
+  }
+
+  var cabecalhoAtual = abaCasos.getRange(1, 1, 1, Math.max(abaCasos.getLastColumn(), 1)).getValues()[0].map(limparTexto).filter(Boolean);
+  var normalizados = {};
+  var duplicadas = [];
+  cabecalhoAtual.forEach(function (coluna) {
+    var chave = normalizarCabecalho_(coluna);
+    if (normalizados[chave]) duplicadas.push(coluna);
+    normalizados[chave] = true;
+  });
+
+  var schemaNormalizado = schemaCasos.map(normalizarCabecalho_);
+  var extras = cabecalhoAtual.filter(function (coluna) {
+    return schemaNormalizado.indexOf(normalizarCabecalho_(coluna)) === -1;
+  });
+
+  Logger.log('HEADER FINAL CASOS: ' + schemaCasos.length);
+  Logger.log('COLUNAS EXTRAS CASOS: ' + JSON.stringify(extras));
+  Logger.log('COLUNAS DUPLICADAS CASOS: ' + JSON.stringify(duplicadas));
+
+  return {
+    ok: true,
+    headerAtual: cabecalhoAtual.length,
+    headerSchema: schemaCasos.length,
+    colunasExtras: extras,
+    colunasDuplicadas: duplicadas
+  };
 }
 
 function testeGravacaoDireta() {
@@ -1014,4 +1073,117 @@ function gerarRelatorioTextoSIOPM_(idCaso) {
   if (!caso.length) return 'Caso não encontrado para relatório SIOPM.';
   var item = caso[0];
   return 'SIOPM | idCaso=' + limparTexto(item.idCaso) + '; talaoPMESP=' + limparTexto(item.talaoPMESP) + '; nome=' + limparTexto(item.nomeCompletoDesaparecido) + '; risco=' + limparTexto(item.classificacaoRisco) + '; prioridade=' + limparTexto(item.prioridade);
+}
+
+function auditarELimparCasosSeguro_(dryRun) {
+  var DRY_RUN = dryRun !== false;
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var schemaCasos = Array.isArray(schema && schema.CASOS) ? schema.CASOS : [];
+  if (!schemaCasos.length) throw new Error('Schema oficial CASOS inválido.');
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var abaOriginal = ss.getSheetByName('CASOS');
+  if (!abaOriginal) throw new Error('Aba CASOS não encontrada.');
+
+  var headerOriginal = abaOriginal.getRange(1, 1, 1, Math.max(abaOriginal.getLastColumn(), 1)).getValues()[0].map(limparTexto).filter(Boolean);
+  var headerNorm = headerOriginal.map(normalizarCabecalho_);
+  var schemaNorm = schemaCasos.map(normalizarCabecalho_);
+
+  var duplicadas = [];
+  var seen = {};
+  headerNorm.forEach(function (h, i) { if (seen[h]) duplicadas.push(headerOriginal[i]); seen[h] = true; });
+
+  var extras = headerOriginal.filter(function (c) { return schemaNorm.indexOf(normalizarCabecalho_(c)) === -1; });
+  var equivalencias = {
+    talaopmesp: 'talaoBopm',
+    datahorainicio: 'dataHoraRegistro',
+    datahoraultimaatualizacao: 'dataHoraRegistro',
+    status: 'statusCaso',
+    dadosveiculotransporte: 'dadosVeiculo',
+    fotodigitaldisponivel: 'fotoDisponivel',
+    dispositivovinculado: 'dispositivoLigado',
+    telefonedispositivopessoa: 'telefoneDesaparecido',
+    vulnerabilidadeidentificada: 'vulnerabilidade',
+    risco: 'classificacaoRisco',
+    classificacaooperacional: 'classificacaoRisco',
+    operadorcriador: 'operadorResponsavel',
+    operadorultimaacao: 'operadorResponsavel',
+    observacoesoperacionais: 'observacoesOperacionais'
+  };
+
+  var camposEquivalentes = [];
+  var camposPerdidos = [];
+  extras.forEach(function (coluna) {
+    var destino = equivalencias[normalizarCabecalho_(coluna)];
+    if (destino && schemaNorm.indexOf(normalizarCabecalho_(destino)) !== -1) {
+      camposEquivalentes.push({ origem: coluna, destino: destino });
+    } else {
+      camposPerdidos.push(coluna);
+    }
+  });
+
+  var relatorio = {
+    dryRun: DRY_RUN,
+    totalColunasAtuais: headerOriginal.length,
+    totalColunasOficiais: schemaCasos.length,
+    colunasExtras: extras,
+    colunasDuplicadas: duplicadas,
+    camposEquivalentesEncontrados: camposEquivalentes,
+    camposQueSeriamPerdidos: camposPerdidos,
+    planoMigracao: [
+      'Criar backup CASOS_BACKUP_<timestamp>',
+      'Criar CASOS_LIMPA com header oficial de 181 colunas',
+      'Copiar dados mapeados por header/equivalências',
+      'Validar contagem de linhas',
+      'Renomear CASOS para CASOS_ANTIGA e CASOS_LIMPA para CASOS'
+    ]
+  };
+
+  Logger.log('RELATORIO AUDITORIA CASOS: ' + JSON.stringify(relatorio));
+  if (DRY_RUN) return relatorio;
+
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyyMMdd_HHmmss');
+  var backupName = 'CASOS_BACKUP_' + timestamp;
+  abaOriginal.copyTo(ss).setName(backupName);
+
+  var abaLimpa = ss.getSheetByName('CASOS_LIMPA');
+  if (abaLimpa) ss.deleteSheet(abaLimpa);
+  abaLimpa = ss.insertSheet('CASOS_LIMPA');
+  abaLimpa.getRange(1, 1, 1, schemaCasos.length).setValues([schemaCasos]);
+
+  var linhas = abaOriginal.getLastRow();
+  if (linhas > 1) {
+    var dados = abaOriginal.getRange(2, 1, linhas - 1, abaOriginal.getLastColumn()).getValues();
+    var dadosMapeados = dados.map(function (linha) {
+      return schemaCasos.map(function (colDestino) {
+        var idxDireto = headerNorm.indexOf(normalizarCabecalho_(colDestino));
+        if (idxDireto >= 0) return normalizarValorPlanilha(linha[idxDireto]);
+
+        var origemEq = null;
+        for (var chave in equivalencias) {
+          if (equivalencias[chave] === colDestino) {
+            var idxEq = headerNorm.indexOf(chave);
+            if (idxEq >= 0) { origemEq = idxEq; break; }
+          }
+        }
+        return origemEq !== null ? normalizarValorPlanilha(linha[origemEq]) : '';
+      });
+    });
+    if (dadosMapeados.length) {
+      abaLimpa.getRange(2, 1, dadosMapeados.length, schemaCasos.length).setValues(dadosMapeados);
+    }
+  }
+
+  if (abaLimpa.getLastRow() !== abaOriginal.getLastRow()) {
+    throw new Error('Validação de linhas falhou: CASOS_LIMPA=' + abaLimpa.getLastRow() + ' CASOS=' + abaOriginal.getLastRow());
+  }
+
+  abaOriginal.setName('CASOS_ANTIGA');
+  abaLimpa.setName('CASOS');
+
+  relatorio.executado = true;
+  relatorio.backupCriado = backupName;
+  relatorio.linhasOriginais = abaOriginal.getLastRow();
+  relatorio.linhasMigradas = ss.getSheetByName('CASOS').getLastRow();
+  return relatorio;
 }

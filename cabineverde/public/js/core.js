@@ -1,6 +1,8 @@
 export const ENDPOINT_OFICIAL_APPS_SCRIPT =
   'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec';
 
+const GAS_URL = ENDPOINT_OFICIAL_APPS_SCRIPT;
+
 const CHAVES_OPERADOR = {
   email: 'cabineVerdeOperadorEmail',
   nome: 'cabineVerdeOperadorNome',
@@ -617,7 +619,7 @@ export const salvarCasoSheets = async (caso) => {
 
 export const healthcheckSheets = async () => {
   try {
-    const resposta = await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, {
+    const resposta = await fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'healthcheck' })
@@ -678,7 +680,7 @@ const chamarAcaoGAS = async (action, payload = {}) => {
 
   console.info('[GAS] Enviando payload:', payloadComOperador);
 
-  const resposta = await fetch(ENDPOINT_OFICIAL_APPS_SCRIPT, {
+  const resposta = await fetch(GAS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(payloadComOperador)
@@ -704,6 +706,22 @@ const chamarAcaoGAS = async (action, payload = {}) => {
 
   return body;
 };
+
+
+const exporDiagnosticoGASNoEscopoGlobal_ = () => {
+  if (typeof window === 'undefined') return;
+  const hostname = String(window.location && window.location.hostname ? window.location.hostname : '').toLowerCase();
+  const ambienteDesenvolvimento = ['localhost', '127.0.0.1'].indexOf(hostname) !== -1;
+  if (!ambienteDesenvolvimento) return;
+
+  window.chamarAcaoGAS = chamarAcaoGAS;
+  window.GAS_URL = GAS_URL;
+  window.diagnosticoBuildCabineVerde = function () {
+    return chamarAcaoGAS('diagnosticoBuild', {});
+  };
+};
+
+exporDiagnosticoGASNoEscopoGlobal_();
 
 export const buscarCaso_ = async (filtro) => chamarAcaoGAS('buscarCaso_', { filtro });
 export const gerarTimelineCaso_ = async (idCaso) => chamarAcaoGAS('gerarTimelineCaso_', { idCaso });
