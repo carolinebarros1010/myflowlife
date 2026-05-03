@@ -1,13 +1,3 @@
-var ABAS_OBRIGATORIAS_CABINE_VERDE = [
-  'CASOS',
-  'TRIAGEM_RESPOSTAS',
-  'EVENTOS_OCORRENCIA',
-  'INDICADORES_OPERACIONAIS',
-  'LOG_MIGRACAO',
-  'LEGADO_OBSERVACOES_BRUTAS',
-  'VALIDACAO_MIGRACAO'
-];
-
 var CABECALHO_LOG_MIGRACAO = [
   'dataHora',
   'funcaoExecutada',
@@ -39,8 +29,6 @@ var CABECALHO_VALIDACAO_MIGRACAO = [
   'severidade',
   'statusValidacao'
 ];
-
-var COLUNAS_CASOS_OBRIGATORIAS_MIGRACAO = COLUNAS_CASOS.concat(['statusMigracao']);
 
 
 var COLUNAS_CASOS_TRATADOS = [
@@ -195,7 +183,7 @@ function ajustarEstruturaPlanilha_(opcoes) {
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
   var mapa = obterEstruturaAbas_();
 
-  ABAS_OBRIGATORIAS_CABINE_VERDE.forEach(function (nomeAba) {
+  obterAbasObrigatoriasCabineVerde_().forEach(function (nomeAba) {
     var sheet = planilha.getSheetByName(nomeAba);
     if (!sheet) {
       if (dryRun) {
@@ -403,15 +391,31 @@ function registrarLogMigracao_(funcaoExecutada, status, idCaso, mensagem, modoEx
 }
 
 function obterEstruturaAbas_() {
+  var schema = obterSchemaCabineVerdeUnificado_();
+
   return {
-    CASOS: COLUNAS_CASOS_OBRIGATORIAS_MIGRACAO,
-    TRIAGEM_RESPOSTAS: COLUNAS_TRIAGEM_RESPOSTAS,
-    EVENTOS_OCORRENCIA: COLUNAS_EVENTOS_OCORRENCIA,
-    INDICADORES_OPERACIONAIS: COLUNAS_INDICADORES_OPERACIONAIS,
+    CASOS: schema.CASOS.concat(['statusMigracao']),
+    TRIAGEM_RESPOSTAS: schema.TRIAGEM_RESPOSTAS,
+    EVENTOS_CASO: schema.EVENTOS_CASO,
+    INDICADORES_OPERACIONAIS: schema.INDICADORES_OPERACIONAIS,
     LOG_MIGRACAO: CABECALHO_LOG_MIGRACAO,
     LEGADO_OBSERVACOES_BRUTAS: CABECALHO_LEGADO_OBSERVACOES_BRUTAS,
     VALIDACAO_MIGRACAO: CABECALHO_VALIDACAO_MIGRACAO
   };
+}
+
+function obterAbasObrigatoriasCabineVerde_() {
+  return Object.keys(obterSchemaCabineVerdeUnificado_()).concat([
+    'LOG_MIGRACAO',
+    'LEGADO_OBSERVACOES_BRUTAS',
+    'VALIDACAO_MIGRACAO'
+  ]);
+}
+
+function testarEstruturaMigracao() {
+  var mapa = obterEstruturaAbas_();
+  Logger.log(JSON.stringify(Object.keys(mapa)));
+  Logger.log(mapa.CASOS.length);
 }
 
 function garantirCabecalhoSemDuplicidade_(sheet, colunasEsperadas, nomeAba, dryRun) {
@@ -572,7 +576,7 @@ function verificarBackupRecente_() {
 function restaurarBackupMaisRecente_() {
   validarContextoExecucaoAutorizada_('restaurarBackupMaisRecente_');
   var planilha = SpreadsheetApp.getActiveSpreadsheet();
-  var abasAlvo = ['CASOS', 'TRIAGEM_RESPOSTAS', 'EVENTOS_OCORRENCIA', 'INDICADORES_OPERACIONAIS'];
+  var abasAlvo = ['CASOS', 'TRIAGEM_RESPOSTAS', 'EVENTOS_CASO', 'INDICADORES_OPERACIONAIS'];
   var backupsPorAba = {};
 
   planilha.getSheets().forEach(function (sheet) {
