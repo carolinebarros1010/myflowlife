@@ -27,6 +27,7 @@ export interface CasoDesaparecimento {
   statusFoto?: 'pendente' | 'enviada' | 'validada';
   fotoDisponivel: boolean;
   linkFoto: string;
+  urlFoto?: string;
   telefoneDesaparecido: string;
   dispositivoLigado: boolean;
   dataHoraUltimaVisualizacao: string;

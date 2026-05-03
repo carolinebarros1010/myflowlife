@@ -41,7 +41,9 @@ export const renderTriageForm = (): string => `
       'arv_p2_dados_veiculo_resp',
       'arv_p3_vinculo_resp',
       'arv_p3_vinculo_comp',
-      'arv_p3_telefone_comp'
+      'arv_p3_telefone_comp',
+      'urlFoto',
+      'linkFoto'
     ].map(inputOcultoArvore).join('')}
     ${etapa(
       0,
@@ -116,8 +118,15 @@ export const renderTriageForm = (): string => `
       5,
       '6) Apoio tecnológico',
       [
-        checkbox('fotoDisponivel', 'Foto disponível'),
-        '<label class="cv-upload">Upload da foto (obrigatório quando disponível)<input type="file" id="fotoDesaparecido" name="fotoDesaparecido" accept="image/*" /><small id="foto-status" class="cv-upload-status">Status da foto: pendente</small></label>',
+        select('fotoDisponivel', 'Foto digital disponível?', ['Sim', 'Não']),
+        `<div id="blocoUploadFotoDesaparecido" class="cv-photo-upload" hidden>
+          <label for="fotoDesaparecido">Inserir foto do desaparecido</label>
+          <input type="file" id="fotoDesaparecido" name="fotoDesaparecido" accept="image/*" capture="environment" />
+          <input type="hidden" id="urlFoto" name="urlFoto" />
+          <input type="hidden" id="linkFoto" name="linkFoto" />
+          <div id="statusUploadFoto" class="cv-photo-status">Nenhuma imagem enviada.</div>
+          <img id="previewFotoDesaparecido" class="cv-photo-preview" alt="Prévia da foto do desaparecido" hidden />
+        </div>`,
         select('origemFoto', 'Origem da foto', ['Solicitante', 'Familiar', 'Câmera', 'Outro']),
         select('tipoFoto', 'Tipo da foto', ['Recente', 'Documento', 'Câmera', 'Outro']),
         checkbox('autorizacaoUsoImagem', 'Autorização de uso de imagem'),
