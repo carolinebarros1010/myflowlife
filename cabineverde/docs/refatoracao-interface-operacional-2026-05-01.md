@@ -18,7 +18,7 @@ Reestruturar o front-end da Cabine Verde para um fluxo operacional direto de dec
 ### Tela 3 — Decisão Operacional
 - Exibição de resumo operacional consolidado.
 - Destaque de Risco, Prioridade e Status.
-- Ações operacionais: despacho e encaminhamento.
+- Ações operacionais: encaminhamento e encaminhamento.
 
 ## Itens removidos da tela principal
 Os blocos abaixo deixaram de ficar na área principal e foram movidos para **Menu secundário**:

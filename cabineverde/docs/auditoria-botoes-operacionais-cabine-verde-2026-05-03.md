@@ -33,8 +33,7 @@ Implementação aplicada em: salvar/finalizar triagem, buscar caso, atualizar pa
 - `salvarRascunho`: **não implementado no front atual**.
 
 ### B. Decisão operacional (não deve gravar diretamente)
-- `despachar`: **não implementado no front atual**.
-- `encaminhar`: **não implementado no front atual**.
+- - `encaminhar`: **não implementado no front atual**.
 - `encerrar`: **não implementado no front atual**.
 
 ### C. Consulta (não grava)
@@ -43,7 +42,7 @@ Implementação aplicada em: salvar/finalizar triagem, buscar caso, atualizar pa
 
 ## 4) Erros/achados da auditoria
 1. **Ambiguidade funcional existente:** "Salvar caso" e "Finalizar triagem" convergem para o mesmo fluxo de submit/gravação (`salvarCaso`), sem diferenciação semântica no backend.
-2. **Ausência de botões críticos de decisão operacional:** não há implementação de `despachar`, `encaminhar` e `encerrar` no front legado atual.
+2. **Ausência de botões críticos de decisão operacional:** não há implementação visual de registrar encaminhamento, manter em monitoramento e encerrar caso no front legado atual.
 3. **`salvarRascunho` ausente:** classificação pediu persistência dedicada, mas não existe botão/handler dedicado.
 4. **Não foi identificado o erro específico** "Finalizar triagem chamando resumoQualidadeDados_" no código auditado em 2026-05-03.
 
@@ -68,7 +67,7 @@ Observação: o front atual envia payload tabular completo de caso (mais rico qu
 ## 6) Roteamento GAS (verificação)
 `doPost(e)` possui roteamento explícito para:
 - `salvarCaso` -> `persistirRegistro(body)`.
-- `despachar` -> `registrarEventoCaso_(body, 'DESPACHO_OPERACIONAL', ...)`.
+- `registrarEncaminhamento` -> registrar evento `ENCAMINHAMENTO_REGISTRADO`.
 - `encaminhar` -> `registrarEventoCaso_(body, 'ENCAMINHAMENTO_OPERACIONAL', ...)`.
 - `encerrar` -> `registrarEventoCaso_(body, 'ENCERRAMENTO_ATENDIMENTO', ...)`.
 
@@ -76,9 +75,13 @@ Conclusão: o backend já suporta o fluxo separado; a lacuna principal está no 
 
 ## 7) Fluxo essencial validado
 - Salvar é independente: **sim**.
-- Despacho não salva dados do caso: **sim no GAS** (evento).
+- Encaminhamento não salva dados do caso: **sim no GAS** (evento).
 - Encaminhamento não salva dados do caso: **sim no GAS** (evento).
 - Finalizar triagem salva + classifica: **salva**; classificação é calculada no front antes de enviar.
 
 ## 8) Evidência prática (ambiente local)
 Foram executados testes automatizados para validar integração de actions e gravação. O ambiente não simulou clique real de navegador, mas validou contrato de payload/action nas funções principais.
+
+
+## Diretriz operacional
+A Cabine Verde não realiza despacho direto de recursos. O sistema registra, qualifica e encaminha informações para apoio à decisão operacional.

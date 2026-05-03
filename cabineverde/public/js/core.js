@@ -455,7 +455,7 @@ export const calcularCriticidadeIndicadores = (indicadores = {}) => {
 
 export const sugerirAcaoIndicadores = (indicadores = {}) => {
   if (indicadores.criancaVeiculoSuspeito || indicadores.adultoSuspeitaCrime) {
-    return 'Acionar despacho imediato com reforço investigativo e varredura de câmeras.';
+    return 'Registrar encaminhamento imediato com reforço investigativo e varredura de câmeras.';
   }
   if (indicadores.preadolescenteAliciamentoVirtual || indicadores.adolescenteSofrimentoPsiquico) {
     return 'Priorizar busca orientada por rede social, contatos digitais e apoio psicossocial.';

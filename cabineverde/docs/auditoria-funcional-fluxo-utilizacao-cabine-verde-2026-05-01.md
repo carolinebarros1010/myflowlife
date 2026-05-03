@@ -41,7 +41,7 @@
 | Análise inicial | Triagem qualificada + classificação de risco/prioridade | ✅ |
 | Evidência visual | Upload de foto (quando disponível) | ⚠️ Condicional |
 | Consolidação | Salvar caso + evento de criação | ✅ |
-| Comunicação | Gerar relatório + exportar texto SIOPM | ✅ para despacho |
+| Comunicação | Gerar relatório + exportar texto SIOPM | ✅ para encaminhamento |
 | Acompanhamento | Consulta/timeline/histórico | ✅ (durante ciclo do caso) |
 | Correção | Edição controlada com justificativa | ⚠️ Sob necessidade |
 | Governança | Auditoria de qualidade e tratamento | ✅ (rotina de gestão) |
@@ -55,7 +55,7 @@
 - última visualização (tempo + local).
 - classificação de risco/prioridade.
 - salvamento com geração de eventos.
-- relatório operacional/SIOPM para casos em despacho.
+- relatório operacional/SIOPM para casos em encaminhamento.
 
 **Opcionais condicionais:**
 - upload de foto (quando indisponível no momento).
@@ -110,7 +110,7 @@
 4. Anexar foto sem metadado/consentimento adequado.
 5. Editar sem justificativa operacional robusta.
 6. Ignorar pendências críticas de qualidade.
-7. Exportar relatório inadequado ao cenário (ex.: estatístico no lugar do SIOPM para despacho).
+7. Exportar relatório inadequado ao cenário (ex.: estatístico no lugar do SIOPM para encaminhamento).
 8. Visualizar foto sem necessidade operacional clara.
 
 ### 10) Conduta esperada por situação
@@ -127,7 +127,7 @@
 1. Tornar “gates” de obrigatoriedade visuais (não avançar etapa sem campo-chave).
 2. Exibir checklist pré-salvamento obrigatório no rodapé da triagem.
 3. Exigir justificativa estruturada (modelo curto com causa-impacto-ação).
-4. Implantar monitor de SLA (tempo de triagem, tempo para despacho, tempo para validação de foto).
+4. Implantar monitor de SLA (tempo de triagem, tempo para encaminhamento, tempo para validação de foto).
 5. Auditar semanalmente top 10 inconsistências por severidade.
 
 ---
@@ -145,7 +145,7 @@
 5. **Salvamento**  
    Persistir caso e confirmar evento de criação.
 6. **Geração de relatório**  
-   Emitir relatório operacional e texto SIOPM para despacho/cópia no SIOPM WEB.
+   Emitir relatório operacional e texto SIOPM para encaminhamento/cópia no SIOPM WEB.
 7. **Consulta posterior**  
    Buscar por `idCaso`/talão/nome; revisar timeline e status.
 8. **Edição controlada**  
