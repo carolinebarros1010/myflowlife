@@ -3,7 +3,7 @@ export const renderHeader = (): string => `
   <div>
     <p class="cv-header__kicker">Centro de Comando · Pessoas Desaparecidas</p>
     <h1>Cabine Verde</h1>
-    <p class="cv-header__subtitle">Triagem dinâmica operacional, priorização de risco e despacho orientado por evidências.</p>
+    <p class="cv-header__subtitle">Triagem dinâmica operacional, priorização de risco e encaminhamento de informações orientado por evidências.</p>
   </div>
   <div class="cv-header__meta" aria-label="status de operação">
     <span class="cv-chip" id="status-banco-central">Banco central: verificando...</span>

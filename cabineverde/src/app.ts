@@ -119,7 +119,7 @@ const baseLayout = () => {
     '<section class="cv-operational-grid">',
     '<div>',
     renderTriageForm(),
-    renderConditionalSection('crime-block', 'Indícios de crime', 'Detalhe ameaças, testemunhas e evidências digitais que justifiquem despacho imediato.'),
+    renderConditionalSection('crime-block', 'Indícios de crime', 'Detalhe ameaças, testemunhas e evidências digitais que justifiquem encaminhamento imediato aos canais competentes.'),
     renderConditionalSection('tech-block', 'Apoio tecnológico ativo', 'Registre câmeras, rastreio de dispositivo e fontes de mídia com potencial de localização.'),
     renderConditionalSection('age-block', 'Subfluxo por faixa etária', 'Perguntas dinâmicas para ampliar entendimento do risco específico.'),
     renderActionFooter(),

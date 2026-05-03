@@ -5,7 +5,7 @@ A gravação foi reestruturada para separar ocorrência, triagem, eventos e indi
 
 1. **CASOS**: dados principais da ocorrência.
 2. **TRIAGEM_RESPOSTAS**: 1 linha por pergunta da árvore, vinculada ao `idCaso`.
-3. **EVENTOS_OCORRENCIA**: ações, decisões, reclassificações e despachos.
+3. **EVENTOS_OCORRENCIA**: ações, decisões, reclassificações e encaminhamentos.
 4. **INDICADORES_OPERACIONAIS**: indicadores booleanos derivados da árvore.
 
 A árvore de decisão **não foi removida**. Ela segue no frontend e agora é persistida de forma estruturada em `TRIAGEM_RESPOSTAS`.
