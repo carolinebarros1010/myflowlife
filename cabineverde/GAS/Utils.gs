@@ -2,6 +2,13 @@
  * Utilitários compartilhados do Apps Script.
  */
 
+
+function jsonResponse_(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
 function parsePayload(e) {
   var rawPostData = extrairRawPostData(e);
 
@@ -130,13 +137,15 @@ function normalizarValorPlanilha(valor) {
 function criarRespostaJson(dados, statusCode) {
   var corpo = dados && typeof dados === 'object' ? dados : { ok: false, message: 'Resposta inválida' };
 
+  if (!corpo.build && typeof CABINE_VERDE_BUILD !== 'undefined') {
+    corpo.build = CABINE_VERDE_BUILD;
+  }
+
   // Apps Script não permite definir status HTTP no ContentService em Web App.
   // statusCode foi mantido para facilitar evolução futura e rastreabilidade.
-  corpo.httpStatus = statusCode || 200;
+  corpo.httpStatus = statusCode || corpo.httpStatus || 200;
 
-  return ContentService
-    .createTextOutput(JSON.stringify(corpo))
-    .setMimeType(ContentService.MimeType.JSON);
+  return jsonResponse_(corpo);
 }
 
 function limparTexto(valor) {
