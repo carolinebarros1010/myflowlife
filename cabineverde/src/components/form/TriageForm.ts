@@ -20,10 +20,29 @@ const etapa = (step: number, titulo: string, conteudo: string) => `
   <div class="cv-grid">${conteudo}</div>
 </fieldset>`;
 
+const inputOcultoArvore = (name: string) => `<input type="hidden" name="${name}" id="${name}" />`;
+
 export const renderTriageForm = (): string => `
 <section class="cv-card">
   <h2>Triagem dinâmica operacional</h2>
   <form id="triage-form" class="cv-form" novalidate>
+    ${[
+      'arv_p1_emergencia_resp',
+      'arv_p1_municipio_resp',
+      'arv_p1_nome_resp',
+      'arv_p1_sexo_resp',
+      'arv_p1_idade_resp',
+      'arv_p1_foto_recente_resp',
+      'arv_p1_dispositivo_vinculado_resp',
+      'arv_p2_data_hora_ultima_resp',
+      'arv_p2_local_ultima_resp',
+      'arv_p2_roupa_resp',
+      'arv_p2_meio_transporte_resp',
+      'arv_p2_dados_veiculo_resp',
+      'arv_p3_vinculo_resp',
+      'arv_p3_vinculo_comp',
+      'arv_p3_telefone_comp'
+    ].map(inputOcultoArvore).join('')}
     ${etapa(
       0,
       '1) Identificação complementar',

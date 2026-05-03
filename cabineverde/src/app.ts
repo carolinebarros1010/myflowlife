@@ -254,11 +254,66 @@ const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCa
   camerasUltimoLocal: toBoolean(dados.get('camerasUltimoLocal')),
   observacoesOperacionais: normalizarTexto(String(dados.get('observacoesOperacionais') || '')),
   statusCaso: (String(dados.get('statusCaso') || statusFallback) as StatusCaso) || StatusCaso.EM_TRIAGEM,
-  subfluxoPerguntas: {}
+  subfluxoPerguntas: Object.fromEntries(
+    Array.from(dados.entries())
+      .filter(([chave]) => chave.startsWith('arv_'))
+      .map(([chave, valor]) => [chave, normalizarTexto(String(valor || ''))])
+  )
 });
 
 const getDadosFormularioAtual = (): CasoDesaparecimento =>
   buildCasoFromForm(form ? new FormData(form) : new FormData());
+
+type CampoPreenchivel = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+const primeiroValorDisponivel = (dados: Record<string, unknown>, chaves: string[]): string => {
+  for (const chave of chaves) {
+    const valor = dados[chave];
+    if (valor !== undefined && valor !== null && String(valor).trim() !== '') return String(valor).trim();
+  }
+  return '';
+};
+
+const preencherSeVazio = (nomeCampo: string, valor: string, origem: string[]): void => {
+  if (!valor) return;
+  const campo = document.querySelector<CampoPreenchivel>(`[name="${nomeCampo}"], #${nomeCampo}`);
+  if (!campo) return;
+  const atual = String(campo.value || '').trim();
+  if (atual && atual !== 'Não informado') return;
+  campo.value = valor;
+  campo.dispatchEvent(new Event('input', { bubbles: true }));
+  campo.dispatchEvent(new Event('change', { bubbles: true }));
+  console.info('[TRIAGEM] Autopreenchimento aplicado', { origem, destino: nomeCampo, valor });
+};
+
+const coletarDadosFormularioAtual = (): Record<string, unknown> => {
+  const dadosRegistro = formRegistro ? Object.fromEntries(new FormData(formRegistro).entries()) : {};
+  const dadosTriagem = form ? Object.fromEntries(new FormData(form).entries()) : {};
+  return { ...dadosTriagem, ...dadosRegistro };
+};
+
+const autopreencherTriagemComDadosExistentes = (): void => {
+  const dados = coletarDadosFormularioAtual();
+  const mapa: Array<{ origem: string[]; destino: string }> = [
+    { origem: ['municipio'], destino: 'arv_p1_municipio_resp' },
+    { origem: ['nomeCompletoDesaparecido'], destino: 'arv_p1_nome_resp' },
+    { origem: ['sexoGenero'], destino: 'arv_p1_sexo_resp' },
+    { origem: ['idade'], destino: 'arv_p1_idade_resp' },
+    { origem: ['fotoDigitalDisponivel', 'fotoDisponivel'], destino: 'arv_p1_foto_recente_resp' },
+    { origem: ['dispositivoVinculado', 'dispositivoLigado'], destino: 'arv_p1_dispositivo_vinculado_resp' },
+    { origem: ['dataHoraUltimaVisualizacao'], destino: 'arv_p2_data_hora_ultima_resp' },
+    { origem: ['localUltimaVisualizacao'], destino: 'arv_p2_local_ultima_resp' },
+    { origem: ['roupaUltimaVisualizacao'], destino: 'arv_p2_roupa_resp' },
+    { origem: ['meioTransporte'], destino: 'arv_p2_meio_transporte_resp' },
+    { origem: ['dadosVeiculoTransporte', 'dadosVeiculo'], destino: 'arv_p2_dados_veiculo_resp' },
+    { origem: ['nomeSolicitante'], destino: 'arv_p3_vinculo_comp' },
+    { origem: ['vinculoSolicitante'], destino: 'arv_p3_vinculo_resp' },
+    { origem: ['telefoneSolicitante'], destino: 'arv_p3_telefone_comp' }
+  ];
+  mapa.forEach((item) => preencherSeVazio(item.destino, primeiroValorDisponivel(dados, item.origem), item.origem));
+  const emergencia = primeiroValorDisponivel(dados, ['emergencia', 'tipoEmergencia', 'descricaoEmergencia']) || 'Pessoa desaparecida';
+  preencherSeVazio('arv_p1_emergencia_resp', emergencia, ['emergencia', 'tipoEmergencia', 'descricaoEmergencia']);
+};
 
 let triagemState: TriagemState = calcularEstadoTriagem(getDadosFormularioAtual(), Math.min(initial, etapasTriagem.length - 1), 'Pronto para triagem.');
 
@@ -473,6 +528,7 @@ if (formRegistro) {
         if (destino) destino.value = valor;
       });
       atualizarStateDoFormulario();
+      autopreencherTriagemComDadosExistentes();
       agendarAutoRascunho();
     }
     atualizarStatus('Registro salvo. Redirecionando para triagem.');
@@ -492,6 +548,7 @@ if (form) {
     }
   }
   atualizarEtapaVisual(triagemState.etapa);
+  autopreencherTriagemComDadosExistentes();
   atualizarStateDoFormulario();
   renderLogs();
 
@@ -513,6 +570,8 @@ if (form) {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    atualizarStateDoFormulario();
+    autopreencherTriagemComDadosExistentes();
     atualizarStateDoFormulario();
     triagemState.dados.statusCaso = StatusCaso.EM_BUSCA;
     const operadorAtual = obterOperadorAtual();
