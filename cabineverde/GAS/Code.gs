@@ -43,11 +43,12 @@ function validarPermissaoAcao_(operador, acao) {
 }
 
 var SCHEMA_CABINE_VERDE = CABINE_VERDE_SCHEMA;
+var SCHEMA_UNIFICADO = obterSchemaCabineVerdeUnificado_();
 
 var ESTRUTURA_PLANILHA = {
-  CASOS: COLUNAS_CASOS,
+  CASOS: Array.isArray(SCHEMA_UNIFICADO.CASOS) ? SCHEMA_UNIFICADO.CASOS : COLUNAS_CASOS,
   TRIAGEM_RESPOSTAS: COLUNAS_TRIAGEM_RESPOSTAS,
-  EVENTOS_CASO: COLUNAS_EVENTOS_OCORRENCIA,
+  EVENTOS_CASO: Array.isArray(SCHEMA_UNIFICADO.EVENTOS_CASO) ? SCHEMA_UNIFICADO.EVENTOS_CASO : COLUNAS_EVENTOS_OCORRENCIA,
   INDICADORES_OPERACIONAIS: COLUNAS_INDICADORES_OPERACIONAIS,
   HISTORICO_EDICOES: ['idEdicao','idCaso','talaoPMESP','campoAlterado','valorAnterior','valorNovo','operadorNome','operadorEmail','operadorPerfil','dataHoraEdicao','justificativa','emailConfirmado'],
   RELATORIO_OPERACIONAL: ['dataReferencia','qtdFotosRecebidas','qtdFotosValidadas','qtdFotosUtilizadas','qtdFotosRejeitadas','observacaoOcorrenciasImagem','geradoEm'],
@@ -420,7 +421,7 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  garantirEstruturaCabineVerde_();
+  Logger.log('DEBUG_FLUXO_SALVARCASO: doPost inicio');
   var planilhaLogs = obterPlanilhaLogs();
   try {
     Logger.log("POST RECEBIDO:");
@@ -451,9 +452,18 @@ function doPost(e) {
     if (action === 'healthcheck') {
       return criarRespostaJson({ ok: true, data: { service: 'cabineverde', message: 'Endpoint ativo' } });
     }
+    if (action === 'testeSalvarCasoWebApp') {
+      return jsonResponse_(testarSalvarCasoPayloadMinimo181());
+    }
     if (action === 'salvarCaso') {
       Logger.log("GRAVANDO CASO:");
       Logger.log(body);
+      Logger.log('DEBUG_FLUXO_SALVARCASO: doPost salvarCaso payload=' + JSON.stringify({
+        colunasArray: Array.isArray(body && body.colunas),
+        colunasLength: Array.isArray(body && body.colunas) ? body.colunas.length : null,
+        valoresArray: Array.isArray(body && body.valores),
+        valoresLength: Array.isArray(body && body.valores) ? body.valores.length : null
+      }));
     }
 
     var mapaPermissao = {
@@ -507,9 +517,17 @@ function doPost(e) {
     if (action === 'listarPerfilOperador') return criarRespostaJson({ ok: true, data: operadorAtual });
 
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
-    Object.keys(ESTRUTURA_PLANILHA).forEach(function (aba) {
-      garantirAbaComCabecalho(planilha, aba, ESTRUTURA_PLANILHA[aba]);
-    });
+    if (action === 'salvarCaso') {
+      var schemaSalvarCaso = obterSchemaCabineVerdeUnificado_();
+      var colunasCasosSalvar = Array.isArray(body.colunas) && body.colunas.length ? body.colunas : schemaSalvarCaso.CASOS;
+      Logger.log('DEBUG_FLUXO_SALVARCASO: doPost garantir CASOS=' + JSON.stringify({
+        origem: Array.isArray(body.colunas) && body.colunas.length ? 'payload.colunas' : 'schema.CASOS',
+        length: Array.isArray(colunasCasosSalvar) ? colunasCasosSalvar.length : null
+      }));
+      garantirAbaComCabecalhos_(planilha, 'CASOS', colunasCasosSalvar);
+    } else {
+      garantirEstruturaCabineVerde_();
+    }
 
     var registros = body.abas && Array.isArray(body.abas) ? body.abas : [body];
     var idCaso = limparTexto((body.payload && body.payload.idCaso) || (body.dados && body.dados.idCaso));
@@ -682,7 +700,13 @@ function gerarRelatorioSeguranca_(resultado) {
 }
 
 function persistirRegistro(planilha, registro) {
-  garantirEstruturaCabineVerde_();
+  Logger.log('DEBUG_FLUXO_SALVARCASO: persistirRegistro entrada=' + JSON.stringify({
+    aba: limparTexto(registro && registro.aba),
+    colunasArray: Array.isArray(registro && registro.colunas),
+    colunasLength: Array.isArray(registro && registro.colunas) ? registro.colunas.length : null,
+    valoresArray: Array.isArray(registro && registro.valores),
+    valoresLength: Array.isArray(registro && registro.valores) ? registro.valores.length : null
+  }));
   var aba = limparTexto(registro.aba);
   var colunas = registro.colunas || [];
   var valores = registro.valores || [];
@@ -904,7 +928,8 @@ function registrarEventoOcorrencia(planilha, idCaso, tipoEvento, descricaoEvento
 }
 
 function registrarEventoOcorrenciaDetalhado_(planilha, idCaso, tipoEvento, descricaoEvento, metadados) {
-  var colunasEventos = obterColunasEventosCaso_();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var colunasEventos = Array.isArray(schema.EVENTOS_CASO) ? schema.EVENTOS_CASO : obterColunasEventosCaso_();
   garantirAbaComCabecalhos_(planilha, 'EVENTOS_CASO', colunasEventos);
   var sheetEventos = garantirAbaComCabecalho(planilha, 'EVENTOS_CASO', colunasEventos);
   var cabecalhoEventos = garantirColunasDaEstrutura(sheetEventos, colunasEventos);
