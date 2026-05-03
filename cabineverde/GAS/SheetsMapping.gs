@@ -1,6 +1,6 @@
 var ABA_CASOS = 'CASOS';
 
-var CABINE_VERDE_SCHEMA = {
+var CABINE_VERDE_SCHEMA = (typeof CABINE_VERDE_SCHEMA !== 'undefined' && CABINE_VERDE_SCHEMA) ? CABINE_VERDE_SCHEMA : {
   OPERADORES: ['email','nome','perfil','ativo','ultimaAtualizacao'],
   CASOS: ['idCaso','talaoPMESP','dataHoraInicio','dataHoraUltimaAtualizacao','status','nomeCompletoDesaparecido','sexoGenero','idade','faixaEtaria','municipio','dataHoraUltimaVisualizacao','localUltimaVisualizacao','roupaUltimaVisualizacao','meioTransporte','dadosVeiculoTransporte','fotoDigitalDisponivel','dispositivoVinculado','telefoneDispositivoPessoa','vulnerabilidadeIdentificada','suspeitaCrime','camerasResidencia','camerasUltimoLocal','nomeSolicitante','vinculoSolicitante','telefoneSolicitante','risco','prioridade','aptoCabineVerde','classificacaoOperacional','tipoCaso','flagAlerta','operadorCriador','operadorUltimaAcao','observacoesOperacionais'],
   TRIAGEM_RESPOSTAS: ['idCaso','talaoPMESP','etapa','campo','pergunta','resposta','dataHora','operadorEmail','operadorNome'],
