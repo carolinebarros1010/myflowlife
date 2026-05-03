@@ -762,7 +762,9 @@ function persistirRegistro(planilha, registro) {
   sheet.appendRow(valores);
 }
 
-
+function executarAuditoriaHeaderCasos() {
+  return auditarHeaderCasos_();
+}
 function auditarHeaderCasos_() {
   var schema = obterSchemaCabineVerdeUnificado_();
   var schemaCasos = Array.isArray(schema && schema.CASOS) ? schema.CASOS : [];
@@ -1075,6 +1077,9 @@ function gerarRelatorioTextoSIOPM_(idCaso) {
   return 'SIOPM | idCaso=' + limparTexto(item.idCaso) + '; talaoPMESP=' + limparTexto(item.talaoPMESP) + '; nome=' + limparTexto(item.nomeCompletoDesaparecido) + '; risco=' + limparTexto(item.classificacaoRisco) + '; prioridade=' + limparTexto(item.prioridade);
 }
 
+function executarAuditarELimparCasosSeguro() {
+  return auditarELimparCasosSeguro_();
+}
 function auditarELimparCasosSeguro_(dryRun) {
   var DRY_RUN = dryRun !== false;
   var schema = obterSchemaCabineVerdeUnificado_();
