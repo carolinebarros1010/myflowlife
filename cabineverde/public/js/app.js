@@ -346,10 +346,16 @@ const render = () => {
               <label>Meio de transporte<input name="meioTransporte" data-sync-key="meioTransporte" /></label>
               <label>Dados do veículo/transporte<input name="dadosVeiculo" data-sync-key="dadosVeiculo" /></label>
               <label>Foto digital disponível?
-                <select name="fotoDisponivel" data-sync-key="fotoDisponivel">
+                <select name="fotoDisponivel" id="fotoDisponivel" data-sync-key="fotoDisponivel">
                   ${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}
                 </select>
               </label>
+              <div id="blocoUploadFotoDesaparecido" class="cv-photo-upload" hidden>
+                <label for="fotoDesaparecido">Inserir foto do desaparecido</label>
+                <input type="file" id="fotoDesaparecido" name="fotoDesaparecido" accept="image/*" capture="environment" />
+                <div id="statusUploadFoto" class="cv-photo-status">Nenhuma imagem selecionada.</div>
+                <img id="previewFotoDesaparecido" class="cv-photo-preview" alt="Prévia da foto do desaparecido" hidden />
+              </div>
               <label>Há dispositivo vinculado?
                 <select name="dispositivoLigado" data-sync-key="dispositivoLigado">
                   ${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}
@@ -498,9 +504,56 @@ const render = () => {
     }
   };
 
+
+  const configurarUploadFotoDesaparecido = () => {
+    const bloco = document.getElementById('blocoUploadFotoDesaparecido');
+    const fotoInput = document.getElementById('fotoDesaparecido');
+    const statusUpload = document.getElementById('statusUploadFoto');
+    const preview = document.getElementById('previewFotoDesaparecido');
+    const selectFoto = document.querySelector('[name="fotoDigitalDisponivel"], [name="fotoDisponivel"], #fotoDigitalDisponivel, #fotoDisponivel');
+
+    console.info('[FOTO] select encontrado:', selectFoto);
+    console.info('[FOTO] bloco encontrado:', bloco);
+
+    if (!bloco || !statusUpload || !preview || !fotoInput || !selectFoto) return;
+
+    const mostrarBlocoUploadFoto = () => {
+      const valor = String(selectFoto?.value || '').trim().toLowerCase();
+      const visivel = valor === 'sim' || valor === 'true' || valor === '1';
+      bloco.hidden = !visivel;
+      bloco.style.display = visivel ? 'block' : 'none';
+      console.info('[FOTO] valor selecionado:', selectFoto?.value);
+      console.info('[FOTO] bloco visível:', !bloco?.hidden);
+    };
+
+    if (!selectFoto.dataset.fotoUploadBind) {
+      selectFoto.addEventListener('change', mostrarBlocoUploadFoto);
+      selectFoto.dataset.fotoUploadBind = '1';
+    }
+
+    if (!fotoInput.dataset.fotoPreviewBind) {
+      fotoInput.addEventListener('change', () => {
+        const arquivo = fotoInput.files?.[0];
+        if (!arquivo) {
+          statusUpload.textContent = 'Nenhuma imagem selecionada.';
+          preview.hidden = true;
+          preview.removeAttribute('src');
+          return;
+        }
+        preview.src = URL.createObjectURL(arquivo);
+        preview.hidden = false;
+        statusUpload.textContent = `Arquivo selecionado: ${arquivo.name}`;
+      });
+      fotoInput.dataset.fotoPreviewBind = '1';
+    }
+
+    mostrarBlocoUploadFoto();
+  };
+
   const sincronizarEAtualizar = (event) => {
     sincronizarCamposDuplicados(event);
     atualizarUI();
+  configurarUploadFotoDesaparecido();
   };
 
   form.addEventListener('input', sincronizarEAtualizar);
@@ -519,12 +572,14 @@ const render = () => {
     form.querySelector('[name="municipio"]').value = document.getElementById('entrada-municipio').value.trim();
     mostrarTela(2);
     atualizarPassos();
+    configurarUploadFotoDesaparecido();
     form.querySelector('[name="nomeCompletoDesaparecido"]')?.focus();
   });
   document.getElementById('passoProximoBtn').addEventListener('click', () => {
     if (passoAtual < 5) {
       passoAtual += 1;
       atualizarPassos();
+      configurarUploadFotoDesaparecido();
       return;
     }
     mostrarTela(3);
@@ -536,9 +591,11 @@ const render = () => {
   document.getElementById('passoVoltarBtn').addEventListener('click', () => {
     if (passoAtual > 1) passoAtual -= 1;
     atualizarPassos();
+    configurarUploadFotoDesaparecido();
   });
-  document.getElementById('voltarTriagemBtn').addEventListener('click', () => mostrarTela(2));
+  document.getElementById('voltarTriagemBtn').addEventListener('click', () => { mostrarTela(2); configurarUploadFotoDesaparecido(); });
   atualizarUI();
+  configurarUploadFotoDesaparecido();
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -676,11 +733,13 @@ const render = () => {
   document.getElementById('menuNovoCaso')?.addEventListener('click', () => {
     form.reset();
     atualizarUI();
+  configurarUploadFotoDesaparecido();
     atualizarFeedback('Novo caso iniciado.');
   });
   document.getElementById('menuLimparFormulario')?.addEventListener('click', () => {
     form.reset();
     atualizarUI();
+  configurarUploadFotoDesaparecido();
     atualizarFeedback('Formulário limpo.');
   });
   document.getElementById('menuVerResumo')?.addEventListener('click', () => {
