@@ -409,6 +409,50 @@
         const ENDPOINT_AUDITORIA_GAS = 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec';
         const CAMPOS_AUDITORIA_EXCLUIDOS = new Set(['inconsistenciasPorCampo', 'auditoriaDetalhada', 'resultadoFinalAuditoria']);
         let casoAtualAuditoria = null;
+        const CHAVES_OPERADOR = {
+            email: 'cabineVerdeOperadorEmail',
+            nome: 'cabineVerdeOperadorNome',
+            perfil: 'cabineVerdeOperadorPerfil',
+            token: 'cabineVerdeOperadorToken'
+        };
+
+        function obterContextoAutenticacao() {
+            const operadorEmail = String(localStorage.getItem(CHAVES_OPERADOR.email) || '').trim().toLowerCase();
+            const operadorNome = String(localStorage.getItem(CHAVES_OPERADOR.nome) || '').trim();
+            const operadorPerfil = String(localStorage.getItem(CHAVES_OPERADOR.perfil) || '').trim().toUpperCase();
+            const token = String(localStorage.getItem(CHAVES_OPERADOR.token) || '').trim();
+            return { operadorEmail, operadorNome, operadorPerfil, token };
+        }
+
+        async function chamarBackendAuditoria(action, payload = {}) {
+            const auth = obterContextoAutenticacao();
+            const headers = { 'Content-Type': 'text/plain;charset=utf-8' };
+            if (auth.token) headers.Authorization = `Bearer ${auth.token}`;
+            const bodyPayload = {
+                action,
+                ...payload,
+                operadorEmail: auth.operadorEmail || payload.operadorEmail || '',
+                operadorNome: auth.operadorNome || payload.operadorNome || '',
+                operadorPerfil: auth.operadorPerfil || payload.operadorPerfil || '',
+                token: auth.token || payload.token || ''
+            };
+            console.info('[AUDITORIA] Request backend', {
+                action,
+                operadorEmail: bodyPayload.operadorEmail,
+                operadorNome: bodyPayload.operadorNome,
+                operadorPerfil: bodyPayload.operadorPerfil,
+                tokenInformado: !!bodyPayload.token
+            });
+            const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
+                method: 'POST',
+                credentials: 'include',
+                headers,
+                body: JSON.stringify(bodyPayload)
+            });
+            const body = await resposta.json();
+            console.info('[AUDITORIA] Response backend', { action, status: resposta.status, ok: body && body.ok, erro: body && body.erro });
+            return { resposta, body };
+        }
 
         function obterFiltroAuditoriaUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -521,12 +565,9 @@
             const talao = (document.getElementById('talao').value || '').trim();
             if (!talao) { alert('Informe o talão para buscar o caso.'); return; }
             try {
-                const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'buscarCasoCompleto', filtro: { talaoPMESP: talao, talaoBopm: talao, talao: talao, numeroTalao: talao, termo: talao } })
+                const { resposta, body } = await chamarBackendAuditoria('buscarCasoCompleto', {
+                    filtro: { talaoPMESP: talao, talaoBopm: talao, talao: talao, numeroTalao: talao, termo: talao }
                 });
-                const body = await resposta.json();
                 if (!resposta.ok || !body.ok || !body.data || !body.data.caso) throw new Error(body.erro || 'Caso não encontrado.');
                 const casoNormalizado = normalizarTalaoCaso(body.data.caso);
                 casoAtualAuditoria = casoNormalizado;
@@ -601,12 +642,7 @@
             const filtro = obterFiltroAuditoriaUrl();
             if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.talaoBopm && !filtro.talao && !filtro.numeroTalao && !filtro.nomeCompletoDesaparecido && !filtro.termo) return;
             try {
-                const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'buscarCasoCompleto', filtro })
-                });
-                const body = await resposta.json();
+                const { resposta, body } = await chamarBackendAuditoria('buscarCasoCompleto', { filtro });
                 if (!resposta.ok || !body.ok || !body.data || !body.data.caso) {
                     throw new Error(body.erro || 'Caso não encontrado.');
                 }
@@ -642,12 +678,7 @@
                 inconsistenciasPorCampo,
                 resultadoFinalAuditoria: Object.keys(inconsistenciasPorCampo).length ? 'Pendências identificadas na auditoria de campos.' : 'Caso conferido sem inconsistências registradas.'
             };
-            const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'salvarAuditoriaCaso', payload: payload, dados: payload })
-            });
-            const body = await resposta.json();
+            const { resposta, body } = await chamarBackendAuditoria('salvarAuditoriaCaso', { payload: payload, dados: payload });
             if (!resposta.ok || !body.ok) throw new Error(body.erro || 'Falha no salvamento de auditoria.');
         }
 
