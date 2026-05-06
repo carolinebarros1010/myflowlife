@@ -128,3 +128,9 @@ Evoluções aplicadas para reduzir carga cognitiva do operador:
   - **Rascunho local**: mensagem `Rascunho salvo no dispositivo.` com destaque **amarelo**.
   - **Salvamento oficial**: mensagem `Caso salvo no sistema com sucesso.` com destaque **verde**.
   - Mensagens distintas evitam confusão entre continuidade local e persistência oficial.
+
+## Atualização 2026-05-06 — Foto pós-triagem
+
+- A triagem passou a permitir salvamento com `fotoDisponivel = "Pendente"`, `linkFoto`/`urlFoto` vazios.
+- O envio da foto foi desacoplado para etapa posterior, via action `atualizarFotoCaso` no backend.
+- O vínculo posterior da foto preserva o mesmo `idCaso`/`talaoPMESP` e não sobrescreve respostas da triagem.
