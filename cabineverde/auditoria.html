@@ -91,12 +91,13 @@
         <div class="backup-zone">
             <span style="font-weight: bold; color: var(--primary-verde);">GERENCIAMENTO DA BASE E RELATÓRIOS GERAIS:</span>
             <div class="btn-group">
-                <button onclick="exportarBackup()" style="background:#1976d2; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;">GERAR BACKUP</button>
-                <button onclick="document.getElementById('fileIn').click()" style="background:#ffa000; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;">RESTAURAR BASE</button>
-                <button onclick="gerarRelatorioMassa('desap')" style="background:var(--danger); color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;">📄 RELATÓRIO TODOS DESAPARECIDOS</button>
-                <button onclick="gerarRelatorioMassa('loc')" style="background:var(--secondary-verde); color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;">📄 RELATÓRIO TODOS LOCALIZADOS</button>
+                <button id="btnBackupOficial" onclick="gerarBackupBackend()" style="background:#1976d2; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;">BACKUP OFICIAL</button>
+                <button id="btnRestaurarOficial" onclick="document.getElementById('fileIn').click()" style="background:#ffa000; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;">RESTAURAR BASE OFICIAL</button>
+                <button id="btnRelatorioDesapOficial" onclick="gerarRelatorioBackend('desap')" style="background:var(--danger); color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;">📄 RELATÓRIO OFICIAL — EM BUSCA</button>
+                <button id="btnRelatorioLocOficial" onclick="gerarRelatorioBackend('loc')" style="background:var(--secondary-verde); color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;">📄 RELATÓRIO OFICIAL — LOCALIZADOS</button>
             </div>
-            <input type="file" id="fileIn" style="display:none" onchange="importarBackup(event)">
+            <small style="color:#1b5e20; font-weight:600;">Dados carregados da base oficial.</small>
+            <input type="file" id="fileIn" accept="application/json" style="display:none" onchange="restaurarBackupBackend(event)">
         </div>
     </div>
 
@@ -403,8 +404,93 @@
             if(chartS) chartS.destroy();
             chartS = new Chart(document.getElementById('chartStatus'), { type: 'pie', data: { labels: ['Desap', 'Loc'], datasets: [{ data: [d, l], backgroundColor: ['#d32f2f', '#2e7d32'] }] }, options: { plugins: { legend: { display: false } }, maintainAspectRatio: false } });
         }
-        function exportarBackup() { saveAs(new Blob([localStorage.getItem(DB_KEY)], {type: 'application/json'}), `BACKUP_CABINE_VERDE.json`); }
-        function importarBackup(e) { const r = new FileReader(); r.onload = (ev) => { localStorage.setItem(DB_KEY, ev.target.result); update(); alert("Base restaurada!"); }; r.readAsText(e.target.files[0]); }
+        function operadorPodeGerenciarBase(perfil) {
+            return perfil === 'ADMIN';
+        }
+
+        function operadorPodeGerarRelatorioGlobal(perfil) {
+            return perfil === 'ADMIN' || perfil === 'SUPERVISOR';
+        }
+
+        function aplicarPermissoesBotoesGerenciais() {
+            const perfil = obterContextoAutenticacao().operadorPerfil;
+            const podeBase = operadorPodeGerenciarBase(perfil);
+            const podeRelatorio = operadorPodeGerarRelatorioGlobal(perfil);
+            const btnBackup = document.getElementById('btnBackupOficial');
+            const btnRestaurar = document.getElementById('btnRestaurarOficial');
+            const btnRelDesap = document.getElementById('btnRelatorioDesapOficial');
+            const btnRelLoc = document.getElementById('btnRelatorioLocOficial');
+            if (btnBackup) btnBackup.style.display = podeBase ? 'inline-block' : 'none';
+            if (btnRestaurar) btnRestaurar.style.display = podeBase ? 'inline-block' : 'none';
+            if (btnRelDesap) btnRelDesap.style.display = podeRelatorio ? 'inline-block' : 'none';
+            if (btnRelLoc) btnRelLoc.style.display = podeRelatorio ? 'inline-block' : 'none';
+        }
+
+        function validarEstruturaBackupOficial(payload) {
+            return !!(payload && payload.meta && Array.isArray(payload.abas));
+        }
+
+        async function gerarBackupBackend() {
+            const auth = obterContextoAutenticacao();
+            if (!operadorPodeGerenciarBase(auth.operadorPerfil)) {
+                alert('Apenas ADMIN pode gerar backup oficial.');
+                return;
+            }
+            const { body } = await chamarBackendAuditoria('gerarBackupBase', {});
+            if (!body || !body.ok || !body.data) {
+                throw new Error((body && body.erro) || 'Falha ao gerar backup oficial.');
+            }
+            const arquivo = JSON.stringify(body.data, null, 2);
+            const dataNome = new Date().toISOString().replace(/[:.]/g, '-');
+            saveAs(new Blob([arquivo], { type: 'application/json' }), `BACKUP_OFICIAL_CABINE_VERDE_${dataNome}.json`);
+        }
+
+        async function restaurarBackupBackend(e) {
+            const arquivo = e && e.target && e.target.files && e.target.files[0];
+            e.target.value = '';
+            const auth = obterContextoAutenticacao();
+            if (!operadorPodeGerenciarBase(auth.operadorPerfil)) {
+                alert('Apenas ADMIN pode restaurar a base oficial.');
+                return;
+            }
+            if (!arquivo) return;
+            if (!confirm('ATENÇÃO: restauração oficial sobrescreve dados. Deseja continuar?')) return;
+            if (!confirm('Confirma novamente a restauração da base oficial?')) return;
+            const texto = await arquivo.text();
+            const payload = JSON.parse(texto);
+            if (!validarEstruturaBackupOficial(payload)) {
+                alert('Backup inválido: estrutura não reconhecida.');
+                return;
+            }
+            const { body } = await chamarBackendAuditoria('restaurarBackupBase', { backup: payload });
+            if (!body || !body.ok) throw new Error((body && body.erro) || 'Falha ao restaurar backup oficial.');
+            alert('Restauração oficial concluída com sucesso.');
+        }
+
+        async function gerarRelatorioBackend(statusFiltro) {
+            const auth = obterContextoAutenticacao();
+            if (!operadorPodeGerarRelatorioGlobal(auth.operadorPerfil)) {
+                alert('Perfil sem autorização para relatório global.');
+                return;
+            }
+            const { body } = await chamarBackendAuditoria('gerarRelatorioCasos', { status: statusFiltro });
+            const lista = body && body.ok && body.data && Array.isArray(body.data.casos) ? body.data.casos : [];
+            if (!lista.length) {
+                alert('Nenhum caso encontrado para este relatório oficial.');
+                return;
+            }
+            const titulo = statusFiltro === 'desap' ? 'RELATÓRIO OFICIAL — EM BUSCA' : 'RELATÓRIO OFICIAL — LOCALIZADOS';
+            const linhas = lista.map((c) => `<tr><td>${c.idCaso || '-'}</td><td>${c.talaoPMESP || '-'}</td><td>${c.nomeCompletoDesaparecido || '-'}</td><td>${c.statusCaso || '-'}</td><td>${c.municipioFato || '-'}</td></tr>`).join('');
+            const html = `<!doctype html><html><head><meta charset="utf-8"><title>${titulo}</title></head><body><h1>${titulo}</h1><p>Dados carregados da base oficial.</p><table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>ID</th><th>Talão</th><th>Nome</th><th>Status</th><th>Município</th></tr></thead><tbody>${linhas}</tbody></table></body></html>`;
+            const w = window.open('', '_blank');
+            w.document.write(html);
+            w.document.close();
+            w.focus();
+            w.print();
+        }
+
+        function exportarBackup() { if (MODO_LOCAL_LEGADO) saveAs(new Blob([localStorage.getItem(DB_KEY)], {type: 'application/json'}), `BACKUP_CABINE_VERDE.json`); }
+        function importarBackup(e) { if (!MODO_LOCAL_LEGADO) return; const r = new FileReader(); r.onload = (ev) => { localStorage.setItem(DB_KEY, ev.target.result); update(); alert("Base restaurada!"); }; r.readAsText(e.target.files[0]); }
         function update() { render(); stats(); }
         const ENDPOINT_AUDITORIA_GAS = 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec';
         const CAMPOS_AUDITORIA_EXCLUIDOS = new Set(['inconsistenciasPorCampo', 'auditoriaDetalhada', 'resultadoFinalAuditoria']);
@@ -683,7 +769,7 @@
             try { await enviarAuditoriaParaBackend(); } catch (erro) { alert(erro.message || erro); }
         });
 
-        window.onload = async function () { update(); await carregarCasoAuditoria(); };
+        window.onload = async function () { aplicarPermissoesBotoesGerenciais(); update(); await carregarCasoAuditoria(); };
     </script>
 </body>
 </html>

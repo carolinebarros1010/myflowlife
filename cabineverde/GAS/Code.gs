@@ -524,7 +524,11 @@ function doPost(e) {
       visualizarFotoDesaparecido: 'VISUALIZAR_FOTO_INTERNO',
       validarFotoDesaparecido: 'VALIDAR_REJEITAR_FOTO',
       editarCasoControlado: 'EDITAR_CASO_CONTROLADO',
-      listarPerfilOperador: 'GERIR_OPERADORES'
+      listarPerfilOperador: 'GERIR_OPERADORES',
+      gerarBackupBase: 'GERIR_OPERADORES',
+      restaurarBackupBase: 'GERIR_OPERADORES',
+      listarCasosPorStatus: 'REGISTRAR_CASO',
+      gerarRelatorioCasos: 'REGISTRAR_CASO'
     };
     var validacaoAcao = validarPermissaoAcao_(operadorAtual, mapaPermissao[action] || 'REGISTRAR_CASO');
     if (!validacaoAcao.permitido) {
@@ -609,6 +613,10 @@ function doPost(e) {
     if (action === 'gerarRelatorioTextoSIOPM') return criarRespostaJson({ ok: true, data: { relatorio: gerarRelatorioTextoSIOPM_(body.idCaso || (body.payload && body.payload.idCaso)) } });
     if (action === 'gerarRelatorioOperacionalComImagem') return criarRespostaJson({ ok: true, data: gerarRelatorioOperacionalComImagem_(body.dataReferencia) });
     if (action === 'listarPerfilOperador') return criarRespostaJson({ ok: true, data: operadorAtual });
+    if (action === 'gerarBackupBase') return criarRespostaJson({ ok: true, data: gerarBackupBase_(operadorAtual) });
+    if (action === 'restaurarBackupBase') return criarRespostaJson({ ok: true, data: restaurarBackupBase_(body.backup, operadorAtual) });
+    if (action === 'listarCasosPorStatus') return criarRespostaJson({ ok: true, data: listarCasosPorStatus_(body.status) });
+    if (action === 'gerarRelatorioCasos') return criarRespostaJson({ ok: true, data: gerarRelatorioCasos_(body.status) });
 
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
     if (action === 'salvarAuditoriaCaso') {
@@ -1402,4 +1410,69 @@ function auditarELimparCasosSeguro_(dryRun) {
   relatorio.linhasOriginais = abaOriginal.getLastRow();
   relatorio.linhasMigradas = ss.getSheetByName('CASOS').getLastRow();
   return relatorio;
+}
+
+function listarCasosPorStatus_(status) {
+  var casos = listarCasosComProtecao_({ perfil: 'ADMIN' });
+  var alvo = limparTexto(status).toLowerCase();
+  return casos.filter(function (caso) {
+    var statusCaso = limparTexto(caso.statusCaso).toLowerCase();
+    if (alvo === 'desap') return statusCaso === 'desap' || statusCaso.indexOf('busca') >= 0 || statusCaso.indexOf('desap') >= 0;
+    if (alvo === 'loc') return statusCaso === 'loc' || statusCaso.indexOf('local') >= 0 || statusCaso.indexOf('encerr') >= 0;
+    return true;
+  });
+}
+
+function gerarRelatorioCasos_(status) {
+  var casos = listarCasosPorStatus_(status);
+  return {
+    status: limparTexto(status),
+    total: casos.length,
+    casos: casos
+  };
+}
+
+function gerarBackupBase_(operadorAtual) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var abas = ['CASOS', 'AUDITORIAS', 'EVENTOS_CASO', 'LOGS'];
+  var dadosAbas = abas.map(function (nomeAba) {
+    var aba = planilha.getSheetByName(nomeAba);
+    if (!aba) return { nome: nomeAba, colunas: [], registros: [] };
+    var valores = aba.getDataRange().getValues();
+    if (!valores.length) return { nome: nomeAba, colunas: [], registros: [] };
+    var colunas = valores[0].map(limparTexto);
+    var registros = valores.slice(1).map(function (linha) {
+      var item = {};
+      colunas.forEach(function (coluna, idx) { item[coluna] = normalizarValorPlanilha(linha[idx]); });
+      return item;
+    });
+    return { nome: nomeAba, colunas: colunas, registros: registros };
+  });
+  var totalCasos = dadosAbas.reduce(function (acc, aba) { return aba.nome === 'CASOS' ? aba.registros.length : acc; }, 0);
+  return {
+    meta: {
+      data: formatarDataHora(new Date()),
+      operador: { email: limparTexto(operadorAtual.email), nome: limparTexto(operadorAtual.nome), perfil: limparTexto(operadorAtual.perfil) },
+      versao: 'cabine-verde-backup-oficial-v1',
+      quantidadeCasos: totalCasos
+    },
+    schema: schema,
+    abas: dadosAbas
+  };
+}
+
+function restaurarBackupBase_(backup, operadorAtual) {
+  if (!backup || !backup.meta || !Array.isArray(backup.abas)) {
+    throw new Error('Backup inválido.');
+  }
+  registrarLogAcessoOperador_(
+    SpreadsheetApp.getActiveSpreadsheet(),
+    'RESTAURACAO_BACKUP_BASE',
+    'PENDENTE_VALIDACAO_MANUAL',
+    'Solicitação de restauração recebida. Fluxo automático bloqueado por segurança operacional.',
+    operadorAtual.email,
+    { perfil: operadorAtual.perfil, origem: 'auditoria.html' }
+  );
+  return { restaurado: false, bloqueado: true, motivo: 'Restauração automática desativada por segurança. Solicitação registrada em LOGS.' };
 }
