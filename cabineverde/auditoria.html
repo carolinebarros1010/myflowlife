@@ -66,6 +66,10 @@
         .backup-zone { background: #e8f5e9; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 2px dashed var(--secondary-verde); display: flex; flex-direction: column; gap: 10px; align-items: center; }
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
         .condicional { display: none; }
+        .painel-auditoria-campo { border: 1px solid #dfe6e9; border-radius: 8px; padding: 10px; background: #fafafa; }
+        .painel-auditoria-campo h4 { margin: 0 0 8px; font-size: 0.9em; color: #1b5e20; }
+        .painel-auditoria-campo .meta { font-size: 0.7em; color: #666; margin-bottom: 6px; }
+        .painel-auditoria-campo .grid-auditoria { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
     </style>
 </head>
 <body>
@@ -181,10 +185,15 @@
                 <div class="double"><label>39. Qual o Município do desaparecimento?</label><input type="text" id="q_municipio" required></div>
                 <div class="double"><label>40. Foto da Pessoa (Obrigatório)</label><input type="file" id="foto" accept="image/*"></div>
 
-                <div class="section-header">🔁 Espelho da Triagem (Schema CASOS)</div>
+                <div class="section-header">🔁 Espelho da Triagem (Schema CASOS) [LEGADO]</div>
                 <div class="full">
                     <label>Campos completos retornados da triagem/backend (somente leitura para conferência)</label>
                     <div id="espelhoTriagem" style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; max-height:420px; overflow:auto; border:1px solid #c8e6c9; border-radius:6px; padding:10px;"></div>
+                </div>
+                <div class="section-header">🧭 Painel Dinâmico de Auditoria da Triagem</div>
+                <div class="full">
+                    <label>Perguntas e respostas da triagem renderizadas dinamicamente (modo auditoria operacional)</label>
+                    <div id="auditoriaTriagemDinamica" style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; max-height:520px; overflow:auto; border:1px solid #c8e6c9; border-radius:6px; padding:10px;"></div>
                 </div>
 
                 <div class="section-header">🛡️ Validação Técnica - Cabine Verde</div>
@@ -395,6 +404,8 @@
         function importarBackup(e) { const r = new FileReader(); r.onload = (ev) => { localStorage.setItem(DB_KEY, ev.target.result); update(); alert("Base restaurada!"); }; r.readAsText(e.target.files[0]); }
         function update() { render(); stats(); }
         const ENDPOINT_AUDITORIA_GAS = 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec';
+        const CAMPOS_AUDITORIA_EXCLUIDOS = new Set(['inconsistenciasPorCampo', 'auditoriaDetalhada', 'resultadoFinalAuditoria']);
+        let casoAtualAuditoria = null;
 
         function obterFiltroAuditoriaUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -421,6 +432,84 @@
             });
         }
 
+        function normalizarTalaoCaso(caso = {}) {
+            const talaoPrincipal = (caso.talaoPMESP || caso.talaoBopm || caso.talao || caso.numeroTalao || '').toString().trim();
+            return { ...caso, talaoPMESP: talaoPrincipal };
+        }
+
+        function gerarLabelAmigavelCampo(chave) {
+            const custom = {
+                talaoPMESP: 'Talão PMESP',
+                talaoBopm: 'Talão BOPM (alias legado)',
+                numeroTalao: 'Número do Talão (alias)',
+                nomeCompletoDesaparecido: 'Nome completo da pessoa desaparecida',
+                respostasArvore: 'Respostas estruturadas da triagem',
+                complementosArvore: 'Complementos estruturados da triagem'
+            };
+            if (custom[chave]) return custom[chave];
+            return chave
+                .replace(/([a-z])([A-Z])/g, '$1 $2')
+                .replace(/[_-]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .replace(/^./, (c) => c.toUpperCase());
+        }
+
+        function renderizarPerguntasTriagemModoAuditoria(caso) {
+            const cont = document.getElementById('auditoriaTriagemDinamica');
+            if (!cont) return;
+            cont.innerHTML = '';
+            const casoNormalizado = normalizarTalaoCaso(caso || {});
+            const entradas = Object.entries(casoNormalizado).filter(([chave, valor]) => {
+                if (CAMPOS_AUDITORIA_EXCLUIDOS.has(chave)) return false;
+                return valor !== null && valor !== undefined && String(valor).trim() !== '';
+            });
+            if (!entradas.length) {
+                cont.innerHTML = '<em>Nenhum campo disponível para auditoria dinâmica.</em>';
+                return;
+            }
+            entradas.sort((a, b) => a[0].localeCompare(b[0], 'pt-BR')).forEach(([chave, valor]) => {
+                const card = document.createElement('div');
+                card.className = 'painel-auditoria-campo';
+                const valorExibicao = typeof valor === 'object' ? JSON.stringify(valor, null, 2) : (valor ?? '');
+                card.innerHTML = `
+                    <h4>${gerarLabelAmigavelCampo(chave)}</h4>
+                    <div class="meta">Campo técnico: <strong>${chave}</strong></div>
+                    <div class="grid-auditoria">
+                        <div style="grid-column:span 2;">
+                            <label>Pergunta/Campo da triagem</label>
+                            <input type="text" readonly value="${gerarLabelAmigavelCampo(chave).replace(/"/g, '&quot;')}">
+                        </div>
+                        <div>
+                            <label>Resposta da triagem</label>
+                            <textarea rows="3" readonly>${valorExibicao}</textarea>
+                        </div>
+                        <div>
+                            <label>Complemento</label>
+                            <textarea rows="3" readonly>${typeof valor === 'object' ? 'Vide resposta estruturada.' : ''}</textarea>
+                        </div>
+                        <div>
+                            <label>Validação da auditoria</label>
+                            <input type="text" data-auditoria-validacao="${chave}" placeholder="Validação objetiva do campo">
+                        </div>
+                        <div>
+                            <label>Status do campo</label>
+                            <select data-auditoria-status="${chave}">
+                                <option value="conforme">Conforme</option>
+                                <option value="inconforme">Inconforme</option>
+                                <option value="revisar">Revisar</option>
+                            </select>
+                        </div>
+                        <div style="grid-column:span 2;">
+                            <label>Observação da auditoria (campo)</label>
+                            <textarea rows="2" data-auditoria-observacao="${chave}" placeholder="Observação específica deste campo"></textarea>
+                        </div>
+                    </div>
+                `;
+                cont.appendChild(card);
+            });
+        }
+
         async function buscarCasoPorTalao() {
             const talao = (document.getElementById('talao').value || '').trim();
             if (!talao) { alert('Informe o talão para buscar o caso.'); return; }
@@ -428,12 +517,15 @@
                 const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'buscarCasoCompleto', filtro: { talaoPMESP: talao, termo: talao } })
+                    body: JSON.stringify({ action: 'buscarCasoCompleto', filtro: { talaoPMESP: talao, talaoBopm: talao, talao: talao, numeroTalao: talao, termo: talao } })
                 });
                 const body = await resposta.json();
                 if (!resposta.ok || !body.ok || !body.data || !body.data.caso) throw new Error(body.erro || 'Caso não encontrado.');
-                preencherFormularioAuditoria(body.data.caso);
-                renderizarEspelhoTriagem(body.data.caso);
+                const casoNormalizado = normalizarTalaoCaso(body.data.caso);
+                casoAtualAuditoria = casoNormalizado;
+                preencherFormularioAuditoria(casoNormalizado);
+                renderizarEspelhoTriagem(casoNormalizado);
+                renderizarPerguntasTriagemModoAuditoria(casoNormalizado);
             } catch (erro) {
                 alert(`Falha na busca por talão: ${erro.message || erro}`);
             }
@@ -444,7 +536,7 @@
             const respostasArvore = caso.respostasArvore || {};
             const complementosArvore = caso.complementosArvore || {};
 
-            document.getElementById('talao').value = caso.talaoPMESP || caso.talao || '';
+            document.getElementById('talao').value = normalizarTalaoCaso(caso).talaoPMESP || '';
             document.getElementById('q1').value = caso.nomeCompletoDesaparecido || respostasArvore.passo1_nome || '';
             document.getElementById('q2').value = caso.sexoGenero || respostasArvore.passo1_sexo_genero || '';
             document.getElementById('q3').value = caso.idade || respostasArvore.passo1_idade || '';
@@ -486,8 +578,11 @@
                 if (!resposta.ok || !body.ok || !body.data || !body.data.caso) {
                     throw new Error(body.erro || 'Caso não encontrado.');
                 }
-                preencherFormularioAuditoria(body.data.caso);
-                renderizarEspelhoTriagem(body.data.caso);
+                const casoNormalizado = normalizarTalaoCaso(body.data.caso);
+                casoAtualAuditoria = casoNormalizado;
+                preencherFormularioAuditoria(casoNormalizado);
+                renderizarEspelhoTriagem(casoNormalizado);
+                renderizarPerguntasTriagemModoAuditoria(casoNormalizado);
             } catch (erro) {
                 alert(`Falha ao carregar caso para auditoria: ${erro.message || erro}`);
             }
@@ -495,17 +590,25 @@
 
         async function enviarAuditoriaParaBackend() {
             const filtro = obterFiltroAuditoriaUrl();
+            const inconsistenciasPorCampo = {};
+            document.querySelectorAll('[data-auditoria-status]').forEach((el) => {
+                const chave = el.getAttribute('data-auditoria-status');
+                const status = el.value;
+                const validacao = (document.querySelector(`[data-auditoria-validacao="${chave}"]`) || {}).value || '';
+                const observacao = (document.querySelector(`[data-auditoria-observacao="${chave}"]`) || {}).value || '';
+                if (status !== 'conforme' || validacao || observacao) {
+                    inconsistenciasPorCampo[chave] = { status, validacao, observacao };
+                }
+            });
             const payload = {
-                idCaso: filtro.idCaso,
+                idCaso: filtro.idCaso || (casoAtualAuditoria && casoAtualAuditoria.idCaso) || '',
                 talaoPMESP: document.getElementById('talao').value,
-                nomeCompletoDesaparecido: document.getElementById('q1').value,
-                sexoGenero: document.getElementById('q2').value,
-                idade: document.getElementById('q3').value,
-                municipio: document.getElementById('q_municipio').value,
-                dataHoraUltimaVisualizacao: document.getElementById('q8').value,
-                localUltimaVisualizacao: document.getElementById('q9').value,
-                roupaUltimaVisualizacao: document.getElementById('q10').value,
-                observacoesOperacionais: document.getElementById('cv_obs').value
+                responsavelAuditoria: document.getElementById('cv_resp').value,
+                dataAuditoria: document.getElementById('cv_data').value,
+                statusAuditoria: Object.keys(inconsistenciasPorCampo).length ? 'revisar' : 'conforme',
+                observacoesAuditoria: document.getElementById('cv_obs').value,
+                inconsistenciasPorCampo,
+                resultadoFinalAuditoria: Object.keys(inconsistenciasPorCampo).length ? 'Pendências identificadas na auditoria de campos.' : 'Caso conferido sem inconsistências registradas.'
             };
             const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
                 method: 'POST',
