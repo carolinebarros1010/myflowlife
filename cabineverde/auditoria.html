@@ -384,7 +384,98 @@
         function exportarBackup() { saveAs(new Blob([localStorage.getItem(DB_KEY)], {type: 'application/json'}), `BACKUP_CABINE_VERDE.json`); }
         function importarBackup(e) { const r = new FileReader(); r.onload = (ev) => { localStorage.setItem(DB_KEY, ev.target.result); update(); alert("Base restaurada!"); }; r.readAsText(e.target.files[0]); }
         function update() { render(); stats(); }
-        window.onload = update;
+        const ENDPOINT_AUDITORIA_GAS = 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec';
+
+        function obterFiltroAuditoriaUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                idCaso: (params.get('idCaso') || '').trim(),
+                talaoPMESP: (params.get('talaoPMESP') || '').trim(),
+                nomeCompletoDesaparecido: (params.get('nomeCompletoDesaparecido') || '').trim()
+            };
+        }
+
+        function preencherFormularioAuditoria(caso) {
+            if (!caso) return;
+            const respostasArvore = caso.respostasArvore || {};
+            const complementosArvore = caso.complementosArvore || {};
+
+            document.getElementById('talao').value = caso.talaoPMESP || caso.talao || '';
+            document.getElementById('q1').value = caso.nomeCompletoDesaparecido || respostasArvore.passo1_nome || '';
+            document.getElementById('q2').value = caso.sexoGenero || respostasArvore.passo1_sexo_genero || '';
+            document.getElementById('q3').value = caso.idade || respostasArvore.passo1_idade || '';
+            document.getElementById('q4').value = [caso.cpf, caso.rg, caso.nomeMae, caso.dataNascimento].filter(Boolean).join(' | ');
+            document.getElementById('q5').value = caso.meioTransporte || respostasArvore.passo2_transporte || '';
+            document.getElementById('q6').value = caso.dadosVeiculo || respostasArvore.passo2_caracteristicas_transporte || '';
+            document.getElementById('q7').value = caso.condicaoMentalCognitivaComportamental || complementosArvore.passo4_condicao_mental || '';
+            document.getElementById('q8').value = caso.dataHoraUltimaVisualizacao || respostasArvore.passo2_data_hora || '';
+            document.getElementById('q9').value = caso.localUltimaVisualizacao || respostasArvore.passo2_local || '';
+            document.getElementById('q10').value = caso.roupaUltimaVisualizacao || respostasArvore.passo2_roupa || '';
+            document.getElementById('q11').value = caso.vinculoSolicitante || respostasArvore.passo3_vinculo || '';
+            document.getElementById('q13').value = respostasArvore.passo3_estudo_trabalho || '';
+            document.getElementById('q16').value = respostasArvore.passo4_intencao_fuga || '';
+            document.getElementById('q18').value = respostasArvore.passo4_conflito || '';
+            document.getElementById('q19').value = respostasArvore.passo4_desapareceu_antes || '';
+            document.getElementById('q20').value = respostasArvore.idoso_alzheimer_demencia || respostasArvore.passo4_condicao_mental || '';
+            document.getElementById('q21').value = caso.limitacaoFisica || complementosArvore.passo4_limitacao_fisica || '';
+            document.getElementById('q22').value = respostasArvore.passo4_alcool_drogas || '';
+            document.getElementById('q25').value = caso.telefoneDesaparecido || complementosArvore.passo1_dispositivo || '';
+            document.getElementById('q35').value = respostasArvore.passo5_cameras_residencia || '';
+            document.getElementById('q36').value = respostasArvore.passo5_cameras_ultimo_local || '';
+            document.getElementById('q37').value = caso.suspeitaCrime ? 'Sim' : (respostasArvore.passo4_suspeita_crime || '');
+            document.getElementById('q39').value = caso.numeroBo || complementosArvore.passo5_registro_delegacia || '';
+            document.getElementById('q_municipio').value = caso.municipio || respostasArvore.passo1_municipio || '';
+            document.getElementById('cv_obs').value = caso.observacoesOperacionais || '';
+            verificarFiltrosIdade();
+        }
+
+        async function carregarCasoAuditoria() {
+            const filtro = obterFiltroAuditoriaUrl();
+            if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.nomeCompletoDesaparecido) return;
+            try {
+                const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'buscarCasoCompleto', filtro })
+                });
+                const body = await resposta.json();
+                if (!resposta.ok || !body.ok || !body.data || !body.data.caso) {
+                    throw new Error(body.erro || 'Caso não encontrado.');
+                }
+                preencherFormularioAuditoria(body.data.caso);
+            } catch (erro) {
+                alert(`Falha ao carregar caso para auditoria: ${erro.message || erro}`);
+            }
+        }
+
+        async function enviarAuditoriaParaBackend() {
+            const filtro = obterFiltroAuditoriaUrl();
+            const payload = {
+                idCaso: filtro.idCaso,
+                talaoPMESP: document.getElementById('talao').value,
+                nomeCompletoDesaparecido: document.getElementById('q1').value,
+                sexoGenero: document.getElementById('q2').value,
+                idade: document.getElementById('q3').value,
+                municipio: document.getElementById('q_municipio').value,
+                dataHoraUltimaVisualizacao: document.getElementById('q8').value,
+                localUltimaVisualizacao: document.getElementById('q9').value,
+                roupaUltimaVisualizacao: document.getElementById('q10').value,
+                observacoesOperacionais: document.getElementById('cv_obs').value
+            };
+            const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'salvarAuditoriaCaso', payload: payload, dados: payload })
+            });
+            const body = await resposta.json();
+            if (!resposta.ok || !body.ok) throw new Error(body.erro || 'Falha no salvamento de auditoria.');
+        }
+
+        document.getElementById('masterForm').addEventListener('submit', async function () {
+            try { await enviarAuditoriaParaBackend(); } catch (erro) { alert(erro.message || erro); }
+        });
+
+        window.onload = async function () { update(); await carregarCasoAuditoria(); };
     </script>
 </body>
 </html>
