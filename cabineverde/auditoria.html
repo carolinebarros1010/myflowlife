@@ -426,8 +426,6 @@
 
         async function chamarBackendAuditoria(action, payload = {}) {
             const auth = obterContextoAutenticacao();
-            const headers = { 'Content-Type': 'text/plain;charset=utf-8' };
-            if (auth.token) headers.Authorization = `Bearer ${auth.token}`;
             const bodyPayload = {
                 action,
                 ...payload,
@@ -445,8 +443,7 @@
             });
             const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
                 method: 'POST',
-                credentials: 'include',
-                headers,
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(bodyPayload)
             });
             const body = await resposta.json();
