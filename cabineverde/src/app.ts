@@ -211,6 +211,7 @@ let modoFormulario: 'criacao' | 'edicao' = 'criacao';
 let idCasoEdicaoAtual = '';
 let casoOriginalEdicao: Record<string, unknown> | null = null;
 let urlFotoUploadAtual = '';
+let referenciaCasoSalvo: { idCaso: string; talaoPMESP: string } | null = null;
 
 
 const fotoDigitalDisponivelSelecionada = (valor: unknown): boolean => {
@@ -234,6 +235,46 @@ const atualizarPreviewFoto = (url: string): void => {
   }
   preview.src = url;
   preview.hidden = false;
+};
+
+const atualizarStatusFotoPendente = (texto: string): void => {
+  const status = document.getElementById('status-foto-pendente');
+  if (status) status.textContent = texto;
+};
+
+const salvarFotoDepoisDaTriagem = async (): Promise<void> => {
+  const arquivoFoto = form?.elements.namedItem('fotoDesaparecido') as HTMLInputElement | null;
+  const fotoSelecionada = arquivoFoto?.files?.[0];
+  const idCaso = referenciaCasoSalvo?.idCaso || triagemState.casoCompleto.id;
+  const talaoPMESP = referenciaCasoSalvo?.talaoPMESP || triagemState.casoCompleto.talaoPMESP;
+  if (!idCaso && !talaoPMESP) return atualizarStatus('Não foi possível identificar o caso para anexar foto.', true);
+  if (!fotoSelecionada) return atualizarStatus('Selecione uma foto antes de enviar.', true);
+  if (!fotoSelecionada.type.startsWith('image/')) return atualizarStatus('Upload bloqueado: apenas imagens são permitidas.', true);
+  if (fotoSelecionada.size > MAX_FOTO_BYTES) return atualizarStatus('Upload bloqueado: imagem excede 5MB.', true);
+
+  const upload = await sheetsService.uploadFotoCaso({
+    base64: await converterArquivoParaBase64(fotoSelecionada),
+    mimeType: fotoSelecionada.type,
+    nomeArquivo: fotoSelecionada.name,
+    idCaso,
+    talaoPMESP,
+    nomeDesaparecido: triagemState.dados.nomeCompletoDesaparecido,
+    operadorResponsavel: obterOperadorAtual()
+  });
+  if (!upload.ok || !upload.urlFoto) return atualizarStatus(`Falha no upload da foto: ${upload.message}`, true);
+
+  const atualizacao = await sheetsService.atualizarFotoCaso({
+    idCaso,
+    talaoPMESP,
+    urlFoto: upload.urlFoto,
+    linkFoto: upload.urlFoto,
+    fotoDisponivel: 'Sim'
+  });
+  if (!atualizacao.ok) return atualizarStatus(`Foto enviada, mas não foi possível vincular no caso: ${atualizacao.message}`, true);
+  urlFotoUploadAtual = upload.urlFoto;
+  atualizarPreviewFoto(upload.urlFoto);
+  atualizarStatusFotoPendente('Foto disponível: Sim');
+  atualizarStatus('Foto vinculada ao caso com sucesso.');
 };
 
 
@@ -701,35 +742,11 @@ if (form) {
     const payload = gerarPayloadSheets(triagemState.casoCompleto);
     payload.dados.modo = modoFormulario;
     if (modoFormulario === 'edicao' && idCasoEdicaoAtual) payload.dados.idCaso = idCasoEdicaoAtual;
-    const arquivoFoto = form.elements.namedItem('fotoDesaparecido') as HTMLInputElement | null;
-    const fotoSelecionada = arquivoFoto?.files?.[0];
     if (urlFotoUploadAtual) {
       payload.dados.urlFoto = urlFotoUploadAtual;
       payload.dados.linkFoto = urlFotoUploadAtual;
     }
-    if (fotoSelecionada) {
-      if (!fotoSelecionada.type.startsWith('image/')) {
-        atualizarStatus('Upload bloqueado: apenas imagens são permitidas.', true, 'bloqueio');
-        return;
-      }
-      if (fotoSelecionada.size > MAX_FOTO_BYTES) {
-        atualizarStatus('Upload bloqueado: imagem excede 5MB.', true, 'bloqueio');
-        return;
-      }
-
-      payload.foto = {
-        base64: await converterArquivoParaBase64(fotoSelecionada),
-        nomeArquivo: fotoSelecionada.name,
-        mimeType: fotoSelecionada.type
-      };
-      payload.dados.origemFoto = normalizarTexto(String((form.elements.namedItem('origemFoto') as HTMLSelectElement | null)?.value || ''));
-      payload.dados.tipoFoto = normalizarTexto(String((form.elements.namedItem('tipoFoto') as HTMLSelectElement | null)?.value || ''));
-      payload.dados.autorizacaoUsoImagem = toBoolean((form.elements.namedItem('autorizacaoUsoImagem') as HTMLInputElement | null)?.checked);
-      payload.dados.operadorResponsavel = normalizarTexto(triagemState.dados.nomeSolicitante || 'Operador');
-      payload.dados.nomeDesaparecido = triagemState.dados.nomeCompletoDesaparecido;
-      payload.dados.idCaso = triagemState.casoCompleto.id;
-      payload.dados.talaoPMESP = triagemState.casoCompleto.talaoPMESP;
-    }
+    payload.dados.fotoDisponivel = payload.dados.urlFoto || payload.dados.linkFoto ? 'Sim' : 'Pendente';
 
     atualizarStatus('Gravação em andamento na planilha central...');
     const retorno = await sheetsService.salvar(payload);
@@ -765,6 +782,8 @@ if (form) {
       atualizarStatus('Falha de conexão detectada: rascunho salvo localmente para retentativa.', true, 'rascunho');
     }
     if (retorno.ok) {
+      referenciaCasoSalvo = { idCaso: retorno.idCaso || triagemState.casoCompleto.id, talaoPMESP: triagemState.casoCompleto.talaoPMESP };
+      atualizarStatusFotoPendente(payload.dados.fotoDisponivel === 'Sim' ? 'Foto disponível: Sim' : 'Foto pendente.');
       const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
       if (chaveAuto) limparAutoRascunhoLocal(chaveAuto);
       if (modoFormulario === 'edicao') {
@@ -777,6 +796,17 @@ if (form) {
     aplicarFiltros();
   });
 }
+
+document.getElementById('btn-adicionar-foto-agora')?.addEventListener('click', () => {
+  mostrarBlocoUploadFoto(true);
+  atualizarStatus('Selecione a foto e clique novamente em "Adicionar foto agora" para enviar.');
+  salvarFotoDepoisDaTriagem();
+});
+
+document.getElementById('btn-finalizar-sem-foto')?.addEventListener('click', () => {
+  atualizarStatusFotoPendente('Foto pendente. Caso salvo sem foto.');
+  atualizarStatus('Triagem finalizada sem foto. Você pode anexar posteriormente pelo mesmo caso.');
+});
 
 document.getElementById('prev-step')?.addEventListener('click', () => atualizarEtapaVisual(triagemState.etapa - 1));
 document.getElementById('next-step')?.addEventListener('click', () => {

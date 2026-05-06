@@ -143,7 +143,16 @@ export const renderTriageForm = (): string => `
         input('observacoesOperacionais', 'Observações operacionais'),
         input('idFotoVisualizacao', 'ID da foto para visualização controlada'),
         input('justificativaVisualizacao', 'Justificativa de visualização (obrigatória para RESTRITO/SIGILOSO)'),
-        input('feedbackOperacional', 'Feedback operacional (melhoria/erro percebido)')
+        input('feedbackOperacional', 'Feedback operacional (melhoria/erro percebido)'),
+        `<div class="cv-card cv-photo-post-triage">
+          <h4>Etapa final de foto</h4>
+          <p class="cv-muted">A foto não bloqueia o salvamento da triagem. Você pode anexar agora ou depois.</p>
+          <div class="cv-inline-actions">
+            <button type="button" id="btn-adicionar-foto-agora" class="cv-button cv-button--secondary">Adicionar foto agora</button>
+            <button type="button" id="btn-finalizar-sem-foto" class="cv-button cv-button--ghost">Finalizar sem foto e adicionar depois</button>
+          </div>
+          <p id="status-foto-pendente" class="cv-photo-status">Foto pendente.</p>
+        </div>`
       ].join('')
     )}
   </form>
