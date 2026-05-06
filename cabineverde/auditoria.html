@@ -102,7 +102,9 @@
                     <label>TALÃO DE OCORRÊNCIA</label>
                     <input type="text" id="talao" class="talao-destaque" placeholder="Nº do Talão" required>
                 </div>
-                <div class="double"></div>
+                <div class="double" style="display:flex; align-items:flex-end; gap:8px;">
+                    <button type="button" class="btn-submit" style="margin-top:0; padding:10px;" onclick="buscarCasoPorTalao()">🔎 Buscar caso</button>
+                </div>
 
                 <div class="section-header">🔹 Questionário de Identificação Padronizado</div>
                 <div class="double"><label>01. Qual o nome da pessoa desaparecida?</label><input type="text" id="q1" required></div>
@@ -179,6 +181,12 @@
                 <div class="double"><label>39. Qual o Município do desaparecimento?</label><input type="text" id="q_municipio" required></div>
                 <div class="double"><label>40. Foto da Pessoa (Obrigatório)</label><input type="file" id="foto" accept="image/*"></div>
 
+                <div class="section-header">🔁 Espelho da Triagem (Schema CASOS)</div>
+                <div class="full">
+                    <label>Campos completos retornados da triagem/backend (somente leitura para conferência)</label>
+                    <div id="espelhoTriagem" style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; max-height:420px; overflow:auto; border:1px solid #c8e6c9; border-radius:6px; padding:10px;"></div>
+                </div>
+
                 <div class="section-header">🛡️ Validação Técnica - Cabine Verde</div>
                 <div class="double"><label>Responsável pelo Registro</label><input type="text" id="cv_resp" required></div>
                 <div><label>Data Registro</label><input type="date" id="cv_data" required></div>
@@ -194,6 +202,7 @@
 
     <script>
         const DB_KEY = 'cabine_verde_vFinal_db';
+        const MODO_LOCAL_LEGADO = false;
         let chartS;
 
         const PERGUNTAS_MAP = {
@@ -227,6 +236,7 @@
 
         document.getElementById('masterForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            if (!MODO_LOCAL_LEGADO) return;
             const editId = document.getElementById('edit_id').value;
             const f = document.getElementById('foto').files[0];
             const processar = (imgBase64 = null) => {
@@ -395,6 +405,40 @@
             };
         }
 
+        function renderizarEspelhoTriagem(caso) {
+            const cont = document.getElementById('espelhoTriagem');
+            if (!cont) return;
+            cont.innerHTML = '';
+            const dados = Object.entries(caso || {});
+            if (!dados.length) {
+                cont.innerHTML = '<em>Nenhum dado retornado.</em>';
+                return;
+            }
+            dados.sort((a, b) => a[0].localeCompare(b[0], 'pt-BR')).forEach(([chave, valor]) => {
+                const bloco = document.createElement('div');
+                bloco.innerHTML = `<label style="font-size:0.72em">${chave}</label><textarea rows="2" readonly>${typeof valor === 'object' ? JSON.stringify(valor) : (valor ?? '')}</textarea>`;
+                cont.appendChild(bloco);
+            });
+        }
+
+        async function buscarCasoPorTalao() {
+            const talao = (document.getElementById('talao').value || '').trim();
+            if (!talao) { alert('Informe o talão para buscar o caso.'); return; }
+            try {
+                const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'buscarCasoCompleto', filtro: { talaoPMESP: talao, termo: talao } })
+                });
+                const body = await resposta.json();
+                if (!resposta.ok || !body.ok || !body.data || !body.data.caso) throw new Error(body.erro || 'Caso não encontrado.');
+                preencherFormularioAuditoria(body.data.caso);
+                renderizarEspelhoTriagem(body.data.caso);
+            } catch (erro) {
+                alert(`Falha na busca por talão: ${erro.message || erro}`);
+            }
+        }
+
         function preencherFormularioAuditoria(caso) {
             if (!caso) return;
             const respostasArvore = caso.respostasArvore || {};
@@ -443,6 +487,7 @@
                     throw new Error(body.erro || 'Caso não encontrado.');
                 }
                 preencherFormularioAuditoria(body.data.caso);
+                renderizarEspelhoTriagem(body.data.caso);
             } catch (erro) {
                 alert(`Falha ao carregar caso para auditoria: ${erro.message || erro}`);
             }
