@@ -62,7 +62,7 @@ test('observacoes operacionais mantem somente texto livre', () => {
 });
 
 test('payload completo com colunas base + arvore para CASOS', () => {
-  const payload = gerarPayloadSheets({ nomeCompletoDesaparecido: 'x', idade: 30 });
+  const payload = gerarPayloadSheets({ nomeCompletoDesaparecido: 'x', idade: 30, talaoPMESP: '2026-000123' });
   assert.equal(payload.aba, 'CASOS');
   assert.equal(payload.colunas.length, payload.valores.length);
   assert.equal(payload.colunas.length > 51, true);
@@ -72,6 +72,8 @@ test('payload completo com colunas base + arvore para CASOS', () => {
   assert.equal(payload.colunas.includes('arv_p4_suspeita_crime_resp'), true);
   assert.equal(payload.colunas.includes('arv_adulto_violencia_divida_ameaca_resp'), true);
   assert.equal(payload.payload.arv_p1_emergencia_resp, 'Não informado');
+  assert.equal(payload.payload.talaoPMESP, '2026-000123');
+  assert.equal(payload.payload.talaoBopm, '2026-000123');
 });
 
 test('salvarCasoSheets usa action salvarCaso via endpoint oficial', async () => {

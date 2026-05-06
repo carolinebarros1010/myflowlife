@@ -617,6 +617,9 @@ function doPost(e) {
       garantirEstruturaCabineVerde_();
     }
 
+    if (body.payload && typeof body.payload === 'object') body.payload = normalizarTalaoPayload(body.payload);
+    if (body.dados && typeof body.dados === 'object') body.dados = normalizarTalaoPayload(body.dados);
+    body = normalizarTalaoPayload(body);
     var registros = body.abas && Array.isArray(body.abas) ? body.abas : [body];
     var idCaso = limparTexto((body.payload && body.payload.idCaso) || (body.dados && body.dados.idCaso));
     var talao = limparTexto((body.payload && body.payload.talaoPMESP) || (body.dados && body.dados.talaoPMESP) || body.talaoPMESP);
@@ -793,6 +796,14 @@ function gerarRelatorioSeguranca_(resultado) {
   ]);
 }
 
+function normalizarTalaoPayload(dados) {
+  var fonte = dados && typeof dados === 'object' ? dados : {};
+  var talao = limparTexto(fonte.talaoPMESP || fonte.talaoBopm || fonte.talao || fonte.numeroTalao || '');
+  fonte.talaoPMESP = talao;
+  fonte.talaoBopm = talao;
+  return fonte;
+}
+
 function persistirRegistro(planilha, registro) {
   Logger.log("PERSISTIR_REGISTRO_OFICIAL_ATIVO");
   Logger.log('DEBUG_FLUXO_SALVARCASO: persistirRegistro entrada=' + JSON.stringify({
@@ -844,6 +855,7 @@ function persistirRegistro(planilha, registro) {
     Logger.log("GRAVANDO CASO:");
     Logger.log(registro);
     var registroPorColuna = mapearPorColuna(colunas, valoresPorSchema);
+    registroPorColuna = normalizarTalaoPayload(registroPorColuna);
     registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
