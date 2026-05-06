@@ -414,8 +414,12 @@
             const params = new URLSearchParams(window.location.search);
             return {
                 idCaso: (params.get('idCaso') || '').trim(),
+                talaoBopm: (params.get('talaoBopm') || '').trim(),
+                talao: (params.get('talao') || '').trim(),
+                numeroTalao: (params.get('numeroTalao') || '').trim(),
                 talaoPMESP: (params.get('talaoPMESP') || '').trim(),
-                nomeCompletoDesaparecido: (params.get('nomeCompletoDesaparecido') || '').trim()
+                nomeCompletoDesaparecido: (params.get('nomeCompletoDesaparecido') || '').trim(),
+                termo: (params.get('termo') || '').trim()
             };
         }
 
@@ -595,7 +599,7 @@
 
         async function carregarCasoAuditoria() {
             const filtro = obterFiltroAuditoriaUrl();
-            if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.nomeCompletoDesaparecido) return;
+            if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.talaoBopm && !filtro.talao && !filtro.numeroTalao && !filtro.nomeCompletoDesaparecido && !filtro.termo) return;
             try {
                 const resposta = await fetch(ENDPOINT_AUDITORIA_GAS, {
                     method: 'POST',

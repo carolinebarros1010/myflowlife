@@ -446,6 +446,7 @@ const render = () => {
       <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
       <section class="cv-card">
       <h3>Consulta e auditoria de caso</h3>
+      <label>Busca livre<input id="audit-campoBusca" placeholder="Talão, nome, idCaso, município..." /></label>
       <div class="cv-grid">
         <label>idCaso<input id="audit-idCaso" /></label>
         <label>talão PMESP<input id="audit-talaoPMESP" /></label>
@@ -665,19 +666,27 @@ const render = () => {
       </div>`;
   };
 
+  const encaminharParaAuditoria = () => {
+    const campoBusca = document.getElementById('audit-campoBusca');
+    const termoCampoBusca = campoBusca?.value?.trim() || '';
+    const termoFallback = [
+      document.getElementById('audit-idCaso')?.value?.trim() || '',
+      document.getElementById('audit-talaoPMESP')?.value?.trim() || '',
+      document.getElementById('audit-nomeCompletoDesaparecido')?.value?.trim() || ''
+    ].find(Boolean) || '';
+    const termo = (termoCampoBusca || termoFallback).trim();
+
+    if (!termo) {
+      atualizarFeedback('Informe o talão, nome ou identificador do caso.', true);
+      return;
+    }
+
+    window.location.href = `./auditoria.html?termo=${encodeURIComponent(termo)}`;
+  };
+
   document.getElementById('buscarCasoBtn')?.addEventListener('click', () => {
     if (!operadorEstaValidadoLocalmente()) return atualizarFeedback('Operador não validado. Faça o login operacional para continuar.', true);
-    const filtro = {
-      idCaso: document.getElementById('audit-idCaso').value.trim(),
-      talaoPMESP: document.getElementById('audit-talaoPMESP').value.trim(),
-      nomeCompletoDesaparecido: document.getElementById('audit-nomeCompletoDesaparecido').value.trim()
-    };
-    if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.nomeCompletoDesaparecido) return atualizarFeedback('Informe ao menos um filtro para consulta.', true);
-    const params = new URLSearchParams();
-    if (filtro.idCaso) params.set('idCaso', filtro.idCaso);
-    if (!filtro.idCaso && filtro.talaoPMESP) params.set('talaoPMESP', filtro.talaoPMESP);
-    if (!filtro.idCaso && !filtro.talaoPMESP && filtro.nomeCompletoDesaparecido) params.set('nomeCompletoDesaparecido', filtro.nomeCompletoDesaparecido);
-    window.location.href = `./auditoria.html?${params.toString()}`;
+    encaminharParaAuditoria();
   });
 
   document.getElementById('audit-resultado')?.addEventListener('click', async (event) => {
