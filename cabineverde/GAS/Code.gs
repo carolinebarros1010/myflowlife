@@ -231,29 +231,51 @@ function buscarCaso_(filtro) {
   if (abasBusca.every(function(a){ return a.getLastRow() < 2; })) return [];
 
   var filtroObj = filtro && typeof filtro === 'object' ? filtro : { termo: filtro };
-  var termoId = limparTexto(filtroObj.idCaso || filtroObj.termo).toLowerCase();
-  var termoTalao = limparTexto(filtroObj.talaoPMESP || filtroObj.termo).toLowerCase();
-  var termoNome = limparTexto(filtroObj.nomeCompletoDesaparecido || filtroObj.termo).toLowerCase();
-  if (!termoId && !termoTalao && !termoNome) return [];
+  var termo = limparTexto(filtroObj.termo).toLowerCase();
+  var termoId = limparTexto(filtroObj.idCaso).toLowerCase();
+  var termoNome = limparTexto(filtroObj.nomeCompletoDesaparecido).toLowerCase();
+  var termosTalao = [filtroObj.talaoPMESP, filtroObj.talaoBopm, filtroObj.talao, filtroObj.numeroTalao, termo]
+    .map(function (valor) { return limparTexto(valor).toLowerCase(); })
+    .filter(Boolean);
+  if (!termo && !termoId && !termoNome && !termosTalao.length) return [];
 
   var resultados = [];
   abasBusca.forEach(function (abaAtual) {
     if (abaAtual.getLastRow() < 2) return;
     var cabecalho = garantirColunasDaEstrutura(abaAtual, colunasCasosBusca).map(limparTexto);
     var idxIdCaso = cabecalho.indexOf('idCaso');
-    var idxTalao = cabecalho.indexOf('talaoPMESP');
+    var idxTalaoPMESP = cabecalho.indexOf('talaoPMESP');
+    var idxTalaoBopm = cabecalho.indexOf('talaoBopm');
+    var idxTalao = cabecalho.indexOf('talao');
+    var idxNumeroTalao = cabecalho.indexOf('numeroTalao');
     var idxNome = cabecalho.indexOf('nomeCompletoDesaparecido');
-    if (idxIdCaso < 0 && idxTalao < 0 && idxNome < 0) return;
+    var idxMunicipio = cabecalho.indexOf('municipio');
+    var idxTelefoneSolicitante = cabecalho.indexOf('telefoneSolicitante');
+    var idxNomeSolicitante = cabecalho.indexOf('nomeSolicitante');
+    if (idxIdCaso < 0 && idxTalaoPMESP < 0 && idxTalaoBopm < 0 && idxTalao < 0 && idxNumeroTalao < 0 && idxNome < 0) return;
     var dados = abaAtual.getRange(2, 1, abaAtual.getLastRow() - 1, abaAtual.getLastColumn()).getValues();
 
     resultados = resultados.concat(dados.filter(function (linha) {
-    var idCaso = limparTexto(linha[idxIdCaso]).toLowerCase();
-    var talao = limparTexto(linha[idxTalao]).toLowerCase();
-    var nome = limparTexto(linha[idxNome]).toLowerCase();
-    var matchId = !termoId || idCaso.indexOf(termoId) !== -1;
-    var matchTalao = !termoTalao || talao.indexOf(termoTalao) !== -1;
-    var matchNome = !termoNome || nome.indexOf(termoNome) !== -1;
-    return matchId && matchTalao && matchNome;
+    var idCaso = limparTexto(idxIdCaso >= 0 ? linha[idxIdCaso] : '').toLowerCase();
+    var nome = limparTexto(idxNome >= 0 ? linha[idxNome] : '').toLowerCase();
+    var talaoCampos = [idxTalaoPMESP, idxTalaoBopm, idxTalao, idxNumeroTalao]
+      .map(function (idx) { return limparTexto(idx >= 0 ? linha[idx] : '').toLowerCase(); })
+      .filter(Boolean);
+    var camposBuscaLivre = [idCaso, nome]
+      .concat(talaoCampos)
+      .concat([
+        limparTexto(idxMunicipio >= 0 ? linha[idxMunicipio] : '').toLowerCase(),
+        limparTexto(idxTelefoneSolicitante >= 0 ? linha[idxTelefoneSolicitante] : '').toLowerCase(),
+        limparTexto(idxNomeSolicitante >= 0 ? linha[idxNomeSolicitante] : '').toLowerCase()
+      ]);
+
+    if (termoId && idCaso === termoId) return true;
+    if (termoId && idCaso.indexOf(termoId) !== -1) return true;
+    if (termosTalao.length && termosTalao.some(function (t) { return talaoCampos.indexOf(t) !== -1; })) return true;
+    if (termosTalao.length && termosTalao.some(function (t) { return talaoCampos.some(function (campo) { return campo.indexOf(t) !== -1; }); })) return true;
+    if (termoNome && nome.indexOf(termoNome) !== -1) return true;
+    if (termo && camposBuscaLivre.some(function (campo) { return campo.indexOf(termo) !== -1; })) return true;
+    return false;
     }).map(function (linha) {
       var caso = {};
       cabecalho.forEach(function (coluna, index) { caso[coluna] = normalizarValorPlanilha(linha[index]); });
@@ -425,10 +447,13 @@ function doGet(e) {
     var filtro = {
       idCaso: limparTexto(parametro.idCaso),
       talaoPMESP: limparTexto(parametro.talaoPMESP),
+      talaoBopm: limparTexto(parametro.talaoBopm),
+      talao: limparTexto(parametro.talao),
+      numeroTalao: limparTexto(parametro.numeroTalao),
       nomeCompletoDesaparecido: limparTexto(parametro.nomeCompletoDesaparecido),
       termo: limparTexto(parametro.termo)
     };
-    if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.nomeCompletoDesaparecido && !filtro.termo) {
+    if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.talaoBopm && !filtro.talao && !filtro.numeroTalao && !filtro.nomeCompletoDesaparecido && !filtro.termo) {
       return criarRespostaJson({ ok: false, erro: 'Ausência de identificador do caso.', codigo: 'ID_OBRIGATORIO' }, 400);
     }
     var caso = obterCasoCompleto_(filtro);
