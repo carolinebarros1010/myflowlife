@@ -412,7 +412,29 @@ function normalizarDataChave_(entrada) {
   return Utilities.formatDate(data, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyy-MM-dd');
 }
 
+function obterCasoCompleto_(filtro) {
+  var resultados = buscarCaso_(filtro || {});
+  if (!Array.isArray(resultados) || !resultados.length) return null;
+  return resultados[0];
+}
+
 function doGet(e) {
+  var parametro = e && e.parameter ? e.parameter : {};
+  var action = limparTexto(parametro.action);
+  if (action === 'buscarCasoCompleto') {
+    var filtro = {
+      idCaso: limparTexto(parametro.idCaso),
+      talaoPMESP: limparTexto(parametro.talaoPMESP),
+      nomeCompletoDesaparecido: limparTexto(parametro.nomeCompletoDesaparecido),
+      termo: limparTexto(parametro.termo)
+    };
+    if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.nomeCompletoDesaparecido && !filtro.termo) {
+      return criarRespostaJson({ ok: false, erro: 'Ausência de identificador do caso.', codigo: 'ID_OBRIGATORIO' }, 400);
+    }
+    var caso = obterCasoCompleto_(filtro);
+    if (!caso) return criarRespostaJson({ ok: false, erro: 'Caso não encontrado.', codigo: 'CASO_NAO_ENCONTRADO' }, 404);
+    return criarRespostaJson({ ok: true, data: { caso: caso } });
+  }
   return jsonResponse_({
     ok: true,
     service: 'cabineverde',
@@ -457,6 +479,11 @@ function doPost(e) {
     if (action === 'testeSalvarCasoWebApp') {
       return jsonResponse_(testarSalvarCasoPayloadMinimo181());
     }
+    if (action === 'salvarAuditoriaCaso') {
+      body.action = 'salvarCaso';
+      action = 'salvarCaso';
+    }
+
     if (action === 'salvarCaso') {
       Logger.log("GRAVANDO CASO:");
       Logger.log(body);
@@ -527,6 +554,17 @@ function doPost(e) {
     }
 
     if (action === 'buscarCaso') return criarRespostaJson({ ok: true, data: buscarCaso_(body.filtro || body.payload || body.termo || '') });
+    if (action === 'buscarCasoCompleto') {
+      var filtroCompleto = body.filtro || body.payload || {
+        idCaso: body.idCaso,
+        talaoPMESP: body.talaoPMESP,
+        nomeCompletoDesaparecido: body.nomeCompletoDesaparecido,
+        termo: body.termo
+      };
+      var casoCompleto = obterCasoCompleto_(filtroCompleto);
+      if (!casoCompleto) return criarRespostaJson({ ok: false, erro: 'Caso não encontrado.', codigo: 'CASO_NAO_ENCONTRADO' }, 404);
+      return criarRespostaJson({ ok: true, data: { caso: casoCompleto } });
+    }
     if (action === 'gerarTimelineCaso') return criarRespostaJson({ ok: true, data: gerarTimelineCaso_(body.idCaso) });
     if (action === 'editarCasoControlado') return criarRespostaJson({ ok: true, data: editarCasoControlado_(body.idCaso, body.operador, body.alteracoes, body.justificativa, body.emailConfirmacaoOperador) });
     if (action === 'validarFotoDesaparecido') return criarRespostaJson({ ok: true, data: validarFotoDesaparecido_(body.idFoto, body.operador || operadorAtual, body.status) });
@@ -537,6 +575,11 @@ function doPost(e) {
     if (action === 'listarPerfilOperador') return criarRespostaJson({ ok: true, data: operadorAtual });
 
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
+    if (action === 'salvarAuditoriaCaso') {
+      body.action = 'salvarCaso';
+      action = 'salvarCaso';
+    }
+
     if (action === 'salvarCaso') {
       var schemaSalvarCaso = obterSchemaCabineVerdeUnificado_();
       var colunasCasosSalvar = Array.isArray(body.colunas) && body.colunas.length ? body.colunas : schemaSalvarCaso.CASOS;

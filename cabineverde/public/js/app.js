@@ -639,7 +639,7 @@ const render = () => {
       </div>`;
   };
 
-  document.getElementById('buscarCasoBtn')?.addEventListener('click', async () => {
+  document.getElementById('buscarCasoBtn')?.addEventListener('click', () => {
     if (!operadorEstaValidadoLocalmente()) return atualizarFeedback('Operador não validado. Faça o login operacional para continuar.', true);
     const filtro = {
       idCaso: document.getElementById('audit-idCaso').value.trim(),
@@ -647,35 +647,11 @@ const render = () => {
       nomeCompletoDesaparecido: document.getElementById('audit-nomeCompletoDesaparecido').value.trim()
     };
     if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.nomeCompletoDesaparecido) return atualizarFeedback('Informe ao menos um filtro para consulta.', true);
-    try {
-      logBotaoOperacional('Buscar caso', filtro);
-      const resposta = await buscarCaso_(filtro);
-      console.log('RESPOSTA GAS:', resposta);
-      const casosEncontrados = Array.isArray(resposta.casos) ? resposta.casos : (resposta.caso ? [resposta.caso] : []);
-      if (!casosEncontrados.length) {
-        atualizarFeedback('Não foi encontrado caso com os filtros informados.', true);
-        return;
-      }
-      const caso = casosEncontrados[0];
-      renderResultadoAuditoria(caso);
-      if (casosEncontrados.length > 1) {
-        const opcoes = casosEncontrados.slice(0, 5).map((item) => `${item.idCaso || item.id} (${item.nomeCompletoDesaparecido || 'Sem nome'})`).join('; ');
-        atualizarFeedback(`Consulta realizada com sucesso. ${casosEncontrados.length} casos encontrados. Exibindo o primeiro: ${opcoes}`);
-      } else {
-        atualizarFeedback('Consulta realizada com sucesso. 1 caso encontrado.');
-      }
-      await registrarConsultaCaso_({
-        operadorEmail: localStorage.getItem('cabineVerdeOperadorEmail') || '',
-        filtroUsado: Object.keys(filtro).filter((chave) => filtro[chave]).join(','),
-        idCaso: filtro.idCaso || '',
-        talaoPMESP: filtro.talaoPMESP || '',
-        nomeCompleto: filtro.nomeCompletoDesaparecido || '',
-        dataHora: new Date().toISOString(),
-        resultado: `${casosEncontrados.length} caso(s)`
-      });
-    } catch (error) {
-      atualizarFeedback(error.message || 'Erro ao consultar caso. Verifique os filtros e tente novamente.', true);
-    }
+    const params = new URLSearchParams();
+    if (filtro.idCaso) params.set('idCaso', filtro.idCaso);
+    if (!filtro.idCaso && filtro.talaoPMESP) params.set('talaoPMESP', filtro.talaoPMESP);
+    if (!filtro.idCaso && !filtro.talaoPMESP && filtro.nomeCompletoDesaparecido) params.set('nomeCompletoDesaparecido', filtro.nomeCompletoDesaparecido);
+    window.location.href = `./auditoria.html?${params.toString()}`;
   });
 
   document.getElementById('audit-resultado')?.addEventListener('click', async (event) => {
