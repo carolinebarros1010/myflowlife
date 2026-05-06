@@ -33,6 +33,15 @@ const app = document.getElementById('app');
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
 const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
 const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
+const lerParametrosTriagemUrl = () => {
+  const params = new URLSearchParams(window.location.search);
+  const idCaso = String(params.get('idCaso') || '').trim();
+  const talaoPMESP = String(
+    params.get('talaoPMESP') || params.get('talaoBopm') || params.get('talao') || params.get('numeroTalao') || ''
+  ).trim();
+  const nomeCompletoDesaparecido = String(params.get('nomeCompletoDesaparecido') || '').trim();
+  return { idCaso, talaoPMESP, nomeCompletoDesaparecido };
+};
 const PERFIL_OPERADOR = () => String(localStorage.getItem('cabineVerdeOperadorPerfil') || 'OPERADOR').toUpperCase();
 const NOME_OPERADOR = () => String(localStorage.getItem('cabineVerdeOperadorNome') || 'Operador Cabine Verde').trim();
 const podeEditarCaso = () => ['SUPERVISOR', 'ADMIN'].includes(PERFIL_OPERADOR());
@@ -625,6 +634,23 @@ const render = () => {
     registrarEventosSessao();
   });
 
+  const carregarCasoTriagemViaUrl = async () => {
+    const filtro = lerParametrosTriagemUrl();
+    if (!filtro.idCaso && !filtro.talaoPMESP && !filtro.nomeCompletoDesaparecido) return;
+
+    try {
+      const resposta = await buscarCaso_(filtro);
+      if (!resposta?.ok || !resposta?.caso) throw new Error(resposta?.mensagem || 'Caso não encontrado para edição.');
+      preencherFormularioComCaso(resposta.caso);
+      mostrarTela(2);
+      passoAtual = 1;
+      atualizarPassos();
+      atualizarFeedback('Caso carregado automaticamente para continuidade da triagem.');
+    } catch (error) {
+      atualizarFeedback(error.message || 'Não foi possível carregar o caso informado pela URL.', true);
+    }
+  };
+
   const renderResultadoAuditoria = (caso) => {
     const resumoFotos = caso.fotoDisponivel ? 'Foto registrada (link protegido).' : 'Sem foto registrada.';
     document.getElementById('audit-resultado').innerHTML = `
@@ -809,6 +835,7 @@ const render = () => {
     await atualizarPainelQualidade();
   });
   atualizarPainelQualidade().catch(() => atualizarFeedback('Falha ao carregar painel de qualidade.', true));
+  carregarCasoTriagemViaUrl().catch(() => {});
 };
 
 const registrarEventosSessao = () => {

@@ -70,11 +70,14 @@
         .painel-auditoria-campo h4 { margin: 0 0 8px; font-size: 0.9em; color: #1b5e20; }
         .painel-auditoria-campo .meta { font-size: 0.7em; color: #666; margin-bottom: 6px; }
         .painel-auditoria-campo .grid-auditoria { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .btn-voltar-triagem { position: sticky; top: 10px; align-self: flex-start; z-index: 20; margin-bottom: 12px; background: #ffffff; color: var(--primary-verde); border: 2px solid #c8e6c9; border-radius: 8px; padding: 10px 14px; font-weight: bold; cursor: pointer; }
+        .btn-voltar-triagem:hover { background: #e8f5e9; }
     </style>
 </head>
 <body>
 
     <header class="main-header">
+        <button type="button" class="btn-voltar-triagem" onclick="voltarParaTriagem()">⬅ Voltar para Triagem</button>
         <h1>Cabine Verde - Inteligência e Busca</h1>
         <p>SISTEMA DE MONITORAMENTO INTEGRADO DE PESSOAS DESAPARECIDAS</p>
     </header>
@@ -563,6 +566,31 @@
             document.getElementById('q_municipio').value = caso.municipio || respostasArvore.passo1_municipio || '';
             document.getElementById('cv_obs').value = caso.observacoesOperacionais || '';
             verificarFiltrosIdade();
+        }
+
+
+        function obterIdentificadorCasoAtual() {
+            const filtro = obterFiltroAuditoriaUrl();
+            const caso = normalizarTalaoCaso(casoAtualAuditoria || {});
+            const idCaso = (filtro.idCaso || caso.idCaso || caso.id || '').toString().trim();
+            const talaoPMESP = (filtro.talaoPMESP || caso.talaoPMESP || caso.talaoBopm || caso.talao || caso.numeroTalao || document.getElementById('talao').value || '').toString().trim();
+            const nomeCompletoDesaparecido = (filtro.nomeCompletoDesaparecido || caso.nomeCompletoDesaparecido || document.getElementById('q1').value || '').toString().trim();
+            return { idCaso, talaoPMESP, nomeCompletoDesaparecido };
+        }
+
+        function voltarParaTriagem() {
+            const { idCaso, talaoPMESP, nomeCompletoDesaparecido } = obterIdentificadorCasoAtual();
+            const params = new URLSearchParams();
+            if (idCaso) params.set('idCaso', idCaso);
+            if (talaoPMESP) {
+                params.set('talaoPMESP', talaoPMESP);
+                params.set('talaoBopm', talaoPMESP);
+                params.set('talao', talaoPMESP);
+                params.set('numeroTalao', talaoPMESP);
+            }
+            if (nomeCompletoDesaparecido) params.set('nomeCompletoDesaparecido', nomeCompletoDesaparecido);
+            const destino = 'index.html';
+            window.location.href = params.toString() ? `${destino}?${params.toString()}` : destino;
         }
 
         async function carregarCasoAuditoria() {
