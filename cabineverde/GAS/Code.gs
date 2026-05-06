@@ -704,7 +704,9 @@ function atualizarFotoCaso_(payload) {
 function validarOperadorPayloadOuSessao_(payload) {
   var emailGoogle = limparTexto(Session.getActiveUser().getEmail()).toLowerCase();
   var emailOperador = limparTexto(payload && payload.operadorEmail).toLowerCase() || emailGoogle;
+  Logger.log('DEBUG_AUTH validarOperadorPayloadOuSessao_ action=%s emailPayload=%s emailSessao=%s operadorNome=%s operadorPerfil=%s', limparTexto(payload && payload.action), emailOperador, emailGoogle, limparTexto(payload && payload.operadorNome), limparTexto(payload && payload.operadorPerfil));
   var validacao = validarOperador_(emailOperador, payload || {});
+  Logger.log('DEBUG_AUTH resultadoValidacao ok=%s autorizado=%s motivo=%s operadorEmail=%s operadorPerfil=%s', !!validacao.ok, !!validacao.autorizado, limparTexto(validacao.motivo), limparTexto(validacao.operador && validacao.operador.email), limparTexto(validacao.operador && validacao.operador.perfil));
   if (!validacao.ok || !validacao.autorizado) {
     Logger.log("BLOQUEIO DE EXECUÇÃO");
     throw new Error('Operador não validado ou não autorizado.');
