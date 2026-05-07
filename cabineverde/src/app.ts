@@ -212,6 +212,8 @@ let idCasoEdicaoAtual = '';
 let casoOriginalEdicao: Record<string, unknown> | null = null;
 let urlFotoUploadAtual = '';
 let referenciaCasoSalvo: { idCaso: string; talaoPMESP: string } | null = null;
+let isSaving = false;
+let ultimoIdCasoSalvo = '';
 
 
 const fotoDigitalDisponivelSelecionada = (valor: unknown): boolean => {
@@ -279,7 +281,7 @@ const salvarFotoDepoisDaTriagem = async (): Promise<void> => {
 
 
 const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCamposFisicos({
-  id: normalizarTexto(String(dados.get('idCaso') || '')) || `CV-${Date.now()}`,
+  id: normalizarTexto(String(dados.get('idCaso') || '')) || referenciaCasoSalvo?.idCaso || ultimoIdCasoSalvo || '',
   talaoPMESP: normalizarTexto(String(dados.get('talaoPMESP') || '')),
   dataHoraRegistro: String(dados.get('dataHoraRegistro') || new Date().toISOString()),
   municipio: normalizarTexto(String(dados.get('municipio') || '')),
@@ -639,6 +641,17 @@ const renderAcoesPosSalvar = (idCaso: string): void => {
   acoes.setAttribute('data-case-id', idCaso);
 };
 
+const sincronizarIdCasoPersistente = (idCaso: string): void => {
+  const idNormalizado = normalizarTexto(idCaso);
+  if (!idNormalizado) return;
+  ultimoIdCasoSalvo = idNormalizado;
+  idCasoEdicaoAtual = idNormalizado;
+  modoFormulario = 'edicao';
+  const campoIdCaso = form?.elements.namedItem('idCaso') as HTMLInputElement | null;
+  if (campoIdCaso) campoIdCaso.value = idNormalizado;
+  triagemState.dados.id = idNormalizado;
+};
+
 const renderDetalheCaso = (caso: CasoCompleto): void => {
   const details = document.getElementById('case-details');
   if (!details) return;
@@ -690,6 +703,8 @@ if (formRegistro) {
 }
 
 if (form) {
+  const idCasoUrl = normalizarTexto(new URLSearchParams(window.location.search).get('idCaso') || '');
+  if (idCasoUrl) sincronizarIdCasoPersistente(idCasoUrl);
   (document.getElementById('session-id') as HTMLInputElement | null)!.value = sessionId;
   const ultimoAutoRascunho = carregarUltimoAutoRascunho();
   if (ultimoAutoRascunho) {
@@ -723,7 +738,12 @@ if (form) {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    atualizarStateDoFormulario();
+    if (isSaving) return;
+    isSaving = true;
+    const botaoSalvar = document.getElementById('save-registro') as HTMLButtonElement | null;
+    if (botaoSalvar) botaoSalvar.disabled = true;
+    try {
+      atualizarStateDoFormulario();
     autopreencherTriagemComDadosExistentes();
     atualizarStateDoFormulario();
     triagemState.dados.statusCaso = StatusCaso.EM_BUSCA;
@@ -782,18 +802,20 @@ if (form) {
       atualizarStatus('Falha de conexão detectada: rascunho salvo localmente para retentativa.', true, 'rascunho');
     }
     if (retorno.ok) {
-      referenciaCasoSalvo = { idCaso: retorno.idCaso || triagemState.casoCompleto.id, talaoPMESP: triagemState.casoCompleto.talaoPMESP };
+      const idCasoPersistente = retorno.idCaso || triagemState.casoCompleto.id || idCasoEdicaoAtual || ultimoIdCasoSalvo;
+      sincronizarIdCasoPersistente(idCasoPersistente);
+      referenciaCasoSalvo = { idCaso: idCasoPersistente, talaoPMESP: triagemState.casoCompleto.talaoPMESP };
       atualizarStatusFotoPendente(payload.dados.fotoDisponivel === 'Sim' ? 'Foto disponível: Sim' : 'Foto pendente.');
       const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
       if (chaveAuto) limparAutoRascunhoLocal(chaveAuto);
-      if (modoFormulario === 'edicao') {
-        casoOriginalEdicao = null;
-        idCasoEdicaoAtual = '';
-        modoFormulario = 'criacao';
-      }
+      casoOriginalEdicao = null;
     }
-    atualizarLista();
-    aplicarFiltros();
+      atualizarLista();
+      aplicarFiltros();
+    } finally {
+      isSaving = false;
+      if (botaoSalvar) botaoSalvar.disabled = false;
+    }
   });
 }
 
@@ -896,6 +918,8 @@ document.getElementById('new-case')?.addEventListener('click', () => {
   atualizarEtapaVisual(0);
   modoFormulario = 'criacao';
   idCasoEdicaoAtual = '';
+  ultimoIdCasoSalvo = '';
+  referenciaCasoSalvo = null;
   atualizarStateDoFormulario();
 });
 
