@@ -552,6 +552,17 @@ function doPost(e) {
       limparFotosTemporarias_();
       return criarRespostaJson({ ok: true, data: { action: 'uploadFotoCaso', urlFoto: resultadoUpload.linkArquivo, linkArquivo: resultadoUpload.linkArquivo, fileIdDrive: resultadoUpload.fileIdDrive } });
     }
+    if (action === 'atualizarFotoCaso') {
+      var payloadAtualizacaoFoto = body.payload || {};
+      var retornoAtualizacaoFoto = atualizarFotoCaso_({
+        idCaso: limparTexto(payloadAtualizacaoFoto.idCaso || body.idCaso),
+        talaoPMESP: limparTexto(payloadAtualizacaoFoto.talaoPMESP || body.talaoPMESP),
+        fotoDisponivel: limparTexto(payloadAtualizacaoFoto.fotoDisponivel || body.fotoDisponivel || 'Sim'),
+        linkFoto: limparTexto(payloadAtualizacaoFoto.linkFoto || body.linkFoto),
+        urlFoto: limparTexto(payloadAtualizacaoFoto.urlFoto || body.urlFoto)
+      });
+      return criarRespostaJson({ ok: true, data: retornoAtualizacaoFoto });
+    }
 
     if (action === 'listarCasos') {
       var casos = listarCasosComProtecao_(operadorAtual);
@@ -661,6 +672,30 @@ function doPost(e) {
     var actionErro = ''; try { actionErro = limparTexto(parsePayload(e).action); } catch (_e) {}
     return criarRespostaJson({ ok: false, erro: mensagemErro, detalhe: 'Falha no processamento da action ' + actionErro }, 500);
   }
+}
+
+function atualizarFotoCaso_(payload) {
+  garantirEstruturaCabineVerde_();
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var colunasCasos = obterSchemaCabineVerdeUnificado_().CASOS;
+  var sheetCasos = garantirAbaComCabecalho(planilha, 'CASOS', colunasCasos);
+  var cabecalho = garantirColunasDaEstrutura(sheetCasos, colunasCasos);
+  var idCaso = limparTexto(payload && payload.idCaso);
+  var talaoPMESP = limparTexto(payload && payload.talaoPMESP);
+  var linha = idCaso ? localizarCasoPorId(sheetCasos, idCaso, cabecalho) : localizarCasoPorTalaoPMESP(sheetCasos, talaoPMESP, cabecalho);
+  if (linha < 2) throw new Error('Caso não encontrado para atualização de foto.');
+
+  var idxFotoDisponivel = cabecalho.indexOf('fotoDisponivel');
+  var idxLinkFoto = cabecalho.indexOf('linkFoto');
+  var idxUrlFoto = cabecalho.indexOf('urlFoto');
+  var idxDataAtualizacaoFoto = cabecalho.indexOf('dataAtualizacaoFoto');
+  var fotoDisponivel = limparTexto(payload && payload.fotoDisponivel) || (limparTexto(payload && (payload.urlFoto || payload.linkFoto)) ? 'Sim' : 'Pendente');
+  var urlFoto = limparTexto(payload && (payload.urlFoto || payload.linkFoto));
+  if (idxFotoDisponivel >= 0) sheetCasos.getRange(linha, idxFotoDisponivel + 1).setValue(fotoDisponivel);
+  if (idxLinkFoto >= 0) sheetCasos.getRange(linha, idxLinkFoto + 1).setValue(urlFoto);
+  if (idxUrlFoto >= 0) sheetCasos.getRange(linha, idxUrlFoto + 1).setValue(urlFoto);
+  if (idxDataAtualizacaoFoto >= 0) sheetCasos.getRange(linha, idxDataAtualizacaoFoto + 1).setValue(new Date());
+  return { action: 'atualizarFotoCaso', idCaso: idCaso, talaoPMESP: talaoPMESP, fotoDisponivel: fotoDisponivel, urlFoto: urlFoto, message: 'Foto do caso atualizada com sucesso' };
 }
 
 function validarOperadorPayloadOuSessao_(payload) {

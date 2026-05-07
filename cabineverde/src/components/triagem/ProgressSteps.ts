@@ -11,7 +11,7 @@ export const etapasTriagem: EtapaTriagem[] = [
   { id: 'solicitante', titulo: 'Solicitante', descricao: 'Contato e vínculo de referência.' },
   { id: 'risco', titulo: 'Vulnerabilidade e risco', descricao: 'Indícios críticos e priorização.' },
   { id: 'tecnologia', titulo: 'Apoio tecnológico', descricao: 'Dispositivos, câmeras e foto.' },
-  { id: 'resumo', titulo: 'Resumo e ação final', descricao: 'Conferência final e operação.' }
+  { id: 'resumo', titulo: 'Tela 2 — Triagem | PASSO 5 de 5', descricao: 'Conferência final, salvamento e anexo de foto.' }
 ];
 
 export const renderProgressSteps = (): string => `
