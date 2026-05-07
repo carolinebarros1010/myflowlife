@@ -80,17 +80,20 @@ textarea { width: 100%; box-sizing: border-box; }
 .cv-button:active { transform: translateY(0); box-shadow: none; }
 
 .cv-step-header-actions {
-  position: sticky;
-  top: 0;
-  z-index: 60;
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 9990;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  width: 100%;
+  width: min(100% - 24px, 980px);
   padding: 10px 12px;
-  margin: 0 0 10px;
-  background: #fff;
+  margin: 0;
+  background: rgba(255, 255, 255, .97);
+  backdrop-filter: blur(6px);
   border: 1px solid var(--line);
   border-radius: 10px;
   box-shadow: 0 6px 18px rgba(10, 25, 35, .08);
@@ -106,6 +109,7 @@ textarea { width: 100%; box-sizing: border-box; }
 
 .cv-form {
   scroll-padding-top: 96px;
+  padding-bottom: 110px;
 }
 
 .cv-risk-grid { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -174,7 +178,11 @@ pre { white-space: pre-wrap; margin: 0; }
   }
 
   .cv-step-header-actions {
-    top: 8px;
+    left: 12px;
+    right: 12px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    transform: none;
+    width: auto;
     padding: 10px;
   }
 
