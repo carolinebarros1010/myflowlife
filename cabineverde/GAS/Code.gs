@@ -649,9 +649,14 @@ function doPost(e) {
     }
     registrarLogTecnico(planilhaLogs, { etapa: 'GRAVACAO_INICIADA', ok: true, mensagem: 'Iniciando persistência em abas de destino', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
 
+    var resultadoPersistencia = { idCaso: idCaso, action: 'updated', linha: -1 };
     registros.forEach(function (registro) {
-      persistirRegistro(planilha, registro);
+      var parcial = persistirRegistro(planilha, registro) || {};
+      if (parcial.idCaso) resultadoPersistencia.idCaso = parcial.idCaso;
+      if (parcial.action) resultadoPersistencia.action = parcial.action;
+      if (parcial.linha) resultadoPersistencia.linha = parcial.linha;
     });
+    idCaso = limparTexto(resultadoPersistencia.idCaso || idCaso);
 
     if (body.foto && body.foto.base64) {
       salvarFotoDesaparecido_({
@@ -676,7 +681,7 @@ function doPost(e) {
     limparFotosTemporarias_();
     registrarLogAcessoOperador_(planilha, 'GRAVACAO_CONCLUIDA', 'SUCESSO', 'Registros persistidos com sucesso.', operadorAtual.email, { perfil: operadorAtual.perfil, acaoExecutada: action, talaoPMESP: talao });
     registrarLogTecnico(planilhaLogs || planilha, { etapa: 'GRAVACAO_SUCESSO', ok: true, mensagem: 'Registros persistidos com sucesso', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
-    return criarRespostaJson({ ok: true, data: { action: 'salvarCaso', idCaso: idCaso, message: 'Gravação multiabas concluída' } });
+    return criarRespostaJson({ ok: true, data: { action: resultadoPersistencia.action, idCaso: idCaso, linha: resultadoPersistencia.linha, message: 'Gravação multiabas concluída' } });
   } catch (err) {
     var mensagemErro = err && err.message ? err.message : String(err);
     registrarLogTecnico(planilhaLogs, { etapa: 'ERRO_GRAVACAO_PLANILHA', ok: false, mensagem: mensagemErro, rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
@@ -849,6 +854,52 @@ function normalizarTalaoPayload(dados) {
   return fonte;
 }
 
+function gerarAssinaturaCaso_(dados) {
+  var nome = normalizarTextoAssinatura_(dados && (dados.nomeCompletoDesaparecido || dados.nome));
+  var idade = limparTexto(dados && dados.idade);
+  var municipio = normalizarTextoAssinatura_(dados && dados.municipio);
+  var dataServico = limparTexto(dados && (dados.dataServico || dados.dataHoraRegistro || dados.dataHoraUltimaVisualizacao));
+  return [nome, idade, municipio, dataServico].join('|');
+}
+
+function normalizarTextoAssinatura_(valor) {
+  return limparTexto(valor).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function localizarLinhaCaso_(sheetCasos, cabecalhoAtual, dados) {
+  var idCaso = limparTexto(dados && dados.idCaso);
+  var talaoPMESP = limparTexto(dados && dados.talaoPMESP);
+  var talaoBopm = limparTexto(dados && dados.talaoBopm);
+  var numeroTalao = limparTexto(dados && (dados.numeroTalao || dados.talao));
+
+  var linhaId = idCaso ? localizarCasoPorIdCaso(sheetCasos, idCaso, cabecalhoAtual) : -1;
+  if (linhaId > 1) return { linha: linhaId, criterio: 'idCaso' };
+
+  var linhaTalao = talaoPMESP ? localizarCasoPorTalaoPMESP(sheetCasos, talaoPMESP, cabecalhoAtual) : -1;
+  if (linhaTalao > 1) return { linha: linhaTalao, criterio: 'talaoPMESP' };
+
+  if (talaoBopm) {
+    var linhaBopm = encontrarLinhaPorColuna(sheetCasos, talaoBopm, 'talaoBopm', cabecalhoAtual);
+    if (linhaBopm > 1) return { linha: linhaBopm, criterio: 'talaoBopm' };
+  }
+
+  if (numeroTalao) {
+    var linhaNumero = encontrarLinhaPorColuna(sheetCasos, numeroTalao, 'numeroTalao', cabecalhoAtual);
+    if (linhaNumero > 1) return { linha: linhaNumero, criterio: 'numeroTalao' };
+  }
+
+  var assinatura = gerarAssinaturaCaso_(dados);
+  if (!assinatura || assinatura === '|||') return { linha: -1, criterio: '' };
+  var idxAssinatura = cabecalhoAtual.indexOf('assinaturaCaso');
+  if (idxAssinatura >= 0 && sheetCasos.getLastRow() > 1) {
+    var assinaturas = sheetCasos.getRange(2, idxAssinatura + 1, sheetCasos.getLastRow() - 1, 1).getValues();
+    for (var i = 0; i < assinaturas.length; i += 1) {
+      if (limparTexto(assinaturas[i][0]) === assinatura) return { linha: i + 2, criterio: 'assinaturaCaso' };
+    }
+  }
+  return { linha: -1, criterio: '' };
+}
+
 function persistirRegistro(planilha, registro) {
   Logger.log("PERSISTIR_REGISTRO_OFICIAL_ATIVO");
   Logger.log('DEBUG_FLUXO_SALVARCASO: persistirRegistro entrada=' + JSON.stringify({
@@ -905,8 +956,21 @@ function persistirRegistro(planilha, registro) {
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
     var modoRegistro = limparTexto((registro.payload && registro.payload.modo) || registro.modo || '').toLowerCase();
-    var linhaPorIdCaso = localizarCasoPorIdCaso(sheetCasos, idCaso, cabecalhoAtual);
-    var linhaPorTalaoPMESP = localizarCasoPorTalaoPMESP(sheetCasos, talaoPMESPRecebido, cabecalhoAtual);
+    var resultadoLocalizacao = localizarLinhaCaso_(sheetCasos, cabecalhoAtual, registroPorColuna);
+    var linhaPorIdCaso = idCaso ? localizarCasoPorIdCaso(sheetCasos, idCaso, cabecalhoAtual) : -1;
+    var linhaPorTalaoPMESP = talaoPMESPRecebido ? localizarCasoPorTalaoPMESP(sheetCasos, talaoPMESPRecebido, cabecalhoAtual) : -1;
+    var linhaAlvo = resultadoLocalizacao.linha;
+    if (linhaAlvo > 1 && !idCaso) {
+      var idxIdCasoAtual = cabecalhoAtual.indexOf('idCaso');
+      if (idxIdCasoAtual >= 0) {
+        idCaso = limparTexto(sheetCasos.getRange(linhaAlvo, idxIdCasoAtual + 1).getValue());
+        registroPorColuna.idCaso = idCaso;
+      }
+    }
+    if (!idCaso) idCaso = 'CV-' + Utilities.getUuid().slice(0, 8).toUpperCase();
+    registroPorColuna.idCaso = idCaso;
+    registroPorColuna.dataHoraAtualizacao = formatarDataHora(new Date());
+    registroPorColuna.assinaturaCaso = gerarAssinaturaCaso_(registroPorColuna);
 
     validarConsistenciaCaso(planilha, {
       idCaso: idCaso,
@@ -919,8 +983,8 @@ function persistirRegistro(planilha, registro) {
       return normalizarValorPlanilha(registroPorColuna[nomeColuna]);
     });
 
-    if (linhaPorIdCaso > 1) {
-      sheetCasos.getRange(linhaPorIdCaso, 1, 1, linhaFinal.length).setValues([linhaFinal]);
+    if (linhaAlvo > 1) {
+      sheetCasos.getRange(linhaAlvo, 1, 1, linhaFinal.length).setValues([linhaFinal]);
       if (modoRegistro === 'edicao') {
         registrarEventoOperacional_(planilha, idCaso, 'EDICAO_CASO', {
           idCaso: idCaso,
@@ -929,11 +993,7 @@ function persistirRegistro(planilha, registro) {
           dataHora: formatarDataHora(new Date())
         });
       }
-      return;
-    }
-
-    if (modoRegistro === 'edicao') {
-      throw new Error('Modo edição requer idCaso existente.');
+      return { idCaso: idCaso, action: 'updated', linha: linhaAlvo };
     }
 
     sheetCasos.appendRow(linhaFinal);
@@ -944,11 +1004,12 @@ function persistirRegistro(planilha, registro) {
       dataHora: formatarDataHora(new Date()),
       statusInicial: limparTexto(registroPorColuna.statusCaso) || 'Em triagem'
     });
-    return;
+    return { idCaso: idCaso, action: 'created', linha: sheetCasos.getLastRow() };
   }
 
   var sheet = garantirAbaComCabecalho(planilha, aba, colunasEstrutura.length ? colunasEstrutura : colunas);
   sheet.appendRow(valores);
+  return { action: 'created', linha: sheet.getLastRow() };
 }
 
 function executarAuditoriaHeaderCasos() {
