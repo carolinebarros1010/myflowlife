@@ -106,12 +106,24 @@
             <input type="hidden" id="edit_id" value="">
             <div class="form-grid">
                 <div class="section-header">📑 Registro de Ocorrência</div>
+                <div class="double" style="grid-column:span 2;">
+                    <label>Consulta do Caso para Auditoria</label>
+                    <input type="text" id="audit-termo" placeholder="Busca livre (id, talão, nome, referência)">
+                </div>
+                <div>
+                    <label>ID DO CASO</label>
+                    <input type="text" id="audit-idCaso" placeholder="Ex: CV-2026-000123">
+                </div>
+                <div>
+                    <label>TALÃO PMESP</label>
+                    <input type="text" id="talao" class="talao-destaque" placeholder="Nº do Talão PMESP">
+                </div>
                 <div class="double">
-                    <label>TALÃO DE OCORRÊNCIA</label>
-                    <input type="text" id="talao" class="talao-destaque" placeholder="Nº do Talão" required>
+                    <label>NOME COMPLETO</label>
+                    <input type="text" id="audit-nomeCompletoDesaparecido" placeholder="Nome completo da pessoa desaparecida">
                 </div>
                 <div class="double" style="display:flex; align-items:flex-end; gap:8px;">
-                    <button type="button" class="btn-submit" style="margin-top:0; padding:10px;" onclick="buscarCasoPorTalao()">🔎 Buscar caso</button>
+                    <button type="button" class="btn-submit" style="margin-top:0; padding:10px;" onclick="buscarCasoAuditoria()">🔎 Buscar caso</button>
                 </div>
 
                 <div class="section-header">🔹 Questionário de Identificação Padronizado</div>
@@ -644,13 +656,21 @@
             });
         }
 
-        async function buscarCasoPorTalao() {
-            const talao = (document.getElementById('talao').value || '').trim();
-            if (!talao) { alert('Informe o talão para buscar o caso.'); return; }
+        async function buscarCasoAuditoria() {
+            const termo = (document.getElementById('audit-termo')?.value || '').trim();
+            const idCaso = (document.getElementById('audit-idCaso')?.value || '').trim();
+            const talaoPMESP = (document.getElementById('talao')?.value || '').trim();
+            const nomeCompletoDesaparecido = (document.getElementById('audit-nomeCompletoDesaparecido')?.value || '').trim();
+
+            if (!termo && !idCaso && !talaoPMESP && !nomeCompletoDesaparecido) {
+                alert('Informe ao menos um filtro para consulta.');
+                return;
+            }
+
+            const filtro = { termo, idCaso, talaoPMESP, nomeCompletoDesaparecido };
+
             try {
-                const { resposta, body } = await chamarBackendAuditoria('buscarCasoCompleto', {
-                    filtro: { talaoPMESP: talao, talaoBopm: talao, talao: talao, numeroTalao: talao, termo: talao }
-                });
+                const { resposta, body } = await chamarBackendAuditoria('buscarCasoCompleto', { filtro });
                 if (!resposta.ok || !body.ok || !body.data || !body.data.caso) throw new Error(body.erro || 'Caso não encontrado.');
                 const casoNormalizado = normalizarTalaoCaso(body.data.caso);
                 casoAtualAuditoria = casoNormalizado;
@@ -658,8 +678,12 @@
                 renderizarEspelhoTriagem(casoNormalizado);
                 renderizarPerguntasTriagemModoAuditoria(casoNormalizado);
             } catch (erro) {
-                alert(`Falha na busca por talão: ${erro.message || erro}`);
+                alert(`Falha na busca de auditoria: ${erro.message || erro}`);
             }
+        }
+
+        async function buscarCasoPorTalao() {
+            return buscarCasoAuditoria();
         }
 
         function preencherFormularioAuditoria(caso) {
@@ -667,7 +691,11 @@
             const respostasArvore = caso.respostasArvore || {};
             const complementosArvore = caso.complementosArvore || {};
 
-            document.getElementById('talao').value = normalizarTalaoCaso(caso).talaoPMESP || '';
+            const casoNormalizado = normalizarTalaoCaso(caso);
+            document.getElementById('audit-termo').value = '';
+            document.getElementById('audit-idCaso').value = casoNormalizado.idCaso || '';
+            document.getElementById('talao').value = casoNormalizado.talaoPMESP || '';
+            document.getElementById('audit-nomeCompletoDesaparecido').value = casoNormalizado.nomeCompletoDesaparecido || '';
             document.getElementById('q1').value = caso.nomeCompletoDesaparecido || respostasArvore.passo1_nome || '';
             document.getElementById('q2').value = caso.sexoGenero || respostasArvore.passo1_sexo_genero || '';
             document.getElementById('q3').value = caso.idade || respostasArvore.passo1_idade || '';
