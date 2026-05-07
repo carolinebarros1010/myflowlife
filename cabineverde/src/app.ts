@@ -212,8 +212,6 @@ let idCasoEdicaoAtual = '';
 let casoOriginalEdicao: Record<string, unknown> | null = null;
 let urlFotoUploadAtual = '';
 let referenciaCasoSalvo: { idCaso: string; talaoPMESP: string } | null = null;
-let isSaving = false;
-let ultimoIdCasoSalvo = '';
 
 
 const fotoDigitalDisponivelSelecionada = (valor: unknown): boolean => {
@@ -802,9 +800,7 @@ if (form) {
       atualizarStatus('Falha de conexão detectada: rascunho salvo localmente para retentativa.', true, 'rascunho');
     }
     if (retorno.ok) {
-      const idCasoPersistente = retorno.idCaso || triagemState.casoCompleto.id || idCasoEdicaoAtual || ultimoIdCasoSalvo;
-      sincronizarIdCasoPersistente(idCasoPersistente);
-      referenciaCasoSalvo = { idCaso: idCasoPersistente, talaoPMESP: triagemState.casoCompleto.talaoPMESP };
+      referenciaCasoSalvo = { idCaso: retorno.idCaso || triagemState.casoCompleto.id, talaoPMESP: triagemState.casoCompleto.talaoPMESP };
       atualizarStatusFotoPendente(payload.dados.fotoDisponivel === 'Sim' ? 'Foto disponível: Sim' : 'Foto pendente.');
       const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
       if (chaveAuto) limparAutoRascunhoLocal(chaveAuto);
