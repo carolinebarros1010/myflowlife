@@ -26,6 +26,11 @@ const normalizarResposta = (valor: unknown): string => {
   return texto || 'Não informado';
 };
 
+const normalizarTalaoPayload = (dados: Record<string, SheetCellValue>): Record<string, SheetCellValue> => {
+  const talao = String(dados.talaoPMESP || dados.talaoBopm || dados.talao || dados.numeroTalao || '').trim();
+  return { ...dados, talaoPMESP: talao, talaoBopm: talao };
+};
+
 const montarTriagemRespostas = (caso: CasoCompleto): SheetCellValue[][] => {
   const subfluxo = caso.subfluxoPerguntas || {};
   const chaves = Object.keys(subfluxo).sort();
@@ -72,13 +77,14 @@ const montarAbas = (caso: CasoCompleto, dadosCaso: Record<string, SheetCellValue
 
 export const gerarPayloadSheets = (caso: CasoCompleto): SheetPayload => {
   const subfluxoPerguntas = caso.subfluxoPerguntas || {};
-  const dadosBase: Record<string, SheetCellValue> = {
+  const dadosSemNormalizacao: Record<string, SheetCellValue> = {
     idCaso: caso.id, talaoPMESP: caso.talaoPMESP, dataHoraRegistro: caso.dataHoraRegistro, dataServico: hojeIso(caso.dataHoraRegistro), turno: '', equipe: 'Cabine Verde', operadorResponsavel: caso.operadorUltimaAcao || caso.operadorCriador || '', operadorCriador: caso.operadorCriador || '', operadorUltimaAcao: caso.operadorUltimaAcao || caso.operadorCriador || '', municipio: caso.municipio, talaoBopm: caso.talaoBopm, statusCaso: caso.statusCaso, nomeCompletoDesaparecido: caso.nomeCompletoDesaparecido, sexoGenero: caso.sexoGenero, idade: caso.idade, faixaEtaria: caso.faixaEtaria, cpf: caso.cpf, rg: caso.rg, nomeMae: caso.nomeMae, dataNascimento: caso.dataNascimento, corPele: caso.corPele || '', alturaAproximada: caso.alturaAproximada || 0, pesoAproximado: caso.pesoAproximado || 0, corCabelo: caso.corCabelo || '', corOlhos: caso.corOlhos || '', caracteristicasMarcantes: caso.caracteristicasMarcantes || '', dataHoraUltimaVisualizacao: caso.dataHoraUltimaVisualizacao, localUltimaVisualizacao: caso.localUltimaVisualizacao, roupaUltimaVisualizacao: caso.roupaUltimaVisualizacao, meioTransporte: caso.meioTransporte, dadosVeiculo: caso.dadosVeiculo, fotoDisponivel: caso.fotoDisponivel, linkFoto: caso.linkFoto || caso.urlFoto || '', urlFoto: caso.urlFoto || caso.linkFoto || '', telefoneDesaparecido: caso.telefoneDesaparecido, dispositivoLigado: caso.dispositivoLigado, camerasResidencia: caso.camerasResidencia, camerasUltimoLocal: caso.camerasUltimoLocal, aptoCabineVerde: caso.aptoCabineVerde, nomeSolicitante: caso.nomeSolicitante, vinculoSolicitante: caso.vinculoSolicitante, telefoneSolicitante: caso.telefoneSolicitante, vulnerabilidade: caso.vulnerabilidade, condicaoMentalCognitivaComportamental: caso.condicaoMentalCognitivaComportamental, limitacaoFisica: caso.limitacaoFisica, usoMedicacaoEssencial: caso.usoMedicacaoEssencial, usoAlcoolOutrasDrogas: caso.usoAlcoolOutrasDrogas, historicoDesaparecimentoAnterior: caso.historicoDesaparecimentoAnterior, conflitoPrevio: caso.conflitoPrevio, suspeitaCrime: caso.suspeitaCrime, locaisHabituais: caso.locaisHabituais, buscasPreliminares: caso.buscasPreliminares, classificacaoRisco: caso.classificacaoRisco, prioridade: caso.prioridade, acaoSugerida: caso.acaoSugerida, localizado: caso.statusCaso === 'Localizado' || caso.statusCaso === 'Encerrado', dataHoraLocalizacao: '', formaLocalizacao: '', encerrado190: caso.statusCaso === 'Encerrado', numeroBo: '', observacoesOperacionais: normalizarObservacaoCurta(caso.observacoesOperacionais)
   };
 
   COLUNAS_CASOS.filter((coluna) => coluna.indexOf('arv_') === 0).forEach((coluna) => {
-    dadosBase[coluna] = coluna.endsWith('_resp') ? normalizarResposta(subfluxoPerguntas[coluna]) : String(subfluxoPerguntas[coluna] ?? '').trim();
+    dadosSemNormalizacao[coluna] = coluna.endsWith('_resp') ? normalizarResposta(subfluxoPerguntas[coluna]) : String(subfluxoPerguntas[coluna] ?? '').trim();
   });
+  const dadosBase = normalizarTalaoPayload(dadosSemNormalizacao);
 
   return {
     aba: 'CASOS',

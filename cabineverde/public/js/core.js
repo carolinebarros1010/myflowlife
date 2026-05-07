@@ -535,8 +535,20 @@ export const calcularAptoCabineVerde = (caso, indicadores = caso.indicadoresOper
   return baseApta && !criticidadeSemSuporte;
 };
 
+export const normalizarTalaoPayload = (dados = {}) => {
+  const talao = String(
+    dados.talaoPMESP || dados.talaoBopm || dados.talao || dados.numeroTalao || ''
+  ).trim();
+
+  return {
+    ...dados,
+    talaoPMESP: talao,
+    talaoBopm: talao
+  };
+};
+
 export const gerarPayloadSheets = (caso) => {
-  const dados = {
+  const dadosBase = {
     idCaso: caso.id || `CV-${Date.now()}`,
     dataHoraRegistro: caso.dataHoraRegistro || new Date().toISOString(),
     dataServico: hojeIso(caso.dataHoraRegistro),
@@ -544,7 +556,7 @@ export const gerarPayloadSheets = (caso) => {
     equipe: caso.equipe || 'Cabine Verde',
     operadorResponsavel: caso.operadorResponsavel || '',
     municipio: caso.municipio || '',
-    talaoBopm: caso.talaoBopm || '',
+    talaoBopm: caso.talaoBopm || caso.talaoPMESP || '',
     statusCaso: caso.statusCaso || 'Em triagem',
     nomeCompletoDesaparecido: caso.nomeCompletoDesaparecido || '',
     sexoGenero: caso.sexoGenero || '',
@@ -590,6 +602,7 @@ export const gerarPayloadSheets = (caso) => {
     observacoesOperacionais: caso.observacoesOperacionais || '',
     ...mapearCamposArvore(caso)
   };
+  const dados = normalizarTalaoPayload(dadosBase);
 
   return {
     aba: 'CASOS',

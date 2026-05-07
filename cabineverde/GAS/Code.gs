@@ -437,7 +437,206 @@ function normalizarDataChave_(entrada) {
 function obterCasoCompleto_(filtro) {
   var resultados = buscarCaso_(filtro || {});
   if (!Array.isArray(resultados) || !resultados.length) return null;
-  return resultados[0];
+  var caso = resultados[0];
+  if (limparTexto(caso.statusDuplicidade).toLowerCase() === 'duplicado' && limparTexto(caso.duplicadoDe)) {
+    var principal = buscarCaso_({ idCaso: limparTexto(caso.duplicadoDe) });
+    if (Array.isArray(principal) && principal.length) return principal[0];
+  }
+  return caso;
+}
+
+
+
+function normalizarTextoDuplicidade_(valor) {
+  var texto = limparTexto(valor).toLowerCase();
+  if (!texto) return '';
+  texto = texto.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  texto = texto.replace(/\s+/g, ' ').trim();
+  return texto;
+}
+
+function normalizarMunicipioDuplicidade_(municipio) {
+  var texto = normalizarTextoDuplicidade_(municipio);
+  if (!texto) return '';
+  var mapa = {
+    'sao paulo - sp': 'sao paulo',
+    'sao paulo/sp': 'sao paulo',
+    's p': 'sao paulo',
+    'sp': 'sao paulo'
+  };
+  return mapa[texto] || texto;
+}
+
+function normalizarDataServicoDuplicidade_(valor) {
+  if (Object.prototype.toString.call(valor) === '[object Date]' && !isNaN(valor.getTime())) {
+    return Utilities.formatDate(valor, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyy-MM-dd');
+  }
+  var texto = limparTexto(valor);
+  if (!texto) return '';
+  var data = new Date(texto);
+  if (!isNaN(data.getTime())) {
+    return Utilities.formatDate(data, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyy-MM-dd');
+  }
+  return normalizarTextoDuplicidade_(texto);
+}
+
+function montarAssinaturaCasoDuplicidade_(registro) {
+  var nome = normalizarTextoDuplicidade_(registro.nomeCompletoDesaparecido);
+  var idade = normalizarTextoDuplicidade_(registro.idade);
+  var municipio = normalizarMunicipioDuplicidade_(registro.municipio);
+  var dataServico = normalizarDataServicoDuplicidade_(registro.dataServico);
+  return [nome, idade, municipio, dataServico].join('|');
+}
+
+function contarCamposPreenchidosDuplicidade_(registro) {
+  var total = 0;
+  Object.keys(registro || {}).forEach(function (chave) {
+    if (chave === '_meta') return;
+    if (limparTexto(registro[chave])) total += 1;
+  });
+  return total;
+}
+
+function garantirColunasDuplicidadeCasos_(abaCasos, cabecalho) {
+  var colunas = ['assinaturaCaso','duplicadoDe','statusDuplicidade','dataAnaliseDuplicidade','observacaoDuplicidade'];
+  var atual = cabecalho.slice();
+  colunas.forEach(function (coluna) {
+    if (atual.indexOf(coluna) === -1) {
+      abaCasos.getRange(1, atual.length + 1).setValue(coluna);
+      atual.push(coluna);
+      Logger.log('SANEAMENTO_DUPLICADOS coluna adicionada: ' + coluna);
+    }
+  });
+  return atual;
+}
+
+function analisarDuplicadosCasos_() {
+  garantirEstruturaCabineVerde_();
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', schema.CASOS);
+  var cabecalho = garantirColunasDaEstrutura(abaCasos, schema.CASOS);
+  cabecalho = garantirColunasDuplicidadeCasos_(abaCasos, cabecalho);
+  var totalRegistros = Math.max(abaCasos.getLastRow() - 1, 0);
+  if (!totalRegistros) {
+    var vazio = { totalRegistrosAnalisados: 0, totalGruposDuplicados: 0, totalRegistrosDuplicados: 0, grupos: [] };
+    Logger.log('SANEAMENTO_DUPLICADOS sem registros para análise.');
+    return vazio;
+  }
+
+  var dados = abaCasos.getRange(2, 1, totalRegistros, abaCasos.getLastColumn()).getValues();
+  var gruposPorAssinatura = {};
+  dados.forEach(function (linha, idx) {
+    var registro = {};
+    cabecalho.forEach(function (coluna, cidx) { registro[coluna] = linha[cidx]; });
+    var assinatura = montarAssinaturaCasoDuplicidade_(registro);
+    if (!gruposPorAssinatura[assinatura]) gruposPorAssinatura[assinatura] = [];
+    gruposPorAssinatura[assinatura].push({
+      linhaPlanilha: idx + 2,
+      idCaso: limparTexto(registro.idCaso),
+      nomeCompletoDesaparecido: limparTexto(registro.nomeCompletoDesaparecido),
+      idade: limparTexto(registro.idade),
+      municipio: limparTexto(registro.municipio),
+      dataServico: limparTexto(registro.dataServico),
+      talaoPMESP: limparTexto(registro.talaoPMESP),
+      talaoBopm: limparTexto(registro.talaoBopm),
+      preenchimento: contarCamposPreenchidosDuplicidade_(registro),
+      dataHoraRegistro: limparTexto(registro.dataHoraRegistro),
+      assinaturaCaso: assinatura
+    });
+  });
+
+  var grupos = [];
+  Object.keys(gruposPorAssinatura).forEach(function (assinatura) {
+    var itens = gruposPorAssinatura[assinatura];
+    if (!itens || itens.length < 2 || !assinatura.replace(/\|/g, '')) return;
+    itens.sort(function (a, b) {
+      var aTemTalao = a.talaoPMESP || a.talaoBopm ? 1 : 0;
+      var bTemTalao = b.talaoPMESP || b.talaoBopm ? 1 : 0;
+      if (bTemTalao !== aTemTalao) return bTemTalao - aTemTalao;
+      if (b.preenchimento !== a.preenchimento) return b.preenchimento - a.preenchimento;
+      var dataA = new Date(a.dataHoraRegistro || '9999-12-31T23:59:59Z').getTime();
+      var dataB = new Date(b.dataHoraRegistro || '9999-12-31T23:59:59Z').getTime();
+      return dataA - dataB;
+    });
+    var principal = itens[0];
+    var duplicados = itens.slice(1);
+    grupos.push({ assinaturaCaso: assinatura, principal: principal, duplicados: duplicados });
+  });
+
+  var totalDuplicados = grupos.reduce(function (acc, g) { return acc + g.duplicados.length; }, 0);
+  var relatorio = {
+    totalRegistrosAnalisados: totalRegistros,
+    totalGruposDuplicados: grupos.length,
+    totalRegistrosDuplicados: totalDuplicados,
+    grupos: grupos.map(function (g) {
+      return {
+        assinaturaCaso: g.assinaturaCaso,
+        idCasoPrincipal: g.principal.idCaso,
+        idsDuplicados: g.duplicados.map(function (d) { return d.idCaso; }),
+        nome: g.principal.nomeCompletoDesaparecido,
+        idade: g.principal.idade,
+        municipio: g.principal.municipio,
+        dataServico: g.principal.dataServico
+      };
+    })
+  };
+  Logger.log('SANEAMENTO_DUPLICADOS_ANALISE ' + JSON.stringify({ totalRegistros: totalRegistros, grupos: relatorio.totalGruposDuplicados, duplicados: totalDuplicados }));
+  return relatorio;
+}
+
+function marcarDuplicadosCasos_(opcoes) {
+  var cfg = opcoes && typeof opcoes === 'object' ? opcoes : {};
+  if (cfg.simulacao) {
+    var simulacao = analisarDuplicadosCasos_();
+    Logger.log('SANEAMENTO_DUPLICADOS_MARCACAO_SIMULACAO ' + JSON.stringify(simulacao));
+    return { simulacao: true, relatorio: simulacao };
+  }
+  var relatorio = analisarDuplicadosCasos_();
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', schema.CASOS);
+  var cabecalho = garantirColunasDuplicidadeCasos_(abaCasos, garantirColunasDaEstrutura(abaCasos, schema.CASOS));
+  var idxAss = cabecalho.indexOf('assinaturaCaso') + 1;
+  var idxDupDe = cabecalho.indexOf('duplicadoDe') + 1;
+  var idxStatus = cabecalho.indexOf('statusDuplicidade') + 1;
+  var idxData = cabecalho.indexOf('dataAnaliseDuplicidade') + 1;
+  var idxObs = cabecalho.indexOf('observacaoDuplicidade') + 1;
+  var agora = formatarDataHora(new Date());
+
+  relatorio.grupos.forEach(function (grupo) {
+    var mapa = grupo;
+    // precisa localizar linhas por idCaso para marcação segura
+    var encontrados = buscarCaso_({ idCaso: mapa.idCasoPrincipal }).slice(0, 1);
+    if (encontrados.length) {
+      var linhaPrincipal = localizarCasoPorId(abaCasos, mapa.idCasoPrincipal, cabecalho);
+      if (linhaPrincipal > 1) {
+        abaCasos.getRange(linhaPrincipal, idxAss).setValue(grupo.assinaturaCaso);
+        abaCasos.getRange(linhaPrincipal, idxStatus).setValue('principal');
+        abaCasos.getRange(linhaPrincipal, idxDupDe).setValue('');
+        abaCasos.getRange(linhaPrincipal, idxData).setValue(agora);
+        abaCasos.getRange(linhaPrincipal, idxObs).setValue('Registro principal definido por saneamento automático');
+      }
+    }
+    (grupo.idsDuplicados || []).forEach(function (idDup) {
+      var linhaDup = localizarCasoPorId(abaCasos, idDup, cabecalho);
+      if (linhaDup > 1) {
+        abaCasos.getRange(linhaDup, idxAss).setValue(grupo.assinaturaCaso);
+        abaCasos.getRange(linhaDup, idxStatus).setValue('duplicado');
+        abaCasos.getRange(linhaDup, idxDupDe).setValue(mapa.idCasoPrincipal);
+        abaCasos.getRange(linhaDup, idxData).setValue(agora);
+        abaCasos.getRange(linhaDup, idxObs).setValue('Duplicado identificado por saneamento automático');
+      }
+    });
+  });
+  Logger.log('SANEAMENTO_DUPLICADOS_MARCACAO_EXECUTADA ' + JSON.stringify({ grupos: relatorio.totalGruposDuplicados, duplicados: relatorio.totalRegistrosDuplicados }));
+  return { simulacao: false, relatorio: relatorio };
+}
+
+function gerarRelatorioDuplicadosCasos_() {
+  var relatorio = analisarDuplicadosCasos_();
+  Logger.log('SANEAMENTO_DUPLICADOS_RELATORIO ' + JSON.stringify(relatorio));
+  return relatorio;
 }
 
 function doGet(e) {
@@ -524,13 +723,23 @@ function doPost(e) {
       visualizarFotoDesaparecido: 'VISUALIZAR_FOTO_INTERNO',
       validarFotoDesaparecido: 'VALIDAR_REJEITAR_FOTO',
       editarCasoControlado: 'EDITAR_CASO_CONTROLADO',
-      listarPerfilOperador: 'GERIR_OPERADORES'
+      listarPerfilOperador: 'GERIR_OPERADORES',
+      gerarBackupBase: 'GERIR_OPERADORES',
+      restaurarBackupBase: 'GERIR_OPERADORES',
+      listarCasosPorStatus: 'REGISTRAR_CASO',
+      gerarRelatorioCasos: 'REGISTRAR_CASO',
+      analisarDuplicadosCasos: 'REGISTRAR_CASO',
+      marcarDuplicadosCasos: 'REGISTRAR_CASO',
+      gerarRelatorioDuplicadosCasos: 'REGISTRAR_CASO'
     };
     var validacaoAcao = validarPermissaoAcao_(operadorAtual, mapaPermissao[action] || 'REGISTRAR_CASO');
     if (!validacaoAcao.permitido) {
       registrarLogAcessoOperador_(SpreadsheetApp.getActiveSpreadsheet(), "ACESSO_NEGADO", "SEM_PERMISSAO_ACAO", "Ação bloqueada: " + acao + "; motivo=" + validacaoAcao.motivo, operadorAtual.email);
       throw new Error("Ação não permitida para o perfil do operador.");
     }
+    var perfilAcao = normalizarPerfilOperador_(operadorAtual && operadorAtual.perfil);
+    if (action === 'marcarDuplicadosCasos' && perfilAcao !== 'ADMIN') throw new Error('Apenas ADMIN pode marcar duplicados.');
+    if ((action === 'analisarDuplicadosCasos' || action === 'gerarRelatorioDuplicadosCasos') && ['ADMIN','SUPERVISOR'].indexOf(perfilAcao) === -1) throw new Error('Somente ADMIN ou SUPERVISOR podem analisar/gerar relatório de duplicados.');
     if (action === 'visualizarFotoDesaparecido') {
       var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa, body.motivoAcessoFoto);
       return criarRespostaJson({ ok: true, data: { message: 'Visualização autorizada', conteudoBase64: respostaFoto.conteudoBase64, mimeType: respostaFoto.mimeType, idCaso: respostaFoto.idCaso, idFoto: respostaFoto.idFoto } });
@@ -609,6 +818,13 @@ function doPost(e) {
     if (action === 'gerarRelatorioTextoSIOPM') return criarRespostaJson({ ok: true, data: { relatorio: gerarRelatorioTextoSIOPM_(body.idCaso || (body.payload && body.payload.idCaso)) } });
     if (action === 'gerarRelatorioOperacionalComImagem') return criarRespostaJson({ ok: true, data: gerarRelatorioOperacionalComImagem_(body.dataReferencia) });
     if (action === 'listarPerfilOperador') return criarRespostaJson({ ok: true, data: operadorAtual });
+    if (action === 'gerarBackupBase') return criarRespostaJson({ ok: true, data: gerarBackupBase_(operadorAtual) });
+    if (action === 'restaurarBackupBase') return criarRespostaJson({ ok: true, data: restaurarBackupBase_(body.backup, operadorAtual) });
+    if (action === 'listarCasosPorStatus') return criarRespostaJson({ ok: true, data: listarCasosPorStatus_(body.status) });
+    if (action === 'gerarRelatorioCasos') return criarRespostaJson({ ok: true, data: gerarRelatorioCasos_(body.status) });
+    if (action === 'analisarDuplicadosCasos') return criarRespostaJson({ ok: true, data: analisarDuplicadosCasos_() });
+    if (action === 'marcarDuplicadosCasos') return criarRespostaJson({ ok: true, data: marcarDuplicadosCasos_({ simulacao: !!body.simulacao }) });
+    if (action === 'gerarRelatorioDuplicadosCasos') return criarRespostaJson({ ok: true, data: gerarRelatorioDuplicadosCasos_() });
 
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
     if (action === 'salvarAuditoriaCaso') {
@@ -628,6 +844,9 @@ function doPost(e) {
       garantirEstruturaCabineVerde_();
     }
 
+    if (body.payload && typeof body.payload === 'object') body.payload = normalizarTalaoPayload(body.payload);
+    if (body.dados && typeof body.dados === 'object') body.dados = normalizarTalaoPayload(body.dados);
+    body = normalizarTalaoPayload(body);
     var registros = body.abas && Array.isArray(body.abas) ? body.abas : [body];
     var idCaso = limparTexto((body.payload && body.payload.idCaso) || (body.dados && body.dados.idCaso));
     var talao = limparTexto((body.payload && body.payload.talaoPMESP) || (body.dados && body.dados.talaoPMESP) || body.talaoPMESP);
@@ -638,9 +857,14 @@ function doPost(e) {
     }
     registrarLogTecnico(planilhaLogs, { etapa: 'GRAVACAO_INICIADA', ok: true, mensagem: 'Iniciando persistência em abas de destino', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
 
+    var resultadoPersistencia = { idCaso: idCaso, action: 'updated', linha: -1 };
     registros.forEach(function (registro) {
-      persistirRegistro(planilha, registro);
+      var parcial = persistirRegistro(planilha, registro) || {};
+      if (parcial.idCaso) resultadoPersistencia.idCaso = parcial.idCaso;
+      if (parcial.action) resultadoPersistencia.action = parcial.action;
+      if (parcial.linha) resultadoPersistencia.linha = parcial.linha;
     });
+    idCaso = limparTexto(resultadoPersistencia.idCaso || idCaso);
 
     if (body.foto && body.foto.base64) {
       salvarFotoDesaparecido_({
@@ -665,7 +889,7 @@ function doPost(e) {
     limparFotosTemporarias_();
     registrarLogAcessoOperador_(planilha, 'GRAVACAO_CONCLUIDA', 'SUCESSO', 'Registros persistidos com sucesso.', operadorAtual.email, { perfil: operadorAtual.perfil, acaoExecutada: action, talaoPMESP: talao });
     registrarLogTecnico(planilhaLogs || planilha, { etapa: 'GRAVACAO_SUCESSO', ok: true, mensagem: 'Registros persistidos com sucesso', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
-    return criarRespostaJson({ ok: true, data: { action: 'salvarCaso', idCaso: idCaso, message: 'Gravação multiabas concluída' } });
+    return criarRespostaJson({ ok: true, data: { action: resultadoPersistencia.action, idCaso: idCaso, linha: resultadoPersistencia.linha, message: 'Gravação multiabas concluída' } });
   } catch (err) {
     var mensagemErro = err && err.message ? err.message : String(err);
     registrarLogTecnico(planilhaLogs, { etapa: 'ERRO_GRAVACAO_PLANILHA', ok: false, mensagem: mensagemErro, rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
@@ -701,7 +925,9 @@ function atualizarFotoCaso_(payload) {
 function validarOperadorPayloadOuSessao_(payload) {
   var emailGoogle = limparTexto(Session.getActiveUser().getEmail()).toLowerCase();
   var emailOperador = limparTexto(payload && payload.operadorEmail).toLowerCase() || emailGoogle;
+  Logger.log('DEBUG_AUTH validarOperadorPayloadOuSessao_ action=%s emailPayload=%s emailSessao=%s operadorNome=%s operadorPerfil=%s', limparTexto(payload && payload.action), emailOperador, emailGoogle, limparTexto(payload && payload.operadorNome), limparTexto(payload && payload.operadorPerfil));
   var validacao = validarOperador_(emailOperador, payload || {});
+  Logger.log('DEBUG_AUTH resultadoValidacao ok=%s autorizado=%s motivo=%s operadorEmail=%s operadorPerfil=%s', !!validacao.ok, !!validacao.autorizado, limparTexto(validacao.motivo), limparTexto(validacao.operador && validacao.operador.email), limparTexto(validacao.operador && validacao.operador.perfil));
   if (!validacao.ok || !validacao.autorizado) {
     Logger.log("BLOQUEIO DE EXECUÇÃO");
     throw new Error('Operador não validado ou não autorizado.');
@@ -828,6 +1054,60 @@ function gerarRelatorioSeguranca_(resultado) {
   ]);
 }
 
+function normalizarTalaoPayload(dados) {
+  var fonte = dados && typeof dados === 'object' ? dados : {};
+  var talao = limparTexto(fonte.talaoPMESP || fonte.talaoBopm || fonte.talao || fonte.numeroTalao || '');
+  fonte.talaoPMESP = talao;
+  fonte.talaoBopm = talao;
+  return fonte;
+}
+
+function gerarAssinaturaCaso_(dados) {
+  var nome = normalizarTextoAssinatura_(dados && (dados.nomeCompletoDesaparecido || dados.nome));
+  var idade = limparTexto(dados && dados.idade);
+  var municipio = normalizarTextoAssinatura_(dados && dados.municipio);
+  var dataServico = limparTexto(dados && (dados.dataServico || dados.dataHoraRegistro || dados.dataHoraUltimaVisualizacao));
+  return [nome, idade, municipio, dataServico].join('|');
+}
+
+function normalizarTextoAssinatura_(valor) {
+  return limparTexto(valor).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function localizarLinhaCaso_(sheetCasos, cabecalhoAtual, dados) {
+  var idCaso = limparTexto(dados && dados.idCaso);
+  var talaoPMESP = limparTexto(dados && dados.talaoPMESP);
+  var talaoBopm = limparTexto(dados && dados.talaoBopm);
+  var numeroTalao = limparTexto(dados && (dados.numeroTalao || dados.talao));
+
+  var linhaId = idCaso ? localizarCasoPorIdCaso(sheetCasos, idCaso, cabecalhoAtual) : -1;
+  if (linhaId > 1) return { linha: linhaId, criterio: 'idCaso' };
+
+  var linhaTalao = talaoPMESP ? localizarCasoPorTalaoPMESP(sheetCasos, talaoPMESP, cabecalhoAtual) : -1;
+  if (linhaTalao > 1) return { linha: linhaTalao, criterio: 'talaoPMESP' };
+
+  if (talaoBopm) {
+    var linhaBopm = encontrarLinhaPorColuna(sheetCasos, talaoBopm, 'talaoBopm', cabecalhoAtual);
+    if (linhaBopm > 1) return { linha: linhaBopm, criterio: 'talaoBopm' };
+  }
+
+  if (numeroTalao) {
+    var linhaNumero = encontrarLinhaPorColuna(sheetCasos, numeroTalao, 'numeroTalao', cabecalhoAtual);
+    if (linhaNumero > 1) return { linha: linhaNumero, criterio: 'numeroTalao' };
+  }
+
+  var assinatura = gerarAssinaturaCaso_(dados);
+  if (!assinatura || assinatura === '|||') return { linha: -1, criterio: '' };
+  var idxAssinatura = cabecalhoAtual.indexOf('assinaturaCaso');
+  if (idxAssinatura >= 0 && sheetCasos.getLastRow() > 1) {
+    var assinaturas = sheetCasos.getRange(2, idxAssinatura + 1, sheetCasos.getLastRow() - 1, 1).getValues();
+    for (var i = 0; i < assinaturas.length; i += 1) {
+      if (limparTexto(assinaturas[i][0]) === assinatura) return { linha: i + 2, criterio: 'assinaturaCaso' };
+    }
+  }
+  return { linha: -1, criterio: '' };
+}
+
 function persistirRegistro(planilha, registro) {
   Logger.log("PERSISTIR_REGISTRO_OFICIAL_ATIVO");
   Logger.log('DEBUG_FLUXO_SALVARCASO: persistirRegistro entrada=' + JSON.stringify({
@@ -879,12 +1159,26 @@ function persistirRegistro(planilha, registro) {
     Logger.log("GRAVANDO CASO:");
     Logger.log(registro);
     var registroPorColuna = mapearPorColuna(colunas, valoresPorSchema);
+    registroPorColuna = normalizarTalaoPayload(registroPorColuna);
     registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
     var modoRegistro = limparTexto((registro.payload && registro.payload.modo) || registro.modo || '').toLowerCase();
-    var linhaPorIdCaso = localizarCasoPorIdCaso(sheetCasos, idCaso, cabecalhoAtual);
-    var linhaPorTalaoPMESP = localizarCasoPorTalaoPMESP(sheetCasos, talaoPMESPRecebido, cabecalhoAtual);
+    var resultadoLocalizacao = localizarLinhaCaso_(sheetCasos, cabecalhoAtual, registroPorColuna);
+    var linhaPorIdCaso = idCaso ? localizarCasoPorIdCaso(sheetCasos, idCaso, cabecalhoAtual) : -1;
+    var linhaPorTalaoPMESP = talaoPMESPRecebido ? localizarCasoPorTalaoPMESP(sheetCasos, talaoPMESPRecebido, cabecalhoAtual) : -1;
+    var linhaAlvo = resultadoLocalizacao.linha;
+    if (linhaAlvo > 1 && !idCaso) {
+      var idxIdCasoAtual = cabecalhoAtual.indexOf('idCaso');
+      if (idxIdCasoAtual >= 0) {
+        idCaso = limparTexto(sheetCasos.getRange(linhaAlvo, idxIdCasoAtual + 1).getValue());
+        registroPorColuna.idCaso = idCaso;
+      }
+    }
+    if (!idCaso) idCaso = 'CV-' + Utilities.getUuid().slice(0, 8).toUpperCase();
+    registroPorColuna.idCaso = idCaso;
+    registroPorColuna.dataHoraAtualizacao = formatarDataHora(new Date());
+    registroPorColuna.assinaturaCaso = gerarAssinaturaCaso_(registroPorColuna);
 
     validarConsistenciaCaso(planilha, {
       idCaso: idCaso,
@@ -897,8 +1191,8 @@ function persistirRegistro(planilha, registro) {
       return normalizarValorPlanilha(registroPorColuna[nomeColuna]);
     });
 
-    if (linhaPorIdCaso > 1) {
-      sheetCasos.getRange(linhaPorIdCaso, 1, 1, linhaFinal.length).setValues([linhaFinal]);
+    if (linhaAlvo > 1) {
+      sheetCasos.getRange(linhaAlvo, 1, 1, linhaFinal.length).setValues([linhaFinal]);
       if (modoRegistro === 'edicao') {
         registrarEventoOperacional_(planilha, idCaso, 'EDICAO_CASO', {
           idCaso: idCaso,
@@ -907,11 +1201,7 @@ function persistirRegistro(planilha, registro) {
           dataHora: formatarDataHora(new Date())
         });
       }
-      return;
-    }
-
-    if (modoRegistro === 'edicao') {
-      throw new Error('Modo edição requer idCaso existente.');
+      return { idCaso: idCaso, action: 'updated', linha: linhaAlvo };
     }
 
     sheetCasos.appendRow(linhaFinal);
@@ -922,11 +1212,12 @@ function persistirRegistro(planilha, registro) {
       dataHora: formatarDataHora(new Date()),
       statusInicial: limparTexto(registroPorColuna.statusCaso) || 'Em triagem'
     });
-    return;
+    return { idCaso: idCaso, action: 'created', linha: sheetCasos.getLastRow() };
   }
 
   var sheet = garantirAbaComCabecalho(planilha, aba, colunasEstrutura.length ? colunasEstrutura : colunas);
   sheet.appendRow(valores);
+  return { action: 'created', linha: sheet.getLastRow() };
 }
 
 function executarAuditoriaHeaderCasos() {
@@ -1388,4 +1679,69 @@ function auditarELimparCasosSeguro_(dryRun) {
   relatorio.linhasOriginais = abaOriginal.getLastRow();
   relatorio.linhasMigradas = ss.getSheetByName('CASOS').getLastRow();
   return relatorio;
+}
+
+function listarCasosPorStatus_(status) {
+  var casos = listarCasosComProtecao_({ perfil: 'ADMIN' });
+  var alvo = limparTexto(status).toLowerCase();
+  return casos.filter(function (caso) {
+    var statusCaso = limparTexto(caso.statusCaso).toLowerCase();
+    if (alvo === 'desap') return statusCaso === 'desap' || statusCaso.indexOf('busca') >= 0 || statusCaso.indexOf('desap') >= 0;
+    if (alvo === 'loc') return statusCaso === 'loc' || statusCaso.indexOf('local') >= 0 || statusCaso.indexOf('encerr') >= 0;
+    return true;
+  });
+}
+
+function gerarRelatorioCasos_(status) {
+  var casos = listarCasosPorStatus_(status);
+  return {
+    status: limparTexto(status),
+    total: casos.length,
+    casos: casos
+  };
+}
+
+function gerarBackupBase_(operadorAtual) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var abas = ['CASOS', 'AUDITORIAS', 'EVENTOS_CASO', 'LOGS'];
+  var dadosAbas = abas.map(function (nomeAba) {
+    var aba = planilha.getSheetByName(nomeAba);
+    if (!aba) return { nome: nomeAba, colunas: [], registros: [] };
+    var valores = aba.getDataRange().getValues();
+    if (!valores.length) return { nome: nomeAba, colunas: [], registros: [] };
+    var colunas = valores[0].map(limparTexto);
+    var registros = valores.slice(1).map(function (linha) {
+      var item = {};
+      colunas.forEach(function (coluna, idx) { item[coluna] = normalizarValorPlanilha(linha[idx]); });
+      return item;
+    });
+    return { nome: nomeAba, colunas: colunas, registros: registros };
+  });
+  var totalCasos = dadosAbas.reduce(function (acc, aba) { return aba.nome === 'CASOS' ? aba.registros.length : acc; }, 0);
+  return {
+    meta: {
+      data: formatarDataHora(new Date()),
+      operador: { email: limparTexto(operadorAtual.email), nome: limparTexto(operadorAtual.nome), perfil: limparTexto(operadorAtual.perfil) },
+      versao: 'cabine-verde-backup-oficial-v1',
+      quantidadeCasos: totalCasos
+    },
+    schema: schema,
+    abas: dadosAbas
+  };
+}
+
+function restaurarBackupBase_(backup, operadorAtual) {
+  if (!backup || !backup.meta || !Array.isArray(backup.abas)) {
+    throw new Error('Backup inválido.');
+  }
+  registrarLogAcessoOperador_(
+    SpreadsheetApp.getActiveSpreadsheet(),
+    'RESTAURACAO_BACKUP_BASE',
+    'PENDENTE_VALIDACAO_MANUAL',
+    'Solicitação de restauração recebida. Fluxo automático bloqueado por segurança operacional.',
+    operadorAtual.email,
+    { perfil: operadorAtual.perfil, origem: 'auditoria.html' }
+  );
+  return { restaurado: false, bloqueado: true, motivo: 'Restauração automática desativada por segurança. Solicitação registrada em LOGS.' };
 }
