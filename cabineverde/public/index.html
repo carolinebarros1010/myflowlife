@@ -9,7 +9,22 @@
   <link rel="stylesheet" href="./styles/main.css" />
 </head>
 <body>
-  <div id="app"></div>
-  <script type="module" src="./js/app.js?v=20260428-arvore-decisao"></script>
+  <div id="cv-splash" class="cv-splash" aria-live="polite">
+    <div class="cv-splash__glow cv-splash__glow--top"></div>
+    <div class="cv-splash__glow cv-splash__glow--bottom"></div>
+    <div class="cv-splash__content">
+      <div class="cv-splash__logo" aria-hidden="true">
+        <span class="cv-splash__logo-core">CV</span>
+      </div>
+      <h1 class="cv-splash__title">Cabine Verde</h1>
+      <p class="cv-splash__subtitle">Esperança</p>
+    </div>
+    <div class="cv-splash__loading" aria-label="Carregando aplicativo">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <div id="app" class="is-hidden" aria-hidden="true"></div>
+  <script type="module" src="./js/app.js?v=20260507-splash-screen"></script>
 </body>
 </html>

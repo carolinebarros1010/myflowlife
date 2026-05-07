@@ -30,6 +30,31 @@ import {
 } from './core.js';
 
 const app = document.getElementById('app');
+
+const splashScreen = document.getElementById('cv-splash');
+const revelarAplicativo = () => {
+  if (!app) return;
+  app.classList.remove('is-hidden');
+  app.setAttribute('aria-hidden', 'false');
+};
+
+const iniciarSplashScreen = () => {
+  if (!splashScreen) {
+    revelarAplicativo();
+    return;
+  }
+
+  const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tempoSplash = reduzirMovimento ? 900 : 2800;
+
+  window.setTimeout(() => {
+    splashScreen.classList.add('is-exiting');
+    revelarAplicativo();
+    window.setTimeout(() => splashScreen.remove(), reduzirMovimento ? 200 : 900);
+  }, tempoSplash);
+};
+
+iniciarSplashScreen();
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
 const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
 const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
