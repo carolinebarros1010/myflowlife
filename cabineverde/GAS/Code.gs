@@ -437,7 +437,206 @@ function normalizarDataChave_(entrada) {
 function obterCasoCompleto_(filtro) {
   var resultados = buscarCaso_(filtro || {});
   if (!Array.isArray(resultados) || !resultados.length) return null;
-  return resultados[0];
+  var caso = resultados[0];
+  if (limparTexto(caso.statusDuplicidade).toLowerCase() === 'duplicado' && limparTexto(caso.duplicadoDe)) {
+    var principal = buscarCaso_({ idCaso: limparTexto(caso.duplicadoDe) });
+    if (Array.isArray(principal) && principal.length) return principal[0];
+  }
+  return caso;
+}
+
+
+
+function normalizarTextoDuplicidade_(valor) {
+  var texto = limparTexto(valor).toLowerCase();
+  if (!texto) return '';
+  texto = texto.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  texto = texto.replace(/\s+/g, ' ').trim();
+  return texto;
+}
+
+function normalizarMunicipioDuplicidade_(municipio) {
+  var texto = normalizarTextoDuplicidade_(municipio);
+  if (!texto) return '';
+  var mapa = {
+    'sao paulo - sp': 'sao paulo',
+    'sao paulo/sp': 'sao paulo',
+    's p': 'sao paulo',
+    'sp': 'sao paulo'
+  };
+  return mapa[texto] || texto;
+}
+
+function normalizarDataServicoDuplicidade_(valor) {
+  if (Object.prototype.toString.call(valor) === '[object Date]' && !isNaN(valor.getTime())) {
+    return Utilities.formatDate(valor, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyy-MM-dd');
+  }
+  var texto = limparTexto(valor);
+  if (!texto) return '';
+  var data = new Date(texto);
+  if (!isNaN(data.getTime())) {
+    return Utilities.formatDate(data, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyy-MM-dd');
+  }
+  return normalizarTextoDuplicidade_(texto);
+}
+
+function montarAssinaturaCasoDuplicidade_(registro) {
+  var nome = normalizarTextoDuplicidade_(registro.nomeCompletoDesaparecido);
+  var idade = normalizarTextoDuplicidade_(registro.idade);
+  var municipio = normalizarMunicipioDuplicidade_(registro.municipio);
+  var dataServico = normalizarDataServicoDuplicidade_(registro.dataServico);
+  return [nome, idade, municipio, dataServico].join('|');
+}
+
+function contarCamposPreenchidosDuplicidade_(registro) {
+  var total = 0;
+  Object.keys(registro || {}).forEach(function (chave) {
+    if (chave === '_meta') return;
+    if (limparTexto(registro[chave])) total += 1;
+  });
+  return total;
+}
+
+function garantirColunasDuplicidadeCasos_(abaCasos, cabecalho) {
+  var colunas = ['assinaturaCaso','duplicadoDe','statusDuplicidade','dataAnaliseDuplicidade','observacaoDuplicidade'];
+  var atual = cabecalho.slice();
+  colunas.forEach(function (coluna) {
+    if (atual.indexOf(coluna) === -1) {
+      abaCasos.getRange(1, atual.length + 1).setValue(coluna);
+      atual.push(coluna);
+      Logger.log('SANEAMENTO_DUPLICADOS coluna adicionada: ' + coluna);
+    }
+  });
+  return atual;
+}
+
+function analisarDuplicadosCasos_() {
+  garantirEstruturaCabineVerde_();
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', schema.CASOS);
+  var cabecalho = garantirColunasDaEstrutura(abaCasos, schema.CASOS);
+  cabecalho = garantirColunasDuplicidadeCasos_(abaCasos, cabecalho);
+  var totalRegistros = Math.max(abaCasos.getLastRow() - 1, 0);
+  if (!totalRegistros) {
+    var vazio = { totalRegistrosAnalisados: 0, totalGruposDuplicados: 0, totalRegistrosDuplicados: 0, grupos: [] };
+    Logger.log('SANEAMENTO_DUPLICADOS sem registros para análise.');
+    return vazio;
+  }
+
+  var dados = abaCasos.getRange(2, 1, totalRegistros, abaCasos.getLastColumn()).getValues();
+  var gruposPorAssinatura = {};
+  dados.forEach(function (linha, idx) {
+    var registro = {};
+    cabecalho.forEach(function (coluna, cidx) { registro[coluna] = linha[cidx]; });
+    var assinatura = montarAssinaturaCasoDuplicidade_(registro);
+    if (!gruposPorAssinatura[assinatura]) gruposPorAssinatura[assinatura] = [];
+    gruposPorAssinatura[assinatura].push({
+      linhaPlanilha: idx + 2,
+      idCaso: limparTexto(registro.idCaso),
+      nomeCompletoDesaparecido: limparTexto(registro.nomeCompletoDesaparecido),
+      idade: limparTexto(registro.idade),
+      municipio: limparTexto(registro.municipio),
+      dataServico: limparTexto(registro.dataServico),
+      talaoPMESP: limparTexto(registro.talaoPMESP),
+      talaoBopm: limparTexto(registro.talaoBopm),
+      preenchimento: contarCamposPreenchidosDuplicidade_(registro),
+      dataHoraRegistro: limparTexto(registro.dataHoraRegistro),
+      assinaturaCaso: assinatura
+    });
+  });
+
+  var grupos = [];
+  Object.keys(gruposPorAssinatura).forEach(function (assinatura) {
+    var itens = gruposPorAssinatura[assinatura];
+    if (!itens || itens.length < 2 || !assinatura.replace(/\|/g, '')) return;
+    itens.sort(function (a, b) {
+      var aTemTalao = a.talaoPMESP || a.talaoBopm ? 1 : 0;
+      var bTemTalao = b.talaoPMESP || b.talaoBopm ? 1 : 0;
+      if (bTemTalao !== aTemTalao) return bTemTalao - aTemTalao;
+      if (b.preenchimento !== a.preenchimento) return b.preenchimento - a.preenchimento;
+      var dataA = new Date(a.dataHoraRegistro || '9999-12-31T23:59:59Z').getTime();
+      var dataB = new Date(b.dataHoraRegistro || '9999-12-31T23:59:59Z').getTime();
+      return dataA - dataB;
+    });
+    var principal = itens[0];
+    var duplicados = itens.slice(1);
+    grupos.push({ assinaturaCaso: assinatura, principal: principal, duplicados: duplicados });
+  });
+
+  var totalDuplicados = grupos.reduce(function (acc, g) { return acc + g.duplicados.length; }, 0);
+  var relatorio = {
+    totalRegistrosAnalisados: totalRegistros,
+    totalGruposDuplicados: grupos.length,
+    totalRegistrosDuplicados: totalDuplicados,
+    grupos: grupos.map(function (g) {
+      return {
+        assinaturaCaso: g.assinaturaCaso,
+        idCasoPrincipal: g.principal.idCaso,
+        idsDuplicados: g.duplicados.map(function (d) { return d.idCaso; }),
+        nome: g.principal.nomeCompletoDesaparecido,
+        idade: g.principal.idade,
+        municipio: g.principal.municipio,
+        dataServico: g.principal.dataServico
+      };
+    })
+  };
+  Logger.log('SANEAMENTO_DUPLICADOS_ANALISE ' + JSON.stringify({ totalRegistros: totalRegistros, grupos: relatorio.totalGruposDuplicados, duplicados: totalDuplicados }));
+  return relatorio;
+}
+
+function marcarDuplicadosCasos_(opcoes) {
+  var cfg = opcoes && typeof opcoes === 'object' ? opcoes : {};
+  if (cfg.simulacao) {
+    var simulacao = analisarDuplicadosCasos_();
+    Logger.log('SANEAMENTO_DUPLICADOS_MARCACAO_SIMULACAO ' + JSON.stringify(simulacao));
+    return { simulacao: true, relatorio: simulacao };
+  }
+  var relatorio = analisarDuplicadosCasos_();
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', schema.CASOS);
+  var cabecalho = garantirColunasDuplicidadeCasos_(abaCasos, garantirColunasDaEstrutura(abaCasos, schema.CASOS));
+  var idxAss = cabecalho.indexOf('assinaturaCaso') + 1;
+  var idxDupDe = cabecalho.indexOf('duplicadoDe') + 1;
+  var idxStatus = cabecalho.indexOf('statusDuplicidade') + 1;
+  var idxData = cabecalho.indexOf('dataAnaliseDuplicidade') + 1;
+  var idxObs = cabecalho.indexOf('observacaoDuplicidade') + 1;
+  var agora = formatarDataHora(new Date());
+
+  relatorio.grupos.forEach(function (grupo) {
+    var mapa = grupo;
+    // precisa localizar linhas por idCaso para marcação segura
+    var encontrados = buscarCaso_({ idCaso: mapa.idCasoPrincipal }).slice(0, 1);
+    if (encontrados.length) {
+      var linhaPrincipal = localizarCasoPorId(abaCasos, mapa.idCasoPrincipal, cabecalho);
+      if (linhaPrincipal > 1) {
+        abaCasos.getRange(linhaPrincipal, idxAss).setValue(grupo.assinaturaCaso);
+        abaCasos.getRange(linhaPrincipal, idxStatus).setValue('principal');
+        abaCasos.getRange(linhaPrincipal, idxDupDe).setValue('');
+        abaCasos.getRange(linhaPrincipal, idxData).setValue(agora);
+        abaCasos.getRange(linhaPrincipal, idxObs).setValue('Registro principal definido por saneamento automático');
+      }
+    }
+    (grupo.idsDuplicados || []).forEach(function (idDup) {
+      var linhaDup = localizarCasoPorId(abaCasos, idDup, cabecalho);
+      if (linhaDup > 1) {
+        abaCasos.getRange(linhaDup, idxAss).setValue(grupo.assinaturaCaso);
+        abaCasos.getRange(linhaDup, idxStatus).setValue('duplicado');
+        abaCasos.getRange(linhaDup, idxDupDe).setValue(mapa.idCasoPrincipal);
+        abaCasos.getRange(linhaDup, idxData).setValue(agora);
+        abaCasos.getRange(linhaDup, idxObs).setValue('Duplicado identificado por saneamento automático');
+      }
+    });
+  });
+  Logger.log('SANEAMENTO_DUPLICADOS_MARCACAO_EXECUTADA ' + JSON.stringify({ grupos: relatorio.totalGruposDuplicados, duplicados: relatorio.totalRegistrosDuplicados }));
+  return { simulacao: false, relatorio: relatorio };
+}
+
+function gerarRelatorioDuplicadosCasos_() {
+  var relatorio = analisarDuplicadosCasos_();
+  Logger.log('SANEAMENTO_DUPLICADOS_RELATORIO ' + JSON.stringify(relatorio));
+  return relatorio;
 }
 
 function doGet(e) {
@@ -528,13 +727,19 @@ function doPost(e) {
       gerarBackupBase: 'GERIR_OPERADORES',
       restaurarBackupBase: 'GERIR_OPERADORES',
       listarCasosPorStatus: 'REGISTRAR_CASO',
-      gerarRelatorioCasos: 'REGISTRAR_CASO'
+      gerarRelatorioCasos: 'REGISTRAR_CASO',
+      analisarDuplicadosCasos: 'REGISTRAR_CASO',
+      marcarDuplicadosCasos: 'REGISTRAR_CASO',
+      gerarRelatorioDuplicadosCasos: 'REGISTRAR_CASO'
     };
     var validacaoAcao = validarPermissaoAcao_(operadorAtual, mapaPermissao[action] || 'REGISTRAR_CASO');
     if (!validacaoAcao.permitido) {
       registrarLogAcessoOperador_(SpreadsheetApp.getActiveSpreadsheet(), "ACESSO_NEGADO", "SEM_PERMISSAO_ACAO", "Ação bloqueada: " + acao + "; motivo=" + validacaoAcao.motivo, operadorAtual.email);
       throw new Error("Ação não permitida para o perfil do operador.");
     }
+    var perfilAcao = normalizarPerfilOperador_(operadorAtual && operadorAtual.perfil);
+    if (action === 'marcarDuplicadosCasos' && perfilAcao !== 'ADMIN') throw new Error('Apenas ADMIN pode marcar duplicados.');
+    if ((action === 'analisarDuplicadosCasos' || action === 'gerarRelatorioDuplicadosCasos') && ['ADMIN','SUPERVISOR'].indexOf(perfilAcao) === -1) throw new Error('Somente ADMIN ou SUPERVISOR podem analisar/gerar relatório de duplicados.');
     if (action === 'visualizarFotoDesaparecido') {
       var respostaFoto = visualizarFotoDesaparecido_(body.idFoto, body.operador, body.justificativa, body.motivoAcessoFoto);
       return criarRespostaJson({ ok: true, data: { message: 'Visualização autorizada', conteudoBase64: respostaFoto.conteudoBase64, mimeType: respostaFoto.mimeType, idCaso: respostaFoto.idCaso, idFoto: respostaFoto.idFoto } });
@@ -617,6 +822,9 @@ function doPost(e) {
     if (action === 'restaurarBackupBase') return criarRespostaJson({ ok: true, data: restaurarBackupBase_(body.backup, operadorAtual) });
     if (action === 'listarCasosPorStatus') return criarRespostaJson({ ok: true, data: listarCasosPorStatus_(body.status) });
     if (action === 'gerarRelatorioCasos') return criarRespostaJson({ ok: true, data: gerarRelatorioCasos_(body.status) });
+    if (action === 'analisarDuplicadosCasos') return criarRespostaJson({ ok: true, data: analisarDuplicadosCasos_() });
+    if (action === 'marcarDuplicadosCasos') return criarRespostaJson({ ok: true, data: marcarDuplicadosCasos_({ simulacao: !!body.simulacao }) });
+    if (action === 'gerarRelatorioDuplicadosCasos') return criarRespostaJson({ ok: true, data: gerarRelatorioDuplicadosCasos_() });
 
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
     if (action === 'salvarAuditoriaCaso') {
