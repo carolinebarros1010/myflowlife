@@ -413,7 +413,7 @@ const render = () => {
             <h3>Fechamento da Triagem</h3>
             <p class="cv-section-helper">Revise os dados e avance para a decisão operacional.</p>
           </section>
-          <div class="cv-inline-actions">
+          <div class="cv-inline-actions cv-step-header-actions" role="group" aria-label="Navegação entre etapas da triagem">
             <button type="button" class="cv-button cv-button--ghost" id="passoVoltarBtn">Voltar</button>
             <button type="button" class="cv-button cv-button--secondary" id="passoProximoBtn">Próximo</button>
           </div>
