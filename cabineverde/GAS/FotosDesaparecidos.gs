@@ -27,7 +27,7 @@ function salvarFotoDesaparecido_(dadosFoto) {
 
   var idCaso = limparTexto(dadosFoto && dadosFoto.idCaso);
   var talaoPMESP = limparTexto(dadosFoto && dadosFoto.talaoPMESP);
-  if (!idCaso) throw new Error('Upload bloqueado: idCaso obrigatório.');
+  if (!idCaso || idCaso.indexOf('CV-') === 0) throw new Error('Upload bloqueado: idCaso temporário inválido.');
   if (!talaoPMESP) throw new Error('Upload bloqueado: talaoPMESP obrigatório.');
 
   var mimeType = limparTexto(dadosFoto && dadosFoto.mimeType) || 'image/jpeg';

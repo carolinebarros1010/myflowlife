@@ -212,6 +212,7 @@ let idCasoEdicaoAtual = '';
 let casoOriginalEdicao: Record<string, unknown> | null = null;
 let urlFotoUploadAtual = '';
 let referenciaCasoSalvo: { idCaso: string; talaoPMESP: string } | null = null;
+let assinaturaUploadFotoConcluido = '';
 
 
 const fotoDigitalDisponivelSelecionada = (valor: unknown): boolean => {
@@ -247,10 +248,16 @@ const salvarFotoDepoisDaTriagem = async (): Promise<void> => {
   const fotoSelecionada = arquivoFoto?.files?.[0];
   const idCaso = referenciaCasoSalvo?.idCaso || triagemState.casoCompleto.id;
   const talaoPMESP = referenciaCasoSalvo?.talaoPMESP || triagemState.casoCompleto.talaoPMESP;
-  if (!idCaso && !talaoPMESP) return atualizarStatus('Não foi possível identificar o caso para anexar foto.', true);
+  if (!idCaso) return atualizarStatus('Upload bloqueado: caso ainda sem id definitivo.', true);
+  if (idCaso.startsWith('CV-')) return atualizarStatus('Upload bloqueado: idCaso temporário inválido.', true);
+  if (!talaoPMESP) return atualizarStatus('Não foi possível identificar o talão PMESP para anexar foto.', true);
   if (!fotoSelecionada) return atualizarStatus('Selecione uma foto antes de enviar.', true);
   if (!fotoSelecionada.type.startsWith('image/')) return atualizarStatus('Upload bloqueado: apenas imagens são permitidas.', true);
   if (fotoSelecionada.size > MAX_FOTO_BYTES) return atualizarStatus('Upload bloqueado: imagem excede 5MB.', true);
+  const assinaturaUploadAtual = [idCaso, fotoSelecionada.name, fotoSelecionada.size, fotoSelecionada.lastModified].join(':');
+  if (assinaturaUploadFotoConcluido === assinaturaUploadAtual && urlFotoUploadAtual) {
+    return atualizarStatus('Esta foto já foi enviada para este caso.');
+  }
 
   const upload = await sheetsService.uploadFotoCaso({
     base64: await converterArquivoParaBase64(fotoSelecionada),
@@ -272,6 +279,13 @@ const salvarFotoDepoisDaTriagem = async (): Promise<void> => {
   });
   if (!atualizacao.ok) return atualizarStatus(`Foto enviada, mas não foi possível vincular no caso: ${atualizacao.message}`, true);
   urlFotoUploadAtual = upload.urlFoto;
+  assinaturaUploadFotoConcluido = assinaturaUploadAtual;
+  triagemState.dados.urlFoto = upload.urlFoto;
+  triagemState.dados.linkFoto = upload.urlFoto;
+  const campoUrlFoto = form?.elements.namedItem('urlFoto') as HTMLInputElement | null;
+  const campoLinkFoto = form?.elements.namedItem('linkFoto') as HTMLInputElement | null;
+  if (campoUrlFoto) campoUrlFoto.value = upload.urlFoto;
+  if (campoLinkFoto) campoLinkFoto.value = upload.urlFoto;
   atualizarPreviewFoto(upload.urlFoto);
   atualizarStatusFotoPendente('Foto disponível: Sim');
   atualizarStatus('Foto vinculada ao caso com sucesso.');
@@ -997,6 +1011,7 @@ const configurarUploadFotoDesaparecido = (): void => {
 
   fotoInput.addEventListener('change', async () => {
     const foto = fotoInput.files?.[0];
+    assinaturaUploadFotoConcluido = '';
     if (!foto) {
       status.textContent = 'Nenhuma imagem enviada.';
       atualizarPreviewFoto('');
@@ -1006,32 +1021,12 @@ const configurarUploadFotoDesaparecido = (): void => {
       status.textContent = 'Arquivo inválido. Selecione uma imagem.';
       return;
     }
-    atualizarPreviewFoto(URL.createObjectURL(foto));
-    status.textContent = 'Upload em andamento...';
-    const dadosAtuais = getDadosFormularioAtual();
-    const idCasoAtual = dadosAtuais.id || normalizarTexto(String((form?.elements.namedItem('idCaso') as HTMLInputElement | null)?.value || '')) || `CV-${Date.now()}`;
-    const retorno = await sheetsService.uploadFotoCaso({
-      base64: await converterArquivoParaBase64(foto),
-      mimeType: foto.type,
-      nomeArquivo: foto.name,
-      idCaso: idCasoAtual,
-      talaoPMESP: dadosAtuais.talaoPMESP || '',
-      nomeDesaparecido: dadosAtuais.nomeCompletoDesaparecido,
-      operadorResponsavel: obterOperadorAtual()
-    });
-    if (!retorno.ok || !retorno.urlFoto) {
-      status.textContent = `Falha no upload: ${retorno.message}`;
+    if (foto.size > MAX_FOTO_BYTES) {
+      status.textContent = 'Arquivo inválido. A imagem deve ter até 5MB.';
       return;
     }
-    urlFotoUploadAtual = retorno.urlFoto;
-    const campoUrlFoto = form?.elements.namedItem('urlFoto') as HTMLInputElement | null;
-    const campoLinkFoto = form?.elements.namedItem('linkFoto') as HTMLInputElement | null;
-    if (campoUrlFoto) campoUrlFoto.value = retorno.urlFoto;
-    if (campoLinkFoto) campoLinkFoto.value = retorno.urlFoto;
-    triagemState.dados.urlFoto = retorno.urlFoto;
-    triagemState.dados.linkFoto = retorno.urlFoto;
-    atualizarPreviewFoto(retorno.urlFoto);
-    status.textContent = 'Upload realizado.';
+    atualizarPreviewFoto(URL.createObjectURL(foto));
+    status.textContent = 'Imagem pronta para envio. Clique em Adicionar foto agora.';
   });
 };
 
