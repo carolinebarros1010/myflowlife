@@ -5,6 +5,9 @@ export const renderRecentCasesPanel = (): string => `
     <label>Busca por ID
       <input type="search" id="filter-idCaso" placeholder="Ex.: CV-2026-001" />
     </label>
+    <label>Talão (PMESP/BOPM)
+      <input type="search" id="filter-talao" placeholder="Ex.: 7764 ou PMESP-2026-000123" />
+    </label>
     <label>Status
       <select id="filter-status">
         <option value="">Todos</option>

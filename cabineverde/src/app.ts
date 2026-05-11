@@ -702,16 +702,19 @@ const renderDetalheCaso = (caso: CasoCompleto): void => {
 
 const aplicarFiltros = (): void => {
   const filtroId = (document.getElementById('filter-idCaso') as HTMLInputElement | null)?.value.toLowerCase() || '';
+  const filtroTalao = (document.getElementById('filter-talao') as HTMLInputElement | null)?.value.toLowerCase() || '';
   const filtroStatus = (document.getElementById('filter-status') as HTMLSelectElement | null)?.value || '';
   const filtroRisco = (document.getElementById('filter-risco') as HTMLSelectElement | null)?.value || '';
   const filtroData = (document.getElementById('filter-data') as HTMLInputElement | null)?.value || '';
 
   const casos = listarCasos().filter((caso) => {
     const matchId = !filtroId || caso.id.toLowerCase().includes(filtroId);
+    const talaoCaso = `${caso.talaoPMESP || ''} ${caso.talaoBopm || ''}`.toLowerCase();
+    const matchTalao = !filtroTalao || talaoCaso.includes(filtroTalao);
     const matchStatus = !filtroStatus || caso.statusCaso === filtroStatus;
     const matchRisco = !filtroRisco || caso.classificacaoRisco === filtroRisco;
     const matchData = !filtroData || caso.dataHoraRegistro.startsWith(filtroData);
-    return matchId && matchStatus && matchRisco && matchData;
+    return matchId && matchTalao && matchStatus && matchRisco && matchData;
   });
 
   atualizarLista(casos);
@@ -984,7 +987,7 @@ document.getElementById('case-list-wrapper')?.addEventListener('click', (event) 
   atualizarStatus(`Editando caso ${caso.id}.`);
 });
 
-['filter-idCaso', 'filter-status', 'filter-risco', 'filter-data'].forEach((id) => {
+['filter-idCaso', 'filter-talao', 'filter-status', 'filter-risco', 'filter-data'].forEach((id) => {
   document.getElementById(id)?.addEventListener('input', aplicarFiltros);
   document.getElementById(id)?.addEventListener('change', aplicarFiltros);
 });
