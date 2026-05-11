@@ -384,12 +384,6 @@ const render = () => {
                   ${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}
                 </select>
               </label>
-              <div id="blocoUploadFotoDesaparecido" class="cv-photo-upload" hidden>
-                <label for="fotoDesaparecido">Inserir foto do desaparecido</label>
-                <input type="file" id="fotoDesaparecido" name="fotoDesaparecido" accept="image/*" capture="environment" />
-                <div id="statusUploadFoto" class="cv-photo-status">Nenhuma imagem selecionada.</div>
-                <img id="previewFotoDesaparecido" class="cv-photo-preview" alt="Prévia da foto do desaparecido" hidden />
-              </div>
               <label>Há dispositivo vinculado?
                 <select name="dispositivoLigado" data-sync-key="dispositivoLigado">
                   ${OPCOES_SIM_NAO_NI.map((item) => `<option value="${item}">${item || 'Selecione'}</option>`).join('')}
@@ -452,6 +446,13 @@ const render = () => {
         <label>Risco<input id="decisao-risco" readonly /></label>
         <label>Prioridade<input id="decisao-prioridade" readonly /></label>
         <label>Status<input id="decisao-status" readonly /></label>
+      </div>
+      <div id="blocoUploadFotoDesaparecido" class="cv-photo-upload" hidden>
+        <label for="fotoDesaparecido">Inserir foto do desaparecido</label>
+        <input type="file" id="fotoDesaparecido" name="fotoDesaparecido" accept="image/*" capture="environment" />
+        <div id="statusUploadFoto" class="cv-photo-status">Nenhuma imagem selecionada.</div>
+        <img id="previewFotoDesaparecido" class="cv-photo-preview" alt="Prévia da foto do desaparecido" hidden />
+        <button class="cv-button cv-button--secondary" type="button" id="btn-adicionar-foto-agora">Adicionar foto agora</button>
       </div>
       <div class="cv-inline-actions">
         <button class="cv-button" type="button" id="menuSalvarCaso">Salvar caso</button>
@@ -556,7 +557,6 @@ const render = () => {
       const valor = String(selectFoto?.value || '').trim().toLowerCase();
       const visivel = valor === 'sim' || valor === 'true' || valor === '1';
       bloco.hidden = !visivel;
-      bloco.style.display = visivel ? 'block' : 'none';
       console.info('[FOTO] valor selecionado:', selectFoto?.value);
       console.info('[FOTO] bloco visível:', !bloco?.hidden);
     };
@@ -577,7 +577,7 @@ const render = () => {
         }
         preview.src = URL.createObjectURL(arquivo);
         preview.hidden = false;
-        statusUpload.textContent = `Arquivo selecionado: ${arquivo.name}`;
+        statusUpload.textContent = 'Imagem pronta para envio. Clique em Adicionar foto agora.';
       });
       fotoInput.dataset.fotoPreviewBind = '1';
     }
