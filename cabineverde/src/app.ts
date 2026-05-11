@@ -223,7 +223,9 @@ const fotoDigitalDisponivelSelecionada = (valor: unknown): boolean => {
 
 const mostrarBlocoUploadFoto = (seMostrar: boolean): void => {
   const bloco = document.getElementById('blocoUploadFotoDesaparecido');
+  const acoes = document.getElementById('acoesUploadFotoDesaparecido');
   if (bloco) bloco.hidden = !seMostrar;
+  if (acoes) acoes.hidden = !seMostrar;
 };
 
 const atualizarPreviewFoto = (url: string): void => {
@@ -833,11 +835,6 @@ document.getElementById('btn-adicionar-foto-agora')?.addEventListener('click', (
   mostrarBlocoUploadFoto(true);
   atualizarStatus('Selecione a foto e clique novamente em "Adicionar foto agora" para enviar.');
   salvarFotoDepoisDaTriagem();
-});
-
-document.getElementById('btn-finalizar-sem-foto')?.addEventListener('click', () => {
-  atualizarStatusFotoPendente('Foto pendente. Caso salvo sem foto.');
-  atualizarStatus('Triagem finalizada sem foto. Você pode anexar posteriormente pelo mesmo caso.');
 });
 
 document.getElementById('prev-step')?.addEventListener('click', () => atualizarEtapaVisual(triagemState.etapa - 1));

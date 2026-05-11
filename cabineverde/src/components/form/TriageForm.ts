@@ -53,7 +53,8 @@ export const renderTriageForm = (): string => `
         input('talaoPMESP', 'Talão PMESP', 'text', true, 'placeholder="Ex.: 2026-000123" pattern="[A-Za-z0-9\\-\\/]{6,20}" title="Use letras, números, hífen ou barra (6 a 20 caracteres)."'),
         input('dataHoraRegistro', 'Data/hora registro', 'datetime-local', true),
         input('talaoBopm', 'Talão BOPM'),
-        select('statusCaso', 'Status caso', ['EM_TRIAGEM', 'EM_BUSCA', 'LOCALIZADO_VIVO', 'LOCALIZADO_OBITO', 'ENCERRADO'], true)
+        select('statusCaso', 'Status caso', ['EM_TRIAGEM', 'EM_BUSCA', 'LOCALIZADO_VIVO', 'LOCALIZADO_OBITO', 'ENCERRADO'], true),
+        select('fotoDisponivel', 'Há foto do desaparecido disponível?', ['Sim', 'Não'], true)
       ].join('')
     )}
 
@@ -118,9 +119,6 @@ export const renderTriageForm = (): string => `
       5,
       '6) Apoio tecnológico',
       [
-        select('fotoDisponivel', 'Foto digital disponível?', ['Sim', 'Não']),
-        select('origemFoto', 'Origem da foto', ['Solicitante', 'Familiar', 'Câmera', 'Outro']),
-        select('tipoFoto', 'Tipo da foto', ['Recente', 'Documento', 'Câmera', 'Outro']),
         checkbox('autorizacaoUsoImagem', 'Autorização de uso de imagem'),
         checkbox('dispositivoLigado', 'Dispositivo ligado'),
         checkbox('camerasResidencia', 'Câmeras na residência'),
@@ -130,7 +128,7 @@ export const renderTriageForm = (): string => `
 
     ${etapa(
       6,
-      'Tela 2 — Triagem | PASSO 5 de 5',
+      'Fechamento',
       [
         input('observacoesOperacionais', 'Observações operacionais'),
         input('idFotoVisualizacao', 'ID da foto para visualização controlada'),
@@ -147,9 +145,8 @@ export const renderTriageForm = (): string => `
             <div id="statusUploadFoto" class="cv-photo-status">Nenhuma imagem enviada.</div>
             <img id="previewFotoDesaparecido" class="cv-photo-preview" alt="Prévia da foto do desaparecido" hidden />
           </div>
-          <div class="cv-inline-actions">
+          <div id="acoesUploadFotoDesaparecido" class="cv-inline-actions" hidden>
             <button type="button" id="btn-adicionar-foto-agora" class="cv-button cv-button--secondary">Adicionar foto agora</button>
-            <button type="button" id="btn-finalizar-sem-foto" class="cv-button cv-button--ghost">Finalizar sem foto e adicionar depois</button>
           </div>
           <p id="status-foto-pendente" class="cv-photo-status">Foto pendente.</p>
         </div>`
