@@ -76,6 +76,22 @@ test('payload completo com colunas base + arvore para CASOS', () => {
   assert.equal(payload.payload.talaoBopm, '2026-000123');
 });
 
+
+test('talaoBopm é gravado na posição de coluna H (índice 7) sem deslocamento', () => {
+  const payload = gerarPayloadSheets({ nomeCompletoDesaparecido: 'x', idade: 30, talaoBopm: 'BOPM-2026-00999' });
+  assert.equal(payload.colunas[7], 'talaoBopm');
+  assert.equal(payload.valores[7], 'BOPM-2026-00999');
+});
+
+test('talaoBopm vazio mantém coluna H vazia sem deslocar colunas seguintes', () => {
+  const payload = gerarPayloadSheets({ nomeCompletoDesaparecido: 'x', idade: 30, talaoPMESP: '' });
+  assert.equal(payload.colunas[7], 'talaoBopm');
+  assert.equal(payload.valores[7], '');
+  const idxStatus = payload.colunas.indexOf('statusCaso');
+  assert.equal(idxStatus > 7, true);
+  assert.notEqual(payload.valores[idxStatus], undefined);
+});
+
 test('salvarCasoSheets usa action salvarCaso via endpoint oficial', async () => {
   const originalFetch = globalThis.fetch;
   const originalLocalStorage = globalThis.localStorage;

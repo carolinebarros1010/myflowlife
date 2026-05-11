@@ -234,10 +234,11 @@ function buscarCaso_(filtro) {
   var termo = limparTexto(filtroObj.termo).toLowerCase();
   var termoId = limparTexto(filtroObj.idCaso).toLowerCase();
   var termoNome = limparTexto(filtroObj.nomeCompletoDesaparecido).toLowerCase();
+  var termoData = limparTexto(filtroObj.dataRegistro || filtroObj.dataServico || filtroObj.data || '').toLowerCase();
   var termosTalao = [filtroObj.talaoPMESP, filtroObj.talaoBopm, filtroObj.talao, filtroObj.numeroTalao, termo]
     .map(function (valor) { return limparTexto(valor).toLowerCase(); })
     .filter(Boolean);
-  if (!termo && !termoId && !termoNome && !termosTalao.length) return [];
+  if (!termo && !termoId && !termoNome && !termosTalao.length && !termoData) return [];
 
   var resultados = [];
   abasBusca.forEach(function (abaAtual) {
@@ -250,6 +251,8 @@ function buscarCaso_(filtro) {
     var idxNumeroTalao = cabecalho.indexOf('numeroTalao');
     var idxNome = cabecalho.indexOf('nomeCompletoDesaparecido');
     var idxMunicipio = cabecalho.indexOf('municipio');
+    var idxDataRegistro = cabecalho.indexOf('dataHoraRegistro');
+    var idxDataServico = cabecalho.indexOf('dataServico');
     var idxTelefoneSolicitante = cabecalho.indexOf('telefoneSolicitante');
     var idxNomeSolicitante = cabecalho.indexOf('nomeSolicitante');
     if (idxIdCaso < 0 && idxTalaoPMESP < 0 && idxTalaoBopm < 0 && idxTalao < 0 && idxNumeroTalao < 0 && idxNome < 0) return;
@@ -261,20 +264,33 @@ function buscarCaso_(filtro) {
     var talaoCampos = [idxTalaoPMESP, idxTalaoBopm, idxTalao, idxNumeroTalao]
       .map(function (idx) { return limparTexto(idx >= 0 ? linha[idx] : '').toLowerCase(); })
       .filter(Boolean);
+    var dataRegistroLinha = limparTexto(idxDataRegistro >= 0 ? linha[idxDataRegistro] : '').toLowerCase();
+    var dataServicoLinha = limparTexto(idxDataServico >= 0 ? linha[idxDataServico] : '').toLowerCase();
+    var dataRegistroNormalizada = dataRegistroLinha ? dataRegistroLinha.slice(0, 10) : '';
+    var dataServicoNormalizada = dataServicoLinha ? dataServicoLinha.slice(0, 10) : '';
+    var dataBuscaNormalizada = termoData ? termoData.slice(0, 10) : '';
+
     var camposBuscaLivre = [idCaso, nome]
       .concat(talaoCampos)
       .concat([
+        dataRegistroLinha,
+        dataServicoLinha,
         limparTexto(idxMunicipio >= 0 ? linha[idxMunicipio] : '').toLowerCase(),
         limparTexto(idxTelefoneSolicitante >= 0 ? linha[idxTelefoneSolicitante] : '').toLowerCase(),
         limparTexto(idxNomeSolicitante >= 0 ? linha[idxNomeSolicitante] : '').toLowerCase()
       ]);
 
-    if (termoId && idCaso === termoId) return true;
-    if (termoId && idCaso.indexOf(termoId) !== -1) return true;
-    if (termosTalao.length && termosTalao.some(function (t) { return talaoCampos.indexOf(t) !== -1; })) return true;
-    if (termosTalao.length && termosTalao.some(function (t) { return talaoCampos.some(function (campo) { return campo.indexOf(t) !== -1; }); })) return true;
-    if (termoNome && nome.indexOf(termoNome) !== -1) return true;
-    if (termo && camposBuscaLivre.some(function (campo) { return campo.indexOf(termo) !== -1; })) return true;
+    var dataConfere = !dataBuscaNormalizada || dataRegistroNormalizada === dataBuscaNormalizada || dataServicoNormalizada === dataBuscaNormalizada;
+
+    if (termoId && (idCaso === termoId || idCaso.indexOf(termoId) !== -1)) return dataConfere;
+    if (termosTalao.length && termosTalao.some(function (t) { return talaoCampos.indexOf(t) !== -1; })) return dataConfere;
+    if (termosTalao.length && termosTalao.some(function (t) { return talaoCampos.some(function (campo) { return campo.indexOf(t) !== -1; }); })) return dataConfere;
+    if (termoNome && nome.indexOf(termoNome) !== -1) return dataConfere;
+    if (termoData && dataConfere) {
+      var talhaoFoiInformado = termosTalao.length > 0;
+      if (talhaoFoiInformado || termoId || termoNome) return true;
+    }
+    if (termo && camposBuscaLivre.some(function (campo) { return campo.indexOf(termo) !== -1; })) return dataConfere;
     return false;
     }).map(function (linha) {
       var caso = {};
