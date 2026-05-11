@@ -294,12 +294,33 @@ const salvarFotoDepoisDaTriagem = async (): Promise<void> => {
 };
 
 
-const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCamposFisicos({
+const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => {
+  const talaoBopmCapturado = normalizarTexto(String(
+    dados.get('talaoBopm')
+      || dados.get('talaoBOPM')
+      || dados.get('talaoBopmPMESP')
+      || dados.get('talaoPMESP')
+      || dados.get('talaoPMESPBOPM')
+      || dados.get('bopm')
+      || dados.get('numeroBopm')
+      || ''
+  ));
+
+  const talaoPMESPCapturado = normalizarTexto(String(
+    dados.get('talaoPMESP')
+      || dados.get('talaoPMEsp')
+      || dados.get('talao')
+      || dados.get('numeroTalao')
+      || talaoBopmCapturado
+      || ''
+  ));
+
+  return normalizarCamposFisicos({
   id: normalizarTexto(String(dados.get('idCaso') || '')) || referenciaCasoSalvo?.idCaso || ultimoIdCasoSalvo || '',
-  talaoPMESP: normalizarTexto(String(dados.get('talaoPMESP') || '')),
+  talaoPMESP: talaoPMESPCapturado,
   dataHoraRegistro: String(dados.get('dataHoraRegistro') || new Date().toISOString()),
   municipio: normalizarTexto(String(dados.get('municipio') || '')),
-  talaoBopm: normalizarTexto(String(dados.get('talaoBopm') || '')),
+  talaoBopm: talaoBopmCapturado || talaoPMESPCapturado,
   nomeCompletoDesaparecido: normalizarTexto(String(dados.get('nomeCompletoDesaparecido') || '')),
   sexoGenero: normalizarTexto(String(dados.get('sexoGenero') || '')),
   idade: Number(dados.get('idade') || 0),
@@ -347,6 +368,7 @@ const buildCasoFromForm = (dados: FormData): CasoDesaparecimento => normalizarCa
       .map(([chave, valor]) => [chave, normalizarTexto(String(valor || ''))])
   )
 });
+};
 
 const getDadosFormularioAtual = (): CasoDesaparecimento =>
   buildCasoFromForm(form ? new FormData(form) : new FormData());
