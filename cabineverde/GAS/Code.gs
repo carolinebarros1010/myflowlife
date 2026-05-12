@@ -3,6 +3,8 @@
 
 var CABINE_VERDE_BUILD = '2026-05-03-181-CASOS-FIX';
 var PERFIS_OPERADOR_VALIDOS = ['OPERADOR', 'SUPERVISOR', 'ADMIN', 'AUDITOR'];
+const ID_PLANILHA_TALAO_190 = '1gq_zk5fYPTLdjDm8IeqTThgfaijqrwNo6PNk-9cKZGs';
+const ABA_MODELO_TALAO = 'MODELO_TALAO';
 
 function normalizarPerfilOperador_(perfil) {
   return limparTexto(perfil).toUpperCase();
@@ -1209,6 +1211,7 @@ function persistirRegistro(planilha, registro) {
 
     if (linhaAlvo > 1) {
       sheetCasos.getRange(linhaAlvo, 1, 1, linhaFinal.length).setValues([linhaFinal]);
+      sincronizarTalao190(registroPorColuna);
       if (modoRegistro === 'edicao') {
         registrarEventoOperacional_(planilha, idCaso, 'EDICAO_CASO', {
           idCaso: idCaso,
@@ -1221,6 +1224,7 @@ function persistirRegistro(planilha, registro) {
     }
 
     sheetCasos.appendRow(linhaFinal);
+    sincronizarTalao190(registroPorColuna);
     registrarEventoOperacional_(planilha, idCaso, 'CASO_CRIADO', {
       idCaso: idCaso,
       talaoPMESP: talaoPMESPRecebido,
@@ -1234,6 +1238,69 @@ function persistirRegistro(planilha, registro) {
   var sheet = garantirAbaComCabecalho(planilha, aba, colunasEstrutura.length ? colunasEstrutura : colunas);
   sheet.appendRow(valores);
   return { action: 'created', linha: sheet.getLastRow() };
+}
+
+function sincronizarTalao190(caso) {
+  try {
+    var dataBase = caso.dataHoraRegistro || caso.dataServico || new Date();
+    var abaTalao = obterOuCriarAbaTalao190(dataBase);
+    var linha = montarLinhaTalao190(caso);
+    var primeiraLinhaLivre = Math.max(abaTalao.getLastRow() + 1, 2);
+    abaTalao.getRange(primeiraLinhaLivre, 1, 1, linha.length).setValues([linha]);
+  } catch (erro) {
+    Logger.log('ERRO_SINCRONIZAR_TALAO_190: ' + (erro && erro.message ? erro.message : erro));
+  }
+}
+
+function obterOuCriarAbaTalao190(data) {
+  var planilhaTalao = SpreadsheetApp.openById(ID_PLANILHA_TALAO_190);
+  var nomeAba = formatarNomeAbaTalao(data);
+  var aba = planilhaTalao.getSheetByName(nomeAba);
+  if (aba) return aba;
+
+  var abaModelo = planilhaTalao.getSheetByName(ABA_MODELO_TALAO);
+  if (!abaModelo) throw new Error('Aba modelo não encontrada: ' + ABA_MODELO_TALAO);
+
+  aba = abaModelo.copyTo(planilhaTalao).setName(nomeAba);
+  planilhaTalao.setActiveSheet(aba);
+  planilhaTalao.moveActiveSheet(planilhaTalao.getNumSheets());
+  atualizarTituloTalao(aba, data);
+  return aba;
+}
+
+function formatarNomeAbaTalao(data) {
+  var dt = data instanceof Date ? data : new Date(data);
+  if (!(dt instanceof Date) || isNaN(dt.getTime())) dt = new Date();
+  var meses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+  var dia = ('0' + dt.getDate()).slice(-2);
+  var mes = meses[dt.getMonth()];
+  var ano = ('0' + (dt.getFullYear() % 100)).slice(-2);
+  return dia + mes + ano;
+}
+
+function montarLinhaTalao190(caso) {
+  var dataRegistro = caso.dataHoraRegistro || caso.dataServico || new Date();
+  var dataServico = caso.dataServico || new Date();
+  return [
+    dataRegistro, // DATA
+    caso.talaoBopm || '', // BOPM
+    caso.cpf || '', // CPF/RG
+    caso.nomeCompletoDesaparecido || '', // NOME COMPLETO (Desaparecido)
+    caso.observacoesOperacionais || '', // OBS.
+    dataServico, // DATA (serviço)
+    caso.nomeSolicitante || '', // Nome do Solicitante
+    caso.telefoneSolicitante || '', // Telefone
+    caso.observacoesOperacionais || '', // OBS.
+    caso.encerrado190 || 'DESAPARECIDO', // 190
+    caso.operadorResponsavel || '' // Operador PM
+  ];
+}
+
+function atualizarTituloTalao(aba, data) {
+  var dt = data instanceof Date ? data : new Date(data);
+  if (!(dt instanceof Date) || isNaN(dt.getTime())) dt = new Date();
+  var titulo = 'TALÃO 190 - ' + Utilities.formatDate(dt, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+  aba.getRange(1, 1).setValue(titulo);
 }
 
 function executarAuditoriaHeaderCasos() {
