@@ -1595,7 +1595,20 @@ function auditarELimparCasosSeguro_(dryRun) {
     operadorultimaacao: 'operadorResponsavel',
     observacoesoperacionais: 'observacoesOperacionais',
     tipocaso: 'observacoesOperacionais',
-    flagalerta: 'observacoesOperacionais'
+    flagalerta: 'observacoesOperacionais',
+
+    // aliases operacionais legados para a aba CASOS
+    data: 'dataHoraRegistro',
+    bopm: 'talaoBopm',
+    cpfrg: 'cpf',
+    nomecompleto: 'nomeCompletoDesaparecido',
+    observacaocurta: 'observacoesOperacionais',
+    datadoatendimento: 'dataServico',
+    nomedosolicitante: 'nomeSolicitante',
+    telefone: 'telefoneSolicitante',
+    observacaocompleta: 'observacoesOperacionais',
+    status190: 'encerrado190',
+    operadorpm: 'operadorResponsavel'
   };
 
   function concatenarObservacoesOperacionais_(valorAtual, prefixo, valorExtra) {
