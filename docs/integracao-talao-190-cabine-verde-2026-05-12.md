@@ -24,7 +24,7 @@ Arquivo alterado: `cabineverde/GAS/Code.gs`.
 5. Quando a aba do dia não existe:
    - copia `MODELO_TALAO`;
    - renomeia para a data do dia;
-   - atualiza o título em `A1`;
+   - atualiza o título localizando o texto "RELATÓRIO TALÃO 190" (fallback em `A5`) no padrão `RELATÓRIO TALÃO 190 ddMMMyy - DIA-DA-SEMANA`;
    - grava o registro.
 6. Quando já existe, apenas grava na primeira linha livre abaixo do cabeçalho.
 
@@ -62,3 +62,11 @@ Arquivo alterado: `cabineverde/GAS/Code.gs`.
 - A função `encontrarPrimeiraLinhaVaziaTalao(aba)` lê apenas o bloco de dados (11 colunas) a partir da linha 7 e encontra a primeira linha totalmente vazia por conteúdo real.
 - O algoritmo ignora formatações, mesclagens e estilos em linhas inferiores, evitando desvios para linhas altas causados por `getLastRow() + 1`.
 - Caso todas as linhas do bloco estejam preenchidas, a gravação é feita imediatamente após a última linha válida.
+
+
+## Ajuste de título diário do relatório (2026-05-12)
+
+- Adicionada a função `obterDiaSemanaPtBr(data)` para retornar o dia da semana em português e em maiúsculo.
+- `atualizarTituloTalao(aba, data)` agora compõe o título como `RELATÓRIO TALÃO 190 <nome-da-aba> - <dia-da-semana>`.
+- A atualização do título busca a célula que já contém `RELATÓRIO TALÃO 190` para preservar layout visual da `MODELO_TALAO`.
+- Se o texto não for encontrado, a rotina usa `A5` como fallback sem recriar cabeçalhos.
