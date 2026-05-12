@@ -1342,11 +1342,42 @@ function montarLinhaTalao190(caso) {
   ];
 }
 
+function obterDiaSemanaPtBr(data) {
+  var dias = [
+    'DOMINGO',
+    'SEGUNDA-FEIRA',
+    'TERÇA-FEIRA',
+    'QUARTA-FEIRA',
+    'QUINTA-FEIRA',
+    'SEXTA-FEIRA',
+    'SÁBADO'
+  ];
+
+  return dias[data.getDay()];
+}
+
 function atualizarTituloTalao(aba, data) {
   var dt = data instanceof Date ? data : new Date(data);
   if (!(dt instanceof Date) || isNaN(dt.getTime())) dt = new Date();
-  var titulo = 'TALÃO 190 - ' + Utilities.formatDate(dt, Session.getScriptTimeZone(), 'dd/MM/yyyy');
-  aba.getRange(1, 1).setValue(titulo);
+
+  var nomeAba = formatarNomeAbaTalao(dt);
+  var diaSemana = obterDiaSemanaPtBr(dt);
+  var titulo = 'RELATÓRIO TALÃO 190 ' + nomeAba + ' - ' + diaSemana;
+
+  var intervalo = aba.getDataRange();
+  var valores = intervalo.getValues();
+
+  for (var i = 0; i < valores.length; i++) {
+    for (var j = 0; j < valores[i].length; j++) {
+      var valor = String(valores[i][j] || '').toUpperCase();
+      if (valor.indexOf('RELATÓRIO TALÃO 190') !== -1) {
+        aba.getRange(i + 1, j + 1).setValue(titulo);
+        return;
+      }
+    }
+  }
+
+  aba.getRange('A5').setValue(titulo);
 }
 
 function executarAuditoriaHeaderCasos() {
