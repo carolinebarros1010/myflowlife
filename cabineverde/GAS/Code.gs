@@ -1245,6 +1245,8 @@ function persistirRegistro(planilha, registro) {
       return { status: 'erro', message: 'Número do Talão PMESP é obrigatório.', mensagem: 'Número do Talão PMESP é obrigatório.' };
     }
     var idCaso = limparTexto(registroPorColuna.idCaso);
+    var dataServicoRecebida = normalizarDataServicoImutavel_(registroPorColuna.dataServico, registroPorColuna.dataHoraRegistro);
+    registroPorColuna.dataServico = dataServicoRecebida;
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
     var chaveUnica = obterChaveUnicaRegistro_(registro, registroPorColuna);
     if (chaveUnica) { registroPorColuna.CHAVE_UNICA = chaveUnica; registroPorColuna.chaveUnica = chaveUnica; registroPorColuna.chaveRequisicao = chaveUnica; }
@@ -1266,6 +1268,19 @@ function persistirRegistro(planilha, registro) {
         idCaso = limparTexto(sheetCasos.getRange(linhaAlvo, idxIdCasoAtual + 1).getValue());
         registroPorColuna.idCaso = idCaso;
       }
+    }
+    var idxDataServico = cabecalhoAtual.indexOf('dataServico');
+    if (linhaAlvo > 1 && idxDataServico >= 0) {
+      var dataServicoPersistida = normalizarDataServicoImutavel_(sheetCasos.getRange(linhaAlvo, idxDataServico + 1).getValue(), registroPorColuna.dataHoraRegistro);
+      if (dataServicoPersistida) {
+        if (dataServicoRecebida && dataServicoRecebida !== dataServicoPersistida) {
+          registrarLogAuditoriaPersistencia_(planilha, { dataHora: formatarDataHora(new Date()), status: 'dataServico_preservada', chaveUnica: chaveUnica, acaoExecutada: 'PRESERVACAO_DATA_SERVICO', nomeDesaparecido: limparTexto(registroPorColuna.nomeCompletoDesaparecido), solicitante: limparTexto(registroPorColuna.nomeSolicitante), telefone: limparTexto(registroPorColuna.telefoneSolicitante), operador: limparTexto(registroPorColuna.operadorResponsavel), mensagemTecnica: 'dataServico recebida diferente foi ignorada para preservar idempotência.' });
+        }
+        registroPorColuna.dataServico = dataServicoPersistida;
+      }
+    }
+    if (!linhaAlvo || linhaAlvo <= 1) {
+      registroPorColuna.dataServico = normalizarDataServicoImutavel_(registroPorColuna.dataServico, registroPorColuna.dataHoraRegistro);
     }
     if (!idCaso) idCaso = 'CV-' + Utilities.getUuid().slice(0, 8).toUpperCase();
     registroPorColuna.idCaso = idCaso;
@@ -1312,9 +1327,18 @@ function persistirRegistro(planilha, registro) {
     return { idCaso: idCaso, action: 'created', linha: linhaInsercao, status: 'sucesso', message: 'Novo caso gravado com sucesso' };
   }
 
+  if (aba === 'LOG_AUDITORIA') {
+    registrarLogAuditoriaPersistencia_(planilha, mapearPorColuna(colunas, valores));
+    var abaLog = garantirAbaComCabecalho(planilha, ABA_LOG_AUDITORIA, COLUNAS_LOG_AUDITORIA);
+    return { action: 'created', linha: abaLog.getLastRow() };
+  }
+  if (aba === 'CASOS' || String(aba).indexOf('RELAT') !== -1 || String(aba).indexOf('TALAO') !== -1) {
+    throw new Error('appendRow genérico bloqueado para aba operacional crítica: ' + aba);
+  }
   var sheet = garantirAbaComCabecalho(planilha, aba, colunasEstrutura.length ? colunasEstrutura : colunas);
-  sheet.appendRow(valores);
-  return { action: 'created', linha: sheet.getLastRow() };
+  var linhaDestino = sheet.getLastRow() + 1;
+  sheet.getRange(linhaDestino, 1, 1, valores.length).setValues([valores]);
+  return { action: 'created', linha: linhaDestino };
 }
 
 function sincronizarTalao190(caso) {
@@ -1322,7 +1346,7 @@ function sincronizarTalao190(caso) {
   try {
     lock = LockService.getScriptLock();
     lock.waitLock(15000);
-    var dataBase = caso.dataHoraRegistro || caso.dataServico || new Date();
+    var dataBase = caso.dataServico || caso.dataHoraRegistro || new Date();
     var abaTalao = obterOuCriarAbaTalao190(dataBase);
     var linha = montarLinhaTalao190(caso);
     var linhaExistente = localizarLinhaDuplicadaRelatorio_(abaTalao, caso);
@@ -1408,13 +1432,12 @@ function localizarLinhaDuplicadaRelatorio_(sheet, caso) {
 }
 
 function gerarAssinaturaOperacionalRelatorio_(caso) {
-  var dataBase = normalizarDataRelatorio_(caso && (caso.dataHoraRegistro || caso.dataServico));
+  var dataBase = normalizarDataRelatorio_(caso && (caso.dataServico || caso.dataHoraRegistro));
   return [
+    dataBase,
     normalizarDocumentoRelatorio_(caso && (caso.talaoBopm || caso.talaoPMESP || caso.talao || caso.numeroTalao)),
-    normalizarDocumentoRelatorio_(caso && caso.cpf),
     normalizarTextoAssinatura_(caso && caso.nomeCompletoDesaparecido),
-    normalizarTelefoneRelatorio_(caso && caso.telefoneSolicitante),
-    dataBase
+    normalizarTelefoneRelatorio_(caso && caso.telefoneSolicitante)
   ].join('|');
 }
 
@@ -1425,6 +1448,13 @@ function normalizarDataRelatorio_(valor) {
   if (!(dt instanceof Date) || isNaN(dt.getTime())) return limparTexto(valor);
   return Utilities.formatDate(dt, Session.getScriptTimeZone(), 'yyyy-MM-dd');
 }
+
+function normalizarDataServicoImutavel_(dataServico, dataHoraRegistro) {
+  var base = limparTexto(dataServico) || limparTexto(dataHoraRegistro);
+  var normalizada = normalizarDataRelatorio_(base);
+  return limparTexto(normalizada) || normalizarDataRelatorio_(new Date());
+}
+
 
 function limparDuplicadosRelatorioAtual() {
   var aba = obterOuCriarAbaTalao190(new Date());
@@ -1475,8 +1505,8 @@ function formatarNomeAbaTalao(data) {
 }
 
 function montarLinhaTalao190(caso) {
-  var dataRegistro = caso.dataHoraRegistro || caso.dataServico || new Date();
-  var dataServico = caso.dataServico || new Date();
+  var dataServico = normalizarDataServicoImutavel_(caso && caso.dataServico, caso && caso.dataHoraRegistro);
+  var dataRegistro = caso.dataHoraRegistro || dataServico || new Date();
   return [
     dataRegistro, // DATA
     caso.talaoBopm || '', // BOPM
