@@ -2331,3 +2331,233 @@ function criarLogRecuperacaoTalao_(idCaso, nome, telefone, status, origem, valor
     mensagemTecnica: 'origem=' + origem + '; valor_recuperado=' + (valorRecuperado || '')
   };
 }
+
+
+function limparDuplicadosCasos(simulacao) {
+  var SIMULACAO = simulacao !== false;
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    garantirEstruturaCabineVerde_();
+    var planilha = SpreadsheetApp.getActiveSpreadsheet();
+    var schema = obterSchemaCabineVerdeUnificado_();
+    var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', schema.CASOS);
+    var cabecalho = garantirColunasDaEstrutura(abaCasos, schema.CASOS);
+    var total = Math.max(abaCasos.getLastRow() - 1, 0);
+    if (!total) return { simulacao: SIMULACAO, totalLinhasAnalisadas: 0, totalGruposDuplicados: 0, totalLinhasRemovidas: 0, totalCamposMesclados: 0, conflitosManuais: [], casosNaoResolvidosAutomaticamente: [] };
+
+    var backupNome = 'BACKUP_CASOS_' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd_HHmmss');
+    var abaBackup = abaCasos.copyTo(planilha).setName(backupNome);
+    planilha.setActiveSheet(abaCasos);
+    planilha.moveActiveSheet(1);
+    abaBackup.hideSheet();
+
+    var dados = abaCasos.getRange(2, 1, total, abaCasos.getLastColumn()).getValues();
+    var indices = mapearIndicesCasosDuplicados_(cabecalho);
+    var grupos = agruparDuplicadosCasos_(dados, indices);
+
+    var linhasMescladas = dados.map(function (linha) { return linha.slice(); });
+    var linhasRemover = {};
+    var logs = [];
+    var conflitosManuais = [];
+    var naoResolvidos = [];
+    var totalCamposMesclados = 0;
+    var totalRemovidos = 0;
+
+    Object.keys(grupos).forEach(function (assinatura) {
+      var grupo = grupos[assinatura];
+      if (!grupo || grupo.length < 2) return;
+      var resolucao = resolverGrupoDuplicadoCasos_(grupo, linhasMescladas, indices, assinatura);
+      if (resolucao.conflito) {
+        conflitosManuais.push(resolucao.conflito);
+        naoResolvidos.push(resolucao.conflito);
+        logs.push(criarLogLimpezaDuplicado_(resolucao.principal && resolucao.principal.idCaso || '', '', 'conflito_manual', assinatura, 'sistema_limpeza_duplicados', JSON.stringify(resolucao.conflito)));
+        return;
+      }
+      if (!resolucao.principal) return;
+      totalCamposMesclados += resolucao.camposMesclados;
+      resolucao.removidos.forEach(function (item) {
+        linhasRemover[item.indiceLinha] = true;
+        totalRemovidos += 1;
+        logs.push(criarLogLimpezaDuplicado_(resolucao.principal.idCaso, item.idCaso, 'duplicado_real_removido', assinatura, 'sistema_limpeza_duplicados', JSON.stringify(resolucao.dadosMesclados[item.indiceLinha] || [])));
+      });
+    });
+
+    if (!SIMULACAO) {
+      abaCasos.getRange(2, 1, linhasMescladas.length, cabecalho.length).setValues(linhasMescladas);
+      var removerOrdenado = Object.keys(linhasRemover).map(function (k) { return Number(k); }).sort(function (a, b) { return b - a; });
+      removerOrdenado.forEach(function (idx) {
+        abaCasos.deleteRow(idx + 2);
+      });
+    }
+
+    registrarLogsEmLote_(planilha, logs);
+
+    return {
+      simulacao: SIMULACAO,
+      backupCriado: backupNome,
+      totalLinhasAnalisadas: total,
+      totalGruposDuplicados: Object.keys(grupos).filter(function (k) { return grupos[k].length > 1; }).length,
+      totalLinhasRemovidas: SIMULACAO ? 0 : totalRemovidos,
+      totalLinhasRemocaoPlanejada: totalRemovidos,
+      totalCamposMesclados: totalCamposMesclados,
+      conflitosManuais: conflitosManuais,
+      casosNaoResolvidosAutomaticamente: naoResolvidos
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function mapearIndicesCasosDuplicados_(cabecalho) {
+  var idx = {};
+  ['idCaso','dataServico','talaoBopm','nomeCompletoDesaparecido','telefoneSolicitante','cpf','rg','observacoesOperacionais','nomeSolicitante'].forEach(function (c) {
+    idx[c] = cabecalho.indexOf(c);
+  });
+  return idx;
+}
+
+function agruparDuplicadosCasos_(dados, idx) {
+  var grupos = {};
+  for (var i = 0; i < dados.length; i += 1) {
+    var linha = dados[i];
+    if (linhaVaziaEstrutural_(linha)) continue;
+    var assinatura = gerarAssinaturaOperacionalDuplicado_(linha, idx);
+    if (!assinatura) continue;
+    grupos[assinatura] = grupos[assinatura] || [];
+    grupos[assinatura].push({ indiceLinha: i, idCaso: idx.idCaso >= 0 ? limparTexto(linha[idx.idCaso]) : '', assinatura: assinatura });
+  }
+  return grupos;
+}
+
+function gerarAssinaturaOperacionalDuplicado_(linha, idx) {
+  var data = idx.dataServico >= 0 ? normalizarDataSomenteDia_(linha[idx.dataServico]) : '';
+  var talao = idx.talaoBopm >= 0 ? limparTexto(linha[idx.talaoBopm]) : '';
+  var nome = idx.nomeCompletoDesaparecido >= 0 ? normalizarTextoOperacional_(linha[idx.nomeCompletoDesaparecido]) : '';
+  var telefone = idx.telefoneSolicitante >= 0 ? normalizarTelefoneOperacional_(linha[idx.telefoneSolicitante]) : '';
+  if (!data && !talao && !nome && !telefone) return '';
+  return [data, talao, nome, telefone].join('|');
+}
+
+function resolverGrupoDuplicadoCasos_(grupo, linhas, idx, assinatura) {
+  var candidatos = grupo.map(function (item) {
+    var linha = linhas[item.indiceLinha];
+    return { item: item, linha: linha, score: pontuarRegistroDuplicado_(linha, idx), preenchidos: contarCamposPreenchidos_(linha), observacaoTam: tamanhoCampo_(linha, idx.observacoesOperacionais) };
+  });
+  candidatos.sort(function (a, b) {
+    if (b.score !== a.score) return b.score - a.score;
+    if (b.observacaoTam !== a.observacaoTam) return b.observacaoTam - a.observacaoTam;
+    if (b.preenchidos !== a.preenchidos) return b.preenchidos - a.preenchidos;
+    return a.item.indiceLinha - b.item.indiceLinha;
+  });
+  if (!candidatos.length) return { principal: null, removidos: [], camposMesclados: 0, dadosMesclados: {}, conflito: null };
+  if (candidatos.length > 1 && Math.abs(candidatos[0].score - candidatos[1].score) <= 5 && !confirmarMesmaPessoa_(candidatos[0].linha, candidatos[1].linha, idx)) {
+    return { principal: null, removidos: [], camposMesclados: 0, dadosMesclados: {}, conflito: { assinaturaOperacional: assinatura, motivo: 'Pontuação próxima com divergência de identidade (cpf/rg/nome).' } };
+  }
+  var principal = candidatos[0];
+  var camposMesclados = 0;
+  var removidos = [];
+  var dadosMesclados = {};
+  candidatos.slice(1).forEach(function (sec) {
+    var mescla = mesclarDadosUteisDuplicado_(principal.linha, sec.linha);
+    camposMesclados += mescla.totalCampos;
+    dadosMesclados[sec.item.indiceLinha] = mescla.campos;
+    removidos.push(sec.item);
+  });
+  if (idx.dataServico >= 0 && !limparTexto(principal.linha[idx.dataServico])) {
+    var primeiraComData = candidatos.find(function (c) { return limparTexto(c.linha[idx.dataServico]); });
+    if (primeiraComData) principal.linha[idx.dataServico] = primeiraComData.linha[idx.dataServico];
+  }
+  return { principal: principal.item, removidos: removidos, camposMesclados: camposMesclados, dadosMesclados: dadosMesclados, conflito: null };
+}
+
+function pontuarRegistroDuplicado_(linha, idx) {
+  var score = 0;
+  if (idx.talaoBopm >= 0 && limparTexto(linha[idx.talaoBopm])) score += 100;
+  var temCpf = idx.cpf >= 0 && limparTexto(linha[idx.cpf]);
+  var temRg = idx.rg >= 0 && limparTexto(linha[idx.rg]);
+  if (temCpf && temRg) score += 70;
+  score += Math.min(tamanhoCampo_(linha, idx.observacoesOperacionais), 500) / 10;
+  score += contarCamposPreenchidos_(linha);
+  return score;
+}
+
+function mesclarDadosUteisDuplicado_(principal, duplicado) {
+  var campos = [];
+  var total = 0;
+  for (var i = 0; i < principal.length; i += 1) {
+    var valorPrincipal = limparTexto(principal[i]);
+    var valorDuplicado = limparTexto(duplicado[i]);
+    if (!valorPrincipal && valorDuplicado) {
+      principal[i] = duplicado[i];
+      campos.push(i);
+      total += 1;
+    }
+  }
+  return { totalCampos: total, campos: campos };
+}
+
+function confirmarMesmaPessoa_(linhaA, linhaB, idx) {
+  var cpfA = idx.cpf >= 0 ? limparTexto(linhaA[idx.cpf]) : '';
+  var cpfB = idx.cpf >= 0 ? limparTexto(linhaB[idx.cpf]) : '';
+  if (cpfA && cpfB && cpfA !== cpfB) return false;
+  var rgA = idx.rg >= 0 ? limparTexto(linhaA[idx.rg]) : '';
+  var rgB = idx.rg >= 0 ? limparTexto(linhaB[idx.rg]) : '';
+  if (rgA && rgB && rgA !== rgB) return false;
+  var nomeA = idx.nomeCompletoDesaparecido >= 0 ? normalizarTextoOperacional_(linhaA[idx.nomeCompletoDesaparecido]) : '';
+  var nomeB = idx.nomeCompletoDesaparecido >= 0 ? normalizarTextoOperacional_(linhaB[idx.nomeCompletoDesaparecido]) : '';
+  if (nomeA && nomeB && nomeA !== nomeB) return false;
+  return true;
+}
+
+function registrarLogsEmLote_(planilha, registrosLog) {
+  if (!registrosLog.length) return;
+  var abaLog = garantirAbaComCabecalho(planilha, ABA_LOG_AUDITORIA, COLUNAS_LOG_AUDITORIA);
+  var cabecalhoLog = garantirColunasDaEstrutura(abaLog, COLUNAS_LOG_AUDITORIA);
+  var linhas = registrosLog.map(function (registro) {
+    return cabecalhoLog.map(function (col) { return normalizarValorPlanilha(registro[col]); });
+  });
+  abaLog.getRange(abaLog.getLastRow() + 1, 1, linhas.length, cabecalhoLog.length).setValues(linhas);
+}
+
+function criarLogLimpezaDuplicado_(idCasoPrincipal, idCasoRemovido, motivo, assinatura, operadorSistema, dadosMesclados) {
+  return {
+    dataHora: formatarDataHora(new Date()),
+    status: motivo === 'conflito_manual' ? 'conflito_manual' : 'deduplicacao_casos',
+    chaveUnica: idCasoPrincipal,
+    acaoExecutada: 'limparDuplicadosCasos',
+    nomeDesaparecido: '',
+    solicitante: '',
+    telefone: '',
+    operador: operadorSistema,
+    mensagemTecnica: 'acao=limparDuplicadosCasos; idCasoPrincipal=' + limparTexto(idCasoPrincipal) + '; idCasoRemovido=' + limparTexto(idCasoRemovido) + '; motivo=' + motivo + '; assinaturaOperacional=' + assinatura + '; dadosMesclados=' + dadosMesclados
+  };
+}
+
+function linhaVaziaEstrutural_(linha) {
+  for (var i = 0; i < linha.length; i += 1) {
+    if (limparTexto(linha[i])) return false;
+  }
+  return true;
+}
+
+function contarCamposPreenchidos_(linha) {
+  var total = 0;
+  for (var i = 0; i < linha.length; i += 1) {
+    if (limparTexto(linha[i])) total += 1;
+  }
+  return total;
+}
+
+function tamanhoCampo_(linha, idx) {
+  if (idx < 0) return 0;
+  return limparTexto(linha[idx]).length;
+}
+
+function normalizarTextoOperacional_(valor) {
+  return limparTexto(valor).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizarTelefoneOperacional_(valor) {
+  return limparTexto(valor).replace(/\D+/g, '');
+}
