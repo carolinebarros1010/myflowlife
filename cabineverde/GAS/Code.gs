@@ -1111,11 +1111,11 @@ function normalizarTalaoPayload(dados) {
 }
 
 function gerarAssinaturaCaso_(dados) {
+  var dataServico = normalizarDataRelatorio_(dados && (dados.dataServico || dados.dataHoraRegistro || dados.dataHoraUltimaVisualizacao));
+  var talaoBopm = normalizarDocumentoRelatorio_(dados && (dados.talaoBopm || dados.talaoPMESP || dados.numeroTalao || dados.talao || dados.bopm));
   var nome = normalizarTextoAssinatura_(dados && (dados.nomeCompletoDesaparecido || dados.nome));
-  var idade = limparTexto(dados && dados.idade);
-  var municipio = normalizarTextoAssinatura_(dados && dados.municipio);
-  var dataServico = limparTexto(dados && (dados.dataServico || dados.dataHoraRegistro || dados.dataHoraUltimaVisualizacao));
-  return [nome, idade, municipio, dataServico].join('|');
+  var telefoneSolicitante = normalizarTelefoneRelatorio_(dados && dados.telefoneSolicitante);
+  return [dataServico, talaoBopm, nome, telefoneSolicitante].join('|');
 }
 
 function normalizarTextoAssinatura_(valor) {
@@ -1238,6 +1238,12 @@ function persistirRegistro(planilha, registro) {
     var registroPorColuna = mapearPorColuna(colunas, valoresPorSchema);
     registroPorColuna = normalizarTalaoPayload(registroPorColuna);
     registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
+    registroPorColuna.talaoBopm = limparTexto(registroPorColuna.talaoBopm || registroPorColuna.talaoPMESP || registroPorColuna.numeroTalao || registroPorColuna.bopm);
+    registroPorColuna.talaoPMESP = limparTexto(registroPorColuna.talaoPMESP || registroPorColuna.talaoBopm);
+    if (!registroPorColuna.talaoBopm) {
+      registrarLogAuditoriaPersistencia_(planilha, { dataHora: formatarDataHora(new Date()), status: 'erro', chaveUnica: obterChaveUnicaRegistro_(registro, registroPorColuna), acaoExecutada: 'BLOQUEIO_TALAO_OBRIGATORIO', nomeDesaparecido: limparTexto(registroPorColuna.nomeCompletoDesaparecido), solicitante: limparTexto(registroPorColuna.nomeSolicitante), telefone: limparTexto(registroPorColuna.telefoneSolicitante), operador: limparTexto(registroPorColuna.operadorResponsavel), mensagemTecnica: 'Número do Talão PMESP é obrigatório.' });
+      return { status: 'erro', message: 'Número do Talão PMESP é obrigatório.', mensagem: 'Número do Talão PMESP é obrigatório.' };
+    }
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
     var chaveUnica = obterChaveUnicaRegistro_(registro, registroPorColuna);
@@ -1312,36 +1318,134 @@ function persistirRegistro(planilha, registro) {
 }
 
 function sincronizarTalao190(caso) {
+  var lock;
   try {
+    lock = LockService.getScriptLock();
+    lock.waitLock(15000);
     var dataBase = caso.dataHoraRegistro || caso.dataServico || new Date();
     var abaTalao = obterOuCriarAbaTalao190(dataBase);
     var linha = montarLinhaTalao190(caso);
-    var linhaDestino = encontrarPrimeiraLinhaVaziaTalao(abaTalao);
+    var linhaExistente = localizarLinhaDuplicadaRelatorio_(abaTalao, caso);
+
+    if (linhaExistente > 0) {
+      abaTalao.getRange(linhaExistente, 1, 1, 11).setValues([linha]);
+      registrarLogAuditoriaPersistencia_(SpreadsheetApp.getActiveSpreadsheet(), {
+        dataHora: formatarDataHora(new Date()),
+        status: 'atualizado',
+        chaveUnica: limparTexto(caso && (caso.CHAVE_UNICA || caso.chaveUnica)),
+        acaoExecutada: 'UPDATE_RELATORIO_TALAO_190',
+        nomeDesaparecido: limparTexto(caso && caso.nomeCompletoDesaparecido),
+        solicitante: limparTexto(caso && caso.nomeSolicitante),
+        telefone: limparTexto(caso && caso.telefoneSolicitante),
+        operador: limparTexto(caso && caso.operadorResponsavel),
+        mensagemTecnica: 'Caso já existente no relatório diário; atualização com setValues na linha ' + linhaExistente + '.'
+      });
+      return { status: 'atualizado', linha: linhaExistente };
+    }
+
+    var linhaDestino = encontrarPrimeiraLinhaVaziaRelatorio(abaTalao);
     abaTalao.getRange(linhaDestino, 1, 1, 11).setValues([linha]);
+    return { status: 'sucesso', linha: linhaDestino };
   } catch (erro) {
     Logger.log('ERRO_SINCRONIZAR_TALAO_190: ' + (erro && erro.message ? erro.message : erro));
+    return { status: 'erro', mensagem: erro && erro.message ? erro.message : String(erro) };
+  } finally {
+    if (lock) {
+      try { lock.releaseLock(); } catch (e) {}
+    }
   }
 }
 
+function encontrarPrimeiraLinhaVaziaRelatorio(sheet) {
+  var ultimaLinhaOperacional = obterUltimaLinhaOperacionalRelatorio_(sheet);
+  if (ultimaLinhaOperacional < PRIMEIRA_LINHA_DADOS_TALAO) throw new Error('Área operacional inválida na aba de relatório.');
 
-function encontrarPrimeiraLinhaVaziaTalao(aba) {
-  var ultimaLinha = aba.getLastRow();
-  if (ultimaLinha < PRIMEIRA_LINHA_DADOS_TALAO) return PRIMEIRA_LINHA_DADOS_TALAO;
+  var quantidadeLinhas = ultimaLinhaOperacional - PRIMEIRA_LINHA_DADOS_TALAO + 1;
+  var valores = sheet.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, quantidadeLinhas, 11).getValues();
 
-  var quantidadeLinhas = ultimaLinha - PRIMEIRA_LINHA_DADOS_TALAO + 1;
-  if (quantidadeLinhas <= 0) return PRIMEIRA_LINHA_DADOS_TALAO;
-
-  var intervalo = aba.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, quantidadeLinhas, 11);
-  var valores = intervalo.getValues();
-
-  for (var i = 0; i < valores.length; i++) {
+  for (var i = 0; i < valores.length; i += 1) {
     var linhaVazia = valores[i].every(function (celula) {
-      return celula === '' || celula === null;
+      return limparTexto(celula) === '';
     });
     if (linhaVazia) return PRIMEIRA_LINHA_DADOS_TALAO + i;
   }
 
-  return PRIMEIRA_LINHA_DADOS_TALAO + valores.length;
+  throw new Error('Área operacional do relatório diário está lotada até a linha ' + ultimaLinhaOperacional + '.');
+}
+
+function encontrarPrimeiraLinhaVaziaTalao(aba) {
+  return encontrarPrimeiraLinhaVaziaRelatorio(aba);
+}
+
+function obterUltimaLinhaOperacionalRelatorio_(sheet) {
+  var ultimaLinha = Math.max(sheet.getLastRow(), PRIMEIRA_LINHA_DADOS_TALAO);
+  var colA = sheet.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, ultimaLinha - PRIMEIRA_LINHA_DADOS_TALAO + 1, 1).getDisplayValues();
+  for (var i = 0; i < colA.length; i += 1) {
+    var valor = limparTexto(colA[i][0]).toUpperCase();
+    if (valor.indexOf('INSTRU') !== -1 || valor.indexOf('ORIENTA') !== -1 || valor.indexOf('OBSERVA') !== -1) {
+      return PRIMEIRA_LINHA_DADOS_TALAO + i - 1;
+    }
+  }
+  return ultimaLinha;
+}
+
+function localizarLinhaDuplicadaRelatorio_(sheet, caso) {
+  var ultimaLinhaOperacional = obterUltimaLinhaOperacionalRelatorio_(sheet);
+  if (ultimaLinhaOperacional < PRIMEIRA_LINHA_DADOS_TALAO) return -1;
+  var linhas = ultimaLinhaOperacional - PRIMEIRA_LINHA_DADOS_TALAO + 1;
+  var dados = sheet.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, linhas, 11).getValues();
+  var assinaturaBusca = gerarAssinaturaOperacionalRelatorio_(caso);
+  for (var i = 0; i < dados.length; i += 1) {
+    var linha = dados[i];
+    var vazia = linha.every(function (c) { return limparTexto(c) === ''; });
+    if (vazia) continue;
+    var assinaturaLinha = gerarAssinaturaOperacionalRelatorio_({
+      talaoBopm: linha[1], cpf: linha[2], nomeCompletoDesaparecido: linha[3], telefoneSolicitante: linha[7], dataHoraRegistro: linha[0]
+    });
+    if (assinaturaLinha === assinaturaBusca) return PRIMEIRA_LINHA_DADOS_TALAO + i;
+  }
+  return -1;
+}
+
+function gerarAssinaturaOperacionalRelatorio_(caso) {
+  var dataBase = normalizarDataRelatorio_(caso && (caso.dataHoraRegistro || caso.dataServico));
+  return [
+    normalizarDocumentoRelatorio_(caso && (caso.talaoBopm || caso.talaoPMESP || caso.talao || caso.numeroTalao)),
+    normalizarDocumentoRelatorio_(caso && caso.cpf),
+    normalizarTextoAssinatura_(caso && caso.nomeCompletoDesaparecido),
+    normalizarTelefoneRelatorio_(caso && caso.telefoneSolicitante),
+    dataBase
+  ].join('|');
+}
+
+function normalizarDocumentoRelatorio_(valor) { return limparTexto(valor).replace(/[^0-9A-Za-z]/g, '').toUpperCase(); }
+function normalizarTelefoneRelatorio_(valor) { return limparTexto(valor).replace(/\D/g, ''); }
+function normalizarDataRelatorio_(valor) {
+  var dt = valor instanceof Date ? valor : new Date(valor);
+  if (!(dt instanceof Date) || isNaN(dt.getTime())) return limparTexto(valor);
+  return Utilities.formatDate(dt, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+}
+
+function limparDuplicadosRelatorioAtual() {
+  var aba = obterOuCriarAbaTalao190(new Date());
+  var ultimaLinhaOperacional = obterUltimaLinhaOperacionalRelatorio_(aba);
+  if (ultimaLinhaOperacional < PRIMEIRA_LINHA_DADOS_TALAO) return { removidos: 0, mantidos: 0 };
+  var totalLinhas = ultimaLinhaOperacional - PRIMEIRA_LINHA_DADOS_TALAO + 1;
+  var dados = aba.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, totalLinhas, 11).getValues();
+  var assinaturas = {};
+  var removidos = 0;
+  for (var i = dados.length - 1; i >= 0; i -= 1) {
+    var linha = dados[i];
+    if (linha.every(function (c) { return limparTexto(c) === ''; })) continue;
+    var assinatura = gerarAssinaturaOperacionalRelatorio_({ talaoBopm: linha[1], cpf: linha[2], nomeCompletoDesaparecido: linha[3], telefoneSolicitante: linha[7], dataHoraRegistro: linha[0] });
+    if (assinaturas[assinatura]) {
+      aba.getRange(PRIMEIRA_LINHA_DADOS_TALAO + i, 1, 1, 11).clearContent();
+      removidos += 1;
+    } else {
+      assinaturas[assinatura] = true;
+    }
+  }
+  return { removidos: removidos, mantidos: Object.keys(assinaturas).length };
 }
 
 function obterOuCriarAbaTalao190(data) {
@@ -1963,4 +2067,31 @@ function restaurarBackupBase_(backup, operadorAtual) {
     { perfil: operadorAtual.perfil, origem: 'auditoria.html' }
   );
   return { restaurado: false, bloqueado: true, motivo: 'Restauração automática desativada por segurança. Solicitação registrada em LOGS.' };
+}
+
+
+function limparDuplicadosCasosPorAssinatura() {
+  garantirEstruturaCabineVerde_();
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', schema.CASOS);
+  var cabecalho = garantirColunasDaEstrutura(abaCasos, schema.CASOS);
+  var total = Math.max(abaCasos.getLastRow() - 1, 0);
+  if (!total) return { removidos: 0, mantidos: 0 };
+  var dados = abaCasos.getRange(2, 1, total, abaCasos.getLastColumn()).getValues();
+  var vistos = {};
+  var removidos = 0;
+  for (var i = dados.length - 1; i >= 0; i -= 1) {
+    var registro = {};
+    cabecalho.forEach(function (coluna, cidx) { registro[coluna] = dados[i][cidx]; });
+    var assinatura = gerarAssinaturaCaso_(registro);
+    if (!assinatura || assinatura === '|||') continue;
+    if (vistos[assinatura]) {
+      abaCasos.deleteRow(i + 2);
+      removidos += 1;
+    } else {
+      vistos[assinatura] = true;
+    }
+  }
+  return { removidos: removidos, mantidos: Object.keys(vistos).length };
 }

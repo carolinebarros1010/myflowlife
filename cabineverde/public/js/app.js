@@ -370,6 +370,7 @@ const render = () => {
             <h3>Dados principais</h3>
             <div class="cv-grid">
               <label for="talaoPMESP">Número do Talão PMESP<input id="talaoPMESP" name="talaoPMESP" data-sync-key="talaoPMESP" required placeholder="Ex: 7450" /></label>
+              <input type="hidden" name="talaoBopm" data-sync-key="talaoPMESP" />
               <label>Nome da pessoa desaparecida<input name="nomeCompletoDesaparecido" data-sync-key="nomeCompletoDesaparecido" required /></label>
               <label>Sexo ou gênero<input name="sexoGenero" data-sync-key="sexoGenero" /></label>
               <label>Idade<input name="idade" data-sync-key="idade" type="number" min="0" required /></label>
@@ -604,7 +605,9 @@ const render = () => {
     const talao = document.getElementById('entrada-talaoPMESP').value.trim();
     if (!talao) return atualizarFeedback('Número do Talão PMESP é obrigatório.', true);
     form.querySelector('[name="talaoPMESP"]').value = talao;
-    form.querySelector('[name="municipio"]').value = document.getElementById('entrada-municipio').value.trim();
+    const campoTalaoBopm = form.querySelector('[name="talaoBopm"]');
+    if (campoTalaoBopm) campoTalaoBopm.value = talao;
+        form.querySelector('[name="municipio"]').value = document.getElementById('entrada-municipio').value.trim();
     mostrarTela(2);
     atualizarPassos();
     configurarUploadFotoDesaparecido();
@@ -638,6 +641,10 @@ const render = () => {
     if (botaoSubmit?.disabled) return;
     if (!operadorEstaValidadoLocalmente()) return atualizarFeedback('Operador não validado. Faça o login operacional para continuar.', true);
     const caso = obterCasoDoFormulario();
+    if (!caso.talaoBopm) {
+      atualizarFeedback('Número do Talão PMESP é obrigatório.', true);
+      return;
+    }
     if (!validarCamposMinimos(caso)) {
       atualizarFeedback('Preencha os campos mínimos: nome do desaparecido, município, nome do solicitante e telefone do solicitante.', true);
       return;
