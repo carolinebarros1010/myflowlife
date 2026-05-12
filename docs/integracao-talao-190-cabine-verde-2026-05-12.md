@@ -54,3 +54,11 @@ Arquivo alterado: `cabineverde/GAS/Code.gs`.
 
 - Em caso de falha de sincronização, o erro é registrado em log (`Logger.log`) sem interromper a persistência oficial da aba `CASOS`.
 - A rotina preserva a formatação da aba modelo ao criar abas diárias por cópia.
+
+
+## Ajuste de inserção sequencial no Talão 190 (2026-05-12)
+
+- A escrita de novos casos na aba diária do Talão 190 passa a iniciar sempre na linha operacional `7` (`PRIMEIRA_LINHA_DADOS_TALAO`).
+- A função `encontrarPrimeiraLinhaVaziaTalao(aba)` lê apenas o bloco de dados (11 colunas) a partir da linha 7 e encontra a primeira linha totalmente vazia por conteúdo real.
+- O algoritmo ignora formatações, mesclagens e estilos em linhas inferiores, evitando desvios para linhas altas causados por `getLastRow() + 1`.
+- Caso todas as linhas do bloco estejam preenchidas, a gravação é feita imediatamente após a última linha válida.
