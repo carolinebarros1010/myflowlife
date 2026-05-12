@@ -5,6 +5,7 @@ var CABINE_VERDE_BUILD = '2026-05-03-181-CASOS-FIX';
 var PERFIS_OPERADOR_VALIDOS = ['OPERADOR', 'SUPERVISOR', 'ADMIN', 'AUDITOR'];
 const ID_PLANILHA_TALAO_190 = '1gq_zk5fYPTLdjDm8IeqTThgfaijqrwNo6PNk-9cKZGs';
 const ABA_MODELO_TALAO = 'MODELO_TALAO';
+const PRIMEIRA_LINHA_DADOS_TALAO = 7;
 
 function normalizarPerfilOperador_(perfil) {
   return limparTexto(perfil).toUpperCase();
@@ -1269,11 +1270,32 @@ function sincronizarTalao190(caso) {
     var dataBase = caso.dataHoraRegistro || caso.dataServico || new Date();
     var abaTalao = obterOuCriarAbaTalao190(dataBase);
     var linha = montarLinhaTalao190(caso);
-    var primeiraLinhaLivre = Math.max(abaTalao.getLastRow() + 1, 2);
-    abaTalao.getRange(primeiraLinhaLivre, 1, 1, linha.length).setValues([linha]);
+    var linhaDestino = encontrarPrimeiraLinhaVaziaTalao(abaTalao);
+    abaTalao.getRange(linhaDestino, 1, 1, 11).setValues([linha]);
   } catch (erro) {
     Logger.log('ERRO_SINCRONIZAR_TALAO_190: ' + (erro && erro.message ? erro.message : erro));
   }
+}
+
+
+function encontrarPrimeiraLinhaVaziaTalao(aba) {
+  var ultimaLinha = aba.getLastRow();
+  if (ultimaLinha < PRIMEIRA_LINHA_DADOS_TALAO) return PRIMEIRA_LINHA_DADOS_TALAO;
+
+  var quantidadeLinhas = ultimaLinha - PRIMEIRA_LINHA_DADOS_TALAO + 1;
+  if (quantidadeLinhas <= 0) return PRIMEIRA_LINHA_DADOS_TALAO;
+
+  var intervalo = aba.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, quantidadeLinhas, 11);
+  var valores = intervalo.getValues();
+
+  for (var i = 0; i < valores.length; i++) {
+    var linhaVazia = valores[i].every(function (celula) {
+      return celula === '' || celula === null;
+    });
+    if (linhaVazia) return PRIMEIRA_LINHA_DADOS_TALAO + i;
+  }
+
+  return PRIMEIRA_LINHA_DADOS_TALAO + valores.length;
 }
 
 function obterOuCriarAbaTalao190(data) {
