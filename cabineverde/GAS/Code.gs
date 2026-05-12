@@ -2150,3 +2150,184 @@ function limparDuplicadosCasosPorAssinatura() {
   }
   return { removidos: removidos, mantidos: Object.keys(vistos).length };
 }
+
+function recuperarTaloesAusentesCasos() {
+  garantirEstruturaCabineVerde_();
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var schema = obterSchemaCabineVerdeUnificado_();
+  var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', schema.CASOS);
+  var cabecalhoCasos = garantirColunasDaEstrutura(abaCasos, schema.CASOS);
+  var totalLinhas = Math.max(abaCasos.getLastRow() - 1, 0);
+  if (!totalLinhas) {
+    return { totalAnalisado: 0, totalSemTalao: 0, totalRecuperado: 0, totalNaoRecuperado: 0, casosNaoRecuperados: [] };
+  }
+
+  var idxTalaoBopm = cabecalhoCasos.indexOf('talaoBopm');
+  var idxIdCaso = cabecalhoCasos.indexOf('idCaso');
+  var idxObservacoes = cabecalhoCasos.indexOf('observacoesOperacionais');
+  var idxNome = cabecalhoCasos.indexOf('nomeCompletoDesaparecido');
+  var idxTelefone = cabecalhoCasos.indexOf('telefoneSolicitante');
+  var idxDataServico = cabecalhoCasos.indexOf('dataServico');
+  if (idxTalaoBopm < 0) throw new Error('Coluna talaoBopm não encontrada em CASOS.');
+
+  var dadosCasos = abaCasos.getRange(2, 1, totalLinhas, abaCasos.getLastColumn()).getValues();
+  var mapaEventos = mapearTextosPorIdCaso_('EVENTOS_CASO', ['idCaso', 'descricaoEvento', 'detalhes', 'observacoes']);
+  var mapaHistorico = mapearTextosPorIdCaso_('HISTORICO_EDICOES', ['idCaso', 'valorNovo', 'valorAnterior', 'justificativa']);
+  var mapaLogs = mapearTextosPorIdCaso_('LOG_AUDITORIA', ['chaveUnica', 'mensagemTecnica', 'acaoExecutada']);
+  var mapaCopom = mapearTalaoPorChaveCopom_();
+
+  var atualizacoes = [];
+  var registrosLog = [];
+  var casosNaoRecuperados = [];
+  var totalSemTalao = 0;
+  var totalRecuperado = 0;
+
+  dadosCasos.forEach(function (linha, idx) {
+    var talaoAtual = limparTexto(linha[idxTalaoBopm]);
+    if (talaoAtual) return;
+    totalSemTalao += 1;
+
+    var idCaso = idxIdCaso >= 0 ? limparTexto(linha[idxIdCaso]) : '';
+    var nome = idxNome >= 0 ? limparTexto(linha[idxNome]) : '';
+    var telefone = idxTelefone >= 0 ? limparTexto(linha[idxTelefone]) : '';
+    var dataServico = idxDataServico >= 0 ? limparTexto(linha[idxDataServico]) : '';
+    var recuperado = buscarTalaoPorPrioridade_({
+      observacoesOperacionais: idxObservacoes >= 0 ? limparTexto(linha[idxObservacoes]) : '',
+      textoHistorico: mapaHistorico[idCaso] || '',
+      textoLog: mapaLogs[idCaso] || '',
+      textoEvento: mapaEventos[idCaso] || '',
+      chaveCopom: gerarChaveCopom_(nome, telefone, dataServico),
+      mapaCopom: mapaCopom
+    });
+
+    if (recuperado && recuperado.valor) {
+      atualizacoes.push({ linhaPlanilha: idx + 2, valor: recuperado.valor });
+      registrosLog.push(criarLogRecuperacaoTalao_(idCaso, nome, telefone, 'talao_recuperado', recuperado.origem, recuperado.valor));
+      totalRecuperado += 1;
+      return;
+    }
+
+    casosNaoRecuperados.push({ idCaso: idCaso, nomeCompletoDesaparecido: nome, telefoneSolicitante: telefone, dataServico: dataServico });
+    registrosLog.push(criarLogRecuperacaoTalao_(idCaso, nome, telefone, 'talao_nao_recuperado', 'nao_encontrado', ''));
+  });
+
+  if (atualizacoes.length) {
+    var valoresColuna = abaCasos.getRange(2, idxTalaoBopm + 1, totalLinhas, 1).getValues();
+    atualizacoes.forEach(function (item) {
+      valoresColuna[item.linhaPlanilha - 2][0] = item.valor;
+    });
+    abaCasos.getRange(2, idxTalaoBopm + 1, totalLinhas, 1).setValues(valoresColuna);
+  }
+
+  if (registrosLog.length) {
+    var abaLog = garantirAbaComCabecalho(planilha, ABA_LOG_AUDITORIA, COLUNAS_LOG_AUDITORIA);
+    var cabecalhoLog = garantirColunasDaEstrutura(abaLog, COLUNAS_LOG_AUDITORIA);
+    var linhasLog = registrosLog.map(function (registro) {
+      return cabecalhoLog.map(function (coluna) { return normalizarValorPlanilha(registro[coluna]); });
+    });
+    abaLog.getRange(abaLog.getLastRow() + 1, 1, linhasLog.length, cabecalhoLog.length).setValues(linhasLog);
+  }
+
+  return {
+    totalAnalisado: totalLinhas,
+    totalSemTalao: totalSemTalao,
+    totalRecuperado: totalRecuperado,
+    totalNaoRecuperado: totalSemTalao - totalRecuperado,
+    casosNaoRecuperados: casosNaoRecuperados
+  };
+}
+
+function buscarTalaoPorPrioridade_(fontes) {
+  var candidatos = [
+    { origem: 'observacao', texto: fontes.observacoesOperacionais || '' },
+    { origem: 'historico', texto: fontes.textoHistorico || '' },
+    { origem: 'log', texto: fontes.textoLog || '' },
+    { origem: 'evento', texto: fontes.textoEvento || '' }
+  ];
+  for (var i = 0; i < candidatos.length; i += 1) {
+    var valor = extrairTalaoTexto_(candidatos[i].texto);
+    if (valor) return { valor: valor, origem: candidatos[i].origem };
+  }
+  var valorCopom = fontes.mapaCopom[fontes.chaveCopom] || '';
+  if (valorCopom) return { valor: valorCopom, origem: 'relatorio' };
+  return null;
+}
+
+function extrairTalaoTexto_(texto) {
+  var conteudo = limparTexto(texto);
+  if (!conteudo) return '';
+  var regex = /(?:TAL[ÃA]O|BOPM)\s*(?:N[º°O]\s*)?[:#-]?\s*(\d{4,12})/i;
+  var match = conteudo.match(regex);
+  return match && match[1] ? limparTexto(match[1]) : '';
+}
+
+function mapearTextosPorIdCaso_(nomeAba, camposTexto) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = planilha.getSheetByName(nomeAba);
+  if (!aba || aba.getLastRow() < 2) return {};
+  var dados = aba.getDataRange().getValues();
+  var cabecalho = dados[0].map(limparTexto);
+  var idxId = cabecalho.indexOf('idCaso');
+  if (idxId < 0) return {};
+  var indicesTexto = camposTexto.map(function (campo) { return cabecalho.indexOf(campo); }).filter(function (idx) { return idx >= 0; });
+  var mapa = {};
+  for (var i = 1; i < dados.length; i += 1) {
+    var idCaso = limparTexto(dados[i][idxId]);
+    if (!idCaso) continue;
+    var textoLinha = indicesTexto.map(function (idx) { return limparTexto(dados[i][idx]); }).join(' | ');
+    mapa[idCaso] = (mapa[idCaso] ? mapa[idCaso] + ' | ' : '') + textoLinha;
+  }
+  return mapa;
+}
+
+function mapearTalaoPorChaveCopom_() {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = planilha.getSheetByName('COPOM - CABINE VERDE');
+  if (!aba || aba.getLastRow() < 2) return {};
+  var dados = aba.getDataRange().getValues();
+  var cabecalho = dados[0].map(limparTexto);
+  var idxNome = cabecalho.indexOf('nomeCompletoDesaparecido');
+  var idxTelefone = cabecalho.indexOf('telefoneSolicitante');
+  var idxDataServico = cabecalho.indexOf('dataServico');
+  var idxTalao = cabecalho.indexOf('talaoBopm');
+  if (idxNome < 0 || idxTelefone < 0 || idxDataServico < 0 || idxTalao < 0) return {};
+  var mapa = {};
+  for (var i = 1; i < dados.length; i += 1) {
+    var valorTalao = limparTexto(dados[i][idxTalao]);
+    if (!valorTalao) continue;
+    var chave = gerarChaveCopom_(dados[i][idxNome], dados[i][idxTelefone], dados[i][idxDataServico]);
+    if (chave) mapa[chave] = valorTalao;
+  }
+  return mapa;
+}
+
+function gerarChaveCopom_(nome, telefone, dataServico) {
+  return [limparTexto(nome).toUpperCase(), limparTexto(telefone), normalizarDataSomenteDia_(dataServico)].join('|');
+}
+
+function normalizarDataSomenteDia_(valor) {
+  if (valor instanceof Date && !isNaN(valor.getTime())) {
+    return Utilities.formatDate(valor, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+  var texto = limparTexto(valor);
+  if (!texto) return '';
+  var matchIso = texto.match(/(\d{4}-\d{2}-\d{2})/);
+  if (matchIso) return matchIso[1];
+  var matchBr = texto.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (matchBr) return matchBr[3] + '-' + matchBr[2] + '-' + matchBr[1];
+  return texto;
+}
+
+function criarLogRecuperacaoTalao_(idCaso, nome, telefone, status, origem, valorRecuperado) {
+  return {
+    dataHora: formatarDataHora(new Date()),
+    status: status,
+    chaveUnica: idCaso,
+    acaoExecutada: 'recuperarTaloesAusentesCasos|' + origem + '|valor=' + (valorRecuperado || ''),
+    nomeDesaparecido: nome,
+    solicitante: '',
+    telefone: telefone,
+    operador: 'rotina_emergencial',
+    mensagemTecnica: 'origem=' + origem + '; valor_recuperado=' + (valorRecuperado || '')
+  };
+}
