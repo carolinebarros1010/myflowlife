@@ -62,6 +62,9 @@ var ESTRUTURA_PLANILHA = {
 };
 
 var CACHE_OPERADORES_TTL_SEGUNDOS = 300;
+var CACHE_IDEMPOTENCIA_TTL_SEGUNDOS = 21600;
+var ABA_LOG_AUDITORIA = 'LOG_AUDITORIA';
+var COLUNAS_LOG_AUDITORIA = ['dataHora', 'status', 'chaveUnica', 'acaoExecutada', 'nomeDesaparecido', 'solicitante', 'telefone', 'operador', 'mensagemTecnica'];
 
 function obterOperadoresCache_() {
   var cache = CacheService.getScriptCache();
@@ -877,6 +880,7 @@ function doPost(e) {
     registrarLogTecnico(planilhaLogs, { etapa: 'GRAVACAO_INICIADA', ok: true, mensagem: 'Iniciando persistência em abas de destino', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
 
     var chaveRequisicao = limparTexto(body.chaveRequisicao || (body.payload && body.payload.chaveRequisicao));
+    var chaveUnica = limparTexto(body.chaveUnica || (body.payload && body.payload.chaveUnica) || chaveRequisicao);
     var cacheIdempotencia = CacheService.getScriptCache();
 
     var lock = null;
@@ -885,11 +889,12 @@ function doPost(e) {
       lock.waitLock(20000);
     }
 
-    var resultadoPersistencia = { idCaso: idCaso, action: 'updated', linha: -1 };
+    var resultadoPersistencia = { idCaso: idCaso, action: 'updated', linha: -1, status: 'sucesso', message: 'Gravação multiabas concluída' };
     try {
-      if (action === 'salvarCaso' && chaveRequisicao) {
-        var marcador = cacheIdempotencia.get('salvarCaso:' + chaveRequisicao);
+      if (action === 'salvarCaso' && chaveUnica) {
+        var marcador = cacheIdempotencia.get('salvarCaso:' + chaveUnica);
         if (marcador) {
+          registrarLogAuditoriaPersistencia_(planilha, { dataHora: formatarDataHora(new Date()), status: 'duplicado_ignorado', chaveUnica: chaveUnica, acaoExecutada: 'CACHE_HIT', nomeDesaparecido: limparTexto((body.payload && body.payload.nomeCompletoDesaparecido) || body.nomeCompletoDesaparecido), solicitante: limparTexto((body.payload && body.payload.nomeSolicitante) || body.nomeSolicitante), telefone: limparTexto((body.payload && body.payload.telefoneSolicitante) || body.telefoneSolicitante), operador: limparTexto(operadorAtual && operadorAtual.email), mensagemTecnica: 'Requisição duplicada ignorada por idempotência no CacheService.' });
           return criarRespostaJson({ ok: true, status: 'duplicado_ignorado', data: { action: 'ignored', idCaso: idCaso, linha: -1, message: 'Requisição duplicada ignorada por idempotência' } });
         }
       }
@@ -901,8 +906,8 @@ function doPost(e) {
         if (parcial.linha) resultadoPersistencia.linha = parcial.linha;
       });
 
-      if (action === 'salvarCaso' && chaveRequisicao) {
-        cacheIdempotencia.put('salvarCaso:' + chaveRequisicao, '1', 21600);
+      if (action === 'salvarCaso' && chaveUnica) {
+        cacheIdempotencia.put('salvarCaso:' + chaveUnica, '1', CACHE_IDEMPOTENCIA_TTL_SEGUNDOS);
       }
     } finally {
       if (lock) lock.releaseLock();
@@ -932,7 +937,7 @@ function doPost(e) {
     limparFotosTemporarias_();
     registrarLogAcessoOperador_(planilha, 'GRAVACAO_CONCLUIDA', 'SUCESSO', 'Registros persistidos com sucesso.', operadorAtual.email, { perfil: operadorAtual.perfil, acaoExecutada: action, talaoPMESP: talao });
     registrarLogTecnico(planilhaLogs || planilha, { etapa: 'GRAVACAO_SUCESSO', ok: true, mensagem: 'Registros persistidos com sucesso', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
-    return criarRespostaJson({ ok: true, status: 'sucesso', data: { action: resultadoPersistencia.action, idCaso: idCaso, linha: resultadoPersistencia.linha, message: 'Gravação multiabas concluída' } });
+    return criarRespostaJson({ ok: true, status: resultadoPersistencia.status || 'sucesso', data: { action: resultadoPersistencia.action, idCaso: idCaso, linha: resultadoPersistencia.linha, message: resultadoPersistencia.message || 'Gravação multiabas concluída' } });
   } catch (err) {
     var mensagemErro = err && err.message ? err.message : String(err);
     registrarLogTecnico(planilhaLogs, { etapa: 'ERRO_GRAVACAO_PLANILHA', ok: false, mensagem: mensagemErro, rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
@@ -1151,6 +1156,35 @@ function localizarLinhaCaso_(sheetCasos, cabecalhoAtual, dados) {
   return { linha: -1, criterio: '' };
 }
 
+
+function obterChaveUnicaRegistro_(body, registroPorColuna) {
+  var chave = limparTexto((registroPorColuna && registroPorColuna.CHAVE_UNICA) || (registroPorColuna && registroPorColuna.chaveUnica) || body.chaveUnica || body.chaveRequisicao || (body.payload && body.payload.chaveUnica) || (body.payload && body.payload.chaveRequisicao));
+  if (!chave) return '';
+  return chave;
+}
+
+function localizarLinhaPorChaveUnica_(sheetCasos, cabecalhoAtual, chaveUnica) {
+  var chave = limparTexto(chaveUnica);
+  if (!chave) return -1;
+  var idx = cabecalhoAtual.indexOf('CHAVE_UNICA');
+  if (idx < 0 || sheetCasos.getLastRow() < 2) return -1;
+  var valores = sheetCasos.getRange(2, idx + 1, sheetCasos.getLastRow() - 1, 1).getValues();
+  for (var i = 0; i < valores.length; i += 1) {
+    if (limparTexto(valores[i][0]) === chave) return i + 2;
+  }
+  return -1;
+}
+
+function registrarLogAuditoriaPersistencia_(planilha, dados) {
+  var aba = garantirAbaComCabecalho(planilha, ABA_LOG_AUDITORIA, COLUNAS_LOG_AUDITORIA);
+  var cabecalho = garantirColunasDaEstrutura(aba, COLUNAS_LOG_AUDITORIA);
+  var linha = cabecalho.map(function (coluna) {
+    return normalizarValorPlanilha((dados || {})[coluna]);
+  });
+  var linhaDestino = aba.getLastRow() + 1;
+  aba.getRange(linhaDestino, 1, 1, linha.length).setValues([linha]);
+}
+
 function persistirRegistro(planilha, registro) {
   Logger.log("PERSISTIR_REGISTRO_OFICIAL_ATIVO");
   Logger.log('DEBUG_FLUXO_SALVARCASO: persistirRegistro entrada=' + JSON.stringify({
@@ -1206,7 +1240,16 @@ function persistirRegistro(planilha, registro) {
     registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var talaoPMESPRecebido = limparTexto(registroPorColuna.talaoPMESP);
+    var chaveUnica = obterChaveUnicaRegistro_(registro, registroPorColuna);
+    if (chaveUnica) { registroPorColuna.CHAVE_UNICA = chaveUnica; registroPorColuna.chaveUnica = chaveUnica; registroPorColuna.chaveRequisicao = chaveUnica; }
     var modoRegistro = limparTexto((registro.payload && registro.payload.modo) || registro.modo || '').toLowerCase();
+    if (chaveUnica) {
+      var linhaExistentePorChave = localizarLinhaPorChaveUnica_(sheetCasos, cabecalhoAtual, chaveUnica);
+      if (linhaExistentePorChave > 1) {
+        registrarLogAuditoriaPersistencia_(planilha, { dataHora: formatarDataHora(new Date()), status: 'duplicado_ignorado', chaveUnica: chaveUnica, acaoExecutada: 'PLANILHA_CHAVE_UNICA_HIT', nomeDesaparecido: limparTexto(registroPorColuna.nomeCompletoDesaparecido), solicitante: limparTexto(registroPorColuna.nomeSolicitante), telefone: limparTexto(registroPorColuna.telefoneSolicitante), operador: limparTexto(registroPorColuna.operadorResponsavel), mensagemTecnica: 'CHAVE_UNICA já existente na planilha CASOS.' });
+        return { idCaso: idCaso, action: 'ignored', linha: linhaExistentePorChave, status: 'duplicado_ignorado', message: 'Requisição duplicada ignorada por CHAVE_UNICA' };
+      }
+    }
     var resultadoLocalizacao = localizarLinhaCaso_(sheetCasos, cabecalhoAtual, registroPorColuna);
     var linhaPorIdCaso = idCaso ? localizarCasoPorIdCaso(sheetCasos, idCaso, cabecalhoAtual) : -1;
     var linhaPorTalaoPMESP = talaoPMESPRecebido ? localizarCasoPorTalaoPMESP(sheetCasos, talaoPMESPRecebido, cabecalhoAtual) : -1;
@@ -1245,10 +1288,12 @@ function persistirRegistro(planilha, registro) {
           dataHora: formatarDataHora(new Date())
         });
       }
-      return { idCaso: idCaso, action: 'updated', linha: linhaAlvo };
+      registrarLogAuditoriaPersistencia_(planilha, { dataHora: formatarDataHora(new Date()), status: 'atualizado', chaveUnica: chaveUnica, acaoExecutada: 'UPDATE_CASO', nomeDesaparecido: limparTexto(registroPorColuna.nomeCompletoDesaparecido), solicitante: limparTexto(registroPorColuna.nomeSolicitante), telefone: limparTexto(registroPorColuna.telefoneSolicitante), operador: limparTexto(registroPorColuna.operadorResponsavel), mensagemTecnica: 'Caso atualizado por critério=' + limparTexto(resultadoLocalizacao.criterio) });
+      return { idCaso: idCaso, action: 'updated', linha: linhaAlvo, status: 'atualizado', message: 'Caso existente atualizado com sucesso' };
     }
 
-    sheetCasos.appendRow(linhaFinal);
+    var linhaInsercao = sheetCasos.getLastRow() + 1;
+    sheetCasos.getRange(linhaInsercao, 1, 1, linhaFinal.length).setValues([linhaFinal]);
     sincronizarTalao190(registroPorColuna);
     registrarEventoOperacional_(planilha, idCaso, 'CASO_CRIADO', {
       idCaso: idCaso,
@@ -1257,7 +1302,8 @@ function persistirRegistro(planilha, registro) {
       dataHora: formatarDataHora(new Date()),
       statusInicial: limparTexto(registroPorColuna.statusCaso) || 'Em triagem'
     });
-    return { idCaso: idCaso, action: 'created', linha: sheetCasos.getLastRow() };
+    registrarLogAuditoriaPersistencia_(planilha, { dataHora: formatarDataHora(new Date()), status: 'sucesso', chaveUnica: chaveUnica, acaoExecutada: 'INSERT_CASO', nomeDesaparecido: limparTexto(registroPorColuna.nomeCompletoDesaparecido), solicitante: limparTexto(registroPorColuna.nomeSolicitante), telefone: limparTexto(registroPorColuna.telefoneSolicitante), operador: limparTexto(registroPorColuna.operadorResponsavel), mensagemTecnica: 'Novo caso inserido com sucesso.' });
+    return { idCaso: idCaso, action: 'created', linha: linhaInsercao, status: 'sucesso', message: 'Novo caso gravado com sucesso' };
   }
 
   var sheet = garantirAbaComCabecalho(planilha, aba, colunasEstrutura.length ? colunasEstrutura : colunas);

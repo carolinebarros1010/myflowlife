@@ -638,7 +638,7 @@ export const salvarCasoSheets = async (caso) => {
     console.log("COLUNAS SALVAR CASO:", payload.colunas);
     console.log("VALORES SALVAR CASO:", payload.valores);
     console.log("PAYLOAD SALVAR CASO:", payload);
-    const resposta = await chamarAcaoGAS('salvarCaso', { ...payload, chaveRequisicao });
+    const resposta = await chamarAcaoGAS('salvarCaso', { ...payload, chaveRequisicao, chaveUnica: chaveRequisicao, payload: { ...(payload.payload || {}), CHAVE_UNICA: chaveRequisicao, chaveUnica: chaveRequisicao, chaveRequisicao } });
     return {
       ok: true,
       status: resposta?.status || 'sucesso',
