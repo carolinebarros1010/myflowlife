@@ -1355,7 +1355,7 @@ function obterOuCriarAbaTalao190(data) {
 
   aba = abaModelo.copyTo(planilhaTalao).setName(nomeAba);
   planilhaTalao.setActiveSheet(aba);
-  planilhaTalao.moveActiveSheet(planilhaTalao.getNumSheets());
+  planilhaTalao.moveActiveSheet(3);
   atualizarTituloTalao(aba, data);
   return aba;
 }
