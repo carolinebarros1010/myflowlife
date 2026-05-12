@@ -2333,6 +2333,128 @@ function criarLogRecuperacaoTalao_(idCaso, nome, telefone, status, origem, valor
 }
 
 
+
+function reconciliarTaloesComRelatoriosCOPOM(simulacao) {
+  var SIMULACAO = simulacao !== false;
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    garantirEstruturaCabineVerde_();
+    var planilha = SpreadsheetApp.getActiveSpreadsheet();
+    var schema = obterSchemaCabineVerdeUnificado_();
+    var abaCasos = garantirAbaComCabecalho(planilha, 'CASOS', schema.CASOS);
+    var cabecalhoCasos = garantirColunasDaEstrutura(abaCasos, schema.CASOS);
+    var totalLinhas = Math.max(abaCasos.getLastRow() - 1, 0);
+    if (!totalLinhas) return { simulacao: SIMULACAO, totalAnalisado: 0, totalSemTalao: 0, totalReconciliado: 0, totalAmbiguo: 0, totalNaoEncontrado: 0, casosRecuperados: [], conflitos: [] };
+
+    var idx = mapearIndicesReconciliacaoCopom_(cabecalhoCasos);
+    if (idx.talaoBopm < 0) throw new Error('Coluna talaoBopm (CASOS!H) não encontrada.');
+
+    var backupNome = SIMULACAO ? '' : criarBackupCasosReconciliacao_(planilha, abaCasos);
+    var dadosCasos = abaCasos.getRange(2, 1, totalLinhas, abaCasos.getLastColumn()).getValues();
+    var indiceCopom = carregarIndiceAbasDiariasCopom_(planilha);
+
+    var atualizacoes = [];
+    var logs = [];
+    var recuperados = [];
+    var conflitos = [];
+    var totalSemTalao = 0;
+
+    for (var i = 0; i < dadosCasos.length; i += 1) {
+      var linha = dadosCasos[i];
+      if (limparTexto(linha[idx.talaoBopm])) continue;
+      totalSemTalao += 1;
+      var caso = extrairCasoReconciliacao_(linha, idx, i + 2);
+      var analise = encontrarMelhorCorrespondenciaCopom_(caso, indiceCopom);
+
+      if (analise.status === 'forte') {
+        atualizacoes.push({ linhaPlanilha: caso.linhaPlanilha, talao: analise.vencedor.talao, assinatura: analise.vencedor.assinatura });
+        recuperados.push({ idCaso: caso.idCaso, linhaCasos: caso.linhaPlanilha, talaoRecuperado: analise.vencedor.talao, abaOrigem: analise.vencedor.abaOrigem, linhaOrigem: analise.vencedor.linhaOrigem });
+        logs.push(criarLogReconciliacaoCopom_(caso, analise.vencedor, 'talao_reconciliado_copom'));
+      } else if (analise.status === 'ambiguo') {
+        conflitos.push({ idCaso: caso.idCaso, linhaCasos: caso.linhaPlanilha, motivo: 'Múltiplas correspondências com alta confiança', candidatos: analise.candidatos.map(function (c) { return { abaOrigem: c.abaOrigem, linhaOrigem: c.linhaOrigem, talao: c.talao, score: c.score }; }) });
+        logs.push(criarLogReconciliacaoCopom_(caso, analise.candidatos[0], 'conflito_manual'));
+      }
+    }
+
+    if (!SIMULACAO && atualizacoes.length) {
+      var idxAss = cabecalhoCasos.indexOf('assinaturaCaso');
+      var colTalao = abaCasos.getRange(2, idx.talaoBopm + 1, totalLinhas, 1).getValues();
+      var colAss = idxAss >= 0 ? abaCasos.getRange(2, idxAss + 1, totalLinhas, 1).getValues() : null;
+      atualizacoes.forEach(function (u) {
+        var pos = u.linhaPlanilha - 2;
+        colTalao[pos][0] = u.talao;
+        if (colAss) colAss[pos][0] = u.assinatura;
+      });
+      abaCasos.getRange(2, idx.talaoBopm + 1, totalLinhas, 1).setValues(colTalao);
+      if (colAss) abaCasos.getRange(2, idxAss + 1, totalLinhas, 1).setValues(colAss);
+    }
+
+    registrarLogsEmLote_(planilha, logs);
+    return { simulacao: SIMULACAO, backupCriado: backupNome, totalAnalisado: totalLinhas, totalSemTalao: totalSemTalao, totalReconciliado: recuperados.length, totalAmbiguo: conflitos.length, totalNaoEncontrado: totalSemTalao - recuperados.length - conflitos.length, casosRecuperados: recuperados, conflitos: conflitos };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function mapearIndicesReconciliacaoCopom_(cabecalho) { var idx = {}; ['idCaso','talaoBopm','nomeCompletoDesaparecido','telefoneSolicitante','dataServico','nomeSolicitante','observacoesOperacionais'].forEach(function (c) { idx[c] = cabecalho.indexOf(c); }); return idx; }
+function extrairCasoReconciliacao_(linha, idx, linhaPlanilha) { return { linhaPlanilha: linhaPlanilha, idCaso: idx.idCaso >= 0 ? limparTexto(linha[idx.idCaso]) : '', nome: idx.nomeCompletoDesaparecido >= 0 ? limparTexto(linha[idx.nomeCompletoDesaparecido]) : '', telefone: idx.telefoneSolicitante >= 0 ? limparTexto(linha[idx.telefoneSolicitante]) : '', dataServico: idx.dataServico >= 0 ? linha[idx.dataServico] : '', nomeSolicitante: idx.nomeSolicitante >= 0 ? limparTexto(linha[idx.nomeSolicitante]) : '', observacoes: idx.observacoesOperacionais >= 0 ? limparTexto(linha[idx.observacoesOperacionais]) : '' }; }
+function criarBackupCasosReconciliacao_(planilha, abaCasos) { var nome = 'BACKUP_CASOS_RECONCILIACAO_' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd_HHmmss'); var abaBackup = abaCasos.copyTo(planilha).setName(nome); abaBackup.hideSheet(); return nome; }
+function criarLogReconciliacaoCopom_(caso, candidato, status) { return { dataHora: formatarDataHora(new Date()), status: status, chaveUnica: caso.idCaso, acaoExecutada: 'reconciliarTaloesComRelatoriosCOPOM|' + (candidato && candidato.abaOrigem || ''), nomeDesaparecido: caso.nome, solicitante: caso.nomeSolicitante, telefone: caso.telefone, operador: 'rotina_reconciliacao_copom', mensagemTecnica: 'abaOrigem=' + limparTexto(candidato && candidato.abaOrigem) + '; linhaOrigem=' + limparTexto(candidato && candidato.linhaOrigem) + '; bopmRecuperado=' + limparTexto(candidato && candidato.talao) }; }
+function normalizarCabecalhoCopom_(valor) { return normalizarTextoOperacional_(valor).replace(/[^A-Z0-9]/g, ''); }
+function localizarIndiceCabecalhoCopom_(cabecalhoNorm, aliases) { for (var i = 0; i < aliases.length; i += 1) { var idx = cabecalhoNorm.indexOf(normalizarCabecalhoCopom_(aliases[i])); if (idx >= 0) return idx; } return -1; }
+function carregarIndiceAbasDiariasCopom_(planilha) {
+  var ignorar = { 'MODELO_TALAO': true, 'LOG_AUDITORIA': true, 'EVENTOS_CASO': true, 'CASOS': true };
+  var mapa = {};
+  planilha.getSheets().forEach(function (aba) {
+    var nomeAba = limparTexto(aba.getName());
+    if (!/^\d{2}[A-Z]{3}\d{2}$/.test(nomeAba) || ignorar[nomeAba]) return;
+    if (aba.getLastRow() < 7) return;
+
+    var ultimaColuna = Math.max(aba.getLastColumn(), 1);
+    var cabecalhoLinha6 = aba.getRange(6, 1, 1, ultimaColuna).getValues()[0].map(limparTexto);
+    var cabecalhoNorm = cabecalhoLinha6.map(normalizarCabecalhoCopom_);
+
+    var idxTalao = localizarIndiceCabecalhoCopom_(cabecalhoNorm, ['BOPM', 'TALÃO', 'TALAO', 'Nº TALÃO', 'NUMERO TALAO']);
+    var idxNome = localizarIndiceCabecalhoCopom_(cabecalhoNorm, ['NOME COMPLETO', 'NOME COMPLETO DESAPARECIDO', 'NOME']);
+    var idxTel = localizarIndiceCabecalhoCopom_(cabecalhoNorm, ['TELEFONE', 'TELEFONE SOLICITANTE', 'CELULAR']);
+    var idxSolic = localizarIndiceCabecalhoCopom_(cabecalhoNorm, ['NOME DO SOLICITANTE', 'SOLICITANTE', 'NOME SOLICITANTE']);
+    var idxData = localizarIndiceCabecalhoCopom_(cabecalhoNorm, ['DATA', 'DATA SERVICO', 'DATA DO SERVICO']);
+    var idxObs = localizarIndiceCabecalhoCopom_(cabecalhoNorm, ['OBS', 'OBSERVACOES', 'OBSERVACOES OPERACIONAIS']);
+
+    if (idxTalao < 0 || idxNome < 0 || idxTel < 0 || idxData < 0 || idxSolic < 0 || idxObs < 0) return;
+
+    var primeiraLinhaDados = 7;
+    var totalLinhasDados = Math.max(aba.getLastRow() - primeiraLinhaDados + 1, 0);
+    if (!totalLinhasDados) return;
+    var dados = aba.getRange(primeiraLinhaDados, 1, totalLinhasDados, ultimaColuna).getValues();
+
+    for (var i = 0; i < dados.length; i += 1) {
+      var talao = limparTexto(dados[i][idxTalao]);
+      if (!talao) continue;
+      var nome = limparTexto(dados[i][idxNome]);
+      var tel = limparTexto(dados[i][idxTel]);
+      var chave = [normalizarTextoOperacional_(nome), normalizarTelefoneOperacional_(tel)].join('|');
+      mapa[chave] = mapa[chave] || [];
+      mapa[chave].push({
+        abaOrigem: nomeAba,
+        linhaOrigem: primeiraLinhaDados + i,
+        talao: talao,
+        nome: nome,
+        telefone: tel,
+        dataServico: dados[i][idxData],
+        nomeSolicitante: limparTexto(dados[i][idxSolic]),
+        observacoes: limparTexto(dados[i][idxObs])
+      });
+    }
+  });
+  return mapa;
+}
+function encontrarMelhorCorrespondenciaCopom_(caso, indice) { var chave = [normalizarTextoOperacional_(caso.nome), normalizarTelefoneOperacional_(caso.telefone)].join('|'); var candidatos = (indice[chave] || []).map(function (cand) { return pontuarCandidatoCopom_(caso, cand); }).filter(function (c) { return c.score >= 70; }).sort(function (a, b) { return b.score - a.score; }); if (!candidatos.length) return { status: 'nao_encontrado', candidatos: [] }; if (candidatos.length > 1 && (candidatos[0].score - candidatos[1].score) <= 5) return { status: 'ambiguo', candidatos: candidatos.slice(0, 3) }; return { status: 'forte', vencedor: candidatos[0], candidatos: candidatos.slice(0, 3) }; }
+function pontuarCandidatoCopom_(caso, candidato) { var score = 0; if (normalizarDataSomenteDia_(caso.dataServico) && normalizarDataSomenteDia_(caso.dataServico) === normalizarDataSomenteDia_(candidato.dataServico)) score += 35; if (normalizarTextoOperacional_(caso.nomeSolicitante) && normalizarTextoOperacional_(caso.nomeSolicitante) === normalizarTextoOperacional_(candidato.nomeSolicitante)) score += 20; score += Math.round(similaridadeTextoCopom_(caso.observacoes, candidato.observacoes) * 25); score += 30; candidato.score = score; candidato.assinatura = gerarAssinaturaCaso_({ dataServico: caso.dataServico || candidato.dataServico, talaoBopm: candidato.talao, nomeCompletoDesaparecido: caso.nome, telefoneSolicitante: caso.telefone }); return candidato; }
+function similaridadeTextoCopom_(a, b) { var ta = normalizarTextoOperacional_(a); var tb = normalizarTextoOperacional_(b); if (!ta || !tb) return 0; var sa = {}; ta.split(/\s+/).forEach(function (t) { if (t && t.length > 2) sa[t] = true; }); var sb = {}; tb.split(/\s+/).forEach(function (t) { if (t && t.length > 2) sb[t] = true; }); var inter = 0; var uni = 0; var keys = {}; Object.keys(sa).forEach(function (k) { keys[k] = true; }); Object.keys(sb).forEach(function (k) { keys[k] = true; }); Object.keys(keys).forEach(function (k) { uni += 1; if (sa[k] && sb[k]) inter += 1; }); return uni ? inter / uni : 0; }
+
+
 function limparDuplicadosCasos(simulacao) {
   var SIMULACAO = simulacao !== false;
   var lock = LockService.getScriptLock();
