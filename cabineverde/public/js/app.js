@@ -634,6 +634,8 @@ const render = () => {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const botaoSubmit = form.querySelector('button[type="submit"], #btnMain');
+    if (botaoSubmit?.disabled) return;
     if (!operadorEstaValidadoLocalmente()) return atualizarFeedback('Operador não validado. Faça o login operacional para continuar.', true);
     const caso = obterCasoDoFormulario();
     if (!validarCamposMinimos(caso)) {
@@ -641,23 +643,38 @@ const render = () => {
       return;
     }
 
-    logBotaoOperacional('Finalizar triagem', caso);
-    const retorno = await salvarCasoSheets(caso);
+    try {
+      if (botaoSubmit) {
+        botaoSubmit.disabled = true;
+        botaoSubmit.dataset.originalText = botaoSubmit.textContent || '';
+        botaoSubmit.textContent = 'Enviando...';
+      }
+
+      logBotaoOperacional('Finalizar triagem', caso);
+      const retorno = await salvarCasoSheets(caso);
     console.log('RESPOSTA GAS:', retorno);
     if (DEBUG_MODE) {
       document.getElementById('gas-response').textContent = JSON.stringify(retorno, null, 2);
     }
 
-    if (retorno.ok) {
+    if (retorno.ok && retorno.status !== 'duplicado_ignorado') {
       atualizarFeedback('Caso salvo com sucesso na planilha.');
       casos.unshift(caso);
       localStorage.setItem('cabine-verde-casos', JSON.stringify(casos));
+    } else if (retorno.status === 'duplicado_ignorado') {
+      atualizarFeedback('Envio duplicado ignorado pelo backend (idempotência ativa).');
     } else {
       atualizarFeedback('Caso salvo localmente para envio.', true);
     }
 
     render();
     registrarEventosSessao();
+    } finally {
+      if (botaoSubmit) {
+        botaoSubmit.disabled = false;
+        botaoSubmit.textContent = botaoSubmit.dataset.originalText || 'FINALIZAR CADASTRO';
+      }
+    }
   });
 
   const carregarCasoTriagemViaUrl = async () => {
