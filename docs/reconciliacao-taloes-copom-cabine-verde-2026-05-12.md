@@ -35,3 +35,9 @@
 - `totalNaoEncontrado`
 - `casosRecuperados`
 - `conflitos`
+
+
+## Ajuste de layout COPOM (linha 6)
+- Leitura dos cabeçalhos da aba diária ocorre na **linha 6**.
+- Coluna de talão é localizada dinamicamente por aliases: `BOPM`, `TALÃO`, `TALAO`, `Nº TALÃO`, `NUMERO TALAO`.
+- Também são localizadas dinamicamente as colunas de nome, telefone, solicitante, data e observações para o cruzamento operacional.
