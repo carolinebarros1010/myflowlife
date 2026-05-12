@@ -1352,6 +1352,10 @@ function sincronizarTalao190(caso) {
     var linhaExistente = localizarLinhaDuplicadaRelatorio_(abaTalao, caso);
 
     if (linhaExistente > 0) {
+      var linhaAncoraAtualizacao = localizarLinhaAncoraRodape_(abaTalao);
+      if (linhaExistente >= linhaAncoraAtualizacao) {
+        throw new Error('Proteção estrutural: tentativa de atualização no rodapé fixo (linha ' + linhaExistente + ', âncora ' + linhaAncoraAtualizacao + ').');
+      }
       abaTalao.getRange(linhaExistente, 1, 1, 11).setValues([linha]);
       registrarLogAuditoriaPersistencia_(SpreadsheetApp.getActiveSpreadsheet(), {
         dataHora: formatarDataHora(new Date()),
@@ -1367,10 +1371,25 @@ function sincronizarTalao190(caso) {
       return { status: 'atualizado', linha: linhaExistente };
     }
 
-    var linhaDestino = encontrarPrimeiraLinhaVaziaRelatorio(abaTalao);
+    var linhaDestino = inserirLinhaOperacionalAntesRodape_(abaTalao);
     abaTalao.getRange(linhaDestino, 1, 1, 11).setValues([linha]);
     return { status: 'sucesso', linha: linhaDestino };
   } catch (erro) {
+    if (String(erro && erro.message || erro).indexOf('ÂNCORA_RODAPE_NAO_ENCONTRADA') !== -1) {
+      try {
+        registrarLogAuditoriaPersistencia_(SpreadsheetApp.getActiveSpreadsheet(), {
+          dataHora: formatarDataHora(new Date()),
+          status: 'erro',
+          chaveUnica: limparTexto(caso && (caso.CHAVE_UNICA || caso.chaveUnica)),
+          acaoExecutada: 'SINCRONIZACAO_BLOQUEADA_AUSENCIA_ANCORA',
+          nomeDesaparecido: limparTexto(caso && caso.nomeCompletoDesaparecido),
+          solicitante: limparTexto(caso && caso.nomeSolicitante),
+          telefone: limparTexto(caso && caso.telefoneSolicitante),
+          operador: limparTexto(caso && caso.operadorResponsavel),
+          mensagemTecnica: 'Sincronização bloqueada: âncora de rodapé fixo ausente na aba diária.'
+        });
+      } catch (e) {}
+    }
     Logger.log('ERRO_SINCRONIZAR_TALAO_190: ' + (erro && erro.message ? erro.message : erro));
     return { status: 'erro', mensagem: erro && erro.message ? erro.message : String(erro) };
   } finally {
@@ -1381,20 +1400,7 @@ function sincronizarTalao190(caso) {
 }
 
 function encontrarPrimeiraLinhaVaziaRelatorio(sheet) {
-  var ultimaLinhaOperacional = obterUltimaLinhaOperacionalRelatorio_(sheet);
-  if (ultimaLinhaOperacional < PRIMEIRA_LINHA_DADOS_TALAO) throw new Error('Área operacional inválida na aba de relatório.');
-
-  var quantidadeLinhas = ultimaLinhaOperacional - PRIMEIRA_LINHA_DADOS_TALAO + 1;
-  var valores = sheet.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, quantidadeLinhas, 11).getValues();
-
-  for (var i = 0; i < valores.length; i += 1) {
-    var linhaVazia = valores[i].every(function (celula) {
-      return limparTexto(celula) === '';
-    });
-    if (linhaVazia) return PRIMEIRA_LINHA_DADOS_TALAO + i;
-  }
-
-  throw new Error('Área operacional do relatório diário está lotada até a linha ' + ultimaLinhaOperacional + '.');
+  return inserirLinhaOperacionalAntesRodape_(sheet);
 }
 
 function encontrarPrimeiraLinhaVaziaTalao(aba) {
@@ -1402,19 +1408,38 @@ function encontrarPrimeiraLinhaVaziaTalao(aba) {
 }
 
 function obterUltimaLinhaOperacionalRelatorio_(sheet) {
-  var ultimaLinha = Math.max(sheet.getLastRow(), PRIMEIRA_LINHA_DADOS_TALAO);
-  var colA = sheet.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, ultimaLinha - PRIMEIRA_LINHA_DADOS_TALAO + 1, 1).getDisplayValues();
+  var linhaAncora = localizarLinhaAncoraRodape_(sheet);
+  return Math.max(PRIMEIRA_LINHA_DADOS_TALAO - 1, linhaAncora - 1);
+}
+
+function localizarLinhaAncoraRodape_(sheet) {
+  var ultimaLinha = Math.max(sheet.getMaxRows(), 21);
+  var colA = sheet.getRange(1, 1, ultimaLinha, 1).getDisplayValues();
   for (var i = 0; i < colA.length; i += 1) {
-    var valor = limparTexto(colA[i][0]).toUpperCase();
-    if (valor.indexOf('INSTRU') !== -1 || valor.indexOf('ORIENTA') !== -1 || valor.indexOf('OBSERVA') !== -1) {
-      return PRIMEIRA_LINHA_DADOS_TALAO + i - 1;
+    if (limparTexto(colA[i][0]) === '### INICIO_RODAPE_FIXO ###') {
+      return i + 1;
     }
   }
-  return ultimaLinha;
+  throw new Error('ÂNCORA_RODAPE_NAO_ENCONTRADA: marcador "### INICIO_RODAPE_FIXO ###" ausente na coluna A da aba ' + sheet.getName() + '.');
+}
+
+function inserirLinhaOperacionalAntesRodape_(sheet) {
+  var linhaAncora = localizarLinhaAncoraRodape_(sheet);
+  if (linhaAncora <= PRIMEIRA_LINHA_DADOS_TALAO) {
+    throw new Error('Estrutura inválida: âncora de rodapé na linha ' + linhaAncora + ', antes do início operacional.');
+  }
+  var linhaOrigemFormato = linhaAncora - 1;
+  sheet.insertRowsBefore(linhaAncora, 1);
+  var intervaloOrigem = sheet.getRange(linhaOrigemFormato, 1, 1, sheet.getMaxColumns());
+  var intervaloDestino = sheet.getRange(linhaAncora, 1, 1, sheet.getMaxColumns());
+  intervaloOrigem.copyTo(intervaloDestino, SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+  intervaloDestino.clearContent();
+  return linhaAncora;
 }
 
 function localizarLinhaDuplicadaRelatorio_(sheet, caso) {
-  var ultimaLinhaOperacional = obterUltimaLinhaOperacionalRelatorio_(sheet);
+  var linhaAncora = localizarLinhaAncoraRodape_(sheet);
+  var ultimaLinhaOperacional = linhaAncora - 1;
   if (ultimaLinhaOperacional < PRIMEIRA_LINHA_DADOS_TALAO) return -1;
   var linhas = ultimaLinhaOperacional - PRIMEIRA_LINHA_DADOS_TALAO + 1;
   var dados = sheet.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, linhas, 11).getValues();
