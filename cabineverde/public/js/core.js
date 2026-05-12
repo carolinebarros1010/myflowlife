@@ -612,6 +612,20 @@ export const gerarPayloadSheets = (caso) => {
   };
 };
 
+
+const gerarChaveRequisicaoDeterministica = (payload = {}) => {
+  const base = [
+    payload.idCaso || '',
+    payload.talaoPMESP || '',
+    payload.nomeCompletoDesaparecido || '',
+    payload.nomeSolicitante || '',
+    payload.telefoneSolicitante || '',
+    payload.dataServico || '',
+    payload.statusCaso || ''
+  ].join('|').toLowerCase();
+  return `cvreq:${base}`;
+};
+
 const contemErroDoGet = (texto = '') => {
   const conteudo = String(texto || '').toLowerCase();
   return conteudo.includes('doget') || conteudo.includes('function doget') || conteudo.includes('script function not found');
@@ -620,11 +634,17 @@ const contemErroDoGet = (texto = '') => {
 export const salvarCasoSheets = async (caso) => {
   try {
     const payload = gerarPayloadSheets(caso);
+    const chaveRequisicao = gerarChaveRequisicaoDeterministica(payload?.payload || {});
     console.log("COLUNAS SALVAR CASO:", payload.colunas);
     console.log("VALORES SALVAR CASO:", payload.valores);
     console.log("PAYLOAD SALVAR CASO:", payload);
-    const resposta = await chamarAcaoGAS('salvarCaso', payload);
-    return { ok: true, message: resposta?.message || 'Caso enviado para processamento', data: resposta };
+    const resposta = await chamarAcaoGAS('salvarCaso', { ...payload, chaveRequisicao });
+    return {
+      ok: true,
+      status: resposta?.status || 'sucesso',
+      message: resposta?.message || 'Caso enviado para processamento',
+      data: resposta
+    };
   } catch {
     return { ok: false, message: 'Falha ao salvar caso' };
   }

@@ -873,13 +873,37 @@ function doPost(e) {
     }
     registrarLogTecnico(planilhaLogs, { etapa: 'GRAVACAO_INICIADA', ok: true, mensagem: 'Iniciando persistência em abas de destino', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
 
+    var chaveRequisicao = limparTexto(body.chaveRequisicao || (body.payload && body.payload.chaveRequisicao));
+    var cacheIdempotencia = CacheService.getScriptCache();
+
+    var lock = null;
+    if (action === 'salvarCaso') {
+      lock = LockService.getScriptLock();
+      lock.waitLock(20000);
+    }
+
     var resultadoPersistencia = { idCaso: idCaso, action: 'updated', linha: -1 };
-    registros.forEach(function (registro) {
-      var parcial = persistirRegistro(planilha, registro) || {};
-      if (parcial.idCaso) resultadoPersistencia.idCaso = parcial.idCaso;
-      if (parcial.action) resultadoPersistencia.action = parcial.action;
-      if (parcial.linha) resultadoPersistencia.linha = parcial.linha;
-    });
+    try {
+      if (action === 'salvarCaso' && chaveRequisicao) {
+        var marcador = cacheIdempotencia.get('salvarCaso:' + chaveRequisicao);
+        if (marcador) {
+          return criarRespostaJson({ ok: true, status: 'duplicado_ignorado', data: { action: 'ignored', idCaso: idCaso, linha: -1, message: 'Requisição duplicada ignorada por idempotência' } });
+        }
+      }
+
+      registros.forEach(function (registro) {
+        var parcial = persistirRegistro(planilha, registro) || {};
+        if (parcial.idCaso) resultadoPersistencia.idCaso = parcial.idCaso;
+        if (parcial.action) resultadoPersistencia.action = parcial.action;
+        if (parcial.linha) resultadoPersistencia.linha = parcial.linha;
+      });
+
+      if (action === 'salvarCaso' && chaveRequisicao) {
+        cacheIdempotencia.put('salvarCaso:' + chaveRequisicao, '1', 21600);
+      }
+    } finally {
+      if (lock) lock.releaseLock();
+    }
     idCaso = limparTexto(resultadoPersistencia.idCaso || idCaso);
 
     if (body.foto && body.foto.base64) {
@@ -905,12 +929,12 @@ function doPost(e) {
     limparFotosTemporarias_();
     registrarLogAcessoOperador_(planilha, 'GRAVACAO_CONCLUIDA', 'SUCESSO', 'Registros persistidos com sucesso.', operadorAtual.email, { perfil: operadorAtual.perfil, acaoExecutada: action, talaoPMESP: talao });
     registrarLogTecnico(planilhaLogs || planilha, { etapa: 'GRAVACAO_SUCESSO', ok: true, mensagem: 'Registros persistidos com sucesso', rawPostData: extrairRawPostData(e), payloadIdCaso: idCaso });
-    return criarRespostaJson({ ok: true, data: { action: resultadoPersistencia.action, idCaso: idCaso, linha: resultadoPersistencia.linha, message: 'Gravação multiabas concluída' } });
+    return criarRespostaJson({ ok: true, status: 'sucesso', data: { action: resultadoPersistencia.action, idCaso: idCaso, linha: resultadoPersistencia.linha, message: 'Gravação multiabas concluída' } });
   } catch (err) {
     var mensagemErro = err && err.message ? err.message : String(err);
     registrarLogTecnico(planilhaLogs, { etapa: 'ERRO_GRAVACAO_PLANILHA', ok: false, mensagem: mensagemErro, rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
     var actionErro = ''; try { actionErro = limparTexto(parsePayload(e).action); } catch (_e) {}
-    return criarRespostaJson({ ok: false, erro: mensagemErro, detalhe: 'Falha no processamento da action ' + actionErro }, 500);
+    return criarRespostaJson({ ok: false, status: 'erro', erro: mensagemErro, detalhe: 'Falha no processamento da action ' + actionErro }, 500);
   }
 }
 
