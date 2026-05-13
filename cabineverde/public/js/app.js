@@ -328,13 +328,21 @@ const render = () => {
     app.innerHTML = `
     <div class="cv-shell">
       <header class="cv-header"><h1>Cabine Verde</h1><p>Triagem dinâmica de pessoas desaparecidas</p></header>
-      <section class="cv-card cv-login-operacional" data-tela="0">
-        <h2>Login Operacional</h2>
-        <p>Informe seu e-mail institucional para acessar o sistema Cabine Verde.</p>
-        <label for="operadorEmail">E-mail institucional do operador</label>
-        <input id="operadorEmail" name="operadorEmail" type="email" required placeholder="seunome@dominio.com" autocomplete="email" />
-        <button type="button" class="cv-button cv-button--primary" id="btnValidarOperador">Validar operador</button>
+      <section class="cv-card cv-login-operacional cv-login-hero" data-tela="0">
+        <p class="cv-login-brand">CABINE VERDE</p>
+        <h2>Acesso Operacional</h2>
+        <p class="cv-login-subtitle">Painel Integrado Operacional</p>
+        <p class="cv-login-helper">
+          Informe seu e-mail institucional para acessar a triagem, o acompanhamento e a auditoria dos casos.
+        </p>
+
+        <label for="operadorEmail">E-mail institucional</label>
+        <input id="operadorEmail" name="operadorEmail" type="email" required placeholder="operador@cabineverde.gov" autocomplete="email" />
+
+        <button type="button" class="cv-button cv-button--primary" id="btnValidarOperador">Entrar</button>
         <p id="mensagemLoginOperacional"></p>
+
+        <small class="cv-login-footer">ESPERANÇA</small>
       </section>
     </div>`;
     return;
