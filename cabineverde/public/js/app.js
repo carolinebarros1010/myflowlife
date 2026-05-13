@@ -136,7 +136,9 @@ const renderFeedbackOperacional = (tipo = 'info', dados = {}) => {
     const mensagem = sanitizarTextoFeedback(
       dados.mensagem || 'As informações foram salvas e seguirão para acompanhamento operacional.'
     );
-    const talao = sanitizarTextoFeedback(dados.talao || dados.talaoPMESP || dados.protocolo || '-');
+    const identificadorCaso = sanitizarTextoFeedback(
+      dados.idCaso || dados.protocolo || dados.talao || dados.talaoPMESP || '-'
+    );
     const status = sanitizarTextoFeedback(dados.statusCaso || dados.status || '-');
     const prioridade = sanitizarTextoFeedback(dados.prioridade || dados.classificacaoRisco || dados.risco || '-');
     const prioridadeRotulo = dados.prioridade ? 'Prioridade' : 'Prioridade/Risco';
@@ -145,7 +147,7 @@ const renderFeedbackOperacional = (tipo = 'info', dados = {}) => {
       <strong class="cv-feedback-title">${titulo}</strong>
       <p>${mensagem}</p>
       <dl class="cv-feedback-meta">
-        <div><dt>Talão/Protocolo</dt><dd>${talao}</dd></div>
+        <div><dt>ID/Talão/Protocolo</dt><dd>${identificadorCaso}</dd></div>
         <div><dt>Status do caso</dt><dd>${status}</dd></div>
         <div><dt>${prioridadeRotulo}</dt><dd>${prioridade}</dd></div>
       </dl>
@@ -894,6 +896,7 @@ const render = () => {
         retorno?.data?.talaoPMESP ||
         retorno?.data?.talaoBopm;
       renderFeedbackOperacional('sucesso', {
+        idCaso: retorno?.data?.idCaso || retorno?.idCaso || '',
         talao: identificadorRetorno || caso.talaoPMESP || caso.talaoBopm,
         statusCaso: caso.statusCaso,
         prioridade: caso.prioridade,
