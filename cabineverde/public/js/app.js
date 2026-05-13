@@ -633,8 +633,8 @@ const render = () => {
   configurarUploadFotoDesaparecido();
   };
 
-  form.addEventListener('input', sincronizarEAtualizar);
-  form.addEventListener('change', sincronizarEAtualizar);
+  form?.addEventListener('input', sincronizarEAtualizar);
+  form?.addEventListener('change', sincronizarEAtualizar);
   const telas = Array.from(document.querySelectorAll('[data-tela]'));
   const mostrarTela = (numero) => telas.forEach((tela) => { tela.hidden = tela.dataset.tela !== String(numero); });
   let passoAtual = 1;
@@ -718,7 +718,7 @@ const render = () => {
     configurarUploadFotoDesaparecido();
     form.querySelector('[name="nomeCompletoDesaparecido"]')?.focus();
   });
-  document.getElementById('passoProximoBtn').addEventListener('click', () => {
+  document.getElementById('passoProximoBtn')?.addEventListener('click', () => {
     if (passoAtual < 5) {
       passoAtual += 1;
       atualizarPassos();
@@ -731,16 +731,16 @@ const render = () => {
     document.getElementById('decisao-prioridade').value = casoAtual.prioridade || '-';
     document.getElementById('decisao-status').value = casoAtual.statusCaso || '-';
   });
-  document.getElementById('passoVoltarBtn').addEventListener('click', () => {
+  document.getElementById('passoVoltarBtn')?.addEventListener('click', () => {
     if (passoAtual > 1) passoAtual -= 1;
     atualizarPassos();
     configurarUploadFotoDesaparecido();
   });
-  document.getElementById('voltarTriagemBtn').addEventListener('click', () => { mostrarTela(2); configurarUploadFotoDesaparecido(); });
+  document.getElementById('voltarTriagemBtn')?.addEventListener('click', () => { mostrarTela(2); configurarUploadFotoDesaparecido(); });
   atualizarUI();
   configurarUploadFotoDesaparecido();
 
-  form.addEventListener('submit', async (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const botaoSubmit = form.querySelector('button[type="submit"], #btnMain');
     if (botaoSubmit?.disabled) return;
@@ -983,10 +983,10 @@ const render = () => {
     } catch (error) { atualizarFeedback(error.message || 'Falha ao atualizar painel de qualidade.', true); }
   });
   ['qualidade-filtro-idCaso', 'qualidade-filtro-talaoPMESP', 'qualidade-filtro-severidade', 'qualidade-filtro-prioridadeTratamento', 'qualidade-filtro-statusTratamento'].forEach((id) =>
-    document.getElementById(id).addEventListener('input', () => atualizarPainelQualidade().catch(() => {}))
+    document.getElementById(id)?.addEventListener('input', () => atualizarPainelQualidade().catch(() => {}))
   );
   document.querySelectorAll('.cv-prioridade-btn').forEach((botao) => {
-    botao.addEventListener('click', () => {
+    botao?.addEventListener('click', () => {
       document.getElementById('qualidade-filtro-prioridadeTratamento').value = botao.dataset.prioridade || '';
       atualizarPainelQualidade().catch(() => {});
     });
