@@ -406,20 +406,24 @@ const render = () => {
         </div>
       </div>
 
-      <section id="entradaOperacionalModulo" class="cv-module-entry" hidden>
-        <h4>Inserção de Caso</h4>
-        <p>Informe o número do talão e o município para iniciar a triagem.</p>
-        <form id="entrada-operacional-form" class="cv-form-section cv-operational-entry">
-          <div class="cv-grid">
-            <label for="entrada-talaoPMESP">Número do Talão PMESP<input id="entrada-talaoPMESP" required /></label>
-            <label for="entrada-municipio">Município<input id="entrada-municipio" /></label>
-          </div>
-          <div class="cv-inline-actions">
-            <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
-            <button type="button" class="cv-button cv-button--ghost" id="trocarOperadorBtn">Trocar operador</button>
-            <button type="button" class="cv-button cv-button--secondary" id="btnVoltarPainelOperacional">Voltar ao Painel</button>
-          </div>
-        </form>
+      <section id="entradaOperacionalModulo" class="cv-module-entry cv-entry-module" hidden>
+        <div class="cv-entry-card">
+          <p class="cv-entry-kicker">Entrada Operacional</p>
+          <h4 class="cv-entry-title">Inserção de Caso</h4>
+          <p class="cv-entry-helper">Informe o número do talão e o município para iniciar a triagem dinâmica do caso.</p>
+          <form id="entrada-operacional-form" class="cv-form-section cv-operational-entry">
+            <div class="cv-grid">
+              <label for="entrada-talaoPMESP">Número do Talão PMESP<input id="entrada-talaoPMESP" required /></label>
+              <label for="entrada-municipio">Município<input id="entrada-municipio" /></label>
+            </div>
+            <p class="cv-entry-note">Após iniciar o atendimento, o sistema abrirá as perguntas de triagem do Cabine Verde.</p>
+            <div class="cv-entry-actions">
+              <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
+              <button type="button" class="cv-button cv-button--secondary" id="btnVoltarPainelOperacional">Voltar ao Painel</button>
+              <button type="button" class="cv-button cv-button--ghost" id="trocarOperadorBtn">Trocar operador</button>
+            </div>
+          </form>
+        </div>
       </section>
     </section>
     <section class="cv-card" data-tela="2" hidden>

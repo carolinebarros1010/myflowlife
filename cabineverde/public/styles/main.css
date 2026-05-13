@@ -494,6 +494,75 @@ pre { white-space: pre-wrap; margin: 0; }
   color: rgba(222, 250, 240, 0.9);
 }
 
+.cv-entry-module {
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(145deg, rgba(7, 55, 46, 0.82) 0%, rgba(5, 40, 34, 0.74) 100%);
+}
+
+.cv-entry-card {
+  width: min(100%, 760px);
+  border-radius: 14px;
+  border: 1px solid #c8ddd5;
+  background: #f4fbf8;
+  padding: clamp(16px, 3.5vw, 26px);
+  box-shadow: 0 12px 26px rgba(2, 27, 23, 0.18);
+}
+
+.cv-entry-kicker {
+  margin: 0 0 6px;
+  color: #215a4b;
+  font-size: .78rem;
+  letter-spacing: .08em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cv-entry-title {
+  margin: 0;
+  color: #12382f;
+  font-size: clamp(1.35rem, 2.8vw, 1.9rem);
+}
+
+.cv-entry-helper {
+  margin: 8px 0 16px;
+  color: #2d5348;
+}
+
+.cv-entry-card .cv-operational-entry {
+  background: #ffffff;
+  border-color: #d8e7e0;
+  padding: clamp(14px, 2.8vw, 20px);
+}
+
+.cv-entry-card input,
+.cv-entry-card select {
+  min-height: 48px;
+  padding: 11px 12px;
+  border-color: #9db8ae;
+}
+
+.cv-entry-note {
+  margin: 12px 0 0;
+  font-size: .9rem;
+  color: #3b5f55;
+}
+
+.cv-entry-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cv-entry-actions .cv-button {
+  flex: 1 1 180px;
+}
+
+.cv-entry-actions #iniciarAtendimentoBtn {
+  flex: 2 1 250px;
+}
+
 @media (max-width: 1024px) {
   .cv-service-grid {
     grid-template-columns: 1fr;
@@ -501,6 +570,13 @@ pre { white-space: pre-wrap; margin: 0; }
 
   .cv-selection-topbar {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .cv-entry-actions .cv-button,
+  .cv-entry-actions #iniciarAtendimentoBtn {
+    flex: 1 1 100%;
   }
 }
 
