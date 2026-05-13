@@ -234,7 +234,12 @@ const obterCasoDoFormulario = () => {
     faixaEtaria === 'Criança' ||
     faixaEtaria === 'Idoso';
 
+  const talaoPMESP = String(data.get('talaoPMESP') || data.get('talaoBopm') || data.get('numeroTalao') || '').trim();
+  const talaoBopm = String(data.get('talaoBopm') || talaoPMESP).trim();
+
   const caso = {
+    talaoPMESP,
+    talaoBopm,
     nomeCompletoDesaparecido: String(data.get('nomeCompletoDesaparecido') || '').trim(),
     municipio: String(data.get('municipio') || '').trim(),
     nomeSolicitante: String(data.get('nomeSolicitante') || '').trim(),
@@ -641,6 +646,7 @@ const render = () => {
     if (botaoSubmit?.disabled) return;
     if (!operadorEstaValidadoLocalmente()) return atualizarFeedback('Operador não validado. Faça o login operacional para continuar.', true);
     const caso = obterCasoDoFormulario();
+    console.debug('[TRIAGEM] valor do talão antes do submit:', { talaoPMESP: caso.talaoPMESP, talaoBopm: caso.talaoBopm });
     if (!caso.talaoBopm) {
       atualizarFeedback('Número do Talão PMESP é obrigatório.', true);
       return;
@@ -658,6 +664,7 @@ const render = () => {
       }
 
       logBotaoOperacional('Finalizar triagem', caso);
+      console.debug('[TRIAGEM] payload enviado para salvarCasoSheets:', caso);
       const retorno = await salvarCasoSheets(caso);
     console.log('RESPOSTA GAS:', retorno);
     if (DEBUG_MODE) {
