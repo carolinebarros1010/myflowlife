@@ -870,8 +870,15 @@ const render = () => {
     }
 
     if (retorno.ok && retorno.status !== 'duplicado_ignorado') {
+      const identificadorRetorno =
+        retorno?.data?.idCaso ||
+        retorno?.idCaso ||
+        retorno?.data?.protocolo ||
+        retorno?.protocolo ||
+        retorno?.data?.talaoPMESP ||
+        retorno?.data?.talaoBopm;
       renderFeedbackOperacional('sucesso', {
-        talao: caso.talaoPMESP || caso.talaoBopm || retorno?.protocolo || retorno?.idCaso,
+        talao: caso.talaoPMESP || caso.talaoBopm || identificadorRetorno,
         statusCaso: caso.statusCaso,
         prioridade: caso.prioridade,
         classificacaoRisco: caso.classificacaoRisco
