@@ -374,6 +374,7 @@ const render = () => {
               <label for="entrada-municipio">Município<input id="entrada-municipio" /></label>
             </div>
             <div class="cv-inline-actions">
+              <button type="button" class="cv-button cv-button--secondary" id="btnAcessarInsercaoCaso">Iniciar inserção de caso</button>
               <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
               <button type="button" class="cv-button cv-button--ghost" id="trocarOperadorBtn">Trocar operador</button>
             </div>
@@ -658,12 +659,51 @@ const render = () => {
     }
   };
 
+  const mostrarSplashEsperanca = (callback) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'cv-transition-splash';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML = '<span class="cv-transition-splash__word">ESPERANÇA</span>';
+    document.body.appendChild(overlay);
+
+    const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const duracao = reduzirMovimento ? 900 : 1050;
+    const removerOverlay = () => {
+      overlay.classList.remove('is-visible');
+      window.setTimeout(() => overlay.remove(), reduzirMovimento ? 100 : 260);
+    };
+
+    window.requestAnimationFrame(() => {
+      overlay.classList.add('is-visible');
+    });
+
+    window.setTimeout(() => {
+      try {
+        if (typeof callback === 'function') callback();
+      } finally {
+        removerOverlay();
+      }
+    }, duracao);
+  };
+
   document.getElementById('btnAcessarRelatorio')?.addEventListener('click', () => {
-    navegarParaSecaoOperacional({ secaoId: 'secaoRelatorioOperacional', detailsId: 'relatorioContainer' });
+    mostrarSplashEsperanca(() => {
+      navegarParaSecaoOperacional({ secaoId: 'secaoRelatorioOperacional', detailsId: 'relatorioContainer' });
+    });
   });
 
   document.getElementById('btnAcessarAuditoria')?.addEventListener('click', () => {
-    navegarParaSecaoOperacional({ secaoId: 'secaoAuditoriaOperacional' });
+    mostrarSplashEsperanca(() => {
+      navegarParaSecaoOperacional({ secaoId: 'secaoAuditoriaOperacional' });
+    });
+  });
+
+  document.getElementById('btnAcessarInsercaoCaso')?.addEventListener('click', () => {
+    mostrarSplashEsperanca(() => {
+      const campoEntrada = document.getElementById('entrada-talaoPMESP');
+      campoEntrada?.focus();
+      campoEntrada?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   });
 
   document.getElementById('iniciarAtendimentoBtn')?.addEventListener('click', () => {
