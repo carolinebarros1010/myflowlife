@@ -105,6 +105,65 @@ const atualizarFeedback = (mensagem, erro = false) => {
   feedback.classList.toggle('danger', erro);
 };
 
+const sanitizarTextoFeedback = (valor) => {
+  const texto = String(valor ?? '').trim();
+  return texto
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+};
+
+const renderFeedbackOperacional = (tipo = 'info', dados = {}) => {
+  const feedback = document.getElementById('feedback');
+  if (!feedback) return;
+
+  const mapeamentoTipo = {
+    sucesso: 'success',
+    erro: 'error',
+    alerta: 'alert',
+    info: 'info'
+  };
+  const tipoClasse = mapeamentoTipo[tipo] || 'info';
+  feedback.className = '';
+  feedback.classList.add('cv-feedback-card', `cv-feedback-card--${tipoClasse}`);
+
+  if (tipo === 'sucesso') {
+    const titulo = sanitizarTextoFeedback(dados.titulo || 'Caso registrado');
+    const mensagem = sanitizarTextoFeedback(
+      dados.mensagem || 'As informações foram salvas e seguirão para acompanhamento operacional.'
+    );
+    const talao = sanitizarTextoFeedback(dados.talao || dados.talaoPMESP || dados.protocolo || '-');
+    const status = sanitizarTextoFeedback(dados.statusCaso || dados.status || '-');
+    const prioridade = sanitizarTextoFeedback(dados.prioridade || dados.classificacaoRisco || dados.risco || '-');
+    const prioridadeRotulo = dados.prioridade ? 'Prioridade' : 'Prioridade/Risco';
+
+    feedback.innerHTML = `
+      <strong class="cv-feedback-title">${titulo}</strong>
+      <p>${mensagem}</p>
+      <dl class="cv-feedback-meta">
+        <div><dt>Talão/Protocolo</dt><dd>${talao}</dd></div>
+        <div><dt>Status do caso</dt><dd>${status}</dd></div>
+        <div><dt>${prioridadeRotulo}</dt><dd>${prioridade}</dd></div>
+      </dl>
+      <p class="cv-feedback-hope">ESPERANÇA</p>
+    `;
+    return;
+  }
+
+  if (tipo === 'erro') {
+    const titulo = sanitizarTextoFeedback(dados.titulo || 'Não foi possível concluir o envio');
+    const mensagem = sanitizarTextoFeedback(dados.mensagem || 'Verifique a conexão ou tente novamente.');
+    feedback.innerHTML = `<strong class="cv-feedback-title">${titulo}</strong><p>${mensagem}</p>`;
+    return;
+  }
+
+  const mensagemPadrao = tipo === 'alerta' ? 'Atenção operacional necessária.' : 'Atualização operacional disponível.';
+  const mensagem = sanitizarTextoFeedback(dados.mensagem || dados.titulo || mensagemPadrao);
+  feedback.innerHTML = `<p>${mensagem}</p>`;
+};
+
 const logBotaoOperacional = (nomeBotao, payload = {}) => {
   console.log('BOTÃO CLICADO:', nomeBotao);
   console.log('PAYLOAD ENVIADO:', payload);
@@ -811,17 +870,25 @@ const render = () => {
     }
 
     if (retorno.ok && retorno.status !== 'duplicado_ignorado') {
-      atualizarFeedback('Caso salvo com sucesso na planilha.');
+      renderFeedbackOperacional('sucesso', {
+        talao: caso.talaoPMESP || caso.talaoBopm || retorno?.protocolo || retorno?.idCaso,
+        statusCaso: caso.statusCaso,
+        prioridade: caso.prioridade,
+        classificacaoRisco: caso.classificacaoRisco
+      });
       casos.unshift(caso);
       localStorage.setItem('cabine-verde-casos', JSON.stringify(casos));
     } else if (retorno.status === 'duplicado_ignorado') {
       atualizarFeedback('Envio duplicado ignorado pelo backend (idempotência ativa).');
     } else {
-      atualizarFeedback('Caso salvo localmente para envio.', true);
+      renderFeedbackOperacional('erro');
     }
 
     render();
     registrarEventosSessao();
+    } catch (error) {
+      console.error('Falha ao enviar caso para salvarCasoSheets:', error);
+      renderFeedbackOperacional('erro');
     } finally {
       if (botaoSubmit) {
         botaoSubmit.disabled = false;
