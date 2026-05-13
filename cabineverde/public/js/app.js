@@ -878,7 +878,7 @@ const render = () => {
         retorno?.data?.talaoPMESP ||
         retorno?.data?.talaoBopm;
       renderFeedbackOperacional('sucesso', {
-        talao: caso.talaoPMESP || caso.talaoBopm || identificadorRetorno,
+        talao: identificadorRetorno || caso.talaoPMESP || caso.talaoBopm,
         statusCaso: caso.statusCaso,
         prioridade: caso.prioridade,
         classificacaoRisco: caso.classificacaoRisco
