@@ -154,7 +154,7 @@ const renderFeedbackOperacional = (tipo = 'info', dados = {}) => {
 
   if (tipo === 'erro') {
     const titulo = sanitizarTextoFeedback(dados.titulo || 'Não foi possível concluir o envio');
-    const mensagem = sanitizarTextoFeedback(dados.mensagem || 'Verifique a conexão ou tente novamente.');
+    const mensagem = sanitizarTextoFeedback(dados.mensagem || 'O sistema seguirá em monitoramento institucional. Verifique a conexão e tente novamente em instantes.');
     feedback.innerHTML = `<strong class="cv-feedback-title">${titulo}</strong><p>${mensagem}</p>`;
     return;
   }
