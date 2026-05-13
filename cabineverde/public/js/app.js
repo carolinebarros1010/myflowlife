@@ -358,19 +358,46 @@ const render = () => {
       <button type="button" class="cv-button cv-button--primary" id="btnValidarOperador">Validar operador</button>
       <p id="mensagemLoginOperacional"></p>
     </section>
-    <section class="cv-card" data-tela="1">
-      <h3>Tela 1 — Entrada Operacional</h3>
+    <section class="cv-card cv-selection-panel" data-tela="1">
+      <h3>Painel Integrado Operacional</h3>
+      <p class="cv-selection-intro">Selecione o serviço desejado para iniciar atendimento, consultar relatórios ou realizar auditoria operacional.</p>
       <p>Operador: <strong>${operadorAtual.operadorNome || operadorAtual.operadorEmail || '-'}</strong> (${operadorAtual.operadorPerfil || '-'})</p>
-      <form id="entrada-operacional-form" class="cv-form-section cv-operational-entry">
-        <div class="cv-grid">
-          <label for="entrada-talaoPMESP">Número do Talão PMESP<input id="entrada-talaoPMESP" required /></label>
-          <label for="entrada-municipio">Município<input id="entrada-municipio" /></label>
-        </div>
-        <div class="cv-inline-actions">
-          <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
-          <button type="button" class="cv-button cv-button--ghost" id="trocarOperadorBtn">Trocar operador</button>
-        </div>
-      </form>
+      <div class="cv-service-grid">
+        <article class="cv-service-card cv-service-card--primary">
+          <header class="cv-service-card__header">
+            <h4 class="cv-service-card__title">Inserção de Caso</h4>
+            <p class="cv-service-card__description">Inicie o registro e a triagem de um caso de desaparecimento.</p>
+          </header>
+          <form id="entrada-operacional-form" class="cv-form-section cv-operational-entry">
+            <div class="cv-grid">
+              <label for="entrada-talaoPMESP">Número do Talão PMESP<input id="entrada-talaoPMESP" required /></label>
+              <label for="entrada-municipio">Município<input id="entrada-municipio" /></label>
+            </div>
+            <div class="cv-inline-actions">
+              <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
+              <button type="button" class="cv-button cv-button--ghost" id="trocarOperadorBtn">Trocar operador</button>
+            </div>
+          </form>
+        </article>
+        <article class="cv-service-card">
+          <header class="cv-service-card__header">
+            <h4 class="cv-service-card__title">Relatório</h4>
+            <p class="cv-service-card__description">Consulte e copie o relatório operacional dos casos registrados.</p>
+          </header>
+          <div class="cv-service-actions">
+            <button type="button" class="cv-button cv-button--secondary" id="btnAcessarRelatorio">Acessar relatório</button>
+          </div>
+        </article>
+        <article class="cv-service-card">
+          <header class="cv-service-card__header">
+            <h4 class="cv-service-card__title">Auditoria</h4>
+            <p class="cv-service-card__description">Consulte casos, histórico, qualidade dos dados e rastreabilidade operacional.</p>
+          </header>
+          <div class="cv-service-actions">
+            <button type="button" class="cv-button cv-button--secondary" id="btnAcessarAuditoria">Acessar auditoria</button>
+          </div>
+        </article>
+      </div>
     </section>
     <section class="cv-card" data-tela="2" hidden>
       <h3>Tela 2 — Triagem</h3>
@@ -484,7 +511,7 @@ const render = () => {
     <details class="cv-card">
       <summary>Menu secundário</summary>
       <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
-      <section class="cv-card">
+      <section class="cv-card" id="secaoAuditoriaOperacional">
       <h3>Consulta e auditoria de caso</h3>
       <label>Busca livre<input id="audit-campoBusca" placeholder="Talão, nome, idCaso, município..." /></label>
       <div class="cv-grid">
@@ -499,7 +526,7 @@ const render = () => {
         <ul id="audit-timeline"></ul>
       </details>
       </section>
-      <section class="cv-card cv-relatorio-card">
+      <section class="cv-card cv-relatorio-card" id="secaoRelatorioOperacional">
       <details id="relatorioContainer">
         <summary>Relatório operacional</summary>
         <textarea id="relatorio" rows="10" placeholder="Clique em &quot;Gerar relatório&quot; para montar o texto."></textarea>
@@ -614,6 +641,31 @@ const render = () => {
     form.querySelectorAll('[data-passo]').forEach((bloco) => { bloco.hidden = Number(bloco.dataset.passo) !== passoAtual; });
     document.getElementById('indicador-passo').textContent = `PASSO ${passoAtual} de 5`;
   };
+  
+
+  const navegarParaSecaoOperacional = ({ secaoId, detailsId }) => {
+    const secao = document.getElementById(secaoId);
+    const details = detailsId ? document.getElementById(detailsId) : null;
+
+    if (details && 'open' in details) details.open = true;
+
+    const menuSecundario = details?.closest('details');
+    if (menuSecundario && 'open' in menuSecundario) menuSecundario.open = true;
+
+    const destino = secao || details;
+    if (destino && typeof destino.scrollIntoView === 'function') {
+      destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  document.getElementById('btnAcessarRelatorio')?.addEventListener('click', () => {
+    navegarParaSecaoOperacional({ secaoId: 'secaoRelatorioOperacional', detailsId: 'relatorioContainer' });
+  });
+
+  document.getElementById('btnAcessarAuditoria')?.addEventListener('click', () => {
+    navegarParaSecaoOperacional({ secaoId: 'secaoAuditoriaOperacional' });
+  });
+
   document.getElementById('iniciarAtendimentoBtn')?.addEventListener('click', () => {
     const talao = document.getElementById('entrada-talaoPMESP').value.trim();
     if (!talao) return atualizarFeedback('Número do Talão PMESP é obrigatório.', true);

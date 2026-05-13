@@ -354,3 +354,66 @@ pre { white-space: pre-wrap; margin: 0; }
     padding: 24px 18px;
   }
 }
+
+.cv-selection-panel {
+  border-color: #b8d7cd;
+  background: linear-gradient(180deg, #f5fbf9 0%, #ffffff 60%);
+}
+
+.cv-selection-intro {
+  margin-top: 0;
+  color: #295347;
+}
+
+.cv-service-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.cv-service-card {
+  border: 1px solid #c6ddd6;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 12px;
+  box-shadow: 0 5px 16px rgba(20, 64, 52, 0.08);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.cv-service-card:hover {
+  transform: translateY(-2px);
+  border-color: #82b9aa;
+  box-shadow: 0 10px 22px rgba(20, 64, 52, 0.14);
+}
+
+.cv-service-card--primary {
+  background: linear-gradient(180deg, #edf8f3 0%, #ffffff 72%);
+  border-color: #9fcbbf;
+}
+
+.cv-service-card__header {
+  margin-bottom: 8px;
+}
+
+.cv-service-card__title {
+  margin: 0;
+  color: #114f3f;
+}
+
+.cv-service-card__description {
+  margin: 6px 0 0;
+  color: #365d53;
+}
+
+.cv-service-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+@media (max-width: 1024px) {
+  .cv-service-grid {
+    grid-template-columns: 1fr;
+  }
+}
