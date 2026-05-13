@@ -118,6 +118,8 @@ const sanitizarTextoFeedback = (valor) => {
 const renderFeedbackOperacional = (tipo = 'info', dados = {}) => {
   const feedback = document.getElementById('feedback');
   if (!feedback) return;
+  const feedbackWrapper = feedback.closest('.cv-feedback-wrapper');
+  feedbackWrapper?.classList.add('is-visible');
 
   const mapeamentoTipo = {
     sucesso: 'success',
@@ -465,8 +467,8 @@ const render = () => {
         </div>
       </div>
 
-      <section id="entradaOperacionalModulo" class="cv-module-entry cv-entry-module" hidden>
-        <div class="cv-entry-card">
+      <section id="entradaOperacionalModulo" class="cv-module-screen cv-module-entry cv-entry-module" hidden>
+        <div class="cv-module-card cv-entry-card">
           <p class="cv-entry-kicker">Entrada Operacional</p>
           <h4 class="cv-entry-title">Inserção de Caso</h4>
           <p class="cv-entry-helper">Informe o número do talão e o município para iniciar a triagem dinâmica do caso.</p>
@@ -482,6 +484,74 @@ const render = () => {
               <button type="button" class="cv-button cv-button--ghost" id="trocarOperadorBtn">Trocar operador</button>
             </div>
           </form>
+        </div>
+      </section>
+      <section id="relatorioOperacionalModulo" class="cv-module-screen cv-report-module" hidden>
+        <div class="cv-module-card cv-relatorio-card">
+          <header class="cv-module-header">
+            <h3 class="cv-module-title">Relatório Operacional</h3>
+            <p class="cv-module-helper">Consulte, gere e copie o relatório operacional dos casos registrados.</p>
+          </header>
+          <details id="relatorioContainer" open>
+            <summary>Relatório operacional</summary>
+            <textarea id="relatorio" rows="10" placeholder="Clique em &quot;Gerar relatório&quot; para montar o texto."></textarea>
+            <div class="cv-relatorio-actions">
+              <button type="button" class="cv-button cv-button--ghost" id="copiarRelatorioBtn">Copiar relatório</button>
+            </div>
+          </details>
+          <div class="cv-module-actions">
+            <button type="button" class="cv-button cv-button--secondary" id="btnVoltarPainelRelatorio">Voltar ao Painel</button>
+          </div>
+        </div>
+      </section>
+      <section id="auditoriaOperacionalModulo" class="cv-module-screen cv-audit-module" hidden>
+        <div class="cv-module-card">
+          <header class="cv-module-header">
+            <h3 class="cv-module-title">Auditoria Operacional</h3>
+            <p class="cv-module-helper">Consulte casos, histórico, qualidade dos dados e rastreabilidade operacional.</p>
+          </header>
+          <section class="cv-card" id="secaoAuditoriaOperacional">
+            <h3>Consulta e auditoria de caso</h3>
+            <label>Busca livre<input id="audit-campoBusca" placeholder="Talão, nome, idCaso, município..." /></label>
+            <div class="cv-grid">
+              <label>idCaso<input id="audit-idCaso" /></label>
+              <label>talão PMESP<input id="audit-talaoPMESP" /></label>
+              <label>Nome completo<input id="audit-nomeCompletoDesaparecido" /></label>
+            </div>
+            <button class="cv-button cv-button--secondary" type="button" id="buscarCasoBtn">Buscar caso</button>
+            <article id="audit-resultado" class="cv-case-detail-grid">Informe ao menos um filtro para consulta.</article>
+            <details>
+              <summary>Timeline</summary>
+              <ul id="audit-timeline"></ul>
+            </details>
+          </section>
+          <section class="cv-card">
+            <h3>Painel de Qualidade dos Dados</h3>
+            <div class="cv-prioridade-rapida" role="group" aria-label="Filtro rápido por prioridade de tratamento">
+              <button class="cv-button cv-prioridade-btn" type="button" data-prioridade="URGENTE">URGENTE</button>
+              <button class="cv-button cv-prioridade-btn cv-prioridade-btn--alta" type="button" data-prioridade="ALTA">ALTA</button>
+              <button class="cv-button cv-prioridade-btn cv-prioridade-btn--media" type="button" data-prioridade="MEDIA">MEDIA</button>
+              <button class="cv-button cv-prioridade-btn cv-prioridade-btn--baixa" type="button" data-prioridade="BAIXA">BAIXA</button>
+            </div>
+            <div class="cv-grid cv-grid--filters">
+              <label>Total problemas<input id="qtd-totalProblemas" readonly /></label>
+              <label>Total críticos<input id="qtd-totalCriticos" readonly /></label>
+              <label>Total pendentes<input id="qtd-totalPendentes" readonly /></label>
+              <label>Total resolvidos<input id="qtd-totalResolvidos" readonly /></label>
+            </div>
+            <div class="cv-grid cv-grid--filters">
+              <label>Filtro idCaso<input id="qualidade-filtro-idCaso" /></label>
+              <label>Filtro talão PMESP<input id="qualidade-filtro-talaoPMESP" /></label>
+              <label>Filtro severidade<input id="qualidade-filtro-severidade" placeholder="CRITICA/ALTA/MEDIA" /></label>
+              <label>Filtro prioridade tratamento<input id="qualidade-filtro-prioridadeTratamento" placeholder="URGENTE/ALTA/MEDIA/BAIXA" /></label>
+              <label>Filtro status<input id="qualidade-filtro-statusTratamento" placeholder="PENDENTE/RESOLVIDO" /></label>
+            </div>
+            <button class="cv-button cv-button--secondary" type="button" id="atualizarQualidadeBtn">Atualizar painel</button>
+            <div id="qualidade-lista" class="cv-case-detail-grid">Carregando inconsistências da aba QUALIDADE_DADOS...</div>
+          </section>
+          <div class="cv-module-actions">
+            <button type="button" class="cv-button cv-button--secondary" id="btnVoltarPainelAuditoria">Voltar ao Painel</button>
+          </div>
         </div>
       </section>
     </section>
@@ -593,58 +663,10 @@ const render = () => {
         <p><strong>Atualizar painel:</strong> apenas consulta qualidade dos dados.</p>
       </div>
     </section>
-    <section class="cv-card"><h3>Feedback</h3><p id="feedback">Pronto para envio.</p></section>
-    <details class="cv-card">
+    <section class="cv-card cv-feedback-wrapper"><h3>Feedback</h3><p id="feedback">Pronto para envio.</p></section>
+    <details class="cv-card cv-secondary-modules">
       <summary>Menu secundário</summary>
       <section class="cv-card"><h3>Casos</h3><ul>${casos.map((c) => `<li>${c.nomeCompletoDesaparecido} - ${c.classificacaoRisco}</li>`).join('')}</ul></section>
-      <section class="cv-card" id="secaoAuditoriaOperacional">
-      <h3>Consulta e auditoria de caso</h3>
-      <label>Busca livre<input id="audit-campoBusca" placeholder="Talão, nome, idCaso, município..." /></label>
-      <div class="cv-grid">
-        <label>idCaso<input id="audit-idCaso" /></label>
-        <label>talão PMESP<input id="audit-talaoPMESP" /></label>
-        <label>Nome completo<input id="audit-nomeCompletoDesaparecido" /></label>
-      </div>
-      <button class="cv-button cv-button--secondary" type="button" id="buscarCasoBtn">Buscar caso</button>
-      <article id="audit-resultado" class="cv-case-detail-grid">Informe ao menos um filtro para consulta.</article>
-      <details>
-        <summary>Timeline</summary>
-        <ul id="audit-timeline"></ul>
-      </details>
-      </section>
-      <section class="cv-card cv-relatorio-card" id="secaoRelatorioOperacional">
-      <details id="relatorioContainer">
-        <summary>Relatório operacional</summary>
-        <textarea id="relatorio" rows="10" placeholder="Clique em &quot;Gerar relatório&quot; para montar o texto."></textarea>
-        <div class="cv-relatorio-actions">
-          <button type="button" class="cv-button cv-button--ghost" id="copiarRelatorioBtn">Copiar relatório</button>
-        </div>
-      </details>
-      </section>
-      <section class="cv-card">
-      <h3>Painel de Qualidade dos Dados</h3>
-      <div class="cv-prioridade-rapida" role="group" aria-label="Filtro rápido por prioridade de tratamento">
-        <button class="cv-button cv-prioridade-btn" type="button" data-prioridade="URGENTE">URGENTE</button>
-        <button class="cv-button cv-prioridade-btn cv-prioridade-btn--alta" type="button" data-prioridade="ALTA">ALTA</button>
-        <button class="cv-button cv-prioridade-btn cv-prioridade-btn--media" type="button" data-prioridade="MEDIA">MEDIA</button>
-        <button class="cv-button cv-prioridade-btn cv-prioridade-btn--baixa" type="button" data-prioridade="BAIXA">BAIXA</button>
-      </div>
-      <div class="cv-grid cv-grid--filters">
-        <label>Total problemas<input id="qtd-totalProblemas" readonly /></label>
-        <label>Total críticos<input id="qtd-totalCriticos" readonly /></label>
-        <label>Total pendentes<input id="qtd-totalPendentes" readonly /></label>
-        <label>Total resolvidos<input id="qtd-totalResolvidos" readonly /></label>
-      </div>
-      <div class="cv-grid cv-grid--filters">
-        <label>Filtro idCaso<input id="qualidade-filtro-idCaso" /></label>
-        <label>Filtro talão PMESP<input id="qualidade-filtro-talaoPMESP" /></label>
-        <label>Filtro severidade<input id="qualidade-filtro-severidade" placeholder="CRITICA/ALTA/MEDIA" /></label>
-        <label>Filtro prioridade tratamento<input id="qualidade-filtro-prioridadeTratamento" placeholder="URGENTE/ALTA/MEDIA/BAIXA" /></label>
-        <label>Filtro status<input id="qualidade-filtro-statusTratamento" placeholder="PENDENTE/RESOLVIDO" /></label>
-      </div>
-      <button class="cv-button cv-button--secondary" type="button" id="atualizarQualidadeBtn">Atualizar painel</button>
-      <div id="qualidade-lista" class="cv-case-detail-grid">Carregando inconsistências da aba QUALIDADE_DADOS...</div>
-      </section>
     </details>
     <section class="cv-card cv-debug-panel${DEBUG_MODE ? '' : ' is-hidden'}" id="painelDebug">
       <h3>Debug integração GAS</h3>
@@ -729,19 +751,15 @@ const render = () => {
   };
   
 
-  const navegarParaSecaoOperacional = ({ secaoId, detailsId }) => {
-    const secao = document.getElementById(secaoId);
-    const details = detailsId ? document.getElementById(detailsId) : null;
-
-    if (details && 'open' in details) details.open = true;
-
-    const menuSecundario = details?.closest('details');
-    if (menuSecundario && 'open' in menuSecundario) menuSecundario.open = true;
-
-    const destino = secao || details;
-    if (destino && typeof destino.scrollIntoView === 'function') {
-      destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  const mostrarModuloOperacional = (moduloId, focoId = null) => {
+    const painel = document.getElementById('painelSelecaoOperacional');
+    const modulos = ['entradaOperacionalModulo', 'relatorioOperacionalModulo', 'auditoriaOperacionalModulo'];
+    painel.hidden = moduloId !== 'painelSelecaoOperacional';
+    modulos.forEach((id) => {
+      const modulo = document.getElementById(id);
+      if (modulo) modulo.hidden = id !== moduloId;
+    });
+    if (focoId) document.getElementById(focoId)?.focus();
   };
 
   const mostrarSplashEsperanca = (callback) => {
@@ -773,35 +791,33 @@ const render = () => {
 
   document.getElementById('btnAcessarRelatorio')?.addEventListener('click', () => {
     mostrarSplashEsperanca(() => {
-      navegarParaSecaoOperacional({ secaoId: 'secaoRelatorioOperacional', detailsId: 'relatorioContainer' });
+      mostrarModuloOperacional('relatorioOperacionalModulo');
+      document.getElementById('relatorioContainer').open = true;
     });
   });
 
   document.getElementById('btnAcessarAuditoria')?.addEventListener('click', () => {
     mostrarSplashEsperanca(() => {
-      navegarParaSecaoOperacional({ secaoId: 'secaoAuditoriaOperacional' });
+      mostrarModuloOperacional('auditoriaOperacionalModulo', 'audit-campoBusca');
     });
   });
 
   document.getElementById('btnAcessarInsercaoCaso')?.addEventListener('click', () => {
     mostrarSplashEsperanca(() => {
-      const painelSelecaoOperacional = document.getElementById('painelSelecaoOperacional');
-      const entradaOperacionalModulo = document.getElementById('entradaOperacionalModulo');
-      if (painelSelecaoOperacional) painelSelecaoOperacional.hidden = true;
-      if (entradaOperacionalModulo) entradaOperacionalModulo.hidden = false;
+      mostrarModuloOperacional('entradaOperacionalModulo', 'entrada-talaoPMESP');
       const campoEntrada = document.getElementById('entrada-talaoPMESP');
-      campoEntrada?.focus();
       campoEntrada?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });
 
   document.getElementById('btnVoltarPainelOperacional')?.addEventListener('click', () => {
-    mostrarSplashEsperanca(() => {
-      const painelSelecaoOperacional = document.getElementById('painelSelecaoOperacional');
-      const entradaOperacionalModulo = document.getElementById('entradaOperacionalModulo');
-      if (entradaOperacionalModulo) entradaOperacionalModulo.hidden = true;
-      if (painelSelecaoOperacional) painelSelecaoOperacional.hidden = false;
-    });
+    mostrarSplashEsperanca(() => mostrarModuloOperacional('painelSelecaoOperacional'));
+  });
+  document.getElementById('btnVoltarPainelRelatorio')?.addEventListener('click', () => {
+    mostrarSplashEsperanca(() => mostrarModuloOperacional('painelSelecaoOperacional'));
+  });
+  document.getElementById('btnVoltarPainelAuditoria')?.addEventListener('click', () => {
+    mostrarSplashEsperanca(() => mostrarModuloOperacional('painelSelecaoOperacional'));
   });
 
   document.getElementById('iniciarAtendimentoBtn')?.addEventListener('click', () => {
