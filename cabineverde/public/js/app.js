@@ -358,47 +358,69 @@ const render = () => {
       <button type="button" class="cv-button cv-button--primary" id="btnValidarOperador">Validar operador</button>
       <p id="mensagemLoginOperacional"></p>
     </section>
-    <section class="cv-card cv-selection-panel" data-tela="1">
-      <h3>Painel Integrado Operacional</h3>
-      <p class="cv-selection-intro">Selecione o serviço desejado para iniciar atendimento, consultar relatórios ou realizar auditoria operacional.</p>
-      <p>Operador: <strong>${operadorAtual.operadorNome || operadorAtual.operadorEmail || '-'}</strong> (${operadorAtual.operadorPerfil || '-'})</p>
-      <div class="cv-service-grid">
-        <article class="cv-service-card cv-service-card--primary">
-          <header class="cv-service-card__header">
-            <h4 class="cv-service-card__title">Inserção de Caso</h4>
-            <p class="cv-service-card__description">Inicie o registro e a triagem de um caso de desaparecimento.</p>
-          </header>
-          <form id="entrada-operacional-form" class="cv-form-section cv-operational-entry">
-            <div class="cv-grid">
-              <label for="entrada-talaoPMESP">Número do Talão PMESP<input id="entrada-talaoPMESP" required /></label>
-              <label for="entrada-municipio">Município<input id="entrada-municipio" /></label>
-            </div>
-            <div class="cv-inline-actions">
-              <button type="button" class="cv-button cv-button--secondary" id="btnAcessarInsercaoCaso">Iniciar inserção de caso</button>
-              <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
-              <button type="button" class="cv-button cv-button--ghost" id="trocarOperadorBtn">Trocar operador</button>
-            </div>
-          </form>
-        </article>
-        <article class="cv-service-card">
-          <header class="cv-service-card__header">
-            <h4 class="cv-service-card__title">Relatório</h4>
-            <p class="cv-service-card__description">Consulte e copie o relatório operacional dos casos registrados.</p>
-          </header>
-          <div class="cv-service-actions">
-            <button type="button" class="cv-button cv-button--secondary" id="btnAcessarRelatorio">Acessar relatório</button>
+    <section class="cv-card cv-selection-panel cv-selection-screen" data-tela="1">
+      <div id="painelSelecaoOperacional">
+        <header class="cv-selection-topbar">
+          <div>
+            <p class="cv-login-brand">CABINE VERDE</p>
+            <h3>Painel Integrado Operacional</h3>
           </div>
-        </article>
-        <article class="cv-service-card">
-          <header class="cv-service-card__header">
-            <h4 class="cv-service-card__title">Auditoria</h4>
-            <p class="cv-service-card__description">Consulte casos, histórico, qualidade dos dados e rastreabilidade operacional.</p>
-          </header>
-          <div class="cv-service-actions">
-            <button type="button" class="cv-button cv-button--secondary" id="btnAcessarAuditoria">Acessar auditoria</button>
+          <p class="cv-selection-operator">${operadorAtual.operadorNome || operadorAtual.operadorEmail || '-'} · ${operadorAtual.operadorPerfil || '-'}</p>
+        </header>
+        <p class="cv-selection-intro">Selecione o serviço desejado.</p>
+        <div class="cv-selection-group">
+          <h4 class="cv-selection-group-title">Área Pública / Atendimento</h4>
+          <article class="cv-service-card cv-public-card">
+            <header class="cv-service-card__header">
+              <p class="cv-service-card__icon" aria-hidden="true">🗂️</p>
+              <h4 class="cv-service-card__title">Inserção de Caso</h4>
+              <p class="cv-service-card__description">Realize o pré-cadastro de um desaparecimento, informando dados do desaparecido, informações relevantes e meios de contato.</p>
+            </header>
+            <div class="cv-service-actions">
+              <button type="button" class="cv-button cv-button--primary" id="btnAcessarInsercaoCaso">Acessar</button>
+            </div>
+          </article>
+        </div>
+        <div class="cv-selection-group">
+          <h4 class="cv-selection-group-title">Área Restrita / Operacional</h4>
+          <div class="cv-service-grid">
+            <article class="cv-service-card cv-internal-card">
+              <header class="cv-service-card__header">
+                <h4 class="cv-service-card__title">Relatório</h4>
+                <p class="cv-service-card__description">Consulte e copie o relatório operacional dos casos registrados.</p>
+              </header>
+              <div class="cv-service-actions">
+                <button type="button" class="cv-button cv-button--secondary" id="btnAcessarRelatorio">Acessar</button>
+              </div>
+            </article>
+            <article class="cv-service-card cv-internal-card">
+              <header class="cv-service-card__header">
+                <h4 class="cv-service-card__title">Auditoria</h4>
+                <p class="cv-service-card__description">Consulte casos, histórico, qualidade dos dados e rastreabilidade operacional.</p>
+              </header>
+              <div class="cv-service-actions">
+                <button type="button" class="cv-button cv-button--secondary" id="btnAcessarAuditoria">Acessar</button>
+              </div>
+            </article>
           </div>
-        </article>
+        </div>
       </div>
+
+      <section id="entradaOperacionalModulo" class="cv-module-entry" hidden>
+        <h4>Inserção de Caso</h4>
+        <p>Informe o número do talão e o município para iniciar a triagem.</p>
+        <form id="entrada-operacional-form" class="cv-form-section cv-operational-entry">
+          <div class="cv-grid">
+            <label for="entrada-talaoPMESP">Número do Talão PMESP<input id="entrada-talaoPMESP" required /></label>
+            <label for="entrada-municipio">Município<input id="entrada-municipio" /></label>
+          </div>
+          <div class="cv-inline-actions">
+            <button type="button" class="cv-button cv-button--primary" id="iniciarAtendimentoBtn">Iniciar atendimento</button>
+            <button type="button" class="cv-button cv-button--ghost" id="trocarOperadorBtn">Trocar operador</button>
+            <button type="button" class="cv-button cv-button--secondary" id="btnVoltarPainelOperacional">Voltar ao Painel</button>
+          </div>
+        </form>
+      </section>
     </section>
     <section class="cv-card" data-tela="2" hidden>
       <h3>Tela 2 — Triagem</h3>
@@ -700,9 +722,22 @@ const render = () => {
 
   document.getElementById('btnAcessarInsercaoCaso')?.addEventListener('click', () => {
     mostrarSplashEsperanca(() => {
+      const painelSelecaoOperacional = document.getElementById('painelSelecaoOperacional');
+      const entradaOperacionalModulo = document.getElementById('entradaOperacionalModulo');
+      if (painelSelecaoOperacional) painelSelecaoOperacional.hidden = true;
+      if (entradaOperacionalModulo) entradaOperacionalModulo.hidden = false;
       const campoEntrada = document.getElementById('entrada-talaoPMESP');
       campoEntrada?.focus();
       campoEntrada?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+
+  document.getElementById('btnVoltarPainelOperacional')?.addEventListener('click', () => {
+    mostrarSplashEsperanca(() => {
+      const painelSelecaoOperacional = document.getElementById('painelSelecaoOperacional');
+      const entradaOperacionalModulo = document.getElementById('entradaOperacionalModulo');
+      if (entradaOperacionalModulo) entradaOperacionalModulo.hidden = true;
+      if (painelSelecaoOperacional) painelSelecaoOperacional.hidden = false;
     });
   });
 
