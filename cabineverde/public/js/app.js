@@ -646,7 +646,7 @@ const render = () => {
     if (botaoSubmit?.disabled) return;
     if (!operadorEstaValidadoLocalmente()) return atualizarFeedback('Operador não validado. Faça o login operacional para continuar.', true);
     const caso = obterCasoDoFormulario();
-    console.debug('[TRIAGEM] valor do talão antes do submit:', { talaoPMESP: caso.talaoPMESP, talaoBopm: caso.talaoBopm });
+    if (DEBUG_MODE) console.debug('[TRIAGEM] valor do talão antes do submit:', { talaoPMESP: caso.talaoPMESP, talaoBopm: caso.talaoBopm });
     if (!caso.talaoBopm) {
       atualizarFeedback('Número do Talão PMESP é obrigatório.', true);
       return;
@@ -664,7 +664,7 @@ const render = () => {
       }
 
       logBotaoOperacional('Finalizar triagem', caso);
-      console.debug('[TRIAGEM] payload enviado para salvarCasoSheets:', caso);
+      if (DEBUG_MODE) console.debug('[TRIAGEM] payload enviado para salvarCasoSheets:', caso);
       const retorno = await salvarCasoSheets(caso);
     console.log('RESPOSTA GAS:', retorno);
     if (DEBUG_MODE) {
