@@ -960,14 +960,17 @@ function atualizarFotoCaso_(payload) {
   var idxFotoDisponivel = cabecalho.indexOf('fotoDisponivel');
   var idxLinkFoto = cabecalho.indexOf('linkFoto');
   var idxUrlFoto = cabecalho.indexOf('urlFoto');
+  var idxStatusFotos = cabecalho.indexOf('statusFotos');
   var idxDataAtualizacaoFoto = cabecalho.indexOf('dataAtualizacaoFoto');
   var fotoDisponivel = limparTexto(payload && payload.fotoDisponivel) || (limparTexto(payload && (payload.urlFoto || payload.linkFoto)) ? 'Sim' : 'Pendente');
   var urlFoto = limparTexto(payload && (payload.urlFoto || payload.linkFoto));
+  var statusFotos = limparTexto(payload && payload.statusFotos) || (urlFoto ? 'ANEXADA' : 'PENDENTE');
   if (idxFotoDisponivel >= 0) sheetCasos.getRange(linha, idxFotoDisponivel + 1).setValue(fotoDisponivel);
   if (idxLinkFoto >= 0) sheetCasos.getRange(linha, idxLinkFoto + 1).setValue(urlFoto);
   if (idxUrlFoto >= 0) sheetCasos.getRange(linha, idxUrlFoto + 1).setValue(urlFoto);
+  if (idxStatusFotos >= 0) sheetCasos.getRange(linha, idxStatusFotos + 1).setValue(statusFotos);
   if (idxDataAtualizacaoFoto >= 0) sheetCasos.getRange(linha, idxDataAtualizacaoFoto + 1).setValue(new Date());
-  return { action: 'atualizarFotoCaso', idCaso: idCaso, talaoPMESP: talaoPMESP, fotoDisponivel: fotoDisponivel, urlFoto: urlFoto, message: 'Foto do caso atualizada com sucesso' };
+  return { action: 'atualizarFotoCaso', idCaso: idCaso, talaoPMESP: talaoPMESP, fotoDisponivel: fotoDisponivel, statusFotos: statusFotos, urlFoto: urlFoto, message: 'Foto do caso atualizada com sucesso' };
 }
 
 function validarOperadorPayloadOuSessao_(payload) {

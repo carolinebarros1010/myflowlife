@@ -36,10 +36,17 @@ function salvarFotoDesaparecido_(dadosFoto) {
   var bytes = Utilities.base64Decode(limparTexto(dadosFoto && dadosFoto.base64));
   var pastaRaiz = obterOuCriarPasta_('Cabine Verde');
   var pastaFotos = obterOuCriarSubpasta_(pastaRaiz, 'Fotos');
-  var pastaCaso = obterOuCriarSubpasta_(pastaFotos, idCaso + '_' + talaoPMESP);
+  var hoje = new Date();
+  var ano = Utilities.formatDate(hoje, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyy');
+  var mes = Utilities.formatDate(hoje, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'MM');
+  var pastaAno = obterOuCriarSubpasta_(pastaFotos, ano);
+  var pastaMes = obterOuCriarSubpasta_(pastaAno, mes);
+  var pastaCaso = obterOuCriarSubpasta_(pastaMes, idCaso + '_' + talaoPMESP);
 
-  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyyMMdd_HHmmss');
-  var nomeArquivo = 'TEMP_' + idCaso + '_' + timestamp + '.jpg';
+  var timestamp = Utilities.formatDate(hoje, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyyMMdd_HHmmss');
+  var totalFotosCaso = contarFotosDoCaso_(idCaso);
+  var prefixoArquivo = limparTexto(dadosFoto && dadosFoto.tipoFoto) === 'ROSTO' || totalFotosCaso === 0 ? 'FOTO_PRINCIPAL_' : 'FOTO_COMPLEMENTAR_';
+  var nomeArquivo = prefixoArquivo + idCaso + '_' + timestamp + '.jpg';
   var blob = Utilities.newBlob(bytes, mimeType, nomeArquivo);
   var file = pastaCaso.createFile(blob);
   file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
@@ -56,8 +63,9 @@ function salvarFotoDesaparecido_(dadosFoto) {
     fileIdDrive: file.getId(),
     autorizacaoUsoImagem: !!dadosFoto.autorizacaoUsoImagem,
     fotoPrincipalSolicitada: !!dadosFoto.fotoPrincipal,
-    nivelAcesso: limparTexto(dadosFoto.nivelAcesso) || 'INTERNO',
-    observacoesFoto: limparTexto(dadosFoto.observacoesFoto)
+    nivelAcesso: limparTexto(dadosFoto.nivelAcesso) || 'RESTRITO',
+    observacoesFoto: limparTexto(dadosFoto.observacoesFoto),
+    statusFoto: totalFotosCaso === 0 ? 'ANEXADA' : 'VALIDACAO_PENDENTE'
   });
 
   atualizarResumoFotosNoCaso_(idCaso, file.getUrl());
@@ -99,8 +107,8 @@ function registrarFotoNaPlanilha_(dados) {
     fotoPrincipal: fotoPrincipal,
     autorizacaoUsoImagem: dados.autorizacaoUsoImagem,
     restricaoDivulgacao: !dados.autorizacaoUsoImagem,
-    statusValidacao: 'Pendente',
-    nivelAcesso: dados.nivelAcesso || 'INTERNO',
+    statusValidacao: dados.statusFoto || 'VALIDACAO_PENDENTE',
+    nivelAcesso: dados.nivelAcesso || 'RESTRITO',
     observacoesFoto: dados.observacoesFoto
   };
   aba.appendRow(colunas.map(function (col) { return normalizarValorPlanilha(linha[col]); }));

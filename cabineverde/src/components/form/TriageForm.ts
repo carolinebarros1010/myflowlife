@@ -134,28 +134,40 @@ export const renderTriageForm = (): string => `
 
     ${etapa(
       6,
-      'Fechamento',
+      '7) Foto do desaparecido',
       [
-        input('observacoesOperacionais', 'Observações operacionais'),
-        input('idFotoVisualizacao', 'ID da foto para visualização controlada'),
-        input('justificativaVisualizacao', 'Justificativa de visualização (obrigatória para RESTRITO/SIGILOSO)'),
-        input('feedbackOperacional', 'Feedback operacional (melhoria/erro percebido)'),
         `<div class="cv-card cv-photo-post-triage">
-          <h4>Etapa final de foto</h4>
-          <p class="cv-muted">A foto não bloqueia o salvamento da triagem. Você pode anexar agora ou depois.</p>
+          <h4>Foto do desaparecido</h4>
+          <p class="cv-muted cv-photo-info">A foto é importante para apoiar a busca, porém não bloqueia o salvamento do caso. Você pode preparar agora e anexar após a confirmação do caso.</p>
+          ${select('origemFoto', 'Origem da foto', ['SOLICITANTE', 'EQUIPE', 'REDE_SOCIAL', 'SISTEMA_EXTERNO', 'OUTRO'])}
+          ${select('tipoFoto', 'Tipo da foto', ['ROSTO', 'CORPO_INTEIRO', 'DOCUMENTO', 'OUTRO'])}
+          ${select('autorizacaoUsoImagem', 'Autorização de uso de imagem', ['SIM', 'NAO', 'NAO_INFORMADO'])}
+          ${select('nivelAcessoFoto', 'Nível de acesso da foto', ['INTERNO', 'RESTRITO', 'SIGILOSO'])}
+          ${input('observacoesFoto', 'Observações da foto')}
           <div id="blocoUploadFotoDesaparecido" class="cv-photo-upload" hidden>
             <label for="fotoDesaparecido">Inserir foto do desaparecido</label>
             <input type="file" id="fotoDesaparecido" name="fotoDesaparecido" accept="image/*" capture="environment" />
             <input type="hidden" id="urlFoto" name="urlFoto" />
             <input type="hidden" id="linkFoto" name="linkFoto" />
-            <div id="statusUploadFoto" class="cv-photo-status">Nenhuma imagem enviada.</div>
+            <div id="statusUploadFoto" class="cv-photo-status">Nenhuma imagem preparada.</div>
             <img id="previewFotoDesaparecido" class="cv-photo-preview" alt="Prévia da foto do desaparecido" hidden />
           </div>
           <div id="acoesUploadFotoDesaparecido" class="cv-inline-actions" hidden>
-            <button type="button" id="btn-adicionar-foto-agora" class="cv-button cv-button--secondary">Adicionar foto agora</button>
+            <button type="button" id="btn-adicionar-foto-agora" class="cv-button cv-button--secondary">Preparar foto para anexar ao caso</button>
           </div>
           <p id="status-foto-pendente" class="cv-photo-status">Foto pendente.</p>
         </div>`
+      ].join('')
+    )}
+
+    ${etapa(
+      7,
+      '8) Fechamento',
+      [
+        input('observacoesOperacionais', 'Observações operacionais'),
+        input('idFotoVisualizacao', 'ID da foto para visualização controlada'),
+        input('justificativaVisualizacao', 'Justificativa de visualização (obrigatória para RESTRITO/SIGILOSO)'),
+        input('feedbackOperacional', 'Feedback operacional (melhoria/erro percebido)')
       ].join('')
     )}
   </form>
