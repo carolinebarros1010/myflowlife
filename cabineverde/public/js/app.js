@@ -57,6 +57,18 @@ const iniciarSplashScreen = () => {
 iniciarSplashScreen();
 const casos = JSON.parse(localStorage.getItem('cabine-verde-casos') || '[]');
 const camposObrigatoriosEnvio = ['nomeCompletoDesaparecido', 'municipio', 'nomeSolicitante', 'telefoneSolicitante'];
+const rotulosCamposObrigatorios = {
+  talaoPMESP: 'Talão PMESP',
+  nomeCompletoDesaparecido: 'Nome do desaparecido',
+  idade: 'Idade',
+  sexoGenero: 'Sexo',
+  municipio: 'Município',
+  dataHoraUltimaVisualizacao: 'Data/hora da última visualização',
+  localUltimaVisualizacao: 'Local da última visualização',
+  nomeSolicitante: 'Nome do solicitante',
+  vinculoSolicitante: 'Vínculo do solicitante',
+  telefoneSolicitante: 'Telefone do solicitante'
+};
 const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
 const lerParametrosTriagemUrl = () => {
   const params = new URLSearchParams(window.location.search);
@@ -379,6 +391,8 @@ const atualizarResumo = (caso) => {
 };
 
 const validarCamposMinimos = (caso) => camposObrigatoriosEnvio.every((campo) => String(caso[campo] || '').trim());
+const obterCamposObrigatoriosPendentes = (caso) =>
+  camposObrigatoriosEnvio.filter((campo) => !String(caso[campo] || '').trim());
 
 const render = () => {
   if (sessaoOperadorExpirada()) {
@@ -867,8 +881,10 @@ const render = () => {
       atualizarFeedback('Número do Talão PMESP é obrigatório.', true);
       return;
     }
-    if (!validarCamposMinimos(caso)) {
-      atualizarFeedback('Preencha os campos mínimos: nome do desaparecido, município, nome do solicitante e telefone do solicitante.', true);
+    const camposPendentes = obterCamposObrigatoriosPendentes(caso);
+    if (camposPendentes.length) {
+      const listaCampos = camposPendentes.map((campo) => rotulosCamposObrigatorios[campo] || campo).join(', ');
+      atualizarFeedback(`Preencha os campos obrigatórios pendentes: ${listaCampos}.`, true);
       return;
     }
 
