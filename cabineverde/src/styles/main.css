@@ -43,6 +43,27 @@ input:focus, textarea:focus, button:focus, select:focus { outline: 2px solid #3b
 textarea { width: 100%; box-sizing: border-box; }
 
 .cv-form { display: grid; gap: 10px; }
+
+.cv-required-alert {
+  margin: 16px 0 20px;
+  padding: 14px 16px;
+  border-left: 5px solid #b7791f;
+  background: #fffaf0;
+  color: #5f370e;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.cv-required-alert strong {
+  font-weight: 700;
+}
+
+.cv-required-mark {
+  color: #8c1d18;
+  font-weight: 700;
+}
+
 .cv-step-section { border: 1px solid var(--line); border-radius: 8px; margin: 0; padding: 10px; }
 .cv-step-section legend { padding: 0 8px; font-weight: 700; }
 
