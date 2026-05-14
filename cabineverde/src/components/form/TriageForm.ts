@@ -1,13 +1,13 @@
 import { StatusCaso } from '../../types/enums.js';
 
 const input = (name: string, label: string, type = 'text', required = false, attrs = '') => `
-  <label>${label}<input name="${name}" type="${type}" ${required ? 'required' : ''} ${attrs} /></label>`;
+  <label>${label}${required ? ' <span class="cv-required-mark" aria-hidden="true">*</span>' : ''}<input name="${name}" type="${type}" ${required ? 'required' : ''} ${attrs} /></label>`;
 
 const checkbox = (name: string, label: string) => `
   <label class="cv-check"><input name="${name}" type="checkbox" /> ${label}</label>`;
 
 const select = (name: string, label: string, opcoes: string[], required = false) => `
-  <label>${label}
+  <label>${label}${required ? ' <span class="cv-required-mark" aria-hidden="true">*</span>' : ''}
     <select name="${name}" ${required ? 'required' : ''}>
       <option value="">Selecione</option>
       ${opcoes.map((opcao) => `<option value="${opcao}">${opcao}</option>`).join('')}
@@ -25,6 +25,12 @@ const inputOcultoArvore = (name: string) => `<input type="hidden" name="${name}"
 export const renderTriageForm = (): string => `
 <section class="cv-card">
   <h2>Triagem dinâmica operacional</h2>
+  <div class="cv-required-alert" role="alert">
+    <strong>Atenção:</strong> os campos marcados como obrigatórios são necessários para salvar o caso.
+    Preencha, no mínimo: Talão PMESP, nome do desaparecido, idade, sexo, município,
+    data/hora da última visualização, local da última visualização, nome do solicitante,
+    vínculo e telefone do solicitante.
+  </div>
   <form id="triage-form" class="cv-form" novalidate>
     ${[
       'arv_p1_emergencia_resp',
