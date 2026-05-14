@@ -15,8 +15,8 @@ export interface SheetsServiceResponse {
 export interface SheetsService {
   salvar(payload: SheetPayload): Promise<SheetsServiceResponse>;
   healthcheck(): Promise<SheetsServiceResponse>;
-  uploadFotoCaso(payload: { base64: string; mimeType: string; nomeArquivo: string; idCaso: string; talaoPMESP: string; nomeDesaparecido?: string; operadorResponsavel?: string; origemFoto?: string; tipoFoto?: string; autorizacaoUsoImagem?: boolean; }): Promise<SheetsServiceResponse & { urlFoto?: string }>;
-  atualizarFotoCaso(payload: { idCaso?: string; talaoPMESP?: string; urlFoto?: string; linkFoto?: string; fotoDisponivel?: string; }): Promise<SheetsServiceResponse & { urlFoto?: string }>;
+  uploadFotoCaso(payload: { base64: string; mimeType: string; nomeArquivo: string; idCaso: string; talaoPMESP: string; nomeDesaparecido?: string; operadorResponsavel?: string; origemFoto?: string; tipoFoto?: string; autorizacaoUsoImagem?: boolean; nivelAcesso?: string; observacoesFoto?: string; }): Promise<SheetsServiceResponse & { urlFoto?: string }>;
+  atualizarFotoCaso(payload: { idCaso?: string; talaoPMESP?: string; urlFoto?: string; linkFoto?: string; fotoDisponivel?: string; statusFotos?: string; }): Promise<SheetsServiceResponse & { urlFoto?: string }>;
   visualizarFoto(
     idFoto: string,
     operador: string,
@@ -51,7 +51,7 @@ const parseResponseBody = async (resposta: Response): Promise<EndpointResponse> 
 };
 
 export class GoogleSheetsService implements SheetsService {
-  async atualizarFotoCaso(payload: { idCaso?: string; talaoPMESP?: string; urlFoto?: string; linkFoto?: string; fotoDisponivel?: string; }): Promise<SheetsServiceResponse & { urlFoto?: string }> {
+  async atualizarFotoCaso(payload: { idCaso?: string; talaoPMESP?: string; urlFoto?: string; linkFoto?: string; fotoDisponivel?: string; statusFotos?: string; }): Promise<SheetsServiceResponse & { urlFoto?: string }> {
     try {
       const resposta = await fetch(sheetsConfig.endpoint, {
         method: 'POST',
@@ -68,7 +68,7 @@ export class GoogleSheetsService implements SheetsService {
     }
   }
 
-  async uploadFotoCaso(payload: { base64: string; mimeType: string; nomeArquivo: string; idCaso: string; talaoPMESP: string; nomeDesaparecido?: string; operadorResponsavel?: string; origemFoto?: string; tipoFoto?: string; autorizacaoUsoImagem?: boolean; }): Promise<SheetsServiceResponse & { urlFoto?: string }> {
+  async uploadFotoCaso(payload: { base64: string; mimeType: string; nomeArquivo: string; idCaso: string; talaoPMESP: string; nomeDesaparecido?: string; operadorResponsavel?: string; origemFoto?: string; tipoFoto?: string; autorizacaoUsoImagem?: boolean; nivelAcesso?: string; observacoesFoto?: string; }): Promise<SheetsServiceResponse & { urlFoto?: string }> {
     try {
       const resposta = await fetch(sheetsConfig.endpoint, {
         method: 'POST',

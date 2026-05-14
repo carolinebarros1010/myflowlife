@@ -268,7 +268,12 @@ const salvarFotoDepoisDaTriagem = async (): Promise<void> => {
     idCaso,
     talaoPMESP,
     nomeDesaparecido: triagemState.dados.nomeCompletoDesaparecido,
-    operadorResponsavel: obterOperadorAtual()
+    operadorResponsavel: obterOperadorAtual(),
+    origemFoto: normalizarTexto(String((form?.elements.namedItem('origemFoto') as HTMLSelectElement | null)?.value || '')),
+    tipoFoto: normalizarTexto(String((form?.elements.namedItem('tipoFoto') as HTMLSelectElement | null)?.value || '')),
+    autorizacaoUsoImagem: ((form?.elements.namedItem('autorizacaoUsoImagem') as HTMLSelectElement | null)?.value || '') === 'SIM',
+    nivelAcesso: normalizarTexto(String((form?.elements.namedItem('nivelAcessoFoto') as HTMLSelectElement | null)?.value || 'RESTRITO')),
+    observacoesFoto: normalizarTexto(String((form?.elements.namedItem('observacoesFoto') as HTMLInputElement | null)?.value || ''))
   });
   if (!upload.ok || !upload.urlFoto) return atualizarStatus(`Falha no upload da foto: ${upload.message}`, true);
 
@@ -277,7 +282,8 @@ const salvarFotoDepoisDaTriagem = async (): Promise<void> => {
     talaoPMESP,
     urlFoto: upload.urlFoto,
     linkFoto: upload.urlFoto,
-    fotoDisponivel: 'Sim'
+    fotoDisponivel: 'Sim',
+    statusFotos: 'ANEXADA'
   });
   if (!atualizacao.ok) return atualizarStatus(`Foto enviada, mas não foi possível vincular no caso: ${atualizacao.message}`, true);
   urlFotoUploadAtual = upload.urlFoto;
@@ -742,6 +748,8 @@ if (formRegistro) {
 }
 
 if (form) {
+  const seletorNivelAcessoFoto = form.elements.namedItem('nivelAcessoFoto') as HTMLSelectElement | null;
+  if (seletorNivelAcessoFoto && !seletorNivelAcessoFoto.value) seletorNivelAcessoFoto.value = 'RESTRITO';
   const idCasoUrl = normalizarTexto(new URLSearchParams(window.location.search).get('idCaso') || '');
   if (idCasoUrl) sincronizarIdCasoPersistente(idCasoUrl);
   (document.getElementById('session-id') as HTMLInputElement | null)!.value = sessionId;
@@ -806,6 +814,7 @@ if (form) {
       payload.dados.linkFoto = urlFotoUploadAtual;
     }
     payload.dados.fotoDisponivel = payload.dados.urlFoto || payload.dados.linkFoto ? 'Sim' : 'Pendente';
+    payload.dados.statusFotos = payload.dados.urlFoto || payload.dados.linkFoto ? 'ANEXADA' : 'PENDENTE';
 
     atualizarStatus('Gravação em andamento na planilha central...');
     const retorno = await sheetsService.salvar(payload);
@@ -842,7 +851,12 @@ if (form) {
     }
     if (retorno.ok) {
       referenciaCasoSalvo = { idCaso: retorno.idCaso || triagemState.casoCompleto.id, talaoPMESP: triagemState.casoCompleto.talaoPMESP };
-      atualizarStatusFotoPendente(payload.dados.fotoDisponivel === 'Sim' ? 'Foto disponível: Sim' : 'Foto pendente.');
+      if ((referenciaCasoSalvo.idCaso || '').startsWith('CV-')) {
+        atualizarStatus('Caso salvo, mas idCaso retornou em formato temporário (CV-...). Upload de foto mantido como pendente por segurança.', true);
+      } else {
+        await salvarFotoDepoisDaTriagem();
+      }
+      atualizarStatusFotoPendente(payload.dados.fotoDisponivel === 'Sim' || Boolean(urlFotoUploadAtual) ? 'Foto disponível: Sim' : 'Foto pendente.');
       const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
       if (chaveAuto) limparAutoRascunhoLocal(chaveAuto);
       casoOriginalEdicao = null;
@@ -858,8 +872,9 @@ if (form) {
 
 document.getElementById('btn-adicionar-foto-agora')?.addEventListener('click', () => {
   mostrarBlocoUploadFoto(true);
-  atualizarStatus('Selecione a foto e clique novamente em "Adicionar foto agora" para enviar.');
-  salvarFotoDepoisDaTriagem();
+  const fotoInput = document.getElementById('fotoDesaparecido') as HTMLInputElement | null;
+  fotoInput?.click();
+  atualizarStatus('Foto preparada para anexação após salvar o caso.');
 });
 
 document.getElementById('prev-step')?.addEventListener('click', () => atualizarEtapaVisual(triagemState.etapa - 1));
