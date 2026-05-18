@@ -127,6 +127,41 @@ const sanitizarTextoFeedback = (valor) => {
     .replaceAll("'", '&#39;');
 };
 
+const salvarFotoDepoisDaTriagem = async (idCasoRecebido) => {
+  const idCaso = String(idCasoRecebido || window.referenciaCasoSalvo || window.ultimoIdCasoSalvo || '').trim();
+  if (!idCaso || idCaso.startsWith('CV-')) {
+    console.warn('[FOTO][UPLOAD] idCaso definitivo ausente para upload:', idCaso);
+    return null;
+  }
+  const fotoInput = document.getElementById('fotoDesaparecido');
+  const arquivoFoto = fotoInput?.files?.[0];
+  if (!arquivoFoto) return null;
+
+  const base64 = await new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      const resultado = String(leitor.result || '');
+      const semPrefixo = resultado.includes(',') ? resultado.split(',')[1] : resultado;
+      resolve(semPrefixo);
+    };
+    leitor.onerror = () => reject(new Error('Falha ao ler imagem para upload.'));
+    leitor.readAsDataURL(arquivoFoto);
+  });
+  const talaoPMESP =
+    String(document.querySelector('[name="talaoPMESP"]')?.value || '').trim() ||
+    String(document.querySelector('[name="talaoBopm"]')?.value || '').trim();
+  const respostaUpload = await chamarAcaoGAS('uploadFotoCaso', {
+    action: 'uploadFotoCaso',
+    idCaso,
+    talaoPMESP,
+    base64,
+    mimeType: arquivoFoto.type || 'application/octet-stream',
+    nomeArquivo: arquivoFoto.name || `foto_${idCaso}.jpg`
+  });
+  console.log('[FOTO][UPLOAD] resposta:', respostaUpload);
+  return respostaUpload;
+};
+
 const renderFeedbackOperacional = (tipo = 'info', dados = {}) => {
   const feedback = document.getElementById('feedback');
   if (!feedback) return;
@@ -904,6 +939,13 @@ const render = () => {
     }
 
     if (retorno.ok && retorno.status !== 'duplicado_ignorado') {
+      const idCaso = String(retorno?.data?.idCaso || retorno?.idCaso || '').trim();
+      window.referenciaCasoSalvo = idCaso;
+      window.ultimoIdCasoSalvo = idCaso;
+      const fotoInput = document.getElementById('fotoDesaparecido');
+      const arquivoFoto = fotoInput?.files?.[0];
+      console.log('[FOTO][POS-SALVAR] idCaso recebido:', idCaso);
+      console.log('[FOTO][POS-SALVAR] arquivo selecionado:', arquivoFoto?.name);
       const identificadorRetorno =
         retorno?.data?.idCaso ||
         retorno?.idCaso ||
@@ -918,8 +960,16 @@ const render = () => {
         prioridade: caso.prioridade,
         classificacaoRisco: caso.classificacaoRisco
       });
+      const possuiLinkFoto = Boolean(caso.linkFoto || caso.urlFoto);
+      if ((arquivoFoto || possuiLinkFoto) && String(caso.fotoDisponivel || '').toLowerCase() !== 'sim') {
+        caso.fotoDisponivel = 'Sim';
+      }
       casos.unshift(caso);
       localStorage.setItem('cabine-verde-casos', JSON.stringify(casos));
+      if (arquivoFoto && idCaso) {
+        console.log('[FOTO][POS-SALVAR] chamando salvarFotoDepoisDaTriagem');
+        await salvarFotoDepoisDaTriagem(idCaso);
+      }
     } else if (retorno.status === 'duplicado_ignorado') {
       atualizarFeedback('Envio duplicado ignorado pelo backend (idempotência ativa).');
     } else {
