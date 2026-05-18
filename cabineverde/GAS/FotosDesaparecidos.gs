@@ -32,8 +32,16 @@ function salvarFotoDesaparecido_(dadosFoto) {
 
   var mimeType = limparTexto(dadosFoto && dadosFoto.mimeType) || 'image/jpeg';
   if (mimeType.indexOf('image/') !== 0) throw new Error('Upload bloqueado: mimeType inválido.');
+  Logger.log('[CV][Foto] Payload recebido no GAS | idCaso=%s | talaoPMESP=%s | mimeType=%s | nomeArquivo=%s | base64Length=%s',
+    idCaso,
+    talaoPMESP,
+    mimeType,
+    limparTexto(dadosFoto && dadosFoto.nomeArquivo),
+    String(limparTexto(dadosFoto && dadosFoto.base64).length)
+  );
 
   var bytes = Utilities.base64Decode(limparTexto(dadosFoto && dadosFoto.base64));
+  Logger.log('[CV][Foto] Base64 decodificado com sucesso | bytes=%s', String(bytes.length));
   var pastaRaiz = obterOuCriarPasta_('Cabine Verde');
   var pastaFotos = obterOuCriarSubpasta_(pastaRaiz, 'Fotos');
   var hoje = new Date();
@@ -48,7 +56,9 @@ function salvarFotoDesaparecido_(dadosFoto) {
   var prefixoArquivo = limparTexto(dadosFoto && dadosFoto.tipoFoto) === 'ROSTO' || totalFotosCaso === 0 ? 'FOTO_PRINCIPAL_' : 'FOTO_COMPLEMENTAR_';
   var nomeArquivo = prefixoArquivo + idCaso + '_' + timestamp + '.jpg';
   var blob = Utilities.newBlob(bytes, mimeType, nomeArquivo);
+  Logger.log('[CV][Foto] Blob criado | nome=%s | mimeType=%s | bytes=%s', nomeArquivo, mimeType, String(blob.getBytes().length));
   var file = pastaCaso.createFile(blob);
+  Logger.log('[CV][Foto] Arquivo criado no Drive | fileId=%s | pasta=%s', file.getId(), pastaCaso.getName());
   file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
 
   var registro = registrarFotoNaPlanilha_({
@@ -69,10 +79,30 @@ function salvarFotoDesaparecido_(dadosFoto) {
   });
 
   atualizarResumoFotosNoCaso_(idCaso, file.getUrl());
+  Logger.log('[CV][Foto] URL gerada e consolidada no caso | idCaso=%s | url=%s', idCaso, file.getUrl());
   registrarEventoOcorrencia(SpreadsheetApp.getActiveSpreadsheet(), idCaso, 'FOTO_ANEXADA', 'Foto anexada ao caso: ' + nomeArquivo);
   registrarLogMigracaoSeNecessario_('FOTO_ANEXADA', idCaso, 'Upload de foto no Drive com metadados na planilha.');
 
   return { idFoto: registro.idFoto, fileIdDrive: file.getId(), linkArquivo: file.getUrl(), nomeArquivo: nomeArquivo };
+}
+
+function testarSalvarFotoBase64() {
+  var base64PixelPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO2+2iQAAAAASUVORK5CYII=';
+  var idCasoTeste = 'TESTE_FOTO_BASE64';
+  var talaoTeste = 'TESTE';
+  var mimeType = 'image/png';
+  var bytes = Utilities.base64Decode(base64PixelPng);
+  Logger.log('[CV][TesteFoto] Base64 de teste decodificado | bytes=%s', String(bytes.length));
+  var pastaRaiz = obterOuCriarPasta_('Cabine Verde');
+  var pastaFotos = obterOuCriarSubpasta_(pastaRaiz, 'Fotos');
+  var pastaTeste = obterOuCriarSubpasta_(pastaFotos, 'TESTES_UPLOAD');
+  var nomeArquivo = 'FOTO_' + idCasoTeste + '.png';
+  var blob = Utilities.newBlob(bytes, mimeType, nomeArquivo);
+  Logger.log('[CV][TesteFoto] Blob de teste criado | nome=%s | mimeType=%s', nomeArquivo, mimeType);
+  var file = pastaTeste.createFile(blob);
+  file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
+  Logger.log('[CV][TesteFoto] Arquivo teste criado | fileId=%s | url=%s', file.getId(), file.getUrl());
+  return { ok: true, idCaso: idCasoTeste, talaoPMESP: talaoTeste, fileIdDrive: file.getId(), urlFoto: file.getUrl(), pasta: pastaTeste.getName() };
 }
 
 function obterOuCriarPasta_(nome) {
