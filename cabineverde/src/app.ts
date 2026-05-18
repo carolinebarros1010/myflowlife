@@ -256,6 +256,7 @@ const salvarFotoDepoisDaTriagem = async (): Promise<void> => {
   if (!fotoSelecionada) return atualizarStatus('Selecione uma foto antes de enviar.', true);
   if (!fotoSelecionada.type.startsWith('image/')) return atualizarStatus('Upload bloqueado: apenas imagens são permitidas.', true);
   if (fotoSelecionada.size > MAX_FOTO_BYTES) return atualizarStatus('Upload bloqueado: imagem excede 5MB.', true);
+  console.info('[CV][Foto] Iniciando upload', { idCaso, talaoPMESP, nome: fotoSelecionada.name, mimeType: fotoSelecionada.type, tamanhoBytes: fotoSelecionada.size });
   const assinaturaUploadAtual = [idCaso, fotoSelecionada.name, fotoSelecionada.size, fotoSelecionada.lastModified].join(':');
   if (assinaturaUploadFotoConcluido === assinaturaUploadAtual && urlFotoUploadAtual) {
     return atualizarStatus('Esta foto já foi enviada para este caso.');
@@ -275,6 +276,7 @@ const salvarFotoDepoisDaTriagem = async (): Promise<void> => {
     nivelAcesso: normalizarTexto(String((form?.elements.namedItem('nivelAcessoFoto') as HTMLSelectElement | null)?.value || 'RESTRITO')),
     observacoesFoto: normalizarTexto(String((form?.elements.namedItem('observacoesFoto') as HTMLInputElement | null)?.value || ''))
   });
+  console.info('[CV][Foto] Retorno uploadFotoCaso', { ok: upload.ok, message: upload.message, urlFoto: upload.urlFoto || '' });
   if (!upload.ok || !upload.urlFoto) return atualizarStatus(`Falha no upload da foto: ${upload.message}`, true);
 
   const atualizacao = await sheetsService.atualizarFotoCaso({
@@ -285,6 +287,7 @@ const salvarFotoDepoisDaTriagem = async (): Promise<void> => {
     fotoDisponivel: 'Sim',
     statusFotos: 'ANEXADA'
   });
+  console.info('[CV][Foto] Retorno atualizarFotoCaso', { ok: atualizacao.ok, message: atualizacao.message, urlFoto: atualizacao.urlFoto || upload.urlFoto });
   if (!atualizacao.ok) return atualizarStatus(`Foto enviada, mas não foi possível vincular no caso: ${atualizacao.message}`, true);
   urlFotoUploadAtual = upload.urlFoto;
   assinaturaUploadFotoConcluido = assinaturaUploadAtual;
@@ -873,8 +876,14 @@ if (form) {
 document.getElementById('btn-adicionar-foto-agora')?.addEventListener('click', () => {
   mostrarBlocoUploadFoto(true);
   const fotoInput = document.getElementById('fotoDesaparecido') as HTMLInputElement | null;
+  const idCasoDefinitivo = referenciaCasoSalvo?.idCaso || triagemState.casoCompleto.id;
+  const fotoSelecionada = fotoInput?.files?.[0];
+  if (fotoSelecionada && idCasoDefinitivo && !idCasoDefinitivo.startsWith('CV-')) {
+    salvarFotoDepoisDaTriagem().catch((erro) => atualizarStatus(`Falha ao anexar foto: ${(erro as Error).message}`, true));
+    return;
+  }
   fotoInput?.click();
-  atualizarStatus('Foto preparada para anexação após salvar o caso.');
+  atualizarStatus('Foto preparada para anexação. Após selecionar, clique novamente para anexar ao caso salvo.');
 });
 
 document.getElementById('prev-step')?.addEventListener('click', () => atualizarEtapaVisual(triagemState.etapa - 1));
@@ -1062,8 +1071,9 @@ const configurarUploadFotoDesaparecido = (): void => {
       status.textContent = 'Arquivo inválido. A imagem deve ter até 5MB.';
       return;
     }
+    console.info('[CV][Foto] Seleção local de arquivo', { nome: foto.name, mimeType: foto.type, tamanhoBytes: foto.size });
     atualizarPreviewFoto(URL.createObjectURL(foto));
-    status.textContent = 'Imagem pronta para envio. Clique em Adicionar foto agora.';
+    status.textContent = 'Imagem pronta para envio. Clique em Adicionar foto agora para anexar.';
   });
 };
 
