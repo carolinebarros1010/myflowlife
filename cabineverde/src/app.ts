@@ -89,6 +89,53 @@ const validarJustificativaVisualizacao = (justificativa: string): boolean => {
 };
 let sessionId = gerarSessionId();
 let timeoutAutoRascunho: number | null = null;
+let botaoAcionadoEmProcessamento: HTMLButtonElement | null = null;
+let rotuloOriginalBotaoProcessamento = '';
+
+const ID_OVERLAY_PROCESSAMENTO = 'cv-processamento-overlay';
+
+const obterOverlayProcessamento = (): HTMLDivElement | null =>
+  document.getElementById(ID_OVERLAY_PROCESSAMENTO) as HTMLDivElement | null;
+
+const iniciarProcessamentoCabineVerde = (mensagem: string): void => {
+  const overlayExistente = obterOverlayProcessamento();
+  if (overlayExistente) {
+    const mensagemEl = overlayExistente.querySelector<HTMLElement>('[data-processamento-mensagem]');
+    if (mensagemEl) mensagemEl.textContent = mensagem;
+    overlayExistente.classList.add('is-visible');
+    return;
+  }
+  const overlay = document.createElement('div');
+  overlay.id = ID_OVERLAY_PROCESSAMENTO;
+  overlay.className = 'cv-processamento-overlay is-visible';
+  overlay.setAttribute('role', 'status');
+  overlay.setAttribute('aria-live', 'polite');
+  overlay.innerHTML = `
+    <div class="cv-processamento-overlay__conteudo">
+      <div class="cv-processamento-overlay__spinner" aria-hidden="true"></div>
+      <strong>Cabine Verde Esperança</strong>
+      <p data-processamento-mensagem>${mensagem}</p>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+};
+
+const finalizarProcessamentoCabineVerde = (): void => {
+  const overlay = obterOverlayProcessamento();
+  if (!overlay) return;
+  const mensagemEl = overlay.querySelector<HTMLElement>('[data-processamento-mensagem]');
+  if (mensagemEl) mensagemEl.textContent = 'Dados salvos com sucesso.';
+  window.setTimeout(() => {
+    overlay.classList.remove('is-visible');
+    overlay.remove();
+  }, 1000);
+};
+
+const erroProcessamentoCabineVerde = (mensagem: string): void => {
+  const overlay = obterOverlayProcessamento();
+  if (overlay) overlay.remove();
+  atualizarStatus(mensagem, true);
+};
 
 const renderModuloCard = (id: ModuloOperacional, descricao: string, acoes: string[]): string => `
   <section class="cv-card cv-module" id="modulo-${id}" data-route="${id}" hidden>
@@ -791,7 +838,15 @@ if (form) {
     if (isSaving) return;
     isSaving = true;
     const botaoSalvar = document.getElementById('save-registro') as HTMLButtonElement | null;
+    const botaoFinalizar = document.getElementById('save-case') as HTMLButtonElement | null;
+    const submitEvent = event as SubmitEvent;
+    const botaoClicado = (submitEvent.submitter as HTMLButtonElement | null) || botaoSalvar;
+    botaoAcionadoEmProcessamento = botaoClicado;
+    rotuloOriginalBotaoProcessamento = botaoClicado?.textContent || '';
     if (botaoSalvar) botaoSalvar.disabled = true;
+    if (botaoFinalizar) botaoFinalizar.disabled = true;
+    if (botaoClicado) botaoClicado.textContent = botaoClicado.id === 'save-case' ? 'Finalizando...' : 'Salvando...';
+    iniciarProcessamentoCabineVerde('Processando dados com segurança...');
     try {
       atualizarStateDoFormulario();
     autopreencherTriagemComDadosExistentes();
@@ -851,6 +906,7 @@ if (form) {
       const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
       if (chaveAuto) salvarAutoRascunhoLocal(chaveAuto, triagemState);
       atualizarStatus('Falha de conexão detectada: rascunho salvo localmente para retentativa.', true, 'rascunho');
+      erroProcessamentoCabineVerde('Não foi possível salvar. Verifique a conexão e tente novamente.');
     }
     if (retorno.ok) {
       referenciaCasoSalvo = { idCaso: retorno.idCaso || triagemState.casoCompleto.id, talaoPMESP: triagemState.casoCompleto.talaoPMESP };
@@ -863,12 +919,20 @@ if (form) {
       const chaveAuto = obterChaveAutoRascunho(triagemState.casoCompleto.id, triagemState.casoCompleto.talaoPMESP);
       if (chaveAuto) limparAutoRascunhoLocal(chaveAuto);
       casoOriginalEdicao = null;
+      finalizarProcessamentoCabineVerde();
     }
       atualizarLista();
       aplicarFiltros();
+    } catch (error) {
+      console.error('Não foi possível salvar. Verifique a conexão e tente novamente.', error);
+      erroProcessamentoCabineVerde('Não foi possível salvar. Verifique a conexão e tente novamente.');
     } finally {
       isSaving = false;
       if (botaoSalvar) botaoSalvar.disabled = false;
+      if (botaoFinalizar) botaoFinalizar.disabled = false;
+      if (botaoAcionadoEmProcessamento) botaoAcionadoEmProcessamento.textContent = rotuloOriginalBotaoProcessamento;
+      botaoAcionadoEmProcessamento = null;
+      rotuloOriginalBotaoProcessamento = '';
     }
   });
 }
