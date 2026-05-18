@@ -1345,10 +1345,18 @@ function persistirRegistro(planilha, registro) {
 }
 
 function sincronizarTalao190(caso) {
-  var lock;
+  var lock = LockService.getDocumentLock();
+  var lockAdquirido = false;
   try {
-    lock = LockService.getScriptLock();
-    lock.waitLock(15000);
+    lock.waitLock(30000);
+    lockAdquirido = true;
+    registrarLogAuditoria_({
+      evento: 'LOCK_TALAO_190_ADQUIRIDO',
+      idCaso: caso && caso.idCaso,
+      talao: caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao),
+      nome: caso && caso.nomeCompletoDesaparecido,
+      timestamp: new Date()
+    });
     var contextoData = resolverDataOperacionalCaso_(caso);
     var abaTalao = obterOuCriarAbaTalao190_(contextoData.dataOperacional);
     validarConsistenciaEstruturalTalao190_(abaTalao, contextoData);
@@ -1405,6 +1413,16 @@ function sincronizarTalao190(caso) {
     });
     return { status: 'sucesso', linha: linhaDestino };
   } catch (erro) {
+    registrarLogAuditoria_({
+      evento: 'ERRO_LOCK_TALAO_190',
+      idCaso: caso && caso.idCaso,
+      talaoBopm: caso && caso.talaoBopm,
+      talaoPMESP: caso && caso.talaoPMESP,
+      nome: caso && caso.nomeCompletoDesaparecido,
+      mensagemErro: erro && erro.message ? erro.message : String(erro),
+      stack: erro && erro.stack ? erro.stack : '',
+      timestamp: new Date()
+    });
     if (String(erro && erro.message || erro).indexOf('ÂNCORA_RODAPE_NAO_ENCONTRADA') !== -1) {
       try {
         registrarLogAuditoriaPersistencia_(SpreadsheetApp.getActiveSpreadsheet(), {
@@ -1423,8 +1441,17 @@ function sincronizarTalao190(caso) {
     Logger.log('ERRO_SINCRONIZAR_TALAO_190: ' + (erro && erro.message ? erro.message : erro));
     return { status: 'erro', mensagem: erro && erro.message ? erro.message : String(erro) };
   } finally {
-    if (lock) {
-      try { lock.releaseLock(); } catch (e) {}
+    if (lockAdquirido) {
+      try {
+        lock.releaseLock();
+        registrarLogAuditoria_({
+          evento: 'LOCK_TALAO_190_LIBERADO',
+          idCaso: caso && caso.idCaso,
+          talao: caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao),
+          nome: caso && caso.nomeCompletoDesaparecido,
+          timestamp: new Date()
+        });
+      } catch (e) {}
     }
   }
 }
