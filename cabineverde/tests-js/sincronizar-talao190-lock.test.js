@@ -54,6 +54,14 @@ test('simulação controlada: duas chamadas rápidas com mesmo talão fazem inse
     inserirLinhaOperacionalAntesRodape_: () => (linhas[3] ? 5 : 4),
     registrarLogAuditoriaPersistencia_: (_ss, payload) => logs.push(payload.acaoExecutada || payload.mensagemTecnica),
     registrarLogAuditoria_: (payload) => logs.push(payload.evento),
+
+    gerarHashOperacionalTalao_: () => 'hash-1',
+    localizarCasoPorIndiceTaloes_: () => ({ encontrado: false }),
+    validarReferenciaIndiceTaloes_: () => ({ valido: false, motivo: 'na' }),
+    atualizarIndiceTaloes_: () => {},
+    normalizarDocumentoRelatorio_: (v) => String(v || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase(),
+    normalizarTextoAssinatura_: (v) => String(v || '').trim().toLowerCase(),
+    normalizarTelefoneRelatorio_: (v) => String(v || '').replace(/\D/g, ''),
     localizarLinhaDuplicadaRelatorio_: (_sheet, caso) => {
       for (let i = 0; i < linhas.length; i += 1) {
         const row = linhas[i];

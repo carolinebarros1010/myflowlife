@@ -1344,6 +1344,83 @@ function persistirRegistro(planilha, registro) {
   return { action: 'created', linha: linhaDestino };
 }
 
+
+var ABA_INDICE_TALOES = 'INDICE_TALOES';
+var COLUNAS_INDICE_TALOES = [
+  'hashOperacional','idCaso','talaoNormalizado','talaoOriginal','nomeNormalizado','telefoneNormalizado','dataOperacional','nomeAba','linha','status','criadoEm','atualizadoEm','origem','observacaoAuditoria'
+];
+
+function obterOuCriarIndiceTaloes_() {
+  var planilha = SpreadsheetApp.openById(ID_PLANILHA_TALAO_190);
+  var aba = planilha.getSheetByName(ABA_INDICE_TALOES);
+  if (!aba) {
+    aba = planilha.insertSheet(ABA_INDICE_TALOES);
+    aba.getRange(1, 1, 1, COLUNAS_INDICE_TALOES.length).setValues([COLUNAS_INDICE_TALOES]);
+    aba.setFrozenRows(1);
+    registrarLogAuditoria_({ evento: 'INDICE_TALOES_CRIADO', timestamp: new Date() });
+    return aba;
+  }
+  var cabecalho = aba.getRange(1, 1, 1, COLUNAS_INDICE_TALOES.length).getDisplayValues()[0];
+  if (cabecalho.join('|') !== COLUNAS_INDICE_TALOES.join('|')) {
+    aba.getRange(1, 1, 1, COLUNAS_INDICE_TALOES.length).setValues([COLUNAS_INDICE_TALOES]);
+  }
+  return aba;
+}
+
+function gerarHashOperacionalTalao_(caso, dataOperacional) {
+  var dataNormalizada = normalizarDataRelatorio_(dataOperacional);
+  var nome = normalizarTextoAssinatura_(caso && caso.nomeCompletoDesaparecido);
+  var telefone = normalizarTelefoneRelatorio_(caso && caso.telefoneSolicitante);
+  var talao = normalizarDocumentoRelatorio_(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || caso.talao));
+  var base = [dataNormalizada, nome, telefone, talao].join('|');
+  var hash = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, base, Utilities.Charset.UTF_8);
+  return hash.map(function(b){ var v=(b<0?b+256:b).toString(16); return v.length===1?'0'+v:v; }).join('');
+}
+
+function localizarCasoPorIndiceTaloes_(chaves) {
+  var aba = obterOuCriarIndiceTaloes_();
+  registrarLogAuditoria_({ evento: 'INDICE_TALOES_CONSULTADO', idCaso: chaves && chaves.idCaso, timestamp: new Date() });
+  var ultima = aba.getLastRow();
+  if (ultima < 2) return { encontrado: false, motivoLocalizacao: 'indice_vazio' };
+  var dados = aba.getRange(2, 1, ultima - 1, COLUNAS_INDICE_TALOES.length).getValues();
+  function encontrar(pred, motivo){ for (var i=0;i<dados.length;i+=1){ if (pred(dados[i])) return { encontrado:true, linhaIndice:i+2, nomeAba:limparTexto(dados[i][7]), linhaRelatorio:Number(dados[i][8])||0, motivoLocalizacao:motivo, registroIndice:dados[i]}; } return null; }
+  var idCaso = limparTexto(chaves && chaves.idCaso);
+  var hash = limparTexto(chaves && chaves.hashOperacional);
+  var talao = normalizarDocumentoRelatorio_(chaves && chaves.talaoNormalizado);
+  var hit = (idCaso && encontrar(function(r){ return limparTexto(r[1])===idCaso; }, 'idCaso')) ||
+    (hash && encontrar(function(r){ return limparTexto(r[0])===hash; }, 'hashOperacional')) ||
+    (talao && encontrar(function(r){ return normalizarDocumentoRelatorio_(r[2])===talao; }, 'talaoNormalizado'));
+  if (hit) { registrarLogAuditoria_({ evento: 'INDICE_TALOES_HIT', motivo: hit.motivoLocalizacao, timestamp: new Date() }); return hit; }
+  registrarLogAuditoria_({ evento: 'INDICE_TALOES_MISS', timestamp: new Date() });
+  return { encontrado: false, motivoLocalizacao: 'nao_localizado' };
+}
+
+function validarReferenciaIndiceTaloes_(registroIndice, chaves) {
+  var planilha = SpreadsheetApp.openById(ID_PLANILHA_TALAO_190);
+  var nomeAba = limparTexto(registroIndice && registroIndice.nomeAba);
+  var linha = Number(registroIndice && registroIndice.linhaRelatorio);
+  if (!nomeAba || !linha || linha < PRIMEIRA_LINHA_DADOS_TALAO) return { valido:false, motivo:'referencia_invalida' };
+  var aba = planilha.getSheetByName(nomeAba);
+  if (!aba || aba.getLastRow() < linha) return { valido:false, motivo:'aba_ou_linha_inexistente' };
+  var linhaDados = aba.getRange(linha, 1, 1, 11).getValues()[0];
+  if (linhaDados.every(function(c){ return limparTexto(c)===''; })) return { valido:false, motivo:'linha_vazia' };
+  var idOk = !chaves.idCaso || limparTexto(linhaDados[10]) === limparTexto(chaves.idCaso);
+  var talaoOk = !chaves.talaoNormalizado || normalizarDocumentoRelatorio_(linhaDados[1]) === normalizarDocumentoRelatorio_(chaves.talaoNormalizado);
+  if (!idOk && !talaoOk) return { valido:false, motivo:'chave_divergente' };
+  return { valido:true, aba:aba, linha:linha };
+}
+
+function atualizarIndiceTaloes_(dados) {
+  var aba = obterOuCriarIndiceTaloes_();
+  var linhaIndice = Number(dados.linhaIndice) || 0;
+  var agora = formatarDataHora(new Date());
+  var criadoEm = dados.criadoEm || agora;
+  var linha = [dados.hashOperacional || '', dados.idCaso || '', dados.talaoNormalizado || '', dados.talaoOriginal || '', dados.nomeNormalizado || '', dados.telefoneNormalizado || '', dados.dataOperacional || '', dados.nomeAba || '', Number(dados.linhaRelatorio) || '', dados.status || 'ativo', criadoEm, agora, dados.origem || 'sincronizarTalao190', dados.observacaoAuditoria || ''];
+  if (linhaIndice >= 2) aba.getRange(linhaIndice, 1, 1, linha.length).setValues([linha]);
+  else aba.getRange(aba.getLastRow()+1, 1, 1, linha.length).setValues([linha]);
+  registrarLogAuditoria_({ evento: 'INDICE_TALOES_ATUALIZADO', idCaso: dados.idCaso, nomeAba: dados.nomeAba, linhaRelatorio: dados.linhaRelatorio, timestamp: new Date() });
+}
+
 function sincronizarTalao190(caso) {
   var lock = LockService.getDocumentLock();
   var lockAdquirido = false;
@@ -1375,7 +1452,17 @@ function sincronizarTalao190(caso) {
         mensagemTecnica: 'Caso encontrado em aba incompatível=' + divergenciaAba + '; abaAtual=' + abaTalao.getName() + '; dataOperacional=' + contextoData.dataOperacionalISO
       });
     }
-    var linhaExistente = localizarLinhaDuplicadaRelatorio_(abaTalao, caso);
+    var hashOperacional = gerarHashOperacionalTalao_(caso, contextoData.dataOperacional);
+    var talaoNormalizado = normalizarDocumentoRelatorio_(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || caso.talao));
+    var idCaso = limparTexto(caso && caso.idCaso);
+    var indiceHit = localizarCasoPorIndiceTaloes_({ idCaso: idCaso, hashOperacional: hashOperacional, talaoNormalizado: talaoNormalizado });
+    var linhaExistente = -1;
+    if (indiceHit.encontrado) {
+      var validacaoIndice = validarReferenciaIndiceTaloes_({ nomeAba: indiceHit.nomeAba, linhaRelatorio: indiceHit.linhaRelatorio }, { idCaso: idCaso, talaoNormalizado: talaoNormalizado });
+      if (validacaoIndice.valido && indiceHit.nomeAba === abaTalao.getName()) linhaExistente = indiceHit.linhaRelatorio;
+      else registrarLogAuditoria_({ evento: 'INDICE_TALOES_REFERENCIA_INVALIDA', idCaso: idCaso, motivo: validacaoIndice.motivo, timestamp: new Date() });
+    }
+    if (linhaExistente <= 0) linhaExistente = localizarLinhaDuplicadaRelatorio_(abaTalao, caso);
 
     if (linhaExistente > 0) {
       var linhaAncoraAtualizacao = localizarLinhaAncoraRodape_(abaTalao);
@@ -1394,6 +1481,7 @@ function sincronizarTalao190(caso) {
         operador: limparTexto(caso && caso.operadorResponsavel),
         mensagemTecnica: 'Caso já existente no relatório diário; atualização com setValues na linha ' + linhaExistente + '.'
       });
+      atualizarIndiceTaloes_({ linhaIndice: indiceHit && indiceHit.linhaIndice, hashOperacional: hashOperacional, idCaso: idCaso, talaoNormalizado: talaoNormalizado, talaoOriginal: limparTexto(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || caso.talao)), nomeNormalizado: normalizarTextoAssinatura_(caso && caso.nomeCompletoDesaparecido), telefoneNormalizado: normalizarTelefoneRelatorio_(caso && caso.telefoneSolicitante), dataOperacional: contextoData.dataOperacionalISO, nomeAba: abaTalao.getName(), linhaRelatorio: linhaExistente, status: 'atualizado' });
       return { status: 'atualizado', linha: linhaExistente };
     }
 
@@ -1411,6 +1499,7 @@ function sincronizarTalao190(caso) {
       operador: limparTexto(caso && caso.operadorResponsavel),
       mensagemTecnica: 'linhaLivreDetectada=' + linhaLivre + '; linhaInserida=' + linhaDestino + '; aba=' + abaTalao.getName() + '; dataOperacional=' + contextoData.dataOperacionalISO + '; talao=' + limparTexto(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao))
     });
+    atualizarIndiceTaloes_({ linhaIndice: indiceHit && indiceHit.linhaIndice, hashOperacional: hashOperacional, idCaso: idCaso, talaoNormalizado: talaoNormalizado, talaoOriginal: limparTexto(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || caso.talao)), nomeNormalizado: normalizarTextoAssinatura_(caso && caso.nomeCompletoDesaparecido), telefoneNormalizado: normalizarTelefoneRelatorio_(caso && caso.telefoneSolicitante), dataOperacional: contextoData.dataOperacionalISO, nomeAba: abaTalao.getName(), linhaRelatorio: linhaDestino, status: 'ativo' });
     return { status: 'sucesso', linha: linhaDestino };
   } catch (erro) {
     registrarLogAuditoria_({
@@ -2833,4 +2922,40 @@ function normalizarTextoOperacional_(valor) {
 
 function normalizarTelefoneOperacional_(valor) {
   return limparTexto(valor).replace(/\D+/g, '');
+}
+
+function auditarIndiceTaloes_() {
+  var aba = obterOuCriarIndiceTaloes_();
+  var inconsistencias = [];
+  var ultima = aba.getLastRow();
+  for (var r = 2; r <= ultima; r += 1) {
+    var row = aba.getRange(r, 1, 1, COLUNAS_INDICE_TALOES.length).getValues()[0];
+    var validacao = validarReferenciaIndiceTaloes_({ nomeAba: row[7], linhaRelatorio: row[8] }, { idCaso: row[1], talaoNormalizado: row[2] });
+    if (!validacao.valido) inconsistencias.push({ linhaIndice: r, motivo: validacao.motivo, idCaso: row[1] });
+  }
+  registrarLogAuditoria_({ evento: 'INDICE_TALOES_AUDITADO', total: ultima - 1, inconsistencias: inconsistencias.length, timestamp: new Date() });
+  return { total: Math.max(0, ultima - 1), inconsistencias: inconsistencias };
+}
+
+function reconstruirIndiceTaloes_() {
+  var planilha = SpreadsheetApp.openById(ID_PLANILHA_TALAO_190);
+  var abas = planilha.getSheets();
+  var indice = obterOuCriarIndiceTaloes_();
+  if (indice.getLastRow() > 1) indice.getRange(2, 1, indice.getLastRow() - 1, COLUNAS_INDICE_TALOES.length).clearContent();
+  for (var i = 0; i < abas.length; i += 1) {
+    var nome = abas[i].getName();
+    if (!/^\d{2}[A-Z]{3}\d{2}$/.test(nome)) continue;
+    var linhaAncora = localizarLinhaAncoraRodape_(abas[i]);
+    var total = linhaAncora - PRIMEIRA_LINHA_DADOS_TALAO;
+    if (total <= 0) continue;
+    var dados = abas[i].getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, total, 11).getValues();
+    for (var j = 0; j < dados.length; j += 1) {
+      if (dados[j].every(function (c) { return limparTexto(c) === ''; })) continue;
+      var caso = { idCaso: dados[j][10], talaoPMESP: dados[j][1], nomeCompletoDesaparecido: dados[j][3], telefoneSolicitante: dados[j][7], dataServico: dados[j][5], dataHoraRegistro: dados[j][0] };
+      var dt = normalizarDataRelatorio_(dados[j][5] || dados[j][0]);
+      atualizarIndiceTaloes_({ hashOperacional: gerarHashOperacionalTalao_(caso, dt), idCaso: limparTexto(dados[j][10]), talaoNormalizado: normalizarDocumentoRelatorio_(dados[j][1]), talaoOriginal: limparTexto(dados[j][1]), nomeNormalizado: normalizarTextoAssinatura_(dados[j][3]), telefoneNormalizado: normalizarTelefoneRelatorio_(dados[j][7]), dataOperacional: dt, nomeAba: nome, linhaRelatorio: PRIMEIRA_LINHA_DADOS_TALAO + j, status: 'reconstruido', origem: 'reconstruirIndiceTaloes_' });
+    }
+  }
+  registrarLogAuditoria_({ evento: 'INDICE_TALOES_RECONSTRUIDO', timestamp: new Date() });
+  return { status: 'ok' };
 }
