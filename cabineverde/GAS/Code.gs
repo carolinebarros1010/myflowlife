@@ -1349,9 +1349,24 @@ function sincronizarTalao190(caso) {
   try {
     lock = LockService.getScriptLock();
     lock.waitLock(15000);
-    var dataBase = caso.dataServico || caso.dataHoraRegistro || new Date();
-    var abaTalao = obterOuCriarAbaTalao190(dataBase);
-    var linha = montarLinhaTalao190(caso);
+    var contextoData = resolverDataOperacionalCaso_(caso);
+    var abaTalao = obterOuCriarAbaTalao190_(contextoData.dataOperacional);
+    validarConsistenciaEstruturalTalao190_(abaTalao, contextoData);
+    var linha = montarLinhaTalao190(caso, contextoData);
+    var divergenciaAba = localizarRegistroEmAbaIncompativel_(caso, abaTalao.getName());
+    if (divergenciaAba) {
+      registrarLogAuditoriaPersistencia_(SpreadsheetApp.getActiveSpreadsheet(), {
+        dataHora: formatarDataHora(new Date()),
+        status: 'alerta',
+        chaveUnica: limparTexto(caso && (caso.CHAVE_UNICA || caso.chaveUnica)),
+        acaoExecutada: 'ALERTA_ABA_INCOMPATIVEL_TALAO_190',
+        nomeDesaparecido: limparTexto(caso && caso.nomeCompletoDesaparecido),
+        solicitante: limparTexto(caso && caso.nomeSolicitante),
+        telefone: limparTexto(caso && caso.telefoneSolicitante),
+        operador: limparTexto(caso && caso.operadorResponsavel),
+        mensagemTecnica: 'Caso encontrado em aba incompatível=' + divergenciaAba + '; abaAtual=' + abaTalao.getName() + '; dataOperacional=' + contextoData.dataOperacionalISO
+      });
+    }
     var linhaExistente = localizarLinhaDuplicadaRelatorio_(abaTalao, caso);
 
     if (linhaExistente > 0) {
@@ -1374,8 +1389,20 @@ function sincronizarTalao190(caso) {
       return { status: 'atualizado', linha: linhaExistente };
     }
 
+    var linhaLivre = localizarPrimeiraLinhaOperacionalLivre_(abaTalao);
     var linhaDestino = inserirLinhaOperacionalAntesRodape_(abaTalao);
     abaTalao.getRange(linhaDestino, 1, 1, 11).setValues([linha]);
+    registrarLogAuditoriaPersistencia_(SpreadsheetApp.getActiveSpreadsheet(), {
+      dataHora: formatarDataHora(new Date()),
+      status: 'sucesso',
+      chaveUnica: limparTexto(caso && (caso.CHAVE_UNICA || caso.chaveUnica)),
+      acaoExecutada: 'INSERT_RELATORIO_TALAO_190',
+      nomeDesaparecido: limparTexto(caso && caso.nomeCompletoDesaparecido),
+      solicitante: limparTexto(caso && caso.nomeSolicitante),
+      telefone: limparTexto(caso && caso.telefoneSolicitante),
+      operador: limparTexto(caso && caso.operadorResponsavel),
+      mensagemTecnica: 'linhaLivreDetectada=' + linhaLivre + '; linhaInserida=' + linhaDestino + '; aba=' + abaTalao.getName() + '; dataOperacional=' + contextoData.dataOperacionalISO + '; talao=' + limparTexto(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao))
+    });
     return { status: 'sucesso', linha: linhaDestino };
   } catch (erro) {
     if (String(erro && erro.message || erro).indexOf('ÂNCORA_RODAPE_NAO_ENCONTRADA') !== -1) {
@@ -1431,6 +1458,8 @@ function inserirLinhaOperacionalAntesRodape_(sheet) {
   if (linhaAncora <= PRIMEIRA_LINHA_DADOS_TALAO) {
     throw new Error('Estrutura inválida: âncora de rodapé na linha ' + linhaAncora + ', antes do início operacional.');
   }
+  var linhaLivreExistente = localizarPrimeiraLinhaOperacionalLivre_(sheet, linhaAncora);
+  if (linhaLivreExistente > 0) return linhaLivreExistente;
   var linhaOrigemFormato = linhaAncora - 1;
   sheet.insertRowsBefore(linhaAncora, 1);
   var intervaloOrigem = sheet.getRange(linhaOrigemFormato, 1, 1, sheet.getMaxColumns());
@@ -1440,6 +1469,33 @@ function inserirLinhaOperacionalAntesRodape_(sheet) {
   return linhaAncora;
 }
 
+function localizarPrimeiraLinhaOperacionalLivre_(sheet, linhaAncora) {
+  var ancora = linhaAncora || localizarLinhaAncoraRodape_(sheet);
+  var ultimaLinhaOperacional = ancora - 1;
+  if (ultimaLinhaOperacional < PRIMEIRA_LINHA_DADOS_TALAO) return -1;
+  var totalLinhas = ultimaLinhaOperacional - PRIMEIRA_LINHA_DADOS_TALAO + 1;
+  var totalColunas = Math.max(11, sheet.getLastColumn(), sheet.getMaxColumns());
+  var intervalo = sheet.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, totalLinhas, totalColunas);
+  var valores = intervalo.getValues();
+  var exibidos = intervalo.getDisplayValues();
+  var formulas = intervalo.getFormulas();
+  for (var i = 0; i < totalLinhas; i += 1) {
+    if (linhaOperacionalVazia_(valores[i], exibidos[i], formulas[i])) return PRIMEIRA_LINHA_DADOS_TALAO + i;
+  }
+  return -1;
+}
+
+function linhaOperacionalVazia_(valores, exibidos, formulas) {
+  var limiteColunas = Math.min(11, Math.max((valores || []).length, (exibidos || []).length, (formulas || []).length));
+  for (var i = 0; i < limiteColunas; i += 1) {
+    var valor = limparTexto(valores && valores[i]).replace(/\u00A0/g, '').trim();
+    var exibido = limparTexto(exibidos && exibidos[i]).replace(/\u00A0/g, '').trim();
+    var formula = limparTexto(formulas && formulas[i]).trim();
+    if (valor || exibido || formula) return false;
+  }
+  return true;
+}
+
 function localizarLinhaDuplicadaRelatorio_(sheet, caso) {
   var linhaAncora = localizarLinhaAncoraRodape_(sheet);
   var ultimaLinhaOperacional = linhaAncora - 1;
@@ -1447,6 +1503,8 @@ function localizarLinhaDuplicadaRelatorio_(sheet, caso) {
   var linhas = ultimaLinhaOperacional - PRIMEIRA_LINHA_DADOS_TALAO + 1;
   var dados = sheet.getRange(PRIMEIRA_LINHA_DADOS_TALAO, 1, linhas, 11).getValues();
   var assinaturaBusca = gerarAssinaturaOperacionalRelatorio_(caso);
+  var idCasoBusca = limparTexto(caso && caso.idCaso);
+  var talaoBusca = normalizarDocumentoRelatorio_(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || caso.talao));
   for (var i = 0; i < dados.length; i += 1) {
     var linha = dados[i];
     var vazia = linha.every(function (c) { return limparTexto(c) === ''; });
@@ -1454,7 +1512,9 @@ function localizarLinhaDuplicadaRelatorio_(sheet, caso) {
     var assinaturaLinha = gerarAssinaturaOperacionalRelatorio_({
       talaoBopm: linha[1], cpf: linha[2], nomeCompletoDesaparecido: linha[3], telefoneSolicitante: linha[7], dataHoraRegistro: linha[0]
     });
-    if (assinaturaLinha === assinaturaBusca) return PRIMEIRA_LINHA_DADOS_TALAO + i;
+    var idLinha = limparTexto(linha[10]);
+    var talaoLinha = normalizarDocumentoRelatorio_(linha[1]);
+    if ((idCasoBusca && idLinha && idLinha === idCasoBusca) || (talaoBusca && talaoLinha && talaoLinha === talaoBusca) || assinaturaLinha === assinaturaBusca) return PRIMEIRA_LINHA_DADOS_TALAO + i;
   }
   return -1;
 }
@@ -1507,10 +1567,17 @@ function limparDuplicadosRelatorioAtual() {
 }
 
 function obterOuCriarAbaTalao190(data) {
+  return obterOuCriarAbaTalao190_(data);
+}
+
+function obterOuCriarAbaTalao190_(dataOperacional) {
   var planilhaTalao = SpreadsheetApp.openById(ID_PLANILHA_TALAO_190);
-  var nomeAba = formatarNomeAbaTalao(data);
+  var nomeAba = formatarNomeAbaTalao190_(dataOperacional);
   var aba = planilhaTalao.getSheetByName(nomeAba);
-  if (aba) return aba;
+  if (aba) {
+    atualizarTituloTalao(aba, dataOperacional);
+    return aba;
+  }
 
   var abaModelo = planilhaTalao.getSheetByName(ABA_MODELO_TALAO);
   if (!abaModelo) throw new Error('Aba modelo não encontrada: ' + ABA_MODELO_TALAO);
@@ -1518,11 +1585,15 @@ function obterOuCriarAbaTalao190(data) {
   aba = abaModelo.copyTo(planilhaTalao).setName(nomeAba);
   planilhaTalao.setActiveSheet(aba);
   planilhaTalao.moveActiveSheet(3);
-  atualizarTituloTalao(aba, data);
+  atualizarTituloTalao(aba, dataOperacional);
   return aba;
 }
 
 function formatarNomeAbaTalao(data) {
+  return formatarNomeAbaTalao190_(data);
+}
+
+function formatarNomeAbaTalao190_(data) {
   var dt = data instanceof Date ? data : new Date(data);
   if (!(dt instanceof Date) || isNaN(dt.getTime())) dt = new Date();
   var meses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
@@ -1532,9 +1603,20 @@ function formatarNomeAbaTalao(data) {
   return dia + mes + ano;
 }
 
-function montarLinhaTalao190(caso) {
-  var dataServico = normalizarDataServicoImutavel_(caso && caso.dataServico, caso && caso.dataHoraRegistro);
-  var dataRegistro = caso.dataHoraRegistro || dataServico || new Date();
+function resolverDataOperacionalCaso_(caso) {
+  var dataBrutaServico = limparTexto(caso && caso.dataServico);
+  var dataBrutaRegistro = limparTexto(caso && caso.dataHoraRegistro);
+  var base = dataBrutaServico || dataBrutaRegistro;
+  var dt = base ? new Date(base) : new Date();
+  if (!(dt instanceof Date) || isNaN(dt.getTime())) dt = new Date();
+  var iso = Utilities.formatDate(dt, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  return { dataOperacional: dt, dataOperacionalISO: iso, fonteData: dataBrutaServico ? 'dataServico' : (dataBrutaRegistro ? 'dataHoraRegistro' : 'sistema') };
+}
+
+function montarLinhaTalao190(caso, contextoData) {
+  var contexto = contextoData || resolverDataOperacionalCaso_(caso);
+  var dataRegistro = contexto.dataOperacionalISO;
+  var dataServico = contexto.dataOperacionalISO;
   return [
     dataRegistro, // DATA
     caso.talaoBopm || '', // BOPM
@@ -1546,8 +1628,47 @@ function montarLinhaTalao190(caso) {
     caso.telefoneSolicitante || '', // Telefone
     caso.observacoesOperacionais || '', // OBS.
     caso.encerrado190 || 'DESAPARECIDO', // 190
-    caso.operadorResponsavel || '' // Operador PM
+    limparTexto(caso.idCaso || caso.id) || caso.operadorResponsavel || '' // Operador PM (idCaso preferencial para UPSERT)
   ];
+}
+
+function validarConsistenciaEstruturalTalao190_(aba, contextoData) {
+  var nomeEsperado = formatarNomeAbaTalao190_(contextoData.dataOperacional);
+  if (aba.getName() !== nomeEsperado) {
+    throw new Error('BLOQUEIO_DIVERGENCIA_ABA_DATA: aba=' + aba.getName() + '; esperado=' + nomeEsperado + '; data=' + contextoData.dataOperacionalISO);
+  }
+  atualizarTituloTalao(aba, contextoData.dataOperacional);
+  if (!validarTituloTalaoConsistente_(aba, contextoData.dataOperacional)) {
+    throw new Error('BLOQUEIO_DIVERGENCIA_TITULO_DATA: aba=' + aba.getName() + '; data=' + contextoData.dataOperacionalISO);
+  }
+}
+
+function validarTituloTalaoConsistente_(aba, data) {
+  var tituloEsperado = 'RELATÓRIO TALÃO 190 ' + formatarNomeAbaTalao190_(data) + ' - ';
+  var valores = aba.getDataRange().getDisplayValues();
+  for (var i = 0; i < valores.length; i += 1) {
+    for (var j = 0; j < valores[i].length; j += 1) {
+      var valor = limparTexto(valores[i][j]).toUpperCase();
+      if (valor.indexOf('RELATÓRIO TALÃO 190') !== -1) return valor.indexOf(tituloEsperado.toUpperCase()) === 0;
+    }
+  }
+  return false;
+}
+
+function localizarRegistroEmAbaIncompativel_(caso, abaAtual) {
+  var planilhaTalao = SpreadsheetApp.openById(ID_PLANILHA_TALAO_190);
+  var talao = normalizarDocumentoRelatorio_(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || caso.talao));
+  var idCaso = limparTexto(caso && caso.idCaso);
+  if (!talao && !idCaso) return '';
+  var abas = planilhaTalao.getSheets();
+  for (var i = 0; i < abas.length; i += 1) {
+    var aba = abas[i];
+    var nome = aba.getName();
+    if (nome === abaAtual || !/^\d{2}[A-Z]{3}\d{2}$/.test(nome)) continue;
+    var linhaHit = localizarLinhaDuplicadaRelatorio_(aba, caso);
+    if (linhaHit > 0) return nome;
+  }
+  return '';
 }
 
 function obterDiaSemanaPtBr(data) {
