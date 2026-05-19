@@ -951,6 +951,8 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
   caso = normalizarTalaoPayload(caso);
   var diagnosticoAuditoria = {
     camposRecebidos: Object.keys(caso),
+    camposCompostosDetectados: [],
+    camposExpandidos: [],
     camposMapeados: [],
     camposAtualizados: [],
     camposIgnorados: [],
@@ -1006,6 +1008,10 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
     });
   }
   if (linhaCaso < 0) return { ok: false, codigo: 'CASO_NAO_ENCONTRADO_EM_CASOS', erro: 'Caso não encontrado na aba CASOS para atualização da auditoria.' };
+  var linhaAtualComoObjeto = {};
+  for (var li = 0; li < headers.length; li += 1) {
+    linhaAtualComoObjeto[limparTexto(headers[li])] = matriz[linhaCaso - 2][li];
+  }
 
   var camposTecnicosIgnorados = {
     action: true, modo: true, destino: true, caso: true, dados: true,
@@ -1014,7 +1020,10 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
     perfilOperadorUltimaAlteracaoAuditoria: true, dataHoraUltimaAlteracaoAuditoria: true,
     dataHoraEdicao: true, idEdicao: true
   };
-  var normalizacaoAuditoria = normalizarCamposAuditoriaParaCasos_(caso, headers);
+  var expansao = expandirCamposCompostosAuditoriaParaCasos_(caso, linhaAtualComoObjeto);
+  diagnosticoAuditoria.camposCompostosDetectados = expansao.camposCompostosDetectados;
+  diagnosticoAuditoria.camposExpandidos = expansao.camposExpandidos;
+  var normalizacaoAuditoria = normalizarCamposAuditoriaParaCasos_(expansao.dados, headers);
   var casoNormalizado = normalizacaoAuditoria.dados;
   diagnosticoAuditoria.camposMapeados = normalizacaoAuditoria.camposMapeados;
   diagnosticoAuditoria.camposIgnorados = normalizacaoAuditoria.camposIgnorados;
@@ -1136,6 +1145,88 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
     operadorUltimaAlteracaoAuditoria: linhaAtual[idx.operadorUltimaAlteracaoAuditoria],
     historicoEdicoesRegistradas: historicoEdicoesRegistradas,
     diagnostico: diagnosticoAuditoria
+  };
+}
+
+function expandirCamposCompostosAuditoriaParaCasos_(dados, linhaAtualComoObjeto) {
+  var entrada = dados && typeof dados === 'object' ? dados : {};
+  var linhaAtual = linhaAtualComoObjeto && typeof linhaAtualComoObjeto === 'object' ? linhaAtualComoObjeto : {};
+  var saida = {};
+  Object.keys(entrada).forEach(function (k) { saida[k] = entrada[k]; });
+  var compostosDetectados = [];
+  var expandidos = [];
+
+  function texto(v) { return limparTexto(v); }
+  function temEspecifico(campo) { return texto(entrada[campo]) !== ''; }
+  function podePreencher(campo, valor) {
+    var limpo = texto(valor);
+    if (!limpo) return false;
+    if (temEspecifico(campo)) return false;
+    if (texto(linhaAtual[campo]) && texto(linhaAtual[campo]) === limpo) return false;
+    return true;
+  }
+  function marcarComposto(nome) { if (texto(entrada[nome])) compostosDetectados.push(nome); }
+  function aplicar(campo, valor) {
+    if (!podePreencher(campo, valor)) return;
+    saida[campo] = texto(valor);
+    expandidos.push(campo);
+  }
+  function extrairMarcador(bloco, marcadores) {
+    var txt = texto(bloco);
+    for (var i = 0; i < marcadores.length; i += 1) {
+      var m = marcadores[i];
+      var rx = new RegExp(m + '\\s*:\\s*([^;|\\n]+)', 'i');
+      var match = txt.match(rx);
+      if (match && texto(match[1])) return texto(match[1]);
+    }
+    return '';
+  }
+
+  ['cpfRg', 'cpfRG', 'documentos', 'dadosIdentificacao', 'identificacao'].forEach(marcarComposto);
+  var blocoDoc = ['cpfRg', 'cpfRG', 'documentos', 'dadosIdentificacao', 'identificacao'].map(function (k) { return texto(entrada[k]); }).filter(Boolean).join(' | ');
+  if (blocoDoc) {
+    var cpfMatch = blocoDoc.match(/CPF\s*:?\s*([0-9.\-]{11,14})|([0-9]{3}\.?[0-9]{3}\.?[0-9]{3}\-?[0-9]{2})/i);
+    var rgMatch = blocoDoc.match(/RG\s*:?\s*([0-9.\-]{5,15})/i);
+    var cpf = texto((cpfMatch && (cpfMatch[1] || cpfMatch[2])) || '').replace(/[^\d]/g, '');
+    var rg = texto((rgMatch && rgMatch[1]) || '').replace(/[^\dXx]/g, '');
+    if (cpf.length === 11) aplicar('cpf', cpf);
+    if (rg.length >= 5) aplicar('rg', rg);
+  }
+
+  ['dadosPessoais', 'qualificacao', 'identificacaoCompleta', 'dadosDesaparecido'].forEach(marcarComposto);
+  var blocoMae = ['dadosPessoais', 'qualificacao', 'identificacaoCompleta', 'dadosDesaparecido'].map(function (k) { return texto(entrada[k]); }).filter(Boolean).join(' | ');
+  var nomeMae = extrairMarcador(blocoMae, ['Nome da mãe', 'Mãe', 'Genitora']);
+  if (nomeMae && nomeMae.length >= 5) aplicar('nomeMae', nomeMae);
+
+  ['ultimaVisualizacao', 'dadosUltimaVisualizacao', 'contextoUltimaVisualizacao'].forEach(marcarComposto);
+  var blocoUltima = ['ultimaVisualizacao', 'dadosUltimaVisualizacao', 'contextoUltimaVisualizacao'].map(function (k) { return texto(entrada[k]); }).filter(Boolean).join('; ');
+  aplicar('dataHoraUltimaVisualizacao', extrairMarcador(blocoUltima, ['Data/Hora', 'Data e Hora']));
+  aplicar('localUltimaVisualizacao', extrairMarcador(blocoUltima, ['Local']));
+  aplicar('roupaUltimaVisualizacao', extrairMarcador(blocoUltima, ['Roupa']));
+  aplicar('meioTransporte', extrairMarcador(blocoUltima, ['Transporte']));
+  aplicar('dadosVeiculo', extrairMarcador(blocoUltima, ['Veículo', 'Veiculo']));
+
+  ['dadosSolicitante', 'solicitante', 'contatoSolicitante'].forEach(marcarComposto);
+  var blocoSolic = ['dadosSolicitante', 'solicitante', 'contatoSolicitante'].map(function (k) { return texto(entrada[k]); }).filter(Boolean).join('; ');
+  aplicar('nomeSolicitante', extrairMarcador(blocoSolic, ['Nome']));
+  aplicar('vinculoSolicitante', extrairMarcador(blocoSolic, ['Vínculo', 'Vinculo']));
+  aplicar('telefoneSolicitante', extrairMarcador(blocoSolic, ['Telefone']));
+
+  ['condicoesVulnerabilidade', 'saude', 'vulnerabilidades', 'perfilVulnerabilidade'].forEach(marcarComposto);
+  var blocoVuln = ['condicoesVulnerabilidade', 'saude', 'vulnerabilidades', 'perfilVulnerabilidade'].map(function (k) { return texto(entrada[k]); }).filter(Boolean).join('; ');
+  aplicar('vulnerabilidade', extrairMarcador(blocoVuln, ['Vulnerabilidade']));
+  aplicar('condicaoMentalCognitivaComportamental', extrairMarcador(blocoVuln, ['Condição mental', 'Condicao mental']));
+  aplicar('limitacaoFisica', extrairMarcador(blocoVuln, ['Limitação física', 'Limitacao fisica']));
+  aplicar('usoMedicacaoEssencial', extrairMarcador(blocoVuln, ['Uso medicação essencial', 'Uso medicacao essencial']));
+  aplicar('usoAlcoolOutrasDrogas', extrairMarcador(blocoVuln, ['Uso álcool/drogas', 'Uso alcool/drogas']));
+  aplicar('historicoDesaparecimentoAnterior', extrairMarcador(blocoVuln, ['Histórico desaparecimento anterior', 'Historico desaparecimento anterior']));
+  aplicar('conflitoPrevio', extrairMarcador(blocoVuln, ['Conflito prévio', 'Conflito previo']));
+  aplicar('suspeitaCrime', extrairMarcador(blocoVuln, ['Suspeita crime']));
+
+  return {
+    dados: saida,
+    camposCompostosDetectados: Array.from(new Set(compostosDetectados)),
+    camposExpandidos: Array.from(new Set(expandidos))
   };
 }
 

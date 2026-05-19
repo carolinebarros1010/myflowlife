@@ -55,7 +55,7 @@ function criarContexto(cabecalho, linhaInicial) {
   return { context, rows, historicoRowsRef: () => historicoRows };
 }
 
-const cabecalho = ['idCaso','talaoBopm','statusCaso','classificacaoRisco','prioridade','observacoesOperacionais','operadorUltimaAlteracaoAuditoria','emailOperadorUltimaAlteracaoAuditoria','perfilOperadorUltimaAlteracaoAuditoria','dataHoraUltimaAlteracaoAuditoria'];
+const cabecalho = ['idCaso','talaoBopm','statusCaso','classificacaoRisco','prioridade','observacoesOperacionais','cpf','rg','nomeMae','dataHoraUltimaVisualizacao','localUltimaVisualizacao','roupaUltimaVisualizacao','meioTransporte','operadorUltimaAlteracaoAuditoria','emailOperadorUltimaAlteracaoAuditoria','perfilOperadorUltimaAlteracaoAuditoria','dataHoraUltimaAlteracaoAuditoria'];
 
 test('mapeia aliases e registra campo real no histórico', () => {
   const { context } = criarContexto(cabecalho, ['CASO-1','T-1','aberto','medio','baixa','obs','','','','']);
@@ -75,4 +75,33 @@ test('retorna erro quando todos os campos são incompatíveis', () => {
   assert.equal(r.ok, false);
   assert.equal(r.codigo, 'CAMPOS_AUDITORIA_NAO_COMPATIVEIS_COM_CASOS');
   assert.deepEqual(Array.from(r.diagnostico.camposIgnorados), ['campoX']);
+});
+
+test('expande cpf/rg de campo composto e mantém prioridade do campo específico', () => {
+  const { context } = criarContexto(cabecalho, ['CASO-1','T-1','aberto','medio','baixa','obs','99999999999','RG-OLD','','','','','','','','','']);
+  const r = context.salvarAuditoriaCaso_({
+    idCaso: 'CASO-1',
+    caso: { cpf: '111.111.111-11', cpfRg: 'CPF: 222.222.222-22 / RG: 33.333.333-3' },
+    operadorNome: 'Op'
+  }, { nome: 'Op' });
+  assert.equal(r.ok, true);
+  assert.equal(r.diagnostico.camposExpandidos.includes('rg'), true);
+  assert.equal(r.diagnostico.camposAtualizados.includes('cpf'), true);
+  assert.equal(r.diagnostico.camposAtualizados.includes('rg'), true);
+});
+
+test('expande nome da mãe e última visualização com marcadores claros', () => {
+  const { context } = criarContexto(cabecalho, ['CASO-1','T-1','aberto','medio','baixa','obs','','','','','','','','','','','']);
+  const r = context.salvarAuditoriaCaso_({
+    idCaso: 'CASO-1',
+    caso: {
+      dadosPessoais: 'Nome da mãe: Maria da Silva',
+      ultimaVisualizacao: 'Data/Hora: 18/05/2026 14:00; Local: Praça Central; Roupa: camiseta azul; Transporte: a pé'
+    },
+    operadorNome: 'Op'
+  }, { nome: 'Op' });
+  assert.equal(r.ok, true);
+  assert.equal(r.diagnostico.camposAtualizados.includes('nomeMae'), true);
+  assert.equal(r.diagnostico.camposAtualizados.includes('dataHoraUltimaVisualizacao'), true);
+  assert.equal(r.diagnostico.camposAtualizados.includes('localUltimaVisualizacao'), true);
 });
