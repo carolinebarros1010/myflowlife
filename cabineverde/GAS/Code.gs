@@ -940,9 +940,10 @@ function doPost(e) {
     return criarRespostaJson({ ok: true, status: resultadoPersistencia.status || 'sucesso', data: { action: resultadoPersistencia.action, idCaso: idCaso, linha: resultadoPersistencia.linha, message: resultadoPersistencia.message || 'Gravação multiabas concluída' } });
   } catch (err) {
     var mensagemErro = err && err.message ? err.message : String(err);
+    var codigoErro = limparTexto(err && err.codigo);
     registrarLogTecnico(planilhaLogs, { etapa: 'ERRO_GRAVACAO_PLANILHA', ok: false, mensagem: mensagemErro, rawPostData: extrairRawPostData(e), payloadIdCaso: extrairIdCasoBruto(e) });
     var actionErro = ''; try { actionErro = limparTexto(parsePayload(e).action); } catch (_e) {}
-    return criarRespostaJson({ ok: false, status: 'erro', erro: mensagemErro, detalhe: 'Falha no processamento da action ' + actionErro }, 500);
+    return criarRespostaJson({ ok: false, status: 'erro', codigo: codigoErro || 'ERRO_GRAVACAO_PLANILHA', erro: mensagemErro, mensagem: mensagemErro, detalhe: 'Falha no processamento da action ' + actionErro }, 500);
   }
 }
 
@@ -1785,8 +1786,15 @@ function formatarNomeAbaTalao190_(data) {
 }
 
 function resolverDataOperacionalCaso_(caso) {
+  var nomeAbaTalao190 = limparTexto(caso && (caso.nomeAbaTalao190 || caso.nomeAba));
+  var abaOrigem = limparTexto(caso && caso.abaOrigem);
   var dataBrutaServico = limparTexto(caso && caso.dataServico);
   var dataBrutaRegistro = limparTexto(caso && caso.dataHoraRegistro);
+  if (!nomeAbaTalao190 && !abaOrigem && !dataBrutaServico && !dataBrutaRegistro) {
+    var erroAba = new Error('Não foi possível identificar a aba diária do Talão 190. Informe dataServico, dataHoraRegistro ou referência da aba original.');
+    erroAba.codigo = 'ABA_TALAO_190_NAO_IDENTIFICADA';
+    throw erroAba;
+  }
   var base = dataBrutaServico || dataBrutaRegistro;
   var dt = base ? new Date(base) : new Date();
   if (!(dt instanceof Date) || isNaN(dt.getTime())) dt = new Date();

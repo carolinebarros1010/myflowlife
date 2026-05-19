@@ -104,6 +104,13 @@
     <div class="form-container">
         <form id="masterForm">
             <input type="hidden" id="edit_id" value="">
+            <input type="hidden" id="hidden-idCaso" value="">
+            <input type="hidden" id="hidden-dataServico" value="">
+            <input type="hidden" id="hidden-dataHoraRegistro" value="">
+            <input type="hidden" id="hidden-nomeAbaTalao190" value="">
+            <input type="hidden" id="hidden-abaOrigem" value="">
+            <input type="hidden" id="hidden-linhaOrigem" value="">
+            <input type="hidden" id="hidden-referenciaIndice" value="">
             <div class="form-grid">
                 <div class="section-header">📑 Registro de Ocorrência</div>
                 <div class="double" style="grid-column:span 2;">
@@ -507,6 +514,7 @@
         const ENDPOINT_AUDITORIA_GAS = 'https://script.google.com/macros/s/AKfycbyWmW1-MNFprc83mtns2FrQCL2x-k5rckwUDI2p6d0L4dzVYxLLQRg4cyB28JLG_501zw/exec';
         const CAMPOS_AUDITORIA_EXCLUIDOS = new Set(['inconsistenciasPorCampo', 'auditoriaDetalhada', 'resultadoFinalAuditoria']);
         let casoAtualAuditoria = null;
+        window.casoAtualAuditoria = null;
         const CHAVES_OPERADOR = {
             email: 'cabineVerdeOperadorEmail',
             nome: 'cabineVerdeOperadorNome',
@@ -673,7 +681,8 @@
                 const { resposta, body } = await chamarBackendAuditoria('buscarCasoCompleto', { filtro });
                 if (!resposta.ok || !body.ok || !body.data || !body.data.caso) throw new Error(body.erro || 'Caso não encontrado.');
                 const casoNormalizado = normalizarTalaoCaso(body.data.caso);
-                casoAtualAuditoria = casoNormalizado;
+                casoAtualAuditoria = { ...casoNormalizado };
+                window.casoAtualAuditoria = casoAtualAuditoria;
                 preencherFormularioAuditoria(casoNormalizado);
                 renderizarEspelhoTriagem(casoNormalizado);
                 renderizarPerguntasTriagemModoAuditoria(casoNormalizado);
@@ -696,6 +705,13 @@
             document.getElementById('audit-idCaso').value = casoNormalizado.idCaso || '';
             document.getElementById('talao').value = casoNormalizado.talaoPMESP || '';
             document.getElementById('audit-nomeCompletoDesaparecido').value = casoNormalizado.nomeCompletoDesaparecido || '';
+            document.getElementById('hidden-idCaso').value = casoNormalizado.idCaso || '';
+            document.getElementById('hidden-dataServico').value = casoNormalizado.dataServico || '';
+            document.getElementById('hidden-dataHoraRegistro').value = casoNormalizado.dataHoraRegistro || '';
+            document.getElementById('hidden-nomeAbaTalao190').value = casoNormalizado.nomeAbaTalao190 || '';
+            document.getElementById('hidden-abaOrigem').value = casoNormalizado.abaOrigem || '';
+            document.getElementById('hidden-linhaOrigem').value = casoNormalizado.linhaOrigem || '';
+            document.getElementById('hidden-referenciaIndice').value = casoNormalizado.referenciaIndice || '';
             document.getElementById('q1').value = caso.nomeCompletoDesaparecido || respostasArvore.passo1_nome || '';
             document.getElementById('q2').value = caso.sexoGenero || respostasArvore.passo1_sexo_genero || '';
             document.getElementById('q3').value = caso.idade || respostasArvore.passo1_idade || '';
@@ -758,7 +774,8 @@
                     throw new Error(body.erro || 'Caso não encontrado.');
                 }
                 const casoNormalizado = normalizarTalaoCaso(body.data.caso);
-                casoAtualAuditoria = casoNormalizado;
+                casoAtualAuditoria = { ...casoNormalizado };
+                window.casoAtualAuditoria = casoAtualAuditoria;
                 preencherFormularioAuditoria(casoNormalizado);
                 renderizarEspelhoTriagem(casoNormalizado);
                 renderizarPerguntasTriagemModoAuditoria(casoNormalizado);
@@ -779,16 +796,32 @@
                     inconsistenciasPorCampo[chave] = { status, validacao, observacao };
                 }
             });
+            const casoOriginal = { ...(window.casoAtualAuditoria || casoAtualAuditoria || {}) };
             const payload = {
-                idCaso: filtro.idCaso || (casoAtualAuditoria && casoAtualAuditoria.idCaso) || '',
+                ...casoOriginal,
+                idCaso: (document.getElementById('hidden-idCaso').value || filtro.idCaso || casoOriginal.idCaso || '').trim(),
                 talaoPMESP: document.getElementById('talao').value,
+                talaoBopm: document.getElementById('talao').value,
+                nomeCompletoDesaparecido: document.getElementById('q1').value,
+                municipio: document.getElementById('q_municipio').value,
+                observacoesOperacionais: document.getElementById('cv_obs').value,
+                dataServico: document.getElementById('hidden-dataServico').value || casoOriginal.dataServico || '',
+                dataHoraRegistro: document.getElementById('hidden-dataHoraRegistro').value || casoOriginal.dataHoraRegistro || '',
+                nomeAbaTalao190: document.getElementById('hidden-nomeAbaTalao190').value || casoOriginal.nomeAbaTalao190 || '',
+                abaOrigem: document.getElementById('hidden-abaOrigem').value || casoOriginal.abaOrigem || '',
+                linhaOrigem: document.getElementById('hidden-linhaOrigem').value || casoOriginal.linhaOrigem || '',
+                referenciaIndice: document.getElementById('hidden-referenciaIndice').value || casoOriginal.referenciaIndice || '',
                 responsavelAuditoria: document.getElementById('cv_resp').value,
                 dataAuditoria: document.getElementById('cv_data').value,
                 statusAuditoria: Object.keys(inconsistenciasPorCampo).length ? 'revisar' : 'conforme',
                 observacoesAuditoria: document.getElementById('cv_obs').value,
                 inconsistenciasPorCampo,
-                resultadoFinalAuditoria: Object.keys(inconsistenciasPorCampo).length ? 'Pendências identificadas na auditoria de campos.' : 'Caso conferido sem inconsistências registradas.'
+                resultadoFinalAuditoria: Object.keys(inconsistenciasPorCampo).length ? 'Pendências identificadas na auditoria de campos.' : 'Caso conferido sem inconsistências registradas.',
+                modo: 'edicao'
             };
+            if (!payload.nomeAbaTalao190 && !payload.abaOrigem && !payload.dataServico && !payload.dataHoraRegistro) {
+                throw new Error('Não foi possível salvar: a auditoria não possui data de serviço ou referência da aba diária do Talão 190.');
+            }
             const { resposta, body } = await chamarBackendAuditoria('salvarAuditoriaCaso', { payload: payload, dados: payload });
             if (!resposta.ok || !body.ok) throw new Error(body.erro || 'Falha no salvamento de auditoria.');
         }
