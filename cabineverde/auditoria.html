@@ -224,6 +224,7 @@
                 <div><label>Data Registro</label><input type="date" id="cv_data" required></div>
                 <div><label>Equipe</label><input type="text" id="cv_equipe" required></div>
                 <div class="full"><label>Observações Cabine Verde</label><input type="text" id="cv_obs"></div>
+                <div class="full"><label>Justificativa da alteração</label><input type="text" id="justificativaAuditoria" name="justificativaAuditoria" placeholder="Justificativa da alteração, se necessário"></div>
             </div>
             <button type="submit" id="btnMain" class="btn-submit">FINALIZAR CADASTRO</button>
         </form>
@@ -806,6 +807,7 @@
                 nomeCompletoDesaparecido: document.getElementById('q1').value,
                 municipio: document.getElementById('q_municipio').value,
                 observacoesOperacionais: document.getElementById('cv_obs').value,
+                justificativaAuditoria: document.getElementById('justificativaAuditoria').value,
                 dataServico: document.getElementById('hidden-dataServico').value || casoOriginal.dataServico || '',
                 dataHoraRegistro: document.getElementById('hidden-dataHoraRegistro').value || casoOriginal.dataHoraRegistro || '',
                 nomeAbaTalao190: document.getElementById('hidden-nomeAbaTalao190').value || casoOriginal.nomeAbaTalao190 || '',

@@ -1000,13 +1000,32 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
   }
   if (linhaCaso < 0) return { ok: false, codigo: 'CASO_NAO_ENCONTRADO_EM_CASOS', erro: 'Caso não encontrado na aba CASOS para atualização da auditoria.' };
 
-  var linhaAtual = abaCasos.getRange(linhaCaso, 1, 1, headers.length).getValues()[0];
+  var camposTecnicosIgnorados = {
+    action: true, modo: true, destino: true, caso: true, dados: true,
+    operadorNome: true, operadorEmail: true, operadorPerfil: true, tokenInformado: true,
+    operadorUltimaAlteracaoAuditoria: true, emailOperadorUltimaAlteracaoAuditoria: true,
+    perfilOperadorUltimaAlteracaoAuditoria: true, dataHoraUltimaAlteracaoAuditoria: true,
+    dataHoraEdicao: true, idEdicao: true
+  };
+  var linhaOriginal = abaCasos.getRange(linhaCaso, 1, 1, headers.length).getValues()[0];
+  var linhaAtual = linhaOriginal.slice();
+  var alteracoesOperacionais = [];
+
   Object.keys(caso).forEach(function (k) {
+    if (camposTecnicosIgnorados[k]) return;
     var pos = idx[k];
     if (pos === undefined) return;
     var v = caso[k];
     if (v === '' || v === null || v === undefined) return;
-    linhaAtual[pos] = v;
+    var valorAnterior = linhaOriginal[pos];
+    var valorNovo = v;
+    if (String(valorAnterior) === String(valorNovo)) return;
+    linhaAtual[pos] = valorNovo;
+    alteracoesOperacionais.push({
+      campoAlterado: k,
+      valorAnterior: valorAnterior,
+      valorNovo: valorNovo
+    });
   });
 
   var operadorNome = limparTexto(body.operadorNome || (operadorAtual && operadorAtual.nome));
@@ -1018,15 +1037,81 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
   linhaAtual[idx.dataHoraUltimaAlteracaoAuditoria] = new Date();
   abaCasos.getRange(linhaCaso, 1, 1, headers.length).setValues([linhaAtual]);
 
+  var historicoEdicoesRegistradas = 0;
+  if (alteracoesOperacionais.length) {
+    var cabecalhoHistorico = [
+      'idEdicao', 'idCaso', 'talaoPMESP', 'campoAlterado', 'valorAnterior', 'valorNovo',
+      'operadorNome', 'operadorEmail', 'operadorPerfil', 'dataHoraEdicao', 'justificativa', 'emailConfirmado'
+    ];
+    var abaHistorico = planilha.getSheetByName('HISTORICO_EDICOES');
+    if (!abaHistorico) {
+      abaHistorico = planilha.insertSheet('HISTORICO_EDICOES');
+      abaHistorico.getRange(1, 1, 1, cabecalhoHistorico.length).setValues([cabecalhoHistorico]);
+    } else {
+      var ultimaColHistorico = Math.max(abaHistorico.getLastColumn(), 1);
+      var cabecalhoAtualHistorico = abaHistorico.getRange(1, 1, 1, ultimaColHistorico).getValues()[0].map(limparTexto);
+      cabecalhoHistorico.forEach(function (coluna) {
+        if (cabecalhoAtualHistorico.indexOf(coluna) !== -1) return;
+        abaHistorico.getRange(1, cabecalhoAtualHistorico.length + 1).setValue(coluna);
+        cabecalhoAtualHistorico.push(coluna);
+      });
+    }
+    var headerHistFinal = abaHistorico.getRange(1, 1, 1, abaHistorico.getLastColumn()).getValues()[0].map(limparTexto);
+    var idxHist = {};
+    headerHistFinal.forEach(function (h, i) { idxHist[h] = i; });
+    var idCasoHistorico = limparTexto(idCaso || caso.idCaso || caso.id);
+    var talaoHistorico = limparTexto(caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || linhaOriginal[idx.talaoPMESP] || linhaOriginal[idx.talaoBopm] || linhaOriginal[idx.numeroTalao] || 'N/D');
+    var justificativa = limparTexto(body.justificativaAuditoria || body.justificativa || caso.justificativaAuditoria || caso.justificativa || '');
+    var emailConfirmado = limparTexto(body.emailConfirmado || caso.emailConfirmado || (operadorEmail ? 'SIM' : 'NÃO'));
+    var operadorNomeHistorico = operadorNome || operadorEmail || 'OPERADOR_NAO_IDENTIFICADO';
+    var dataHora = new Date();
+
+    function gerarIdEdicao_() {
+      var agora = new Date();
+      function pad(n) { return String(n).padStart(2, '0'); }
+      var carimbo = agora.getFullYear() + pad(agora.getMonth() + 1) + pad(agora.getDate()) + '-' + pad(agora.getHours()) + pad(agora.getMinutes()) + pad(agora.getSeconds());
+      var sufixo = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+      return 'EDT-' + carimbo + '-' + sufixo;
+    }
+
+    var linhasHistorico = alteracoesOperacionais.map(function (alt) {
+      var linhaHist = new Array(headerHistFinal.length).fill('');
+      linhaHist[idxHist.idEdicao] = gerarIdEdicao_();
+      linhaHist[idxHist.idCaso] = idCasoHistorico;
+      linhaHist[idxHist.talaoPMESP] = talaoHistorico || 'N/D';
+      linhaHist[idxHist.campoAlterado] = alt.campoAlterado;
+      linhaHist[idxHist.valorAnterior] = alt.valorAnterior;
+      linhaHist[idxHist.valorNovo] = alt.valorNovo;
+      linhaHist[idxHist.operadorNome] = operadorNomeHistorico;
+      linhaHist[idxHist.operadorEmail] = operadorEmail || '';
+      linhaHist[idxHist.operadorPerfil] = operadorPerfil || '';
+      linhaHist[idxHist.dataHoraEdicao] = dataHora;
+      linhaHist[idxHist.justificativa] = justificativa;
+      linhaHist[idxHist.emailConfirmado] = emailConfirmado;
+      return linhaHist;
+    });
+    abaHistorico.getRange(abaHistorico.getLastRow() + 1, 1, linhasHistorico.length, headerHistFinal.length).setValues(linhasHistorico);
+    historicoEdicoesRegistradas = linhasHistorico.length;
+  }
+
+  Logger.log('AUDITORIA_CASO_ATUALIZADA idCaso=%s linha=%s operador=%s camposAlterados=%s historicoRegistrado=%s',
+    limparTexto(idCaso || caso.idCaso || caso.id),
+    linhaCaso,
+    operadorNome || operadorEmail || 'OPERADOR_NAO_IDENTIFICADO',
+    alteracoesOperacionais.length,
+    historicoEdicoesRegistradas
+  );
+
   return {
     ok: true,
     action: 'salvarAuditoriaCaso',
     destino: 'CASOS',
     codigo: 'AUDITORIA_CASO_ATUALIZADA_EM_CASOS',
-    mensagem: 'Caso atualizado com sucesso na aba CASOS.',
+    mensagem: alteracoesOperacionais.length ? 'Caso atualizado com sucesso na aba CASOS.' : 'Nenhuma alteração operacional foi detectada para atualização na aba CASOS.',
     idCaso: idCaso || limparTexto(caso.idCaso || caso.id),
     linha: linhaCaso,
-    operadorUltimaAlteracaoAuditoria: linhaAtual[idx.operadorUltimaAlteracaoAuditoria]
+    operadorUltimaAlteracaoAuditoria: linhaAtual[idx.operadorUltimaAlteracaoAuditoria],
+    historicoEdicoesRegistradas: historicoEdicoesRegistradas
   };
 }
 
