@@ -949,6 +949,13 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
   var caso = (body && (body.caso || body.dados || body.payload)) || {};
   if (typeof caso !== 'object' || caso === null) caso = {};
   caso = normalizarTalaoPayload(caso);
+  var diagnosticoAuditoria = {
+    camposRecebidos: Object.keys(caso),
+    camposMapeados: [],
+    camposAtualizados: [],
+    camposIgnorados: [],
+    historicoEdicoesRegistradas: 0
+  };
 
   var idCaso = limparTexto(body.idCaso || caso.idCaso || caso.id);
   var talaoBopm = limparTexto(caso.talaoBopm || caso.talaoPMESP || caso.numeroTalao || caso.talao);
@@ -1007,15 +1014,29 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
     perfilOperadorUltimaAlteracaoAuditoria: true, dataHoraUltimaAlteracaoAuditoria: true,
     dataHoraEdicao: true, idEdicao: true
   };
+  var normalizacaoAuditoria = normalizarCamposAuditoriaParaCasos_(caso, headers);
+  var casoNormalizado = normalizacaoAuditoria.dados;
+  diagnosticoAuditoria.camposMapeados = normalizacaoAuditoria.camposMapeados;
+  diagnosticoAuditoria.camposIgnorados = normalizacaoAuditoria.camposIgnorados;
+
+  if (diagnosticoAuditoria.camposMapeados.length === 0 && diagnosticoAuditoria.camposRecebidos.length > 0) {
+    return {
+      ok: false,
+      codigo: 'CAMPOS_AUDITORIA_NAO_COMPATIVEIS_COM_CASOS',
+      erro: 'Nenhum campo enviado pela auditoria corresponde às colunas da aba CASOS.',
+      diagnostico: diagnosticoAuditoria
+    };
+  }
+
   var linhaOriginal = abaCasos.getRange(linhaCaso, 1, 1, headers.length).getValues()[0];
   var linhaAtual = linhaOriginal.slice();
   var alteracoesOperacionais = [];
 
-  Object.keys(caso).forEach(function (k) {
+  Object.keys(casoNormalizado).forEach(function (k) {
     if (camposTecnicosIgnorados[k]) return;
     var pos = idx[k];
     if (pos === undefined) return;
-    var v = caso[k];
+    var v = casoNormalizado[k];
     if (v === '' || v === null || v === undefined) return;
     var valorAnterior = linhaOriginal[pos];
     var valorNovo = v;
@@ -1026,6 +1047,7 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
       valorAnterior: valorAnterior,
       valorNovo: valorNovo
     });
+    diagnosticoAuditoria.camposAtualizados.push(k);
   });
 
   var operadorNome = limparTexto(body.operadorNome || (operadorAtual && operadorAtual.nome));
@@ -1102,16 +1124,77 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
     historicoEdicoesRegistradas
   );
 
+  diagnosticoAuditoria.historicoEdicoesRegistradas = historicoEdicoesRegistradas;
   return {
     ok: true,
     action: 'salvarAuditoriaCaso',
     destino: 'CASOS',
     codigo: 'AUDITORIA_CASO_ATUALIZADA_EM_CASOS',
-    mensagem: alteracoesOperacionais.length ? 'Caso atualizado com sucesso na aba CASOS.' : 'Nenhuma alteração operacional foi detectada para atualização na aba CASOS.',
+    mensagem: alteracoesOperacionais.length ? 'Caso atualizado com sucesso na aba CASOS.' : 'Nenhuma alteração operacional detectada.',
     idCaso: idCaso || limparTexto(caso.idCaso || caso.id),
     linha: linhaCaso,
     operadorUltimaAlteracaoAuditoria: linhaAtual[idx.operadorUltimaAlteracaoAuditoria],
-    historicoEdicoesRegistradas: historicoEdicoesRegistradas
+    historicoEdicoesRegistradas: historicoEdicoesRegistradas,
+    diagnostico: diagnosticoAuditoria
+  };
+}
+
+function normalizarCamposAuditoriaParaCasos_(dados, headersCasos) {
+  var entrada = dados && typeof dados === 'object' ? dados : {};
+  var headers = Array.isArray(headersCasos) ? headersCasos.map(limparTexto) : [];
+  var headersLookup = {};
+  headers.forEach(function (h) { if (h) headersLookup[h] = true; });
+
+  var aliases = {
+    talaoPMESP: 'talaoBopm',
+    numeroTalao: 'talaoBopm',
+    status: 'statusCaso',
+    status190: 'encerrado190',
+    classificacaoOperacional: 'classificacaoRisco',
+    prioridadeAutomatica: 'prioridade',
+    observacoes: 'observacoesOperacionais',
+    nomeDesaparecido: 'nomeCompletoDesaparecido',
+    genero: 'sexoGenero',
+    sexo: 'sexoGenero',
+    bo: 'numeroBo',
+    numeroBO: 'numeroBo',
+    localizado190: 'localizado',
+    dataLocalizacao: 'dataHoraLocalizacao',
+    formaEncontrado: 'formaLocalizacao'
+  };
+
+  var normalizado = {};
+  var camposMapeados = [];
+  var camposIgnorados = [];
+  var contextoTelefone = limparTexto(entrada.vinculoSolicitante || entrada.nomeSolicitante);
+
+  Object.keys(entrada).forEach(function (k) {
+    var campo = limparTexto(k);
+    if (!campo) return;
+    var destino = campo;
+    if (!headersLookup[destino]) {
+      if (aliases[campo]) {
+        destino = aliases[campo];
+      } else if (campo === 'telefone') {
+        if (contextoTelefone) destino = 'telefoneSolicitante';
+      } else if (campo === 'flagAlerta' && headersLookup.aptoCabineVerde) {
+        destino = 'aptoCabineVerde';
+      } else if (campo === 'tipoCaso' && headersLookup.classificacaoRisco) {
+        destino = 'classificacaoRisco';
+      }
+    }
+    if (!headersLookup[destino]) {
+      camposIgnorados.push(campo);
+      return;
+    }
+    normalizado[destino] = entrada[k];
+    camposMapeados.push(destino);
+  });
+
+  return {
+    dados: normalizado,
+    camposMapeados: Array.from(new Set(camposMapeados)),
+    camposIgnorados: Array.from(new Set(camposIgnorados))
   };
 }
 
