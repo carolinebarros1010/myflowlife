@@ -799,12 +799,23 @@
                 }
             });
             const casoOriginal = { ...(window.casoAtualAuditoria || casoAtualAuditoria || {}) };
+            const dadosIdentificacaoTexto = (document.getElementById('q4').value || '').trim();
+            const partesIdentificacao = dadosIdentificacaoTexto.split('|').map((item) => item.trim()).filter(Boolean);
+            const cpfSeparado = partesIdentificacao.find((item) => /^(\d{3}\.?\d{3}\.?\d{3}\-?\d{2})$/i.test(item));
+            const rgSeparado = partesIdentificacao.find((item) => /^(rg\s*:?\s*)?[\d.\-xX]{5,15}$/i.test(item) && item !== cpfSeparado);
+            const nomeMaeSeparado = partesIdentificacao.find((item) => /^(m[ãa]e|nome da m[ãa]e|genitora)\s*:/i.test(item));
+            const dataNascimentoSeparada = partesIdentificacao.find((item) => /^(\d{2}\/\d{2}\/\d{4})$/i.test(item));
             const camposEditados = {
                 ...casoOriginal,
                 idCaso: (document.getElementById('hidden-idCaso').value || filtro.idCaso || casoOriginal.idCaso || '').trim(),
                 talaoPMESP: document.getElementById('talao').value,
                 talaoBopm: document.getElementById('talao').value,
                 nomeCompletoDesaparecido: document.getElementById('q1').value,
+                cpf: cpfSeparado ? cpfSeparado.replace(/[^\d.\-]/g, '') : (casoOriginal.cpf || ''),
+                rg: rgSeparado ? rgSeparado.replace(/rg\s*:?\s*/i, '').trim() : (casoOriginal.rg || ''),
+                nomeMae: nomeMaeSeparado ? nomeMaeSeparado.replace(/^(m[ãa]e|nome da m[ãa]e|genitora)\s*:\s*/i, '').trim() : (casoOriginal.nomeMae || ''),
+                dataNascimento: dataNascimentoSeparada || casoOriginal.dataNascimento || '',
+                dadosIdentificacao: dadosIdentificacaoTexto,
                 municipio: document.getElementById('q_municipio').value,
                 observacoesOperacionais: document.getElementById('cv_obs').value,
                 justificativaAuditoria: document.getElementById('justificativaAuditoria').value,
