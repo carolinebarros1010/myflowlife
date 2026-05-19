@@ -1113,6 +1113,66 @@ function normalizarTalaoPayload(dados) {
   return fonte;
 }
 
+function normalizarPayloadCaso_(caso) {
+  var fonte = caso && typeof caso === 'object' ? caso : {};
+  var talao = limparTexto(fonte.talaoPMESP || fonte.talaoBopm || fonte.numeroTalao || fonte.talao);
+  var nome = limparTexto(fonte.nomeCompletoDesaparecido || fonte.nomeDesaparecido);
+  var observacoes = limparTexto(fonte.observacoesOperacionais || fonte.observacoes);
+  var status190 = limparTexto(fonte.encerrado190 || fonte.status190);
+  var operador = limparTexto(fonte.operadorResponsavel || fonte.operadorPM);
+  var foto = limparTexto(fonte.urlFoto || fonte.linkFoto);
+  var cpf = limparTexto(fonte.cpf);
+  var rg = limparTexto(fonte.rg);
+  var cpfRg = limparTexto(fonte.cpfRg || [cpf, rg].filter(Boolean).join(' / '));
+
+  fonte.talaoPMESP = talao;
+  fonte.talaoBopm = talao;
+  fonte.numeroTalao = talao;
+  fonte.talao = talao;
+  fonte.nomeCompletoDesaparecido = nome;
+  if (!fonte.nomeDesaparecido) fonte.nomeDesaparecido = nome;
+  fonte.observacoesOperacionais = observacoes;
+  if (!fonte.observacoes) fonte.observacoes = observacoes;
+  fonte.encerrado190 = status190;
+  if (!fonte.status190) fonte.status190 = status190;
+  fonte.operadorResponsavel = operador;
+  if (!fonte.operadorPM) fonte.operadorPM = operador;
+  fonte.urlFoto = foto;
+  if (!fonte.linkFoto) fonte.linkFoto = foto;
+  fonte.cpfRg = cpfRg;
+  return fonte;
+}
+
+function validarCamposObrigatoriosCaso_(caso) {
+  var campos = ['talaoBopm', 'nomeCompletoDesaparecido', 'nomeSolicitante', 'telefoneSolicitante'];
+  var faltantes = campos.filter(function (campo) { return !limparTexto(caso && caso[campo]); });
+  if (!faltantes.length) return { ok: true, camposAusentes: [] };
+  var rotulos = {
+    talaoBopm: 'Número do Talão PMESP/BOPM',
+    nomeCompletoDesaparecido: 'Nome completo do desaparecido',
+    nomeSolicitante: 'Nome do solicitante',
+    telefoneSolicitante: 'Telefone do solicitante'
+  };
+  var mensagem = 'Campos obrigatórios ausentes: ' + faltantes.map(function (c) { return rotulos[c] || c; }).join(', ') + '.';
+  return {
+    ok: false,
+    erro: {
+      sucesso: false,
+      codigo: 'CAMPO_OBRIGATORIO_AUSENTE',
+      mensagem: mensagem,
+      message: mensagem,
+      camposAusentes: faltantes,
+      diagnostico: {
+        idCaso: limparTexto(caso && caso.idCaso),
+        talaoBopm: limparTexto(caso && caso.talaoBopm),
+        nomeCompletoDesaparecido: limparTexto(caso && caso.nomeCompletoDesaparecido),
+        nomeSolicitante: limparTexto(caso && caso.nomeSolicitante),
+        telefoneSolicitante: limparTexto(caso && caso.telefoneSolicitante)
+      }
+    }
+  };
+}
+
 function gerarAssinaturaCaso_(dados) {
   var dataServico = normalizarDataRelatorio_(dados && (dados.dataServico || dados.dataHoraRegistro || dados.dataHoraUltimaVisualizacao));
   var talaoBopm = normalizarDocumentoRelatorio_(dados && (dados.talaoBopm || dados.talaoPMESP || dados.numeroTalao || dados.talao || dados.bopm));
@@ -1239,13 +1299,14 @@ function persistirRegistro(planilha, registro) {
     Logger.log("GRAVANDO CASO:");
     Logger.log(registro);
     var registroPorColuna = mapearPorColuna(colunas, valoresPorSchema);
-    registroPorColuna = normalizarTalaoPayload(registroPorColuna);
+    registroPorColuna = normalizarPayloadCaso_(normalizarTalaoPayload(registroPorColuna));
     registroPorColuna = normalizarCamposFisicos_(registroPorColuna);
     registroPorColuna.talaoBopm = limparTexto(registroPorColuna.talaoBopm || registroPorColuna.talaoPMESP || registroPorColuna.numeroTalao || registroPorColuna.bopm);
     registroPorColuna.talaoPMESP = limparTexto(registroPorColuna.talaoPMESP || registroPorColuna.talaoBopm);
-    if (!registroPorColuna.talaoBopm) {
-      registrarLogAuditoriaPersistencia_(planilha, { dataHora: formatarDataHora(new Date()), status: 'erro', chaveUnica: obterChaveUnicaRegistro_(registro, registroPorColuna), acaoExecutada: 'BLOQUEIO_TALAO_OBRIGATORIO', nomeDesaparecido: limparTexto(registroPorColuna.nomeCompletoDesaparecido), solicitante: limparTexto(registroPorColuna.nomeSolicitante), telefone: limparTexto(registroPorColuna.telefoneSolicitante), operador: limparTexto(registroPorColuna.operadorResponsavel), mensagemTecnica: 'Número do Talão PMESP é obrigatório.' });
-      return { status: 'erro', message: 'Número do Talão PMESP é obrigatório.', mensagem: 'Número do Talão PMESP é obrigatório.' };
+    var validacaoObrigatorios = validarCamposObrigatoriosCaso_(registroPorColuna);
+    if (!validacaoObrigatorios.ok) {
+      registrarLogAuditoriaPersistencia_(planilha, { dataHora: formatarDataHora(new Date()), status: 'erro', chaveUnica: obterChaveUnicaRegistro_(registro, registroPorColuna), acaoExecutada: 'BLOQUEIO_CAMPOS_OBRIGATORIOS', nomeDesaparecido: limparTexto(registroPorColuna.nomeCompletoDesaparecido), solicitante: limparTexto(registroPorColuna.nomeSolicitante), telefone: limparTexto(registroPorColuna.telefoneSolicitante), operador: limparTexto(registroPorColuna.operadorResponsavel), mensagemTecnica: validacaoObrigatorios.erro.mensagem });
+      return validacaoObrigatorios.erro;
     }
     var idCaso = limparTexto(registroPorColuna.idCaso);
     var dataServicoRecebida = normalizarDataServicoImutavel_(registroPorColuna.dataServico, registroPorColuna.dataHoraRegistro);
@@ -1422,6 +1483,10 @@ function atualizarIndiceTaloes_(dados) {
 }
 
 function sincronizarTalao190(caso) {
+  var normalizador = (typeof normalizarPayloadCaso_ === 'function')
+    ? normalizarPayloadCaso_
+    : function (c) { return c || {}; };
+  var casoNormalizado = normalizador(caso || {});
   var lock = LockService.getDocumentLock();
   var lockAdquirido = false;
   try {
@@ -1429,32 +1494,32 @@ function sincronizarTalao190(caso) {
     lockAdquirido = true;
     registrarLogAuditoria_({
       evento: 'LOCK_TALAO_190_ADQUIRIDO',
-      idCaso: caso && caso.idCaso,
-      talao: caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao),
-      nome: caso && caso.nomeCompletoDesaparecido,
+      idCaso: casoNormalizado.idCaso,
+      talao: casoNormalizado.talaoBopm,
+      nome: casoNormalizado.nomeCompletoDesaparecido,
       timestamp: new Date()
     });
-    var contextoData = resolverDataOperacionalCaso_(caso);
+    var contextoData = resolverDataOperacionalCaso_(casoNormalizado);
     var abaTalao = obterOuCriarAbaTalao190_(contextoData.dataOperacional);
     validarConsistenciaEstruturalTalao190_(abaTalao, contextoData);
-    var linha = montarLinhaTalao190(caso, contextoData);
-    var divergenciaAba = localizarRegistroEmAbaIncompativel_(caso, abaTalao.getName());
+    var linha = montarLinhaTalao190(casoNormalizado, contextoData);
+    var divergenciaAba = localizarRegistroEmAbaIncompativel_(casoNormalizado, abaTalao.getName());
     if (divergenciaAba) {
       registrarLogAuditoriaPersistencia_(SpreadsheetApp.getActiveSpreadsheet(), {
         dataHora: formatarDataHora(new Date()),
         status: 'alerta',
-        chaveUnica: limparTexto(caso && (caso.CHAVE_UNICA || caso.chaveUnica)),
+        chaveUnica: limparTexto(casoNormalizado.CHAVE_UNICA || casoNormalizado.chaveUnica),
         acaoExecutada: 'ALERTA_ABA_INCOMPATIVEL_TALAO_190',
-        nomeDesaparecido: limparTexto(caso && caso.nomeCompletoDesaparecido),
-        solicitante: limparTexto(caso && caso.nomeSolicitante),
-        telefone: limparTexto(caso && caso.telefoneSolicitante),
-        operador: limparTexto(caso && caso.operadorResponsavel),
+        nomeDesaparecido: limparTexto(casoNormalizado.nomeCompletoDesaparecido),
+        solicitante: limparTexto(casoNormalizado.nomeSolicitante),
+        telefone: limparTexto(casoNormalizado.telefoneSolicitante),
+        operador: limparTexto(casoNormalizado.operadorResponsavel),
         mensagemTecnica: 'Caso encontrado em aba incompatível=' + divergenciaAba + '; abaAtual=' + abaTalao.getName() + '; dataOperacional=' + contextoData.dataOperacionalISO
       });
     }
-    var hashOperacional = gerarHashOperacionalTalao_(caso, contextoData.dataOperacional);
-    var talaoNormalizado = normalizarDocumentoRelatorio_(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || caso.talao));
-    var idCaso = limparTexto(caso && caso.idCaso);
+    var hashOperacional = gerarHashOperacionalTalao_(casoNormalizado, contextoData.dataOperacional);
+    var talaoNormalizado = normalizarDocumentoRelatorio_(casoNormalizado.talaoBopm);
+    var idCaso = limparTexto(casoNormalizado.idCaso);
     var indiceHit = localizarCasoPorIndiceTaloes_({ idCaso: idCaso, hashOperacional: hashOperacional, talaoNormalizado: talaoNormalizado });
     var linhaExistente = -1;
     if (indiceHit.encontrado) {
@@ -1462,7 +1527,7 @@ function sincronizarTalao190(caso) {
       if (validacaoIndice.valido && indiceHit.nomeAba === abaTalao.getName()) linhaExistente = indiceHit.linhaRelatorio;
       else registrarLogAuditoria_({ evento: 'INDICE_TALOES_REFERENCIA_INVALIDA', idCaso: idCaso, motivo: validacaoIndice.motivo, timestamp: new Date() });
     }
-    if (linhaExistente <= 0) linhaExistente = localizarLinhaDuplicadaRelatorio_(abaTalao, caso);
+    if (linhaExistente <= 0) linhaExistente = localizarLinhaDuplicadaRelatorio_(abaTalao, casoNormalizado);
 
     if (linhaExistente > 0) {
       var linhaAncoraAtualizacao = localizarLinhaAncoraRodape_(abaTalao);
@@ -1473,16 +1538,16 @@ function sincronizarTalao190(caso) {
       registrarLogAuditoriaPersistencia_(SpreadsheetApp.getActiveSpreadsheet(), {
         dataHora: formatarDataHora(new Date()),
         status: 'atualizado',
-        chaveUnica: limparTexto(caso && (caso.CHAVE_UNICA || caso.chaveUnica)),
+        chaveUnica: limparTexto(casoNormalizado.CHAVE_UNICA || casoNormalizado.chaveUnica),
         acaoExecutada: 'UPDATE_RELATORIO_TALAO_190',
-        nomeDesaparecido: limparTexto(caso && caso.nomeCompletoDesaparecido),
-        solicitante: limparTexto(caso && caso.nomeSolicitante),
-        telefone: limparTexto(caso && caso.telefoneSolicitante),
-        operador: limparTexto(caso && caso.operadorResponsavel),
+        nomeDesaparecido: limparTexto(casoNormalizado.nomeCompletoDesaparecido),
+        solicitante: limparTexto(casoNormalizado.nomeSolicitante),
+        telefone: limparTexto(casoNormalizado.telefoneSolicitante),
+        operador: limparTexto(casoNormalizado.operadorResponsavel),
         mensagemTecnica: 'Caso já existente no relatório diário; atualização com setValues na linha ' + linhaExistente + '.'
       });
-      atualizarIndiceTaloes_({ linhaIndice: indiceHit && indiceHit.linhaIndice, hashOperacional: hashOperacional, idCaso: idCaso, talaoNormalizado: talaoNormalizado, talaoOriginal: limparTexto(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || caso.talao)), nomeNormalizado: normalizarTextoAssinatura_(caso && caso.nomeCompletoDesaparecido), telefoneNormalizado: normalizarTelefoneRelatorio_(caso && caso.telefoneSolicitante), dataOperacional: contextoData.dataOperacionalISO, nomeAba: abaTalao.getName(), linhaRelatorio: linhaExistente, status: 'atualizado' });
-      return { status: 'atualizado', linha: linhaExistente };
+      atualizarIndiceTaloes_({ linhaIndice: indiceHit && indiceHit.linhaIndice, hashOperacional: hashOperacional, idCaso: idCaso, talaoNormalizado: talaoNormalizado, talaoOriginal: limparTexto(casoNormalizado.talaoBopm), nomeNormalizado: normalizarTextoAssinatura_(casoNormalizado.nomeCompletoDesaparecido), telefoneNormalizado: normalizarTelefoneRelatorio_(casoNormalizado.telefoneSolicitante), dataOperacional: contextoData.dataOperacionalISO, nomeAba: abaTalao.getName(), linhaRelatorio: linhaExistente, status: 'atualizado' });
+      return { sucesso: true, status: 'atualizado', acao: 'ATUALIZADO', nomeAba: abaTalao.getName(), linha: linhaExistente, idCaso: idCaso, talaoBopm: casoNormalizado.talaoBopm, mensagem: 'Talão 190 sincronizado com sucesso.' };
     }
 
     var linhaLivre = localizarPrimeiraLinhaOperacionalLivre_(abaTalao);
@@ -1491,23 +1556,23 @@ function sincronizarTalao190(caso) {
     registrarLogAuditoriaPersistencia_(SpreadsheetApp.getActiveSpreadsheet(), {
       dataHora: formatarDataHora(new Date()),
       status: 'sucesso',
-      chaveUnica: limparTexto(caso && (caso.CHAVE_UNICA || caso.chaveUnica)),
+      chaveUnica: limparTexto(casoNormalizado.CHAVE_UNICA || casoNormalizado.chaveUnica),
       acaoExecutada: 'INSERT_RELATORIO_TALAO_190',
-      nomeDesaparecido: limparTexto(caso && caso.nomeCompletoDesaparecido),
-      solicitante: limparTexto(caso && caso.nomeSolicitante),
-      telefone: limparTexto(caso && caso.telefoneSolicitante),
-      operador: limparTexto(caso && caso.operadorResponsavel),
-      mensagemTecnica: 'linhaLivreDetectada=' + linhaLivre + '; linhaInserida=' + linhaDestino + '; aba=' + abaTalao.getName() + '; dataOperacional=' + contextoData.dataOperacionalISO + '; talao=' + limparTexto(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao))
+      nomeDesaparecido: limparTexto(casoNormalizado.nomeCompletoDesaparecido),
+      solicitante: limparTexto(casoNormalizado.nomeSolicitante),
+      telefone: limparTexto(casoNormalizado.telefoneSolicitante),
+      operador: limparTexto(casoNormalizado.operadorResponsavel),
+      mensagemTecnica: 'linhaLivreDetectada=' + linhaLivre + '; linhaInserida=' + linhaDestino + '; aba=' + abaTalao.getName() + '; dataOperacional=' + contextoData.dataOperacionalISO + '; talao=' + limparTexto(casoNormalizado.talaoBopm)
     });
-    atualizarIndiceTaloes_({ linhaIndice: indiceHit && indiceHit.linhaIndice, hashOperacional: hashOperacional, idCaso: idCaso, talaoNormalizado: talaoNormalizado, talaoOriginal: limparTexto(caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || caso.talao)), nomeNormalizado: normalizarTextoAssinatura_(caso && caso.nomeCompletoDesaparecido), telefoneNormalizado: normalizarTelefoneRelatorio_(caso && caso.telefoneSolicitante), dataOperacional: contextoData.dataOperacionalISO, nomeAba: abaTalao.getName(), linhaRelatorio: linhaDestino, status: 'ativo' });
-    return { status: 'sucesso', linha: linhaDestino };
+    atualizarIndiceTaloes_({ linhaIndice: indiceHit && indiceHit.linhaIndice, hashOperacional: hashOperacional, idCaso: idCaso, talaoNormalizado: talaoNormalizado, talaoOriginal: limparTexto(casoNormalizado.talaoBopm), nomeNormalizado: normalizarTextoAssinatura_(casoNormalizado.nomeCompletoDesaparecido), telefoneNormalizado: normalizarTelefoneRelatorio_(casoNormalizado.telefoneSolicitante), dataOperacional: contextoData.dataOperacionalISO, nomeAba: abaTalao.getName(), linhaRelatorio: linhaDestino, status: 'ativo' });
+    return { sucesso: true, status: 'sucesso', acao: 'INSERIDO', nomeAba: abaTalao.getName(), linha: linhaDestino, idCaso: idCaso, talaoBopm: casoNormalizado.talaoBopm, mensagem: 'Talão 190 sincronizado com sucesso.' };
   } catch (erro) {
     registrarLogAuditoria_({
       evento: 'ERRO_LOCK_TALAO_190',
-      idCaso: caso && caso.idCaso,
-      talaoBopm: caso && caso.talaoBopm,
-      talaoPMESP: caso && caso.talaoPMESP,
-      nome: caso && caso.nomeCompletoDesaparecido,
+      idCaso: casoNormalizado.idCaso,
+      talaoBopm: casoNormalizado.talaoBopm,
+      talaoPMESP: casoNormalizado.talaoPMESP,
+      nome: casoNormalizado.nomeCompletoDesaparecido,
       mensagemErro: erro && erro.message ? erro.message : String(erro),
       stack: erro && erro.stack ? erro.stack : '',
       timestamp: new Date()
@@ -1528,16 +1593,16 @@ function sincronizarTalao190(caso) {
       } catch (e) {}
     }
     Logger.log('ERRO_SINCRONIZAR_TALAO_190: ' + (erro && erro.message ? erro.message : erro));
-    return { status: 'erro', mensagem: erro && erro.message ? erro.message : String(erro) };
+    return { sucesso: false, status: 'erro', codigo: 'ERRO_SINCRONIZAR_TALAO_190', mensagem: erro && erro.message ? erro.message : String(erro) };
   } finally {
     if (lockAdquirido) {
       try {
         lock.releaseLock();
         registrarLogAuditoria_({
           evento: 'LOCK_TALAO_190_LIBERADO',
-          idCaso: caso && caso.idCaso,
-          talao: caso && (caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao),
-          nome: caso && caso.nomeCompletoDesaparecido,
+          idCaso: casoNormalizado.idCaso,
+          talao: casoNormalizado.talaoBopm,
+          nome: casoNormalizado.nomeCompletoDesaparecido,
           timestamp: new Date()
         });
       } catch (e) {}
@@ -1700,7 +1765,7 @@ function obterOuCriarAbaTalao190_(dataOperacional) {
 
   aba = abaModelo.copyTo(planilhaTalao).setName(nomeAba);
   planilhaTalao.setActiveSheet(aba);
-  planilhaTalao.moveActiveSheet(3);
+  planilhaTalao.moveActiveSheet(1);
   atualizarTituloTalao(aba, dataOperacional);
   return aba;
 }
@@ -1711,7 +1776,7 @@ function formatarNomeAbaTalao(data) {
 
 function formatarNomeAbaTalao190_(data) {
   var dt = data instanceof Date ? data : new Date(data);
-  if (!(dt instanceof Date) || isNaN(dt.getTime())) dt = new Date();
+  if (!(dt instanceof Date) || isNaN(dt.getTime())) throw new Error('DATA_SERVICO_INVALIDA_PARA_NOME_DA_ABA');
   var meses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
   var dia = ('0' + dt.getDate()).slice(-2);
   var mes = meses[dt.getMonth()];
