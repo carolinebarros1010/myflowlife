@@ -954,6 +954,8 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
     camposCompostosDetectados: [],
     camposExpandidos: [],
     camposMapeados: [],
+    camposQuestionarioMapeados: [],
+    perguntasSemDestinoSeguro: [],
     camposAtualizados: [],
     camposIgnorados: [],
     historicoEdicoesRegistradas: 0
@@ -1018,8 +1020,11 @@ function salvarAuditoriaCaso_(body, operadorAtual) {
     operadorNome: true, operadorEmail: true, operadorPerfil: true, tokenInformado: true,
     operadorUltimaAlteracaoAuditoria: true, emailOperadorUltimaAlteracaoAuditoria: true,
     perfilOperadorUltimaAlteracaoAuditoria: true, dataHoraUltimaAlteracaoAuditoria: true,
-    dataHoraEdicao: true, idEdicao: true
+    dataHoraEdicao: true, idEdicao: true,
+    camposQuestionarioMapeados: true, perguntasSemDestinoSeguro: true
   };
+  diagnosticoAuditoria.camposQuestionarioMapeados = Array.isArray(caso.camposQuestionarioMapeados) ? caso.camposQuestionarioMapeados : [];
+  diagnosticoAuditoria.perguntasSemDestinoSeguro = Array.isArray(caso.perguntasSemDestinoSeguro) ? caso.perguntasSemDestinoSeguro : [];
   var expansao = expandirCamposCompostosAuditoriaParaCasos_(caso, linhaAtualComoObjeto);
   diagnosticoAuditoria.camposCompostosDetectados = expansao.camposCompostosDetectados;
   diagnosticoAuditoria.camposExpandidos = expansao.camposExpandidos;
