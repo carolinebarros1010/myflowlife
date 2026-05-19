@@ -250,6 +250,46 @@
             q34: "Vínculo emocional", q35: "Câmeras Casa", q36: "Câmeras Local", q37: "Sequestro?",
             q38: "Foto Digital?", q39: "Registro Delegacia?"
         };
+        const MAPEAMENTO_PERGUNTAS_CASOS = {
+            q1: ['nomeCompletoDesaparecido', 'arv_p1_nome_resp'],
+            q2: ['sexoGenero', 'arv_p1_sexo_resp'],
+            q3: ['idade', 'arv_p1_idade_resp'],
+            q4: ['arv_p1_dados_identificacao_resp'],
+            q5: ['meioTransporte', 'arv_p2_meio_transporte_resp'],
+            q6: ['dadosVeiculo', 'arv_p2_dados_veiculo_resp'],
+            q7: ['observacoesOperacionais'],
+            q8: ['dataHoraUltimaVisualizacao', 'arv_p2_data_hora_ultima_resp'],
+            q9: ['localUltimaVisualizacao', 'arv_p2_local_ultima_resp']
+        };
+
+        function extrairIdentificacaoQuestionario_(texto) {
+            const bruto = (texto || '').toString();
+            if (!bruto.trim()) return {};
+            function extrairPorMarcador(marcadores) {
+                for (const marcador of marcadores) {
+                    const rx = new RegExp(`${marcador}\\s*:\\s*([^;|\\n]+)`, 'i');
+                    const match = bruto.match(rx);
+                    if (match && match[1] && match[1].trim()) return match[1].trim();
+                }
+                return '';
+            }
+            const cpfMarcado = extrairPorMarcador(['CPF']);
+            const rgMarcado = extrairPorMarcador(['RG']);
+            const maeMarcada = extrairPorMarcador(['Nome da mãe', 'Nome da mae', 'Mãe', 'Mae', 'Genitora']);
+            const nascimentoMarcado = extrairPorMarcador(['Data de nascimento', 'Nascimento', 'DN']);
+            const cpfSolto = (bruto.match(/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/) || [])[0] || '';
+            const rgSolto = (bruto.match(/\b\d{1,2}\.?\d{3}\.?\d{3}-?[\dXx]\b/) || [])[0] || '';
+            const nascimentoSolto = (bruto.match(/\b\d{2}\/\d{2}\/\d{4}\b/) || [])[0] || '';
+            const cpfFinal = (cpfMarcado || cpfSolto || '').replace(/[^\d.\-]/g, '');
+            const rgFinal = (rgMarcado || rgSolto || '').replace(/[^\d.\-xX]/g, '');
+            const nascimentoFinal = (nascimentoMarcado || nascimentoSolto || '').trim();
+            const saida = {};
+            if ((cpfFinal.replace(/\D/g, '') || '').length === 11) saida.cpf = cpfFinal;
+            if ((rgFinal.replace(/[^\dXx]/g, '') || '').length >= 5) saida.rg = rgFinal;
+            if (maeMarcada && maeMarcada.length >= 5) saida.nomeMae = maeMarcada;
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(nascimentoFinal)) saida.dataNascimento = nascimentoFinal;
+            return saida;
+        }
 
         function formatarDataBR(dataISO) {
             if(!dataISO) return "---";
@@ -800,21 +840,30 @@
             });
             const casoOriginal = { ...(window.casoAtualAuditoria || casoAtualAuditoria || {}) };
             const dadosIdentificacaoTexto = (document.getElementById('q4').value || '').trim();
-            const partesIdentificacao = dadosIdentificacaoTexto.split('|').map((item) => item.trim()).filter(Boolean);
-            const cpfSeparado = partesIdentificacao.find((item) => /^(\d{3}\.?\d{3}\.?\d{3}\-?\d{2})$/i.test(item));
-            const rgSeparado = partesIdentificacao.find((item) => /^(rg\s*:?\s*)?[\d.\-xX]{5,15}$/i.test(item) && item !== cpfSeparado);
-            const nomeMaeSeparado = partesIdentificacao.find((item) => /^(m[ãa]e|nome da m[ãa]e|genitora)\s*:/i.test(item));
-            const dataNascimentoSeparada = partesIdentificacao.find((item) => /^(\d{2}\/\d{2}\/\d{4})$/i.test(item));
+            const identificacaoExtraida = extrairIdentificacaoQuestionario_(dadosIdentificacaoTexto);
+            const camposQuestionarioMapeados = [];
+            const perguntasSemDestinoSeguro = [];
+            const valorQ7 = (document.getElementById('q7').value || '').trim();
             const camposEditados = {
                 ...casoOriginal,
                 idCaso: (document.getElementById('hidden-idCaso').value || filtro.idCaso || casoOriginal.idCaso || '').trim(),
                 talaoPMESP: document.getElementById('talao').value,
                 talaoBopm: document.getElementById('talao').value,
                 nomeCompletoDesaparecido: document.getElementById('q1').value,
-                cpf: cpfSeparado ? cpfSeparado.replace(/[^\d.\-]/g, '') : (casoOriginal.cpf || ''),
-                rg: rgSeparado ? rgSeparado.replace(/rg\s*:?\s*/i, '').trim() : (casoOriginal.rg || ''),
-                nomeMae: nomeMaeSeparado ? nomeMaeSeparado.replace(/^(m[ãa]e|nome da m[ãa]e|genitora)\s*:\s*/i, '').trim() : (casoOriginal.nomeMae || ''),
-                dataNascimento: dataNascimentoSeparada || casoOriginal.dataNascimento || '',
+                sexoGenero: document.getElementById('q2').value,
+                idade: document.getElementById('q3').value,
+                meioTransporte: document.getElementById('q5').value,
+                dadosVeiculo: document.getElementById('q6').value,
+                dataHoraUltimaVisualizacao: document.getElementById('q8').value,
+                localUltimaVisualizacao: document.getElementById('q9').value,
+                arv_p1_nome_resp: document.getElementById('q1').value,
+                arv_p1_sexo_resp: document.getElementById('q2').value,
+                arv_p1_idade_resp: document.getElementById('q3').value,
+                arv_p1_dados_identificacao_resp: dadosIdentificacaoTexto,
+                arv_p2_meio_transporte_resp: document.getElementById('q5').value,
+                arv_p2_dados_veiculo_resp: document.getElementById('q6').value,
+                arv_p2_data_hora_ultima_resp: document.getElementById('q8').value,
+                arv_p2_local_ultima_resp: document.getElementById('q9').value,
                 dadosIdentificacao: dadosIdentificacaoTexto,
                 municipio: document.getElementById('q_municipio').value,
                 observacoesOperacionais: document.getElementById('cv_obs').value,
@@ -833,6 +882,22 @@
                 resultadoFinalAuditoria: Object.keys(inconsistenciasPorCampo).length ? 'Pendências identificadas na auditoria de campos.' : 'Caso conferido sem inconsistências registradas.',
                 modo: 'edicao'
             };
+            if (identificacaoExtraida.cpf) camposEditados.cpf = identificacaoExtraida.cpf;
+            if (identificacaoExtraida.rg) camposEditados.rg = identificacaoExtraida.rg;
+            if (identificacaoExtraida.nomeMae) camposEditados.nomeMae = identificacaoExtraida.nomeMae;
+            if (identificacaoExtraida.dataNascimento) camposEditados.dataNascimento = identificacaoExtraida.dataNascimento;
+            if (valorQ7) {
+                camposEditados.observacoesOperacionais = [camposEditados.observacoesOperacionais, `Características físicas (auditoria): ${valorQ7}`].filter(Boolean).join(' | ');
+            } else {
+                perguntasSemDestinoSeguro.push('q7');
+            }
+            Object.keys(MAPEAMENTO_PERGUNTAS_CASOS).forEach((pergunta) => {
+                const valor = (document.getElementById(pergunta)?.value || '').toString().trim();
+                if (!valor && pergunta !== 'q7') return;
+                (MAPEAMENTO_PERGUNTAS_CASOS[pergunta] || []).forEach((coluna) => camposQuestionarioMapeados.push(`${pergunta}->${coluna}`));
+            });
+            camposEditados.camposQuestionarioMapeados = Array.from(new Set(camposQuestionarioMapeados));
+            camposEditados.perguntasSemDestinoSeguro = Array.from(new Set(perguntasSemDestinoSeguro));
             const casoAtualizado = { ...casoOriginal, ...camposEditados };
             if (!casoAtualizado.idCaso) {
                 throw new Error('Não foi possível salvar: ID do caso não identificado para atualização na aba CASOS.');
