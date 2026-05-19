@@ -726,8 +726,7 @@ function doPost(e) {
       return jsonResponse_(testarSalvarCasoPayloadMinimo181());
     }
     if (action === 'salvarAuditoriaCaso') {
-      body.action = 'salvarCaso';
-      action = 'salvarCaso';
+      return criarRespostaJson(salvarAuditoriaCaso_(body, operadorAtual));
     }
 
     if (action === 'salvarCaso') {
@@ -849,11 +848,6 @@ function doPost(e) {
     if (action === 'gerarRelatorioDuplicadosCasos') return criarRespostaJson({ ok: true, data: gerarRelatorioDuplicadosCasos_() });
 
     var planilha = SpreadsheetApp.getActiveSpreadsheet();
-    if (action === 'salvarAuditoriaCaso') {
-      body.action = 'salvarCaso';
-      action = 'salvarCaso';
-    }
-
     if (action === 'salvarCaso') {
       var schemaSalvarCaso = obterSchemaCabineVerdeUnificado_();
       var colunasCasosSalvar = Array.isArray(body.colunas) && body.colunas.length ? body.colunas : schemaSalvarCaso.CASOS;
@@ -945,6 +939,95 @@ function doPost(e) {
     var actionErro = ''; try { actionErro = limparTexto(parsePayload(e).action); } catch (_e) {}
     return criarRespostaJson({ ok: false, status: 'erro', codigo: codigoErro || 'ERRO_GRAVACAO_PLANILHA', erro: mensagemErro, mensagem: mensagemErro, detalhe: 'Falha no processamento da action ' + actionErro }, 500);
   }
+}
+
+function salvarAuditoriaCaso_(body, operadorAtual) {
+  var planilha = SpreadsheetApp.getActiveSpreadsheet();
+  var abaCasos = planilha.getSheetByName('CASOS');
+  if (!abaCasos) return { ok: false, codigo: 'ABA_CASOS_NAO_ENCONTRADA', erro: 'Aba CASOS não encontrada.' };
+
+  var caso = (body && (body.caso || body.dados || body.payload)) || {};
+  if (typeof caso !== 'object' || caso === null) caso = {};
+  caso = normalizarTalaoPayload(caso);
+
+  var idCaso = limparTexto(body.idCaso || caso.idCaso || caso.id);
+  var talaoBopm = limparTexto(caso.talaoBopm || caso.talaoPMESP || caso.numeroTalao || caso.talao);
+  var talaoPMESP = limparTexto(caso.talaoPMESP || caso.talaoBopm || caso.numeroTalao || caso.talao);
+  var numeroTalao = limparTexto(caso.numeroTalao || caso.talaoPMESP || caso.talaoBopm || caso.talao);
+  var assinaturaCaso = limparTexto(caso.assinaturaCaso);
+  var nomeCompletoDesaparecido = limparTexto(caso.nomeCompletoDesaparecido);
+  var telefoneSolicitante = limparTexto(caso.telefoneSolicitante);
+  var temFallbackNomeTelefone = !!(nomeCompletoDesaparecido && telefoneSolicitante);
+  if (!idCaso && !talaoBopm && !talaoPMESP && !numeroTalao && !assinaturaCaso && !temFallbackNomeTelefone) {
+    return { ok: false, codigo: 'CHAVE_CASO_AUDITORIA_NAO_INFORMADA', erro: 'Não foi possível identificar o caso para atualização na aba CASOS.' };
+  }
+
+  var headers = abaCasos.getRange(1, 1, 1, Math.max(abaCasos.getLastColumn(), 1)).getValues()[0];
+  var auditoriaCols = ['operadorUltimaAlteracaoAuditoria', 'emailOperadorUltimaAlteracaoAuditoria', 'perfilOperadorUltimaAlteracaoAuditoria', 'dataHoraUltimaAlteracaoAuditoria'];
+  for (var c = 0; c < auditoriaCols.length; c += 1) {
+    if (headers.indexOf(auditoriaCols[c]) === -1) {
+      headers.push(auditoriaCols[c]);
+      abaCasos.getRange(1, headers.length).setValue(auditoriaCols[c]);
+    }
+  }
+  headers = abaCasos.getRange(1, 1, 1, abaCasos.getLastColumn()).getValues()[0];
+  var idx = {};
+  headers.forEach(function (h, i) { idx[limparTexto(h)] = i; });
+
+  var ultimaLinha = abaCasos.getLastRow();
+  if (ultimaLinha < 2) return { ok: false, codigo: 'CASO_NAO_ENCONTRADO_EM_CASOS', erro: 'Caso não encontrado na aba CASOS para atualização da auditoria.' };
+  var matriz = abaCasos.getRange(2, 1, ultimaLinha - 1, headers.length).getValues();
+
+  function valorLinha(linha, chave) {
+    var pos = idx[chave];
+    return pos === undefined ? '' : limparTexto(linha[pos]);
+  }
+  function acharLinha(predicate) {
+    for (var i = 0; i < matriz.length; i += 1) if (predicate(matriz[i])) return i + 2;
+    return -1;
+  }
+
+  var linhaCaso = -1;
+  if (idCaso) linhaCaso = acharLinha(function (r) { return valorLinha(r, 'idCaso') === idCaso; });
+  if (linhaCaso < 0 && talaoBopm) linhaCaso = acharLinha(function (r) { return valorLinha(r, 'talaoBopm') === talaoBopm; });
+  if (linhaCaso < 0 && talaoPMESP) linhaCaso = acharLinha(function (r) { return valorLinha(r, 'talaoPMESP') === talaoPMESP; });
+  if (linhaCaso < 0 && numeroTalao) linhaCaso = acharLinha(function (r) { return valorLinha(r, 'numeroTalao') === numeroTalao; });
+  if (linhaCaso < 0 && assinaturaCaso) linhaCaso = acharLinha(function (r) { return valorLinha(r, 'assinaturaCaso') === assinaturaCaso; });
+  if (linhaCaso < 0 && temFallbackNomeTelefone) {
+    linhaCaso = acharLinha(function (r) {
+      return valorLinha(r, 'nomeCompletoDesaparecido') === nomeCompletoDesaparecido && valorLinha(r, 'telefoneSolicitante') === telefoneSolicitante;
+    });
+  }
+  if (linhaCaso < 0) return { ok: false, codigo: 'CASO_NAO_ENCONTRADO_EM_CASOS', erro: 'Caso não encontrado na aba CASOS para atualização da auditoria.' };
+
+  var linhaAtual = abaCasos.getRange(linhaCaso, 1, 1, headers.length).getValues()[0];
+  Object.keys(caso).forEach(function (k) {
+    var pos = idx[k];
+    if (pos === undefined) return;
+    var v = caso[k];
+    if (v === '' || v === null || v === undefined) return;
+    linhaAtual[pos] = v;
+  });
+
+  var operadorNome = limparTexto(body.operadorNome || (operadorAtual && operadorAtual.nome));
+  var operadorEmail = limparTexto(body.operadorEmail || (operadorAtual && operadorAtual.email));
+  var operadorPerfil = limparTexto(body.operadorPerfil || (operadorAtual && operadorAtual.perfil));
+  linhaAtual[idx.operadorUltimaAlteracaoAuditoria] = operadorNome || operadorEmail || 'OPERADOR_NAO_IDENTIFICADO';
+  linhaAtual[idx.emailOperadorUltimaAlteracaoAuditoria] = operadorEmail || '';
+  linhaAtual[idx.perfilOperadorUltimaAlteracaoAuditoria] = operadorPerfil || '';
+  linhaAtual[idx.dataHoraUltimaAlteracaoAuditoria] = new Date();
+  abaCasos.getRange(linhaCaso, 1, 1, headers.length).setValues([linhaAtual]);
+
+  return {
+    ok: true,
+    action: 'salvarAuditoriaCaso',
+    destino: 'CASOS',
+    codigo: 'AUDITORIA_CASO_ATUALIZADA_EM_CASOS',
+    mensagem: 'Caso atualizado com sucesso na aba CASOS.',
+    idCaso: idCaso || limparTexto(caso.idCaso || caso.id),
+    linha: linhaCaso,
+    operadorUltimaAlteracaoAuditoria: linhaAtual[idx.operadorUltimaAlteracaoAuditoria]
+  };
 }
 
 function atualizarFotoCaso_(payload) {
