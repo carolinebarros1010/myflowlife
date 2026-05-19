@@ -786,6 +786,7 @@
 
         async function enviarAuditoriaParaBackend() {
             const filtro = obterFiltroAuditoriaUrl();
+            const auth = obterContextoAutenticacao();
             const inconsistenciasPorCampo = {};
             document.querySelectorAll('[data-auditoria-status]').forEach((el) => {
                 const chave = el.getAttribute('data-auditoria-status');
@@ -797,7 +798,7 @@
                 }
             });
             const casoOriginal = { ...(window.casoAtualAuditoria || casoAtualAuditoria || {}) };
-            const payload = {
+            const camposEditados = {
                 ...casoOriginal,
                 idCaso: (document.getElementById('hidden-idCaso').value || filtro.idCaso || casoOriginal.idCaso || '').trim(),
                 talaoPMESP: document.getElementById('talao').value,
@@ -819,10 +820,38 @@
                 resultadoFinalAuditoria: Object.keys(inconsistenciasPorCampo).length ? 'Pendências identificadas na auditoria de campos.' : 'Caso conferido sem inconsistências registradas.',
                 modo: 'edicao'
             };
-            if (!payload.nomeAbaTalao190 && !payload.abaOrigem && !payload.dataServico && !payload.dataHoraRegistro) {
-                throw new Error('Não foi possível salvar: a auditoria não possui data de serviço ou referência da aba diária do Talão 190.');
+            const casoAtualizado = { ...casoOriginal, ...camposEditados };
+            if (!casoAtualizado.idCaso) {
+                throw new Error('Não foi possível salvar: ID do caso não identificado para atualização na aba CASOS.');
             }
-            const { resposta, body } = await chamarBackendAuditoria('salvarAuditoriaCaso', { payload: payload, dados: payload });
+            if (!auth.operadorNome && !auth.operadorEmail) {
+                throw new Error('Não foi possível salvar: operador não identificado.');
+            }
+            if (!Object.keys(casoAtualizado).length) {
+                throw new Error('Não foi possível salvar: dados do caso não informados.');
+            }
+            const requestAuditoria = {
+                action: 'salvarAuditoriaCaso',
+                modo: 'edicao',
+                destino: 'CASOS',
+                idCaso: casoAtualizado.idCaso,
+                caso: casoAtualizado,
+                dados: casoAtualizado,
+                operadorNome: auth.operadorNome || '',
+                operadorEmail: auth.operadorEmail || '',
+                operadorPerfil: auth.operadorPerfil || ''
+            };
+            console.info('[AUDITORIA] Request backend', {
+                action: requestAuditoria.action,
+                destino: requestAuditoria.destino,
+                possuiIdCaso: !!requestAuditoria.idCaso,
+                idCaso: requestAuditoria.idCaso,
+                possuiCaso: !!requestAuditoria.caso,
+                quantidadeCamposCaso: Object.keys(requestAuditoria.caso || {}).length,
+                operadorNome: requestAuditoria.operadorNome,
+                operadorEmail: requestAuditoria.operadorEmail
+            });
+            const { resposta, body } = await chamarBackendAuditoria('salvarAuditoriaCaso', requestAuditoria);
             if (!resposta.ok || !body.ok) throw new Error(body.erro || 'Falha no salvamento de auditoria.');
         }
 
