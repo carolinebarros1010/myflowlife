@@ -1,0 +1,30 @@
+[
+  {
+    "title": "RevenueCat alignment audit",
+    "notes": "Conferir produtos, entitlements e paywalls ativos antes do ciclo de release.",
+    "date": "2026-05-25",
+    "start": "08:30",
+    "end": "09:15"
+  },
+  {
+    "title": "Capacitor sync pipeline",
+    "notes": "Validar build web, sync nativo e checkpoints de assets Android/iOS.",
+    "date": "2026-05-25",
+    "start": "09:30",
+    "end": "10:30"
+  },
+  {
+    "title": "Android launchMode review",
+    "notes": "Revisar configuracao de launchMode e comportamento de retorno ao app.",
+    "date": "2026-05-26",
+    "start": "08:30",
+    "end": "09:15"
+  },
+  {
+    "title": "Auditoria PWA iOS/WebKit",
+    "notes": "Checar instalacao, cache, navegacao standalone e limitacoes WebKit relevantes.",
+    "date": "2026-05-27",
+    "start": "08:30",
+    "end": "09:30"
+  }
+]
