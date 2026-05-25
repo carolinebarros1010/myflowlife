@@ -3,3 +3,5 @@ tools/femflow-ops/token.json
 tools/femflow-ops/tasks.json
 tools/femflow-ops/.venv/
 tools/femflow-ops/apply_tasks.local.bat
+tools/femflow-ops/.env
+tools/femflow-ops/pedido.txt
