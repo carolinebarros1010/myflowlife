@@ -117,3 +117,44 @@ Importante:
 - `create_plan.py` so deve ser executado contra Google no servidor fixo/local autorizado.
 - Em ambiente online, use apenas validacao estaticas como `python -m py_compile`.
 - `generate_tasks.py` apenas gera JSON e nao chama publicacao no Google.
+
+## Aplicar plano ja validado
+
+Use este fluxo quando voce ja possui um `tasks.json` revisado e quer aplicar com seguranca, com validacao previa e confirmacao humana explicita.
+
+### Fluxo A — vindo de chat comum
+
+1. ChatGPT organiza processo complexo e entrega JSON.
+2. Usuario cola o conteudo em `tools/femflow-ops/tasks.json` local.
+3. Usuario roda `validate_tasks.py`.
+4. Usuario roda `create_plan.py --dry-run`.
+5. Usuario aplica somente apos confirmacao explicita.
+
+### Fluxo B — vindo de generate_tasks.py
+
+1. Usuario escreve `pedido.txt` local.
+2. Usuario roda `generate_tasks.py` para gerar `tasks.json`.
+3. Usuario valida `tasks.json` com `validate_tasks.py`.
+4. Usuario roda `create_plan.py --dry-run`.
+5. Usuario aplica somente apos confirmacao explicita.
+
+### Comandos Windows
+
+```powershell
+cd tools\femflow-ops
+.\.venv\Scripts\activate
+
+python validate_tasks.py --tasks-file tasks.json
+python create_plan.py --dry-run --tasks-file tasks.json --prefix "[FemFlow Ops]"
+python create_plan.py --clear-week --tasks-file tasks.json --prefix "[FemFlow Ops]"
+
+copy apply_validated_plan.example.bat apply_validated_plan.local.bat
+.\apply_validated_plan.local.bat
+```
+
+### Regras de seguranca operacional
+
+- Publicacao real no Google Calendar/Tasks so deve acontecer no servidor fixo/local autorizado.
+- Em ambiente online, usar apenas `py_compile` e validacoes que nao chamem Google.
+- Nunca versionar `credentials.json`, `token.json`, `tasks.json`, `.env`, `pedido.txt` ou `.venv`.
+- O arquivo `apply_validated_plan.local.bat` e local e deve permanecer ignorado no git.
