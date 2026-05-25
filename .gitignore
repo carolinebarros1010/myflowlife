@@ -5,3 +5,4 @@ tools/femflow-ops/.venv/
 tools/femflow-ops/apply_tasks.local.bat
 tools/femflow-ops/.env
 tools/femflow-ops/pedido.txt
+tools/femflow-ops/apply_validated_plan.local.bat

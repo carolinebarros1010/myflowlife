@@ -67,3 +67,31 @@ Prepare uma sprint de auditoria PWA para iOS/WebKit, cache, manifest, service wo
 ```text
 Gere tools/femflow-ops/tasks.json a partir de um pedido em linguagem natural, respeitando janela diaria e sem executar create_plan.py. Retorne somente JSON valido compativel com create_plan.py.
 ```
+
+## Prompt para ChatGPT gerar tasks.json validado
+
+```text
+Gere um tasks.json compativel com create_plan.py.
+
+Regras obrigatorias:
+- Retorne somente JSON valido (sem markdown, sem comentarios, sem texto extra).
+- Estruture um array de tarefas com os campos: title, notes, date, start, end, priority, phase.
+- Divida o processo complexo por datas, dias e horarios.
+- Respeite a janela diaria informada.
+- Nao sobreponha horarios no mesmo dia.
+- Priorize tarefas P0 antes de P1/P2.
+- Use date no formato YYYY-MM-DD e start/end no formato HH:MM.
+
+Formato obrigatorio de notes em cada tarefa:
+Objetivo:
+Subtarefas:
+Validacao:
+Criterio de conclusao:
+Risco:
+```
+
+## Prompt para Codex local executar plano validado
+
+```text
+Existe um tasks.json local ja revisado em tools/femflow-ops/tasks.json. Execute o fluxo seguro: validate_tasks.py, create_plan.py --dry-run e depois apply_validated_plan.local.bat. Nao altere codigo, nao mexa em credenciais e so aplique se houver confirmacao humana no terminal.
+```
