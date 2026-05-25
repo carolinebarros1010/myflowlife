@@ -1,0 +1,1 @@
+Organize o processo completo de estabilizacao do FemFlow em 3 dias, de segunda a quarta, das 08h30 as 11h30, priorizando RevenueCat, Capacitor sync, PWA iOS, release Android e observabilidade.

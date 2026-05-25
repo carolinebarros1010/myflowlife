@@ -90,3 +90,30 @@ Atualize tools/femflow-ops/tasks.json com minha semana FemFlow de segunda a quar
 ```
 
 Veja `PROMPTS.md` para prompts prontos.
+
+## Gerar tarefas por prompt
+
+Fluxo seguro para ambiente online/local (sem publicar no Google):
+
+1. Criar `pedido.txt` local a partir de `pedido.example.txt`.
+2. Criar `.env` local a partir de `.env.example`.
+3. Configurar `OPENAI_API_KEY` no `.env` local.
+4. Rodar `generate_tasks.py` para gerar `tasks.json`.
+5. Revisar o `tasks.json` gerado.
+6. Rodar `create_plan.py` em modo `--dry-run`.
+7. Aplicar no Google apenas no servidor fixo/local autorizado.
+
+Comandos Windows:
+
+```powershell
+cd tools\femflow-ops
+.\.venv\Scripts\activate
+python generate_tasks.py --prompt-file pedido.txt --output tasks.json --start-date 2026-05-25 --days 3 --start-time 08:30 --end-time 11:30 --slot-minutes 60
+python create_plan.py --dry-run --tasks-file tasks.json --prefix "[FemFlow Ops]"
+python create_plan.py --clear-week --tasks-file tasks.json --prefix "[FemFlow Ops]"
+```
+
+Importante:
+- `create_plan.py` so deve ser executado contra Google no servidor fixo/local autorizado.
+- Em ambiente online, use apenas validacao estaticas como `python -m py_compile`.
+- `generate_tasks.py` apenas gera JSON e nao chama publicacao no Google.
