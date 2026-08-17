@@ -9,3 +9,5 @@ A auditoria permite registrar o desfecho do caso sem apagar os dados legados:
 - justificativa obrigatória, com valores anterior e novo preservados em `auditoria_local`.
 
 O Dashboard considera como pessoa localizada somente um resultado positivo, status de localização/encerramento ou data de localização válida.
+
+Na auditoria também são atualizados: status da vítima, condição, desfecho, encaminhamento e recurso principal, incluindo viatura, familiares, outros órgãos, videomonitoramento e reconhecimento facial.
