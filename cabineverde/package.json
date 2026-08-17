@@ -5,6 +5,21 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests-js/*.test.js",
-    "dev": "python3 -m http.server 4173 -d ."
-  }
+    "dev": "python3 -m http.server 4173 -d .",
+    "migrate:legacy": "python tools/migrate-legacy-to-sqlite.py",
+    "dev:local": "concurrently \"vite --config vite.config.ts\" \"wait-on http://localhost:5173 && electron electron/main.cjs\"",
+    "build": "vite build --config vite.config.ts",
+    "start:local": "electron electron/main.cjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "better-sqlite3": "latest",
+    "concurrently": "latest",
+    "electron": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "vite": "latest",
+    "wait-on": "latest"
+  },
+  "devDependencies": {}
 }

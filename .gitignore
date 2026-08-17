@@ -6,3 +6,9 @@ tools/femflow-ops/apply_tasks.local.bat
 tools/femflow-ops/.env
 tools/femflow-ops/pedido.txt
 tools/femflow-ops/apply_validated_plan.local.bat
+
+# Dados operacionais locais da Cabine Verde (contêm dados pessoais/sensíveis)
+cabineverde/data/
+cabineverde/fotos/
+cabineverde/node_modules/
+cabineverde/dist-local/
