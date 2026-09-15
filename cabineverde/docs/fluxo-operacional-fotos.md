@@ -68,3 +68,15 @@ Para `RESTRITO` e `SIGILOSO`, a justificativa só é aceita quando:
 
 Quando inválida, o acesso é bloqueado com a mensagem:
 `Justificativa inválida. Descreva o motivo da visualização.`
+
+## Organização física por metadados operacionais
+
+Fotos novas gravadas pela aplicação são organizadas em uma pasta descritiva formada por:
+
+`DATA_DO_TALÃO_NÚMERO_DO_TALÃO_NOME_DA_VÍTIMA`
+
+O arquivo também recebe esse prefixo, seguido de um timestamp para evitar colisões. O `idCaso` não é usado como nome da pasta ou do arquivo; permanece apenas no banco de dados e no arquivo `.meta.json` para vínculo interno, auditoria e consulta. Fotos legadas em pastas `NOVO-*` ou `IMPORT-*` não são renomeadas automaticamente.
+
+Antes de gravar uma foto, a aplicação consolida o nome da identificação do atendimento, o nome respondido na entrevista e o nome já persistido no caso. Assim, uma edição que não informe um novo nome preserva o nome anterior e não grava a foto como `Sem nome`.
+
+Na consulta de imagens, o nome, talão e data dos metadados da foto têm prioridade sobre os campos resumidos do caso. Isso mantém a identificação correta mesmo quando o cadastro do caso ainda não foi sincronizado.

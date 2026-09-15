@@ -1,0 +1,13 @@
+.consulta-completa { margin-top: 24px; overflow-wrap: anywhere; }
+.consulta-completa-acoes { display: flex; gap: 12px; flex-wrap: wrap; }
+.consulta-completa dl { margin: 8px 0; }
+.consulta-completa dl > div { padding: 8px 12px; border-left: 2px solid #ccd7d0; margin: 8px 0; }
+.consulta-completa dt { font-weight: 700; }
+.consulta-completa dd { margin: 4px 0 0; white-space: pre-wrap; }
+@media print {
+  body * { visibility: hidden; }
+  .consulta-completa, .consulta-completa * { visibility: visible; }
+  .consulta-completa { position: absolute; inset: 0; background: white; color: black; width: 100%; margin: 0; padding: 0; box-shadow: none; border: 0; }
+  .consulta-completa-acoes { display: none; }
+  .consulta-completa dl > div { break-inside: auto; }
+}

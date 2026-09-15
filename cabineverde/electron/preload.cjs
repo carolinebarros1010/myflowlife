@@ -1,18 +1,42 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('cabineVerdeLocal', {
+  configuracao: () => ipcRenderer.invoke('cv:configuracao'),
+  salvarConfiguracao: (dados) => ipcRenderer.invoke('cv:salvar-configuracao', dados),
+  testarServidor: (dados) => ipcRenderer.invoke('cv:testar-servidor', dados),
   listarOperadores: () => ipcRenderer.invoke('cv:operadores'),
   registrarOperador: (dados) => ipcRenderer.invoke('cv:registrar-operador', dados),
   entrarOperador: (email) => ipcRenderer.invoke('cv:entrar-operador', email),
-  dashboard: () => ipcRenderer.invoke('cv:dashboard'),
+  dashboard: (filtro) => ipcRenderer.invoke('cv:dashboard', filtro),
+  copiarPainel: (retangulo) => ipcRenderer.invoke('cv:copiar-painel', retangulo),
+  copiarImagem: (dataUrl) => ipcRenderer.invoke('cv:copiar-imagem', dataUrl),
   listarCasos: (termo) => ipcRenderer.invoke('cv:casos', termo),
   carregarCaso: (idCaso) => ipcRenderer.invoke('cv:caso', idCaso),
+  listarVitimasCaso: (idCaso) => ipcRenderer.invoke('cv:vitimas-caso', idCaso),
+  adicionarVitima: (dados) => ipcRenderer.invoke('cv:adicionar-vitima', dados),
+  salvarVitima: (dados) => ipcRenderer.invoke('cv:salvar-vitima', dados),
   listarFotos: (idCaso) => ipcRenderer.invoke('cv:fotos', idCaso),
-  adicionarFoto: (idCaso) => ipcRenderer.invoke('cv:adicionar-foto', idCaso),
+  buscarFotos: (termo) => ipcRenderer.invoke('cv:buscar-fotos', termo),
+  selecionarImagemConfronto: () => ipcRenderer.invoke('cv:selecionar-imagem-confronto'),
+  obterCaminhoArquivoArrastado: (arquivo) => webUtils.getPathForFile(arquivo),
+  confrontarImagem: (caminho, limiar) => ipcRenderer.invoke('cv:confrontar-imagem', caminho, limiar),
+  abrirFoto: (caminho) => ipcRenderer.invoke('cv:abrir-foto', caminho),
+  adicionarFoto: (idCaso, metadados) => ipcRenderer.invoke('cv:adicionar-foto', idCaso, metadados),
   registrarConsentimentoFoto: (dados) => ipcRenderer.invoke('cv:registrar-consentimento-foto', dados),
   auditoria: () => ipcRenderer.invoke('cv:auditoria')
   ,listarAuditoriaCasos: (termo) => ipcRenderer.invoke('cv:auditoria-casos', termo),
   historicoCaso: (idCaso) => ipcRenderer.invoke('cv:historico-caso', idCaso),
   corrigirCaso: (dados) => ipcRenderer.invoke('cv:corrigir-caso', dados)
   ,salvarDesfechoOperacional: (dados) => ipcRenderer.invoke('cv:salvar-desfecho-operacional', dados)
+  ,salvarPainelArvore: (dados) => ipcRenderer.invoke('cv:salvar-painel-arvore', dados)
+  ,buscarPessoasF2: (dados) => ipcRenderer.invoke('cv:buscar-pessoas-f2', dados)
+  ,criarPessoaF2: (dados) => ipcRenderer.invoke('cv:criar-pessoa-f2', dados)
+  ,listarAnalisesF2: (idPessoa) => ipcRenderer.invoke('cv:analises-f2', idPessoa)
+  ,criarAnaliseF2: (dados) => ipcRenderer.invoke('cv:criar-analise-f2', dados)
+  ,listarEventosF2: (idPessoa) => ipcRenderer.invoke('cv:eventos-f2', idPessoa)
+  ,criarQualificacaoF2: (dados) => ipcRenderer.invoke('cv:criar-qualificacao-f2', dados)
+  ,criarPistaF2: (dados) => ipcRenderer.invoke('cv:criar-pista-f2', dados)
+  ,listarProducaoDiaria: (filtro) => ipcRenderer.invoke('cv:listar-producao-diaria', filtro)
+  ,salvarProducaoDiaria: (dados) => ipcRenderer.invoke('cv:salvar-producao-diaria', dados)
+  ,listarProducaoConsolidada: (filtro) => ipcRenderer.invoke('cv:listar-producao-consolidada', filtro)
 });

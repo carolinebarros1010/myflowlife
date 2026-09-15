@@ -52,3 +52,12 @@ Esse padrão reduz estado espalhado no `app.ts` e melhora rastreabilidade de com
 
 ## Evolução futura
 Permite evolução para sincronização de rascunho por backend/GAS, autenticação de operador e trilha de auditoria persistente em planilha sem quebra do núcleo funcional.
+
+## Configuração de rede do servidor local
+
+O servidor local (`server/server.py`) usa HTTP/1.1 com keep-alive e fila de até 64 conexões, reduzindo o custo de abrir uma conexão para cada consulta do painel. Respostas JSON maiores que 1 KiB são compactadas com gzip quando o cliente anuncia suporte; endpoints operacionais continuam com `Cache-Control: no-store` para evitar dados desatualizados.
+
+Variáveis opcionais:
+
+- `CABINE_VERDE_PORT`: porta de escuta; padrão `80`.
+- `CABINE_VERDE_SOCKET_TIMEOUT`: tempo limite de uma conexão em segundos; padrão `30`.

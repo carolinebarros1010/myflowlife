@@ -1,0 +1,32 @@
+PACOTE SERVIDOR CENTRAL CABINE VERDE — 01/09/2026
+
+Este pacote deve ser levado ao servidor e aplicado somente depois de interromper
+o server.py atual.
+
+1) CÓDIGO DO SERVIDOR
+Copie os arquivos da pasta DESPACHADOR para a pasta de código do servidor:
+- server.py
+- storage_repository.py
+- search_methodology.py
+- iniciar-servidor-pc01.ps1
+- testar-backend-pc01.ps1
+
+2) BASE JSON ATUALIZADA
+Faça backup da pasta de dados atual e copie o conteúdo da pasta Base-JSON-Atualizacao\dados
+para a pasta dados da base operacional do servidor.
+
+Arquivos incluídos: casos.json, pessoas.json, vitimas.json, eventos.json,
+analises-f2.json, historicos-v7.json, producao-diaria.json, metadados.json,
+além dos arquivos de consulta da produção consolidada.
+
+3) INICIALIZAÇÃO
+Execute iniciar-servidor-pc01.ps1. O script usa D:\CabineVerde quando essa base existir.
+Na homologação, usa C:\Users\Ricardo Junior\Desktop\CabineVerde.
+
+4) CONFERÊNCIA
+Teste /api/status, /api/indicadores, busca de talão, auditoria e análise.
+
+IMPORTANTE
+Este servidor trabalha com JSON. Não copie cabine-verde.sqlite para a base central.
+Mantenha fotos, documentos, logs e backups existentes; eles não fazem parte desta
+substituição de dados JSON.

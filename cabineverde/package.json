@@ -1,25 +1,91 @@
 {
   "name": "cabineverde",
-  "version": "0.1.0",
+  "version": "0.2.5",
   "private": true,
+  "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
     "test": "node --test tests-js/*.test.js",
+    "test:server": "python -m unittest server.test_vertical_slice server.test_search_methodology -v",
     "dev": "python3 -m http.server 4173 -d .",
     "migrate:legacy": "python tools/migrate-legacy-to-sqlite.py",
     "dev:local": "concurrently \"vite --config vite.config.ts\" \"wait-on http://localhost:5173 && electron electron/main.cjs\"",
     "build": "vite build --config vite.config.ts",
-    "start:local": "electron electron/main.cjs"
+    "start:local": "electron electron/main.cjs",
+    "pack:win": "npm run build && electron-builder --win nsis"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
     "better-sqlite3": "latest",
     "concurrently": "latest",
-    "electron": "latest",
+    "html2canvas": "^1.4.1",
     "react": "latest",
     "react-dom": "latest",
     "vite": "latest",
     "wait-on": "latest"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "electron": "latest",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "br.gov.sp.pmesp.cabineverde",
+    "productName": "Cabine Verde",
+    "artifactName": "Cabine-Verde-Setup-${version}.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "npmRebuild": false,
+    "files": [
+      "dist-local/**/*",
+      "electron/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "data",
+        "to": "data"
+      },
+      {
+        "from": "dados/consulta",
+        "to": "dados/consulta"
+      },
+      {
+        "from": "tools",
+        "to": "tools"
+      },
+      {
+        "from": "motor-facial",
+        "to": "motor-facial"
+      },
+      {
+        "from": "server",
+        "to": "server",
+        "filter": [
+          "server.py",
+          "storage_repository.py",
+          "search_methodology.py"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Cabine Verde"
+    }
+  }
 }

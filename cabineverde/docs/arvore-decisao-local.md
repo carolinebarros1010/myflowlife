@@ -32,14 +32,19 @@ Após as perguntas e o subfluxo etário, a etapa final permite inserir a imagem 
 
 O botão **Novo caso** inicia um atendimento em branco e conduz o operador nesta ordem:
 
-1. **P0 — Caracterização inicial do risco**;
-2. **P1 — Idade da pessoa desaparecida**, que seleciona o subfluxo correto;
-3. **P2 — Vulnerabilidade**;
-4. **P3 — Identificação, características e contexto**;
-5. **P4 — Buscas preliminares e meios disponíveis**;
-6. subfluxo específico de criança, pré-adolescente, adolescente, adulto ou idoso.
+1. **Entrevista inicial — localização imediata**, com perguntas essenciais de identificação, última visualização, vestimenta, deslocamento e riscos urgentes;
+2. **Entrevista qualificada**, com os painéis completos de identificação, vulnerabilidade, saúde, contexto, buscas, contatos e acionamentos;
+3. subfluxo específico de criança, pré-adolescente, adolescente, adulto ou idoso, quando aplicável.
+
+A entrevista inicial fica destacada visualmente e pode ser salva de forma independente. A busca não deve aguardar o preenchimento da entrevista qualificada. A etapa qualificada serve para aprofundar a investigação, registrar informações complementares e apoiar revisões posteriores do caso.
 
 As perguntas e os cálculos de risco continuam reutilizando as regras do legado.
+
+## Autopreenchimento entre etapas
+
+As respostas informadas na análise F2, na entrevista inicial ou na entrevista qualificada são registradas em uma camada unificada no armazenamento local. O mesmo valor é associado ao ID da pergunta, aos nomes canônicos do caso e aos campos legados equivalentes.
+
+Assim, informações como idade, município, nome, documentos, telefone, endereço, características, última visualização, vestimenta, meio de transporte e riscos urgentes reaparecem automaticamente nas demais etapas. O operador pode revisar e substituir o valor quando houver informação mais recente.
 
 ## Auditoria e correção
 

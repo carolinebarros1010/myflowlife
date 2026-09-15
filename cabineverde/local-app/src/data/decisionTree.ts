@@ -17,7 +17,7 @@ export const perguntasMestre: PerguntaMestre[] = [
     "blocoTitulo": "Identificação",
     "id": "p2",
     "pergunta": "Em qual município ocorreu o desaparecimento?",
-    "tipo": "simNao",
+    "tipo": "texto",
     "complemento": true
   },
   {
@@ -2796,4 +2796,3 @@ export const blocosMestre = [
     "fim": 300
   }
 ];
-

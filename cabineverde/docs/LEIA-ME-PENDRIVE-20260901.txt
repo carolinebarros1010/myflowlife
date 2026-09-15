@@ -1,0 +1,25 @@
+PACOTE CABINE VERDE — SERVIDOR — 01/09/2026
+
+1) INSTALAÇÃO
+Execute Cabine-Verde-Setup-0.2.4.exe no servidor e conclua o instalador.
+
+2) ATUALIZAÇÃO DA BASE
+Feche o aplicativo antes de copiar os arquivos.
+Faça backup de:
+%APPDATA%\Cabine Verde\dados\cabine-verde.sqlite
+
+Depois substitua os arquivos do servidor pelos arquivos da pasta Atualizacao-Servidor-20260901:
+
+dados\cabine-verde.sqlite
+dados\consulta\producao-consolidada\producao-consolidada.json
+
+Destinos:
+%APPDATA%\Cabine Verde\dados\cabine-verde.sqlite
+%APPDATA%\Cabine Verde\dados\consulta\producao-consolidada\producao-consolidada.json
+
+3) CONFERÊNCIA
+Abra o Cabine Verde, consulte um talão importado e confira o resumo diário.
+O resumo continua somando os lançamentos salvos em tempo real; ao final do turno, o operador pode copiar o painel para colar no WhatsApp.
+
+IMPORTANTE
+O instalador atualiza o aplicativo. A pasta Atualizacao-Servidor-20260901 atualiza a base usada por uma instalação existente. Não substitua o banco com o aplicativo aberto.

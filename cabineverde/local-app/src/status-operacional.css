@@ -1,0 +1,7 @@
+.resultado-talao--andamento { background: #fff; }
+.resultado-talao--triagem { background: #fff4df; border-left: 4px solid #e6b566; }
+.resultado-talao--localizado { background: #e5f1ff; border-left: 4px solid #4d8fd8; }
+.resultado-talao--triagem:hover { background: #ffedcc; }
+.resultado-talao--localizado:hover { background: #d7eaff; }
+.entrevista-inicial__acoes label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #557168; }
+.entrevista-inicial__acoes select { border: 1px solid #ccdcd4; border-radius: 8px; padding: 9px; background: #fff; color: #18322c; }

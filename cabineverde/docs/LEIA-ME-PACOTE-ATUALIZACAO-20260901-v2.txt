@@ -1,0 +1,17 @@
+PACOTE DE ATUALIZAÇÃO — CABINE VERDE — 01/09/2026
+
+1) INSTALADOR
+Execute Instalador\Cabine-Verde-Setup-0.2.4.exe no computador que usará a aplicação.
+
+2) SERVIDOR CENTRAL
+No PC01, substitua somente os arquivos da pasta DESPACHADOR pelos arquivos de Servidor-JSON\DESPACHADOR.
+Execute iniciar-servidor-pc01.ps1. A base usada será D:\CabineVerde quando ela existir; caso contrário, será a base da Área de Trabalho.
+
+3) BANCO DE DADOS JSON
+A pasta Banco-JSON-Atualizado\dados contém a base JSON atualizada. Faça backup de D:\CabineVerde\dados e copie os arquivos dessa pasta para D:\CabineVerde\dados.
+Não apague a pasta backup e não misture essa base com SQLite: o servidor central desta versão trabalha com JSON.
+
+4) VALIDAÇÃO
+Depois de iniciar o servidor, abra a aplicação, selecione modo central e teste a conexão. Confirme uma consulta de talão, o status da vítima, a aba Localizações e o dashboard.
+
+Conteúdo desta versão: status visual Em andamento/Em triagem/Localizado, seletor na inserção rápida, atualização automática para triagem após entrevista/imagem, dashboard com vulto/imprensa e servidor com módulos auxiliares incluídos.

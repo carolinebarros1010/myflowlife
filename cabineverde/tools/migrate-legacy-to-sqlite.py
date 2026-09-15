@@ -14,6 +14,7 @@ import json
 import sqlite3
 import unicodedata
 import zipfile
+import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,11 +23,13 @@ from typing import Any
 
 ALIASES = {
     "idCaso": ["idCaso", "id", "codigoCaso", "ID Caso", "Código Caso"],
-    "talaoPMESP": ["talaoPMESP", "talaoBopm", "talaoBOPM", "talão", "talao", "numeroTalao"],
-    "nomeCompletoDesaparecido": ["nomeCompletoDesaparecido", "nome", "nomeDesaparecido", "Nome"],
+    "talaoPMESP": ["talaoPMESP", "talaoBopm", "talaoBOPM", "BOPM", "talão", "talao", "numeroTalao"],
+    "nomeCompletoDesaparecido": ["nomeCompletoDesaparecido", "nome", "nomeDesaparecido", "Nome", "NOME COMPLETO (Desaparecido)", "NOME COMPLETO"],
     "statusCaso": ["statusCaso", "status", "Status"],
     "observacoesOperacionais": ["observacoesOperacionais", "observacoes", "observacao", "obsOperacional"],
 }
+
+CABECALHO_ALVOS = {"data", "bopm", "documentocpfrg", "nomecompletodesaparecido", "nomedosolicitante", "telefone"}
 
 
 def normalizar_chave(valor: Any) -> str:
@@ -39,6 +42,39 @@ def texto(valor: Any) -> str:
     return str(valor or "").strip()
 
 
+def texto_unificado(valor: Any) -> str:
+    """Une acentos/abreviações apenas para classificação, sem alterar o bruto."""
+    return " ".join(texto(valor).split()).upper()
+
+
+def extrair_taloes(registro: dict[str, Any]) -> list[str]:
+    conteudo = " ".join(texto(valor) for valor in registro.values() if texto(valor))
+    encontrados = re.findall(r"(?<!\d)(?:TAL[ÃA]O|TALAO|TAL[ÃA]ES|TALOES|LOC|L)?\s*(\d{2,6})(?!\d)", conteudo, flags=re.IGNORECASE)
+    return list(dict.fromkeys(encontrados))
+
+
+def normalizar_desfecho(registro: dict[str, Any]) -> tuple[str, str, bool]:
+    conteudo = texto_unificado(" ".join(texto(valor) for valor in registro.values()))
+    if any(chave in conteudo for chave in ("OBITO", "ÓBITO", "CADAVER", "CADÁVER", "MORTO")):
+        resultado = "Localizado morto"
+    elif any(chave in conteudo for chave in ("PRESO", "PRISAO", "PRISÃO", "CUSTODI")):
+        resultado = "Localizado preso"
+    elif any(chave in conteudo for chave in ("LOCALIZAD", "ENCONTRAD", "REENCONTRO")):
+        resultado = "Localizado vivo"
+    else:
+        resultado = ""
+    if any(chave in conteudo for chave in ("VTR", "VIATURA", "POLICIAMENTO", "M-0", "M-") ):
+        recurso = "Viatura"
+    elif any(chave in conteudo for chave in ("MURALHA", "CABINE VERDE", "CABINE")):
+        recurso = "Cabine Verde"
+    elif any(chave in conteudo for chave in ("IMPRENSA", "VULTO", "OUTROS")):
+        recurso = "Outros"
+    else:
+        recurso = ""
+    revisao = not resultado or (not recurso and bool(extrair_taloes(registro)))
+    return resultado, recurso, revisao
+
+
 def valor_mapeado(registro: dict[str, Any], campo: str) -> str:
     por_chave = {normalizar_chave(k): v for k, v in registro.items()}
     for alias in ALIASES.get(campo, [campo]):
@@ -46,6 +82,31 @@ def valor_mapeado(registro: dict[str, Any], campo: str) -> str:
         if valor:
             return valor
     return ""
+
+
+def pontuacao_cabecalho(linha: Any) -> int:
+    valores = {normalizar_chave(valor) for valor in linha if texto(valor)}
+    return len(valores & CABECALHO_ALVOS)
+
+
+def linha_cabecalho(linhas: list[Any]) -> int:
+    """Encontra o cabeçalho real em abas com capa, título e instruções antes da tabela."""
+    candidatos = [(indice, pontuacao_cabecalho(linha)) for indice, linha in enumerate(linhas[:30])]
+    pontuacao = max((item[1] for item in candidatos), default=0)
+    if pontuacao >= 2:
+        return next(indice for indice, valor in candidatos if valor == pontuacao)
+    return 0
+
+
+def nomes_cabecalho(linha: Any) -> list[str]:
+    usados: dict[str, int] = {}
+    nomes: list[str] = []
+    for indice, valor in enumerate(linha):
+        base = texto(valor) or f"coluna_{indice + 1}"
+        ocorrencias = usados.get(normalizar_chave(base), 0) + 1
+        usados[normalizar_chave(base)] = ocorrencias
+        nomes.append(base if ocorrencias == 1 else f"{base}_{ocorrencias}")
+    return nomes
 
 
 def ler_arquivo(caminho: Path) -> list[dict[str, Any]]:
@@ -77,14 +138,13 @@ def ler_xlsx(caminho: Path) -> list[tuple[str, list[dict[str, Any]]]]:
     workbook = load_workbook(caminho, read_only=True, data_only=True)
     resultado: list[tuple[str, list[dict[str, Any]]]] = []
     for planilha in workbook.worksheets:
-        linhas = planilha.iter_rows(values_only=True)
-        cabecalho_bruto = next(linhas, None)
-        if not cabecalho_bruto:
+        linhas = list(planilha.iter_rows(values_only=True))
+        if not linhas:
             continue
-        cabecalho = [texto(valor) for valor in cabecalho_bruto]
-        cabecalho = [valor or f"coluna_{indice + 1}" for indice, valor in enumerate(cabecalho)]
+        indice_cabecalho = linha_cabecalho(linhas)
+        cabecalho = nomes_cabecalho(linhas[indice_cabecalho])
         registros = []
-        for linha in linhas:
+        for linha in linhas[indice_cabecalho + 1:]:
             if not any(valor not in (None, "") for valor in linha):
                 continue
             registros.append({cabecalho[indice]: valor for indice, valor in enumerate(linha) if indice < len(cabecalho)})
@@ -133,11 +193,14 @@ def ler_xlsx_sem_dependencias(caminho: Path) -> list[tuple[str, list[dict[str, A
                     linhas[numero] = valores
             if not linhas:
                 continue
-            cabecalho = linhas[min(linhas)]
-            nomes = {indice: texto(valor) or f"coluna_{indice}" for indice, valor in cabecalho.items()}
+            numeros_linhas = sorted(linhas)
+            indice_cabecalho = linha_cabecalho([[linhas[numero].get(indice, "") for indice in range(1, max(linhas[numero]) + 1)] for numero in numeros_linhas])
+            numero_cabecalho = numeros_linhas[indice_cabecalho]
+            cabecalho = [linhas[numero_cabecalho].get(indice, "") for indice in range(1, max(linhas[numero_cabecalho]) + 1)]
+            nomes = {indice: nome for indice, nome in enumerate(nomes_cabecalho(cabecalho), start=1)}
             registros = []
             for numero in sorted(linhas):
-                if numero == min(linhas):
+                if numero <= numero_cabecalho:
                     continue
                 registro = {nomes.get(indice, f"coluna_{indice}"): valor for indice, valor in linhas[numero].items()}
                 if any(texto(valor) for valor in registro.values()):
@@ -161,6 +224,11 @@ def criar_schema(conexao: sqlite3.Connection) -> None:
           dados_json TEXT NOT NULL,
           bruto_json TEXT NOT NULL,
           importado_em TEXT NOT NULL,
+          data_registro TEXT,
+          resultado_localizacao TEXT,
+          recurso_localizacao TEXT,
+          taloes_extraidos_json TEXT NOT NULL DEFAULT '[]',
+          revisao_necessaria INTEGER NOT NULL DEFAULT 0,
           UNIQUE(origem_arquivo, linha_origem)
         );
         CREATE TABLE IF NOT EXISTS legado_observacoes (
@@ -222,6 +290,8 @@ def criar_schema(conexao: sqlite3.Connection) -> None:
 
 def categoria(caminho: Path) -> str:
     nome = normalizar_chave(caminho.stem)
+    if "operador" in nome:
+        return "dados_auxiliares"
     if "foto" in nome:
         return "fotos"
     if "legadoobservacoes" in nome:
@@ -288,15 +358,23 @@ def importar(input_dir: Path, output: Path, dry_run: bool) -> dict[str, Any]:
                             relatorio["detalhes"].append({"arquivo": origem, "linha": numero, "erro": str(erro)})
                         continue
 
-                    id_caso = valor_mapeado(registro, "idCaso") or f"LEGADO-{nome_fonte}-{numero}"
+                    id_origem = valor_mapeado(registro, "idCaso")
                     talao = valor_mapeado(registro, "talaoPMESP")
                     nome = valor_mapeado(registro, "nomeCompletoDesaparecido")
+                    marcadores = {"", "*", "**", "***", "****", "*****", "******"}
+                    if not talao and not nome:
+                        continue
+                    if talao.strip() in marcadores and nome.strip() in marcadores:
+                        continue
+                    id_caso = id_origem or f"LEGADO-{nome_fonte}-{numero}"
                     status = valor_mapeado(registro, "statusCaso") or "LEGADO"
+                    resultado_localizacao, recurso_localizacao, revisao_necessaria = normalizar_desfecho(registro)
+                    taloes_extraidos = extrair_taloes(registro)
                     status_migracao = "MIGRADO" if talao and nome else "INCOMPLETO"
                     try:
                         cursor = conexao.execute(
                             "INSERT OR IGNORE INTO casos(id_caso, talao_pm, nome_desaparecido, status_caso, status_migracao, origem_arquivo, linha_origem, dados_json, bruto_json, importado_em) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            (id_caso, talao, nome, status, status_migracao, origem, numero, json.dumps({**registro, "idCaso": id_caso, "talaoPMESP": talao}, ensure_ascii=False, default=str), bruto, agora),
+                            (id_caso, talao, nome, status, status_migracao, origem, numero, json.dumps({**registro, "idCaso": id_caso, "talaoPMESP": talao, "taloesExtraidos": taloes_extraidos, "resultadoLocalizacao": resultado_localizacao, "recursoLocalizacao": recurso_localizacao, "revisaoNecessaria": revisao_necessaria}, ensure_ascii=False, default=str), bruto, agora),
                         )
                         if cursor.rowcount == 0:
                             relatorio["duplicados"] += 1
