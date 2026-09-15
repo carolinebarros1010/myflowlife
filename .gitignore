@@ -12,3 +12,28 @@ cabineverde/data/
 cabineverde/fotos/
 cabineverde/node_modules/
 cabineverde/dist-local/
+
+# Bases, documentos e configuração da instalação local
+/cabineverde/dados/
+/cabineverde/Documentos_Cabine_Verde/
+/cabineverde/configuracao.json
+
+# Pacotes de distribuição e cópias para instalação (fontes nas pastas principais)
+/cabineverde/build/
+/cabineverde/release/
+/cabineverde/release-*/
+/cabineverde/CabineVerde_Pacote_*
+/cabineverde/CabineVerde_V7_JSON_Dashboard_*
+/cabineverde/Atualizacao_Base_*_PENDRIVE/
+/cabineverde/deploy-pc01/
+/cabineverde/versaoFinal/
+/cabineverde/motor-facial/*.exe
+/cabineverde/motor-facial/modelos/
+
+# Caches, logs e cópias de trabalho
+__pycache__/
+*.py[cod]
+/cabineverde/**/*.log
+/cabineverde/**/*.bak-*
+/cabineverde/electron/main.cjs.antes-modelos
+/cabineverde/electron/main-teste.cjs
